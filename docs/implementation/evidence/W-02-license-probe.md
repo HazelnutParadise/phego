@@ -42,6 +42,60 @@ PYCODE
 
 LLVM 記錄的是固定提交的原始檔，並非其二進位封存檔的完整清點。下載[固定提交的原始授權檔](https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/llvm/LICENSE.TXT)後，可用 `sha256sum "$LLVM_LICENSE"` 核對；`LLVM_LICENSE` 是下載後的檔案路徑。
 
+## Go 來源封存檔的授權文件線索
+
+2026-10-29 在無網路、唯讀、非 root、限制資源的 Linux arm64 容器中，核對 Go 1.27.3 來源封存檔 SHA-256 `6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb`，讀取封存內容但未解壓或執行來源。封存檔有 15,636 個一般檔案與 1,711 個目錄。以下列命名規則篩得 26 個一般檔案，其路徑、大小、摘要和 UTF-8 判定記錄於 [Go 來源檔名清單](W-02-go-source-license-files.json)：檔案名稱不分大小寫，包含 `LICENSE`、`LICENCE`、`COPYING` 或 `NOTICE` 任一字串。
+
+其中 21 個是 UTF-8 授權文字；另 5 個是名稱含 `UserNotice` 的非 UTF-8 憑證測試資料，不當成授權文件。依檔案內容，pprof 的授權檔含 Apache License 2.0，`goker` 測試資料含 MIT 授權檔，`crypto/internal/boring/LICENSE` 則另列 OpenSSL、SSLeay、ISC 及 Intel 條款。這些觀察不判定 Phego 的實際適用範圍或散布義務。來源標頭、巢狀封存檔、其他版本與實際產物的完整授權仍待審查。
+
+重跑清點時，`ARCHIVE` 為已下載且與來源鎖相符的 Go 來源封存檔絕對路徑：
+
+```sh
+docker run --rm -i --pull never --platform linux/arm64 --network none --read-only \
+  --user 65534:65534 --pids-limit 64 --memory 512m --cpus 1 \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --mount "type=bind,src=$ARCHIVE,dst=/input/source.tar.gz,readonly" \
+  buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3 \
+  python3 - <<'PYCODE'
+import hashlib, json, tarfile
+from pathlib import Path, PurePosixPath
+p = Path('/input/source.tar.gz')
+expected = '6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb'
+h = hashlib.sha256()
+with p.open('rb') as f:
+    for chunk in iter(lambda: f.read(1024 * 1024), b''):
+        h.update(chunk)
+if h.hexdigest() != expected:
+    raise SystemExit('archive digest mismatch')
+files = []
+regular = directories = other = 0
+with tarfile.open(p, 'r:gz') as archive:
+    for item in archive:
+        if item.isdir():
+            directories += 1
+            continue
+        if not item.isfile():
+            other += 1
+            continue
+        regular += 1
+        name = PurePosixPath(item.name).name.upper()
+        if not any(x in name for x in ('LICENSE', 'LICENCE', 'COPYING', 'NOTICE')):
+            continue
+        data = archive.extractfile(item).read()
+        try:
+            data.decode('utf-8')
+            encoding = 'utf8_text'
+        except UnicodeDecodeError:
+            encoding = 'non_utf8'
+        files.append({'path': item.name, 'size': len(data),
+                      'sha256': hashlib.sha256(data).hexdigest(), 'encoding': encoding})
+print(json.dumps({'schema_version': 1, 'status': 'partial',
+    'archive_url': 'https://go.dev/dl/go1.27.3.src.tar.gz', 'archive_sha256': expected,
+    'selection': 'Regular files with LICENSE, LICENCE, COPYING or NOTICE as a case-insensitive substring of the basename.',
+    'regular_files': regular, 'directories': directories, 'other_members': other, 'files': files}, indent=2))
+PYCODE
+```
+
 ## 歷史來源的授權線索
 
 官方 museum 的 `php-108` 來源封存檔中，`version.h` 標示 1.0.8，其標頭聲明 GPL 第 2 版或更新版本。這與現代 PHP 的主要授權不同；來源內容是否可納入專案及其分發義務需要另行審查。實際封存檔與文件摘要、隔離檢查範圍及未驗證事項記錄於 [W-49 歷史來源線索](W-49-php-108-source.json)。該封存檔不能代表第一個公開版本，也沒有執行歷史引擎。
