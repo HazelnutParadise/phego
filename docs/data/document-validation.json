@@ -10,7 +10,7 @@
     "work_packages": 60,
     "decisions": 28,
     "sources": 57,
-    "local_markdown_links": 78,
+    "local_markdown_links": 84,
     "checks": 33,
     "catalogs": {
       "php-history-policy.json": 7,
@@ -254,6 +254,7 @@
   ],
   "input_sha256": {
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+    ".github/workflows/docs.yml": "399d56f9590b0aec1b0226ae49e928777f2d54b8487f325ddae1ae9fe4724f1d",
     ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
     "AGENTS.md": "d6561509027f152b98931559746aa842c2895ab012158f928b51791546ea80e3",
     "CHANGELOG.md": "c6320531f024a8616007b30f23b6103d72b778e2fc6754b2028125532625daf8",
@@ -272,7 +273,10 @@
     "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
     "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
     "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
+    "docs/decisions/W-01-contract.md": "9e47af41f4f3537d3a38e666ecc8e98f29ff5380c7bbd0d666e26c83640d6023",
     "docs/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
+    "docs/implementation/W-01.md": "8ec23fcd1256c5c716a712c8e6f841c85e07b282fbdd73ba2bdea237e57d3968",
+    "docs/implementation/evidence/W-01.json": "09f5f1967fb5f4cd5d491959d94d7fa18a5d71e56921ae906abaa418d39dfd54",
     "docs/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
