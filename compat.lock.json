@@ -24,17 +24,68 @@
     "checksum_source": "https://go.dev/dl/?mode=json",
     "license": "BSD-3-Clause",
     "source_status": "downloaded_and_digest_verified",
-    "probe_status": "isolated_pure_go_build_passed"
+    "probe_status": "isolated_pure_go_build_passed",
+    "additional_archives": [
+      {
+        "platform": "linux/amd64",
+        "archive_url": "https://go.dev/dl/go1.27.3.linux-amd64.tar.gz",
+        "archive_sha256": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+        "source_status": "downloaded_and_digest_verified",
+        "probe_status": "isolated_pure_go_build_passed_under_emulation",
+        "probe_image": "debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31"
+      },
+      {
+        "platform": "darwin/amd64",
+        "archive_url": "https://go.dev/dl/go1.27.3.darwin-amd64.tar.gz",
+        "archive_sha256": "b6f8e931e4ab497fcde6da8ae4499a58f9d258e55c8a80824a516eae5950a750",
+        "source_status": "downloaded_and_digest_verified",
+        "probe_status": "not_run"
+      },
+      {
+        "platform": "darwin/arm64",
+        "archive_url": "https://go.dev/dl/go1.27.3.darwin-arm64.tar.gz",
+        "archive_sha256": "dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2",
+        "source_status": "downloaded_and_digest_verified",
+        "probe_status": "not_run"
+      },
+      {
+        "platform": "windows/amd64",
+        "archive_url": "https://go.dev/dl/go1.27.3.windows-amd64.zip",
+        "archive_sha256": "f26081f438319757f8a1b46d7d0b2c5ec7583d4038e485e0aa725cfde7885fff",
+        "source_status": "downloaded_and_digest_verified",
+        "probe_status": "not_run"
+      }
+    ]
   },
   "reference_build": {
     "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
     "platform": "linux/arm64",
-    "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
+    "configure_options": [
+      "--disable-all",
+      "--enable-cli",
+      "--without-pear"
+    ],
     "status": "in_progress"
   },
   "remaining": [
     "Extend isolated reference builds and reproducibility evidence beyond the current PHP 8.5.12 linux/arm64 profile.",
-    "Lock and validate the optional LLVM toolchain and remaining Go platforms.",
+    "Validate the optional LLVM toolchain on remaining platforms and execute the remaining Go platform probes.",
     "Create upstream change detection and complete source and license records."
-  ]
+  ],
+  "llvm": {
+    "version": "23.1.4",
+    "tag": "llvmorg-23.1.4",
+    "tag_object": "f2c432f21b5e6f96157b1720857b472dc487fa49",
+    "commit": "7a941dfb2877a0b8cf30323fefa85ad019e0b0f5",
+    "platform": "linux/arm64",
+    "archive_url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.4/LLVM-23.1.4-Linux-ARM64.tar.zst",
+    "archive_sha256": "0975f753e0f9b5f83146a7a2f4678bc143e713496b56520716a4de047a63f99f",
+    "checksum_source": "https://api.github.com/repos/llvm/llvm-project/releases/tags/llvmorg-23.1.4",
+    "license": "Apache-2.0 WITH LLVM-exception",
+    "license_source": "https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-23.1.4/llvm/LICENSE.TXT",
+    "source_status": "downloaded_and_digest_verified",
+    "probe_status": "isolated_c_compile_and_lld_link_passed",
+    "probe_image": "buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3",
+    "limitations": "Optional native toolchain only; Go ABI integration and other platforms are not validated."
+  }
 }

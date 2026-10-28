@@ -42,6 +42,34 @@ docker run --rm --pull never --network none --read-only \
   sh -ec 'sha256sum /input/go.tar.gz; cd /tmp; tar -xzf /input/go.tar.gz; /tmp/go/bin/go version; printf "package main\nfunc main() {}\n" > main.go; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache CGO_ENABLED=0 GOPROXY=off /tmp/go/bin/go build -o /tmp/probe /tmp/main.go; /tmp/probe; printf "pure-Go build: PASS\n"'
 ```
 
+另外下載並核對官方下載資料列出的 Go 1.27.3 Linux amd64、macOS amd64／arm64、Windows amd64 封存檔；各摘要記錄於來源鎖的 `additional_archives`。Windows 第一次下載逾時，重新下載後摘要及檔案大小才符合官方資料。其中 Linux amd64 的 Go 1.27.3 已在 Linux arm64 的 OrbStack 宿主上透過 amd64 容器轉譯執行，`CGO_ENABLED=0`、`GOPROXY=off` 編譯並執行最小 Go 程式成功，產物 SHA-256 為 `5696deac3649bad0068e7c2ca350ccb0e48dde0e3c09676530a3382982917e43`。macOS、Windows 與原生 amd64 主機仍未執行；此探查不是 Phego 建置測試。
+
+Linux amd64 探查使用唯讀來源掛載與無網路的受限容器，映像是 `debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31`。重跑時將 `$GO_ARCHIVE` 設為已下載的 Linux amd64 封存檔：
+
+```sh
+docker run --rm --pull never --platform linux/amd64 --network none --read-only \
+  --tmpfs /tmp:rw,nosuid,nodev,exec,size=1g --user 65534:65534 \
+  --pids-limit 128 --memory 1g --cpus 2 --cap-drop ALL --security-opt no-new-privileges \
+  --mount "type=bind,source=$GO_ARCHIVE,target=/input/go.tar.gz,readonly" \
+  debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31 \
+  timeout 180s sh -ec 'printf "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40  /input/go.tar.gz\n" | sha256sum -c -; cd /tmp; tar -xzf /input/go.tar.gz; /tmp/go/bin/go version; printf "package main\nfunc main() {}\n" > main.go; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache CGO_ENABLED=0 GOPROXY=off /tmp/go/bin/go build -o /tmp/probe /tmp/main.go; /tmp/probe; sha256sum /tmp/probe'
+```
+
+## 可選 LLVM 工具鏈探查
+
+從 [LLVM 23.1.4 官方發布資料](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.4)下載 Linux arm64 的 `.tar.zst`；實際 SHA-256 與 GitHub 發行檔資料的摘要均為 `0975f753e0f9b5f83146a7a2f4678bc143e713496b56520716a4de047a63f99f`。tag 物件是 `f2c432f21b5e6f96157b1720857b472dc487fa49`，指向 `7a941dfb2877a0b8cf30323fefa85ad019e0b0f5`。上游授權為 Apache-2.0 WITH LLVM-exception。
+
+以既有的 `zstd` 將已驗證封存檔解壓為標準輸入，僅在無網路、唯讀根目錄、非 root、移除 capabilities 的容器暫存空間擷取 clang 與 lld。映像固定為 `buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3`（Debian 13、Linux arm64、glibc 2.41、GNU ld 2.44）；記憶體上限 2 GiB、2 CPU、128 程序及 180 秒期限。`clang --version` 和 `ld.lld --version` 均為 23.1.4，最小 C 程式經 clang、LLD 編譯連結後執行成功，二進位摘要 `055f61449e18ef4e6de750dae7bc89573acb4547f6823c8d92258239e7d2a9ce`。未安裝至宿主系統；未驗證 Go ABI 橋接、其他平台或 Phego 原生後端。
+
+```sh
+zstd -dc --long=30 "$LLVM_ARCHIVE" | docker run --rm -i --pull never --network none --read-only \
+  --tmpfs /tmp:rw,nosuid,nodev,exec,size=1500m --user 65534:65534 \
+  --pids-limit 128 --memory 2g --cpus 2 --cap-drop ALL \
+  --security-opt no-new-privileges --platform linux/arm64 \
+  buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3 \
+  timeout --kill-after=5s 180s sh -ec 'cd /tmp; tar -xf - LLVM-23.1.4-Linux-ARM64/bin/clang-23 LLVM-23.1.4-Linux-ARM64/bin/clang LLVM-23.1.4-Linux-ARM64/bin/lld LLVM-23.1.4-Linux-ARM64/bin/ld.lld; cd LLVM-23.1.4-Linux-ARM64; bin/clang --version; bin/ld.lld --version; printf "int main(void) { return 0; }\n" > /tmp/probe.c; bin/clang -fuse-ld=lld /tmp/probe.c -o /tmp/probe; /tmp/probe; sha256sum /tmp/probe; printf "clang and lld probe: PASS\n"'
+```
+
 ## 可重跑的參考建置工具
 
 `python3 tools/reference_php.py "$ARCHIVE"` 使用來源鎖核對摘要，並在固定主機名稱、路徑及環境的受限容器內建置與執行單一上游 PHPT。三次工具建置均得到二進位 SHA-256 `e5d0591e0d82e30f413e4aa928ff66afddd1f752c707b17feffaae70c4f8b519`，且各有一項 PHPT 通過；最後一次使用腳本 SHA-256 `725f90f1be0582064fe56d7af7936f2f9b5f3bc1f21d773b5d51729981b2feae`，回傳 0，並以 Docker inspect 確認容器已移除。這個工具使用的建置路徑不同於前述手動試驗，因此兩組摘要不可直接比較。
