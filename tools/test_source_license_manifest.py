@@ -17,6 +17,8 @@ INPUTS = {
     / "docs/implementation/evidence/W-02-php-license-files.json",
     "docs/implementation/evidence/W-02-go-source-license-files.json": REPO
     / "docs/implementation/evidence/W-02-go-source-license-files.json",
+    "docs/implementation/evidence/W-02-binary-license-files.json": REPO
+    / "docs/implementation/evidence/W-02-binary-license-files.json",
     "docs/implementation/evidence/W-02-build-image-packages.json": REPO
     / "docs/implementation/evidence/W-02-build-image-packages.json",
 }
@@ -46,6 +48,9 @@ class SourceLicenseManifestTests(unittest.TestCase):
         go = json.loads(go_path.read_text(encoding="utf-8"))
         go["files"] = go["files"][:3]
         go_path.write_text(json.dumps(go), encoding="utf-8")
+
+        # Binary inventories are archive captures. Keep their complete real
+        # records so fixture identities and candidate files remain evidence-backed.
 
         packages_path = repo / "docs/implementation/evidence/W-02-build-image-packages.json"
         packages = json.loads(packages_path.read_text(encoding="utf-8"))
@@ -174,18 +179,29 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(record["copyright"]["sha256"], rendered)
 
         gaps = manifest["gaps"]
+        binary_evidence = self.read_json("docs/implementation/evidence/W-02-binary-license-files.json")
+        recorded = {
+            (item["component"], item["platform"], item["archive_url"], item["archive_sha256"])
+            for item in binary_evidence["inventories"]
+        }
         for kind in ("go_binaries", "llvm"):
             archives = manifest["artifacts"][kind]
             if kind == "llvm":
                 archives = archives["archives"]
             for archive in archives:
                 platform = archive["platform"]
-                self.assertEqual(archive["license_inventory_status"], "not_recorded")
-                self.assertTrue(any(
-                    gap.get("scope") == f"{'Go binary' if kind == 'go_binaries' else 'LLVM binary'} license inventory {platform}"
-                    and gap.get("status") == "unknown"
-                    for gap in gaps
-                ))
+                component = "go" if kind == "go_binaries" else "llvm"
+                identity = (component, platform, archive["archive_url"], archive["archive_sha256"])
+                if identity in recorded:
+                    self.assertEqual(archive["license_inventory_status"], "partial_filename_inventory")
+                    self.assertEqual(archive["license_applicability"], "unknown")
+                else:
+                    self.assertEqual(archive["license_inventory_status"], "not_recorded")
+                    self.assertTrue(any(
+                        gap.get("scope") == f"{'Go binary' if kind == 'go_binaries' else 'LLVM binary'} license inventory {platform}"
+                        and gap.get("status") == "unknown"
+                        for gap in gaps
+                    ))
                 if archive.get("probe_image"):
                     self.assertTrue(any(
                         gap.get("image") == archive["probe_image"]
@@ -205,6 +221,110 @@ class SourceLicenseManifestTests(unittest.TestCase):
         )
         self.assertEqual(mapping_gap["status"], "unknown")
         self.assertIn("not been independently verified", mapping_gap["reason"])
+
+    def test_binary_license_inventories_match_all_locked_archives(self):
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        manifest = json.loads(result.stdout)
+        lock = self.read_json("compat.lock.json")
+        evidence = self.read_json("docs/implementation/evidence/W-02-binary-license-files.json")
+        self.assertEqual(evidence["schema_version"], 1)
+        self.assertEqual(evidence["status"], "partial")
+        self.assertEqual(len(evidence["inventories"]), 7)
+
+        expected = {}
+        for component in ("go", "llvm"):
+            locked = lock[component]
+            rows = [locked, *locked.get("additional_archives", [])]
+            for row in rows:
+                expected[(component, locked["version"], row["platform"], row["archive_url"], row["archive_sha256"])] = row
+        self.assertEqual(len(expected), 7)
+        inventories = {
+            (item["component"], item["version"], item["platform"], item["archive_url"], item["archive_sha256"]): item
+            for item in evidence["inventories"]
+        }
+        self.assertEqual(set(inventories), set(expected))
+
+        output_archives = [
+            *manifest["artifacts"]["go_binaries"],
+            *manifest["artifacts"]["llvm"]["archives"],
+        ]
+        for key, inventory in inventories.items():
+            component, version, platform, archive_url, digest = key
+            archive = next(
+                item for item in output_archives
+                if item.get("archive_url") == archive_url and item.get("platform") == platform
+            )
+            self.assertEqual(archive["version"], version)
+            self.assertEqual(archive["archive_sha256"], digest)
+            self.assertEqual(archive["license_inventory_status"], "partial_filename_inventory")
+            self.assertEqual(archive["license_applicability"], "unknown")
+            self.assertEqual(archive["candidate_files"], inventory["files"])
+
+        old_inventory_gaps = {
+            gap.get("scope") for gap in manifest["gaps"]
+            if gap.get("scope", "").startswith(("Go binary license inventory ", "LLVM binary license inventory "))
+        }
+        self.assertFalse(old_inventory_gaps)
+
+    def test_rejects_binary_license_inventory_omissions_duplicates_unknown_and_mismatches(self):
+        relative = "docs/implementation/evidence/W-02-binary-license-files.json"
+        original = self.read_json(relative)
+        cases = []
+        cases.append(("missing inventory", {**original, "inventories": original["inventories"][:-1]}))
+        cases.append(("duplicate inventory", {**original, "inventories": [*original["inventories"], original["inventories"][0]]}))
+        cases.append(("unknown inventory", {**original, "inventories": [*original["inventories"], {**original["inventories"][0], "platform": "linux/ppc64"}]}))
+        for field, value in (("archive_sha256", "0" * 64), ("platform", "linux/ppc64")):
+            changed = json.loads(json.dumps(original))
+            changed["inventories"][0][field] = value
+            cases.append((f"mismatched {field}", changed))
+
+        for name, evidence in cases:
+            with self.subTest(case=name):
+                self.write_json(relative, evidence)
+                self.assert_rejected_without_json()
+
+    def test_rejects_invalid_binary_license_inventory_candidate_records_and_totals(self):
+        relative = "docs/implementation/evidence/W-02-binary-license-files.json"
+        original = self.read_json(relative)
+
+        # The captured evidence itself must remain a valid input before each
+        # corruption case is applied.
+        valid = self.generate()
+        self.assertEqual(valid.returncode, 0, valid.stderr.decode("utf-8", "replace"))
+
+        cases = []
+        for name, path in (
+            ("parent traversal", "../go/LICENSE"),
+            ("wrong archive root", "not-go/LICENSE"),
+            ("absolute candidate path", "/go/LICENSE"),
+        ):
+            changed = json.loads(json.dumps(original))
+            changed["inventories"][0]["files"][0]["path"] = path
+            cases.append((name, changed))
+        for name, encoding in (("null encoding", None), ("empty encoding", ""), ("invalid encoding", "utf16")):
+            changed = json.loads(json.dumps(original))
+            changed["inventories"][0]["files"][0]["encoding"] = encoding
+            cases.append((name, changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["format"] = "zip"
+        cases.append(("format does not match archive", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["entries"] = len(changed["inventories"][0]["files"]) - 1
+        cases.append(("candidate count exceeds entries", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["expanded_bytes"] = sum(
+            item["size"] for item in changed["inventories"][0]["files"]
+        ) - 1
+        cases.append(("candidate bytes exceed expanded total", changed))
+
+        for name, evidence in cases:
+            with self.subTest(case=name):
+                self.write_json(relative, evidence)
+                self.assert_rejected_without_json()
 
     def test_rejects_cross_source_archive_mismatch(self):
         php_path = "docs/implementation/evidence/W-02-php-license-files.json"
@@ -438,13 +558,13 @@ class SourceLicenseManifestTests(unittest.TestCase):
             "probe_status": "not_run",
         }
         llvm_archive = {
-            "platform": "linux/amd64",
-            "archive_url": "https://example.invalid/llvm-linux-amd64.tar.zst",
+            "platform": "linux/ppc64",
+            "archive_url": "https://example.invalid/llvm-linux-ppc64.tar.zst",
             "archive_sha256": "c" * 64,
             "source_status": "downloaded_and_digest_verified",
         }
         lock["go"]["additional_archives"].append(go_archive)
-        lock["llvm"]["additional_archives"] = [llvm_archive]
+        lock["llvm"].setdefault("additional_archives", []).append(llvm_archive)
         self.write_json("compat.lock.json", lock)
 
         result = self.generate()
@@ -460,7 +580,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(candidate["encoding"], "binary")
         self.assertIn("freebsd/arm64", all_output)
         self.assertIn(go_archive["archive_sha256"], all_output)
-        self.assertIn("linux/amd64", all_output)
+        self.assertIn(llvm_archive["platform"], all_output)
         self.assertIn(llvm_archive["archive_sha256"], all_output)
         self.assertIn("freebsd/arm64", gaps)
         self.assertIn(llvm_archive["platform"], gaps)
@@ -468,6 +588,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
             item for item in manifest["artifacts"]["go_binaries"]
             if item["platform"] == go_archive["platform"]
         )
+        self.assertEqual(go_record["license_inventory_status"], "not_recorded")
         self.assertEqual(go_record["url_identity_status"], "unverified")
         self.assertTrue(any(
             gap.get("scope") == "Go binary archive identity freebsd/arm64"
@@ -479,9 +600,10 @@ class SourceLicenseManifestTests(unittest.TestCase):
             item for item in manifest["artifacts"]["llvm"]["archives"]
             if item["platform"] == llvm_archive["platform"]
         )
+        self.assertEqual(llvm_record["license_inventory_status"], "not_recorded")
         self.assertEqual(llvm_record["url_identity_status"], "unverified")
         self.assertTrue(any(
-            gap.get("scope") == "LLVM binary archive identity linux/amd64"
+            gap.get("scope") == "LLVM binary archive identity linux/ppc64"
             and gap.get("archive_url") == llvm_archive["archive_url"]
             and gap.get("status") == "unknown"
             for gap in manifest["gaps"]

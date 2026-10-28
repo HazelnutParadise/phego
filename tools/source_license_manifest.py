@@ -18,6 +18,7 @@ INPUT_PATHS = (
     "docs/implementation/evidence/W-02-php-license-files.json",
     "docs/implementation/evidence/W-02-go-source-license-files.json",
     "docs/implementation/evidence/W-02-build-image-packages.json",
+    "docs/implementation/evidence/W-02-binary-license-files.json",
 )
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 IMAGE_RE = re.compile(r"^([^@\s]+)@sha256:([0-9a-fA-F]{64})$")
@@ -339,12 +340,13 @@ def _build(repo):
     php_evidence = inputs[INPUT_PATHS[1]]
     go_evidence = inputs[INPUT_PATHS[2]]
     image_evidence = inputs[INPUT_PATHS[3]]
+    binary_evidence = inputs[INPUT_PATHS[4]]
 
     if _integer(lock, "schema_version", "compat.lock.json", 1) != 1:
         raise ManifestError("unsupported compat.lock.json schema_version")
     if _string(lock, "status", "compat.lock.json") != "partial":
         raise ManifestError("compat.lock.json status must be partial")
-    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence)):
+    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence), ("binary license evidence", binary_evidence)):
         if _integer(evidence, "schema_version", name, 1) != 1:
             raise ManifestError(f"unsupported {name} schema_version")
         if _string(evidence, "status", name) != "partial":
@@ -419,6 +421,60 @@ def _build(repo):
         llvm_archives, component_name="LLVM", version=llvm_version, gaps=gaps
     )
 
+    locked_binary = {(component, item["platform"]): item
+                     for component, archives in (("go", go_binary_archives), ("llvm", llvm_archives))
+                     for item in archives}
+    inventories = {}
+    for index, record in enumerate(_list(binary_evidence, "inventories", "binary license evidence")):
+        context = f"binary license evidence.inventories[{index}]"
+        if not isinstance(record, dict):
+            raise ManifestError(f"{context} must be an object")
+        if _integer(record, "schema_version", context, 1) != 1 or _string(record, "status", context) != "partial":
+            raise ManifestError(f"{context} must be a partial schema 1 inventory")
+        component = _string(record, "component", context)
+        platform = _string(record, "platform", context)
+        key = (component, platform)
+        locked = locked_binary.get(key)
+        if locked is None or key in inventories:
+            raise ManifestError(f"{context} has an unknown or duplicate archive identity")
+        for field in ("version", "archive_url", "archive_sha256"):
+            if _string(record, field, context) != locked[field]:
+                raise ManifestError(f"{context}.{field} does not match the lock")
+        if _string(record, "license_applicability", context) != "unknown":
+            raise ManifestError(f"{context} license applicability must remain unknown")
+        entries = _integer(record, "entries", context, 1)
+        expanded_bytes = _integer(record, "expanded_bytes", context)
+        _string(record, "selection", context)
+        fmt = _string(record, "format", context)
+        expected_format = "tar.zst" if component == "llvm" else ("zip" if platform.startswith("windows/") else "tar.gz")
+        if fmt != expected_format:
+            raise ManifestError(f"{context}.format does not match the locked archive")
+        files = _list(record, "files", context)
+        _entries(files, f"{context}.files", require_encoding=True)
+        root = "go" if component == "go" else locked["archive_url"].rsplit("/", 1)[-1].removesuffix(".tar.zst")
+        for file in files:
+            path = file["path"]
+            if (not path.startswith(root + "/") or "\\" in path or
+                    any(part in ("", ".", "..") for part in path.split("/"))):
+                raise ManifestError(f"{context} contains an invalid candidate path")
+            if file["encoding"] not in ("utf8_text", "binary"):
+                raise ManifestError(f"{context} contains an invalid candidate encoding")
+        if len(files) > entries or sum(file["size"] for file in files) > expanded_bytes:
+            raise ManifestError(f"{context} candidate totals exceed inventory totals")
+        inventories[key] = files
+
+    # Known locked official profiles require their recorded evidence. New,
+    # unrecognized profiles remain visible as not_recorded until investigated.
+    for key, archive in locked_binary.items():
+        files = inventories.get(key)
+        if files is None:
+            if archive["url_identity_status"] == "matches_known_official_pattern":
+                raise ManifestError(f"binary license inventory missing for {key[0]} {key[1]}")
+            continue
+        archive["license_inventory_status"] = "partial_filename_inventory"
+        archive["license_applicability"] = "unknown"
+        archive["candidate_files"] = files
+
     def archive_source(component, archive):
         if component.get("platform") == archive["platform"]:
             return component
@@ -445,13 +501,14 @@ def _build(repo):
                         "reason": "probe status is not a recognized completed result",
                     }
                 )
-            gaps.append(
-                {
-                    "scope": f"{component_name} license inventory {archive['platform']}",
-                    "status": "unknown",
-                    "reason": "license file inventory for this binary archive is not recorded",
-                }
-            )
+            if archive["license_inventory_status"] == "not_recorded":
+                gaps.append(
+                    {
+                        "scope": f"{component_name} license inventory {archive['platform']}",
+                        "status": "unknown",
+                        "reason": "license file inventory for this binary archive is not recorded",
+                    }
+                )
             if archive.get("probe_image"):
                 gaps.append(
                     {
