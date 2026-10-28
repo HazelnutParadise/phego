@@ -273,12 +273,13 @@
     "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
     "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
     "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
-    "docs/decisions/W-01-contract.md": "9e47af41f4f3537d3a38e666ecc8e98f29ff5380c7bbd0d666e26c83640d6023",
+    "docs/decisions/W-01-contract.md": "154a572e6749859ca746db3b92802a8a979a7c0a1df9e764be465e2ec9126bba",
     "docs/implementation/README.md": "b6559535784ad9ea30a8e2f1e37c17f90ad01efc46eb04f8313e17acd84afbca",
-    "docs/implementation/W-01.md": "8ec23fcd1256c5c716a712c8e6f841c85e07b282fbdd73ba2bdea237e57d3968",
+    "docs/implementation/W-01.md": "39ff776df37b402576aa495efe2806b0704c0694d80f3c7410f76232571bf7c6",
     "docs/implementation/evidence/W-01.json": "09f5f1967fb5f4cd5d491959d94d7fa18a5d71e56921ae906abaa418d39dfd54",
     "docs/implementation/github-index.json": "d96ed639e78a56944640faca7ce692ad8f5435e2c4866501345508ba191649d7",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+    "tools/test_contract_document.py": "dda81d89e311990b37ce8953a9d927802629d3f5909567e5937b31811561d9a4",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
   }
