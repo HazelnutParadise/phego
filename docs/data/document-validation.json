@@ -300,7 +300,7 @@
     "docs/implementation/evidence/W-02-binary-license-files.json": "7a1ca7f1f8087f78085a92ac9094d04b76aa25ccd362eaad97f6ac96ee4a1980",
     "docs/implementation/evidence/W-02-binary-license-probe.md": "482c714e1437ac25433b07e560146feb2d1de8e92765e171fdf5623a544000e1",
     "docs/implementation/evidence/W-02-build-image-packages.json": "900b5e30ab78687767720de17738806df5bd376fc6ae7a610c8e7c2a9bab340c",
-    "docs/implementation/evidence/W-02-go-darwin-arm64-probe.md": "418f3c68b27c8d1a30a864132a788c0990292b401153b4a3ca5961c384ed2171",
+    "docs/implementation/evidence/W-02-go-darwin-arm64-probe.md": "ea6c2ed28e87d1fa9ab14fde6e268cd450776cf48eeebbcd4abbe6992f3df9ee",
     "docs/implementation/evidence/W-02-go-probe.md": "730d5af2f1aca25fbb76a8aaed2b8482922cbc1f3ba7410e15539a60182183d5",
     "docs/implementation/evidence/W-02-go-source-20261029/cli-amd64-1.log": "28fd9df3aa343da9f735ad8e53446045a57933b4f4a05f0957f0742d5c01cce7",
     "docs/implementation/evidence/W-02-go-source-20261029/cli-amd64-2.log": "d50dba1429cb1e9c6a164500dcc5eff8db308902e80a46349881d1698bc5cc95",
