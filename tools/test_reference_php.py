@@ -12,6 +12,12 @@ from unittest.mock import Mock, patch
 
 from reference_php import build_command, main, verify_archive
 
+_EXPECTED_PROFILE = {
+    "extensions": ["Core", "Reflection", "SPL", "Zend OPcache", "date", "hash", "json", "lexbor", "pcre", "random", "standard", "uri"],
+    "zend_extensions": ["Zend OPcache"],
+    "session_available": False,
+    "session_upload_progress": False,
+}
 
 class TestVerifyArchive(unittest.TestCase):
     def test_matching_regular_archive_is_accepted(self):
@@ -72,6 +78,7 @@ class TestBuildCommand(unittest.TestCase):
     def test_unpinned_image_is_rejected(self):
         lock = {"schema_version": 1, "php": {"version": "8.5.12", "archive_sha256": "0" * 64},
                 "reference_build": {"image": "--privileged", "platform": "linux/arm64",
+                                    "expected_profile": _EXPECTED_PROFILE,
                                     "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]}}
         with tempfile.TemporaryDirectory() as td, patch("reference_php._load_compat", return_value=lock):
             with self.assertRaises((ValueError, OSError)):
@@ -83,6 +90,7 @@ class TestBuildCommand(unittest.TestCase):
             "php": {"version": "8.5.12", "archive_sha256": "A" * 64},
             "reference_build": {"image": "buildpack-deps@sha256:" + "0" * 64,
                                 "platform": "linux/arm64",
+                                "expected_profile": _EXPECTED_PROFILE,
                                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]},
         }
         with tempfile.TemporaryDirectory() as td, patch("reference_php._load_compat", return_value=lock):
@@ -96,6 +104,7 @@ class TestBuildCommand(unittest.TestCase):
             "reference_build": {
                 "image": "buildpack-deps@sha256:" + "0" * 64,
                 "platform": "linux/arm64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             },
         }

@@ -6,6 +6,12 @@ from unittest.mock import patch
 
 from reference_php import build_command
 
+_EXPECTED_PROFILE = {
+    "extensions": ["Core", "Reflection", "SPL", "Zend OPcache", "date", "hash", "json", "lexbor", "pcre", "random", "standard", "uri"],
+    "zend_extensions": ["Zend OPcache"],
+    "session_available": False,
+    "session_upload_progress": False,
+}
 
 class TestReferencePhpAmd64(unittest.TestCase):
     def _archive_path(self, td, name="source.tar.xz"):
@@ -19,12 +25,14 @@ class TestReferencePhpAmd64(unittest.TestCase):
             "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
             "reference_build": {
                 "platform": "linux/arm64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps@sha256:" + "b" * 64,
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             },
             "additional_reference_builds": [
                 {
                     "platform": "linux/amd64",
+                    "expected_profile": _EXPECTED_PROFILE,
                     "image": "buildpack-deps@sha256:" + "c" * 64,
                     "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
                 }
@@ -71,11 +79,13 @@ class TestReferencePhpAmd64(unittest.TestCase):
         compat["additional_reference_builds"] = [
             {
                 "platform": "linux/amd64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps@sha256:" + "c" * 64,
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             },
             {
                 "platform": "linux/amd64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps@sha256:" + "d" * 64,
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             },
@@ -91,6 +101,7 @@ class TestReferencePhpAmd64(unittest.TestCase):
         compat["additional_reference_builds"] = [
             {
                 "platform": "linux/amd64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "not-pinned",
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             }
@@ -106,6 +117,7 @@ class TestReferencePhpAmd64(unittest.TestCase):
         compat["additional_reference_builds"] = [
             {
                 "platform": "linux/amd64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps:latest",
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             }
@@ -121,6 +133,7 @@ class TestReferencePhpAmd64(unittest.TestCase):
         compat["additional_reference_builds"] = [
             {
                 "platform": "linux/amd64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps@sha256:" + "c" * 64,
                 "configure_options": ["--enable-debug"],
             }

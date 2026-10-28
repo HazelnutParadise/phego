@@ -11,7 +11,7 @@ python3 tools/source_license_manifest.py generate --repo . > /tmp/phego-source-m
 python3 tools/source_license_manifest.py check --repo . docs/implementation/evidence/W-02-source-license-manifest.json
 ```
 
-2026-10-29 連續產生兩次，輸出逐位元相同，`check` 回傳 0。保存的 JSON SHA-256 為 `cf73e4bbf0cd42675780dcc2aea714b055f3126d8ae359206b274f2f42aa9b8a`。此結果只表示整理與比對成功，不代表授權或產品驗收通過。輸入檔案變更後須重新產生並檢查清單。
+2026-10-29 連續產生兩次，輸出逐位元相同，`check` 回傳 0。保存的 JSON SHA-256 為 `3d4b68f73bb5002d2bde473447800251eb0320eaf935bf10b9d14a2435b96aca`。此結果只表示整理與比對成功，不代表授權或產品驗收通過。輸入檔案變更後須重新產生並檢查清單。
 
 ## 證據界線
 

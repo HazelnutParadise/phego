@@ -7,13 +7,20 @@ from unittest.mock import Mock, patch
 
 import reference_php
 
+_EXPECTED_PROFILE = {
+    "extensions": ["Core", "Reflection", "SPL", "Zend OPcache", "date", "hash", "json", "lexbor", "pcre", "random", "standard", "uri"],
+    "zend_extensions": ["Zend OPcache"],
+    "session_available": False,
+    "session_upload_progress": False,
+}
+
 
 class TestAmd64CLI(unittest.TestCase):
     def setUp(self):
         self.lock = {"schema_version": 1, "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
-            "reference_build": {"platform": "linux/arm64", "image": "buildpack-deps@sha256:" + "b" * 64,
+            "reference_build": {"platform": "linux/arm64", "expected_profile": _EXPECTED_PROFILE, "image": "buildpack-deps@sha256:" + "b" * 64,
                                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]},
-            "additional_reference_builds": [{"platform": "linux/amd64", "image": "buildpack-deps@sha256:" + "c" * 64,
+            "additional_reference_builds": [{"platform": "linux/amd64", "expected_profile": _EXPECTED_PROFILE, "image": "buildpack-deps@sha256:" + "c" * 64,
                                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]}]}
 
     def run_cli(self, remove_exit):
@@ -51,7 +58,7 @@ class TestAmd64CLI(unittest.TestCase):
                 elif kind == "non_object":
                     lock["additional_reference_builds"] = [None, self.lock["additional_reference_builds"][0]]
                 else:
-                    lock["additional_reference_builds"] = [{"image": "missing-platform"}, self.lock["additional_reference_builds"][0]]
+                    lock["additional_reference_builds"] = [{"image": "missing-platform", "expected_profile": _EXPECTED_PROFILE}, self.lock["additional_reference_builds"][0]]
                 with self.subTest(kind=kind), patch("reference_php._load_compat", return_value=lock):
                     with self.assertRaises((ValueError, OSError)):
                         reference_php.build_command(archive, 900, "linux/amd64")

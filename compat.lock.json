@@ -72,7 +72,28 @@
       "--enable-cli",
       "--without-pear"
     ],
-    "status": "in_progress"
+    "status": "in_progress",
+    "expected_profile": {
+      "extensions": [
+        "Core",
+        "Reflection",
+        "SPL",
+        "Zend OPcache",
+        "date",
+        "hash",
+        "json",
+        "lexbor",
+        "pcre",
+        "random",
+        "standard",
+        "uri"
+      ],
+      "zend_extensions": [
+        "Zend OPcache"
+      ],
+      "session_available": false,
+      "session_upload_progress": false
+    }
   },
   "remaining": [
     "Extend isolated reference builds and reproducibility evidence beyond the current PHP 8.5.12 linux/arm64 profile.",
@@ -118,7 +139,28 @@
         "--enable-cli",
         "--without-pear"
       ],
-      "status": "in_progress"
+      "status": "in_progress",
+      "expected_profile": {
+        "extensions": [
+          "Core",
+          "Reflection",
+          "SPL",
+          "Zend OPcache",
+          "date",
+          "hash",
+          "json",
+          "lexbor",
+          "pcre",
+          "random",
+          "standard",
+          "uri"
+        ],
+        "zend_extensions": [
+          "Zend OPcache"
+        ],
+        "session_available": false,
+        "session_upload_progress": false
+      }
     }
   ],
   "inventory_tool_image": {

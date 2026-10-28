@@ -16,6 +16,12 @@ from unittest.mock import Mock, patch
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = Path(__file__).with_name("reference_php.py")
 CONTAINER_ID = "a" * 64
+_EXPECTED_PROFILE = {
+    "extensions": ["Core", "Reflection", "SPL", "Zend OPcache", "date", "hash", "json", "lexbor", "pcre", "random", "standard", "uri"],
+    "zend_extensions": ["Zend OPcache"],
+    "session_available": False,
+    "session_upload_progress": False,
+}
 
 
 def valid_lock(archive):
@@ -24,6 +30,7 @@ def valid_lock(archive):
         "php": {"version": "8.5.12", "archive_sha256": hashlib.sha256(archive).hexdigest()},
         "reference_build": {
             "platform": "linux/arm64",
+            "expected_profile": _EXPECTED_PROFILE,
             "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             "image": "buildpack-deps@sha256:" + "d" * 64,
         },

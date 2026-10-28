@@ -33,7 +33,13 @@ def reject(message):
     raise SystemExit(1)
 
 try:
-    version, platform = sys.argv[1:]
+    if len(sys.argv) != 4:
+        reject("expected profile is required")
+    version, platform = sys.argv[1:3]
+    configured = json.loads(sys.argv[3])
+    if not isinstance(configured, dict) or set(configured) != {
+            "extensions", "zend_extensions", "session_available", "session_upload_progress"}:
+        reject("invalid expected profile")
     raw = sys.stdin.read(1024 * 1024 + 1)
     if len(raw) > 1024 * 1024:
         reject("profile exceeds size limit")
@@ -53,7 +59,21 @@ try:
         if not isinstance(values, list) or len(values) > 1024 or any(
                 not isinstance(item, str) or not item or len(item) > 1024 for item in values):
             reject(key)
+        expected_values = configured.get(key)
+        if (not isinstance(expected_values, list) or len(expected_values) > 1024 or
+                any(not isinstance(item, str) or not item or len(item) > 1024 for item in expected_values) or
+                len(set(expected_values)) != len(expected_values) or len(set(values)) != len(values) or
+                sorted(values) != sorted(expected_values)):
+            reject(key)
         profile[key] = sorted(values)
+    for key in ("session_available", "session_upload_progress"):
+        wanted = configured.get(key)
+        if key == "session_available" and type(wanted) is not bool:
+            reject(key)
+        if key == "session_upload_progress" and type(wanted) not in (bool, str):
+            reject(key)
+        if type(profile.get(key)) is not type(wanted) or profile.get(key) != wanted:
+            reject(key)
     print(json.dumps(profile, sort_keys=True, separators=(",", ":")))
 except (ValueError, TypeError, UnicodeError) as exc:
     reject(str(exc))
@@ -146,12 +166,26 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: 
     _validate_lock_profile(compat)
     arm64_image = _load_reference_image(compat)
     if platform == "linux/arm64":
+        prof = compat["reference_build"]
         image = arm64_image
     elif platform == "linux/amd64":
         prof = _select_additional_profile(compat, platform)
         image = prof["image"]
     else:
         raise ValueError("unsupported platform")
+    expected_profile = prof.get("expected_profile")
+    if not isinstance(expected_profile, dict) or set(expected_profile) != {
+            "extensions", "zend_extensions", "session_available", "session_upload_progress"}:
+        raise ValueError("platform expected_profile is required")
+    for key in ("extensions", "zend_extensions"):
+        values = expected_profile[key]
+        if (not isinstance(values, list) or len(values) > 1024 or
+                any(not isinstance(item, str) or not item or len(item) > 1024 for item in values) or
+                len(set(values)) != len(values)):
+            raise ValueError(f"invalid expected_profile.{key}")
+    if type(expected_profile["session_available"]) is not bool or type(
+            expected_profile["session_upload_progress"]) not in (bool, str):
+        raise ValueError("invalid expected_profile session values")
 
     try:
         archive_abs = Path(archive).resolve(strict=True)
@@ -209,6 +243,7 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: 
         ) + " > /tmp/phego-profile.json; "
         + "_PROFILE_VALIDATOR=" + shlex.quote(_PROFILE_VALIDATOR) + "; "
         + "python3 -c \"$_PROFILE_VALIDATOR\" " + shlex.quote(version) + " " + shlex.quote(platform)
+        + " " + shlex.quote(json.dumps(expected_profile, sort_keys=True, separators=(",", ":")))
         + " < /tmp/phego-profile.json; "
         + "echo '=== binary sha256 ==='; sha256sum ./sapi/cli/php; "
         "TEST_PHP_EXECUTABLE=./sapi/cli/php ./sapi/cli/php -n run-tests.php -P tests/basic/001.phpt"

@@ -11,6 +11,13 @@ from unittest.mock import patch
 
 from reference_php import build_command
 
+_EXPECTED_PROFILE = {
+    "extensions": ["Core", "Reflection", "SPL", "Zend OPcache", "date", "hash", "json", "lexbor", "pcre", "random", "standard", "uri"],
+    "zend_extensions": ["Zend OPcache"],
+    "session_available": False,
+    "session_upload_progress": False,
+}
+
 
 class TestReferencePhpArchiveRace(unittest.TestCase):
     def _compat(self):
@@ -19,12 +26,14 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
             "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
             "reference_build": {
                 "platform": "linux/arm64",
+                "expected_profile": _EXPECTED_PROFILE,
                 "image": "buildpack-deps@sha256:" + "b" * 64,
                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
             },
             "additional_reference_builds": [
                 {
                     "platform": "linux/amd64",
+                    "expected_profile": _EXPECTED_PROFILE,
                     "image": "buildpack-deps@sha256:" + "c" * 64,
                     "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
                 }
@@ -184,7 +193,10 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
                 "cat <<'PROFILE'\n"
                 '{"version":"8.5.12","int_size":8,"sapi":"cli",'
                 '"os_family":"Linux","machine":"aarch64","ini_loaded":"",'
-                '"ini_scanned":"","extensions":["Core"],"zend_extensions":[]}\n'
+                '"ini_scanned":"","extensions":["Core","Reflection","SPL",'
+                '"Zend OPcache","date","hash","json","lexbor","pcre","random",'
+                '"standard","uri"],"zend_extensions":["Zend OPcache"],'
+                '"session_available":false,"session_upload_progress":false}\n'
                 'PROFILE\nfi\nexit 0\n'
             )
             tar_tool.write_text(

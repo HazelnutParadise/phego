@@ -21296,7 +21296,7 @@
   "inputs": [
     {
       "path": "compat.lock.json",
-      "sha256": "bf3f83687aa52c04847aaa15ce07ed5190d8780782b6adb307d567bfba33385f"
+      "sha256": "a22d697ec519d6a5a612c344be26cf5ef9c5389b279e440659094d11fc0b1d4a"
     },
     {
       "path": "docs/implementation/evidence/W-02-php-license-files.json",
