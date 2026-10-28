@@ -42,7 +42,7 @@ docker run --rm --pull never --network none --read-only \
   sh -ec 'sha256sum /input/go.tar.gz; cd /tmp; tar -xzf /input/go.tar.gz; /tmp/go/bin/go version; printf "package main\nfunc main() {}\n" > main.go; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache CGO_ENABLED=0 GOPROXY=off /tmp/go/bin/go build -o /tmp/probe /tmp/main.go; /tmp/probe; printf "pure-Go build: PASS\n"'
 ```
 
-另外下載並核對官方下載資料列出的 Go 1.27.3 Linux amd64、macOS amd64／arm64、Windows amd64 封存檔；各摘要記錄於來源鎖的 `additional_archives`。Windows 第一次下載逾時，重新下載後摘要及檔案大小才符合官方資料。其中 Linux amd64 的 Go 1.27.3 已在 Linux arm64 的 OrbStack 宿主上透過 amd64 容器轉譯執行，`CGO_ENABLED=0`、`GOPROXY=off` 編譯並執行最小 Go 程式成功，產物 SHA-256 為 `5696deac3649bad0068e7c2ca350ccb0e48dde0e3c09676530a3382982917e43`。macOS、Windows 與原生 amd64 主機仍未執行；此探查不是 Phego 建置測試。
+另外下載並核對官方下載資料列出的 Go 1.27.3 Linux amd64、macOS amd64／arm64、Windows amd64 封存檔；各摘要記錄於來源鎖的 `additional_archives`。Windows 第一次下載逾時，重新下載後摘要及檔案大小才符合官方資料。其中 Linux amd64 的 Go 1.27.3 已在 Mac 的 OrbStack Linux arm64 虛擬機中透過 amd64 容器轉譯執行，`CGO_ENABLED=0`、`GOPROXY=off` 編譯並執行最小 Go 程式成功，產物 SHA-256 為 `5696deac3649bad0068e7c2ca350ccb0e48dde0e3c09676530a3382982917e43`。macOS、Windows 與原生 amd64 主機仍未執行；此探查不是 Phego 建置測試。
 
 Linux amd64 探查使用唯讀來源掛載與無網路的受限容器，映像是 `debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31`。重跑時將 `$GO_ARCHIVE` 設為已下載的 Linux amd64 封存檔：
 
