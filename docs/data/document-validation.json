@@ -273,7 +273,6 @@
     "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
     "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
     "docs/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
-    "docs/implementation/W-21.md": "d3702fe27775c89a8ef564bd70c0e538ab7be22a653ae1f354a969464025d914",
     "docs/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
