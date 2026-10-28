@@ -87,5 +87,17 @@
     "probe_status": "isolated_c_compile_and_lld_link_passed",
     "probe_image": "buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3",
     "limitations": "Optional native toolchain only; Go ABI integration and other platforms are not validated."
-  }
+  },
+  "additional_reference_builds": [
+    {
+      "platform": "linux/amd64",
+      "image": "buildpack-deps@sha256:702b53c861e19913b8720993a4032b13441ed63916e123b403301423977f818f",
+      "configure_options": [
+        "--disable-all",
+        "--enable-cli",
+        "--without-pear"
+      ],
+      "status": "in_progress"
+    }
+  ]
 }

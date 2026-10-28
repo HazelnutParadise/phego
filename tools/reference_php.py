@@ -74,15 +74,46 @@ def _load_reference_image(compat: Optional[dict] = None) -> str:
     return image
 
 
-def build_command(archive: Path, timeout_seconds: int) -> list[str]:
+def build_command(archive: Path, timeout_seconds: int, platform: str = "linux/arm64") -> list[str]:
     """Return a Docker command for a bounded, networkless reference build."""
-    return _build_command(archive, timeout_seconds, _load_compat())
+    return _build_command(archive, timeout_seconds, _load_compat(), platform=platform)
 
 
-def _build_command(archive: Path, timeout_seconds: int, compat: dict) -> list[str]:
+def _select_additional_profile(compat: dict, platform: str) -> dict:
+    additional = compat.get("additional_reference_builds")
+    if not isinstance(additional, list):
+        raise ValueError("missing additional_reference_builds")
+    matches = []
+    for p in additional:
+        if not isinstance(p, dict) or not isinstance(p.get("platform"), str) or not p["platform"]:
+            raise ValueError("additional_reference_builds entries need a platform")
+        if p["platform"] == platform:
+            matches.append(p)
+    if len(matches) != 1:
+        raise ValueError("ambiguous or missing additional reference profile")
+    prof = matches[0]
+    if prof.get("configure_options") != _CONFIGURE_OPTIONS:
+        raise ValueError("unsupported additional_reference_builds.configure_options")
+    image = prof.get("image")
+    if not isinstance(image, str) or not _PINNED_IMAGE_RE.fullmatch(image):
+        raise ValueError("additional_reference_builds.image must be a valid image name pinned by a 64-hex sha256 digest")
+    return prof
+
+
+def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: str = "linux/arm64") -> list[str]:
     if not isinstance(timeout_seconds, int) or isinstance(timeout_seconds, bool) or timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be a positive integer")
+    # The additional profile extends a valid lock; it cannot redefine the
+    # schema or replace the canonical arm64 build.
     _validate_lock_profile(compat)
+    arm64_image = _load_reference_image(compat)
+    if platform == "linux/arm64":
+        image = arm64_image
+    elif platform == "linux/amd64":
+        prof = _select_additional_profile(compat, platform)
+        image = prof["image"]
+    else:
+        raise ValueError("unsupported platform")
 
     try:
         archive_abs = Path(archive).resolve(strict=True)
@@ -102,12 +133,11 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict) -> list[st
         raise ValueError("php.archive_sha256 must be a 64-hex digit digest")
     expected_sha = expected_sha.lower()
 
-    image = _load_reference_image(compat)
     argv = [
         "docker", "run", "--pull", "never", "--hostname", "phego-reference",
         "--network", "none", "--read-only", "--tmpfs", "/tmp:rw,nosuid,nodev,exec,size=2g",
         "--user", "65534:65534", "--cpus", "2", "--memory", "2g", "--pids-limit", "256",
-        "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--platform", "linux/arm64",
+        "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--platform", platform,
         "--mount", f"type=bind,source={archive_str},target=/input/php.tar.xz,readonly",
         image,
         "timeout", "--kill-after=5s", f"{timeout_seconds}s", "sh", "-c",
@@ -155,13 +185,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", type=Path, help="downloaded official PHP source archive")
     parser.add_argument("--timeout", type=int, default=900, help="container build time limit in seconds")
+    parser.add_argument("--platform", choices=["linux/arm64", "linux/amd64"], default="linux/arm64")
     args = parser.parse_args()
 
     try:
         compat = _load_compat()
         expected_sha = compat["php"]["archive_sha256"]
         verify_archive(args.archive, expected_sha)
-        argv = _build_command(args.archive, args.timeout, compat)
+        argv = _build_command(args.archive, args.timeout, compat, platform=args.platform)
     except (OSError, ValueError, KeyError, TypeError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
