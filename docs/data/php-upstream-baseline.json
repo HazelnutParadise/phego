@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "series": {
+    "8.2": {
+      "announcement": "https://www.php.net/releases/8_2_35.php",
+      "announcement_sha256": "c0dcc29e7ec1c5cbe9e1819f53c4d1ab356fd6b703d7446aa0795ba50c2e36bc",
+      "commit": "09a9f29a0402bb87bb448cb2e3149ccbec1699c6",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "5737b98601fe5ab1b8c5db0c82ed3158acb9283ed3081ffe2faffb9ac81455e6",
+      "tag": "php-8.2.35",
+      "tag_object": "5db33b627a2a1cc18e307f8ecd6060875efa28b1",
+      "version": "8.2.35"
+    },
+    "8.3": {
+      "announcement": "https://www.php.net/releases/8_3_36.php",
+      "announcement_sha256": "ecb5f27e82449613616cada8b8700c1288c296e41f527ec1e0c9c9e4eae9a3f6",
+      "commit": "5ba6ad519229ac09fc4fc74155c76bdca69ae0de",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "dd54693aa334c5c4d72e9aee96b082c2473750a18a6c1d105789c93a3b1692fd",
+      "tag": "php-8.3.36",
+      "tag_object": "7ed5ca1aa4fe3272c08ad5283217dc96ac6e3d82",
+      "version": "8.3.36"
+    },
+    "8.4": {
+      "announcement": "https://www.php.net/releases/8_4_27.php",
+      "announcement_sha256": "815f567027de4252e1930b9dc6a99ccda36b5cc74f8d918e01a955b3674b6c00",
+      "commit": "00d8bae801541db0d95a698e108bb4b1b273fe6e",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0",
+      "tag": "php-8.4.27",
+      "tag_object": "aa58018e5a2d69f3c497aa22a085fc897b5c3df8",
+      "version": "8.4.27"
+    },
+    "8.5": {
+      "announcement": "https://www.php.net/releases/8_5_12.php",
+      "announcement_sha256": "5f4b922d4a6419cfbb9a74fbbcf3f4deb39e84d4b33629dca534c9a4b53d4094",
+      "commit": "136e049ac10b032c83018e65b63b6df858943750",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+      "tag": "php-8.5.12",
+      "tag_object": "c96586077b050b362744ba295f97f6395f58a75a",
+      "version": "8.5.12"
+    }
+  }
+}
