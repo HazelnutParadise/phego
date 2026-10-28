@@ -255,7 +255,7 @@
   "input_sha256": {
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
     ".github/workflows/docs.yml": "399d56f9590b0aec1b0226ae49e928777f2d54b8487f325ddae1ae9fe4724f1d",
-    ".github/workflows/upstream-watch.yml": "78c4daf44c4942d5038fd31d1a2474a578739309f38acd3a8cd43d5494ccdd28",
+    ".github/workflows/upstream-watch.yml": "4faa352e3daaebebca26299ad6d097014c34c899d31751dd9432a754aeb6d8a4",
     ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
     "AGENTS.md": "e3b1388608d8d977ed39baf2569cc6624cc41e67b4c8d3d98e3d5744424d288c",
     "CHANGELOG.md": "c6320531f024a8616007b30f23b6103d72b778e2fc6754b2028125532625daf8",
