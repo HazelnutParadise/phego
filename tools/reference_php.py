@@ -146,10 +146,11 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: 
         "set -eu; "
         "export SOURCE_DATE_EPOCH=1792540800 TZ=UTC LC_ALL=C; "
         f"expected={expected_sha}; "
-        "actual=$(sha256sum /input/php.tar.xz | awk '{print $1}'); "
+        "cp /input/php.tar.xz /tmp/phego-php.tar.xz; "
+        "actual=$(sha256sum /tmp/phego-php.tar.xz | awk '{print $1}'); "
         "[ \"$actual\" = \"$expected\" ] || { echo 'sha256 mismatch' >&2; exit 1; }; "
         "mkdir -p /tmp/build; cd /tmp/build; "
-        "tar -xf /input/php.tar.xz; "
+        "tar -xf /tmp/phego-php.tar.xz; "
         "set -- php-*; [ -d \"$1\" ] || { echo 'no php source directory found' >&2; exit 1; }; "
         "cd \"$1\"; "
         "./configure --disable-all --enable-cli --without-pear; make -j2; "
@@ -197,86 +198,68 @@ def main() -> int:
         print(f"Error: {e}", file=sys.stderr)
         return 1
 
-    state = {"sigterm": False, "proc": None}
+    state = {"sigint": False, "sigterm": False, "proc": None}
 
-    def handle_sigterm(signum, frame):
-        state["sigterm"] = True
-        active_proc = state["proc"]
-        if active_proc is not None and active_proc.poll() is None:
-            try:
-                active_proc.terminate()
-            except ProcessLookupError:
-                pass
+    def handle_signal(signum, _frame):
+        # Handlers only record cancellation. The main loop owns child
+        # termination, and the same handlers defer signals through cleanup.
+        if signum == signal.SIGINT:
+            state["sigint"] = True
+        elif signum == signal.SIGTERM:
+            state["sigterm"] = True
 
-    previous_sigterm_handler = signal.signal(signal.SIGTERM, handle_sigterm)
+    previous_sigint = signal.signal(signal.SIGINT, handle_signal)
+    previous_sigterm = signal.signal(signal.SIGTERM, handle_signal)
+    cleanup_failed = False
+    result = 1
     try:
         with tempfile.TemporaryDirectory(prefix="phego-reference-") as td:
             cidfile = Path(td) / "container.cid"
             image_index = argv.index("--mount") + 2
             argv[image_index:image_index] = ["--cidfile", str(cidfile)]
-            result = 1
-            cleanup_failed = False
+            process_started = False
             try:
-                proc = subprocess.Popen(argv)
-                state["proc"] = proc
-
-                def cancel_after_sigterm():
-                    if proc.poll() is None and not state["sigterm"]:
-                        proc.terminate()
-                    try:
-                        proc.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        proc.kill()
-                        proc.wait()
-                    return 143
-
-                # SIGTERM may arrive while Popen is creating the child, before
-                # its handle can be stored by the signal handler.
-                if state["sigterm"] and proc.poll() is None:
-                    proc.terminate()
-                if state["sigterm"]:
-                    result = cancel_after_sigterm()
-                else:
+                if not state["sigint"] and not state["sigterm"]:
+                    proc = subprocess.Popen(argv)
+                    process_started = True
+                    state["proc"] = proc
                     deadline = time.monotonic() + args.timeout + 60
-                    try:
-                        while True:
-                            if state["sigterm"]:
-                                result = cancel_after_sigterm()
-                                break
-                            remaining = deadline - time.monotonic()
-                            if remaining <= 0:
-                                raise subprocess.TimeoutExpired(argv, args.timeout + 60)
-                            try:
-                                result = proc.wait(timeout=min(remaining, 0.5))
-                                if state["sigterm"]:
-                                    result = cancel_after_sigterm()
-                                break
-                            except subprocess.TimeoutExpired:
-                                if state["sigterm"]:
-                                    result = cancel_after_sigterm()
-                                    break
-                                if time.monotonic() >= deadline:
-                                    raise
-                    except subprocess.TimeoutExpired:
-                        print("Error: host wait timeout expired", file=sys.stderr)
-                        proc.kill()
-                        proc.wait()
-                        result = 124
-                    except KeyboardInterrupt:
-                        print("Error: interrupted", file=sys.stderr)
-                        proc.terminate()
+                    while proc.poll() is None:
+                        if state["sigint"] or state["sigterm"]:
+                            break
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0:
+                            raise subprocess.TimeoutExpired(argv, args.timeout + 60)
+                        try:
+                            proc.wait(timeout=min(remaining, 0.5))
+                        except subprocess.TimeoutExpired:
+                            pass
+                    if state["sigint"] or state["sigterm"]:
+                        try:
+                            proc.terminate()
+                        except OSError:
+                            pass
                         try:
                             proc.wait(timeout=5)
                         except subprocess.TimeoutExpired:
                             proc.kill()
-                            proc.wait()
-                        result = 130
+                            proc.wait(timeout=5)
+                        result = 143 if state["sigterm"] else 130
+                    else:
+                        result = proc.wait()
+                        if result == 124:
+                            print("Error: container build timed out", file=sys.stderr)
             except FileNotFoundError as e:
                 print(f"Error: {e}", file=sys.stderr)
                 result = 127
             except OSError as e:
                 print(f"Error: failed to start Docker: {e}", file=sys.stderr)
                 result = 126 if isinstance(e, PermissionError) else 1
+            except subprocess.TimeoutExpired:
+                print("Error: host wait timeout expired", file=sys.stderr)
+                proc.kill()
+                proc.wait(timeout=5)
+                result = 124
             finally:
                 state["proc"] = None
                 cidfile_created, container_id = _cidfile_state(cidfile)
@@ -287,15 +270,30 @@ def main() -> int:
                         print(f"Error: {e}", file=sys.stderr)
                         result = 1
                         cleanup_failed = True
-                elif result == 0 or result in (124, 130) or cidfile_created or state["sigterm"]:
+                elif process_started:
                     print("Error: container cleanup state unknown; Docker cidfile is missing, unreadable, or invalid", file=sys.stderr)
                     result = 1
                     cleanup_failed = True
-                if state["sigterm"] and not cleanup_failed:
+                if cleanup_failed:
+                    result = 1
+                elif state["sigterm"]:
                     result = 143
-            return result
+                elif state["sigint"]:
+                    result = 130
     finally:
-        signal.signal(signal.SIGTERM, previous_sigterm_handler)
+        try:
+            signal.signal(signal.SIGTERM, previous_sigterm)
+        finally:
+            signal.signal(signal.SIGINT, previous_sigint)
+
+    # A deferred signal can arrive during handler restoration.
+    if cleanup_failed:
+        return 1
+    if state["sigterm"]:
+        return 143
+    if state["sigint"]:
+        return 130
+    return result
 
 
 if __name__ == "__main__":
