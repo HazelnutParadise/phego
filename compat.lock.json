@@ -93,7 +93,21 @@
     "source_status": "downloaded_and_digest_verified",
     "probe_status": "isolated_c_compile_and_lld_link_passed",
     "probe_image": "buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3",
-    "limitations": "Optional native toolchain only; Go ABI integration and other platforms are not validated."
+    "limitations": "Optional native toolchain only; this arm64 probe does not validate Go ABI integration or native backend behavior.",
+    "additional_archives": [
+      {
+        "platform": "linux/amd64",
+        "archive_url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.4/LLVM-23.1.4-Linux-X64.tar.zst",
+        "archive_sha256": "efdd1dbd089b99bfcfcde7b8eb1236163f2e88df5a981cca4f783ec9cb5e0378",
+        "checksum_source": "https://api.github.com/repos/llvm/llvm-project/releases/tags/llvmorg-23.1.4",
+        "attestation_url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.4/LLVM-23.1.4-Linux-X64.tar.zst.jsonl",
+        "attestation_sha256": "90e6c020ac93350c7ab06bde3872fe4ce3b290431e8649c85dcfc8a0ff00f35d",
+        "source_status": "downloaded_and_digest_verified",
+        "probe_status": "isolated_c_compile_and_lld_link_passed_under_emulation",
+        "probe_image": "buildpack-deps@sha256:0766bfc10a5b87c895c6f675bb8dd09067821b4de144b047a6d029e0c366ecac",
+        "limitations": "Emulated Linux amd64 C probe only; native host, Go ABI and Phego native backend are not validated."
+      }
+    ]
   },
   "additional_reference_builds": [
     {
