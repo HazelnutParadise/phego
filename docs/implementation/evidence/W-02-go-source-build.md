@@ -30,7 +30,7 @@ docker run --rm --cidfile "$CIDFILE" --pull never --platform linux/arm64 \
 
 兩次容器 ID 分別為 `3fa2e72e2479dd2f65f2d812f492966d8dd13e2956cbd448cbb39be95dcce9cf` 和 `f0f716736222b74c8af4d95c096aa5fe6f0a76606e50b72d4ce6edc9dd94b846`；後續 `docker inspect` 各回傳 1 和 `no such object`。結束碼與 inspect 結果未包含在上述原始輸出中。
 
-此比較只涵蓋同一 Linux arm64 環境、單一來源與 bootstrap；只比對 `go` 執行檔和最小程式，沒有逐一比對整套工具鏈，也沒有執行完整 Go 測試或其他平台測試。官方來源與 bootstrap 的授權及供應鏈審查仍須完成。
+上述兩次手動探查只涵蓋同一 Linux arm64 環境、單一來源與 bootstrap；只比對 `go` 執行檔和最小程式，沒有逐一比對整套工具鏈，也沒有執行完整 Go 測試或其他平台測試。官方來源與 bootstrap 的授權及供應鏈審查仍須完成。
 
 ## 可重跑工具的探查
 
@@ -45,3 +45,15 @@ python3 tools/reference_go.py "$BOOTSTRAP" --source-build "$SOURCE" --platform l
 同一工具版本以 `--timeout 1` 執行回傳 124；容器 `daea2728f121b86b7a2d4fc771eecc077173e44571a21b34e8ab0aacf0e06e38` 的 inspect 回傳 1 和 `no such object`。另一個容器 `8b89ff9e5f2348fde2ba39999631cec39303853e0471fda90dd1fde9598a10fa` 經 inspect 確認正在執行後，對工具送 SIGTERM，工具回傳 143，後續 inspect 回傳 1 和 `no such object`。這些探查不代表所有故障已驗證。
 
 `python3 -m unittest discover -s tools -p test_reference_go_source.py` 執行 13 項通過，包含命令輸入與隔離條件，以及以受控替身執行 shell 的來源、bootstrap、建置失敗與產物檢查；替身測試不代表實際跨平台相容。
+
+## Linux amd64 轉譯環境
+
+以同一工具與來源鎖版本，在同一 OrbStack Linux 虛擬機的 amd64 轉譯環境，使用已核對摘要 `65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40` 的 Linux amd64 Go 1.27.3 預編譯封存檔作 bootstrap，執行兩次：
+
+```sh
+python3 tools/reference_go.py "$BOOTSTRAP_AMD64" --source-build "$SOURCE" --platform linux/amd64 --timeout 1800
+```
+
+兩次回傳 0，重建的 `go` 版本均為 `go1.27.3 linux/amd64`，執行檔 SHA-256 均為 `fea858cf420141c20f0ac45b84595e416ee66b14d8c308068037ec771a0bc236`；各自編譯並執行的最小程式 SHA-256 均為 `850c3000c369daed039ec0e0e217f38a09bdb11e1146675be42488e153647410`。完整輸出保存在[第一次](W-02-go-source-20261029/cli-amd64-1.log)與[第二次](W-02-go-source-20261029/cli-amd64-2.log)，SHA-256 依序為 `28fd9df3aa343da9f735ad8e53446045a57933b4f4a05f0957f0742d5c01cce7`、`d50dba1429cb1e9c6a164500dcc5eff8db308902e80a46349881d1698bc5cc95`。容器 ID 依序為 `6c2e82be67978cf641534aa77efb549cd589a4313d3be801d6d5d854bbb420ae`、`f237e90b78628c1ef80d4099b489fc564af1d998c6012e81c5738947dbc92407`；各自 `docker inspect` 均回傳 1 和 `no such object`。結束碼與 inspect 結果未包含在輸出檔中。
+
+結果僅支持此轉譯環境、來源、bootstrap、映像與設定下對 `go` 執行檔和最小程式的比較；原生 amd64、其他環境、整套工具鏈與完整 Go 測試仍未驗證。
