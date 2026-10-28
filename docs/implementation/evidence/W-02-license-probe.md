@@ -4,7 +4,7 @@
 
 已核對 PHP 8.5.12 官方來源封存檔 SHA-256 `08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209`，再以檔名篩選封存檔內的一般檔案。篩到的 17 個檔案路徑、大小與各自摘要列於 [PHP 授權文件清點](W-02-php-license-files.json)。清點不執行檔案，也不將來源複製進專案。檔名以大小寫不敏感方式比對 `license`、`licence`、`copying` 或 `notice`；字詞兩側須為檔名邊界或 `.`, `_`, `-`。
 
-PHP 主檔 `LICENSE` 標示 PHP License 3.01，但封存內容不只一種授權。例如 `ext/date/lib/LICENSE.rst` 標示 MIT，`ext/lexbor/LICENSE` 與 `NOTICE` 標示 Apache License 2.0 及其通知。各檔的適用範圍、來源標頭、外部套件與發行條件仍須逐項審查，不能只依檔名判斷。
+PHP 主檔 `LICENSE` 標示 PHP License 3.01，但封存內容不只一種授權。例如 `ext/date/lib/LICENSE.rst` 標示 MIT，`ext/lexbor/LICENSE` 與 `NOTICE` 標示 Apache License 2.0 及其通知。各檔的適用範圍、來源標頭、外部套件與發行條件仍須逐項審查，不能只依檔名判斷。[17 份文件的原文觀察](W-02-php-license-observations.md)列出其中明示的授權名稱與尚待查證的範圍。
 
 [來源鎖](../../../compat.lock.json)記錄 Go 1.27.3 Linux arm64 官方封存檔的取得位置及摘要。該封存檔中的 `go/LICENSE` 摘要為 `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad`，`go/PATENTS` 摘要為 `96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc`。LLVM 23.1.4 固定提交上游原始檔 [llvm/LICENSE.TXT](https://github.com/llvm/llvm-project/blob/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/llvm/LICENSE.TXT) 摘要為 `8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee`，標示 Apache License 2.0 with LLVM Exceptions。來源鎖中的 `license` 欄位只描述已核對的主要授權文件，不代表整份封存或其依賴都只有該授權。
 
