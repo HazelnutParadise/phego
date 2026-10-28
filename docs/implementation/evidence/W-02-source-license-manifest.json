@@ -1030,7 +1030,7 @@
         "license_applicability": "unknown",
         "license_inventory_status": "partial_filename_inventory",
         "platform": "darwin/arm64",
-        "probe_status": "not_run",
+        "probe_status": "isolated_pure_go_build_passed",
         "url_identity_status": "matches_known_official_pattern",
         "version": "1.27.3"
       },
@@ -21253,12 +21253,6 @@
     {
       "probe_status": "not_run",
       "reason": "probe status is not a recognized completed result",
-      "scope": "Go binary probe darwin/arm64",
-      "status": "unknown"
-    },
-    {
-      "probe_status": "not_run",
-      "reason": "probe status is not a recognized completed result",
       "scope": "Go binary probe windows/amd64",
       "status": "unknown"
     },
@@ -21296,7 +21290,7 @@
   "inputs": [
     {
       "path": "compat.lock.json",
-      "sha256": "a22d697ec519d6a5a612c344be26cf5ef9c5389b279e440659094d11fc0b1d4a"
+      "sha256": "e2ab2c8af2c9411e2e7b8774da0a196c3f1c21206b3e3ec04eab7ed543bbceeb"
     },
     {
       "path": "docs/implementation/evidence/W-02-php-license-files.json",
