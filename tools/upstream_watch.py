@@ -45,6 +45,19 @@ def _json(fetch, url):
     return value
 
 
+def _content(body):
+    """Extract the official content section, excluding rotating site chrome."""
+    start = b'<section id="layout-content">'
+    end = b'</section><!-- layout-content -->'
+    if not isinstance(body, bytes) or len(body) > MAX_RESPONSE or body.count(start) != 1 or body.count(end) != 1:
+        raise ValueError("invalid source content section")
+    left = body.index(start)
+    right = body.index(end)
+    if right <= left + len(start):
+        raise ValueError("empty or misplaced source content")
+    return body[left:right]
+
+
 def _record(series, record):
     if not isinstance(series, str) or not SERIES.fullmatch(series):
         raise ValueError("invalid release series")
@@ -70,8 +83,11 @@ def _record(series, record):
 
 
 def _snapshot(snapshot):
-    if not isinstance(snapshot, dict) or set(snapshot) != {"schema_version", "series"} or type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != 1:
+    if not isinstance(snapshot, dict) or set(snapshot) != {"schema_version", "series", "news_sha256"} or type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != 2:
         raise ValueError("invalid snapshot schema")
+    news_digest = snapshot["news_sha256"]
+    if not isinstance(news_digest, str) or not SHA64.fullmatch(news_digest):
+        raise ValueError("invalid news digest")
     series = snapshot["series"]
     if not isinstance(series, dict) or not 0 < len(series) <= MAX_SERIES:
         raise ValueError("invalid series collection")
@@ -98,6 +114,7 @@ def observe(fetch):
             supported.add(series)
     if not 0 < len(supported) <= MAX_SERIES:
         raise ValueError("invalid supported release count")
+    news_digest = hashlib.sha256(_content(fetch(PHP + "/"))).hexdigest()
     records = {}
     for series in sorted(supported):
         releases = _json(fetch, PHP + "/releases/index.php?json&version=" + series + "&max=1")
@@ -131,15 +148,15 @@ def observe(fetch):
             commit = obj["sha"]
         else:
             commit = tag_object
-        notice_body = fetch(announcement_url)
+        notice_body = _content(fetch(announcement_url))
         version_marker = rb"PHP " + re.escape(version.encode("ascii")) + rb"(?![0-9]|\.[0-9])"
-        if not isinstance(notice_body, bytes) or not notice_body or len(notice_body) > MAX_RESPONSE or re.search(version_marker, notice_body) is None:
+        if re.search(version_marker, notice_body) is None:
             raise ValueError("invalid announcement body")
         record = {"version": version, "tag": "php-" + version, "tag_object": tag_object,
                   "commit": commit, "sha256": matches[0]["sha256"], "announcement": announcement_url,
                   "announcement_sha256": hashlib.sha256(notice_body).hexdigest(), "release_tags": sorted(tags)}
         records[series] = _record(series, record)
-    return {"schema_version": 1, "series": records}
+    return {"schema_version": 2, "news_sha256": news_digest, "series": records}
 
 
 def compare(old, new):
@@ -153,6 +170,8 @@ def compare(old, new):
         for field in sorted(FIELDS):
             if before[series][field] != after[series][field]:
                 changes.append({"series": series, "field": field, "old": before[series][field], "new": after[series][field]})
+    if old["news_sha256"] != new["news_sha256"]:
+        changes.append({"series": "global", "field": "news_sha256", "old": old["news_sha256"], "new": new["news_sha256"]})
     return {"schema_version": 1, "status": "pending_review" if changes else "unchanged",
             "compatibility": "not_assessed", "changes": changes}
 

@@ -20,6 +20,8 @@ class FakeFetch:
             if isinstance(val, bytes):
                 return val
             return json.dumps(val).encode("utf-8")
+        if url == "https://www.php.net/":
+            return b'<section id="layout-content">Official news</section><!-- layout-content -->'
         raise URLError(f"unexpected {url}")
 
 
@@ -63,7 +65,7 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         return {"object": {"type": "commit", "sha": sha}}
 
     def _announce_html(self, ver):
-        return f"<html>PHP {ver} announcement</html>".encode("utf-8")
+        return f'<section id="layout-content">PHP {ver} announcement</section><!-- layout-content -->'.encode("utf-8")
 
     def test_observe_basic_snapshot(self):
         catalog = self.catalog
@@ -95,7 +97,7 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         f = FakeFetch(mapping)
         snap = uw.observe(f)
         self.assertIsInstance(snap, dict)
-        self.assertEqual(snap.get("schema_version"), 1)
+        self.assertEqual(snap.get("schema_version"), 2)
         self.assertIn("series", snap)
         series = snap["series"]
         self.assertEqual(list(series.keys()), sorted(series.keys()))
@@ -140,9 +142,26 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         mapping = {CATALOG_URL: b({"8": {"supported_versions": ["8.3"]}}),
                    "https://www.php.net/releases/index.php?json&version=8.3&max=1": b(self._series_resp("8.3", version)),
                    "https://api.github.com/repos/php/php-src/git/ref/tags/php-8.3.12": b({"object": {"type": "commit", "sha": "c" * 40}}),
-                   "https://www.php.net/releases/8_3_12.php": b"<html>PHP 8.3.120 announcement</html>"}
+                   "https://www.php.net/releases/8_3_12.php": b'<section id="layout-content">PHP 8.3.120 announcement</section><!-- layout-content -->' }
         with self.assertRaises(ValueError):
             uw.observe(FakeFetch(mapping))
+
+    def test_news_content_changes_but_rotating_banner_does_not(self):
+        version = "8.3.12"
+        mapping = {CATALOG_URL: b({"8": {"supported_versions": ["8.3"]}}),
+                   "https://www.php.net/releases/index.php?json&version=8.3&max=1": b(self._series_resp("8.3", version)),
+                   "https://api.github.com/repos/php/php-src/git/ref/tags/php-8.3.12": b({"object": {"type": "commit", "sha": "c" * 40}}),
+                   "https://www.php.net/releases/8_3_12.php": self._announce_html(version)}
+        home = "https://www.php.net/"
+        mapping[home] = b'banner A<section id="layout-content">security notice A</section><!-- layout-content -->'
+        old = uw.observe(FakeFetch(mapping))
+        mapping[home] = b'banner B<section id="layout-content">security notice A</section><!-- layout-content -->'
+        same = uw.observe(FakeFetch(mapping))
+        self.assertEqual(uw.compare(old, same)["status"], "unchanged")
+        mapping[home] = b'banner B<section id="layout-content">security notice B</section><!-- layout-content -->'
+        changed = uw.compare(old, uw.observe(FakeFetch(mapping)))
+        self.assertEqual(changed["status"], "pending_review")
+        self.assertEqual([entry["field"] for entry in changed["changes"]], ["news_sha256"])
 
     def test_observe_lightweight_tag_records_same_sha(self):
         catalog = {"8": {"supported_versions": ["8.3"]}}
@@ -255,7 +274,7 @@ class TestUpstreamWatchObserve(unittest.TestCase):
 
 class TestUpstreamWatchCompare(unittest.TestCase):
     def _mk_snap(self, series_map):
-        snap = {"schema_version": 1, "series": {}}
+        snap = {"schema_version": 2, "news_sha256": "f" * 64, "series": {}}
         for sname, rec in series_map.items():
             snap["series"][sname] = dict(rec)
         # ensure sorted
@@ -263,7 +282,8 @@ class TestUpstreamWatchCompare(unittest.TestCase):
 
     def test_compare_unchanged(self):
         old = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "news_sha256": "f" * 64,
             "series": {
                 "8.1": {
                     "version": "8.1.30",
@@ -284,9 +304,28 @@ class TestUpstreamWatchCompare(unittest.TestCase):
         self.assertEqual(res["compatibility"], "not_assessed")
         self.assertEqual(res["changes"], [])
 
+    def test_news_change_is_separate_candidate(self):
+        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": {
+            "version": "8.1.30", "tag": "php-8.1.30", "tag_object": "a" * 40,
+            "commit": "a" * 40, "sha256": "1" * 64,
+            "announcement": "https://www.php.net/releases/8_1_30.php",
+            "announcement_sha256": "2" * 64, "release_tags": ["security"]}}}
+        new = json.loads(json.dumps(old))
+        new["news_sha256"] = "e" * 64
+        result = uw.compare(old, new)
+        self.assertEqual(result["status"], "pending_review")
+        self.assertEqual(result["changes"][0]["field"], "news_sha256")
+
+    def test_dynamic_banner_is_not_part_of_announcement_content(self):
+        content = b'<section id="layout-content">PHP 8.1.30 release</section><!-- layout-content -->'
+        self.assertEqual(uw._content(b'banner one' + content), uw._content(b'banner two' + content))
+        with self.assertRaises(ValueError):
+            uw._content(b'missing section')
+
     def test_compare_release_changes_emit_events_sorted(self):
         old = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "news_sha256": "f" * 64,
             "series": {
                 "8.2": {
                     "version": "8.2.24",
@@ -341,15 +380,15 @@ class TestUpstreamWatchCompare(unittest.TestCase):
                     "commit": "b" * 40, "sha256": "c" * 64,
                     "announcement": "https://www.php.net/releases/" + version.replace(".", "_") + ".php",
                     "announcement_sha256": "d" * 64, "release_tags": ["security"]}
-        old = {"schema_version": 1, "series": {"8.1": record("8.1.30")}}
-        new = {"schema_version": 1, "series": {"8.2": record("8.2.25")}}
+        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": record("8.1.30")}}
+        new = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.2": record("8.2.25")}}
         res = uw.compare(old, new)
         self.assertEqual(res["status"], "pending_review")
         fields = [c["field"] for c in res["changes"]]
         self.assertIn("series", fields)
 
     def test_compare_invalid_shape_rejected(self):
-        bad = {"schema_version": 2, "series": {}}
+        bad = {"schema_version": 3, "series": {}}
         with self.assertRaises(ValueError):
             uw.compare(bad, bad)
         bad2 = {"schema_version": 1}
@@ -360,7 +399,11 @@ class TestUpstreamWatchCompare(unittest.TestCase):
             uw.compare(bad3, bad3)
 
     def test_compare_unrecognized_fields_rejected(self):
-        old = {"schema_version": 1, "series": {"8.1": {"version": "8.1.30", "extra": 1}}}
+        record = {"version": "8.1.30", "tag": "php-8.1.30", "tag_object": "a" * 40,
+                  "commit": "a" * 40, "sha256": "1" * 64,
+                  "announcement": "https://www.php.net/releases/8_1_30.php",
+                  "announcement_sha256": "2" * 64, "release_tags": ["security"], "extra": 1}
+        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": record}}
         with self.assertRaises(ValueError):
             uw.compare(old, old)
 

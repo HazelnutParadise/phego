@@ -255,7 +255,7 @@
   "input_sha256": {
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
     ".github/workflows/docs.yml": "399d56f9590b0aec1b0226ae49e928777f2d54b8487f325ddae1ae9fe4724f1d",
-    ".github/workflows/upstream-watch.yml": "4faa352e3daaebebca26299ad6d097014c34c899d31751dd9432a754aeb6d8a4",
+    ".github/workflows/upstream-watch.yml": "78c4daf44c4942d5038fd31d1a2474a578739309f38acd3a8cd43d5494ccdd28",
     ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
     "AGENTS.md": "e3b1388608d8d977ed39baf2569cc6624cc41e67b4c8d3d98e3d5744424d288c",
     "CHANGELOG.md": "c6320531f024a8616007b30f23b6103d72b778e2fc6754b2028125532625daf8",
@@ -274,7 +274,7 @@
     "docs/data/phego-sources.json": "c4e4217c59185e7f97ee49f32eb92d335b79df1528c93b6102bf8e3395609079",
     "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
     "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
-    "docs/data/php-upstream-baseline.json": "371cac48a4dea46c78dd9e4d465e4774288b39f036e78457ba64bf0272da41f8",
+    "docs/data/php-upstream-baseline.json": "d8cba6a9cebfe5ff8e67bbcacf9eac571efe19a6575165f502da8d8362a54e0b",
     "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
     "docs/decisions/W-01-contract.md": "154a572e6749859ca746db3b92802a8a979a7c0a1df9e764be465e2ec9126bba",
     "docs/implementation/README.md": "e4a2325e661f1f33dffe05fbaf7183dea2e96e2e1361f114ef18987a2ef171ae",
@@ -285,7 +285,7 @@
     "docs/implementation/evidence/W-02-source-probe.md": "e133730fc84c6f5b8fb7c5a1065eedcd981c8c2a92f637111e41bedfd09d275a",
     "docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json": "55f1041efb9a4fa43ee379f78e6451e50c3ba1e45a696cfe682857cf114cbe37",
     "docs/implementation/evidence/W-02-upstream-probe.md": "080e3caf04e384cb6a590668beb7fa3b447b334b3a5888ec45a29a2edcb9df41",
-    "docs/implementation/evidence/W-02-watch-probe.md": "11ed9d6f6ff55061948ac6fff78c92857cee149534d679dd70a8cd142d7779ed",
+    "docs/implementation/evidence/W-02-watch-probe.md": "cb646d5f8e4cc10f95b82fba4f3c4567bae7c9a68c33df20720f4ede6e858b2a",
     "docs/implementation/evidence/W-02.json": "cc1fb440722c69e464bb0710f9b68f03899ec98ce591838255f7e5e8b58ce8c0",
     "docs/implementation/github-index.json": "d96ed639e78a56944640faca7ce692ad8f5435e2c4866501345508ba191649d7",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
@@ -295,11 +295,11 @@
     "tools/test_upstream_cli.py": "1ed93507643b8f40da0b24320e6f247247a0dcbcf3b67713638ebb63c4033db6",
     "tools/test_upstream_limits.py": "584be6d87cb60f2aefafc8b6e2d9842a70346efd66d29cdbbc8df7a6bbe9853b",
     "tools/test_upstream_snapshot.py": "3959b8f86c8e8f67af1691b8d586fe31d9d1c5cdf4a38a4d29eed6ebc0b94120",
-    "tools/test_upstream_watch.py": "22b26ce6e7bff2769de1a726eff19301489345352e6ff1af2fb940b56a7c0477",
+    "tools/test_upstream_watch.py": "f195cbbf3143db8ecc28f10baba15ffa391776b0ce3ef5a041fbcd18cf919699",
     "tools/test_upstream_watch_network.py": "2dbdcd2d8d31edc594749ae726ceb45a0584fdf5ed28a6219599adc457f175d8",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
     "tools/upstream_snapshot.py": "f5e462dff260892461dd1f94964eb1965f62e817d0eb7a488ce2d4d83c12ecb6",
-    "tools/upstream_watch.py": "025174b4bcac2fc28c4f77129f6378147066ad455a82304697512b65e2f46cdb",
+    "tools/upstream_watch.py": "6ed30328f03ec9fe406f1c8bc15017fc310310751c7006cde2b57cc66681b9e0",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
   }
 }

@@ -1,9 +1,10 @@
 {
-  "schema_version": 1,
+  "news_sha256": "285c04c991324e26df7f76acf265a8bfe2793f98a42d43c0f699e426d445bc48",
+  "schema_version": 2,
   "series": {
     "8.2": {
       "announcement": "https://www.php.net/releases/8_2_35.php",
-      "announcement_sha256": "c0dcc29e7ec1c5cbe9e1819f53c4d1ab356fd6b703d7446aa0795ba50c2e36bc",
+      "announcement_sha256": "3e08437b0466b0232557487fa86c738f32a4a222298e963ede1aad4d946a41f1",
       "commit": "09a9f29a0402bb87bb448cb2e3149ccbec1699c6",
       "release_tags": [
         "security"
@@ -15,7 +16,7 @@
     },
     "8.3": {
       "announcement": "https://www.php.net/releases/8_3_36.php",
-      "announcement_sha256": "ecb5f27e82449613616cada8b8700c1288c296e41f527ec1e0c9c9e4eae9a3f6",
+      "announcement_sha256": "22bb5a177652f9a97f8b50c7fdea87ec28cb6bf2f482d1b902ab325360db8661",
       "commit": "5ba6ad519229ac09fc4fc74155c76bdca69ae0de",
       "release_tags": [
         "security"
@@ -27,7 +28,7 @@
     },
     "8.4": {
       "announcement": "https://www.php.net/releases/8_4_27.php",
-      "announcement_sha256": "815f567027de4252e1930b9dc6a99ccda36b5cc74f8d918e01a955b3674b6c00",
+      "announcement_sha256": "04b82cfea23b0c874473f6e61fc5c065d3221212c02f370410cd3c48fd44b849",
       "commit": "00d8bae801541db0d95a698e108bb4b1b273fe6e",
       "release_tags": [
         "security"
@@ -39,7 +40,7 @@
     },
     "8.5": {
       "announcement": "https://www.php.net/releases/8_5_12.php",
-      "announcement_sha256": "5f4b922d4a6419cfbb9a74fbbcf3f4deb39e84d4b33629dca534c9a4b53d4094",
+      "announcement_sha256": "6f1482b63d6d01103339dc521e4cf91ead7016f594a234d017e7b5c4c8ee3cd8",
       "commit": "136e049ac10b032c83018e65b63b6df858943750",
       "release_tags": [
         "security"

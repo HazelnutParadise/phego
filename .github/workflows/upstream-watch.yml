@@ -36,9 +36,6 @@ jobs:
       - name: Compare with reviewed baseline
         run: |
           python3 tools/upstream_watch.py compare docs/data/php-upstream-baseline.json /tmp/php-upstream-observed.json > /tmp/php-upstream-changes.json 2> /tmp/php-upstream-compare-error.txt || { code=$?; cat /tmp/php-upstream-compare-error.txt >&2; exit "$code"; }
-      - name: Capture public announcement pages for diagnosis
-        run: |
-          python3 -c 'from pathlib import Path; from tools.upstream_watch import fetch; [(Path("/tmp/php-announcement-"+v+".html").write_bytes(fetch("https://www.php.net/releases/"+v+".php"))) for v in ("8_3_36", "8_5_12")]'
       - name: Retain observation and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,7 +46,6 @@ jobs:
             /tmp/php-upstream-changes.json
             /tmp/php-upstream-observe-error.txt
             /tmp/php-upstream-compare-error.txt
-            /tmp/php-announcement-*.html
           if-no-files-found: warn
           retention-days: 30
       - name: Require review for changes
