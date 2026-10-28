@@ -1,0 +1,3306 @@
+{
+  "schema_version": 1,
+  "specification_version": "1.1.2",
+  "source_commit": "6e2e701174a2f8d7afb0a884305007923684f1a9",
+  "scope": "implementation_planning_only",
+  "counts": {
+    "work_packages": 60,
+    "requirements": 100,
+    "acceptance_scenarios": 200
+  },
+  "dependency_waves": [
+    [
+      "W-01"
+    ],
+    [
+      "W-02"
+    ],
+    [
+      "W-03"
+    ],
+    [
+      "W-04",
+      "W-05",
+      "W-49",
+      "W-54"
+    ],
+    [
+      "W-06",
+      "W-07",
+      "W-09"
+    ],
+    [
+      "W-08",
+      "W-10"
+    ],
+    [
+      "W-11",
+      "W-20",
+      "W-45"
+    ],
+    [
+      "W-12",
+      "W-14"
+    ],
+    [
+      "W-13",
+      "W-15",
+      "W-16"
+    ],
+    [
+      "W-17",
+      "W-21"
+    ],
+    [
+      "W-18",
+      "W-19",
+      "W-22",
+      "W-29",
+      "W-37",
+      "W-50"
+    ],
+    [
+      "W-23",
+      "W-24",
+      "W-30",
+      "W-51"
+    ],
+    [
+      "W-25",
+      "W-26",
+      "W-31",
+      "W-32",
+      "W-33",
+      "W-38",
+      "W-46"
+    ],
+    [
+      "W-27",
+      "W-35",
+      "W-39",
+      "W-52"
+    ],
+    [
+      "W-28",
+      "W-36"
+    ],
+    [
+      "W-34",
+      "W-40",
+      "W-41"
+    ],
+    [
+      "W-43",
+      "W-53",
+      "W-56",
+      "W-57",
+      "W-58"
+    ],
+    [
+      "W-42",
+      "W-47",
+      "W-48",
+      "W-55",
+      "W-59"
+    ],
+    [
+      "W-44"
+    ],
+    [
+      "W-60"
+    ]
+  ],
+  "acceptance_owner": {
+    "T-001": "W-44",
+    "T-002": "W-44",
+    "T-003": "W-35",
+    "T-004": "W-35",
+    "T-005": "W-34",
+    "T-006": "W-34",
+    "T-007": "W-34",
+    "T-008": "W-34",
+    "T-009": "W-24",
+    "T-010": "W-24",
+    "T-011": "W-24",
+    "T-012": "W-24",
+    "T-013": "W-24",
+    "T-014": "W-24",
+    "T-015": "W-24",
+    "T-016": "W-24",
+    "T-017": "W-46",
+    "T-018": "W-46",
+    "T-019": "W-41",
+    "T-020": "W-41",
+    "T-021": "W-39",
+    "T-022": "W-39",
+    "T-023": "W-29",
+    "T-024": "W-29",
+    "T-025": "W-36",
+    "T-026": "W-36",
+    "T-027": "W-39",
+    "T-028": "W-39",
+    "T-029": "W-17",
+    "T-030": "W-17",
+    "T-031": "W-17",
+    "T-032": "W-17",
+    "T-033": "W-41",
+    "T-034": "W-41",
+    "T-035": "W-42",
+    "T-036": "W-42",
+    "T-037": "W-38",
+    "T-038": "W-38",
+    "T-039": "W-13",
+    "T-040": "W-13",
+    "T-041": "W-41",
+    "T-042": "W-41",
+    "T-043": "W-41",
+    "T-044": "W-41",
+    "T-045": "W-43",
+    "T-046": "W-43",
+    "T-047": "W-39",
+    "T-048": "W-39",
+    "T-049": "W-41",
+    "T-050": "W-41",
+    "T-051": "W-41",
+    "T-052": "W-41",
+    "T-053": "W-41",
+    "T-054": "W-41",
+    "T-055": "W-41",
+    "T-056": "W-41",
+    "T-057": "W-26",
+    "T-058": "W-26",
+    "T-059": "W-35",
+    "T-060": "W-35",
+    "T-061": "W-41",
+    "T-062": "W-41",
+    "T-063": "W-41",
+    "T-064": "W-41",
+    "T-065": "W-39",
+    "T-066": "W-39",
+    "T-067": "W-39",
+    "T-068": "W-39",
+    "T-069": "W-32",
+    "T-070": "W-32",
+    "T-071": "W-40",
+    "T-072": "W-40",
+    "T-073": "W-41",
+    "T-074": "W-41",
+    "T-075": "W-42",
+    "T-076": "W-42",
+    "T-077": "W-35",
+    "T-078": "W-35",
+    "T-079": "W-41",
+    "T-080": "W-41",
+    "T-081": "W-41",
+    "T-082": "W-41",
+    "T-083": "W-41",
+    "T-084": "W-41",
+    "T-085": "W-41",
+    "T-086": "W-41",
+    "T-087": "W-41",
+    "T-088": "W-41",
+    "T-089": "W-41",
+    "T-090": "W-41",
+    "T-091": "W-42",
+    "T-092": "W-42",
+    "T-093": "W-44",
+    "T-094": "W-44",
+    "T-095": "W-42",
+    "T-096": "W-42",
+    "T-097": "W-42",
+    "T-098": "W-42",
+    "T-099": "W-44",
+    "T-100": "W-44",
+    "T-101": "W-42",
+    "T-102": "W-42",
+    "T-103": "W-44",
+    "T-104": "W-44",
+    "T-105": "W-41",
+    "T-106": "W-41",
+    "T-107": "W-39",
+    "T-108": "W-39",
+    "T-109": "W-39",
+    "T-110": "W-39",
+    "T-111": "W-43",
+    "T-112": "W-43",
+    "T-113": "W-44",
+    "T-114": "W-44",
+    "T-115": "W-44",
+    "T-116": "W-44",
+    "T-117": "W-36",
+    "T-118": "W-36",
+    "T-119": "W-44",
+    "T-120": "W-44",
+    "T-121": "W-23",
+    "T-122": "W-23",
+    "T-123": "W-41",
+    "T-124": "W-41",
+    "T-125": "W-41",
+    "T-126": "W-41",
+    "T-127": "W-44",
+    "T-128": "W-44",
+    "T-129": "W-45",
+    "T-130": "W-45",
+    "T-131": "W-42",
+    "T-132": "W-42",
+    "T-133": "W-44",
+    "T-134": "W-44",
+    "T-135": "W-41",
+    "T-136": "W-41",
+    "T-137": "W-40",
+    "T-138": "W-40",
+    "T-139": "W-40",
+    "T-140": "W-40",
+    "T-141": "W-42",
+    "T-142": "W-42",
+    "T-143": "W-42",
+    "T-144": "W-42",
+    "T-145": "W-42",
+    "T-146": "W-42",
+    "T-147": "W-55",
+    "T-148": "W-55",
+    "T-149": "W-42",
+    "T-150": "W-42",
+    "T-151": "W-44",
+    "T-152": "W-44",
+    "T-153": "W-43",
+    "T-154": "W-43",
+    "T-155": "W-60",
+    "T-156": "W-60",
+    "T-157": "W-44",
+    "T-158": "W-44",
+    "T-159": "W-60",
+    "T-160": "W-60",
+    "T-161": "W-53",
+    "T-162": "W-53",
+    "T-163": "W-50",
+    "T-164": "W-50",
+    "T-165": "W-52",
+    "T-166": "W-52",
+    "T-167": "W-52",
+    "T-168": "W-52",
+    "T-169": "W-53",
+    "T-170": "W-53",
+    "T-171": "W-59",
+    "T-172": "W-59",
+    "T-173": "W-53",
+    "T-174": "W-53",
+    "T-175": "W-60",
+    "T-176": "W-60",
+    "T-177": "W-55",
+    "T-178": "W-55",
+    "T-179": "W-60",
+    "T-180": "W-60",
+    "T-181": "W-55",
+    "T-182": "W-55",
+    "T-183": "W-60",
+    "T-184": "W-60",
+    "T-185": "W-59",
+    "T-186": "W-59",
+    "T-187": "W-59",
+    "T-188": "W-59",
+    "T-189": "W-58",
+    "T-190": "W-58",
+    "T-191": "W-59",
+    "T-192": "W-59",
+    "T-193": "W-60",
+    "T-194": "W-60",
+    "T-195": "W-60",
+    "T-196": "W-60",
+    "T-197": "W-60",
+    "T-198": "W-60",
+    "T-199": "W-60",
+    "T-200": "W-60"
+  },
+  "integration_gate_reasons": {
+    "W-35": {
+      "W-25": "serve／fastcgi 子命令必須接到實際協定入口",
+      "W-26": "serve 子命令必須接到實際 HTTP 入口"
+    },
+    "W-41": {
+      "W-46": "程序隔離終止與硬性限制測試需要真實 worker",
+      "W-38": "完整 native ABI／指標與 GC 檢查需要正式原生 Runtime"
+    },
+    "W-43": {
+      "W-21": "observe／enforce 效能比較需要實際來源追蹤與政策"
+    },
+    "W-56": {
+      "W-36": "宣告的封裝模式驗收需要實際封裝與 VFS"
+    },
+    "W-57": {
+      "W-36": "第38章適用的單檔模式需要實際封裝"
+    },
+    "W-58": {
+      "W-36": "第38章適用的單檔模式需要實際封裝"
+    },
+    "W-60": {
+      "W-45": "認證截點的新版本與安全差異必須已完成追蹤與回歸"
+    }
+  },
+  "source_sha256": {
+    "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+    "docs/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
+    "docs/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
+    "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102"
+  },
+  "items": [
+    {
+      "id": "W-01",
+      "phase": "M0",
+      "title": "[W-01][M0] 維護者可以判斷每個執行入口的信任、權限與授權條件",
+      "work_package_title": "建立產品契約與威脅模型",
+      "branch": "codex/w-01-implementation",
+      "plan_path": "docs/implementation/W-01.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-01-implementation/docs/implementation/W-01.md",
+      "dependencies": [],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-001",
+        "REQ-077",
+        "REQ-078"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-153",
+        "T-154",
+        "T-155",
+        "T-156"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "067c1f50e13b2335d03d7dad3aed54e109a0a99613ae21f46602dc7692eeb8fd",
+      "issue": {
+        "number": 1,
+        "url": "https://github.com/HazelnutParadise/phego/issues/1"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-02",
+      "phase": "M0",
+      "title": "[W-02][M0] 維護者可以從真實來源重建固定的 PHP 與工具基準",
+      "work_package_title": "鎖定官方與工具基準",
+      "branch": "codex/w-02-implementation",
+      "plan_path": "docs/implementation/W-02.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-02-implementation/docs/implementation/W-02.md",
+      "dependencies": [
+        "W-01"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-002",
+        "REQ-060",
+        "REQ-065"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-119",
+        "T-120",
+        "T-129",
+        "T-130"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "1f61ab5b4a42933c41d1e02327dee710792b12227fc4b55b37fdd7a428718da4",
+      "issue": {
+        "number": 2,
+        "url": "https://github.com/HazelnutParadise/phego/issues/2"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-03",
+      "phase": "M0",
+      "title": "[W-03][M0] 維護者可以追查需求、測試、工作包與執行證據",
+      "work_package_title": "建立追蹤與證據工具",
+      "branch": "codex/w-03-implementation",
+      "plan_path": "docs/implementation/W-03.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-03-implementation/docs/implementation/W-03.md",
+      "dependencies": [
+        "W-01",
+        "W-02"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-003",
+        "REQ-072",
+        "REQ-076",
+        "REQ-077",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-143",
+        "T-144",
+        "T-151",
+        "T-152",
+        "T-153",
+        "T-154",
+        "T-157",
+        "T-158"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "48c1de43b076df4ebf1db48ac43c851b9dc6d485c949577d88e6f9cdfa30ae07",
+      "issue": {
+        "number": 3,
+        "url": "https://github.com/HazelnutParadise/phego/issues/3"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-04",
+      "phase": "M0",
+      "title": "[W-04][M0] 維護者可以用官方測試比較參考 PHP 與受測引擎",
+      "work_package_title": "建立官方測試與差異runner",
+      "branch": "codex/w-04-implementation",
+      "plan_path": "docs/implementation/W-04.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-04-implementation/docs/implementation/W-04.md",
+      "dependencies": [
+        "W-02",
+        "W-03"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-072"
+      ],
+      "tests": [
+        "T-143",
+        "T-144"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "7bdb58f59adc8c6e92f05e64a654537d211cf2f7bb93e6bea6d67d2904de7402",
+      "issue": {
+        "number": 4,
+        "url": "https://github.com/HazelnutParadise/phego/issues/4"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-05",
+      "phase": "M1",
+      "title": "[W-05][M1] 維護者可以重播初始化、取消與資源釋放的狀態轉移",
+      "work_package_title": "生命週期與資源狀態模型",
+      "branch": "codex/w-05-implementation",
+      "plan_path": "docs/implementation/W-05.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-05-implementation/docs/implementation/W-05.md",
+      "dependencies": [
+        "W-01",
+        "W-03"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-020",
+        "REQ-021",
+        "REQ-022",
+        "REQ-073"
+      ],
+      "tests": [
+        "T-039",
+        "T-040",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-145",
+        "T-146"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "3982a7e16f163527570aca040825c99c94ec382b471a76761db612b323d4a933",
+      "issue": {
+        "number": 5,
+        "url": "https://github.com/HazelnutParadise/phego/issues/5"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-06",
+      "phase": "M1",
+      "title": "[W-06][M1] 維護者可以驗證 PHP 值、參照及解構的候選模型",
+      "work_package_title": "值／參照／生命週期原型",
+      "branch": "codex/w-06-implementation",
+      "plan_path": "docs/implementation/W-06.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-06-implementation/docs/implementation/W-06.md",
+      "dependencies": [
+        "W-02",
+        "W-04",
+        "W-05"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-007",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017",
+        "REQ-020",
+        "REQ-023"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-029",
+        "T-030",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034",
+        "T-039",
+        "T-040",
+        "T-045",
+        "T-046"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "20b423e1f8d4867ec22f03a18f3622cadd7d5000f70661031bb2cf0be7dad2e0",
+      "issue": {
+        "number": 8,
+        "url": "https://github.com/HazelnutParadise/phego/issues/8"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-07",
+      "phase": "M1",
+      "title": "[W-07][M1] 維護者可以在受控 ABI 下驗證 LLVM 與 Go 橋接",
+      "work_package_title": "LLVM與Go橋接概念驗證",
+      "branch": "codex/w-07-implementation",
+      "plan_path": "docs/implementation/W-07.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-07-implementation/docs/implementation/W-07.md",
+      "dependencies": [
+        "W-02",
+        "W-05"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-052",
+        "REQ-053"
+      ],
+      "tests": [
+        "T-103",
+        "T-104",
+        "T-105",
+        "T-106"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c2ad17406e71b73185cd134325961e79a4b1e3980f9dba021ecd6dd58dc7632a",
+      "issue": {
+        "number": 9,
+        "url": "https://github.com/HazelnutParadise/phego/issues/9"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-08",
+      "phase": "M1",
+      "title": "[W-08][M1] Go 開發者可以依單函式入口與明確資料擁有權整合 PHP",
+      "work_package_title": "定義Go公開API與結果契約",
+      "branch": "codex/w-08-implementation",
+      "plan_path": "docs/implementation/W-08.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-08-implementation/docs/implementation/W-08.md",
+      "dependencies": [
+        "W-01",
+        "W-03",
+        "W-06"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-001",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014",
+        "T-015",
+        "T-016"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "93574805a2a3755d5670e5f8d63ae12b46e483472d11181b766ec262cdb627d5",
+      "issue": {
+        "number": 11,
+        "url": "https://github.com/HazelnutParadise/phego/issues/11"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-09",
+      "phase": "M2",
+      "title": "[W-09][M2] 開發者可以解析 PHP 與模板並定位語法錯誤",
+      "work_package_title": "Lexer與parser",
+      "branch": "codex/w-09-implementation",
+      "plan_path": "docs/implementation/W-09.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-09-implementation/docs/implementation/W-09.md",
+      "dependencies": [
+        "W-02",
+        "W-04"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-010"
+      ],
+      "tests": [
+        "T-019",
+        "T-020"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "065de798268e3d1a705cc72bddb6ca93446d8ebb66f773e244767daeb3f29e75",
+      "issue": {
+        "number": 10,
+        "url": "https://github.com/HazelnutParadise/phego/issues/10"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-10",
+      "phase": "M2",
+      "title": "[W-10][M2] 開發者可以依精確版本辨識語法、行為與相容缺口",
+      "work_package_title": "版本規則與相容診斷",
+      "branch": "codex/w-10-implementation",
+      "plan_path": "docs/implementation/W-10.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-10-implementation/docs/implementation/W-10.md",
+      "dependencies": [
+        "W-02",
+        "W-09"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-002",
+        "REQ-004",
+        "REQ-010",
+        "REQ-011",
+        "REQ-066"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-007",
+        "T-008",
+        "T-019",
+        "T-020",
+        "T-021",
+        "T-022",
+        "T-131",
+        "T-132"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "0213fc5e2987074ef5e58f0f847dd266ca742a7fda9aa4b460ec2715822b97ef",
+      "issue": {
+        "number": 12,
+        "url": "https://github.com/HazelnutParadise/phego/issues/12"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-11",
+      "phase": "M2",
+      "title": "[W-11][M2] 維護者可以將 PHP 呼叫與副作用保留到中介表示",
+      "work_package_title": "高階IR與呼叫語意",
+      "branch": "codex/w-11-implementation",
+      "plan_path": "docs/implementation/W-11.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-11-implementation/docs/implementation/W-11.md",
+      "dependencies": [
+        "W-06",
+        "W-09",
+        "W-10"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-011",
+        "REQ-012",
+        "REQ-015",
+        "REQ-024"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-023",
+        "T-024",
+        "T-029",
+        "T-030",
+        "T-047",
+        "T-048"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "ee5f168c08dc2a6ccbd30329ace50cc5b45db435ff6d46688bad27c6253e2f47",
+      "issue": {
+        "number": 13,
+        "url": "https://github.com/HazelnutParadise/phego/issues/13"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-12",
+      "phase": "M2",
+      "title": "[W-12][M2] PHP 程式可以保留陣列順序、鍵轉換與參照關係",
+      "work_package_title": "正式array與reference實作",
+      "branch": "codex/w-12-implementation",
+      "plan_path": "docs/implementation/W-12.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-12-implementation/docs/implementation/W-12.md",
+      "dependencies": [
+        "W-06",
+        "W-11"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "96886159d5e83d71a75ebc248b0261563610d32987d031ced5fd6cd62193fe24",
+      "issue": {
+        "number": 16,
+        "url": "https://github.com/HazelnutParadise/phego/issues/16"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-13",
+      "phase": "M3",
+      "title": "[W-13][M3] PHP 程式可以執行完整物件行為及可觀察的生命週期",
+      "work_package_title": "物件與邏輯生命週期",
+      "branch": "codex/w-13-implementation",
+      "plan_path": "docs/implementation/W-13.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-13-implementation/docs/implementation/W-13.md",
+      "dependencies": [
+        "W-05",
+        "W-06",
+        "W-11",
+        "W-12"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-012",
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021"
+      ],
+      "tests": [
+        "T-023",
+        "T-024",
+        "T-035",
+        "T-036",
+        "T-037",
+        "T-038",
+        "T-039",
+        "T-040",
+        "T-041",
+        "T-042"
+      ],
+      "acceptance_owner_for": [
+        "T-039",
+        "T-040"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "d19b7de8e3c2b1201d1f1439d8603c44e031a130b903f67958378b36b55d91e5",
+      "issue": {
+        "number": 18,
+        "url": "https://github.com/HazelnutParadise/phego/issues/18"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-14",
+      "phase": "M2",
+      "title": "[W-14][M2] Go 宿主可以區分 PHP 結束原因並正確清理請求",
+      "work_package_title": "Frame、錯誤與shutdown",
+      "branch": "codex/w-14-implementation",
+      "plan_path": "docs/implementation/W-14.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-14-implementation/docs/implementation/W-14.md",
+      "dependencies": [
+        "W-05",
+        "W-08",
+        "W-11"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-009",
+        "REQ-020",
+        "REQ-022",
+        "REQ-030",
+        "REQ-040",
+        "REQ-044"
+      ],
+      "tests": [
+        "T-017",
+        "T-018",
+        "T-039",
+        "T-040",
+        "T-043",
+        "T-044",
+        "T-059",
+        "T-060",
+        "T-079",
+        "T-080",
+        "T-087",
+        "T-088"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "9087a0ac9fa81eb0928ed6ef480614024e6819578c30be79e27936ed5456c6e3",
+      "issue": {
+        "number": 17,
+        "url": "https://github.com/HazelnutParadise/phego/issues/17"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-15",
+      "phase": "M3",
+      "title": "[W-15][M3] 維護者可以最佳化程式並保留語意、政策與取消行為",
+      "work_package_title": "SSA、效果與安全保留最佳化",
+      "branch": "codex/w-15-implementation",
+      "plan_path": "docs/implementation/W-15.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-15-implementation/docs/implementation/W-15.md",
+      "dependencies": [
+        "W-11",
+        "W-12",
+        "W-14"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-016",
+        "REQ-024",
+        "REQ-034",
+        "REQ-054"
+      ],
+      "tests": [
+        "T-031",
+        "T-032",
+        "T-047",
+        "T-048",
+        "T-067",
+        "T-068",
+        "T-107",
+        "T-108"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "eb02657eed2c0f32de815591371a25fbc57dba43c1ac675861f8fcd655d3eb0e",
+      "issue": {
+        "number": 19,
+        "url": "https://github.com/HazelnutParadise/phego/issues/19"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-16",
+      "phase": "M2",
+      "title": "[W-16][M2] 維護者可以安全載入及拒絕損毀的 Bytecode",
+      "work_package_title": "Bytecode格式與驗證器",
+      "branch": "codex/w-16-implementation",
+      "plan_path": "docs/implementation/W-16.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-16-implementation/docs/implementation/W-16.md",
+      "dependencies": [
+        "W-11",
+        "W-14"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-025",
+        "REQ-061",
+        "REQ-064"
+      ],
+      "tests": [
+        "T-049",
+        "T-050",
+        "T-121",
+        "T-122",
+        "T-127",
+        "T-128"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c11bcc45e9f3a149e40712c641fdfb2bb03dfa611e6ff7c1ceaf3d720649b475",
+      "issue": {
+        "number": 20,
+        "url": "https://github.com/HazelnutParadise/phego/issues/20"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-17",
+      "phase": "M2",
+      "title": "[W-17][M2] Go 開發者可以經 VM 執行 PHP 並取得明確結果",
+      "work_package_title": "VM通用執行路徑",
+      "branch": "codex/w-17-implementation",
+      "plan_path": "docs/implementation/W-17.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-17-implementation/docs/implementation/W-17.md",
+      "dependencies": [
+        "W-12",
+        "W-14",
+        "W-16"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-001",
+        "REQ-005",
+        "REQ-011",
+        "REQ-015",
+        "REQ-016",
+        "REQ-025",
+        "REQ-026"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-009",
+        "T-010",
+        "T-021",
+        "T-022",
+        "T-029",
+        "T-030",
+        "T-031",
+        "T-032",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052"
+      ],
+      "acceptance_owner_for": [
+        "T-029",
+        "T-030",
+        "T-031",
+        "T-032"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "b18fce8a7002e4a2b10eed3c5ba5e5c9cab204b7b84b834ee66d565f25569b0b",
+      "issue": {
+        "number": 21,
+        "url": "https://github.com/HazelnutParadise/phego/issues/21"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-18",
+      "phase": "M3",
+      "title": "[W-18][M3] PHP 程式可以在同一政策下動態載入、eval 與 autoload",
+      "work_package_title": "動態載入、eval與autoload",
+      "branch": "codex/w-18-implementation",
+      "plan_path": "docs/implementation/W-18.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-18-implementation/docs/implementation/W-18.md",
+      "dependencies": [
+        "W-10",
+        "W-13",
+        "W-17",
+        "W-20"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-004",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "REQ-055",
+        "REQ-059"
+      ],
+      "tests": [
+        "T-007",
+        "T-008",
+        "T-023",
+        "T-024",
+        "T-025",
+        "T-026",
+        "T-027",
+        "T-028",
+        "T-109",
+        "T-110",
+        "T-117",
+        "T-118"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "64ef770b95bcabd9db3391dbcd333db8ec6412ca2747aa07758369bf92a53216",
+      "issue": {
+        "number": 23,
+        "url": "https://github.com/HazelnutParadise/phego/issues/23"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-19",
+      "phase": "M3",
+      "title": "[W-19][M3] PHP 程式可以依原本順序暫停及恢復 Generator 與 Fiber",
+      "work_package_title": "Generator與Fiber",
+      "branch": "codex/w-19-implementation",
+      "plan_path": "docs/implementation/W-19.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-19-implementation/docs/implementation/W-19.md",
+      "dependencies": [
+        "W-13",
+        "W-14",
+        "W-17"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-027",
+        "REQ-055"
+      ],
+      "tests": [
+        "T-053",
+        "T-054",
+        "T-109",
+        "T-110"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "cd67a238360abfa724ac313375c0f380619e16e09ed6e068a6890c3b02ee6c65",
+      "issue": {
+        "number": 24,
+        "url": "https://github.com/HazelnutParadise/phego/issues/24"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-20",
+      "phase": "M2",
+      "title": "[W-20][M2] 宿主可以限制每次 PHP 執行的資源與外部能力",
+      "work_package_title": "能力與配額核心",
+      "branch": "codex/w-20-implementation",
+      "plan_path": "docs/implementation/W-20.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-20-implementation/docs/implementation/W-20.md",
+      "dependencies": [
+        "W-01",
+        "W-05",
+        "W-08"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-008",
+        "REQ-009",
+        "REQ-013",
+        "REQ-014",
+        "REQ-019",
+        "REQ-022",
+        "REQ-026",
+        "REQ-029",
+        "REQ-031",
+        "REQ-033",
+        "REQ-036",
+        "REQ-037",
+        "REQ-042",
+        "REQ-045",
+        "REQ-049",
+        "REQ-059",
+        "REQ-069"
+      ],
+      "tests": [
+        "T-015",
+        "T-016",
+        "T-017",
+        "T-018",
+        "T-025",
+        "T-026",
+        "T-027",
+        "T-028",
+        "T-037",
+        "T-038",
+        "T-043",
+        "T-044",
+        "T-051",
+        "T-052",
+        "T-057",
+        "T-058",
+        "T-061",
+        "T-062",
+        "T-065",
+        "T-066",
+        "T-071",
+        "T-072",
+        "T-073",
+        "T-074",
+        "T-083",
+        "T-084",
+        "T-089",
+        "T-090",
+        "T-097",
+        "T-098",
+        "T-117",
+        "T-118",
+        "T-137",
+        "T-138"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "a1f70b7d9e92dabb42cf395532fe2c4248fb93aa29e30774fe5851af1b73efb3",
+      "issue": {
+        "number": 14,
+        "url": "https://github.com/HazelnutParadise/phego/issues/14"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-21",
+      "phase": "M5",
+      "title": "[W-21][M5] 宿主可以追查資料來源並依使用脈絡觀察或阻擋操作",
+      "work_package_title": "來源追蹤與脈絡政策",
+      "branch": "codex/w-21-implementation",
+      "plan_path": "docs/implementation/W-21.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-21-implementation/docs/implementation/W-21.md",
+      "dependencies": [
+        "W-12",
+        "W-15",
+        "W-20"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-008",
+        "REQ-014",
+        "REQ-031",
+        "REQ-034",
+        "REQ-035",
+        "REQ-036",
+        "REQ-049"
+      ],
+      "tests": [
+        "T-015",
+        "T-016",
+        "T-027",
+        "T-028",
+        "T-061",
+        "T-062",
+        "T-067",
+        "T-068",
+        "T-069",
+        "T-070",
+        "T-071",
+        "T-072",
+        "T-097",
+        "T-098"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "d3702fe27775c89a8ef564bd70c0e538ab7be22a653ae1f354a969464025d914",
+      "issue": {
+        "number": 22,
+        "url": "https://github.com/HazelnutParadise/phego/issues/22"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-22",
+      "phase": "M4",
+      "title": "[W-22][M4] 網站管理者可以並行處理請求而不混用執行狀態",
+      "work_package_title": "Goroutine接納與Execution隔離",
+      "branch": "codex/w-22-implementation",
+      "plan_path": "docs/implementation/W-22.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-22-implementation/docs/implementation/W-22.md",
+      "dependencies": [
+        "W-05",
+        "W-14",
+        "W-17",
+        "W-20"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-006",
+        "REQ-009",
+        "REQ-023",
+        "REQ-028",
+        "REQ-029",
+        "REQ-030",
+        "REQ-043",
+        "REQ-062",
+        "REQ-063",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-011",
+        "T-012",
+        "T-017",
+        "T-018",
+        "T-045",
+        "T-046",
+        "T-055",
+        "T-056",
+        "T-057",
+        "T-058",
+        "T-059",
+        "T-060",
+        "T-085",
+        "T-086",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-139",
+        "T-140"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "525de6dac6c87713eedfa12f5cac78074d53394f65418266de10a0763444b932",
+      "issue": {
+        "number": 25,
+        "url": "https://github.com/HazelnutParadise/phego/issues/25"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-23",
+      "phase": "M4",
+      "title": "[W-23][M4] 多個請求可以安全重用有容量上限的編譯結果",
+      "work_package_title": "共享編譯快取",
+      "branch": "codex/w-23-implementation",
+      "plan_path": "docs/implementation/W-23.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-23-implementation/docs/implementation/W-23.md",
+      "dependencies": [
+        "W-16",
+        "W-17",
+        "W-22"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-006",
+        "REQ-013",
+        "REQ-023",
+        "REQ-028",
+        "REQ-061",
+        "REQ-062",
+        "REQ-063",
+        "REQ-064"
+      ],
+      "tests": [
+        "T-011",
+        "T-012",
+        "T-025",
+        "T-026",
+        "T-045",
+        "T-046",
+        "T-055",
+        "T-056",
+        "T-121",
+        "T-122",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-127",
+        "T-128"
+      ],
+      "acceptance_owner_for": [
+        "T-121",
+        "T-122"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "a87fb22db7cd46aba04d4e35d02cceb1dd31324a3cc3d2f47a6e397a8a4a6b06",
+      "issue": {
+        "number": 29,
+        "url": "https://github.com/HazelnutParadise/phego/issues/29"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-24",
+      "phase": "M4",
+      "title": "[W-24][M4] Go 開發者可以執行檔案、重用程式並註冊受控 callback",
+      "work_package_title": "正式SDK與HostCall",
+      "branch": "codex/w-24-implementation",
+      "plan_path": "docs/implementation/W-24.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-24-implementation/docs/implementation/W-24.md",
+      "dependencies": [
+        "W-08",
+        "W-17",
+        "W-20",
+        "W-22"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-030",
+        "REQ-033",
+        "REQ-034"
+      ],
+      "tests": [
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014",
+        "T-015",
+        "T-016",
+        "T-017",
+        "T-018",
+        "T-059",
+        "T-060",
+        "T-065",
+        "T-066",
+        "T-067",
+        "T-068"
+      ],
+      "acceptance_owner_for": [
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014",
+        "T-015",
+        "T-016"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "65e28c2cb24daf5fa589a414e3899f17d614c2e8217b3d0e80286af86fe9d625",
+      "issue": {
+        "number": 30,
+        "url": "https://github.com/HazelnutParadise/phego/issues/30"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-25",
+      "phase": "M4",
+      "title": "[W-25][M4] 網站管理者可以保留 Apache 或 Nginx 並接到 FastCGI",
+      "work_package_title": "FastCGI adapter",
+      "branch": "codex/w-25-implementation",
+      "plan_path": "docs/implementation/W-25.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-25-implementation/docs/implementation/W-25.md",
+      "dependencies": [
+        "W-14",
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-029",
+        "REQ-038",
+        "REQ-039",
+        "REQ-040",
+        "REQ-045",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-057",
+        "T-058",
+        "T-075",
+        "T-076",
+        "T-077",
+        "T-078",
+        "T-079",
+        "T-080",
+        "T-089",
+        "T-090",
+        "T-139",
+        "T-140"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c4b572f91d975a2364fa549baafcdc807aa6d7304be4729b0944cce2004ca715",
+      "issue": {
+        "number": 33,
+        "url": "https://github.com/HazelnutParadise/phego/issues/33"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-26",
+      "phase": "M4",
+      "title": "[W-26][M4] 網站管理者可以經內建 HTTP 服務公開允許的內容",
+      "work_package_title": "內建HTTP與公開目錄路由",
+      "branch": "codex/w-26-implementation",
+      "plan_path": "docs/implementation/W-26.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-26-implementation/docs/implementation/W-26.md",
+      "dependencies": [
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-029",
+        "REQ-039",
+        "REQ-040",
+        "REQ-041"
+      ],
+      "tests": [
+        "T-057",
+        "T-058",
+        "T-077",
+        "T-078",
+        "T-079",
+        "T-080",
+        "T-081",
+        "T-082"
+      ],
+      "acceptance_owner_for": [
+        "T-057",
+        "T-058"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "938247848d0ef42525004d64373b39f2d6aef43aefd0da95ecc7c1481dba5f41",
+      "issue": {
+        "number": 34,
+        "url": "https://github.com/HazelnutParadise/phego/issues/34"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-27",
+      "phase": "M4",
+      "title": "[W-27][M4] PHP 網站可以取得相容的表單、輸入與上傳資料",
+      "work_package_title": "PHP請求映射與上傳",
+      "branch": "codex/w-27-implementation",
+      "plan_path": "docs/implementation/W-27.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-27-implementation/docs/implementation/W-27.md",
+      "dependencies": [
+        "W-20",
+        "W-25",
+        "W-26"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-039",
+        "REQ-042"
+      ],
+      "tests": [
+        "T-077",
+        "T-078",
+        "T-083",
+        "T-084"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "32c11c3af04fc979804bf4ebac4439c4b66807b0bef9b7fe8cf30aab3476ebd4",
+      "issue": {
+        "number": 40,
+        "url": "https://github.com/HazelnutParadise/phego/issues/40"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-28",
+      "phase": "M4",
+      "title": "[W-28][M4] PHP 網站可以安全共用 Session 並與既有資料共存",
+      "work_package_title": "Session與共享狀態",
+      "branch": "codex/w-28-implementation",
+      "plan_path": "docs/implementation/W-28.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-28-implementation/docs/implementation/W-28.md",
+      "dependencies": [
+        "W-14",
+        "W-20",
+        "W-22",
+        "W-27"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-043",
+        "REQ-044",
+        "REQ-045",
+        "REQ-046"
+      ],
+      "tests": [
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-088",
+        "T-089",
+        "T-090",
+        "T-091",
+        "T-092"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "1f23d7f024af1db0fa1708873c0f6e3e3538caeb4e325ea6ea19fc091122a33c",
+      "issue": {
+        "number": 44,
+        "url": "https://github.com/HazelnutParadise/phego/issues/44"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-29",
+      "phase": "M3",
+      "title": "[W-29][M3] PHP 程式可以呼叫真實存在的核心函式並查詢能力",
+      "work_package_title": "核心函式與模組登錄",
+      "branch": "codex/w-29-implementation",
+      "plan_path": "docs/implementation/W-29.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-29-implementation/docs/implementation/W-29.md",
+      "dependencies": [
+        "W-10",
+        "W-13",
+        "W-17",
+        "W-20"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-003",
+        "REQ-012",
+        "REQ-018",
+        "REQ-047"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-023",
+        "T-024",
+        "T-035",
+        "T-036",
+        "T-093",
+        "T-094"
+      ],
+      "acceptance_owner_for": [
+        "T-023",
+        "T-024"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "915c71a576f39a9423cd370c873e7499d6ca86edbca94f7095ab169a2f17a0f5",
+      "issue": {
+        "number": 26,
+        "url": "https://github.com/HazelnutParadise/phego/issues/26"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-30",
+      "phase": "M5",
+      "title": "[W-30][M5] PHP 程式可以依版本執行字串、編碼與 PCRE 行為",
+      "work_package_title": "字串、編碼與PCRE",
+      "branch": "codex/w-30-implementation",
+      "plan_path": "docs/implementation/W-30.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-30-implementation/docs/implementation/W-30.md",
+      "dependencies": [
+        "W-12",
+        "W-20",
+        "W-29"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-026",
+        "REQ-035",
+        "REQ-048"
+      ],
+      "tests": [
+        "T-051",
+        "T-052",
+        "T-069",
+        "T-070",
+        "T-095",
+        "T-096"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "aeb98125b51d6607f0fabab252d7b52d6b1cb64a9f48859ba03c6540e1c4c451",
+      "issue": {
+        "number": 31,
+        "url": "https://github.com/HazelnutParadise/phego/issues/31"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-31",
+      "phase": "M5",
+      "title": "[W-31][M5] PHP 網站可以正確使用 PDO／mysqli 的查詢與交易",
+      "work_package_title": "資料庫與PDO／mysqli",
+      "branch": "codex/w-31-implementation",
+      "plan_path": "docs/implementation/W-31.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-31-implementation/docs/implementation/W-31.md",
+      "dependencies": [
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-019",
+        "REQ-033",
+        "REQ-035",
+        "REQ-049"
+      ],
+      "tests": [
+        "T-037",
+        "T-038",
+        "T-065",
+        "T-066",
+        "T-069",
+        "T-070",
+        "T-097",
+        "T-098"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c3c81c355c9b37d15b92c5c33390d1f9fe19c31171e335e4adb6ba4fc290ebe9",
+      "issue": {
+        "number": 35,
+        "url": "https://github.com/HazelnutParadise/phego/issues/35"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-32",
+      "phase": "M5",
+      "title": "[W-32][M5] PHP 網站可以在明確網路政策下使用 HTTP、TLS 與密碼功能",
+      "work_package_title": "HTTP、crypto與網路政策",
+      "branch": "codex/w-32-implementation",
+      "plan_path": "docs/implementation/W-32.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-32-implementation/docs/implementation/W-32.md",
+      "dependencies": [
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-033",
+        "REQ-035",
+        "REQ-037",
+        "REQ-050"
+      ],
+      "tests": [
+        "T-065",
+        "T-066",
+        "T-069",
+        "T-070",
+        "T-073",
+        "T-074",
+        "T-099",
+        "T-100"
+      ],
+      "acceptance_owner_for": [
+        "T-069",
+        "T-070"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "56fb0967bac190ea539636912a25f3d76dc39041238bdef471097b12131f745d",
+      "issue": {
+        "number": 36,
+        "url": "https://github.com/HazelnutParadise/phego/issues/36"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-33",
+      "phase": "M5",
+      "title": "[W-33][M5] PHP 網站可以使用明列的 XML、封存與國際化功能",
+      "work_package_title": "XML、封存、國際化與網站額外模組",
+      "branch": "codex/w-33-implementation",
+      "plan_path": "docs/implementation/W-33.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-33-implementation/docs/implementation/W-33.md",
+      "dependencies": [
+        "W-20",
+        "W-29",
+        "W-30"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-050"
+      ],
+      "tests": [
+        "T-099",
+        "T-100"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "0ffd02394ea8babc55c08cf2359e03365f0aeb03d9e6b84c7d3ea395908366f1",
+      "issue": {
+        "number": 37,
+        "url": "https://github.com/HazelnutParadise/phego/issues/37"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-34",
+      "phase": "M5",
+      "title": "[W-34][M5] 網站管理者可以檢查 Composer 需求並重播不改碼網站流程",
+      "work_package_title": "Composer與網站認證場景",
+      "branch": "codex/w-34-implementation",
+      "plan_path": "docs/implementation/W-34.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-34-implementation/docs/implementation/W-34.md",
+      "dependencies": [
+        "W-18",
+        "W-25",
+        "W-26",
+        "W-27",
+        "W-28",
+        "W-29",
+        "W-30",
+        "W-31",
+        "W-32",
+        "W-33"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-003",
+        "REQ-004",
+        "REQ-046",
+        "REQ-051",
+        "REQ-071"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-008",
+        "T-091",
+        "T-092",
+        "T-101",
+        "T-102",
+        "T-141",
+        "T-142"
+      ],
+      "acceptance_owner_for": [
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-008"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "2d571c683d607077ab4646ed16d2fcdb0c39dcdae3679c865888979951bcd98c",
+      "issue": {
+        "number": 46,
+        "url": "https://github.com/HazelnutParadise/phego/issues/46"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-35",
+      "phase": "M4",
+      "title": "[W-35][M4] 使用者可以透過 CLI 執行、服務及檢查相容性",
+      "work_package_title": "CLI、設定與相容檢查入口",
+      "branch": "codex/w-35-implementation",
+      "plan_path": "docs/implementation/W-35.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-35-implementation/docs/implementation/W-35.md",
+      "dependencies": [
+        "W-10",
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "integration_dependencies": [
+        "W-25",
+        "W-26"
+      ],
+      "requirements": [
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-030",
+        "REQ-036",
+        "REQ-039",
+        "REQ-041",
+        "REQ-047",
+        "REQ-068"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-008",
+        "T-059",
+        "T-060",
+        "T-071",
+        "T-072",
+        "T-077",
+        "T-078",
+        "T-081",
+        "T-082",
+        "T-093",
+        "T-094",
+        "T-135",
+        "T-136"
+      ],
+      "acceptance_owner_for": [
+        "T-003",
+        "T-004",
+        "T-059",
+        "T-060",
+        "T-077",
+        "T-078"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "9fc0eef36aded0eb4489c87bcf8ac73b9f8ff0e9ccd28d724aaac6119854498e",
+      "issue": {
+        "number": 41,
+        "url": "https://github.com/HazelnutParadise/phego/issues/41"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-36",
+      "phase": "M6",
+      "title": "[W-36][M6] 部署者可以封裝應用並分開管理唯讀程式與可寫資料",
+      "work_package_title": "單檔封裝與VFS",
+      "branch": "codex/w-36-implementation",
+      "plan_path": "docs/implementation/W-36.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-36-implementation/docs/implementation/W-36.md",
+      "dependencies": [
+        "W-18",
+        "W-23",
+        "W-26",
+        "W-35"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-013",
+        "REQ-057",
+        "REQ-058",
+        "REQ-059",
+        "REQ-060"
+      ],
+      "tests": [
+        "T-025",
+        "T-026",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-117",
+        "T-118",
+        "T-119",
+        "T-120"
+      ],
+      "acceptance_owner_for": [
+        "T-025",
+        "T-026",
+        "T-117",
+        "T-118"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "30cad246358f0550bd363014f47d83ca2e78f51114781e45ef3f843d3eebecd0",
+      "issue": {
+        "number": 45,
+        "url": "https://github.com/HazelnutParadise/phego/issues/45"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-37",
+      "phase": "M6",
+      "title": "[W-37][M6] 維護者可以把已驗證的 PHP 中介表示編成原生物件",
+      "work_package_title": "LLVM降低與AOT產生",
+      "branch": "codex/w-37-implementation",
+      "plan_path": "docs/implementation/W-37.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-37-implementation/docs/implementation/W-37.md",
+      "dependencies": [
+        "W-07",
+        "W-15",
+        "W-17"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-011",
+        "REQ-052",
+        "REQ-054",
+        "REQ-058",
+        "REQ-061"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-103",
+        "T-104",
+        "T-107",
+        "T-108",
+        "T-115",
+        "T-116",
+        "T-121",
+        "T-122"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "178314a6650acd77441e4ff8ebd3346efba69f3d3560a4a609d0e227895a39e0",
+      "issue": {
+        "number": 27,
+        "url": "https://github.com/HazelnutParadise/phego/issues/27"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-38",
+      "phase": "M6",
+      "title": "[W-38][M6] Go 宿主可以透過版本化 ABI 與原生 Runtime 安全互通",
+      "work_package_title": "正式Native Runtime ABI",
+      "branch": "codex/w-38-implementation",
+      "plan_path": "docs/implementation/W-38.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-38-implementation/docs/implementation/W-38.md",
+      "dependencies": [
+        "W-07",
+        "W-14",
+        "W-20",
+        "W-24",
+        "W-37"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-019",
+        "REQ-031",
+        "REQ-052",
+        "REQ-053",
+        "REQ-055",
+        "REQ-058"
+      ],
+      "tests": [
+        "T-037",
+        "T-038",
+        "T-061",
+        "T-062",
+        "T-103",
+        "T-104",
+        "T-105",
+        "T-106",
+        "T-109",
+        "T-110",
+        "T-115",
+        "T-116"
+      ],
+      "acceptance_owner_for": [
+        "T-037",
+        "T-038"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "4e2f9277e52484c0eba5c6ff90fb16ebb83da8794f5c1fb8f78c0cd198612af8",
+      "issue": {
+        "number": 38,
+        "url": "https://github.com/HazelnutParadise/phego/issues/38"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-39",
+      "phase": "M6",
+      "title": "[W-39][M6] 維護者可以證明 VM、AOT 與混合路徑語意及安全一致",
+      "work_package_title": "後端等價與安全整合",
+      "branch": "codex/w-39-implementation",
+      "plan_path": "docs/implementation/W-39.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-39-implementation/docs/implementation/W-39.md",
+      "dependencies": [
+        "W-15",
+        "W-18",
+        "W-19",
+        "W-21",
+        "W-38"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-011",
+        "REQ-014",
+        "REQ-024",
+        "REQ-027",
+        "REQ-033",
+        "REQ-034",
+        "REQ-054",
+        "REQ-055",
+        "REQ-056",
+        "REQ-074"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-027",
+        "T-028",
+        "T-047",
+        "T-048",
+        "T-053",
+        "T-054",
+        "T-065",
+        "T-066",
+        "T-067",
+        "T-068",
+        "T-107",
+        "T-108",
+        "T-109",
+        "T-110",
+        "T-111",
+        "T-112",
+        "T-147",
+        "T-148"
+      ],
+      "acceptance_owner_for": [
+        "T-021",
+        "T-022",
+        "T-027",
+        "T-028",
+        "T-047",
+        "T-048",
+        "T-065",
+        "T-066",
+        "T-067",
+        "T-068",
+        "T-107",
+        "T-108",
+        "T-109",
+        "T-110"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "0acc06aec05b422c22e87a664e2356ec6af29e980a89aad9f01b3ecb305eb088",
+      "issue": {
+        "number": 42,
+        "url": "https://github.com/HazelnutParadise/phego/issues/42"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-40",
+      "phase": "M7",
+      "title": "[W-40][M7] 網站管理者可以觀測、重載、關閉及回復部署",
+      "work_package_title": "維運、重載、遷移與回復",
+      "branch": "codex/w-40-implementation",
+      "plan_path": "docs/implementation/W-40.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-40-implementation/docs/implementation/W-40.md",
+      "dependencies": [
+        "W-22",
+        "W-25",
+        "W-26",
+        "W-28",
+        "W-35"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-028",
+        "REQ-032",
+        "REQ-036",
+        "REQ-046",
+        "REQ-051",
+        "REQ-068",
+        "REQ-069",
+        "REQ-070",
+        "REQ-071",
+        "REQ-078"
+      ],
+      "tests": [
+        "T-055",
+        "T-056",
+        "T-063",
+        "T-064",
+        "T-071",
+        "T-072",
+        "T-091",
+        "T-092",
+        "T-101",
+        "T-102",
+        "T-135",
+        "T-136",
+        "T-137",
+        "T-138",
+        "T-139",
+        "T-140",
+        "T-141",
+        "T-142",
+        "T-155",
+        "T-156"
+      ],
+      "acceptance_owner_for": [
+        "T-071",
+        "T-072",
+        "T-137",
+        "T-138",
+        "T-139",
+        "T-140"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "03ff1487861779e0446ba0d8780e9d34002e8b300be4edd168c681e04fc82d18",
+      "issue": {
+        "number": 47,
+        "url": "https://github.com/HazelnutParadise/phego/issues/47"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-41",
+      "phase": "M7",
+      "title": "[W-41][M7] 維護者可以重現並修正格式、並行與故障注入缺陷",
+      "work_package_title": "全系統fuzz、race與故障注入",
+      "branch": "codex/w-41-implementation",
+      "plan_path": "docs/implementation/W-41.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-41-implementation/docs/implementation/W-41.md",
+      "dependencies": [
+        "W-05",
+        "W-16",
+        "W-17",
+        "W-22",
+        "W-25",
+        "W-27",
+        "W-28",
+        "W-30"
+      ],
+      "integration_dependencies": [
+        "W-46",
+        "W-38"
+      ],
+      "requirements": [
+        "REQ-010",
+        "REQ-017",
+        "REQ-021",
+        "REQ-022",
+        "REQ-025",
+        "REQ-026",
+        "REQ-027",
+        "REQ-028",
+        "REQ-031",
+        "REQ-032",
+        "REQ-037",
+        "REQ-038",
+        "REQ-040",
+        "REQ-041",
+        "REQ-042",
+        "REQ-043",
+        "REQ-044",
+        "REQ-045",
+        "REQ-048",
+        "REQ-050",
+        "REQ-053",
+        "REQ-062",
+        "REQ-063",
+        "REQ-064",
+        "REQ-067",
+        "REQ-068",
+        "REQ-073",
+        "REQ-075"
+      ],
+      "tests": [
+        "T-019",
+        "T-020",
+        "T-033",
+        "T-034",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052",
+        "T-053",
+        "T-054",
+        "T-055",
+        "T-056",
+        "T-061",
+        "T-062",
+        "T-063",
+        "T-064",
+        "T-073",
+        "T-074",
+        "T-075",
+        "T-076",
+        "T-079",
+        "T-080",
+        "T-081",
+        "T-082",
+        "T-083",
+        "T-084",
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-088",
+        "T-089",
+        "T-090",
+        "T-095",
+        "T-096",
+        "T-099",
+        "T-100",
+        "T-105",
+        "T-106",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-127",
+        "T-128",
+        "T-133",
+        "T-134",
+        "T-135",
+        "T-136",
+        "T-145",
+        "T-146",
+        "T-149",
+        "T-150"
+      ],
+      "acceptance_owner_for": [
+        "T-019",
+        "T-020",
+        "T-033",
+        "T-034",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052",
+        "T-053",
+        "T-054",
+        "T-055",
+        "T-056",
+        "T-061",
+        "T-062",
+        "T-063",
+        "T-064",
+        "T-073",
+        "T-074",
+        "T-079",
+        "T-080",
+        "T-081",
+        "T-082",
+        "T-083",
+        "T-084",
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-088",
+        "T-089",
+        "T-090",
+        "T-105",
+        "T-106",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-135",
+        "T-136"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "282ad37a940ecfdbcbaf6d877d35f0e52eb9af6b47954526c88470bd122958c7",
+      "issue": {
+        "number": 48,
+        "url": "https://github.com/HazelnutParadise/phego/issues/48"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-42",
+      "phase": "M7",
+      "title": "[W-42][M7] 驗收者可以審查完整相容範圍及真實網站結果",
+      "work_package_title": "完整相容性與網站驗收",
+      "branch": "codex/w-42-implementation",
+      "plan_path": "docs/implementation/W-42.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-42-implementation/docs/implementation/W-42.md",
+      "dependencies": [
+        "W-04",
+        "W-19",
+        "W-29",
+        "W-34",
+        "W-39",
+        "W-41",
+        "W-52",
+        "W-53",
+        "W-56",
+        "W-57",
+        "W-58"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-018",
+        "REQ-038",
+        "REQ-046",
+        "REQ-048",
+        "REQ-049",
+        "REQ-051",
+        "REQ-066",
+        "REQ-071",
+        "REQ-072",
+        "REQ-073",
+        "REQ-075",
+        "REQ-076",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-035",
+        "T-036",
+        "T-075",
+        "T-076",
+        "T-091",
+        "T-092",
+        "T-095",
+        "T-096",
+        "T-097",
+        "T-098",
+        "T-101",
+        "T-102",
+        "T-131",
+        "T-132",
+        "T-141",
+        "T-142",
+        "T-143",
+        "T-144",
+        "T-145",
+        "T-146",
+        "T-149",
+        "T-150",
+        "T-151",
+        "T-152",
+        "T-157",
+        "T-158"
+      ],
+      "acceptance_owner_for": [
+        "T-035",
+        "T-036",
+        "T-075",
+        "T-076",
+        "T-091",
+        "T-092",
+        "T-095",
+        "T-096",
+        "T-097",
+        "T-098",
+        "T-101",
+        "T-102",
+        "T-131",
+        "T-132",
+        "T-141",
+        "T-142",
+        "T-143",
+        "T-144",
+        "T-145",
+        "T-146",
+        "T-149",
+        "T-150"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "b947e890339dabe7be658218d70e325276d6d75e24583f4a77980dc47f295cb9",
+      "issue": {
+        "number": 54,
+        "url": "https://github.com/HazelnutParadise/phego/issues/54"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-43",
+      "phase": "M7",
+      "title": "[W-43][M7] 維護者可以量測正確請求的效能、容量及長時間資源變化",
+      "work_package_title": "效能、容量與長時間測試",
+      "branch": "codex/w-43-implementation",
+      "plan_path": "docs/implementation/W-43.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-43-implementation/docs/implementation/W-43.md",
+      "dependencies": [
+        "W-17",
+        "W-22",
+        "W-23",
+        "W-34",
+        "W-39",
+        "W-40",
+        "W-54"
+      ],
+      "integration_dependencies": [
+        "W-21"
+      ],
+      "requirements": [
+        "REQ-023",
+        "REQ-056",
+        "REQ-074",
+        "REQ-075",
+        "REQ-077"
+      ],
+      "tests": [
+        "T-045",
+        "T-046",
+        "T-111",
+        "T-112",
+        "T-147",
+        "T-148",
+        "T-149",
+        "T-150",
+        "T-153",
+        "T-154"
+      ],
+      "acceptance_owner_for": [
+        "T-045",
+        "T-046",
+        "T-111",
+        "T-112",
+        "T-153",
+        "T-154"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "b03a29ed6ab20d9ab63af2eabfc2a47226922a536cc7a3115e917300e395f90c",
+      "issue": {
+        "number": 49,
+        "url": "https://github.com/HazelnutParadise/phego/issues/49"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-44",
+      "phase": "M7",
+      "title": "[W-44][M7] 發布維護者可以準備具來源、授權及證據的候選產物",
+      "work_package_title": "供應鏈與發布候選",
+      "branch": "codex/w-44-implementation",
+      "plan_path": "docs/implementation/W-44.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-44-implementation/docs/implementation/W-44.md",
+      "dependencies": [
+        "W-02",
+        "W-03",
+        "W-36",
+        "W-40",
+        "W-42",
+        "W-43"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-001",
+        "REQ-047",
+        "REQ-050",
+        "REQ-052",
+        "REQ-057",
+        "REQ-058",
+        "REQ-060",
+        "REQ-064",
+        "REQ-067",
+        "REQ-076",
+        "REQ-078",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-093",
+        "T-094",
+        "T-099",
+        "T-100",
+        "T-103",
+        "T-104",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-119",
+        "T-120",
+        "T-127",
+        "T-128",
+        "T-133",
+        "T-134",
+        "T-151",
+        "T-152",
+        "T-155",
+        "T-156",
+        "T-157",
+        "T-158"
+      ],
+      "acceptance_owner_for": [
+        "T-001",
+        "T-002",
+        "T-093",
+        "T-094",
+        "T-099",
+        "T-100",
+        "T-103",
+        "T-104",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-119",
+        "T-120",
+        "T-127",
+        "T-128",
+        "T-133",
+        "T-134",
+        "T-151",
+        "T-152",
+        "T-157",
+        "T-158"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "8eb74d99b711ac4ad5284bb3da7d4773e9f27cf9ab875cdb364fd4000669a71d",
+      "issue": {
+        "number": 59,
+        "url": "https://github.com/HazelnutParadise/phego/issues/59"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-45",
+      "phase": "M8",
+      "title": "[W-45][M8] 維護者可以持續發現新版 PHP 與安全差異並建立回歸",
+      "work_package_title": "上游版本追蹤",
+      "branch": "codex/w-45-implementation",
+      "plan_path": "docs/implementation/W-45.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-45-implementation/docs/implementation/W-45.md",
+      "dependencies": [
+        "W-02",
+        "W-03",
+        "W-04",
+        "W-10"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-065",
+        "REQ-066",
+        "REQ-067"
+      ],
+      "tests": [
+        "T-129",
+        "T-130",
+        "T-131",
+        "T-132",
+        "T-133",
+        "T-134"
+      ],
+      "acceptance_owner_for": [
+        "T-129",
+        "T-130"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "16a7de96fb7479c07dff8f093f711aca008261cfe4b919a325bbf2fb2d23a2bb",
+      "issue": {
+        "number": 15,
+        "url": "https://github.com/HazelnutParadise/phego/issues/15"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-46",
+      "phase": "M5",
+      "title": "[W-46][M5] 宿主可以在獨立程序強制限制及停止高風險執行",
+      "work_package_title": "高風險worker隔離模式",
+      "branch": "codex/w-46-implementation",
+      "plan_path": "docs/implementation/W-46.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-46-implementation/docs/implementation/W-46.md",
+      "dependencies": [
+        "W-05",
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-009",
+        "REQ-032",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-017",
+        "T-018",
+        "T-063",
+        "T-064",
+        "T-139",
+        "T-140"
+      ],
+      "acceptance_owner_for": [
+        "T-017",
+        "T-018"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "1941cef39ba3398cdebbb5335f40fdb4c9ed6c65170da29360db2c1632b14afe",
+      "issue": {
+        "number": 39,
+        "url": "https://github.com/HazelnutParadise/phego/issues/39"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-47",
+      "phase": "M8",
+      "title": "[W-47][M8] 維護者可以以獨立安全及效能閘門接受或拒絕 JIT",
+      "work_package_title": "可選JIT實驗",
+      "branch": "codex/w-47-implementation",
+      "plan_path": "docs/implementation/W-47.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-47-implementation/docs/implementation/W-47.md",
+      "dependencies": [
+        "W-37",
+        "W-38",
+        "W-39",
+        "W-43"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-056"
+      ],
+      "tests": [
+        "T-111",
+        "T-112"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "3b7c27681b68204d501ac135bc09d6a8f61a7c29c4184645ea75ce559eb70ca7",
+      "issue": {
+        "number": 55,
+        "url": "https://github.com/HazelnutParadise/phego/issues/55"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-48",
+      "phase": "M8",
+      "title": "[W-48][M8] 維護者可以實測自適應接納與池化並退回固定策略",
+      "work_package_title": "自適應接納與池化實驗",
+      "branch": "codex/w-48-implementation",
+      "plan_path": "docs/implementation/W-48.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-48-implementation/docs/implementation/W-48.md",
+      "dependencies": [
+        "W-22",
+        "W-23",
+        "W-41",
+        "W-43"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-023",
+        "REQ-029"
+      ],
+      "tests": [
+        "T-045",
+        "T-046",
+        "T-057",
+        "T-058"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "5f96de01fe8dd29184222c496c2547288063acdd17cfa590d6848b205d8a5662",
+      "issue": {
+        "number": 56,
+        "url": "https://github.com/HazelnutParadise/phego/issues/56"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-49",
+      "phase": "M0",
+      "title": "[W-49][M0] 維護者可以追溯第一版起的所有發行與隔離參考環境",
+      "work_package_title": "全歷史版本清冊與隔離參考環境",
+      "branch": "codex/w-49-implementation",
+      "plan_path": "docs/implementation/W-49.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-49-implementation/docs/implementation/W-49.md",
+      "dependencies": [
+        "W-01",
+        "W-02",
+        "W-03"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-002",
+        "REQ-080",
+        "REQ-081",
+        "REQ-082",
+        "REQ-084",
+        "REQ-085"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-159",
+        "T-160",
+        "T-161",
+        "T-162",
+        "T-163",
+        "T-164",
+        "T-167",
+        "T-168",
+        "T-169",
+        "T-170"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "24bb4f6d7268f794eee06e3aac8b20373c461b61cefbafbbe5f28e8857ebd00c",
+      "issue": {
+        "number": 6,
+        "url": "https://github.com/HazelnutParadise/phego/issues/6"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-50",
+      "phase": "M2",
+      "title": "[W-50][M2] 歷史 PHP 程式可以經對應前端及受控工具入口執行",
+      "work_package_title": "早期 PHP Tools／PHP-FI 前端與工具語意",
+      "branch": "codex/w-50-implementation",
+      "plan_path": "docs/implementation/W-50.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-50-implementation/docs/implementation/W-50.md",
+      "dependencies": [
+        "W-49",
+        "W-11",
+        "W-17"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-082",
+        "REQ-095"
+      ],
+      "tests": [
+        "T-163",
+        "T-164",
+        "T-189",
+        "T-190"
+      ],
+      "acceptance_owner_for": [
+        "T-163",
+        "T-164"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c0259540f5d3f9da5238dfe1d86974344f3361189e041592a6ca04258aaeb4fe",
+      "issue": {
+        "number": 28,
+        "url": "https://github.com/HazelnutParadise/phego/issues/28"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-51",
+      "phase": "M3",
+      "title": "[W-51][M3] PHP 程式可以選擇正確的歷史版本與平台語意",
+      "work_package_title": "完整版本與平台語意規則",
+      "branch": "codex/w-51-implementation",
+      "plan_path": "docs/implementation/W-51.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-51-implementation/docs/implementation/W-51.md",
+      "dependencies": [
+        "W-49",
+        "W-06",
+        "W-07",
+        "W-10",
+        "W-19"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-002",
+        "REQ-081",
+        "REQ-083",
+        "REQ-084",
+        "REQ-087"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-161",
+        "T-162",
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168",
+        "T-173",
+        "T-174"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "0e05366a114f2d20b998487254657753023ba501af5f7db3a2d48664045fa80a",
+      "issue": {
+        "number": 32,
+        "url": "https://github.com/HazelnutParadise/phego/issues/32"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-52",
+      "phase": "M5",
+      "title": "[W-52][M5] 歷史 PHP 網站可以使用相應的內建函式及擴充功能",
+      "work_package_title": "歷史內建函式與擴充相容",
+      "branch": "codex/w-52-implementation",
+      "plan_path": "docs/implementation/W-52.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-52-implementation/docs/implementation/W-52.md",
+      "dependencies": [
+        "W-50",
+        "W-51",
+        "W-29",
+        "W-30",
+        "W-31",
+        "W-32",
+        "W-33"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-083",
+        "REQ-084",
+        "REQ-086",
+        "REQ-095"
+      ],
+      "tests": [
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168",
+        "T-171",
+        "T-172",
+        "T-189",
+        "T-190"
+      ],
+      "acceptance_owner_for": [
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "9223ae0b97aaa7827fc8a17c83503b58ca77a4d51df87d4a7b7bd034214210ab",
+      "issue": {
+        "number": 43,
+        "url": "https://github.com/HazelnutParadise/phego/issues/43"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-53",
+      "phase": "M5",
+      "title": "[W-53][M5] 多版本網站可以共享引擎而不交換請求狀態或政策",
+      "work_package_title": "混合版本並行與安全契約",
+      "branch": "codex/w-53-implementation",
+      "plan_path": "docs/implementation/W-53.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-53-implementation/docs/implementation/W-53.md",
+      "dependencies": [
+        "W-49",
+        "W-50",
+        "W-51",
+        "W-22",
+        "W-23",
+        "W-41"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-081",
+        "REQ-085",
+        "REQ-086",
+        "REQ-087",
+        "REQ-097"
+      ],
+      "tests": [
+        "T-161",
+        "T-162",
+        "T-169",
+        "T-170",
+        "T-171",
+        "T-172",
+        "T-173",
+        "T-174",
+        "T-193",
+        "T-194"
+      ],
+      "acceptance_owner_for": [
+        "T-161",
+        "T-162",
+        "T-169",
+        "T-170",
+        "T-173",
+        "T-174"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "67476251387cb8f46f8bbc7f4e4b9b9ea5d8c3b5965cba42ab5e31faa5bf3618",
+      "issue": {
+        "number": 50,
+        "url": "https://github.com/HazelnutParadise/phego/issues/50"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-54",
+      "phase": "M0",
+      "title": "[W-54][M0] 驗收者可以查明全部競品與預先固定的比較工作負載",
+      "work_package_title": "全競品與工作負載登錄",
+      "branch": "codex/w-54-implementation",
+      "plan_path": "docs/implementation/W-54.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-54-implementation/docs/implementation/W-54.md",
+      "dependencies": [
+        "W-01",
+        "W-02",
+        "W-03"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-074",
+        "REQ-088",
+        "REQ-089",
+        "REQ-090"
+      ],
+      "tests": [
+        "T-147",
+        "T-148",
+        "T-175",
+        "T-176",
+        "T-177",
+        "T-178",
+        "T-179",
+        "T-180"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "9382760d09349b80b4c05a3b4cae478d9efc2977a937e6266cfd495de9d7c2dc",
+      "issue": {
+        "number": 7,
+        "url": "https://github.com/HazelnutParadise/phego/issues/7"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-55",
+      "phase": "M7",
+      "title": "[W-55][M7] 驗收者可以逐格判斷是否嚴格超越所有適用競品",
+      "work_package_title": "嚴格效能比較與統計驗收",
+      "branch": "codex/w-55-implementation",
+      "plan_path": "docs/implementation/W-55.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-55-implementation/docs/implementation/W-55.md",
+      "dependencies": [
+        "W-54",
+        "W-43",
+        "W-56",
+        "W-57",
+        "W-58"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-074",
+        "REQ-089",
+        "REQ-090",
+        "REQ-091",
+        "REQ-092"
+      ],
+      "tests": [
+        "T-147",
+        "T-148",
+        "T-177",
+        "T-178",
+        "T-179",
+        "T-180",
+        "T-181",
+        "T-182",
+        "T-183",
+        "T-184"
+      ],
+      "acceptance_owner_for": [
+        "T-147",
+        "T-148",
+        "T-177",
+        "T-178",
+        "T-181",
+        "T-182"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "c9e45190945a2fae378065c7b3b96577419fefefeab253cadee4dd788a313848",
+      "issue": {
+        "number": 57,
+        "url": "https://github.com/HazelnutParadise/phego/issues/57"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-56",
+      "phase": "M5",
+      "title": "[W-56][M5] 驗收者可以重播 WordPress 與 WooCommerce 的整站與交易流程",
+      "work_package_title": "WordPress 與 WooCommerce 真實驗收",
+      "branch": "codex/w-56-implementation",
+      "plan_path": "docs/implementation/W-56.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-56-implementation/docs/implementation/W-56.md",
+      "dependencies": [
+        "W-34",
+        "W-40",
+        "W-41"
+      ],
+      "integration_dependencies": [
+        "W-36"
+      ],
+      "requirements": [
+        "REQ-091",
+        "REQ-093",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-185",
+        "T-186",
+        "T-191",
+        "T-192"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "17f5ff4bc58adfc6645f894e09535eb2cd58d9c1c154720c5f2c8e836875f08c",
+      "issue": {
+        "number": 51,
+        "url": "https://github.com/HazelnutParadise/phego/issues/51"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-57",
+      "phase": "M5",
+      "title": "[W-57][M5] 驗收者可以分別證明 Laravel 框架與 BookStack 應用相容",
+      "work_package_title": "Laravel 與 BookStack 真實驗收",
+      "branch": "codex/w-57-implementation",
+      "plan_path": "docs/implementation/W-57.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-57-implementation/docs/implementation/W-57.md",
+      "dependencies": [
+        "W-34",
+        "W-40",
+        "W-41"
+      ],
+      "integration_dependencies": [
+        "W-36"
+      ],
+      "requirements": [
+        "REQ-091",
+        "REQ-094",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-187",
+        "T-188",
+        "T-191",
+        "T-192"
+      ],
+      "acceptance_owner_for": [],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "cf1e40bc38f12c5851195124dea10234d83d1abb514246253ea42eac1655556f",
+      "issue": {
+        "number": 52,
+        "url": "https://github.com/HazelnutParadise/phego/issues/52"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-58",
+      "phase": "M5",
+      "title": "[W-58][M5] 驗收者可以重播多個生態與歷史應用的真實工作",
+      "work_package_title": "多生態與歷史專案驗收",
+      "branch": "codex/w-58-implementation",
+      "plan_path": "docs/implementation/W-58.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-58-implementation/docs/implementation/W-58.md",
+      "dependencies": [
+        "W-50",
+        "W-52",
+        "W-34",
+        "W-40"
+      ],
+      "integration_dependencies": [
+        "W-36"
+      ],
+      "requirements": [
+        "REQ-091",
+        "REQ-095",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-189",
+        "T-190",
+        "T-191",
+        "T-192"
+      ],
+      "acceptance_owner_for": [
+        "T-189",
+        "T-190"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "e91ab7946a3b93cbe2ad5902fcb425e29f00144e63cb15d48dd687eb5bb49173",
+      "issue": {
+        "number": 53,
+        "url": "https://github.com/HazelnutParadise/phego/issues/53"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-59",
+      "phase": "M7",
+      "title": "[W-59][M7] 驗收者可以證明長時間服務、資料完整與遷移回復",
+      "work_package_title": "資料完整、故障、長時間與遷移驗收",
+      "branch": "codex/w-59-implementation",
+      "plan_path": "docs/implementation/W-59.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-59-implementation/docs/implementation/W-59.md",
+      "dependencies": [
+        "W-53",
+        "W-56",
+        "W-57",
+        "W-58",
+        "W-41"
+      ],
+      "integration_dependencies": [],
+      "requirements": [
+        "REQ-086",
+        "REQ-093",
+        "REQ-094",
+        "REQ-096",
+        "REQ-097",
+        "REQ-098"
+      ],
+      "tests": [
+        "T-171",
+        "T-172",
+        "T-185",
+        "T-186",
+        "T-187",
+        "T-188",
+        "T-191",
+        "T-192",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196"
+      ],
+      "acceptance_owner_for": [
+        "T-171",
+        "T-172",
+        "T-185",
+        "T-186",
+        "T-187",
+        "T-188",
+        "T-191",
+        "T-192"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "e2ff894701dc86a4213acf50260696c24f2aa922fcc2442748fd8dc70aceac42",
+      "issue": {
+        "number": 58,
+        "url": "https://github.com/HazelnutParadise/phego/issues/58"
+      },
+      "pull_request": null
+    },
+    {
+      "id": "W-60",
+      "phase": "M7",
+      "title": "[W-60][M7] 驗收者可以依同一候選提交核對完整目標與發布授權",
+      "work_package_title": "全目標認證與專案文件發布",
+      "branch": "codex/w-60-implementation",
+      "plan_path": "docs/implementation/W-60.md",
+      "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-60-implementation/docs/implementation/W-60.md",
+      "dependencies": [
+        "W-49",
+        "W-52",
+        "W-54",
+        "W-55",
+        "W-59",
+        "W-44"
+      ],
+      "integration_dependencies": [
+        "W-45"
+      ],
+      "requirements": [
+        "REQ-078",
+        "REQ-080",
+        "REQ-088",
+        "REQ-090",
+        "REQ-092",
+        "REQ-097",
+        "REQ-098",
+        "REQ-099",
+        "REQ-100"
+      ],
+      "tests": [
+        "T-155",
+        "T-156",
+        "T-159",
+        "T-160",
+        "T-175",
+        "T-176",
+        "T-179",
+        "T-180",
+        "T-183",
+        "T-184",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196",
+        "T-197",
+        "T-198",
+        "T-199",
+        "T-200"
+      ],
+      "acceptance_owner_for": [
+        "T-155",
+        "T-156",
+        "T-159",
+        "T-160",
+        "T-175",
+        "T-176",
+        "T-179",
+        "T-180",
+        "T-183",
+        "T-184",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196",
+        "T-197",
+        "T-198",
+        "T-199",
+        "T-200"
+      ],
+      "implementation_status": "not_started",
+      "product_test_status": "not_run",
+      "plan_sha256": "1485779376821d6d2da9961a70d8251b0841c8838a55adf59623a561a37eb39b",
+      "issue": {
+        "number": 60,
+        "url": "https://github.com/HazelnutParadise/phego/issues/60"
+      },
+      "pull_request": null
+    }
+  ]
+}

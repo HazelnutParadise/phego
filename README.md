@@ -39,6 +39,7 @@ The slogan is a playful riff on the classic 'PHP is the best language in the wor
 | [Compatibility contract](docs/compatibility/README.md) | Every historical release, explicit profiles, and evidence requirements. |
 | [Benchmark contract](docs/benchmarks/README.md) | Complete competitor coverage and strict, reproducible comparisons. |
 | [Real-application acceptance](docs/acceptance/README.md) | Real projects, data integrity, and release gates. |
+| [Implementation issues and draft PRs](docs/implementation/README.md) | Complete work-package mapping, dependencies, and acceptance ownership. |
 | [Agent instructions](AGENTS.md) | Implementation boundaries, traceability, and completion rules. |
 | [Change log](CHANGELOG.md) | Specification changes and superseded decisions. |
 
