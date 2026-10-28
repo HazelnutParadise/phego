@@ -1,0 +1,95 @@
+{
+  "archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "archive_url": "https://www.php.net/distributions/php-8.5.12.tar.xz",
+  "files": [
+    {
+      "path": "php-8.5.12/LICENSE",
+      "sha256": "b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a",
+      "size": 3204
+    },
+    {
+      "path": "php-8.5.12/TSRM/LICENSE",
+      "sha256": "fe97b8423e34199f7df3e65fd53c4df067a56ab6fe0f2296474ba7da0656460c",
+      "size": 1314
+    },
+    {
+      "path": "php-8.5.12/Zend/LICENSE",
+      "sha256": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b",
+      "size": 2803
+    },
+    {
+      "path": "php-8.5.12/Zend/asm/LICENSE",
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "size": 1338
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/LICENSE",
+      "sha256": "7586d794d062a2a4a16513d95358aecaee4450e2062f7e64ce5ce63ac7212fd6",
+      "size": 26512
+    },
+    {
+      "path": "php-8.5.12/ext/date/lib/LICENSE.rst",
+      "sha256": "2120d029e7c67b9d08c1f665f1c3ed581206f00970b664cccdebe1419bf566e9",
+      "size": 1129
+    },
+    {
+      "path": "php-8.5.12/ext/fileinfo/libmagic/LICENSE",
+      "sha256": "0bfa856a9930bddadbef95d1be1cf4e163c0be618e76ea3275caaf255283e274",
+      "size": 1649
+    },
+    {
+      "path": "php-8.5.12/ext/gd/tests/Rochester-Regular.otf.LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "size": 11358
+    },
+    {
+      "path": "php-8.5.12/ext/lexbor/LICENSE",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "size": 10174
+    },
+    {
+      "path": "php-8.5.12/ext/lexbor/NOTICE",
+      "sha256": "b87f965fd2eba846a0a502d633dd7e7a680b93de5c514c404c948ccf1e5c9dc7",
+      "size": 606
+    },
+    {
+      "path": "php-8.5.12/ext/mbstring/libmbfl/LICENSE",
+      "sha256": "31d9cadcc63c15b79fc59c70f043956104a34c75f23f0ac0ada53c1edfeb88ca",
+      "size": 27776
+    },
+    {
+      "path": "php-8.5.12/ext/opcache/jit/ir/LICENSE",
+      "sha256": "852f2a779458e30d09852bdf6b9a775eabfd4c9f8ac9e5a4b182a2942ae4c9e9",
+      "size": 1106
+    },
+    {
+      "path": "php-8.5.12/ext/standard/libavifinfo/LICENSE",
+      "sha256": "5d40dcb72f934c3d08e10ddb8ba4844de17bf6f9aabc1a382aacf8a8bf4567f8",
+      "size": 1315
+    },
+    {
+      "path": "php-8.5.12/ext/uri/uriparser/COPYING.BSD-3-Clause",
+      "sha256": "287f09e6546a9610f949f89e8fb937cacfeabd7bfaa8c8a0c18312193bf04ad3",
+      "size": 1734
+    },
+    {
+      "path": "php-8.5.12/ext/uri/uriparser/include/uriparser/COPYING",
+      "sha256": "287f09e6546a9610f949f89e8fb937cacfeabd7bfaa8c8a0c18312193bf04ad3",
+      "size": 1734
+    },
+    {
+      "path": "php-8.5.12/ext/uri/uriparser/src/COPYING",
+      "sha256": "287f09e6546a9610f949f89e8fb937cacfeabd7bfaa8c8a0c18312193bf04ad3",
+      "size": 1734
+    },
+    {
+      "path": "php-8.5.12/sapi/fpm/LICENSE",
+      "sha256": "28b9b14401f49784efd2246b32f745c2cd998f4f425be677f29e02a33e68bfed",
+      "size": 1282
+    }
+  ],
+  "limitations": "Filename inventory only; embedded headers, dependencies, applicability and redistribution obligations require review.",
+  "schema_version": 1,
+  "selection": "Regular files whose basename contains license, licence, copying or notice as a separated token.",
+  "status": "partial"
+}
