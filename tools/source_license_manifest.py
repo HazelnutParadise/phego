@@ -22,6 +22,8 @@ INPUT_PATHS = (
     "docs/implementation/evidence/W-02-probe-image-packages.json",
     "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
     "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+    "docs/implementation/evidence/W-02-php-reference-index.json",
+    "docs/implementation/evidence/W-02-python-local-20261029/local-1.json",
 )
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 IMAGE_RE = re.compile(r"^([^@\s]+)@sha256:([0-9a-fA-F]{64})$")
@@ -345,12 +347,13 @@ def _build(repo):
     image_evidence = inputs[INPUT_PATHS[3]]
     binary_evidence = inputs[INPUT_PATHS[4]]
     probe_evidence = inputs[INPUT_PATHS[5]]
+    python_local_evidence = inputs[INPUT_PATHS[9]]
 
     if _integer(lock, "schema_version", "compat.lock.json", 1) != 1:
         raise ManifestError("unsupported compat.lock.json schema_version")
     if _string(lock, "status", "compat.lock.json") != "partial":
         raise ManifestError("compat.lock.json status must be partial")
-    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence), ("binary license evidence", binary_evidence), ("probe image evidence", probe_evidence)):
+    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence), ("binary license evidence", binary_evidence), ("probe image evidence", probe_evidence), ("Python local evidence", python_local_evidence)):
         if _integer(evidence, "schema_version", name, 1) != 1:
             raise ManifestError(f"unsupported {name} schema_version")
         if _string(evidence, "status", name) != "partial":
@@ -601,6 +604,40 @@ def _build(repo):
         raise ManifestError("probe image evidence missing locked image")
     if len(tool_images) != 1:
         raise ManifestError("expected one separate inventory tool image")
+    if (_string(python_local_evidence, "image", "Python local evidence") != tool_images[0]["image"] or
+            _string(python_local_evidence, "platform", "Python local evidence") != tool_images[0]["platform"]):
+        raise ManifestError("Python local evidence image/platform does not match the tool image")
+    if _string(python_local_evidence, "root", "Python local evidence") != "/usr/local":
+        raise ManifestError("Python local evidence root must be /usr/local")
+    if _string(python_local_evidence, "license_applicability", "Python local evidence") != "unknown":
+        raise ManifestError("Python local evidence applicability must remain unknown")
+    _string(python_local_evidence, "selection", "Python local evidence")
+    local_files = _list(python_local_evidence, "files", "Python local evidence")
+    _entries(local_files, "Python local evidence.files", require_encoding=True)
+    if len(local_files) > _integer(python_local_evidence, "visited_files", "Python local evidence"):
+        raise ManifestError("Python local evidence candidate count exceeds visited files")
+    for file in local_files:
+        path = file["path"]
+        if (not path.startswith("/usr/local/") or "\\" in path or
+                any(part in ("", ".", "..") for part in path.split("/")[1:]) or
+                not re.search(r"LICENSE|LICENCE|COPYING|NOTICE|PATENTS", path.rsplit("/", 1)[-1], re.I) or
+                file["encoding"] not in ("utf8_text", "binary")):
+            raise ManifestError("invalid Python local candidate path or encoding")
+    links = _list(python_local_evidence, "unfollowed_symlinks", "Python local evidence", nonempty=False)
+    seen_links = set()
+    candidate_paths = {file["path"] for file in local_files}
+    for link in links:
+        if (not isinstance(link, str) or not link.startswith("/usr/local/") or "\\" in link or
+                "\0" in link or any(part in ("", ".", "..") for part in link.split("/")[1:])):
+            raise ManifestError("invalid Python local symlink path")
+        if link in candidate_paths:
+            raise ManifestError("Python local symlink conflicts with candidate file")
+        if link in seen_links:
+            raise ManifestError("duplicate Python local symlink")
+        seen_links.add(link)
+    tool_images[0]["local_filename_inventory"] = {
+        "status": "partial", "files": local_files, "unfollowed_symlinks": links,
+        "visited_files": python_local_evidence["visited_files"], "license_applicability": "unknown"}
 
     def archive_source(component, archive):
         if component.get("platform") == archive["platform"]:
@@ -684,6 +721,9 @@ def _build(repo):
     )
     if index_digest != _image_digest(reference_profiles[platform]["image"], "reference build image"):
         raise ManifestError("build image evidence.image_index does not match the locked reference image")
+    if hashlib.sha256(raw_inputs[INPUT_PATHS[8]]).hexdigest() != index_digest:
+        raise ManifestError("PHP reference image index digest does not match the lock")
+    reference_descriptors = _list(inputs[INPUT_PATHS[8]], "manifests", "PHP reference image index")
 
     image_records = []
     for profile_platform in sorted(image_profiles):
@@ -694,9 +734,16 @@ def _build(repo):
         manifest_value = _string(profile, "image_manifest", context)
         manifest_digest = _sha(manifest_value.removeprefix("sha256:"), f"{context}.image_manifest")
         expected_digest = _image_digest(reference_profiles[profile_platform]["image"], f"{context} lock image")
-        if manifest_digest != expected_digest and not (
-            profile_platform == platform and index_digest == expected_digest
-        ):
+        parts = profile_platform.split("/")
+        if len(parts) != 2:
+            raise ManifestError(f"{context} invalid platform descriptor")
+        descriptors = [item for item in reference_descriptors
+                       if isinstance(item, dict) and isinstance(item.get("platform"), dict)
+                       and item["platform"].get("os") == parts[0]
+                       and item["platform"].get("architecture") == parts[1]]
+        if len(descriptors) != 1 or descriptors[0].get("digest") != f"sha256:{manifest_digest}":
+            raise ManifestError(f"{context} platform descriptor mismatch")
+        if profile_platform != platform and manifest_digest != expected_digest:
             raise ManifestError(f"{context}.image_manifest does not match compat.lock.json")
         packages = _list(profile, "packages", context)
         count = _integer(profile, "package_count", context)
@@ -743,16 +790,6 @@ def _build(repo):
                 "license_applicability": "unknown",
             }
         )
-        if profile_platform == platform and manifest_digest != index_digest:
-            gaps.append(
-                {
-                    "scope": f"reference image index mapping {profile_platform}",
-                    "status": "unknown",
-                    "image_index": _string(image_evidence, "image_index", "build image evidence"),
-                    "image_manifest": f"sha256:{manifest_digest}",
-                    "reason": "the index-to-platform-manifest correspondence has not been independently verified",
-                }
-            )
         if reference_profiles[profile_platform]["status"] != "complete":
             gaps.append(
                 {

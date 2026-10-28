@@ -26,6 +26,10 @@ INPUTS = {
     / "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
     "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json": REPO
     / "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+    "docs/implementation/evidence/W-02-php-reference-index.json": REPO
+    / "docs/implementation/evidence/W-02-php-reference-index.json",
+    "docs/implementation/evidence/W-02-python-local-20261029/local-1.json": REPO
+    / "docs/implementation/evidence/W-02-python-local-20261029/local-1.json",
     "docs/implementation/evidence/W-02-build-image-packages.json": REPO
     / "docs/implementation/evidence/W-02-build-image-packages.json",
 }
@@ -252,12 +256,110 @@ class SourceLicenseManifestTests(unittest.TestCase):
             if item["platform"] == lock["reference_build"]["platform"]
         )
         self.assertEqual(arm64_profile["image_index"], package_evidence["image_index"])
-        mapping_gap = next(
-            gap for gap in gaps
-            if gap.get("scope") == "reference image index mapping linux/arm64"
-        )
-        self.assertEqual(mapping_gap["status"], "unknown")
-        self.assertIn("not been independently verified", mapping_gap["reason"])
+        self.assertFalse(any(
+            gap.get("scope", "").startswith("reference image index mapping ")
+            for gap in gaps
+        ))
+
+    def test_php_reference_index_is_pinned_and_maps_both_platform_manifests(self):
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        manifest = json.loads(result.stdout)
+        lock = self.read_json("compat.lock.json")
+        package_evidence = self.read_json("docs/implementation/evidence/W-02-build-image-packages.json")
+        index_relative = "docs/implementation/evidence/W-02-php-reference-index.json"
+        index_bytes = (self.repo / index_relative).read_bytes()
+        index = json.loads(index_bytes)
+        locked_image = lock["reference_build"]["image"]
+        self.assertEqual(hashlib.sha256(index_bytes).hexdigest(), locked_image.rsplit("sha256:", 1)[1])
+        self.assertEqual(index_relative, next(item["path"] for item in manifest["inputs"] if item["path"] == index_relative))
+
+        for platform, profile in package_evidence["profiles"].items():
+            expected_arch = platform.split("/", 1)[1]
+            descriptors = [
+                item for item in index["manifests"]
+                if item.get("platform", {}).get("os") == "linux"
+                and item.get("platform", {}).get("architecture") == expected_arch
+            ]
+            self.assertEqual(len(descriptors), 1)
+            self.assertEqual(descriptors[0]["digest"], profile["image_manifest"])
+            output = next(
+                item for item in manifest["artifacts"]["reference_build_images"]
+                if item["platform"] == platform
+            )
+            self.assertEqual(output["image_manifest"], profile["image_manifest"])
+            self.assertEqual(output["image_index"], package_evidence["image_index"])
+        self.assertFalse(any(
+            gap.get("scope", "").startswith("reference image index mapping ")
+            for gap in manifest["gaps"]
+        ))
+
+    def test_rejects_invalid_php_reference_index_evidence_independently(self):
+        index_relative = "docs/implementation/evidence/W-02-php-reference-index.json"
+        package_relative = "docs/implementation/evidence/W-02-build-image-packages.json"
+
+        # Mutating bytes without updating the lock must fail at the raw index digest gate.
+        repo = Path(self.temp.name) / "php-index-bytes-changed"
+        self.make_repo(repo)
+        index_path = repo / index_relative
+        index_path.write_bytes(index_path.read_bytes() + b" ")
+        result = self.generate(repo)
+        self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        self.assertEqual(result.stdout, b"")
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertIn(b"index digest", result.stderr.lower())
+
+        # Swapping the profile descriptors keeps the pinned index bytes intact,
+        # so rejection must come from the platform-to-descriptor comparison.
+        repo = Path(self.temp.name) / "php-index-profile-descriptors-swapped"
+        self.make_repo(repo)
+        packages_path = repo / package_relative
+        packages = json.loads(packages_path.read_text(encoding="utf-8"))
+        arm64 = packages["profiles"]["linux/arm64"]["image_manifest"]
+        packages["profiles"]["linux/arm64"]["image_manifest"] = packages["profiles"]["linux/amd64"]["image_manifest"]
+        packages["profiles"]["linux/amd64"]["image_manifest"] = arm64
+        packages_path.write_text(json.dumps(packages), encoding="utf-8")
+        result = self.generate(repo)
+        self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        self.assertEqual(result.stdout, b"")
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertIn(b"descriptor", result.stderr.lower())
+
+        for mode in ("missing", "duplicate"):
+            with self.subTest(descriptor=mode):
+                repo = Path(self.temp.name) / f"php-index-{mode}-arm64-descriptor"
+                self.make_repo(repo)
+                index_path = repo / index_relative
+                index = json.loads(index_path.read_text(encoding="utf-8"))
+                arm64_rows = [
+                    item for item in index["manifests"]
+                    if item.get("platform", {}).get("os") == "linux"
+                    and item.get("platform", {}).get("architecture") == "arm64"
+                ]
+                self.assertEqual(len(arm64_rows), 1)
+                if mode == "missing":
+                    index["manifests"].remove(arm64_rows[0])
+                else:
+                    index["manifests"].append(dict(arm64_rows[0]))
+                index_bytes = json.dumps(index, separators=(",", ":")).encode("utf-8")
+                index_path.write_bytes(index_bytes)
+                digest = hashlib.sha256(index_bytes).hexdigest()
+
+                lock_path = repo / "compat.lock.json"
+                lock = json.loads(lock_path.read_text(encoding="utf-8"))
+                image_name = lock["reference_build"]["image"].split("@", 1)[0]
+                lock["reference_build"]["image"] = f"{image_name}@sha256:{digest}"
+                lock_path.write_text(json.dumps(lock), encoding="utf-8")
+                packages_path = repo / package_relative
+                packages = json.loads(packages_path.read_text(encoding="utf-8"))
+                packages["image_index"] = f"sha256:{digest}"
+                packages_path.write_text(json.dumps(packages), encoding="utf-8")
+
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+                self.assertIn(b"descriptor", result.stderr.lower())
 
     def test_binary_license_inventories_match_all_locked_archives(self):
         result = self.generate()
@@ -660,6 +762,138 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertEqual(result.stdout, b"")
                 self.assertNotIn(b"Traceback", result.stderr)
                 self.assertIn(b"inventory tool", result.stderr.lower())
+
+    def test_python_local_candidates_are_preserved_with_unknown_non_dpkg_gap(self):
+        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        manifest = json.loads(result.stdout)
+        lock = self.read_json("compat.lock.json")
+        evidence = self.read_json(relative)
+        identity = lock["inventory_tool_image"]
+        self.assertEqual(evidence["image"], identity["image"])
+        self.assertEqual(evidence["platform"], identity["platform"])
+        self.assertIn(relative, {item["path"] for item in manifest["inputs"]})
+
+        tool_image = next(
+            item for item in manifest["artifacts"]["inventory_tool_images"]
+            if item["image"] == identity["image"] and item["platform"] == identity["platform"]
+        )
+
+        def dictionaries(value):
+            if isinstance(value, dict):
+                yield value
+                for child in value.values():
+                    yield from dictionaries(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from dictionaries(child)
+
+        records = list(dictionaries(tool_image))
+        for candidate in evidence["files"]:
+            self.assertTrue(any(
+                all(record.get(key) == candidate[key] for key in ("path", "size", "sha256", "encoding"))
+                for record in records
+            ), f"candidate was not preserved: {candidate['path']}")
+        self.assertTrue(any(
+            item.get("unfollowed_symlinks") == evidence["unfollowed_symlinks"]
+            for item in records
+        ))
+        self.assertEqual(len(evidence["files"]), 42)
+        self.assertGreater(evidence["visited_files"], len(evidence["files"]))
+        self.assertTrue(any(
+            gap.get("scope") == "inventory tool image non-dpkg contents"
+            and gap.get("image") == identity["image"]
+            and gap.get("platform") == identity["platform"]
+            and gap.get("status") == "unknown"
+            for gap in manifest["gaps"]
+        ))
+
+    def test_rejects_invalid_python_local_candidate_evidence(self):
+        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        original = self.read_json(relative)
+        cases = []
+
+        changed = json.loads(json.dumps(original))
+        changed["image"] = changed["image"].replace("python@", "python-alt@")
+        cases.append(("wrong image", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["platform"] = "linux/amd64"
+        cases.append(("wrong platform", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["files"][0]["path"] = "/usr/local/../../etc/passwd"
+        cases.append(("path traversal", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["files"].append(dict(changed["files"][0]))
+        cases.append(("duplicate candidate", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["files"][0]["sha256"] = "not-a-checksum"
+        cases.append(("invalid checksum", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["visited_files"] = len(changed["files"]) - 1
+        cases.append(("candidate count exceeds visited files", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["status"] = "unknown_status"
+        cases.append(("unknown status", changed))
+
+        cases.append(("null evidence", None))
+        for name, evidence in cases:
+            with self.subTest(case=name):
+                repo = Path(self.temp.name) / f"invalid-python-local-{name.replace(' ', '-') }"
+                self.make_repo(repo)
+                path = repo / relative
+                path.write_text(json.dumps(evidence), encoding="utf-8")
+                self.assert_rejected_without_json(repo)
+
+    def test_rejects_invalid_python_local_symlink_and_candidate_paths_independently(self):
+        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        original = self.read_json(relative)
+        cases = (
+            ("symlink object", lambda data: data.update(unfollowed_symlinks=[{"path": "/usr/local/man"}])),
+            ("duplicate symlink path", lambda data: data.update(unfollowed_symlinks=["/usr/local/man", "/usr/local/man"])),
+            ("symlink traversal", lambda data: data.update(unfollowed_symlinks=["/usr/local/../etc"])),
+            ("candidate double slash", lambda data: data["files"][0].update(path=data["files"][0]["path"].replace("/lib/", "//lib/", 1))),
+            ("candidate NUL", lambda data: data["files"][0].update(path=data["files"][0]["path"] + "\0")),
+            ("non-license candidate basename", lambda data: data["files"][0].update(path="/usr/local/README.txt")),
+        )
+
+        for index, (name, mutate) in enumerate(cases):
+            with self.subTest(case=name):
+                repo = Path(self.temp.name) / f"invalid-python-local-path-{index}"
+                self.make_repo(repo)
+                changed = json.loads(json.dumps(original))
+                mutate(changed)
+                (repo / relative).write_text(json.dumps(changed), encoding="utf-8")
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+
+    def test_rejects_python_local_symlink_nul_and_candidate_path_collision(self):
+        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        original = self.read_json(relative)
+        cases = (
+            ("NUL symlink path", lambda data: data.update(unfollowed_symlinks=["/usr/local/man\0"]), b"invalid Python local symlink path"),
+            ("symlink matches candidate", lambda data: data.update(unfollowed_symlinks=[data["files"][0]["path"]]), b"symlink"),
+        )
+        for index, (name, mutate, expected_error) in enumerate(cases):
+            with self.subTest(case=name):
+                repo = Path(self.temp.name) / f"invalid-python-local-symlink-collision-{index}"
+                self.make_repo(repo)
+                changed = json.loads(json.dumps(original))
+                mutate(changed)
+                (repo / relative).write_text(json.dumps(changed), encoding="utf-8")
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+                self.assertIn(expected_error, result.stderr)
 
     def test_rejects_cross_source_archive_mismatch(self):
         php_path = "docs/implementation/evidence/W-02-php-license-files.json"
