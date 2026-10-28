@@ -18,7 +18,7 @@
 
 依上述兩平台的實際觀察，各自的 `expected_profile` 已加入來源鎖。新版參考建置會比對一般及 Zend 擴充的完整集合，拒絕新增、缺少或重複項目，並嚴格比對 session 欄位的型別與值。這些值只適用固定的 PHP 8.5.12、映像、設定與 CLI `-n`，不是 Phego 的能力承諾。
 
-新版工具 SHA-256 為 `08265060e296ec9ef6081d9042060d959f3cb1b99f01676a8cc22d8c62750754`，新版來源鎖 SHA-256 為 `a22d697ec519d6a5a612c344be26cf5ef9c5389b279e440659094d11fc0b1d4a`。2026-10-29 Linux arm64 以同一命令重新建置，擴充及 session 欄位比對通過，單項 PHPT 通過；[原始輸出](W-02-php-profile-20261029/linux-arm64-locked.log.gz)解壓後 SHA-256 為 `ee40ac3f0f6d17bcbc98a1265b37fb1b025fd411644e9040dd9450b7d0a24f8c`。上方 amd64 結果使用先前只觀察擴充的版本，不代表新版閘門已在該平台執行。
+新版工具 SHA-256 為 `08265060e296ec9ef6081d9042060d959f3cb1b99f01676a8cc22d8c62750754`，新版來源鎖 SHA-256 為 `a22d697ec519d6a5a612c344be26cf5ef9c5389b279e440659094d11fc0b1d4a`。2026-10-29 Linux arm64 以同一命令重新建置，擴充及 session 欄位比對通過，單項 PHPT 通過；[原始輸出](W-02-php-profile-20261029/linux-arm64-locked.log.gz)解壓後 SHA-256 為 `ee40ac3f0f6d17bcbc98a1265b37fb1b025fd411644e9040dd9450b7d0a24f8c`。OrbStack 轉譯 amd64 也以新版工具重新建置，擴充與 session 欄位比對及單項 PHPT 均通過；[原始輸出](W-02-php-profile-20261029/linux-amd64-locked.log.gz)解壓後 SHA-256 為 `297e66d7e585d5911b131fa8e25433b6cd6e7a95613adcc0b195d98d94d2339a`。兩次新版容器均已確認移除；amd64 仍非原生硬體驗證。
 
 兩個 session 欄位為 `false` 是因這個參考建置沒有載入 session，`ini_get` 也無該設定；不能據此宣稱 upload progress 已停用或 session 安全回歸已通過。
 
