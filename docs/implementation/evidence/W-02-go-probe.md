@@ -2,7 +2,7 @@
 
 本紀錄對應 [REQ-060](../../data/phego-requirements.json)、局部情境 [T-119](../../data/phego-acceptance-tests.json) 與 [W-02](../W-02.md)。它驗證參考工具鏈的局部操作，不代表 Phego 引擎、完整建置重現性或產品驗收通過。
 
-[工具](../../../tools/reference_go.py) 使用[來源鎖](../../../compat.lock.json)選擇 Go 1.27.3 與精確的 Linux 平台及固定映像。它在啟動容器前核對封存檔摘要，並在無網路、唯讀根目錄、非 root 和有限資源的容器內複製已下載的 Go 工具鏈封存檔，再核對副本摘要、確認 Go 版本與平台，使用 `CGO_ENABLED=0`、`GOPROXY=off`、`GOTOOLCHAIN=local` 編譯與執行最小程式。`HOME` 與建置快取位於容器的暫存空間。本探查使用預編譯的 Go 工具鏈，沒有從 Go 原始碼重建工具鏈。工具不下載映像或來源，重跑前須先取得來源鎖所列檔案及映像。
+[工具](../../../tools/reference_go.py) 使用[來源鎖](../../../compat.lock.json)選擇 Go 1.27.3 與精確的 Linux 平台及固定映像。它在啟動容器前核對封存檔摘要，並在無網路、唯讀根目錄、非 root 和有限資源的容器內複製已下載的 Go 工具鏈封存檔，再核對副本摘要、確認 Go 版本與平台，使用 `CGO_ENABLED=0`、`GOPROXY=off`、`GOTOOLCHAIN=local` 編譯與執行最小程式。`HOME` 與建置快取位於容器的暫存空間。本探查使用預編譯的 Go 工具鏈；另一次從來源重建的結果見[來源建置紀錄](W-02-go-source-build.md)。工具不下載映像或來源，重跑前須先取得來源鎖所列檔案及映像。
 
 2026-10-29 在 Mac 的 OrbStack Linux arm64 虛擬機執行下列命令；`GO_ARM64_ARCHIVE` 與 `GO_AMD64_ARCHIVE` 為各自已下載封存檔的絕對路徑：
 

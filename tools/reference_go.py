@@ -18,6 +18,7 @@ _PINNED_IMAGE_RE = re.compile(r"^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]+)?(?:
 _VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 _ARCHIVE_RE = re.compile(r"^https://go\.dev/dl/go([0-9]+\.[0-9]+\.[0-9]+)\.linux-(arm64|amd64)\.tar\.gz$")
 _SUPPORTED_PLATFORMS = ("linux/arm64", "linux/amd64")
+_SOURCE_ARCHIVE_RE = re.compile(r"^https://go\.dev/dl/go([0-9]+\.[0-9]+\.[0-9]+)\.src\.tar\.gz$")
 
 
 def _validate_lock_profile(compat: dict) -> None:
@@ -100,19 +101,79 @@ def _profile(compat: dict, platform: str) -> dict:
     return {"image": image, "archive_url": url, "archive_sha256": digest.lower(), "version": version}
 
 
-def build_command(archive: Path, platform: str, timeout_seconds: int, compat: dict) -> list[str]:
+def _source_profile(compat: dict, version: str) -> dict:
+    source = compat.get("go", {}).get("source_build")
+    if not isinstance(source, dict):
+        raise ValueError("missing go.source_build")
+    url = source.get("archive_url")
+    match = _SOURCE_ARCHIVE_RE.fullmatch(url) if isinstance(url, str) else None
+    if source.get("version") != version or not match or match.group(1) != version:
+        raise ValueError("source archive URL and version must match go.version")
+    digest = source.get("archive_sha256")
+    if not isinstance(digest, str) or not _HEX64_RE.fullmatch(digest):
+        raise ValueError("source archive_sha256 must be a 64-hex digit digest")
+    return {"archive_sha256": digest.lower()}
+
+
+def _mount_path(path: Path) -> str:
+    try:
+        resolved = Path(path).resolve(strict=True)
+    except OSError as e:
+        raise OSError(f"cannot resolve archive path: {e}") from e
+    if not resolved.is_file():
+        raise OSError("archive must be a regular file")
+    value = str(resolved)
+    if any(c in value for c in (",", '"', "\n", "\r")):
+        raise ValueError("archive path contains characters unsafe for Docker --mount")
+    return value
+
+
+def build_command(archive: Path, platform: str, timeout_seconds: int, compat: dict,
+                  source_archive: Optional[Path] = None) -> list[str]:
     if type(timeout_seconds) is not int or timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be a positive integer")
     prof = _profile(compat, platform)
-    try:
-        path = Path(archive).resolve(strict=True)
-    except OSError as e:
-        raise OSError(f"cannot resolve archive path: {e}") from e
-    if not path.is_file():
-        raise OSError("archive must be a regular file")
-    source = str(path)
-    if any(c in source for c in (",", '"', "\n", "\r")):
-        raise ValueError("archive path contains characters unsafe for Docker --mount")
+    source = _mount_path(archive)
+    if source_archive is not None:
+        source_profile = _source_profile(compat, prof["version"])
+        source_path = _mount_path(source_archive)
+        verify_archive(Path(source), prof["archive_sha256"])
+        verify_archive(Path(source_path), source_profile["archive_sha256"])
+        version = prof["version"]
+        arch = platform.split("/")[1]
+        script = " ".join((
+            "set -eu;",
+            "cp /input/go.tar.gz /tmp/phego-bootstrap.tar.gz;",
+            f"expected='{prof['archive_sha256']}';",
+            "actual=$(sha256sum /tmp/phego-bootstrap.tar.gz | awk '{print $1}');",
+            '[ "$actual" = "$expected" ] || { echo bootstrap_sha256_mismatch >&2; exit 1; };',
+            "mkdir -p /tmp/bootstrap /tmp/source /tmp/phego-home /tmp/phego-gocache /tmp/phego-gopath;",
+            "tar -xzf /tmp/phego-bootstrap.tar.gz -C /tmp/bootstrap;",
+            "cp /input/go.src.tar.gz /tmp/phego-source.tar.gz;",
+            f"expected='{source_profile['archive_sha256']}';",
+            "actual=$(sha256sum /tmp/phego-source.tar.gz | awk '{print $1}');",
+            '[ "$actual" = "$expected" ] || { echo source_sha256_mismatch >&2; exit 1; };',
+            "tar -xzf /tmp/phego-source.tar.gz -C /tmp/source;",
+            f'[ "$(head -n 1 /tmp/source/go/VERSION)" = "go{version}" ] || {{ echo source_version_mismatch >&2; exit 1; }};',
+            f'[ "$(/tmp/bootstrap/go/bin/go version)" = "go version go{version} linux/{arch}" ] || {{ echo bootstrap_version_platform_mismatch >&2; exit 1; }};',
+            "export HOME=/tmp/phego-home GOCACHE=/tmp/phego-gocache GOPATH=/tmp/phego-gopath;",
+            "export GOROOT_BOOTSTRAP=/tmp/bootstrap/go CGO_ENABLED=0 GOPROXY=off GOTOOLCHAIN=local GOENV=off GOWORK=off;",
+            "cd /tmp/source/go/src; /tmp/source/go/src/make.bash;",
+            f'[ "$(/tmp/source/go/bin/go version)" = "go version go{version} linux/{arch}" ] || {{ echo rebuilt_version_platform_mismatch >&2; exit 1; }};',
+            "printf 'package main\\nfunc main() {}\\n' > /tmp/probe.go;",
+            "cd /tmp; /tmp/source/go/bin/go build -o /tmp/probe /tmp/probe.go; /tmp/probe;",
+            "echo '=== go version ==='; /tmp/source/go/bin/go version;",
+            "echo '=== binary sha256 ==='; sha256sum /tmp/source/go/bin/go /tmp/probe; echo source_build_probe_ok",
+        ))
+        return [
+            "docker", "run", "--pull", "never", "--network", "none", "--read-only",
+            "--tmpfs", "/tmp:rw,nosuid,nodev,exec,size=2g", "--user", "65534:65534",
+            "--cpus", "2", "--memory", "3g", "--pids-limit", "256", "--cap-drop", "ALL",
+            "--security-opt", "no-new-privileges", "--platform", platform,
+            "--mount", f"type=bind,source={source},target=/input/go.tar.gz,readonly",
+            "--mount", f"type=bind,source={source_path},target=/input/go.src.tar.gz,readonly",
+            prof["image"], "timeout", "--kill-after=5s", f"{timeout_seconds}s", "sh", "-c", script,
+        ]
     script = " ".join((
         "set -eu;",
         f"expected='{prof['archive_sha256']}';",
@@ -172,10 +233,22 @@ def _remove_container(container_id: str) -> bool:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("archive", type=Path)
-    parser.add_argument("--timeout", type=int, default=900)
-    parser.add_argument("--platform", choices=_SUPPORTED_PLATFORMS, default="linux/arm64")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=("Examples:\n"
+                "  reference_go.py go.linux-arm64.tar.gz --platform linux/arm64\n"
+                "  reference_go.py go.linux-arm64.tar.gz --source-build go.src.tar.gz --timeout 1200\n\n"
+                "Archives and the pinned container image must already be available. "
+                "Invalid archives, lock data or cleanup errors return 1; invalid CLI syntax returns 2. "
+                "A missing Docker command returns 127; a timeout returns 124. "
+                "SIGINT and SIGTERM return 130 and 143 after successful cleanup."),
+    )
+    parser.add_argument("archive", type=Path, help="locked Go binary archive; bootstrap for --source-build")
+    parser.add_argument("--timeout", type=int, default=900, help="container time limit in seconds (default: 900)")
+    parser.add_argument("--platform", choices=_SUPPORTED_PLATFORMS, default="linux/arm64",
+                        help="Linux build platform (default: linux/arm64)")
+    parser.add_argument("--source-build", type=Path, metavar="SOURCE_ARCHIVE",
+                        help="build the locked Go source archive using the positional bootstrap archive")
     args = parser.parse_args(argv)
     try:
         compat = _load_compat()
@@ -183,7 +256,7 @@ def main(argv=None) -> int:
         if type(args.timeout) is not int or args.timeout <= 0:
             raise ValueError("timeout must be a positive integer")
         verify_archive(args.archive, prof["archive_sha256"])
-        command = build_command(args.archive, args.platform, args.timeout, compat)
+        command = build_command(args.archive, args.platform, args.timeout, compat, source_archive=args.source_build)
     except (OSError, ValueError, KeyError, TypeError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
