@@ -120,5 +120,9 @@
       ],
       "status": "in_progress"
     }
-  ]
+  ],
+  "inventory_tool_image": {
+    "image": "python@sha256:29434a59c93070e470f84663e4289026e04644ea44b5220ef7e07d653318ca1f",
+    "platform": "linux/arm64"
+  }
 }

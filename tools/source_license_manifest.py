@@ -19,6 +19,9 @@ INPUT_PATHS = (
     "docs/implementation/evidence/W-02-go-source-license-files.json",
     "docs/implementation/evidence/W-02-build-image-packages.json",
     "docs/implementation/evidence/W-02-binary-license-files.json",
+    "docs/implementation/evidence/W-02-probe-image-packages.json",
+    "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+    "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
 )
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 IMAGE_RE = re.compile(r"^([^@\s]+)@sha256:([0-9a-fA-F]{64})$")
@@ -341,12 +344,13 @@ def _build(repo):
     go_evidence = inputs[INPUT_PATHS[2]]
     image_evidence = inputs[INPUT_PATHS[3]]
     binary_evidence = inputs[INPUT_PATHS[4]]
+    probe_evidence = inputs[INPUT_PATHS[5]]
 
     if _integer(lock, "schema_version", "compat.lock.json", 1) != 1:
         raise ManifestError("unsupported compat.lock.json schema_version")
     if _string(lock, "status", "compat.lock.json") != "partial":
         raise ManifestError("compat.lock.json status must be partial")
-    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence), ("binary license evidence", binary_evidence)):
+    for name, evidence in (("PHP license evidence", php_evidence), ("Go source license evidence", go_evidence), ("build image evidence", image_evidence), ("binary license evidence", binary_evidence), ("probe image evidence", probe_evidence)):
         if _integer(evidence, "schema_version", name, 1) != 1:
             raise ManifestError(f"unsupported {name} schema_version")
         if _string(evidence, "status", name) != "partial":
@@ -475,6 +479,129 @@ def _build(repo):
         archive["license_applicability"] = "unknown"
         archive["candidate_files"] = files
 
+    # Compare raw index bytes to their pinned digest before trusting a descriptor.
+    image_indexes = {}
+    index_profiles = ((INPUT_PATHS[6], go_binary_archives, "linux/amd64"),
+                      (INPUT_PATHS[7], llvm_archives, "linux/arm64"))
+    for relative, archives, index_platform in index_profiles:
+        matching = [item for item in archives if item["platform"] == index_platform]
+        if len(matching) != 1 or not matching[0].get("probe_image"):
+            raise ManifestError(f"probe image index digest missing lock profile {index_platform}")
+        digest = _image_digest(matching[0]["probe_image"], "locked probe image")
+        if hashlib.sha256(raw_inputs[relative]).hexdigest() != digest:
+            raise ManifestError(f"probe image index digest mismatch for {relative}")
+        image_indexes[digest] = inputs[relative]
+
+    expected_probe = {}
+    for role, archives in (("go_probe", go_binary_archives), ("llvm_probe", llvm_archives)):
+        for archive in archives:
+            if archive.get("probe_image"):
+                key = (archive["probe_image"], archive["platform"])
+                if key in expected_probe and expected_probe[key] != role:
+                    raise ManifestError("ambiguous probe image role")
+                expected_probe[key] = role
+    probe_images, tool_images, seen_images = [], [], set()
+    for index, record in enumerate(_list(probe_evidence, "inventories", "probe image evidence")):
+        context = f"probe image evidence.inventories[{index}]"
+        if not isinstance(record, dict):
+            raise ManifestError(f"{context} must be an object")
+        role = _string(record, "role", context)
+        image = _string(record, "image", context)
+        image_digest = _image_digest(image, f"{context}.image")
+        platform = _string(record, "platform", context)
+        key = (image, platform)
+        if key in seen_images:
+            raise ManifestError(f"{context} duplicate image/platform")
+        seen_images.add(key)
+        if role != "inventory_tool" and expected_probe.get(key) != role:
+            raise ManifestError(f"{context} unknown probe image or role")
+        if role == "inventory_tool":
+            tool_lock = _required(lock, "inventory_tool_image", "compat.lock.json")
+            if not isinstance(tool_lock, dict):
+                raise ManifestError("compat.lock.json.inventory_tool_image must be an object")
+            expected_tool = (_string(tool_lock, "image", "compat.lock.json.inventory_tool_image"),
+                             _string(tool_lock, "platform", "compat.lock.json.inventory_tool_image"))
+            if key in expected_probe or key != expected_tool:
+                raise ManifestError(f"{context} inventory tool image/platform mismatch")
+        manifest = _string(record, "image_manifest", context)
+        manifest_digest = _sha(manifest.removeprefix("sha256:"), f"{context}.image_manifest")
+        if image_digest in image_indexes:
+            descriptors = _list(image_indexes[image_digest], "manifests", f"{context} index")
+            parts = platform.split("/")
+            if len(parts) != 2:
+                raise ManifestError(f"{context} invalid platform")
+            matching = [d for d in descriptors if isinstance(d, dict) and isinstance(d.get("platform"), dict)
+                        and d["platform"].get("os") == parts[0] and d["platform"].get("architecture") == parts[1]]
+            if len(matching) != 1 or matching[0].get("digest") != manifest:
+                raise ManifestError(f"{context} index platform descriptor mismatch")
+        elif image_digest != manifest_digest:
+            raise ManifestError(f"{context} probe image index digest missing or mismatched")
+        packages = _list(record, "packages", context)
+        count = _integer(record, "package_count", context, 1)
+        if count != len(packages):
+            raise ManifestError(f"{context} package count mismatch")
+        stdout_digest = _sha_field(record, "stdout_sha256", context)
+        names = set()
+        output_lines = []
+        for j, package in enumerate(packages):
+            label = f"{context}.packages[{j}]"
+            if not isinstance(package, dict):
+                raise ManifestError(f"{label} must be an object")
+            name = _string(package, "package", label)
+            if name in names:
+                raise ManifestError(f"{label} duplicates a package")
+            names.add(name)
+            _string(package, "version", label)
+            copyright = _required(package, "copyright", label)
+            if not isinstance(copyright, dict):
+                raise ManifestError(f"{label}.copyright must be an object")
+            path = _string(copyright, "path", f"{label}.copyright")
+            status = _string(copyright, "status", f"{label}.copyright")
+            if not path.startswith("/usr/share/doc/") or any(part in (".", "..") for part in path.split("/")):
+                raise ManifestError(f"{label} invalid copyright path")
+            if status not in ("recorded", "missing", "unresolvable", "unreadable", "not_regular", "outside_allowed_path"):
+                raise ManifestError(f"{label} invalid copyright status")
+            if status in ("recorded", "unreadable", "not_regular", "outside_allowed_path"):
+                resolved = _string(copyright, "resolved_path", f"{label}.copyright")
+                allowed = resolved.startswith(("/usr/share/doc/", "/usr/share/common-licenses/"))
+                if not resolved.startswith("/") or any(part in (".", "..") for part in resolved.split("/")):
+                    raise ManifestError(f"{label} invalid resolved path")
+                if (status == "outside_allowed_path") == allowed:
+                    raise ManifestError(f"{label} inconsistent resolved path")
+            elif "resolved_path" in copyright:
+                raise ManifestError(f"{label} unexpected resolved path")
+            if status == "recorded":
+                _integer(copyright, "size", f"{label}.copyright")
+                _sha_field(copyright, "sha256", f"{label}.copyright")
+            else:
+                if "size" in copyright or "sha256" in copyright:
+                    raise ManifestError(f"{label} unrecorded copyright cannot have a digest or size")
+                gaps.append({"scope": "probe image copyright", "image": image, "platform": platform,
+                             "package": name, "path": path, "status": status,
+                             "reason": "copyright file was not recorded"})
+            fields = (name, package["version"], path, status, copyright.get("resolved_path", "-"),
+                      str(copyright["size"]) if status == "recorded" else "-",
+                      copyright.get("sha256", "-"))
+            if any(not isinstance(value, str) or any(ch in value for ch in "\t\r\n\0") for value in fields):
+                raise ManifestError(f"{label} contains an invalid TSV field")
+            output_lines.append("\t".join(fields) + "\n")
+        if hashlib.sha256("".join(output_lines).encode("utf-8")).hexdigest() != stdout_digest:
+            raise ManifestError(f"{context} stdout digest does not match package records")
+        output = {"image": image, "platform": platform, "image_manifest": manifest,
+                  "package_count": count, "packages": packages, "license_applicability": "unknown"}
+        if role == "inventory_tool":
+            output["role"] = role
+            tool_images.append(output)
+            gaps.append({"scope": "inventory tool image non-dpkg contents", "image": image,
+                         "platform": platform, "status": "unknown",
+                         "reason": "contents not managed by dpkg have not been inventoried"})
+        else:
+            probe_images.append(output)
+    if set(expected_probe) != {(entry["image"], entry["platform"]) for entry in probe_images}:
+        raise ManifestError("probe image evidence missing locked image")
+    if len(tool_images) != 1:
+        raise ManifestError("expected one separate inventory tool image")
+
     def archive_source(component, archive):
         if component.get("platform") == archive["platform"]:
             return component
@@ -509,7 +636,7 @@ def _build(repo):
                         "reason": "license file inventory for this binary archive is not recorded",
                     }
                 )
-            if archive.get("probe_image"):
+            if archive.get("probe_image") and (archive["probe_image"], archive["platform"]) not in seen_images:
                 gaps.append(
                     {
                         "scope": f"probe image {archive['platform']}",
@@ -681,6 +808,8 @@ def _build(repo):
                 "license_applicability": "unknown",
             },
             "reference_build_images": image_records,
+            "probe_build_images": probe_images,
+            "inventory_tool_images": tool_images,
         },
         "gaps": gaps,
     }

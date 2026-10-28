@@ -1,6 +1,7 @@
 """Behavioral tests for the source license manifest CLI."""
 
 import json
+import hashlib
 import shutil
 import subprocess
 import sys
@@ -19,6 +20,12 @@ INPUTS = {
     / "docs/implementation/evidence/W-02-go-source-license-files.json",
     "docs/implementation/evidence/W-02-binary-license-files.json": REPO
     / "docs/implementation/evidence/W-02-binary-license-files.json",
+    "docs/implementation/evidence/W-02-probe-image-packages.json": REPO
+    / "docs/implementation/evidence/W-02-probe-image-packages.json",
+    "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json": REPO
+    / "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+    "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json": REPO
+    / "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
     "docs/implementation/evidence/W-02-build-image-packages.json": REPO
     / "docs/implementation/evidence/W-02-build-image-packages.json",
 }
@@ -66,6 +73,23 @@ class SourceLicenseManifestTests(unittest.TestCase):
 
     def read_json(self, relative):
         return json.loads((self.repo / relative).read_text(encoding="utf-8"))
+
+    @staticmethod
+    def probe_stdout_digest(packages):
+        rows = []
+        for package in packages:
+            copyright = package["copyright"]
+            columns = (
+                package["package"],
+                package["version"],
+                copyright["path"],
+                copyright["status"],
+                copyright.get("resolved_path", "-"),
+                str(copyright.get("size", "-")),
+                copyright.get("sha256", "-"),
+            )
+            rows.append("\t".join(columns) + "\n")
+        return hashlib.sha256("".join(rows).encode("utf-8")).hexdigest()
 
     def run_cli(self, *args):
         # A missing implementation must fail the test, never count as a valid
@@ -169,6 +193,14 @@ class SourceLicenseManifestTests(unittest.TestCase):
         package_evidence = self.read_json(
             "docs/implementation/evidence/W-02-build-image-packages.json"
         )
+        probe_package_evidence = self.read_json(
+            "docs/implementation/evidence/W-02-probe-image-packages.json"
+        )
+        recorded_probe_images = {
+            (item["image"], item["platform"])
+            for item in probe_package_evidence["inventories"]
+            if item["role"] in {"go_probe", "llvm_probe"}
+        }
         for relative in INPUTS:
             self.assertIn(relative, rendered)
         for platform, profile in package_evidence["profiles"].items():
@@ -203,12 +235,17 @@ class SourceLicenseManifestTests(unittest.TestCase):
                         for gap in gaps
                     ))
                 if archive.get("probe_image"):
-                    self.assertTrue(any(
-                        gap.get("image") == archive["probe_image"]
+                    probe_identity = (archive["probe_image"], platform)
+                    probe_gaps = [
+                        gap for gap in gaps
+                        if gap.get("image") == archive["probe_image"]
                         and gap.get("platform") == platform
                         and gap.get("status") == "unknown"
-                        for gap in gaps
-                    ))
+                    ]
+                    if probe_identity in recorded_probe_images:
+                        self.assertFalse(probe_gaps)
+                    else:
+                        self.assertTrue(probe_gaps)
 
         arm64_profile = next(
             item for item in manifest["artifacts"]["reference_build_images"]
@@ -325,6 +362,304 @@ class SourceLicenseManifestTests(unittest.TestCase):
             with self.subTest(case=name):
                 self.write_json(relative, evidence)
                 self.assert_rejected_without_json()
+
+    def test_probe_image_package_evidence_matches_locked_images_by_full_identity(self):
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        manifest = json.loads(result.stdout)
+        lock = self.read_json("compat.lock.json")
+        evidence = self.read_json("docs/implementation/evidence/W-02-probe-image-packages.json")
+        self.assertEqual(evidence["schema_version"], 1)
+        self.assertEqual(evidence["status"], "partial")
+
+        expected = {}
+        for component in ("go", "llvm"):
+            rows = [lock[component], *lock[component].get("additional_archives", [])]
+            for row in rows:
+                image = row.get("probe_image")
+                if image:
+                    expected[(image, row["platform"])] = row
+        self.assertEqual(len(expected), 3)
+
+        inventory_by_identity = {
+            (item["image"], item["platform"]): item
+            for item in evidence["inventories"]
+        }
+        self.assertEqual(len(evidence["inventories"]), 4)
+        self.assertTrue(all(identity in inventory_by_identity for identity in expected))
+        tool_inventory = next(item for item in evidence["inventories"] if item["role"] == "inventory_tool")
+        self.assertNotIn((tool_inventory["image"], tool_inventory["platform"]), expected)
+        locked_tool = lock["inventory_tool_image"]
+        self.assertEqual(tool_inventory["image"], locked_tool["image"])
+        self.assertEqual(tool_inventory["platform"], locked_tool["platform"])
+
+        package_outputs = manifest["artifacts"]["probe_build_images"]
+        actual = {
+            (item["image"], item["platform"]): item
+            for item in package_outputs
+        }
+        self.assertEqual(set(actual), set(expected))
+        self.assertNotIn((tool_inventory["image"], tool_inventory["platform"]), actual)
+        inventory_tool_outputs = [
+            item for item in manifest["artifacts"].get("inventory_tool_images", [])
+            if item.get("role") == "inventory_tool"
+        ]
+        self.assertEqual(len(inventory_tool_outputs), 1)
+        self.assertEqual(inventory_tool_outputs[0]["image"], tool_inventory["image"])
+        self.assertEqual(inventory_tool_outputs[0]["platform"], tool_inventory["platform"])
+        self.assertIn("docs/implementation/evidence/W-02-probe-image-packages.json", {
+            item["path"] for item in manifest["inputs"]
+        })
+        for relative in (
+            "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+            "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+        ):
+            self.assertIn(relative, {item["path"] for item in manifest["inputs"]})
+
+        for identity, locked in expected.items():
+            inventory = inventory_by_identity[identity]
+            output = actual[identity]
+            self.assertEqual(output["packages"], inventory["packages"])
+            self.assertEqual(output["package_count"], inventory["package_count"])
+            self.assertEqual(output["license_applicability"], "unknown")
+            self.assertFalse(any(
+                gap.get("scope") == f"probe image {identity[1]}"
+                and gap.get("image") == identity[0]
+                and gap.get("platform") == identity[1]
+                and "no package or license inventory" in gap.get("reason", "")
+                for gap in manifest["gaps"]
+            ))
+
+    def test_rejects_invalid_probe_image_package_evidence(self):
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        original = self.read_json(relative)
+        cases = []
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"].append(dict(changed["inventories"][0]))
+        cases.append(("duplicate inventory", changed))
+
+        for field, value in (("image", "debian@sha256:" + "0" * 64), ("platform", "linux/arm64")):
+            changed = json.loads(json.dumps(original))
+            changed["inventories"][0][field] = value
+            cases.append((f"mismatched {field}", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["package_count"] += 1
+        cases.append(("package count mismatch", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["packages"][0]["copyright"]["sha256"] = "not-a-digest"
+        cases.append(("invalid copyright digest", changed))
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["role"] = "unknown"
+        cases.append(("unknown inventory role", changed))
+
+        for name, evidence in cases:
+            with self.subTest(case=name):
+                self.write_json(relative, evidence)
+                self.assert_rejected_without_json()
+
+        path = self.repo / relative
+        path.write_text('{"schema_version":1,"status":', encoding="utf-8")
+        self.assert_rejected_without_json()
+
+    def test_rejects_changed_probe_image_indexes_and_wrong_platform_descriptors(self):
+        index_cases = (
+            (
+                "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+                "probe image index digest",
+            ),
+            (
+                "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+                "probe image index digest",
+            ),
+        )
+        for index, (relative, expected_error) in enumerate(index_cases):
+            with self.subTest(index=relative):
+                repo = Path(self.temp.name) / f"changed-index-{index}"
+                self.make_repo(repo)
+                path = repo / relative
+                path.write_bytes(path.read_bytes() + b" ")
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+                self.assertIn(expected_error.encode(), result.stderr)
+
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        repo = Path(self.temp.name) / "wrong-platform-descriptor"
+        self.make_repo(repo)
+        evidence = self.read_json(relative)
+        changed = json.loads(json.dumps(evidence))
+        arm64 = next(item for item in changed["inventories"] if item["role"] == "llvm_probe" and item["platform"] == "linux/arm64")
+        amd64 = next(item for item in changed["inventories"] if item["role"] == "llvm_probe" and item["platform"] == "linux/amd64")
+        arm64["image_manifest"], amd64["image_manifest"] = amd64["image_manifest"], arm64["image_manifest"]
+        target = repo / relative
+        target.write_text(json.dumps(changed), encoding="utf-8")
+        result = self.generate(repo)
+        self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        self.assertEqual(result.stdout, b"")
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertIn(b"platform descriptor", result.stderr)
+
+    def test_rejects_mutated_index_relabelled_as_its_own_direct_manifest(self):
+        repo = Path(self.temp.name) / "mutated-index-as-manifest"
+        self.make_repo(repo)
+        index_relative = "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json"
+        index_path = repo / index_relative
+        modified = index_path.read_bytes() + b" "
+        index_path.write_bytes(modified)
+        modified_digest = hashlib.sha256(modified).hexdigest()
+
+        evidence_relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        evidence_path = repo / evidence_relative
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        go_probe = next(item for item in evidence["inventories"] if item["role"] == "go_probe")
+        go_probe["image_manifest"] = f"sha256:{modified_digest}"
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+
+        result = self.generate(repo)
+        self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        self.assertEqual(result.stdout, b"")
+        self.assertNotIn(b"Traceback", result.stderr)
+        self.assertIn(b"index", result.stderr.lower())
+
+    def test_probe_package_copyright_gaps_keep_packages_without_fabricated_metadata(self):
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        original = self.read_json(relative)
+        inventory = next(item for item in original["inventories"] if item["role"] == "go_probe")
+        image, platform = inventory["image"], inventory["platform"]
+        package_name = inventory["packages"][0]["package"]
+        statuses = {
+            "missing": {"path": "/usr/share/doc/apt/copyright", "status": "missing"},
+            "unreadable": {
+                "path": "/usr/share/doc/apt/copyright",
+                "resolved_path": "/usr/share/doc/apt/copyright",
+                "status": "unreadable",
+            },
+            "not_regular": {
+                "path": "/usr/share/doc/apt/copyright",
+                "resolved_path": "/usr/share/doc/apt/copyright",
+                "status": "not_regular",
+            },
+            "outside_allowed_path": {
+                "path": "/usr/share/doc/apt/copyright",
+                "resolved_path": "/opt/licenses/apt/copyright",
+                "status": "outside_allowed_path",
+            },
+            "unresolvable": {"path": "/usr/share/doc/apt/copyright", "status": "unresolvable"},
+        }
+
+        for status, copyright_record in statuses.items():
+            with self.subTest(status=status):
+                repo = Path(self.temp.name) / f"probe-copyright-{status}"
+                self.make_repo(repo)
+                changed = json.loads(json.dumps(original))
+                target_inventory = next(item for item in changed["inventories"] if item["role"] == "go_probe")
+                target_package = next(item for item in target_inventory["packages"] if item["package"] == package_name)
+                target_package["copyright"] = copyright_record
+                target_inventory["stdout_sha256"] = self.probe_stdout_digest(target_inventory["packages"])
+                path = repo / relative
+                path.write_text(json.dumps(changed), encoding="utf-8")
+
+                result = self.generate(repo)
+                self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                manifest = json.loads(result.stdout)
+                output = next(
+                    item for item in manifest["artifacts"]["probe_build_images"]
+                    if item["image"] == image and item["platform"] == platform
+                )
+                self.assertEqual(output["package_count"], inventory["package_count"])
+                self.assertEqual(len(output["packages"]), inventory["package_count"])
+                retained = next(item for item in output["packages"] if item["package"] == package_name)
+                self.assertEqual(retained["version"], target_package["version"])
+                self.assertEqual(retained["copyright"], copyright_record)
+                self.assertNotIn("sha256", retained["copyright"])
+                self.assertNotIn("size", retained["copyright"])
+                self.assertTrue(any(
+                    gap.get("image") == image
+                    and gap.get("platform") == platform
+                    and gap.get("package") == package_name
+                    and gap.get("status") == status
+                    and gap.get("path") == copyright_record["path"]
+                    for gap in manifest["gaps"]
+                ))
+
+    def test_rejects_invalid_probe_package_copyright_statuses_and_shapes(self):
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        original = self.read_json(relative)
+        cases = []
+
+        changed = json.loads(json.dumps(original))
+        changed["inventories"][0]["packages"][0]["copyright"].update({"status": "unknown_status"})
+        cases.append(("unknown status", changed))
+
+        changed = json.loads(json.dumps(original))
+        copyright = changed["inventories"][0]["packages"][0]["copyright"]
+        copyright["status"] = "missing"
+        cases.append(("missing status with fabricated digest", changed))
+
+        changed = json.loads(json.dumps(original))
+        copyright = changed["inventories"][0]["packages"][0]["copyright"]
+        copyright.pop("sha256")
+        cases.append(("recorded status without digest", changed))
+
+        for name, evidence in cases:
+            with self.subTest(case=name):
+                repo = Path(self.temp.name) / f"invalid-copyright-{name.replace(' ', '-') }"
+                self.make_repo(repo)
+                (repo / relative).write_text(json.dumps(evidence), encoding="utf-8")
+                self.assert_rejected_without_json(repo)
+
+    def test_rejects_probe_package_content_changed_without_stdout_digest_update(self):
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        original = self.read_json(relative)
+        cases = []
+        for field, value in (("version", "999.0"), ("sha256", "0" * 64)):
+            changed = json.loads(json.dumps(original))
+            package = changed["inventories"][0]["packages"][0]
+            if field == "version":
+                package[field] = value
+            else:
+                package["copyright"][field] = value
+            cases.append((field, changed))
+
+        for name, evidence in cases:
+            with self.subTest(field=name):
+                repo = Path(self.temp.name) / f"changed-probe-content-{name}"
+                self.make_repo(repo)
+                (repo / relative).write_text(json.dumps(evidence), encoding="utf-8")
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+                self.assertIn(b"stdout", result.stderr.lower())
+
+    def test_rejects_inventory_tool_identity_changed_with_matching_manifest_digest(self):
+        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        original = self.read_json(relative)
+        for field, value in (
+            ("image", "python@sha256:" + "0" * 64),
+            ("platform", "linux/amd64"),
+        ):
+            with self.subTest(field=field):
+                repo = Path(self.temp.name) / f"changed-tool-identity-{field}"
+                self.make_repo(repo)
+                changed = json.loads(json.dumps(original))
+                tool_inventory = next(item for item in changed["inventories"] if item["role"] == "inventory_tool")
+                if field == "image":
+                    tool_inventory["image"] = value
+                    tool_inventory["image_manifest"] = "sha256:" + "0" * 64
+                else:
+                    tool_inventory["platform"] = value
+                (repo / relative).write_text(json.dumps(changed), encoding="utf-8")
+                result = self.generate(repo)
+                self.assertNotEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+                self.assertEqual(result.stdout, b"")
+                self.assertNotIn(b"Traceback", result.stderr)
+                self.assertIn(b"inventory tool", result.stderr.lower())
 
     def test_rejects_cross_source_archive_mismatch(self):
         php_path = "docs/implementation/evidence/W-02-php-license-files.json"
