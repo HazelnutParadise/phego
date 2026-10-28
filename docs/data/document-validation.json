@@ -10,7 +10,7 @@
     "work_packages": 60,
     "decisions": 28,
     "sources": 57,
-    "local_markdown_links": 89,
+    "local_markdown_links": 92,
     "checks": 33,
     "catalogs": {
       "php-history-policy.json": 7,
@@ -261,6 +261,7 @@
     "LICENSE": "1d89138d5b983bf02dd2f6c6da3a63014631251033e9adc039c153ffe54b32cc",
     "README.md": "55fa09d8c4efe007ea5181192a9e91cc9a375a57df90dfe867af2a5abd0a5b95",
     "THIRD_PARTY_NOTICES.md": "fce643a639b306627eea3c21ecb57a81269b27b726b11b62ab5bfc1b2cc5b7ac",
+    "compat.lock.json": "dd43355ffd0088f589e93bdf8e1441f856f522afa5781b414ee3ae5bb0881278",
     "docs/README.md": "e5fc0bd1a10207f363c017ef4615f09a9f95c0687c43ce346739127cb97049aa",
     "docs/acceptance/README.md": "6f454d12918ff24b738e15aa95e42819353af13e2850c81c2f3ced9adb331edc",
     "docs/benchmarks/README.md": "11a1356436fd1536199fb4cdcc79ed65da04e1c2077695897d611069630f2cb5",
@@ -276,11 +277,16 @@
     "docs/decisions/W-01-contract.md": "154a572e6749859ca746db3b92802a8a979a7c0a1df9e764be465e2ec9126bba",
     "docs/implementation/README.md": "e4a2325e661f1f33dffe05fbaf7183dea2e96e2e1361f114ef18987a2ef171ae",
     "docs/implementation/W-01.md": "512c8992cd4976fac1f509603d257f21dfca911171bf2891b5fb84207f5c7ca8",
+    "docs/implementation/W-02.md": "24b562061c7331694dc2aaa7b5eb1eee86a75f9de245f76a964cf51731bf5e6d",
     "docs/implementation/evidence/W-01-contract-review.md": "6bd6fe1bc0053ad15051d6e0dd29cff9b6821edf07e3f9a3c1a558c75ab896d1",
     "docs/implementation/evidence/W-01.json": "09f5f1967fb5f4cd5d491959d94d7fa18a5d71e56921ae906abaa418d39dfd54",
+    "docs/implementation/evidence/W-02-source-probe.md": "1f528159f5dc2d14ad263d871f4e33849a102e27086690e27d9ba6bc070c1e96",
+    "docs/implementation/evidence/W-02.json": "cc1fb440722c69e464bb0710f9b68f03899ec98ce591838255f7e5e8b58ce8c0",
     "docs/implementation/github-index.json": "d96ed639e78a56944640faca7ce692ad8f5435e2c4866501345508ba191649d7",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+    "tools/reference_php.py": "725f90f1be0582064fe56d7af7936f2f9b5f3bc1f21d773b5d51729981b2feae",
     "tools/test_contract_document.py": "dda81d89e311990b37ce8953a9d927802629d3f5909567e5937b31811561d9a4",
+    "tools/test_reference_php.py": "4cc87609e3f0efddf28da2b37272172fc0539b48e0d149f23b97cdc721e57a69",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
   }

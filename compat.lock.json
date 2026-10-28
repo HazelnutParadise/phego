@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "purpose": "Development reference only; this does not certify PHP compatibility.",
+  "php": {
+    "version": "8.5.12",
+    "tag": "php-8.5.12",
+    "tag_object": "c96586077b050b362744ba295f97f6395f58a75a",
+    "commit": "136e049ac10b032c83018e65b63b6df858943750",
+    "archive_url": "https://www.php.net/distributions/php-8.5.12.tar.xz",
+    "archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+    "checksum_source": "https://www.php.net/releases/index.php?json&version=8.5",
+    "release_announcement": "https://www.php.net/releases/8_5_12.php",
+    "changelog": "https://www.php.net/ChangeLog-8.php#8.5.12",
+    "release_kind": "security",
+    "license": "PHP-3.01",
+    "source_status": "downloaded_and_digest_verified"
+  },
+  "go": {
+    "version": "1.27.3",
+    "platform": "linux/arm64",
+    "archive_url": "https://go.dev/dl/go1.27.3.linux-arm64.tar.gz",
+    "archive_sha256": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49",
+    "checksum_source": "https://go.dev/dl/?mode=json",
+    "license": "BSD-3-Clause",
+    "source_status": "downloaded_and_digest_verified",
+    "probe_status": "isolated_pure_go_build_passed"
+  },
+  "reference_build": {
+    "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+    "platform": "linux/arm64",
+    "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
+    "status": "in_progress"
+  },
+  "remaining": [
+    "Extend isolated reference builds and reproducibility evidence beyond the current PHP 8.5.12 linux/arm64 profile.",
+    "Lock and validate the optional LLVM toolchain and remaining Go platforms.",
+    "Create upstream change detection and complete source and license records."
+  ]
+}
