@@ -8,4 +8,10 @@
 
 `python3 tools/reference_php.py ARCHIVE --platform linux/arm64 --timeout 900` 回傳 0，profile 符合 PHP 8.5.12、64 位元、Linux aarch64、CLI 與無 INI 載入；單項 `tests/basic/001.phpt` 通過。執行檔 SHA-256 為 `e5d0591e0d82e30f413e4aa928ff66afddd1f752c707b17feffaae70c4f8b519`。[原始輸出](W-02-php-profile-20261029/linux-arm64.log.gz)解壓後 SHA-256 為 `8e66f214ae9a420638ebd3f24cd1a5e9bee9a14ec15712533b2a9ddaf5e2758b`，其中列出實際一般及 Zend 擴充；此設定未載入 session 擴充。
 
+## Linux amd64 轉譯
+
+`python3 tools/reference_php.py ARCHIVE --platform linux/amd64 --timeout 900` 在 OrbStack 轉譯環境回傳 0，profile 符合 PHP 8.5.12、64 位元、Linux x86_64、CLI 與無 INI 載入；單項 `tests/basic/001.phpt` 通過。執行檔 SHA-256 為 `04faa180577e391ed634d9b647ddd6c42d39cf82475e19b6f176d99d09811a9a`。[原始輸出](W-02-php-profile-20261029/linux-amd64.log.gz)解壓後 SHA-256 為 `08b8671b48dccb09922208e6674b3a6d480f6c711bb5c5281cff457427587868`。此設定也未載入 session 擴充。這不是原生 amd64 硬體驗證。
+
+兩次容器均回傳成功，其容器 ID 在完成後經 `docker inspect` 確認不存在。退出碼與後續 inspect 結果屬當次操作紀錄。
+
 這是參考 PHP 局部探查，不能代表 Phego 引擎、完整歷史版本、其他 SAPI、效能或安全回歸已完成。上游安全公告與尚未驗證的事項另見[部分安全基準](W-02-php-security-baseline.md)。
