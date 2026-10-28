@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "planning_catalog",
+  "purpose": "Mandatory target policy, not a recovered release inventory or compatibility certification.",
+  "scope": "Every publicly released PHP generation from the first public PHP Tools onward, including exact patch identities and separately identified public prereleases.",
+  "release_inventory_status": "not_built",
+  "completion_status": "not_verified",
+  "required_generations": [
+    {
+      "id": "HIST-01",
+      "name": "First PHP Tools and PHP 1 lineage",
+      "evidence_sources": [
+        "R44",
+        "R45",
+        "R57"
+      ],
+      "special_requirements": [
+        "Establish first public release identity independently of the php-108 archive.",
+        "Recover original tool/CGI behavior and original examples."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-02",
+      "name": "FI, Construction Kit, PHP/FI and PHP/FI 2",
+      "evidence_sources": [
+        "R44",
+        "R46",
+        "R57"
+      ],
+      "special_requirements": [
+        "Separate historical syntax and tool entrypoints.",
+        "Do not force HTML-comment instruction forms into modern PHP syntax."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-03",
+      "name": "PHP 3",
+      "evidence_sources": [
+        "R44",
+        "R47"
+      ],
+      "special_requirements": [
+        "Exact releases, module contracts, language and environment semantics."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-04",
+      "name": "PHP 4",
+      "evidence_sources": [
+        "R44",
+        "R47"
+      ],
+      "special_requirements": [
+        "Historical object/reference behavior and application fixtures."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-05",
+      "name": "PHP 5",
+      "evidence_sources": [
+        "R44",
+        "R47"
+      ],
+      "special_requirements": [
+        "Every released minor/patch identity, not only the final branch."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-07",
+      "name": "PHP 7",
+      "evidence_sources": [
+        "R44",
+        "R47",
+        "R48"
+      ],
+      "special_requirements": [
+        "Every released minor/patch identity and guest-platform behavior."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "HIST-08",
+      "name": "PHP 8",
+      "evidence_sources": [
+        "R44",
+        "R47",
+        "R48"
+      ],
+      "special_requirements": [
+        "Current and historical releases, dynamic features, exact function behavior."
+      ],
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    }
+  ],
+  "future_release_rule": "Continuously add new public releases with independent source locks and certification; no claim of advance verification.",
+  "unreleased_version_rule": "Do not invent a formal PHP 6 release. Evidence-backed experimental snapshots are a distinct research category.",
+  "missing_evidence_rule": "Unresolved release identity, unavailable source, unavailable oracle or missing real application evidence remains a visible blocker, never a pass or implicit scope removal.",
+  "required_release_record_fields": [
+    "release_id",
+    "original_name",
+    "aliases",
+    "release_kind",
+    "release_date_evidence",
+    "source_url",
+    "retrieved_source_sha256",
+    "license",
+    "build_recipe",
+    "oracle_environment",
+    "guest_platform_semantics",
+    "semantic_profile",
+    "test_inventory",
+    "real_application_mapping",
+    "security_differences",
+    "evidence_state"
+  ],
+  "profile_identity": [
+    "release_id",
+    "language_generation",
+    "guest_integer_width",
+    "guest_platform_rules",
+    "module_set",
+    "ini_semantics",
+    "security_difference_set",
+    "semantic_data_versions"
+  ],
+  "states": [
+    "discovered",
+    "identity_unresolved",
+    "source_unavailable",
+    "source_retrieved",
+    "oracle_unavailable",
+    "oracle_ready",
+    "tests_pending",
+    "certified"
+  ],
+  "required_work_packages": [
+    "W-49",
+    "W-50",
+    "W-51",
+    "W-52",
+    "W-53"
+  ],
+  "requirements": [
+    "REQ-080",
+    "REQ-081",
+    "REQ-082",
+    "REQ-083",
+    "REQ-084",
+    "REQ-085",
+    "REQ-086",
+    "REQ-087"
+  ]
+}

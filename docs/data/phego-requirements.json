@@ -1,0 +1,2036 @@
+{
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "plan_not_implementation",
+  "items": [
+    {
+      "id": "REQ-001",
+      "group": "產品與版本",
+      "title": "獨立 Go 引擎",
+      "actor": "Go 開發者",
+      "capability": "不安裝官方 PHP 即可執行已支援 PHP 程式。",
+      "acceptance": "純 Go build 在沒有 php 可執行檔與 Zend 動態函式庫的環境完成 SDK 與 CLI 測試。",
+      "normal": "在乾淨映像中執行算術、物件與 include fixture，輸出符合固定 PHP 基準。",
+      "adversarial": "移除 PATH 的 php、封鎖程序啟動並檢查依賴，不能發生隱藏 Zend 回退。",
+      "work_packages": [
+        "W-01",
+        "W-08",
+        "W-17",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-001",
+        "T-002"
+      ]
+    },
+    {
+      "id": "REQ-002",
+      "group": "產品與版本",
+      "title": "明確語言版本",
+      "actor": "網站管理者",
+      "capability": "為站台或 Go 呼叫指定從第一代起的精確 PHP 版本與平台語意 profile。",
+      "acceptance": "完整目標涵蓋全部歷史版本；每個版本的編譯、Runtime、函式與設定一致。開發階段尚未完成的版本必須誠實拒絕，不能縮小最終承諾。",
+      "normal": "同一語法在兩個宣告支援的 profile 按各自預期結果執行。",
+      "adversarial": "把新 profile 程式放入舊 profile 的快取，不得誤執行。",
+      "work_packages": [
+        "W-02",
+        "W-10",
+        "W-35",
+        "W-49",
+        "W-51"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-003",
+        "T-004"
+      ]
+    },
+    {
+      "id": "REQ-003",
+      "group": "產品與版本",
+      "title": "誠實能力清單",
+      "actor": "應用程式與維運者",
+      "capability": "查詢實際可用的模組、函式、設定與缺口。",
+      "acceptance": "capabilities、Reflection、extension_loaded 與 Composer 平台檢查一致。",
+      "normal": "載入已完成模組後，各種能力查詢回傳一致清單。",
+      "adversarial": "移除模組或只留空實作時，不得仍回報完整支援。",
+      "work_packages": [
+        "W-03",
+        "W-29",
+        "W-34",
+        "W-35"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-005",
+        "T-006"
+      ]
+    },
+    {
+      "id": "REQ-004",
+      "group": "產品與版本",
+      "title": "相容性檢查",
+      "actor": "網站管理者",
+      "capability": "在部署前取得可定位的相容性與動態未知報告。",
+      "acceptance": "每個發現包含來源位置、種類、能力、證據及部署影響，未知不標為通過。",
+      "normal": "掃描固定網站 fixture，辨識實際使用的語法、擴充與可寫目錄。",
+      "adversarial": "使用動態產生函式名／include 路徑，報告未知而非假定安全可用。",
+      "work_packages": [
+        "W-10",
+        "W-18",
+        "W-34",
+        "W-35"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-007",
+        "T-008"
+      ]
+    },
+    {
+      "id": "REQ-005",
+      "group": "Go SDK",
+      "title": "單函式執行",
+      "actor": "Go 開發者",
+      "capability": "透過 phego.Run 執行 PHP 字串並取得結果。",
+      "acceptance": "一般輸出、return、PHP 錯誤與 exit 皆有明確結果，不終止宿主。",
+      "normal": "呼叫 return 30、echo 與例外 fixture，核對 Result 及錯誤型別。",
+      "adversarial": "PHP exit 與未處理例外後，宿主仍能執行下一次 Run。",
+      "work_packages": [
+        "W-08",
+        "W-17",
+        "W-24"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-009",
+        "T-010"
+      ]
+    },
+    {
+      "id": "REQ-006",
+      "group": "Go SDK",
+      "title": "重用編譯結果",
+      "actor": "Go 開發者",
+      "capability": "共用 Program 並從不同 goroutine 同時執行。",
+      "acceptance": "Program 不可變，各 Run 的輸出、static 與變數不互相影響。",
+      "normal": "100個獨立執行以不同輸入共用一個 Program，結果逐一核對。",
+      "adversarial": "故意交錯 static 寫入與取消，檢查無資料競爭或跨請求值。",
+      "work_packages": [
+        "W-08",
+        "W-22",
+        "W-23",
+        "W-24"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-011",
+        "T-012"
+      ]
+    },
+    {
+      "id": "REQ-007",
+      "group": "Go SDK",
+      "title": "資料傳遞與擁有權",
+      "actor": "Go 開發者",
+      "capability": "傳入明確型別資料並在請求結束後安全讀取輸出快照。",
+      "acceptance": "位元組字串、有序鍵、數字範圍與複製行為有測試，無失效活物件外流。",
+      "normal": "輸入有序陣列與含零位元組字串，輸出快照保留內容與順序。",
+      "adversarial": "呼叫者同時改動原始 slice，預設隔離副本不受影響；resource 不能再操作。",
+      "work_packages": [
+        "W-06",
+        "W-08",
+        "W-12",
+        "W-24"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-013",
+        "T-014"
+      ]
+    },
+    {
+      "id": "REQ-008",
+      "group": "Go SDK",
+      "title": "宿主函式註冊",
+      "actor": "Go 開發者",
+      "capability": "明確授權 PHP 呼叫特定 Go 函式。",
+      "acceptance": "簽章、權限、來源標記、重入與取消規則在註冊時驗證。",
+      "normal": "PHP 呼叫已註冊函式，參數與回傳標記符合契約。",
+      "adversarial": "未註冊方法、反射越權、重入違規與 callback panic 均受控失敗。",
+      "work_packages": [
+        "W-08",
+        "W-20",
+        "W-21",
+        "W-24"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-015",
+        "T-016"
+      ]
+    },
+    {
+      "id": "REQ-009",
+      "group": "Go SDK",
+      "title": "關閉與取消",
+      "actor": "Go 開發者",
+      "capability": "取消執行或有期限地關閉 Engine。",
+      "acceptance": "停止接納、取消與 drain 可觀察，已開始的輸出與副作用不被隱藏。",
+      "normal": "取消長迴圈後可執行下一請求，Close 在無工作時正常完成。",
+      "adversarial": "阻塞的非合作 callback 被標示限制，不宣稱已強制停止。",
+      "work_packages": [
+        "W-14",
+        "W-20",
+        "W-22",
+        "W-24",
+        "W-46"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-017",
+        "T-018"
+      ]
+    },
+    {
+      "id": "REQ-010",
+      "group": "編譯前端",
+      "title": "PHP 與模板解析",
+      "actor": "PHP 開發者",
+      "capability": "執行含混合 HTML、字串插值與支援版本語法的原始檔。",
+      "acceptance": "解析與錯誤位置符合 profile，輸入限制在配置前生效。",
+      "normal": "對照短標記設定、heredoc、插值與命名空間測試集。",
+      "adversarial": "極深巢狀、巨大 token、破損 UTF-8 與截斷字串不使程序崩潰。",
+      "work_packages": [
+        "W-09",
+        "W-10",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-019",
+        "T-020"
+      ]
+    },
+    {
+      "id": "REQ-011",
+      "group": "編譯前端",
+      "title": "版本化運算",
+      "actor": "PHP 開發者",
+      "capability": "得到對應版本的型別轉換、算術與比較結果。",
+      "acceptance": "整數溢位、數字字串、NaN、除零與警告均有對照測試。",
+      "normal": "測試整數邊界、混合型別與正常比較，核對官方基準。",
+      "adversarial": "LLVM 特化遇到溢位與非整數輸入，不得產生未定義行為或錯誤繞回。",
+      "work_packages": [
+        "W-10",
+        "W-11",
+        "W-17",
+        "W-37",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-021",
+        "T-022"
+      ]
+    },
+    {
+      "id": "REQ-012",
+      "group": "編譯前端",
+      "title": "呼叫與符號",
+      "actor": "PHP 開發者",
+      "capability": "使用具名／參照參數、動態呼叫、autoload 與命名空間。",
+      "acceptance": "參數規則、解析順序、存取權與 callback 次數符合基準。",
+      "normal": "結合具名參數、trait、autoload、參照回傳與 closure 測試。",
+      "adversarial": "重複參數、錯誤存取權及動態宣告衝突不得被忽略。",
+      "work_packages": [
+        "W-11",
+        "W-13",
+        "W-18",
+        "W-29"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-023",
+        "T-024"
+      ]
+    },
+    {
+      "id": "REQ-013",
+      "group": "編譯前端",
+      "title": "include 與 require",
+      "actor": "PHP 開發者",
+      "capability": "以相容作用域與路徑規則載入 PHP 檔案。",
+      "acceptance": "include_once 身分、回傳、失敗種類與讀取權限正確。",
+      "normal": "以相對路徑、符號連結與多層 include 驗證一次載入與變數作用域。",
+      "adversarial": "路徑逃出授權根、檔案替換與不相容快取不得繞過權限。",
+      "work_packages": [
+        "W-18",
+        "W-20",
+        "W-23",
+        "W-36"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-025",
+        "T-026"
+      ]
+    },
+    {
+      "id": "REQ-014",
+      "group": "編譯前端",
+      "title": "eval 與動態宣告",
+      "actor": "PHP 開發者",
+      "capability": "執行符合站台政策的動態 PHP 程式碼。",
+      "acceptance": "沿用同一版本、配額、來源標記與語意，不啟動外部 PHP。",
+      "normal": "eval 新增合法函式並在當次請求使用，另一請求看不到宣告。",
+      "adversarial": "受限來源與巨大 eval 輸入被政策／配額處理，native 路徑不得旁路。",
+      "work_packages": [
+        "W-18",
+        "W-20",
+        "W-21",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-027",
+        "T-028"
+      ]
+    },
+    {
+      "id": "REQ-015",
+      "group": "值與資料結構",
+      "title": "型別表示",
+      "actor": "PHP 開發者",
+      "capability": "保留 null、未定義、bool、整數、浮點、字串與複雜值的區別。",
+      "acceptance": "每種型別的讀寫、比較與轉換有穩定結果，不以 Go 預設轉型取代。",
+      "normal": "依型別矩陣執行轉換與判斷，核對診斷與回傳。",
+      "adversarial": "非法 resource／handle 類型不可被當成物件或記憶體位址。",
+      "work_packages": [
+        "W-06",
+        "W-11",
+        "W-17"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-029",
+        "T-030"
+      ]
+    },
+    {
+      "id": "REQ-016",
+      "group": "值與資料結構",
+      "title": "參照位置",
+      "actor": "PHP 開發者",
+      "capability": "使用參照參數、參照回傳、陣列元素與 foreach。",
+      "acceptance": "別名關係、解除綁定與型別限制跨優化路徑一致。",
+      "normal": "建立多層別名後修改、unset 及回傳，核對可觀察結果。",
+      "adversarial": "陣列複製含參照、變數重新綁定時不發生過度深拷貝或誤共享。",
+      "work_packages": [
+        "W-06",
+        "W-12",
+        "W-15",
+        "W-17"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-031",
+        "T-032"
+      ]
+    },
+    {
+      "id": "REQ-017",
+      "group": "值與資料結構",
+      "title": "有序陣列",
+      "actor": "PHP 開發者",
+      "capability": "使用保持 PHP 鍵轉換與順序的 array。",
+      "acceptance": "packed／ordered 表示轉換前後，索引、順序與引用結果一致。",
+      "normal": "連續鍵轉混合鍵、刪除後插入、排序與字串鍵全部對照。",
+      "adversarial": "極端鍵、整數邊界、遍歷時修改及 callback 重入不毀損結構。",
+      "work_packages": [
+        "W-06",
+        "W-12",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-033",
+        "T-034"
+      ]
+    },
+    {
+      "id": "REQ-018",
+      "group": "值與資料結構",
+      "title": "完整物件語意",
+      "actor": "PHP 開發者",
+      "capability": "使用繼承、trait、enum、typed／readonly 屬性與目標版新功能。",
+      "acceptance": "存取權、物件身分、property hooks、lazy object 與 Reflection 相容。",
+      "normal": "建立跨繼承與延遲初始化 fixture，核對 Reflection 與 hook 次數。",
+      "adversarial": "屬性初始化中途失敗／重入時不留下可使用的半初始化物件。",
+      "work_packages": [
+        "W-13",
+        "W-29",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-035",
+        "T-036"
+      ]
+    },
+    {
+      "id": "REQ-019",
+      "group": "值與資料結構",
+      "title": "受控資源",
+      "actor": "PHP 開發者",
+      "capability": "使用檔案、資料庫與其他 resource 並安全關閉。",
+      "acceptance": "種類、擁有者、代次與關閉狀態均受檢查。",
+      "normal": "資源在正常、例外與 exit 路徑均只釋放一次。",
+      "adversarial": "將舊 handle 帶入新請求或重複關閉，不可操作另一資源。",
+      "work_packages": [
+        "W-13",
+        "W-20",
+        "W-31",
+        "W-38"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-037",
+        "T-038"
+      ]
+    },
+    {
+      "id": "REQ-020",
+      "group": "生命週期",
+      "title": "確定的解構",
+      "actor": "PHP 開發者",
+      "capability": "取得符合版本基準的解構時機與副作用。",
+      "acceptance": "不以 Go GC finalizer 取代 PHP 解構；復活與重入有明確處理。",
+      "normal": "覆寫最後參照、函式離開與正常關閉，核對解構事件序列。",
+      "adversarial": "解構內再拋例外、建立參照或重新進入 Runtime，不重複解構。",
+      "work_packages": [
+        "W-05",
+        "W-06",
+        "W-13",
+        "W-14"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-039",
+        "T-040"
+      ]
+    },
+    {
+      "id": "REQ-021",
+      "group": "生命週期",
+      "title": "循環與弱參照",
+      "actor": "PHP 開發者",
+      "capability": "使用 gc 系列、WeakReference 與 WeakMap。",
+      "acceptance": "循環、弱鍵與值指回鍵的行為對照基準，不永久強參照。",
+      "normal": "解除外部根並觸發相容收集，核對弱參照與解構。",
+      "adversarial": "大量循環、弱鍵反向引用及中途取消不造成無界保留。",
+      "work_packages": [
+        "W-05",
+        "W-13",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-041",
+        "T-042"
+      ]
+    },
+    {
+      "id": "REQ-022",
+      "group": "生命週期",
+      "title": "初始化安全",
+      "actor": "平台管理者",
+      "capability": "在任何初始化步驟失敗時維持服務完整性。",
+      "acceptance": "只有已提交資源進入清理，下一請求不取得半成品。",
+      "normal": "逐步注入配置與外部開啟失敗，ledger 正確清理。",
+      "adversarial": "反覆失敗後建立正常請求，無跨請求引用、配額遺失或錯誤解構。",
+      "work_packages": [
+        "W-05",
+        "W-14",
+        "W-20",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-043",
+        "T-044"
+      ]
+    },
+    {
+      "id": "REQ-023",
+      "group": "生命週期",
+      "title": "受限池化",
+      "actor": "平台管理者",
+      "capability": "在不殘留資料的條件下重用合適緩衝。",
+      "acceptance": "敏感資料、request handle 與完整 Execution 不未經驗證重用。",
+      "normal": "重複處理不同大小請求，量測配置與保留上限。",
+      "adversarial": "前次敏感輸入與超大 buffer 不出現在下一請求或永久抬高保留量。",
+      "work_packages": [
+        "W-06",
+        "W-22",
+        "W-23",
+        "W-43",
+        "W-48"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-045",
+        "T-046"
+      ]
+    },
+    {
+      "id": "REQ-024",
+      "group": "IR 與 VM",
+      "title": "保留 PHP 語意的 IR",
+      "actor": "編譯器維護者",
+      "capability": "分析型別與參照而不遺失 PHP 可觀察操作。",
+      "acceptance": "高階操作具有來源與效果，別名位置不被錯誤純量化。",
+      "normal": "在優化前後比對相同 fixture 的輸出、警告與 callback 序列。",
+      "adversarial": "magic method／autoload／解構的副作用不能被錯刪或錯移。",
+      "work_packages": [
+        "W-11",
+        "W-15",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-047",
+        "T-048"
+      ]
+    },
+    {
+      "id": "REQ-025",
+      "group": "IR 與 VM",
+      "title": "驗證 Bytecode",
+      "actor": "平台管理者",
+      "capability": "安全拒絕損毀或不相容的中介程式。",
+      "acceptance": "載入前驗證長度、索引、控制流程、frame 與能力，資源消耗有界。",
+      "normal": "合法 Bytecode 往返保存與載入後結果一致。",
+      "adversarial": "變異跳躍目標、索引、長度與格式版本，拒絕而不執行部分內容。",
+      "work_packages": [
+        "W-16",
+        "W-17",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-049",
+        "T-050"
+      ]
+    },
+    {
+      "id": "REQ-026",
+      "group": "IR 與 VM",
+      "title": "可取消 VM",
+      "actor": "平台管理者",
+      "capability": "中止高成本 PHP 執行且釋放核心資源。",
+      "acceptance": "回邊、配置、函式與長操作有檢查點，錯誤可分類。",
+      "normal": "在不同迴圈與資料操作階段取消，名額與資源全部收回。",
+      "adversarial": "單一巨大字串／正規表示式操作不得永遠避開檢查。",
+      "work_packages": [
+        "W-17",
+        "W-20",
+        "W-30",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-051",
+        "T-052"
+      ]
+    },
+    {
+      "id": "REQ-027",
+      "group": "IR 與 VM",
+      "title": "Fiber 與 Generator",
+      "actor": "PHP 開發者",
+      "capability": "依 PHP 的暫停／恢復語意執行程式。",
+      "acceptance": "同一 Execution 的狀態不被多個 Fiber 任意平行修改。",
+      "normal": "測試 resume、send、throw、巢狀 Fiber、yield from 與提前銷毀。",
+      "adversarial": "在暫停時取消、解構或 native 邊界切換，不造成死鎖或重複副作用。",
+      "work_packages": [
+        "W-19",
+        "W-39",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-053",
+        "T-054"
+      ]
+    },
+    {
+      "id": "REQ-028",
+      "group": "並行與資源",
+      "title": "Goroutine 請求模型",
+      "actor": "網站管理者",
+      "capability": "同時執行多個獨立 PHP 請求。",
+      "acceptance": "不同請求共享程式但不共享可變執行狀態。",
+      "normal": "不同輸入與靜態變數的高並行 fixture 逐次正確。",
+      "adversarial": "刻意交錯例外、取消與重載，race 與狀態污染檢查通過。",
+      "work_packages": [
+        "W-22",
+        "W-23",
+        "W-40",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-055",
+        "T-056"
+      ]
+    },
+    {
+      "id": "REQ-029",
+      "group": "並行與資源",
+      "title": "有界接納",
+      "actor": "平台管理者",
+      "capability": "限制連線、排隊與活躍 PHP 請求。",
+      "acceptance": "超過容量時在執行前拒絕，goroutine／body 緩衝不無界成長。",
+      "normal": "設定小容量並施加較大負載，活躍與排隊保持設定上限。",
+      "adversarial": "slowloris、空閒連線與巨大 body 不在取得名額前耗盡記憶體。",
+      "work_packages": [
+        "W-20",
+        "W-22",
+        "W-25",
+        "W-26",
+        "W-48"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-057",
+        "T-058"
+      ]
+    },
+    {
+      "id": "REQ-030",
+      "group": "並行與資源",
+      "title": "請求環境隔離",
+      "actor": "PHP 開發者",
+      "capability": "在自己的執行範圍設定目錄、環境、INI 與時區。",
+      "acceptance": "宿主程序與其他請求不受其變更影響。",
+      "normal": "兩請求設定不同 chdir、putenv、timezone 後同時讀回。",
+      "adversarial": "callback 使用宿主環境時不意外讀取另一請求設定。",
+      "work_packages": [
+        "W-14",
+        "W-22",
+        "W-24",
+        "W-35"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-059",
+        "T-060"
+      ]
+    },
+    {
+      "id": "REQ-031",
+      "group": "並行與資源",
+      "title": "資源預算",
+      "actor": "平台管理者",
+      "capability": "限制運算、邏輯記憶體、輸出與外部資源。",
+      "acceptance": "超限在可控邊界拒絕，不把邏輯額度誤稱為 RSS 硬限制。",
+      "normal": "逐項設低額度，核對 ResourceError 與清理。",
+      "adversarial": "長度乘法溢位、來源標記爆量與native配置不繞過額度。",
+      "work_packages": [
+        "W-20",
+        "W-21",
+        "W-38",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-061",
+        "T-062"
+      ]
+    },
+    {
+      "id": "REQ-032",
+      "group": "並行與資源",
+      "title": "高風險程序隔離",
+      "actor": "平台管理者",
+      "capability": "對需要硬性停止或較低信任的程式選用隔離 worker。",
+      "acceptance": "worker 受到 OS 權限與資源限制，崩潰不終止控制程序。",
+      "normal": "故意讓 worker 超限／逾時，宿主終止並回收。",
+      "adversarial": "非合作 callback、native crash 與硬 kill 不污染新的 worker 或其他站台。",
+      "work_packages": [
+        "W-46",
+        "W-40",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-063",
+        "T-064"
+      ]
+    },
+    {
+      "id": "REQ-033",
+      "group": "安全政策",
+      "title": "能力式 I/O",
+      "actor": "平台管理者",
+      "capability": "只授權 PHP 使用明確的檔案、網路、資料庫與宿主功能。",
+      "acceptance": "所有入口與後端經過同一能力檢查。",
+      "normal": "授權路徑與目標成功，未授權目標回傳可定位政策錯誤。",
+      "adversarial": "經 include、stream wrapper、callback 或native 路徑仍不可越權。",
+      "work_packages": [
+        "W-20",
+        "W-24",
+        "W-31",
+        "W-32",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-065",
+        "T-066"
+      ]
+    },
+    {
+      "id": "REQ-034",
+      "group": "安全政策",
+      "title": "來源追蹤",
+      "actor": "平台管理者",
+      "capability": "追蹤外部資料進入高風險操作的路徑。",
+      "acceptance": "字串區段、複雜值、參照、最佳化與宿主回傳保留必要來源。",
+      "normal": "輸入經串接、切片、陣列、callback 後，sink 收到正確來源證據。",
+      "adversarial": "來源爆量採保守合併，不能清空標記或耗盡程序。",
+      "work_packages": [
+        "W-21",
+        "W-15",
+        "W-24",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-067",
+        "T-068"
+      ]
+    },
+    {
+      "id": "REQ-035",
+      "group": "安全政策",
+      "title": "脈絡化防護",
+      "actor": "網站管理者",
+      "capability": "對 SQL、shell 與輸出脈絡套用各自的規則。",
+      "acceptance": "不以單一 sanitized 布林或關鍵字過濾宣稱完整防護。",
+      "normal": "合法參數化 SQL 與已授權參數命令不被錯擋。",
+      "adversarial": "HTML 處理後的字串不能因此被視為 SQL／shell 安全。",
+      "work_packages": [
+        "W-21",
+        "W-30",
+        "W-31",
+        "W-32"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-069",
+        "T-070"
+      ]
+    },
+    {
+      "id": "REQ-036",
+      "group": "安全政策",
+      "title": "模式與稽核",
+      "actor": "網站管理者",
+      "capability": "在 compat、observe、enforce 下檢視或阻擋規則事件。",
+      "acceptance": "模式可辨識，強制能力與資源限制在各模式都有效。",
+      "normal": "同一可疑輸入於 observe 產生事件、enforce 依規則拒絕。",
+      "adversarial": "compat 模式不得關閉驗證器、越權限制或跨請求保護。",
+      "work_packages": [
+        "W-20",
+        "W-21",
+        "W-35",
+        "W-40"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-071",
+        "T-072"
+      ]
+    },
+    {
+      "id": "REQ-037",
+      "group": "安全政策",
+      "title": "路徑與 SSRF",
+      "actor": "網站管理者",
+      "capability": "防止 PHP 超出授權檔案與網路範圍。",
+      "acceptance": "實際使用時檢查根目錄、解析IP、重新導向與代理。",
+      "normal": "允許的檔案與HTTPS目標正常使用。",
+      "adversarial": "符號連結替換、DNS重綁、IPv6、內網重新導向與代理旁路被阻擋。",
+      "work_packages": [
+        "W-20",
+        "W-32",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-073",
+        "T-074"
+      ]
+    },
+    {
+      "id": "REQ-038",
+      "group": "Web 服務",
+      "title": "FastCGI 協定",
+      "actor": "網站管理者",
+      "capability": "以 Apache／Nginx 連接 Phego Responder。",
+      "acceptance": "合法 record、串流、重用、abort 與協定錯誤有互通測試。",
+      "normal": "用兩種Web伺服器經socket與TCP完成GET、POST與串流回應。",
+      "adversarial": "短讀、亂序、錯ID、未支援角色與多工都按協定受控處理。",
+      "work_packages": [
+        "W-25",
+        "W-41",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-075",
+        "T-076"
+      ]
+    },
+    {
+      "id": "REQ-039",
+      "group": "Web 服務",
+      "title": "參數與路由",
+      "actor": "網站管理者",
+      "capability": "取得正確的 script、PATH_INFO、URI 與 PHP 超全域資料。",
+      "acceptance": "保留必要原始參數，入口路徑與站台身分不由不可信欄位越權決定。",
+      "normal": "同一站台在Apache GENERIC與Nginx下核對SERVER欄位。",
+      "adversarial": "偽造SCRIPT_FILENAME或SERVER_NAME不可切換到未授權站台。",
+      "work_packages": [
+        "W-25",
+        "W-26",
+        "W-27",
+        "W-35"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-077",
+        "T-078"
+      ]
+    },
+    {
+      "id": "REQ-040",
+      "group": "Web 服務",
+      "title": "標頭與輸出",
+      "actor": "PHP 開發者",
+      "capability": "輸出狀態、Cookie、二進位內容與緩衝資料。",
+      "acceptance": "重複Set-Cookie與標頭替換符合PHP語意，stdout與stderr不混淆。",
+      "normal": "測試多Cookie、緩衝、flush、HEAD與二進位body。",
+      "adversarial": "標頭換行、輸出後錯誤與中途斷線不洩漏原始碼或內部記錄。",
+      "work_packages": [
+        "W-14",
+        "W-25",
+        "W-26",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-079",
+        "T-080"
+      ]
+    },
+    {
+      "id": "REQ-041",
+      "group": "Web 服務",
+      "title": "安全靜態與入口",
+      "actor": "網站管理者",
+      "capability": "使用內建HTTP服務或保留現有Web路由。",
+      "acceptance": "只公開document-root及明確入口，PHP執行失敗不回傳原始碼。",
+      "normal": "front controller與靜態資源在正常路由下成功。",
+      "adversarial": "請求.env、vendor、備份、PHP原始碼與目錄穿越均被正確限制。",
+      "work_packages": [
+        "W-26",
+        "W-35",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-081",
+        "T-082"
+      ]
+    },
+    {
+      "id": "REQ-042",
+      "group": "Web 服務",
+      "title": "表單與上傳",
+      "actor": "PHP 開發者",
+      "capability": "使用相容的表單、Cookie與檔案上傳資料。",
+      "acceptance": "鍵轉換、重複欄位、深度、大小、暫存登錄及move_uploaded_file正確。",
+      "normal": "使用陣列欄位、空檔案與多檔案上傳對照PHP。",
+      "adversarial": "巨大欄位、截斷multipart、跨請求暫存路徑及超額body不造成外洩。",
+      "work_packages": [
+        "W-27",
+        "W-20",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-083",
+        "T-084"
+      ]
+    },
+    {
+      "id": "REQ-043",
+      "group": "Session",
+      "title": "Session 互斥與寫回",
+      "actor": "PHP 開發者",
+      "capability": "安全共享同一session ID的資料。",
+      "acceptance": "同ID採對應後端的鎖定契約，不同站台不混用鍵。",
+      "normal": "同ID遞增請求不遺失更新，不同ID可並行。",
+      "adversarial": "持鎖請求取消或寫回失敗後，不永久鎖住其他請求。",
+      "work_packages": [
+        "W-28",
+        "W-22",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-085",
+        "T-086"
+      ]
+    },
+    {
+      "id": "REQ-044",
+      "group": "Session",
+      "title": "格式與進度安全",
+      "actor": "網站管理者",
+      "capability": "使用經認證的序列化與upload progress能力。",
+      "acceptance": "格式切換不誤讀半初始化資料，能力未完成不回報支援。",
+      "normal": "在允許的格式與切換流程中對照資料與回應。",
+      "adversarial": "在上傳進度與ini_set切換的交錯下，拒絕或安全處理不一致狀態。",
+      "work_packages": [
+        "W-28",
+        "W-14",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-087",
+        "T-088"
+      ]
+    },
+    {
+      "id": "REQ-045",
+      "group": "Session",
+      "title": "提早結束回應",
+      "actor": "PHP 開發者",
+      "capability": "使用fastcgi_finish_request後完成允許的後續工作。",
+      "acceptance": "回應關閉與Execution結束分開，名額、鎖與額度持續有效。",
+      "normal": "先結束回應再執行短收尾，檢查事件順序。",
+      "adversarial": "回應後無限迴圈、持鎖及取消不能逃脫平台期限。",
+      "work_packages": [
+        "W-25",
+        "W-28",
+        "W-20",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-089",
+        "T-090"
+      ]
+    },
+    {
+      "id": "REQ-046",
+      "group": "Session",
+      "title": "既有資料共存",
+      "actor": "網站管理者",
+      "capability": "在遷移時保留相容的Session資料與Cookie。",
+      "acceptance": "舊後端與新後端之格式、TTL、ID與鎖定有雙向測試。",
+      "normal": "使用固定資料副本在兩後端交替讀寫並維持登入。",
+      "adversarial": "不相容格式不被默默改寫，回復演練不刪除使用者資料。",
+      "work_packages": [
+        "W-28",
+        "W-34",
+        "W-40",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-091",
+        "T-092"
+      ]
+    },
+    {
+      "id": "REQ-047",
+      "group": "模組與網站",
+      "title": "模組契約",
+      "actor": "維護者",
+      "capability": "以明確能力與生命週期加入內建功能。",
+      "acceptance": "每個模組具有簽章、INI、依賴、安全與測試描述。",
+      "normal": "載入模組並生成能力報告，依描述建立請求狀態。",
+      "adversarial": "模組缺少權限或簽章衝突時在執行前拒絕。",
+      "work_packages": [
+        "W-29",
+        "W-35",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-093",
+        "T-094"
+      ]
+    },
+    {
+      "id": "REQ-048",
+      "group": "模組與網站",
+      "title": "字串與PCRE",
+      "actor": "PHP 開發者",
+      "capability": "執行符合PHP語意的字串、編碼與正規表示式操作。",
+      "acceptance": "PCRE能力不以RE2子集冒充，錯誤與限制可查詢。",
+      "normal": "回溯引用、捕獲、替換、非UTF8與編碼fixture對照基準。",
+      "adversarial": "災難性回溯與超大輸入有界，不以Go整個程序失控作代價。",
+      "work_packages": [
+        "W-30",
+        "W-41",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-095",
+        "T-096"
+      ]
+    },
+    {
+      "id": "REQ-049",
+      "group": "模組與網站",
+      "title": "資料庫語意",
+      "actor": "PHP 開發者",
+      "capability": "使用已認證的PDO／mysqli功能。",
+      "acceptance": "placeholder、fetch、型別、交易、錯誤及連線重設相容。",
+      "normal": "測試CRUD、交易回滾、不同fetch模式與連線池重用。",
+      "adversarial": "前一請求留下的交易、變數或認證狀態不得外洩至下一請求。",
+      "work_packages": [
+        "W-31",
+        "W-20",
+        "W-21",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-097",
+        "T-098"
+      ]
+    },
+    {
+      "id": "REQ-050",
+      "group": "模組與網站",
+      "title": "外部函式庫",
+      "actor": "PHP 開發者",
+      "capability": "使用明列的HTTP、crypto、XML、壓縮、影像與國際化能力。",
+      "acceptance": "按函式族認證，依賴版本與純Go／native性質如實公開。",
+      "normal": "以模組功能矩陣核對成功、錯誤碼與資料格式。",
+      "adversarial": "壓縮炸彈、XML外部資源與未修補依賴不能繞過政策或掃描。",
+      "work_packages": [
+        "W-32",
+        "W-33",
+        "W-41",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-099",
+        "T-100"
+      ]
+    },
+    {
+      "id": "REQ-051",
+      "group": "模組與網站",
+      "title": "真實網站",
+      "actor": "網站管理者",
+      "capability": "在不改PHP原始碼的條件下遷移認證範圍內網站。",
+      "acceptance": "固定版本WordPress與Laravel fixture的主要流程與例外測試通過。",
+      "normal": "登入、CRUD、上傳、Session、CLI與錯誤頁完成端對端對照。",
+      "adversarial": "缺少外掛能力或mod_php專用設定時明確阻擋認證，不默認全部相容。",
+      "work_packages": [
+        "W-34",
+        "W-42",
+        "W-40"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-101",
+        "T-102"
+      ]
+    },
+    {
+      "id": "REQ-052",
+      "group": "LLVM",
+      "title": "可選建置",
+      "actor": "Go 開發者",
+      "capability": "不用LLVM使用核心，或明確選用native profile。",
+      "acceptance": "純Go依賴樹不含強制cgo，native依賴與工具版本可檢查。",
+      "normal": "CGO_ENABLED=0核心建置與獨立native建置各自成功。",
+      "adversarial": "沒有LLVM時核心仍正常；native需求不足時明確失敗不假裝成功。",
+      "work_packages": [
+        "W-07",
+        "W-37",
+        "W-38",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-103",
+        "T-104"
+      ]
+    },
+    {
+      "id": "REQ-053",
+      "group": "LLVM",
+      "title": "受控ABI",
+      "actor": "維護者",
+      "capability": "以穩定資料契約連接原生程式與Go Runtime。",
+      "acceptance": "不私藏Go指標，handle的擁有者、代次與保活經檢查。",
+      "normal": "在GC壓力下反覆跨界傳遞複雜值與callback。",
+      "adversarial": "過期／跨請求handle、取消中釋放與指標違規被捕捉。",
+      "work_packages": [
+        "W-07",
+        "W-38",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-105",
+        "T-106"
+      ]
+    },
+    {
+      "id": "REQ-054",
+      "group": "LLVM",
+      "title": "正確降低",
+      "actor": "PHP 開發者",
+      "capability": "在原生後端取得相同PHP數值與副作用。",
+      "acceptance": "不錯用LLVM未定義行為假設，錯誤與警告保留。",
+      "normal": "算術、混合型別、例外與來源標記在VM／AOT中一致。",
+      "adversarial": "邊界溢位、除零、NaN與別名重疊不得被錯誤最佳化。",
+      "work_packages": [
+        "W-15",
+        "W-37",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-107",
+        "T-108"
+      ]
+    },
+    {
+      "id": "REQ-055",
+      "group": "LLVM",
+      "title": "動態回退",
+      "actor": "PHP 開發者",
+      "capability": "在原生程式中使用需要VM的動態功能。",
+      "acceptance": "回到VM時保持frame、scope、權限與一次性副作用。",
+      "normal": "AOT函式呼叫動態include、eval與callback後正常返回。",
+      "adversarial": "guard失敗、例外與取消時SQL／檔案／callback不重複執行。",
+      "work_packages": [
+        "W-18",
+        "W-19",
+        "W-38",
+        "W-39"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-109",
+        "T-110"
+      ]
+    },
+    {
+      "id": "REQ-056",
+      "group": "LLVM",
+      "title": "後端與JIT閘門",
+      "actor": "維護者",
+      "capability": "只啟用通過等價與效能測試的原生能力。",
+      "acceptance": "無證據不啟用，JIT另具W^X、快取與平台安全測試。",
+      "normal": "同語意fixture在各支援後端取得一致結果與報告。",
+      "adversarial": "篡改native產物、錯CPU特徵或不可用平台不能直接執行。",
+      "work_packages": [
+        "W-39",
+        "W-43",
+        "W-47"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-111",
+        "T-112"
+      ]
+    },
+    {
+      "id": "REQ-057",
+      "group": "封裝",
+      "title": "Bytecode單檔",
+      "actor": "部署者",
+      "capability": "將PHP程式、VM與必要資源封裝為單檔。",
+      "acceptance": "乾淨環境不安裝PHP仍可啟動，manifest完整。",
+      "normal": "移除來源目錄後執行封裝網站與靜態資源測試。",
+      "adversarial": "缺少必要外部資料時明確回報，不聲稱完全自足。",
+      "work_packages": [
+        "W-36",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-113",
+        "T-114"
+      ]
+    },
+    {
+      "id": "REQ-058",
+      "group": "封裝",
+      "title": "原生單檔",
+      "actor": "部署者",
+      "capability": "將AOT區段與Go／PHP Runtime封裝為目標平台產物。",
+      "acceptance": "部署環境不必安裝LLVM，外部共享函式庫需求清楚列出。",
+      "normal": "在目標OS／CPU乾淨映像啟動並檢查依賴。",
+      "adversarial": "錯平台、缺函式庫或ABI版本不合不得被宣告可用。",
+      "work_packages": [
+        "W-36",
+        "W-37",
+        "W-38",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-115",
+        "T-116"
+      ]
+    },
+    {
+      "id": "REQ-059",
+      "group": "封裝",
+      "title": "VFS與寫入",
+      "actor": "PHP 開發者",
+      "capability": "在封裝環境使用一致路徑並存取授權可寫資料。",
+      "acceptance": "__FILE__、include、realpath與列舉一致，程式與資料區分開。",
+      "normal": "在虛擬/app中讀取程式，外部mount保存上傳與Session。",
+      "adversarial": "自我更新唯讀程式、原生工具看不到VFS時明確拒絕或要求受控實體化。",
+      "work_packages": [
+        "W-18",
+        "W-20",
+        "W-36"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-117",
+        "T-118"
+      ]
+    },
+    {
+      "id": "REQ-060",
+      "group": "封裝",
+      "title": "祕密與重現",
+      "actor": "部署者",
+      "capability": "產生不含未授權祕密、可追溯的建置產物。",
+      "acceptance": "排除祕密、固定工具與來源、保留依賴／授權報告。",
+      "normal": "相同鎖定輸入重建，摘要一致或差異具明確解釋。",
+      "adversarial": "含.env、私鑰、憑證與危險路徑的輸入被掃描提示／阻擋。",
+      "work_packages": [
+        "W-02",
+        "W-36",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-119",
+        "T-120"
+      ]
+    },
+    {
+      "id": "REQ-061",
+      "group": "快取",
+      "title": "完整指紋",
+      "actor": "維護者",
+      "capability": "依語言與安全語意安全重用編譯結果。",
+      "acceptance": "來源、版本、模組、ABI與相關政策變更會正確失效。",
+      "normal": "相同輸入命中，不同profile或模組指紋重新編譯。",
+      "adversarial": "同檔名／mtime但不同內容、跨站台與錯CPU快取不誤用。",
+      "work_packages": [
+        "W-16",
+        "W-23",
+        "W-37"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-121",
+        "T-122"
+      ]
+    },
+    {
+      "id": "REQ-062",
+      "group": "快取",
+      "title": "唯讀與有界",
+      "actor": "平台管理者",
+      "capability": "共享程式快取但不共享請求資料。",
+      "acceptance": "快取有上限，逐出不影響活躍Program，請求狀態不進入快取。",
+      "normal": "並行命中與逐出時執行結果穩定。",
+      "adversarial": "static值、使用者輸入或request closure不得在下一請求可見。",
+      "work_packages": [
+        "W-22",
+        "W-23",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-123",
+        "T-124"
+      ]
+    },
+    {
+      "id": "REQ-063",
+      "group": "快取",
+      "title": "編譯合併與取消",
+      "actor": "平台管理者",
+      "capability": "避免相同來源的編譯風暴。",
+      "acceptance": "同鍵共享編譯，單一等待者取消不殺掉其他需求。",
+      "normal": "多請求同時載入冷程式，只進行受控數量的編譯。",
+      "adversarial": "等待者全部取消與編譯失敗後不永久卡住鍵或漏掉名額。",
+      "work_packages": [
+        "W-23",
+        "W-22",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-125",
+        "T-126"
+      ]
+    },
+    {
+      "id": "REQ-064",
+      "group": "快取",
+      "title": "磁碟快取安全",
+      "actor": "平台管理者",
+      "capability": "從可信來源恢復快取並拒絕損毀資料。",
+      "acceptance": "格式驗證、摘要、來源信任與native簽章政策各自成立。",
+      "normal": "正常保存／讀回與損毀後重編譯有測試。",
+      "adversarial": "惡意長度、錯誤版本、未知native來源不被執行。",
+      "work_packages": [
+        "W-16",
+        "W-23",
+        "W-44",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-127",
+        "T-128"
+      ]
+    },
+    {
+      "id": "REQ-065",
+      "group": "上游更新",
+      "title": "自動發現差異",
+      "actor": "維護者",
+      "capability": "從官方tag、語法、stubs與測試形成更新清單。",
+      "acceptance": "來源鎖定，新增／刪除／行為變動與安全公告分開。",
+      "normal": "比對兩個固定官方版本，輸出可重現差異與受影響工作。",
+      "adversarial": "只有簽章相同但實作行為改變時，不宣稱自動完成相容。",
+      "work_packages": [
+        "W-02",
+        "W-45"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-129",
+        "T-130"
+      ]
+    },
+    {
+      "id": "REQ-066",
+      "group": "上游更新",
+      "title": "多版本回歸",
+      "actor": "維護者",
+      "capability": "新增PHP版本且不破壞既有profile。",
+      "acceptance": "舊新版本測試矩陣完整，安全修補例外有紀錄。",
+      "normal": "一項版本分歧fixture分別得到各自合法結果。",
+      "adversarial": "更新共用helper導致舊profile改變時CI失敗。",
+      "work_packages": [
+        "W-10",
+        "W-42",
+        "W-45"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-131",
+        "T-132"
+      ]
+    },
+    {
+      "id": "REQ-067",
+      "group": "上游更新",
+      "title": "安全影響判斷",
+      "actor": "維護者",
+      "capability": "以證據判定官方PHP或依賴漏洞是否影響Phego。",
+      "acceptance": "分析對應功能、依賴與測試，不只看語言或CVE名稱。",
+      "normal": "對已核對的公告建立影響說明與受控回歸測試。",
+      "adversarial": "尚未支援或未測試的路徑不得直接宣稱不受影響。",
+      "work_packages": [
+        "W-41",
+        "W-44",
+        "W-45"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-133",
+        "T-134"
+      ]
+    },
+    {
+      "id": "REQ-068",
+      "group": "維運",
+      "title": "設定重載",
+      "actor": "網站管理者",
+      "capability": "安全替換站台設定而不混用請求狀態。",
+      "acceptance": "新代次原子發布，失敗保留舊設定，強制取消模式明確。",
+      "normal": "在流量中切換合法設定，舊請求維持原快照。",
+      "adversarial": "不合法設定與半完成模組載入不影響健康設定。",
+      "work_packages": [
+        "W-35",
+        "W-40",
+        "W-41"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-135",
+        "T-136"
+      ]
+    },
+    {
+      "id": "REQ-069",
+      "group": "維運",
+      "title": "健康與觀測",
+      "actor": "平台管理者",
+      "capability": "分辨程序存活、服務可用與請求瓶頸。",
+      "acceptance": "提供有界metrics與可關聯事件，不公開祕密或管理端點。",
+      "normal": "故意阻塞DB／Session／編譯，指標呈現相應階段。",
+      "adversarial": "高基數URI與敏感輸入不能造成指標爆量或紀錄外洩。",
+      "work_packages": [
+        "W-40",
+        "W-20"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-137",
+        "T-138"
+      ]
+    },
+    {
+      "id": "REQ-070",
+      "group": "維運",
+      "title": "平滑停止",
+      "actor": "網站管理者",
+      "capability": "在有期限的條件下停止服務。",
+      "acceptance": "停止接納、完成／取消工作、釋放資源，native程式不提早卸載。",
+      "normal": "流量中drain，已接納請求完成後服務退出。",
+      "adversarial": "過期收尾與阻塞外部資源不使關閉永久卡住。",
+      "work_packages": [
+        "W-22",
+        "W-25",
+        "W-40",
+        "W-46"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-139",
+        "T-140"
+      ]
+    },
+    {
+      "id": "REQ-071",
+      "group": "維運",
+      "title": "遷移與回復",
+      "actor": "網站管理者",
+      "capability": "以可回復方式將現有網站切換至Phego。",
+      "acceptance": "設定差異、資料相容、測試副本與回切步驟俱全。",
+      "normal": "在副本驗收後切換測試流量，再切回原後端。",
+      "adversarial": "不允許無隔離的正式雙寫，也不刪除使用者資料作回復。",
+      "work_packages": [
+        "W-34",
+        "W-40",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-141",
+        "T-142"
+      ]
+    },
+    {
+      "id": "REQ-072",
+      "group": "品質與發布",
+      "title": "完整測試分母",
+      "actor": "審查者",
+      "capability": "核對相容率的全部測試與排除理由。",
+      "acceptance": "unsupported、runner缺口與環境skip分開，無隱藏失敗。",
+      "normal": "產生包含各種結果的測試報告，總數與分組一致。",
+      "adversarial": "把失敗改成skip或移除模組來提高通過率時追蹤檢查拒絕。",
+      "work_packages": [
+        "W-03",
+        "W-04",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-143",
+        "T-144"
+      ]
+    },
+    {
+      "id": "REQ-073",
+      "group": "品質與發布",
+      "title": "模糊與故障測試",
+      "actor": "審查者",
+      "capability": "檢查惡意輸入與中途失敗的系統完整性。",
+      "acceptance": "高風險parser／decoder有fuzz corpus，各初始化步驟有故障注入。",
+      "normal": "固定種子與回歸輸入可重現測試結果。",
+      "adversarial": "發現crash、無限等待或跨請求污染時禁止發布。",
+      "work_packages": [
+        "W-05",
+        "W-41",
+        "W-42"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-145",
+        "T-146"
+      ]
+    },
+    {
+      "id": "REQ-074",
+      "group": "品質與發布",
+      "title": "效能比較",
+      "actor": "維護者",
+      "capability": "驗證 Phego 的執行效能是否超越所有已盤點可比較的 PHP 編譯器及引擎。",
+      "acceptance": "符合第23與37章的逐格嚴格勝出規則，原始資料包含 CPU、記憶體、p99、錯誤、冷熱與安全模式；尚未比較不能算勝出。",
+      "normal": "多輪固定環境測試能重現改善與變異。",
+      "adversarial": "僅微型測試變快但網站退步，不得無條件設為預設。",
+      "work_packages": [
+        "W-43",
+        "W-39",
+        "W-54",
+        "W-55"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-147",
+        "T-148"
+      ]
+    },
+    {
+      "id": "REQ-075",
+      "group": "品質與發布",
+      "title": "長時間與並行證據",
+      "actor": "審查者",
+      "capability": "驗證持續服務不累積無界資源。",
+      "acceptance": "滿足文件所定24小時及100萬請求基準並分析保留趨勢。",
+      "normal": "混合成功、錯誤、取消、重載與上傳負載完成長測。",
+      "adversarial": "handle、goroutine、Session鎖或heap持續增長則閘門不通過。",
+      "work_packages": [
+        "W-41",
+        "W-42",
+        "W-43"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-149",
+        "T-150"
+      ]
+    },
+    {
+      "id": "REQ-076",
+      "group": "品質與發布",
+      "title": "可追溯發布",
+      "actor": "專案負責人",
+      "capability": "只發布具有測試、能力、授權與依賴證據的版本。",
+      "acceptance": "每個REQ可連到測試與工作包，發布另有明確授權。",
+      "normal": "從指定commit重建報告與產物並驗證摘要。",
+      "adversarial": "未執行測試、未知授權或重大缺陷未處理時不能標示正式完成。",
+      "work_packages": [
+        "W-03",
+        "W-42",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-151",
+        "T-152"
+      ]
+    },
+    {
+      "id": "REQ-077",
+      "group": "工程邊界",
+      "title": "不變條件與設計紀錄",
+      "actor": "實作agent",
+      "capability": "在產品契約內選擇更好的內部設計。",
+      "acceptance": "每項重大設計具有理由、替代方案、證據與影響範圍。",
+      "normal": "替換內部陣列策略後全部語意測試及基準通過。",
+      "adversarial": "以最佳化為由縮小PHP範圍、引入Zend或關閉安全限制時須停止並回報。",
+      "work_packages": [
+        "W-01",
+        "W-03",
+        "W-43"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-153",
+        "T-154"
+      ]
+    },
+    {
+      "id": "REQ-078",
+      "group": "工程邊界",
+      "title": "權限與修改範圍",
+      "actor": "實作agent",
+      "capability": "在授權範圍內完成與驗證工作。",
+      "acceptance": "已授權建立 HazelnutParadise/phego、使用 MIT 並推送本次規格與英文 README；正式引擎 release、付費、正式設定及資料刪改仍須另有授權。",
+      "normal": "在獨立工作區交付測試與候選部署設定。",
+      "adversarial": "沒有授權時不建立公開release、不覆寫正式設定、不刪除使用者資料。",
+      "work_packages": [
+        "W-01",
+        "W-40",
+        "W-44",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-155",
+        "T-156"
+      ]
+    },
+    {
+      "id": "REQ-079",
+      "group": "工程邊界",
+      "title": "獨立交接",
+      "actor": "下一位agent",
+      "capability": "只依交接包掌握目前目標、狀態與下一步。",
+      "acceptance": "提供規格、commit、lock、能力、證據、未決ADR與工作包。",
+      "normal": "由乾淨環境依交接包執行指定測試。",
+      "adversarial": "缺少真實測試證據時狀態保留未驗證，不用文字保證填補。",
+      "work_packages": [
+        "W-03",
+        "W-42",
+        "W-44"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-157",
+        "T-158"
+      ]
+    },
+    {
+      "id": "REQ-080",
+      "group": "全歷史相容",
+      "title": "完整發行版本清冊",
+      "actor": "相容性維護者",
+      "capability": "盤點從 PHP Tools 第一個公開版本起的全部正式與公開預覽發行。",
+      "acceptance": "清冊涵蓋原始名稱、版本、來源、可取得性及證據狀態；缺失來源保留為未完成，不能刪除版本縮小分母。",
+      "normal": "以官方發布資料、museum 與版本紀錄交叉比對，識別 PHP Tools、FI、Construction Kit、PHP/FI 與後續發行。",
+      "adversarial": "僅取得 php-108 時不能把 PHP Tools 1.0 標成已驗收；不存在的 PHP 6 正式版不得虛構。",
+      "work_packages": [
+        "W-49",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-159",
+        "T-160"
+      ]
+    },
+    {
+      "id": "REQ-081",
+      "group": "全歷史相容",
+      "title": "精確版本選擇",
+      "actor": "Go 開發者與網站管理者",
+      "capability": "用完整版本與平台語意設定執行舊 PHP，不修改應用程式來源。",
+      "acceptance": "版本描述鎖定語法、運算、診斷、函式與設定，修補版差異不得被主版本別名覆蓋。",
+      "normal": "同一差異案例在兩個相鄰修補版得到各自的預期行為；別名解析後輸出完整版本。",
+      "adversarial": "HTTP 輸入不能更改語言版本；未完成的版本明確拒絕，不能偷偷改以最新版本執行。",
+      "work_packages": [
+        "W-49",
+        "W-51",
+        "W-53"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-161",
+        "T-162"
+      ]
+    },
+    {
+      "id": "REQ-082",
+      "group": "全歷史相容",
+      "title": "第一代工具與早期語法",
+      "actor": "歷史網站維運者",
+      "capability": "執行 PHP Tools、FI、Construction Kit、PHP/FI 的原始頁面與工具行為。",
+      "acceptance": "早期詞法、標記、指令與 CGI 輸入輸出由獨立前端／適配器支援，不能只用現代 PHP parser 接受檔案。",
+      "normal": "以具有出處的早期工具、官方範例及可取得真實網站重播表單、計數、日誌與頁面生成。",
+      "adversarial": "將 PHP/FI 頁面交給 PHP 8 profile 必須報告版本不合，不得把未解析原始程式碼當作成功輸出。",
+      "work_packages": [
+        "W-49",
+        "W-50"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-163",
+        "T-164"
+      ]
+    },
+    {
+      "id": "REQ-083",
+      "group": "全歷史相容",
+      "title": "歷史內建與擴充 API",
+      "actor": "舊 PHP 專案開發者",
+      "capability": "使用各版本曾提供且被網站依賴的內建函式、設定與擴充 API。",
+      "acceptance": "建立版本化函式清冊並實作行為適配；已移除 API 不靠名稱別名或無作用函式充數。",
+      "normal": "用固定舊專案驗證資料庫、正規表示式、字元編碼、Session 與舊物件行為。",
+      "adversarial": "現代 PDO 或 regexp 結果不相容時保留測試失敗，不得以函式存在代替相容或暗中呼叫 Zend。",
+      "work_packages": [
+        "W-51",
+        "W-52"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-165",
+        "T-166"
+      ]
+    },
+    {
+      "id": "REQ-084",
+      "group": "全歷史相容",
+      "title": "歷史平台語意",
+      "actor": "歷史程式維護者",
+      "capability": "在受支援宿主上選用有證據的 32／64 位元及平台相關 PHP 行為。",
+      "acceptance": "guest 整數寬度、溢位、序列化、路徑與換行由 profile 定義，不取決於 Go int；與真實舊平台基準對照。",
+      "normal": "在同一 64 位元宿主驗證有歷史依據的 32／64 位元邊界輸入及檔案路徑案例。",
+      "adversarial": "把宿主位元寬度直接當 guest 寬度、或虛構不曾存在的平台組合，都必須被驗收拒絕。",
+      "work_packages": [
+        "W-49",
+        "W-51",
+        "W-52"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-167",
+        "T-168"
+      ]
+    },
+    {
+      "id": "REQ-085",
+      "group": "全歷史相容",
+      "title": "歷史參考引擎隔離",
+      "actor": "測試工程師",
+      "capability": "在受控環境重建舊 PHP 作為行為比較基準。",
+      "acceptance": "來源與建置修補可追溯，測試 oracle 無正式憑證、無外網、無可寫宿主掛載，不能成為正式產品回退。",
+      "normal": "重建同一歷史來源並重播 fixture，保存環境、來源雜湊與原始輸出。",
+      "adversarial": "古老引擎失控、連外或嘗試存取宿主檔案時由隔離邊界阻止；來源不足記錄 blocker。",
+      "work_packages": [
+        "W-49",
+        "W-53"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-169",
+        "T-170"
+      ]
+    },
+    {
+      "id": "REQ-086",
+      "group": "全歷史相容",
+      "title": "舊功能與安全差異契約",
+      "actor": "部署者",
+      "capability": "保留舊程式的合法行為，同時看見安全限制造成的真實差異。",
+      "acceptance": "逐功能區分語言行為、可隔離的危險能力與實作漏洞；不得為相容複製記憶體破壞，不得隱藏不相容。",
+      "normal": "對舊輸入注入變數、動態程式碼與序列化功能，驗證版本規則和能力限制同時成立。",
+      "adversarial": "當合法行為與既定防護政策確實衝突時，回報具體情境並保留未通過狀態，不自行放寬安全或縮小範圍。",
+      "work_packages": [
+        "W-52",
+        "W-53",
+        "W-59"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-171",
+        "T-172"
+      ]
+    },
+    {
+      "id": "REQ-087",
+      "group": "全歷史相容",
+      "title": "混合版本並行隔離",
+      "actor": "Go 宿主與多站台管理者",
+      "capability": "在同一 Phego 服務並行執行不同 PHP 版本的站台。",
+      "acceptance": "Execution、快取、常數、INI、函式表與安全標記按版本及站台隔離，跨版本呼叫需明確轉換契約。",
+      "normal": "多個 goroutine 同時執行互不相容的版本案例並反覆載入同名程式。",
+      "adversarial": "混用快取、不同版本 Session 格式、static 或回傳 live object 時測試失敗或明確拒絕。",
+      "work_packages": [
+        "W-51",
+        "W-53"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-173",
+        "T-174"
+      ]
+    },
+    {
+      "id": "REQ-088",
+      "group": "競爭效能",
+      "title": "完整競品盤點",
+      "actor": "效能維護者",
+      "capability": "建立可更新的所有已發現 PHP 編譯器及執行引擎比較清冊。",
+      "acceptance": "包含現行與歷史實作、查找來源、版本、維護狀態、建置結果與可比性；不能只挑容易勝出的競品。",
+      "normal": "以固定快照記錄 Zend、KPHP、PeachPie、PHP 相容期 HHVM 及所有其他已發現實作。",
+      "adversarial": "無法取得、無法建置、尚未測量的競品保留 blocker，不能算 Phego 勝出。",
+      "work_packages": [
+        "W-54",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-175",
+        "T-176"
+      ]
+    },
+    {
+      "id": "REQ-089",
+      "group": "競爭效能",
+      "title": "正確性先於速度",
+      "actor": "效能審查者",
+      "capability": "只比較完成相同語意與相同工作量的正確程式。",
+      "acceptance": "輸出、HTTP 狀態、資料庫與檔案副作用先對照通過；錯誤回應與漏做工作不納入有效吞吐量。",
+      "normal": "相同來源與 fixture 在各引擎輸出一致後才啟動正式計時。",
+      "adversarial": "某引擎跳過 Session／交易／授權或回傳錯誤造成更快時，判定無效結果，不保留勝利數字。",
+      "work_packages": [
+        "W-54",
+        "W-55"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-177",
+        "T-178"
+      ]
+    },
+    {
+      "id": "REQ-090",
+      "group": "競爭效能",
+      "title": "超越全部可比引擎",
+      "actor": "專案負責人",
+      "capability": "依預先固定矩陣判定 Phego 是否快於所有已盤點且可比較的 PHP 編譯器。",
+      "acceptance": "每個必測可比單元的有效吞吐量及適用延遲以校正後信賴區間嚴格勝出；平手、顯著退步或未知皆不能標成全勝。",
+      "normal": "在固定硬體、負載、功能與設定下，多輪成對測量並生成完整比較矩陣。",
+      "adversarial": "幾何平均較快但某必要單元落後，或比較範圍仍有可執行未測競品時，最快目標保持未達成。",
+      "work_packages": [
+        "W-54",
+        "W-55",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-179",
+        "T-180"
+      ]
+    },
+    {
+      "id": "REQ-091",
+      "group": "競爭效能",
+      "title": "真實專案效能",
+      "actor": "網站管理者",
+      "capability": "比較真實 WordPress、Laravel 與其他基準站台的請求與命令表現。",
+      "acceptance": "同時涵蓋登入與匿名、讀寫、冷熱、單請求與並行、VM 與 Native、安全模式及系統資源。",
+      "normal": "固定資料庫及資料集，測量登入、搜尋、更新、上傳、佇列與快取失效。",
+      "adversarial": "只測 hello world、靜態頁快取或資料庫 mock 不得代表網站效能；外部瓶頸平手不得宣稱勝出。",
+      "work_packages": [
+        "W-55",
+        "W-56",
+        "W-57",
+        "W-58"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-181",
+        "T-182"
+      ]
+    },
+    {
+      "id": "REQ-092",
+      "group": "競爭效能",
+      "title": "效能結果可重現",
+      "actor": "獨立驗證者",
+      "capability": "重播每一個效能結果並查看失敗與負面結果。",
+      "acceptance": "公開原始樣本、命令、雜湊、負載、暖機、順序、資源與統計方法；編譯、啟動及記憶體另報，不隱藏成本。",
+      "normal": "由獨立環境重建比較，結果落在預先定義的變異範圍。",
+      "adversarial": "偵測針對測試名稱的特殊捷徑、移除慢案例或不同安全設定時，整份最快認證失效。",
+      "work_packages": [
+        "W-55",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-183",
+        "T-184"
+      ]
+    },
+    {
+      "id": "REQ-093",
+      "group": "真實專案驗收",
+      "title": "WordPress 完整站台",
+      "actor": "WordPress 維運者",
+      "capability": "不修改 WordPress 核心與受測外掛來源，完成真實站台工作。",
+      "acceptance": "官方 PHP／瀏覽器測試、管理後台、編輯、媒體、REST、權限、排程、外掛、佈景及升級回復通過。",
+      "normal": "固定新舊 WordPress、WooCommerce、佈景與資料集，跑完整流程並比較資料庫及檔案。",
+      "adversarial": "登入 A 後並行登入 B、上傳失敗、升級中斷及 PHP 執行失敗時，沒有跨使用者污染、資料遺失或原始碼外洩。",
+      "work_packages": [
+        "W-56",
+        "W-59"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-185",
+        "T-186"
+      ]
+    },
+    {
+      "id": "REQ-094",
+      "group": "真實專案驗收",
+      "title": "Laravel 框架與實際應用",
+      "actor": "Laravel 維運者",
+      "capability": "不修改受測程式來源，執行框架測試及至少一個非展示用實際應用。",
+      "acceptance": "框架測試與固定 BookStack 等實際應用的登入、權限、Eloquent、Blade、交易、佇列、CLI、上傳與瀏覽器流程通過。",
+      "normal": "鎖定 Laravel、BookStack、Composer lock、服務與資料，分別比較 CLI、FastCGI、HTTP 與封裝模式。",
+      "adversarial": "只有空白 Laravel 首頁或內部 HTTP mock 通過仍不足；真實 HTTP、資料庫、佇列或清理失敗即阻擋認證。",
+      "work_packages": [
+        "W-57",
+        "W-59"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-187",
+        "T-188"
+      ]
+    },
+    {
+      "id": "REQ-095",
+      "group": "真實專案驗收",
+      "title": "多生態與歷史真實專案",
+      "actor": "相容性審查者",
+      "capability": "以跨時代及不同框架的真實程式驗證通用性。",
+      "acceptance": "WordPress／WooCommerce、Laravel／BookStack 外，加入 Drupal、Symfony 應用、MediaWiki、phpMyAdmin、phpBB 與有來源的早期網站。",
+      "normal": "依各應用原本支援的 PHP 範圍建立合法版本配對，覆蓋語意分歧及歷史 API。",
+      "adversarial": "把最新 Laravel 強配 PHP 1 或用手寫簡單範例取代全部舊站，不能計入歷史網站認證。",
+      "work_packages": [
+        "W-50",
+        "W-52",
+        "W-58"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-189",
+        "T-190"
+      ]
+    },
+    {
+      "id": "REQ-096",
+      "group": "真實專案驗收",
+      "title": "遷移與回復實測",
+      "actor": "維運者",
+      "capability": "從原 PHP 後端切換至 Phego，再安全切回。",
+      "acceptance": "使用資料副本驗證 Session、cookie、交易、上傳、命令、可寫程式與唯讀封裝，依方案演練回復。",
+      "normal": "Apache 與 Nginx 分別切換同一受測站台並核對登入及資料一致性。",
+      "adversarial": "不以雙送正式 POST 製造重複資料；格式不相容或無法回復時禁止標成可直接遷移。",
+      "work_packages": [
+        "W-56",
+        "W-57",
+        "W-58",
+        "W-59"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-191",
+        "T-192"
+      ]
+    },
+    {
+      "id": "REQ-097",
+      "group": "真實專案驗收",
+      "title": "資料完整與持續服務",
+      "actor": "可靠性審查者",
+      "capability": "在長時間並行與故障負載下確認資料及請求隔離不被破壞。",
+      "acceptance": "至少 24 小時與 100 萬混合請求的既定下限成立；資料不變條件、鎖、handle、goroutine 與回復全部檢查，不能只看存活。",
+      "normal": "混合讀寫、重載、取消、Session 競爭、佇列重試與上傳，核對每筆副作用。",
+      "adversarial": "任何無授權讀寫、重複提交、遺失更新、資源無界成長或跨版本污染都阻擋發布。",
+      "work_packages": [
+        "W-53",
+        "W-59",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-193",
+        "T-194"
+      ]
+    },
+    {
+      "id": "REQ-098",
+      "group": "真實專案驗收",
+      "title": "零未解決缺陷閘門",
+      "actor": "專案負責人",
+      "capability": "辨識完整目標是否已真正完成，而非把未知視為沒有問題。",
+      "acceptance": "最終目標範圍內失敗、未實作、未執行、runner 缺口、未調查差異及未解決 Phego 缺陷均為零；既有上游缺陷獨立列示。",
+      "normal": "驗收工具根據原始結果與缺陷清冊阻止未達門檻的全相容／最快／完成聲明。",
+      "adversarial": "把失敗改 skip、刪需求、藏 flaky 測試或把安全例外當成完全等價，均使驗收失敗。",
+      "work_packages": [
+        "W-59",
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-195",
+        "T-196"
+      ]
+    },
+    {
+      "id": "REQ-099",
+      "group": "專案發布",
+      "title": "MIT 與第三方來源",
+      "actor": "專案貢獻者",
+      "capability": "在 MIT 授權下使用與貢獻 Phego 原創程式及規格。",
+      "acceptance": "根目錄為完整 MIT LICENSE，原創文件與程式適用 MIT；第三方來源、測試與 fixture 保留原授權，不被重新標示 MIT。",
+      "normal": "檢查 LICENSE、檔案來源與依賴清單，確保沒有混入未授權程式、資料或憑證。",
+      "adversarial": "嘗試把 WordPress／PHP 測試直接改標 MIT 或發布未知授權來源時，授權檢查失敗。",
+      "work_packages": [
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-197",
+        "T-198"
+      ]
+    },
+    {
+      "id": "REQ-100",
+      "group": "專案發布",
+      "title": "英文品牌與真實狀態",
+      "actor": "專案讀者與接手 agent",
+      "capability": "從英文 README 掌握 Phego 方向、英文 slogan、文件與實際成熟度。",
+      "acceptance": "README 使用英文與 The safest PHP in the world slogan；完整目標與現況分開，repo 為 HazelnutParadise/phego，授權與操作邊界明確。",
+      "normal": "檢查 README、規格與 JSON 一致，文件發布授權不被誤當正式引擎發布授權。",
+      "adversarial": "沒有實作與基準證據時不得新增已通過、最快倍數、可安裝 API 或假 CI 成功徽章。",
+      "work_packages": [
+        "W-60"
+      ],
+      "status": "planned",
+      "tests": [
+        "T-199",
+        "T-200"
+      ]
+    }
+  ]
+}

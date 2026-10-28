@@ -1,0 +1,3407 @@
+{
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "plan_not_implementation",
+  "items": [
+    {
+      "id": "T-001",
+      "requirement": "REQ-001",
+      "category": "正常與相容",
+      "title": "獨立 Go 引擎：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在乾淨映像中執行算術、物件與 include fixture，輸出符合固定 PHP 基準。",
+      "expected": "純 Go build 在沒有 php 可執行檔與 Zend 動態函式庫的環境完成 SDK 與 CLI 測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-002",
+      "requirement": "REQ-001",
+      "category": "例外與安全",
+      "title": "獨立 Go 引擎：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "移除 PATH 的 php、封鎖程序啟動並檢查依賴，不能發生隱藏 Zend 回退。",
+      "expected": "純 Go build 在沒有 php 可執行檔與 Zend 動態函式庫的環境完成 SDK 與 CLI 測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-003",
+      "requirement": "REQ-002",
+      "category": "正常與相容",
+      "title": "明確語言版本：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同一語法在兩個宣告支援的 profile 按各自預期結果執行。",
+      "expected": "完整目標涵蓋全部歷史版本；每個版本的編譯、Runtime、函式與設定一致。開發階段尚未完成的版本必須誠實拒絕，不能縮小最終承諾。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-004",
+      "requirement": "REQ-002",
+      "category": "例外與安全",
+      "title": "明確語言版本：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "把新 profile 程式放入舊 profile 的快取，不得誤執行。",
+      "expected": "完整目標涵蓋全部歷史版本；每個版本的編譯、Runtime、函式與設定一致。開發階段尚未完成的版本必須誠實拒絕，不能縮小最終承諾。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-005",
+      "requirement": "REQ-003",
+      "category": "正常與相容",
+      "title": "誠實能力清單：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "載入已完成模組後，各種能力查詢回傳一致清單。",
+      "expected": "capabilities、Reflection、extension_loaded 與 Composer 平台檢查一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-006",
+      "requirement": "REQ-003",
+      "category": "例外與安全",
+      "title": "誠實能力清單：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "移除模組或只留空實作時，不得仍回報完整支援。",
+      "expected": "capabilities、Reflection、extension_loaded 與 Composer 平台檢查一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-007",
+      "requirement": "REQ-004",
+      "category": "正常與相容",
+      "title": "相容性檢查：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "掃描固定網站 fixture，辨識實際使用的語法、擴充與可寫目錄。",
+      "expected": "每個發現包含來源位置、種類、能力、證據及部署影響，未知不標為通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-008",
+      "requirement": "REQ-004",
+      "category": "例外與安全",
+      "title": "相容性檢查：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "使用動態產生函式名／include 路徑，報告未知而非假定安全可用。",
+      "expected": "每個發現包含來源位置、種類、能力、證據及部署影響，未知不標為通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-009",
+      "requirement": "REQ-005",
+      "category": "正常與相容",
+      "title": "單函式執行：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "呼叫 return 30、echo 與例外 fixture，核對 Result 及錯誤型別。",
+      "expected": "一般輸出、return、PHP 錯誤與 exit 皆有明確結果，不終止宿主。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-010",
+      "requirement": "REQ-005",
+      "category": "例外與安全",
+      "title": "單函式執行：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "PHP exit 與未處理例外後，宿主仍能執行下一次 Run。",
+      "expected": "一般輸出、return、PHP 錯誤與 exit 皆有明確結果，不終止宿主。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-011",
+      "requirement": "REQ-006",
+      "category": "正常與相容",
+      "title": "重用編譯結果：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "100個獨立執行以不同輸入共用一個 Program，結果逐一核對。",
+      "expected": "Program 不可變，各 Run 的輸出、static 與變數不互相影響。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-012",
+      "requirement": "REQ-006",
+      "category": "例外與安全",
+      "title": "重用編譯結果：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "故意交錯 static 寫入與取消，檢查無資料競爭或跨請求值。",
+      "expected": "Program 不可變，各 Run 的輸出、static 與變數不互相影響。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-013",
+      "requirement": "REQ-007",
+      "category": "正常與相容",
+      "title": "資料傳遞與擁有權：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "輸入有序陣列與含零位元組字串，輸出快照保留內容與順序。",
+      "expected": "位元組字串、有序鍵、數字範圍與複製行為有測試，無失效活物件外流。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-014",
+      "requirement": "REQ-007",
+      "category": "例外與安全",
+      "title": "資料傳遞與擁有權：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "呼叫者同時改動原始 slice，預設隔離副本不受影響；resource 不能再操作。",
+      "expected": "位元組字串、有序鍵、數字範圍與複製行為有測試，無失效活物件外流。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-015",
+      "requirement": "REQ-008",
+      "category": "正常與相容",
+      "title": "宿主函式註冊：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "PHP 呼叫已註冊函式，參數與回傳標記符合契約。",
+      "expected": "簽章、權限、來源標記、重入與取消規則在註冊時驗證。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-016",
+      "requirement": "REQ-008",
+      "category": "例外與安全",
+      "title": "宿主函式註冊：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "未註冊方法、反射越權、重入違規與 callback panic 均受控失敗。",
+      "expected": "簽章、權限、來源標記、重入與取消規則在註冊時驗證。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-017",
+      "requirement": "REQ-009",
+      "category": "正常與相容",
+      "title": "關閉與取消：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "取消長迴圈後可執行下一請求，Close 在無工作時正常完成。",
+      "expected": "停止接納、取消與 drain 可觀察，已開始的輸出與副作用不被隱藏。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-018",
+      "requirement": "REQ-009",
+      "category": "例外與安全",
+      "title": "關閉與取消：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "阻塞的非合作 callback 被標示限制，不宣稱已強制停止。",
+      "expected": "停止接納、取消與 drain 可觀察，已開始的輸出與副作用不被隱藏。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-019",
+      "requirement": "REQ-010",
+      "category": "正常與相容",
+      "title": "PHP 與模板解析：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "對照短標記設定、heredoc、插值與命名空間測試集。",
+      "expected": "解析與錯誤位置符合 profile，輸入限制在配置前生效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-020",
+      "requirement": "REQ-010",
+      "category": "例外與安全",
+      "title": "PHP 與模板解析：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "極深巢狀、巨大 token、破損 UTF-8 與截斷字串不使程序崩潰。",
+      "expected": "解析與錯誤位置符合 profile，輸入限制在配置前生效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-021",
+      "requirement": "REQ-011",
+      "category": "正常與相容",
+      "title": "版本化運算：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "測試整數邊界、混合型別與正常比較，核對官方基準。",
+      "expected": "整數溢位、數字字串、NaN、除零與警告均有對照測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-022",
+      "requirement": "REQ-011",
+      "category": "例外與安全",
+      "title": "版本化運算：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "LLVM 特化遇到溢位與非整數輸入，不得產生未定義行為或錯誤繞回。",
+      "expected": "整數溢位、數字字串、NaN、除零與警告均有對照測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-023",
+      "requirement": "REQ-012",
+      "category": "正常與相容",
+      "title": "呼叫與符號：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "結合具名參數、trait、autoload、參照回傳與 closure 測試。",
+      "expected": "參數規則、解析順序、存取權與 callback 次數符合基準。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-024",
+      "requirement": "REQ-012",
+      "category": "例外與安全",
+      "title": "呼叫與符號：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "重複參數、錯誤存取權及動態宣告衝突不得被忽略。",
+      "expected": "參數規則、解析順序、存取權與 callback 次數符合基準。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-025",
+      "requirement": "REQ-013",
+      "category": "正常與相容",
+      "title": "include 與 require：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以相對路徑、符號連結與多層 include 驗證一次載入與變數作用域。",
+      "expected": "include_once 身分、回傳、失敗種類與讀取權限正確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-026",
+      "requirement": "REQ-013",
+      "category": "例外與安全",
+      "title": "include 與 require：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "路徑逃出授權根、檔案替換與不相容快取不得繞過權限。",
+      "expected": "include_once 身分、回傳、失敗種類與讀取權限正確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-027",
+      "requirement": "REQ-014",
+      "category": "正常與相容",
+      "title": "eval 與動態宣告：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "eval 新增合法函式並在當次請求使用，另一請求看不到宣告。",
+      "expected": "沿用同一版本、配額、來源標記與語意，不啟動外部 PHP。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-028",
+      "requirement": "REQ-014",
+      "category": "例外與安全",
+      "title": "eval 與動態宣告：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "受限來源與巨大 eval 輸入被政策／配額處理，native 路徑不得旁路。",
+      "expected": "沿用同一版本、配額、來源標記與語意，不啟動外部 PHP。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-029",
+      "requirement": "REQ-015",
+      "category": "正常與相容",
+      "title": "型別表示：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "依型別矩陣執行轉換與判斷，核對診斷與回傳。",
+      "expected": "每種型別的讀寫、比較與轉換有穩定結果，不以 Go 預設轉型取代。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-030",
+      "requirement": "REQ-015",
+      "category": "例外與安全",
+      "title": "型別表示：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "非法 resource／handle 類型不可被當成物件或記憶體位址。",
+      "expected": "每種型別的讀寫、比較與轉換有穩定結果，不以 Go 預設轉型取代。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-031",
+      "requirement": "REQ-016",
+      "category": "正常與相容",
+      "title": "參照位置：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "建立多層別名後修改、unset 及回傳，核對可觀察結果。",
+      "expected": "別名關係、解除綁定與型別限制跨優化路徑一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-032",
+      "requirement": "REQ-016",
+      "category": "例外與安全",
+      "title": "參照位置：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "陣列複製含參照、變數重新綁定時不發生過度深拷貝或誤共享。",
+      "expected": "別名關係、解除綁定與型別限制跨優化路徑一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-033",
+      "requirement": "REQ-017",
+      "category": "正常與相容",
+      "title": "有序陣列：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "連續鍵轉混合鍵、刪除後插入、排序與字串鍵全部對照。",
+      "expected": "packed／ordered 表示轉換前後，索引、順序與引用結果一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-034",
+      "requirement": "REQ-017",
+      "category": "例外與安全",
+      "title": "有序陣列：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "極端鍵、整數邊界、遍歷時修改及 callback 重入不毀損結構。",
+      "expected": "packed／ordered 表示轉換前後，索引、順序與引用結果一致。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-035",
+      "requirement": "REQ-018",
+      "category": "正常與相容",
+      "title": "完整物件語意：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "建立跨繼承與延遲初始化 fixture，核對 Reflection 與 hook 次數。",
+      "expected": "存取權、物件身分、property hooks、lazy object 與 Reflection 相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-036",
+      "requirement": "REQ-018",
+      "category": "例外與安全",
+      "title": "完整物件語意：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "屬性初始化中途失敗／重入時不留下可使用的半初始化物件。",
+      "expected": "存取權、物件身分、property hooks、lazy object 與 Reflection 相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-037",
+      "requirement": "REQ-019",
+      "category": "正常與相容",
+      "title": "受控資源：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "資源在正常、例外與 exit 路徑均只釋放一次。",
+      "expected": "種類、擁有者、代次與關閉狀態均受檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-038",
+      "requirement": "REQ-019",
+      "category": "例外與安全",
+      "title": "受控資源：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "將舊 handle 帶入新請求或重複關閉，不可操作另一資源。",
+      "expected": "種類、擁有者、代次與關閉狀態均受檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-039",
+      "requirement": "REQ-020",
+      "category": "正常與相容",
+      "title": "確定的解構：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "覆寫最後參照、函式離開與正常關閉，核對解構事件序列。",
+      "expected": "不以 Go GC finalizer 取代 PHP 解構；復活與重入有明確處理。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-040",
+      "requirement": "REQ-020",
+      "category": "例外與安全",
+      "title": "確定的解構：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "解構內再拋例外、建立參照或重新進入 Runtime，不重複解構。",
+      "expected": "不以 Go GC finalizer 取代 PHP 解構；復活與重入有明確處理。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-041",
+      "requirement": "REQ-021",
+      "category": "正常與相容",
+      "title": "循環與弱參照：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "解除外部根並觸發相容收集，核對弱參照與解構。",
+      "expected": "循環、弱鍵與值指回鍵的行為對照基準，不永久強參照。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-042",
+      "requirement": "REQ-021",
+      "category": "例外與安全",
+      "title": "循環與弱參照：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "大量循環、弱鍵反向引用及中途取消不造成無界保留。",
+      "expected": "循環、弱鍵與值指回鍵的行為對照基準，不永久強參照。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-043",
+      "requirement": "REQ-022",
+      "category": "正常與相容",
+      "title": "初始化安全：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "逐步注入配置與外部開啟失敗，ledger 正確清理。",
+      "expected": "只有已提交資源進入清理，下一請求不取得半成品。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-044",
+      "requirement": "REQ-022",
+      "category": "例外與安全",
+      "title": "初始化安全：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "反覆失敗後建立正常請求，無跨請求引用、配額遺失或錯誤解構。",
+      "expected": "只有已提交資源進入清理，下一請求不取得半成品。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-045",
+      "requirement": "REQ-023",
+      "category": "正常與相容",
+      "title": "受限池化：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "重複處理不同大小請求，量測配置與保留上限。",
+      "expected": "敏感資料、request handle 與完整 Execution 不未經驗證重用。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-046",
+      "requirement": "REQ-023",
+      "category": "例外與安全",
+      "title": "受限池化：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "前次敏感輸入與超大 buffer 不出現在下一請求或永久抬高保留量。",
+      "expected": "敏感資料、request handle 與完整 Execution 不未經驗證重用。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-047",
+      "requirement": "REQ-024",
+      "category": "正常與相容",
+      "title": "保留 PHP 語意的 IR：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在優化前後比對相同 fixture 的輸出、警告與 callback 序列。",
+      "expected": "高階操作具有來源與效果，別名位置不被錯誤純量化。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-048",
+      "requirement": "REQ-024",
+      "category": "例外與安全",
+      "title": "保留 PHP 語意的 IR：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "magic method／autoload／解構的副作用不能被錯刪或錯移。",
+      "expected": "高階操作具有來源與效果，別名位置不被錯誤純量化。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-049",
+      "requirement": "REQ-025",
+      "category": "正常與相容",
+      "title": "驗證 Bytecode：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "合法 Bytecode 往返保存與載入後結果一致。",
+      "expected": "載入前驗證長度、索引、控制流程、frame 與能力，資源消耗有界。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-050",
+      "requirement": "REQ-025",
+      "category": "例外與安全",
+      "title": "驗證 Bytecode：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "變異跳躍目標、索引、長度與格式版本，拒絕而不執行部分內容。",
+      "expected": "載入前驗證長度、索引、控制流程、frame 與能力，資源消耗有界。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-051",
+      "requirement": "REQ-026",
+      "category": "正常與相容",
+      "title": "可取消 VM：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在不同迴圈與資料操作階段取消，名額與資源全部收回。",
+      "expected": "回邊、配置、函式與長操作有檢查點，錯誤可分類。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-052",
+      "requirement": "REQ-026",
+      "category": "例外與安全",
+      "title": "可取消 VM：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "單一巨大字串／正規表示式操作不得永遠避開檢查。",
+      "expected": "回邊、配置、函式與長操作有檢查點，錯誤可分類。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-053",
+      "requirement": "REQ-027",
+      "category": "正常與相容",
+      "title": "Fiber 與 Generator：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "測試 resume、send、throw、巢狀 Fiber、yield from 與提前銷毀。",
+      "expected": "同一 Execution 的狀態不被多個 Fiber 任意平行修改。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-054",
+      "requirement": "REQ-027",
+      "category": "例外與安全",
+      "title": "Fiber 與 Generator：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在暫停時取消、解構或 native 邊界切換，不造成死鎖或重複副作用。",
+      "expected": "同一 Execution 的狀態不被多個 Fiber 任意平行修改。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-055",
+      "requirement": "REQ-028",
+      "category": "正常與相容",
+      "title": "Goroutine 請求模型：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "不同輸入與靜態變數的高並行 fixture 逐次正確。",
+      "expected": "不同請求共享程式但不共享可變執行狀態。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-056",
+      "requirement": "REQ-028",
+      "category": "例外與安全",
+      "title": "Goroutine 請求模型：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "刻意交錯例外、取消與重載，race 與狀態污染檢查通過。",
+      "expected": "不同請求共享程式但不共享可變執行狀態。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-057",
+      "requirement": "REQ-029",
+      "category": "正常與相容",
+      "title": "有界接納：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "設定小容量並施加較大負載，活躍與排隊保持設定上限。",
+      "expected": "超過容量時在執行前拒絕，goroutine／body 緩衝不無界成長。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-058",
+      "requirement": "REQ-029",
+      "category": "例外與安全",
+      "title": "有界接納：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "slowloris、空閒連線與巨大 body 不在取得名額前耗盡記憶體。",
+      "expected": "超過容量時在執行前拒絕，goroutine／body 緩衝不無界成長。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-059",
+      "requirement": "REQ-030",
+      "category": "正常與相容",
+      "title": "請求環境隔離：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "兩請求設定不同 chdir、putenv、timezone 後同時讀回。",
+      "expected": "宿主程序與其他請求不受其變更影響。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-060",
+      "requirement": "REQ-030",
+      "category": "例外與安全",
+      "title": "請求環境隔離：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "callback 使用宿主環境時不意外讀取另一請求設定。",
+      "expected": "宿主程序與其他請求不受其變更影響。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-061",
+      "requirement": "REQ-031",
+      "category": "正常與相容",
+      "title": "資源預算：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "逐項設低額度，核對 ResourceError 與清理。",
+      "expected": "超限在可控邊界拒絕，不把邏輯額度誤稱為 RSS 硬限制。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-062",
+      "requirement": "REQ-031",
+      "category": "例外與安全",
+      "title": "資源預算：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "長度乘法溢位、來源標記爆量與native配置不繞過額度。",
+      "expected": "超限在可控邊界拒絕，不把邏輯額度誤稱為 RSS 硬限制。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-063",
+      "requirement": "REQ-032",
+      "category": "正常與相容",
+      "title": "高風險程序隔離：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "故意讓 worker 超限／逾時，宿主終止並回收。",
+      "expected": "worker 受到 OS 權限與資源限制，崩潰不終止控制程序。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-064",
+      "requirement": "REQ-032",
+      "category": "例外與安全",
+      "title": "高風險程序隔離：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "非合作 callback、native crash 與硬 kill 不污染新的 worker 或其他站台。",
+      "expected": "worker 受到 OS 權限與資源限制，崩潰不終止控制程序。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-065",
+      "requirement": "REQ-033",
+      "category": "正常與相容",
+      "title": "能力式 I/O：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "授權路徑與目標成功，未授權目標回傳可定位政策錯誤。",
+      "expected": "所有入口與後端經過同一能力檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-066",
+      "requirement": "REQ-033",
+      "category": "例外與安全",
+      "title": "能力式 I/O：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "經 include、stream wrapper、callback 或native 路徑仍不可越權。",
+      "expected": "所有入口與後端經過同一能力檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-067",
+      "requirement": "REQ-034",
+      "category": "正常與相容",
+      "title": "來源追蹤：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "輸入經串接、切片、陣列、callback 後，sink 收到正確來源證據。",
+      "expected": "字串區段、複雜值、參照、最佳化與宿主回傳保留必要來源。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-068",
+      "requirement": "REQ-034",
+      "category": "例外與安全",
+      "title": "來源追蹤：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "來源爆量採保守合併，不能清空標記或耗盡程序。",
+      "expected": "字串區段、複雜值、參照、最佳化與宿主回傳保留必要來源。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-069",
+      "requirement": "REQ-035",
+      "category": "正常與相容",
+      "title": "脈絡化防護：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "合法參數化 SQL 與已授權參數命令不被錯擋。",
+      "expected": "不以單一 sanitized 布林或關鍵字過濾宣稱完整防護。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-070",
+      "requirement": "REQ-035",
+      "category": "例外與安全",
+      "title": "脈絡化防護：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "HTML 處理後的字串不能因此被視為 SQL／shell 安全。",
+      "expected": "不以單一 sanitized 布林或關鍵字過濾宣稱完整防護。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-071",
+      "requirement": "REQ-036",
+      "category": "正常與相容",
+      "title": "模式與稽核：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同一可疑輸入於 observe 產生事件、enforce 依規則拒絕。",
+      "expected": "模式可辨識，強制能力與資源限制在各模式都有效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-072",
+      "requirement": "REQ-036",
+      "category": "例外與安全",
+      "title": "模式與稽核：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "compat 模式不得關閉驗證器、越權限制或跨請求保護。",
+      "expected": "模式可辨識，強制能力與資源限制在各模式都有效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-073",
+      "requirement": "REQ-037",
+      "category": "正常與相容",
+      "title": "路徑與 SSRF：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "允許的檔案與HTTPS目標正常使用。",
+      "expected": "實際使用時檢查根目錄、解析IP、重新導向與代理。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-074",
+      "requirement": "REQ-037",
+      "category": "例外與安全",
+      "title": "路徑與 SSRF：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "符號連結替換、DNS重綁、IPv6、內網重新導向與代理旁路被阻擋。",
+      "expected": "實際使用時檢查根目錄、解析IP、重新導向與代理。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-075",
+      "requirement": "REQ-038",
+      "category": "正常與相容",
+      "title": "FastCGI 協定：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "用兩種Web伺服器經socket與TCP完成GET、POST與串流回應。",
+      "expected": "合法 record、串流、重用、abort 與協定錯誤有互通測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-076",
+      "requirement": "REQ-038",
+      "category": "例外與安全",
+      "title": "FastCGI 協定：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "短讀、亂序、錯ID、未支援角色與多工都按協定受控處理。",
+      "expected": "合法 record、串流、重用、abort 與協定錯誤有互通測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-077",
+      "requirement": "REQ-039",
+      "category": "正常與相容",
+      "title": "參數與路由：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同一站台在Apache GENERIC與Nginx下核對SERVER欄位。",
+      "expected": "保留必要原始參數，入口路徑與站台身分不由不可信欄位越權決定。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-078",
+      "requirement": "REQ-039",
+      "category": "例外與安全",
+      "title": "參數與路由：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "偽造SCRIPT_FILENAME或SERVER_NAME不可切換到未授權站台。",
+      "expected": "保留必要原始參數，入口路徑與站台身分不由不可信欄位越權決定。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-079",
+      "requirement": "REQ-040",
+      "category": "正常與相容",
+      "title": "標頭與輸出：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "測試多Cookie、緩衝、flush、HEAD與二進位body。",
+      "expected": "重複Set-Cookie與標頭替換符合PHP語意，stdout與stderr不混淆。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-080",
+      "requirement": "REQ-040",
+      "category": "例外與安全",
+      "title": "標頭與輸出：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "標頭換行、輸出後錯誤與中途斷線不洩漏原始碼或內部記錄。",
+      "expected": "重複Set-Cookie與標頭替換符合PHP語意，stdout與stderr不混淆。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-081",
+      "requirement": "REQ-041",
+      "category": "正常與相容",
+      "title": "安全靜態與入口：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "front controller與靜態資源在正常路由下成功。",
+      "expected": "只公開document-root及明確入口，PHP執行失敗不回傳原始碼。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-082",
+      "requirement": "REQ-041",
+      "category": "例外與安全",
+      "title": "安全靜態與入口：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "請求.env、vendor、備份、PHP原始碼與目錄穿越均被正確限制。",
+      "expected": "只公開document-root及明確入口，PHP執行失敗不回傳原始碼。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-083",
+      "requirement": "REQ-042",
+      "category": "正常與相容",
+      "title": "表單與上傳：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "使用陣列欄位、空檔案與多檔案上傳對照PHP。",
+      "expected": "鍵轉換、重複欄位、深度、大小、暫存登錄及move_uploaded_file正確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-084",
+      "requirement": "REQ-042",
+      "category": "例外與安全",
+      "title": "表單與上傳：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "巨大欄位、截斷multipart、跨請求暫存路徑及超額body不造成外洩。",
+      "expected": "鍵轉換、重複欄位、深度、大小、暫存登錄及move_uploaded_file正確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-085",
+      "requirement": "REQ-043",
+      "category": "正常與相容",
+      "title": "Session 互斥與寫回：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同ID遞增請求不遺失更新，不同ID可並行。",
+      "expected": "同ID採對應後端的鎖定契約，不同站台不混用鍵。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-086",
+      "requirement": "REQ-043",
+      "category": "例外與安全",
+      "title": "Session 互斥與寫回：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "持鎖請求取消或寫回失敗後，不永久鎖住其他請求。",
+      "expected": "同ID採對應後端的鎖定契約，不同站台不混用鍵。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-087",
+      "requirement": "REQ-044",
+      "category": "正常與相容",
+      "title": "格式與進度安全：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在允許的格式與切換流程中對照資料與回應。",
+      "expected": "格式切換不誤讀半初始化資料，能力未完成不回報支援。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-088",
+      "requirement": "REQ-044",
+      "category": "例外與安全",
+      "title": "格式與進度安全：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在上傳進度與ini_set切換的交錯下，拒絕或安全處理不一致狀態。",
+      "expected": "格式切換不誤讀半初始化資料，能力未完成不回報支援。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-089",
+      "requirement": "REQ-045",
+      "category": "正常與相容",
+      "title": "提早結束回應：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "先結束回應再執行短收尾，檢查事件順序。",
+      "expected": "回應關閉與Execution結束分開，名額、鎖與額度持續有效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-090",
+      "requirement": "REQ-045",
+      "category": "例外與安全",
+      "title": "提早結束回應：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "回應後無限迴圈、持鎖及取消不能逃脫平台期限。",
+      "expected": "回應關閉與Execution結束分開，名額、鎖與額度持續有效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-091",
+      "requirement": "REQ-046",
+      "category": "正常與相容",
+      "title": "既有資料共存：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "使用固定資料副本在兩後端交替讀寫並維持登入。",
+      "expected": "舊後端與新後端之格式、TTL、ID與鎖定有雙向測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-092",
+      "requirement": "REQ-046",
+      "category": "例外與安全",
+      "title": "既有資料共存：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "不相容格式不被默默改寫，回復演練不刪除使用者資料。",
+      "expected": "舊後端與新後端之格式、TTL、ID與鎖定有雙向測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-093",
+      "requirement": "REQ-047",
+      "category": "正常與相容",
+      "title": "模組契約：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "載入模組並生成能力報告，依描述建立請求狀態。",
+      "expected": "每個模組具有簽章、INI、依賴、安全與測試描述。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-094",
+      "requirement": "REQ-047",
+      "category": "例外與安全",
+      "title": "模組契約：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "模組缺少權限或簽章衝突時在執行前拒絕。",
+      "expected": "每個模組具有簽章、INI、依賴、安全與測試描述。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-095",
+      "requirement": "REQ-048",
+      "category": "正常與相容",
+      "title": "字串與PCRE：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "回溯引用、捕獲、替換、非UTF8與編碼fixture對照基準。",
+      "expected": "PCRE能力不以RE2子集冒充，錯誤與限制可查詢。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-096",
+      "requirement": "REQ-048",
+      "category": "例外與安全",
+      "title": "字串與PCRE：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "災難性回溯與超大輸入有界，不以Go整個程序失控作代價。",
+      "expected": "PCRE能力不以RE2子集冒充，錯誤與限制可查詢。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-097",
+      "requirement": "REQ-049",
+      "category": "正常與相容",
+      "title": "資料庫語意：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "測試CRUD、交易回滾、不同fetch模式與連線池重用。",
+      "expected": "placeholder、fetch、型別、交易、錯誤及連線重設相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-098",
+      "requirement": "REQ-049",
+      "category": "例外與安全",
+      "title": "資料庫語意：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "前一請求留下的交易、變數或認證狀態不得外洩至下一請求。",
+      "expected": "placeholder、fetch、型別、交易、錯誤及連線重設相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-099",
+      "requirement": "REQ-050",
+      "category": "正常與相容",
+      "title": "外部函式庫：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以模組功能矩陣核對成功、錯誤碼與資料格式。",
+      "expected": "按函式族認證，依賴版本與純Go／native性質如實公開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-100",
+      "requirement": "REQ-050",
+      "category": "例外與安全",
+      "title": "外部函式庫：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "壓縮炸彈、XML外部資源與未修補依賴不能繞過政策或掃描。",
+      "expected": "按函式族認證，依賴版本與純Go／native性質如實公開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-101",
+      "requirement": "REQ-051",
+      "category": "正常與相容",
+      "title": "真實網站：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "登入、CRUD、上傳、Session、CLI與錯誤頁完成端對端對照。",
+      "expected": "固定版本WordPress與Laravel fixture的主要流程與例外測試通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-102",
+      "requirement": "REQ-051",
+      "category": "例外與安全",
+      "title": "真實網站：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "缺少外掛能力或mod_php專用設定時明確阻擋認證，不默認全部相容。",
+      "expected": "固定版本WordPress與Laravel fixture的主要流程與例外測試通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-103",
+      "requirement": "REQ-052",
+      "category": "正常與相容",
+      "title": "可選建置：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "CGO_ENABLED=0核心建置與獨立native建置各自成功。",
+      "expected": "純Go依賴樹不含強制cgo，native依賴與工具版本可檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-104",
+      "requirement": "REQ-052",
+      "category": "例外與安全",
+      "title": "可選建置：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "沒有LLVM時核心仍正常；native需求不足時明確失敗不假裝成功。",
+      "expected": "純Go依賴樹不含強制cgo，native依賴與工具版本可檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-105",
+      "requirement": "REQ-053",
+      "category": "正常與相容",
+      "title": "受控ABI：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在GC壓力下反覆跨界傳遞複雜值與callback。",
+      "expected": "不私藏Go指標，handle的擁有者、代次與保活經檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-106",
+      "requirement": "REQ-053",
+      "category": "例外與安全",
+      "title": "受控ABI：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "過期／跨請求handle、取消中釋放與指標違規被捕捉。",
+      "expected": "不私藏Go指標，handle的擁有者、代次與保活經檢查。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-107",
+      "requirement": "REQ-054",
+      "category": "正常與相容",
+      "title": "正確降低：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "算術、混合型別、例外與來源標記在VM／AOT中一致。",
+      "expected": "不錯用LLVM未定義行為假設，錯誤與警告保留。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-108",
+      "requirement": "REQ-054",
+      "category": "例外與安全",
+      "title": "正確降低：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "邊界溢位、除零、NaN與別名重疊不得被錯誤最佳化。",
+      "expected": "不錯用LLVM未定義行為假設，錯誤與警告保留。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-109",
+      "requirement": "REQ-055",
+      "category": "正常與相容",
+      "title": "動態回退：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "AOT函式呼叫動態include、eval與callback後正常返回。",
+      "expected": "回到VM時保持frame、scope、權限與一次性副作用。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-110",
+      "requirement": "REQ-055",
+      "category": "例外與安全",
+      "title": "動態回退：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "guard失敗、例外與取消時SQL／檔案／callback不重複執行。",
+      "expected": "回到VM時保持frame、scope、權限與一次性副作用。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-111",
+      "requirement": "REQ-056",
+      "category": "正常與相容",
+      "title": "後端與JIT閘門：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同語意fixture在各支援後端取得一致結果與報告。",
+      "expected": "無證據不啟用，JIT另具W^X、快取與平台安全測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-112",
+      "requirement": "REQ-056",
+      "category": "例外與安全",
+      "title": "後端與JIT閘門：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "篡改native產物、錯CPU特徵或不可用平台不能直接執行。",
+      "expected": "無證據不啟用，JIT另具W^X、快取與平台安全測試。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-113",
+      "requirement": "REQ-057",
+      "category": "正常與相容",
+      "title": "Bytecode單檔：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "移除來源目錄後執行封裝網站與靜態資源測試。",
+      "expected": "乾淨環境不安裝PHP仍可啟動，manifest完整。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-114",
+      "requirement": "REQ-057",
+      "category": "例外與安全",
+      "title": "Bytecode單檔：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "缺少必要外部資料時明確回報，不聲稱完全自足。",
+      "expected": "乾淨環境不安裝PHP仍可啟動，manifest完整。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-115",
+      "requirement": "REQ-058",
+      "category": "正常與相容",
+      "title": "原生單檔：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在目標OS／CPU乾淨映像啟動並檢查依賴。",
+      "expected": "部署環境不必安裝LLVM，外部共享函式庫需求清楚列出。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-116",
+      "requirement": "REQ-058",
+      "category": "例外與安全",
+      "title": "原生單檔：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "錯平台、缺函式庫或ABI版本不合不得被宣告可用。",
+      "expected": "部署環境不必安裝LLVM，外部共享函式庫需求清楚列出。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-117",
+      "requirement": "REQ-059",
+      "category": "正常與相容",
+      "title": "VFS與寫入：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在虛擬/app中讀取程式，外部mount保存上傳與Session。",
+      "expected": "__FILE__、include、realpath與列舉一致，程式與資料區分開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-118",
+      "requirement": "REQ-059",
+      "category": "例外與安全",
+      "title": "VFS與寫入：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "自我更新唯讀程式、原生工具看不到VFS時明確拒絕或要求受控實體化。",
+      "expected": "__FILE__、include、realpath與列舉一致，程式與資料區分開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-119",
+      "requirement": "REQ-060",
+      "category": "正常與相容",
+      "title": "祕密與重現：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "相同鎖定輸入重建，摘要一致或差異具明確解釋。",
+      "expected": "排除祕密、固定工具與來源、保留依賴／授權報告。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-120",
+      "requirement": "REQ-060",
+      "category": "例外與安全",
+      "title": "祕密與重現：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "含.env、私鑰、憑證與危險路徑的輸入被掃描提示／阻擋。",
+      "expected": "排除祕密、固定工具與來源、保留依賴／授權報告。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-121",
+      "requirement": "REQ-061",
+      "category": "正常與相容",
+      "title": "完整指紋：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "相同輸入命中，不同profile或模組指紋重新編譯。",
+      "expected": "來源、版本、模組、ABI與相關政策變更會正確失效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-122",
+      "requirement": "REQ-061",
+      "category": "例外與安全",
+      "title": "完整指紋：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同檔名／mtime但不同內容、跨站台與錯CPU快取不誤用。",
+      "expected": "來源、版本、模組、ABI與相關政策變更會正確失效。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-123",
+      "requirement": "REQ-062",
+      "category": "正常與相容",
+      "title": "唯讀與有界：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "並行命中與逐出時執行結果穩定。",
+      "expected": "快取有上限，逐出不影響活躍Program，請求狀態不進入快取。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-124",
+      "requirement": "REQ-062",
+      "category": "例外與安全",
+      "title": "唯讀與有界：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "static值、使用者輸入或request closure不得在下一請求可見。",
+      "expected": "快取有上限，逐出不影響活躍Program，請求狀態不進入快取。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-125",
+      "requirement": "REQ-063",
+      "category": "正常與相容",
+      "title": "編譯合併與取消：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "多請求同時載入冷程式，只進行受控數量的編譯。",
+      "expected": "同鍵共享編譯，單一等待者取消不殺掉其他需求。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-126",
+      "requirement": "REQ-063",
+      "category": "例外與安全",
+      "title": "編譯合併與取消：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "等待者全部取消與編譯失敗後不永久卡住鍵或漏掉名額。",
+      "expected": "同鍵共享編譯，單一等待者取消不殺掉其他需求。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-127",
+      "requirement": "REQ-064",
+      "category": "正常與相容",
+      "title": "磁碟快取安全：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "正常保存／讀回與損毀後重編譯有測試。",
+      "expected": "格式驗證、摘要、來源信任與native簽章政策各自成立。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-128",
+      "requirement": "REQ-064",
+      "category": "例外與安全",
+      "title": "磁碟快取安全：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "惡意長度、錯誤版本、未知native來源不被執行。",
+      "expected": "格式驗證、摘要、來源信任與native簽章政策各自成立。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-129",
+      "requirement": "REQ-065",
+      "category": "正常與相容",
+      "title": "自動發現差異：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "比對兩個固定官方版本，輸出可重現差異與受影響工作。",
+      "expected": "來源鎖定，新增／刪除／行為變動與安全公告分開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-130",
+      "requirement": "REQ-065",
+      "category": "例外與安全",
+      "title": "自動發現差異：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "只有簽章相同但實作行為改變時，不宣稱自動完成相容。",
+      "expected": "來源鎖定，新增／刪除／行為變動與安全公告分開。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-131",
+      "requirement": "REQ-066",
+      "category": "正常與相容",
+      "title": "多版本回歸：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "一項版本分歧fixture分別得到各自合法結果。",
+      "expected": "舊新版本測試矩陣完整，安全修補例外有紀錄。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-132",
+      "requirement": "REQ-066",
+      "category": "例外與安全",
+      "title": "多版本回歸：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "更新共用helper導致舊profile改變時CI失敗。",
+      "expected": "舊新版本測試矩陣完整，安全修補例外有紀錄。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-133",
+      "requirement": "REQ-067",
+      "category": "正常與相容",
+      "title": "安全影響判斷：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "對已核對的公告建立影響說明與受控回歸測試。",
+      "expected": "分析對應功能、依賴與測試，不只看語言或CVE名稱。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-134",
+      "requirement": "REQ-067",
+      "category": "例外與安全",
+      "title": "安全影響判斷：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "尚未支援或未測試的路徑不得直接宣稱不受影響。",
+      "expected": "分析對應功能、依賴與測試，不只看語言或CVE名稱。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-135",
+      "requirement": "REQ-068",
+      "category": "正常與相容",
+      "title": "設定重載：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在流量中切換合法設定，舊請求維持原快照。",
+      "expected": "新代次原子發布，失敗保留舊設定，強制取消模式明確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-136",
+      "requirement": "REQ-068",
+      "category": "例外與安全",
+      "title": "設定重載：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "不合法設定與半完成模組載入不影響健康設定。",
+      "expected": "新代次原子發布，失敗保留舊設定，強制取消模式明確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-137",
+      "requirement": "REQ-069",
+      "category": "正常與相容",
+      "title": "健康與觀測：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "故意阻塞DB／Session／編譯，指標呈現相應階段。",
+      "expected": "提供有界metrics與可關聯事件，不公開祕密或管理端點。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-138",
+      "requirement": "REQ-069",
+      "category": "例外與安全",
+      "title": "健康與觀測：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "高基數URI與敏感輸入不能造成指標爆量或紀錄外洩。",
+      "expected": "提供有界metrics與可關聯事件，不公開祕密或管理端點。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-139",
+      "requirement": "REQ-070",
+      "category": "正常與相容",
+      "title": "平滑停止：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "流量中drain，已接納請求完成後服務退出。",
+      "expected": "停止接納、完成／取消工作、釋放資源，native程式不提早卸載。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-140",
+      "requirement": "REQ-070",
+      "category": "例外與安全",
+      "title": "平滑停止：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "過期收尾與阻塞外部資源不使關閉永久卡住。",
+      "expected": "停止接納、完成／取消工作、釋放資源，native程式不提早卸載。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-141",
+      "requirement": "REQ-071",
+      "category": "正常與相容",
+      "title": "遷移與回復：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在副本驗收後切換測試流量，再切回原後端。",
+      "expected": "設定差異、資料相容、測試副本與回切步驟俱全。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-142",
+      "requirement": "REQ-071",
+      "category": "例外與安全",
+      "title": "遷移與回復：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "不允許無隔離的正式雙寫，也不刪除使用者資料作回復。",
+      "expected": "設定差異、資料相容、測試副本與回切步驟俱全。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-143",
+      "requirement": "REQ-072",
+      "category": "正常與相容",
+      "title": "完整測試分母：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "產生包含各種結果的測試報告，總數與分組一致。",
+      "expected": "unsupported、runner缺口與環境skip分開，無隱藏失敗。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-144",
+      "requirement": "REQ-072",
+      "category": "例外與安全",
+      "title": "完整測試分母：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "把失敗改成skip或移除模組來提高通過率時追蹤檢查拒絕。",
+      "expected": "unsupported、runner缺口與環境skip分開，無隱藏失敗。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-145",
+      "requirement": "REQ-073",
+      "category": "正常與相容",
+      "title": "模糊與故障測試：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "固定種子與回歸輸入可重現測試結果。",
+      "expected": "高風險parser／decoder有fuzz corpus，各初始化步驟有故障注入。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-146",
+      "requirement": "REQ-073",
+      "category": "例外與安全",
+      "title": "模糊與故障測試：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "發現crash、無限等待或跨請求污染時禁止發布。",
+      "expected": "高風險parser／decoder有fuzz corpus，各初始化步驟有故障注入。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-147",
+      "requirement": "REQ-074",
+      "category": "正常與相容",
+      "title": "效能比較：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "多輪固定環境測試能重現改善與變異。",
+      "expected": "符合第23與37章的逐格嚴格勝出規則，原始資料包含 CPU、記憶體、p99、錯誤、冷熱與安全模式；尚未比較不能算勝出。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-148",
+      "requirement": "REQ-074",
+      "category": "例外與安全",
+      "title": "效能比較：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "僅微型測試變快但網站退步，不得無條件設為預設。",
+      "expected": "符合第23與37章的逐格嚴格勝出規則，原始資料包含 CPU、記憶體、p99、錯誤、冷熱與安全模式；尚未比較不能算勝出。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-149",
+      "requirement": "REQ-075",
+      "category": "正常與相容",
+      "title": "長時間與並行證據：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "混合成功、錯誤、取消、重載與上傳負載完成長測。",
+      "expected": "滿足文件所定24小時及100萬請求基準並分析保留趨勢。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-150",
+      "requirement": "REQ-075",
+      "category": "例外與安全",
+      "title": "長時間與並行證據：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "handle、goroutine、Session鎖或heap持續增長則閘門不通過。",
+      "expected": "滿足文件所定24小時及100萬請求基準並分析保留趨勢。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-151",
+      "requirement": "REQ-076",
+      "category": "正常與相容",
+      "title": "可追溯發布：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "從指定commit重建報告與產物並驗證摘要。",
+      "expected": "每個REQ可連到測試與工作包，發布另有明確授權。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-152",
+      "requirement": "REQ-076",
+      "category": "例外與安全",
+      "title": "可追溯發布：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "未執行測試、未知授權或重大缺陷未處理時不能標示正式完成。",
+      "expected": "每個REQ可連到測試與工作包，發布另有明確授權。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-153",
+      "requirement": "REQ-077",
+      "category": "正常與相容",
+      "title": "不變條件與設計紀錄：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "替換內部陣列策略後全部語意測試及基準通過。",
+      "expected": "每項重大設計具有理由、替代方案、證據與影響範圍。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-154",
+      "requirement": "REQ-077",
+      "category": "例外與安全",
+      "title": "不變條件與設計紀錄：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以最佳化為由縮小PHP範圍、引入Zend或關閉安全限制時須停止並回報。",
+      "expected": "每項重大設計具有理由、替代方案、證據與影響範圍。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-155",
+      "requirement": "REQ-078",
+      "category": "正常與相容",
+      "title": "權限與修改範圍：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在獨立工作區交付測試與候選部署設定。",
+      "expected": "已授權建立 HazelnutParadise/phego、使用 MIT 並推送本次規格與英文 README；正式引擎 release、付費、正式設定及資料刪改仍須另有授權。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-156",
+      "requirement": "REQ-078",
+      "category": "例外與安全",
+      "title": "權限與修改範圍：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "沒有授權時不建立公開release、不覆寫正式設定、不刪除使用者資料。",
+      "expected": "已授權建立 HazelnutParadise/phego、使用 MIT 並推送本次規格與英文 README；正式引擎 release、付費、正式設定及資料刪改仍須另有授權。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-157",
+      "requirement": "REQ-079",
+      "category": "正常與相容",
+      "title": "獨立交接：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "由乾淨環境依交接包執行指定測試。",
+      "expected": "提供規格、commit、lock、能力、證據、未決ADR與工作包。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-158",
+      "requirement": "REQ-079",
+      "category": "例外與安全",
+      "title": "獨立交接：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "缺少真實測試證據時狀態保留未驗證，不用文字保證填補。",
+      "expected": "提供規格、commit、lock、能力、證據、未決ADR與工作包。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-159",
+      "requirement": "REQ-080",
+      "category": "正常與相容",
+      "title": "完整發行版本清冊：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以官方發布資料、museum 與版本紀錄交叉比對，識別 PHP Tools、FI、Construction Kit、PHP/FI 與後續發行。",
+      "expected": "清冊涵蓋原始名稱、版本、來源、可取得性及證據狀態；缺失來源保留為未完成，不能刪除版本縮小分母。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-160",
+      "requirement": "REQ-080",
+      "category": "例外與安全",
+      "title": "完整發行版本清冊：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "僅取得 php-108 時不能把 PHP Tools 1.0 標成已驗收；不存在的 PHP 6 正式版不得虛構。",
+      "expected": "清冊涵蓋原始名稱、版本、來源、可取得性及證據狀態；缺失來源保留為未完成，不能刪除版本縮小分母。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-161",
+      "requirement": "REQ-081",
+      "category": "正常與相容",
+      "title": "精確版本選擇：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "同一差異案例在兩個相鄰修補版得到各自的預期行為；別名解析後輸出完整版本。",
+      "expected": "版本描述鎖定語法、運算、診斷、函式與設定，修補版差異不得被主版本別名覆蓋。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-162",
+      "requirement": "REQ-081",
+      "category": "例外與安全",
+      "title": "精確版本選擇：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "HTTP 輸入不能更改語言版本；未完成的版本明確拒絕，不能偷偷改以最新版本執行。",
+      "expected": "版本描述鎖定語法、運算、診斷、函式與設定，修補版差異不得被主版本別名覆蓋。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-163",
+      "requirement": "REQ-082",
+      "category": "正常與相容",
+      "title": "第一代工具與早期語法：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以具有出處的早期工具、官方範例及可取得真實網站重播表單、計數、日誌與頁面生成。",
+      "expected": "早期詞法、標記、指令與 CGI 輸入輸出由獨立前端／適配器支援，不能只用現代 PHP parser 接受檔案。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-164",
+      "requirement": "REQ-082",
+      "category": "例外與安全",
+      "title": "第一代工具與早期語法：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "將 PHP/FI 頁面交給 PHP 8 profile 必須報告版本不合，不得把未解析原始程式碼當作成功輸出。",
+      "expected": "早期詞法、標記、指令與 CGI 輸入輸出由獨立前端／適配器支援，不能只用現代 PHP parser 接受檔案。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-165",
+      "requirement": "REQ-083",
+      "category": "正常與相容",
+      "title": "歷史內建與擴充 API：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "用固定舊專案驗證資料庫、正規表示式、字元編碼、Session 與舊物件行為。",
+      "expected": "建立版本化函式清冊並實作行為適配；已移除 API 不靠名稱別名或無作用函式充數。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-166",
+      "requirement": "REQ-083",
+      "category": "例外與安全",
+      "title": "歷史內建與擴充 API：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "現代 PDO 或 regexp 結果不相容時保留測試失敗，不得以函式存在代替相容或暗中呼叫 Zend。",
+      "expected": "建立版本化函式清冊並實作行為適配；已移除 API 不靠名稱別名或無作用函式充數。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-167",
+      "requirement": "REQ-084",
+      "category": "正常與相容",
+      "title": "歷史平台語意：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在同一 64 位元宿主驗證有歷史依據的 32／64 位元邊界輸入及檔案路徑案例。",
+      "expected": "guest 整數寬度、溢位、序列化、路徑與換行由 profile 定義，不取決於 Go int；與真實舊平台基準對照。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-168",
+      "requirement": "REQ-084",
+      "category": "例外與安全",
+      "title": "歷史平台語意：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "把宿主位元寬度直接當 guest 寬度、或虛構不曾存在的平台組合，都必須被驗收拒絕。",
+      "expected": "guest 整數寬度、溢位、序列化、路徑與換行由 profile 定義，不取決於 Go int；與真實舊平台基準對照。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-169",
+      "requirement": "REQ-085",
+      "category": "正常與相容",
+      "title": "歷史參考引擎隔離：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "重建同一歷史來源並重播 fixture，保存環境、來源雜湊與原始輸出。",
+      "expected": "來源與建置修補可追溯，測試 oracle 無正式憑證、無外網、無可寫宿主掛載，不能成為正式產品回退。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-170",
+      "requirement": "REQ-085",
+      "category": "例外與安全",
+      "title": "歷史參考引擎隔離：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "古老引擎失控、連外或嘗試存取宿主檔案時由隔離邊界阻止；來源不足記錄 blocker。",
+      "expected": "來源與建置修補可追溯，測試 oracle 無正式憑證、無外網、無可寫宿主掛載，不能成為正式產品回退。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-171",
+      "requirement": "REQ-086",
+      "category": "正常與相容",
+      "title": "舊功能與安全差異契約：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "對舊輸入注入變數、動態程式碼與序列化功能，驗證版本規則和能力限制同時成立。",
+      "expected": "逐功能區分語言行為、可隔離的危險能力與實作漏洞；不得為相容複製記憶體破壞，不得隱藏不相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-172",
+      "requirement": "REQ-086",
+      "category": "例外與安全",
+      "title": "舊功能與安全差異契約：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "當合法行為與既定防護政策確實衝突時，回報具體情境並保留未通過狀態，不自行放寬安全或縮小範圍。",
+      "expected": "逐功能區分語言行為、可隔離的危險能力與實作漏洞；不得為相容複製記憶體破壞，不得隱藏不相容。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-173",
+      "requirement": "REQ-087",
+      "category": "正常與相容",
+      "title": "混合版本並行隔離：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "多個 goroutine 同時執行互不相容的版本案例並反覆載入同名程式。",
+      "expected": "Execution、快取、常數、INI、函式表與安全標記按版本及站台隔離，跨版本呼叫需明確轉換契約。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-174",
+      "requirement": "REQ-087",
+      "category": "例外與安全",
+      "title": "混合版本並行隔離：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "混用快取、不同版本 Session 格式、static 或回傳 live object 時測試失敗或明確拒絕。",
+      "expected": "Execution、快取、常數、INI、函式表與安全標記按版本及站台隔離，跨版本呼叫需明確轉換契約。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-175",
+      "requirement": "REQ-088",
+      "category": "正常與相容",
+      "title": "完整競品盤點：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "以固定快照記錄 Zend、KPHP、PeachPie、PHP 相容期 HHVM 及所有其他已發現實作。",
+      "expected": "包含現行與歷史實作、查找來源、版本、維護狀態、建置結果與可比性；不能只挑容易勝出的競品。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-176",
+      "requirement": "REQ-088",
+      "category": "例外與安全",
+      "title": "完整競品盤點：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "無法取得、無法建置、尚未測量的競品保留 blocker，不能算 Phego 勝出。",
+      "expected": "包含現行與歷史實作、查找來源、版本、維護狀態、建置結果與可比性；不能只挑容易勝出的競品。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-177",
+      "requirement": "REQ-089",
+      "category": "正常與相容",
+      "title": "正確性先於速度：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "相同來源與 fixture 在各引擎輸出一致後才啟動正式計時。",
+      "expected": "輸出、HTTP 狀態、資料庫與檔案副作用先對照通過；錯誤回應與漏做工作不納入有效吞吐量。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-178",
+      "requirement": "REQ-089",
+      "category": "例外與安全",
+      "title": "正確性先於速度：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "某引擎跳過 Session／交易／授權或回傳錯誤造成更快時，判定無效結果，不保留勝利數字。",
+      "expected": "輸出、HTTP 狀態、資料庫與檔案副作用先對照通過；錯誤回應與漏做工作不納入有效吞吐量。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-179",
+      "requirement": "REQ-090",
+      "category": "正常與相容",
+      "title": "超越全部可比引擎：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "在固定硬體、負載、功能與設定下，多輪成對測量並生成完整比較矩陣。",
+      "expected": "每個必測可比單元的有效吞吐量及適用延遲以校正後信賴區間嚴格勝出；平手、顯著退步或未知皆不能標成全勝。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-180",
+      "requirement": "REQ-090",
+      "category": "例外與安全",
+      "title": "超越全部可比引擎：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "幾何平均較快但某必要單元落後，或比較範圍仍有可執行未測競品時，最快目標保持未達成。",
+      "expected": "每個必測可比單元的有效吞吐量及適用延遲以校正後信賴區間嚴格勝出；平手、顯著退步或未知皆不能標成全勝。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-181",
+      "requirement": "REQ-091",
+      "category": "正常與相容",
+      "title": "真實專案效能：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "固定資料庫及資料集，測量登入、搜尋、更新、上傳、佇列與快取失效。",
+      "expected": "同時涵蓋登入與匿名、讀寫、冷熱、單請求與並行、VM 與 Native、安全模式及系統資源。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-182",
+      "requirement": "REQ-091",
+      "category": "例外與安全",
+      "title": "真實專案效能：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "只測 hello world、靜態頁快取或資料庫 mock 不得代表網站效能；外部瓶頸平手不得宣稱勝出。",
+      "expected": "同時涵蓋登入與匿名、讀寫、冷熱、單請求與並行、VM 與 Native、安全模式及系統資源。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-183",
+      "requirement": "REQ-092",
+      "category": "正常與相容",
+      "title": "效能結果可重現：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "由獨立環境重建比較，結果落在預先定義的變異範圍。",
+      "expected": "公開原始樣本、命令、雜湊、負載、暖機、順序、資源與統計方法；編譯、啟動及記憶體另報，不隱藏成本。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-184",
+      "requirement": "REQ-092",
+      "category": "例外與安全",
+      "title": "效能結果可重現：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "偵測針對測試名稱的特殊捷徑、移除慢案例或不同安全設定時，整份最快認證失效。",
+      "expected": "公開原始樣本、命令、雜湊、負載、暖機、順序、資源與統計方法；編譯、啟動及記憶體另報，不隱藏成本。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-185",
+      "requirement": "REQ-093",
+      "category": "正常與相容",
+      "title": "WordPress 完整站台：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "固定新舊 WordPress、WooCommerce、佈景與資料集，跑完整流程並比較資料庫及檔案。",
+      "expected": "官方 PHP／瀏覽器測試、管理後台、編輯、媒體、REST、權限、排程、外掛、佈景及升級回復通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-186",
+      "requirement": "REQ-093",
+      "category": "例外與安全",
+      "title": "WordPress 完整站台：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "登入 A 後並行登入 B、上傳失敗、升級中斷及 PHP 執行失敗時，沒有跨使用者污染、資料遺失或原始碼外洩。",
+      "expected": "官方 PHP／瀏覽器測試、管理後台、編輯、媒體、REST、權限、排程、外掛、佈景及升級回復通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-187",
+      "requirement": "REQ-094",
+      "category": "正常與相容",
+      "title": "Laravel 框架與實際應用：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "鎖定 Laravel、BookStack、Composer lock、服務與資料，分別比較 CLI、FastCGI、HTTP 與封裝模式。",
+      "expected": "框架測試與固定 BookStack 等實際應用的登入、權限、Eloquent、Blade、交易、佇列、CLI、上傳與瀏覽器流程通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-188",
+      "requirement": "REQ-094",
+      "category": "例外與安全",
+      "title": "Laravel 框架與實際應用：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "只有空白 Laravel 首頁或內部 HTTP mock 通過仍不足；真實 HTTP、資料庫、佇列或清理失敗即阻擋認證。",
+      "expected": "框架測試與固定 BookStack 等實際應用的登入、權限、Eloquent、Blade、交易、佇列、CLI、上傳與瀏覽器流程通過。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-189",
+      "requirement": "REQ-095",
+      "category": "正常與相容",
+      "title": "多生態與歷史真實專案：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "依各應用原本支援的 PHP 範圍建立合法版本配對，覆蓋語意分歧及歷史 API。",
+      "expected": "WordPress／WooCommerce、Laravel／BookStack 外，加入 Drupal、Symfony 應用、MediaWiki、phpMyAdmin、phpBB 與有來源的早期網站。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-190",
+      "requirement": "REQ-095",
+      "category": "例外與安全",
+      "title": "多生態與歷史真實專案：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "把最新 Laravel 強配 PHP 1 或用手寫簡單範例取代全部舊站，不能計入歷史網站認證。",
+      "expected": "WordPress／WooCommerce、Laravel／BookStack 外，加入 Drupal、Symfony 應用、MediaWiki、phpMyAdmin、phpBB 與有來源的早期網站。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-191",
+      "requirement": "REQ-096",
+      "category": "正常與相容",
+      "title": "遷移與回復實測：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "Apache 與 Nginx 分別切換同一受測站台並核對登入及資料一致性。",
+      "expected": "使用資料副本驗證 Session、cookie、交易、上傳、命令、可寫程式與唯讀封裝，依方案演練回復。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-192",
+      "requirement": "REQ-096",
+      "category": "例外與安全",
+      "title": "遷移與回復實測：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "不以雙送正式 POST 製造重複資料；格式不相容或無法回復時禁止標成可直接遷移。",
+      "expected": "使用資料副本驗證 Session、cookie、交易、上傳、命令、可寫程式與唯讀封裝，依方案演練回復。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-193",
+      "requirement": "REQ-097",
+      "category": "正常與相容",
+      "title": "資料完整與持續服務：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "混合讀寫、重載、取消、Session 競爭、佇列重試與上傳，核對每筆副作用。",
+      "expected": "至少 24 小時與 100 萬混合請求的既定下限成立；資料不變條件、鎖、handle、goroutine 與回復全部檢查，不能只看存活。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-194",
+      "requirement": "REQ-097",
+      "category": "例外與安全",
+      "title": "資料完整與持續服務：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "任何無授權讀寫、重複提交、遺失更新、資源無界成長或跨版本污染都阻擋發布。",
+      "expected": "至少 24 小時與 100 萬混合請求的既定下限成立；資料不變條件、鎖、handle、goroutine 與回復全部檢查，不能只看存活。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-195",
+      "requirement": "REQ-098",
+      "category": "正常與相容",
+      "title": "零未解決缺陷閘門：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "驗收工具根據原始結果與缺陷清冊阻止未達門檻的全相容／最快／完成聲明。",
+      "expected": "最終目標範圍內失敗、未實作、未執行、runner 缺口、未調查差異及未解決 Phego 缺陷均為零；既有上游缺陷獨立列示。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-196",
+      "requirement": "REQ-098",
+      "category": "例外與安全",
+      "title": "零未解決缺陷閘門：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "把失敗改 skip、刪需求、藏 flaky 測試或把安全例外當成完全等價，均使驗收失敗。",
+      "expected": "最終目標範圍內失敗、未實作、未執行、runner 缺口、未調查差異及未解決 Phego 缺陷均為零；既有上游缺陷獨立列示。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-197",
+      "requirement": "REQ-099",
+      "category": "正常與相容",
+      "title": "MIT 與第三方來源：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "檢查 LICENSE、檔案來源與依賴清單，確保沒有混入未授權程式、資料或憑證。",
+      "expected": "根目錄為完整 MIT LICENSE，原創文件與程式適用 MIT；第三方來源、測試與 fixture 保留原授權，不被重新標示 MIT。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-198",
+      "requirement": "REQ-099",
+      "category": "例外與安全",
+      "title": "MIT 與第三方來源：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "嘗試把 WordPress／PHP 測試直接改標 MIT 或發布未知授權來源時，授權檢查失敗。",
+      "expected": "根目錄為完整 MIT LICENSE，原創文件與程式適用 MIT；第三方來源、測試與 fixture 保留原授權，不被重新標示 MIT。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-199",
+      "requirement": "REQ-100",
+      "category": "正常與相容",
+      "title": "英文品牌與真實狀態：正常與相容",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "檢查 README、規格與 JSON 一致，文件發布授權不被誤當正式引擎發布授權。",
+      "expected": "README 使用英文與 The safest PHP in the world slogan；完整目標與現況分開，repo 為 HazelnutParadise/phego，授權與操作邊界明確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-200",
+      "requirement": "REQ-100",
+      "category": "例外與安全",
+      "title": "英文品牌與真實狀態：例外與安全",
+      "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
+      "procedure": "沒有實作與基準證據時不得新增已通過、最快倍數、可安裝 API 或假 CI 成功徽章。",
+      "expected": "README 使用英文與 The safest PHP in the world slogan；完整目標與現況分開，repo 為 HazelnutParadise/phego，授權與操作邊界明確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    }
+  ]
+}

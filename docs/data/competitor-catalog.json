@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "planning_catalog",
+  "purpose": "Seed catalog for complete competitor discovery, not an exhaustive current survey or benchmark result.",
+  "coverage_review_status": "incomplete",
+  "benchmark_status": "not_run",
+  "discovery_categories": [
+    "Official PHP interpreters, opcode caches and JIT configurations",
+    "Independent interpreters and virtual machines",
+    "PHP native/AOT compilers",
+    "PHP-to-other-language or runtime compilers",
+    "Historical PHP-compatible engines",
+    "Go/Rust embeddings and WebAssembly distributions",
+    "Website deployment stacks using a PHP execution engine",
+    "Newly discovered open-source or commercially obtainable implementations"
+  ],
+  "rules": [
+    "Continue discovery before each full certification; this seed list is not the complete competitor universe.",
+    "Unavailable versions/build failures are unresolved, not Phego wins.",
+    "Unsupported work is reported separately, then common supported workloads are sought.",
+    "Compare semantically equivalent successful work under declared resources and safety conditions.",
+    "Require each applicable mandatory cell to win; averages do not hide losses."
+  ],
+  "required_lock_fields": [
+    "upstream",
+    "exact_version",
+    "commit_or_artifact_digest",
+    "license",
+    "build_recipe",
+    "toolchain",
+    "supported_php_semantics",
+    "target_platform",
+    "configuration",
+    "application_changes",
+    "security_mode",
+    "workload_mapping"
+  ],
+  "method": {
+    "minimum_independent_paired_repetitions": 30,
+    "confidence_level": 0.95,
+    "multiple_comparison_correction_required": true,
+    "strict_advantage_lower_bound": 1,
+    "unknown_or_tie_is_pass": false,
+    "correctness_required": true,
+    "raw_data_required": true,
+    "independent_reproduction_required": true
+  },
+  "requirements": [
+    "REQ-088",
+    "REQ-089",
+    "REQ-090",
+    "REQ-091",
+    "REQ-092"
+  ],
+  "required_work_packages": [
+    "W-54",
+    "W-55"
+  ],
+  "items": [
+    {
+      "id": "COMP-01",
+      "name": "Official PHP / Zend",
+      "category": "execution_engine",
+      "upstream_discovery_sources": [
+        "https://www.php.net/"
+      ],
+      "configuration_families_to_assess": [
+        "OPcache off/on",
+        "JIT off/on where supported",
+        "Historical and current release profiles"
+      ],
+      "comparison_rule": "Select appropriate exact releases and documented best-performing valid configurations.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-02",
+      "name": "KPHP",
+      "category": "compiler",
+      "upstream_discovery_sources": [
+        "https://vkcom.github.io/kphp/"
+      ],
+      "configuration_families_to_assess": [
+        "Native compiler",
+        "Common supported PHP workloads"
+      ],
+      "comparison_rule": "Full-site unsupported results do not count as speed wins; assess common supported real workloads.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-03",
+      "name": "PeachPie",
+      "category": "compiler_runtime",
+      "upstream_discovery_sources": [
+        "https://docs.peachpie.io/php/compatibility/"
+      ],
+      "configuration_families_to_assess": [
+        "PHP-to-.NET compilation",
+        "Runtime settings"
+      ],
+      "comparison_rule": "Pin compiler, .NET runtime, supported semantics and settings.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-04",
+      "name": "HHVM PHP-compatible releases",
+      "category": "historical_execution_engine",
+      "upstream_discovery_sources": [
+        "https://hhvm.com/blog/2018/09/12/end-of-php-support-future-of-hack.html"
+      ],
+      "configuration_families_to_assess": [
+        "PHP-compatible historical releases"
+      ],
+      "comparison_rule": "Do not substitute a Hack-only release for a PHP comparator.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-05",
+      "name": "Goro",
+      "category": "alternative_execution_engine",
+      "upstream_discovery_sources": [
+        "https://github.com/KarpelesLab",
+        "https://github.com/KarpelesLab/goro"
+      ],
+      "configuration_families_to_assess": [
+        "Go embedding",
+        "Applicable CLI and website execution"
+      ],
+      "comparison_rule": "Verify current upstream scope, exact source and module coverage before comparison.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-06",
+      "name": "FrankenPHP",
+      "category": "deployment_stack",
+      "upstream_discovery_sources": [
+        "https://frankenphp.dev/"
+      ],
+      "configuration_families_to_assess": [
+        "Request mode",
+        "Applicable worker mode"
+      ],
+      "comparison_rule": "Separate official-PHP execution core from whole-stack measurements and persistent-state semantics.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-07",
+      "name": "RoadRunner",
+      "category": "deployment_stack",
+      "upstream_discovery_sources": [
+        "https://roadrunner.dev/"
+      ],
+      "configuration_families_to_assess": [
+        "Applicable worker deployment"
+      ],
+      "comparison_rule": "Record PHP worker engine, lifecycle, application adapter and whole-stack effects.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    },
+    {
+      "id": "COMP-08",
+      "name": "OpenSwoole / Swoole family",
+      "category": "deployment_stack",
+      "upstream_discovery_sources": [
+        "https://openswoole.com/"
+      ],
+      "configuration_families_to_assess": [
+        "Applicable coroutine/worker deployment"
+      ],
+      "comparison_rule": "Inventory distinct upstream projects and exact versions; do not assume identical semantics.",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "benchmark_status": "not_run"
+    }
+  ]
+}

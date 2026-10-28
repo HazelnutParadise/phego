@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "planning_catalog",
+  "purpose": "Real-application acceptance plan. No source versions are locked and no application has been run on Phego.",
+  "selection_rule": "Select genuine unmodified releases with actual supported PHP versions and dependencies. Include historical and current cohorts, not an invalid cross-product of every app with every PHP version.",
+  "source_lock_status": "not_locked",
+  "acceptance_status": "not_run",
+  "all_php_execution_on_sut_required": true,
+  "production_zend_fallback_allowed": false,
+  "application_source_modification_allowed_for_certification": false,
+  "required_lock_fields": [
+    "upstream_url",
+    "release_tag_or_commit",
+    "retrieved_source_digest",
+    "license",
+    "dependency_locks",
+    "php_profiles",
+    "module_versions",
+    "database_versions",
+    "configuration",
+    "fixture_digest",
+    "web_server_config",
+    "worker_entrypoints",
+    "expected_data_invariants"
+  ],
+  "mandatory_evidence": [
+    "Official applicable tests",
+    "Real HTTP/browser/CLI/background workflows",
+    "Database, filesystem, session and external-event checks",
+    "Mixed-site/version concurrency",
+    "Fault injection and cleanup",
+    "Upgrade, migration and rollback",
+    "Raw results and independent reproduction"
+  ],
+  "minimum_soak": {
+    "hours": 24,
+    "mixed_requests": 1000000,
+    "data_integrity_checks_required": true,
+    "bounded_resource_trends_required": true
+  },
+  "requirements": [
+    "REQ-093",
+    "REQ-094",
+    "REQ-095",
+    "REQ-096",
+    "REQ-097",
+    "REQ-098"
+  ],
+  "required_work_packages": [
+    "W-56",
+    "W-57",
+    "W-58",
+    "W-59"
+  ],
+  "items": [
+    {
+      "id": "APP-01",
+      "name": "WordPress",
+      "selection": "required",
+      "upstream_discovery_sources": [
+        "https://wordpress.org/",
+        "https://make.wordpress.org/test/handbook/get-setup-for-testing/run-automated-tests/"
+      ],
+      "required_workflows": [
+        "Install/upgrade/rollback",
+        "Authentication/password reset/roles",
+        "Posts/revisions/comments/search",
+        "REST/editor/permalinks",
+        "Media/files/themes/plugins",
+        "Cron/CLI/cache/multisite where claimed"
+      ],
+      "work_package": "W-56",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-02",
+      "name": "WooCommerce on WordPress",
+      "selection": "required",
+      "upstream_discovery_sources": [
+        "https://woocommerce.com/"
+      ],
+      "required_workflows": [
+        "Catalog/cart/checkout",
+        "Prices/tax/shipping/discounts",
+        "Inventory/concurrent orders",
+        "Test payments/repeated callbacks/refunds",
+        "Background jobs/email events"
+      ],
+      "work_package": "W-56",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-03",
+      "name": "Laravel framework test suites",
+      "selection": "required_framework_layer",
+      "upstream_discovery_sources": [
+        "https://laravel.com/docs/13.x/testing",
+        "https://laravel.com/framework/docs/dusk"
+      ],
+      "required_workflows": [
+        "Unit and feature suites",
+        "Routing/container/middleware/Blade",
+        "Eloquent/transactions/validation",
+        "Sessions/CSRF/cache/files",
+        "Artisan/queue/scheduler/mail"
+      ],
+      "work_package": "W-57",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-04",
+      "name": "BookStack",
+      "selection": "required_real_laravel_application",
+      "upstream_discovery_sources": [
+        "https://www.bookstackapp.com/"
+      ],
+      "required_workflows": [
+        "Install/authentication/permissions",
+        "Books/chapters/pages/revisions",
+        "Search/images/files/import/export",
+        "API/configuration/migrations",
+        "Upgrade/rollback"
+      ],
+      "work_package": "W-57",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-05",
+      "name": "Drupal",
+      "selection": "required_ecosystem",
+      "upstream_discovery_sources": [
+        "https://www.drupal.org/"
+      ],
+      "required_workflows": [
+        "Install/modules/content",
+        "Roles/permissions/forms",
+        "Cache/files/upgrades"
+      ],
+      "work_package": "W-58",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-06",
+      "name": "Shopware",
+      "selection": "selected_real_symfony_application",
+      "upstream_discovery_sources": [
+        "https://developer.shopware.com/what-is-shopware.html",
+        "https://developer.shopware.com/docs/guides/installation/project-overview.html"
+      ],
+      "required_workflows": [
+        "Install/admin/storefront",
+        "Products/search/cart/test checkout",
+        "Plugins/templates/cache",
+        "Console/queues/upgrades/rollback"
+      ],
+      "work_package": "W-58",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-07",
+      "name": "MediaWiki",
+      "selection": "required_ecosystem",
+      "upstream_discovery_sources": [
+        "https://www.mediawiki.org/"
+      ],
+      "required_workflows": [
+        "Install/login/permissions",
+        "Edit/history/parser/search",
+        "Uploads/API/cache/maintenance",
+        "Upgrade/rollback"
+      ],
+      "work_package": "W-58",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-08",
+      "name": "phpMyAdmin",
+      "selection": "required_ecosystem",
+      "upstream_discovery_sources": [
+        "https://www.phpmyadmin.net/"
+      ],
+      "required_workflows": [
+        "Authentication/permissions/connections",
+        "Schema/query/transactions",
+        "Import/export/files",
+        "Error and disconnect recovery"
+      ],
+      "work_package": "W-58",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "APP-09",
+      "name": "phpBB",
+      "selection": "required_ecosystem",
+      "upstream_discovery_sources": [
+        "https://www.phpbb.com/"
+      ],
+      "required_workflows": [
+        "Install/login/roles",
+        "Forums/topics/posts/moderation",
+        "Attachments/search/administration",
+        "Upgrade/rollback"
+      ],
+      "work_package": "W-58",
+      "status": "planned",
+      "source_lock_status": "not_locked",
+      "acceptance_status": "not_run"
+    }
+  ],
+  "historical_application_discovery": {
+    "status": "not_started",
+    "required": true,
+    "generations": [
+      "HIST-01",
+      "HIST-02",
+      "HIST-03",
+      "HIST-04",
+      "HIST-05",
+      "HIST-07",
+      "HIST-08"
+    ],
+    "rule": "Acquire authentic applications or original distributed example applications for each historical generation. Synthetic unit fixtures supplement but do not replace real-application evidence. Missing authentic evidence remains a visible completion blocker.",
+    "work_package": "W-58"
+  }
+}

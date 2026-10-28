@@ -1,0 +1,2669 @@
+{
+  "document_version": "1.1.2",
+  "as_of": "2026-10-28",
+  "state": "plan_not_implementation",
+  "items": [
+    {
+      "id": "W-01",
+      "phase": "M0",
+      "title": "建立產品契約與威脅模型",
+      "dependencies": [],
+      "owner_role": "整合／安全維護者",
+      "implementation_steps": [
+        "確認已確認方向與本版設計基準的分界。",
+        "建立能力、信任與資料流邊界，將不可違反條件轉成可檢查規則。",
+        "列出需要使用者授權的外部行為。"
+      ],
+      "deliverables": [
+        "產品契約",
+        "威脅模型",
+        "初始ADR",
+        "授權邊界"
+      ],
+      "exit_gate": "不留下會改變架構方向卻未分類的決策；未確認項目不得冒充已確認。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-001",
+        "REQ-077",
+        "REQ-078"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-153",
+        "T-154",
+        "T-155",
+        "T-156"
+      ]
+    },
+    {
+      "id": "W-02",
+      "phase": "M0",
+      "title": "鎖定官方與工具基準",
+      "dependencies": [
+        "W-01"
+      ],
+      "owner_role": "建置／相容性維護者",
+      "implementation_steps": [
+        "取得並驗證官方PHP、Go與測試來源。",
+        "固定tag、摘要、設定與OS／CPU；記錄已知安全例外。",
+        "原生概念驗證固定可取得的LLVM與linker版本。"
+      ],
+      "deliverables": [
+        "compat.lock.json",
+        "來源／授權清單",
+        "基準建置腳本"
+      ],
+      "exit_gate": "鎖定內容均來自真實來源，乾淨環境可重建參考PHP與工具。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-002",
+        "REQ-060",
+        "REQ-065"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-119",
+        "T-120",
+        "T-129",
+        "T-130"
+      ]
+    },
+    {
+      "id": "W-03",
+      "phase": "M0",
+      "title": "建立追蹤與證據工具",
+      "dependencies": [
+        "W-01",
+        "W-02"
+      ],
+      "owner_role": "測試基礎設施維護者",
+      "implementation_steps": [
+        "導入本計劃REQ、T、W清單。",
+        "檢查ID、需求覆蓋、工作依賴與狀態轉移。",
+        "定義機器可讀的能力與測試證據schema。"
+      ],
+      "deliverables": [
+        "追蹤檢查器",
+        "證據schema",
+        "狀態報告"
+      ],
+      "exit_gate": "任何需求遺漏測試、循環依賴或未執行測試卻標完成都會失敗。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-003",
+        "REQ-072",
+        "REQ-076",
+        "REQ-077",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-143",
+        "T-144",
+        "T-151",
+        "T-152",
+        "T-153",
+        "T-154",
+        "T-157",
+        "T-158"
+      ]
+    },
+    {
+      "id": "W-04",
+      "phase": "M0",
+      "title": "建立官方測試與差異runner",
+      "dependencies": [
+        "W-02",
+        "W-03"
+      ],
+      "owner_role": "相容性測試維護者",
+      "implementation_steps": [
+        "支援PHPT所需sections、CLI與CGI介面。",
+        "建立官方PHP與受測程式的獨立執行環境。",
+        "實作結果分類、輸出正規化白名單與副作用記錄。"
+      ],
+      "deliverables": [
+        "PHPT runner",
+        "差異測試器",
+        "結果分類fixture"
+      ],
+      "exit_gate": "已知通過、失敗、skip、unsupported與runner缺口均能正確分類，不靠Phego先完成才能驗證runner。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-072"
+      ],
+      "tests": [
+        "T-143",
+        "T-144"
+      ]
+    },
+    {
+      "id": "W-05",
+      "phase": "M1",
+      "title": "生命週期與資源狀態模型",
+      "dependencies": [
+        "W-01",
+        "W-03"
+      ],
+      "owner_role": "Runtime／安全維護者",
+      "implementation_steps": [
+        "建立請求狀態機、cleanup ledger、名額與handle模型。",
+        "枚舉部分初始化、取消與重入。",
+        "建立故障注入點與有限狀態檢查。"
+      ],
+      "deliverables": [
+        "可執行狀態模型",
+        "不變條件測試",
+        "故障點清單"
+      ],
+      "exit_gate": "無重複釋放、無失效handle再有效、無未初始化物件進入Ready。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-020",
+        "REQ-021",
+        "REQ-022",
+        "REQ-073"
+      ],
+      "tests": [
+        "T-039",
+        "T-040",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-145",
+        "T-146"
+      ]
+    },
+    {
+      "id": "W-06",
+      "phase": "M1",
+      "title": "值／參照／生命週期原型",
+      "dependencies": [
+        "W-02",
+        "W-04",
+        "W-05"
+      ],
+      "owner_role": "Runtime維護者",
+      "implementation_steps": [
+        "實作候選Value、Location、有序array與object身分。",
+        "驗證邏輯生命週期與Go GC協同。",
+        "測量配置、保留、參照與解構成本。"
+      ],
+      "deliverables": [
+        "原型與比較紀錄",
+        "語意fixture",
+        "選型ADR"
+      ],
+      "exit_gate": "複雜參照、解構、循環與弱參照的核心案例成立；有失敗先修模型。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-007",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017",
+        "REQ-020",
+        "REQ-023"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-029",
+        "T-030",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034",
+        "T-039",
+        "T-040",
+        "T-045",
+        "T-046"
+      ]
+    },
+    {
+      "id": "W-07",
+      "phase": "M1",
+      "title": "LLVM與Go橋接概念驗證",
+      "dependencies": [
+        "W-02",
+        "W-05"
+      ],
+      "owner_role": "Native後端維護者",
+      "implementation_steps": [
+        "以固定ABI連結小型native區段。",
+        "驗證數值、opaque handle、callback、例外狀態、取消與GC壓力。",
+        "至少在Linux amd64／arm64驗證連結與依賴。"
+      ],
+      "deliverables": [
+        "可重現橋接實驗",
+        "ABI風險報告",
+        "可行平台清單"
+      ],
+      "exit_gate": "不違反Go指標規則，無私有ABI依賴，不能靠停用檢查通過。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-052",
+        "REQ-053"
+      ],
+      "tests": [
+        "T-103",
+        "T-104",
+        "T-105",
+        "T-106"
+      ]
+    },
+    {
+      "id": "W-08",
+      "phase": "M1",
+      "title": "定義Go公開API與結果契約",
+      "dependencies": [
+        "W-01",
+        "W-03",
+        "W-06"
+      ],
+      "owner_role": "SDK維護者",
+      "implementation_steps": [
+        "定義Run、Engine、Program、Result與錯誤分類。",
+        "定義傳入副本、輸出快照、callback與Close契約。",
+        "建立可編譯契約測試與文件使用案例。"
+      ],
+      "deliverables": [
+        "API契約",
+        "錯誤表",
+        "SDK範例與測試"
+      ],
+      "exit_gate": "單函式入口成立，物件／resource生命週期與取消限制無歧義。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-001",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014",
+        "T-015",
+        "T-016"
+      ]
+    },
+    {
+      "id": "W-09",
+      "phase": "M2",
+      "title": "Lexer與parser",
+      "dependencies": [
+        "W-02",
+        "W-04"
+      ],
+      "owner_role": "前端維護者",
+      "implementation_steps": [
+        "支援目標版本完整語法與模板混合。",
+        "加入來源映射、輸入上限與有界錯誤恢復。",
+        "建立解析fuzz corpus與官方語法fixture。"
+      ],
+      "deliverables": [
+        "解析器",
+        "AST",
+        "來源映射",
+        "解析fuzz測試"
+      ],
+      "exit_gate": "語法範圍有清單，無panic／無限迴圈，錯誤位置可定位。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-010"
+      ],
+      "tests": [
+        "T-019",
+        "T-020"
+      ]
+    },
+    {
+      "id": "W-10",
+      "phase": "M2",
+      "title": "版本規則與相容診斷",
+      "dependencies": [
+        "W-02",
+        "W-09"
+      ],
+      "owner_role": "語言相容性維護者",
+      "implementation_steps": [
+        "建立版本化語法、運算、警告、簽章與INI資料。",
+        "區分功能未知、未支援與政策差異。",
+        "建立profile與版本分歧fixture。"
+      ],
+      "deliverables": [
+        "版本規則",
+        "差異分類",
+        "profile測試"
+      ],
+      "exit_gate": "同語法在不同profile可得到明確結果，未知版本不靜默降級。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-002",
+        "REQ-004",
+        "REQ-010",
+        "REQ-011",
+        "REQ-066"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-007",
+        "T-008",
+        "T-019",
+        "T-020",
+        "T-021",
+        "T-022",
+        "T-131",
+        "T-132"
+      ]
+    },
+    {
+      "id": "W-11",
+      "phase": "M2",
+      "title": "高階IR與呼叫語意",
+      "dependencies": [
+        "W-06",
+        "W-09",
+        "W-10"
+      ],
+      "owner_role": "編譯器維護者",
+      "implementation_steps": [
+        "將AST轉成保留PHP操作的HIR。",
+        "實作scope、符號、呼叫、參數與型別轉換。",
+        "標註可能的警告、例外、使用者callback與副作用。"
+      ],
+      "deliverables": [
+        "HIR契約",
+        "語意操作庫",
+        "降低測試"
+      ],
+      "exit_gate": "優化前即可逐項對照語意，不把動態行為過早降成裸記憶體操作。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-011",
+        "REQ-012",
+        "REQ-015",
+        "REQ-024"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-023",
+        "T-024",
+        "T-029",
+        "T-030",
+        "T-047",
+        "T-048"
+      ]
+    },
+    {
+      "id": "W-12",
+      "phase": "M2",
+      "title": "正式array與reference實作",
+      "dependencies": [
+        "W-06",
+        "W-11"
+      ],
+      "owner_role": "Runtime維護者",
+      "implementation_steps": [
+        "實作packed與ordered representation或經證據選定的替代。",
+        "完善別名、COW／替代策略、foreach與鍵轉換。",
+        "加入性質測試與資料結構fuzz。"
+      ],
+      "deliverables": [
+        "陣列／參照模組",
+        "性質測試",
+        "布局與效能紀錄"
+      ],
+      "exit_gate": "表示切換不改變順序、別名或下一索引，邊界測試無缺口。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ]
+    },
+    {
+      "id": "W-13",
+      "phase": "M3",
+      "title": "物件與邏輯生命週期",
+      "dependencies": [
+        "W-05",
+        "W-06",
+        "W-11",
+        "W-12"
+      ],
+      "owner_role": "Runtime維護者",
+      "implementation_steps": [
+        "實作類別、繼承、屬性、解構與弱參照。",
+        "處理循環、復活、重入、lazy object與property hooks。",
+        "區分共享描述與請求可變狀態。"
+      ],
+      "deliverables": [
+        "物件系統",
+        "生命週期模組",
+        "解構／WeakMap矩陣"
+      ],
+      "exit_gate": "目標Language profile的相關測試通過，不能靠Go finalizer控制時機。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-012",
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021"
+      ],
+      "tests": [
+        "T-023",
+        "T-024",
+        "T-035",
+        "T-036",
+        "T-037",
+        "T-038",
+        "T-039",
+        "T-040",
+        "T-041",
+        "T-042"
+      ]
+    },
+    {
+      "id": "W-14",
+      "phase": "M2",
+      "title": "Frame、錯誤與shutdown",
+      "dependencies": [
+        "W-05",
+        "W-08",
+        "W-11"
+      ],
+      "owner_role": "執行引擎維護者",
+      "implementation_steps": [
+        "實作frame、exception、warning、exit與輸出。",
+        "固定各種結束原因的PHP與Runtime收尾行為。",
+        "加入部分輸出、收尾失敗與重入測試。"
+      ],
+      "deliverables": [
+        "執行frame",
+        "錯誤分類",
+        "清理策略"
+      ],
+      "exit_gate": "PHP錯誤不終止宿主，外部已提交副作用不被假裝回滾。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-009",
+        "REQ-020",
+        "REQ-022",
+        "REQ-030",
+        "REQ-040",
+        "REQ-044"
+      ],
+      "tests": [
+        "T-017",
+        "T-018",
+        "T-039",
+        "T-040",
+        "T-043",
+        "T-044",
+        "T-059",
+        "T-060",
+        "T-079",
+        "T-080",
+        "T-087",
+        "T-088"
+      ]
+    },
+    {
+      "id": "W-15",
+      "phase": "M3",
+      "title": "SSA、效果與安全保留最佳化",
+      "dependencies": [
+        "W-11",
+        "W-12",
+        "W-14"
+      ],
+      "owner_role": "最佳化維護者",
+      "implementation_steps": [
+        "建立SSA、別名與效果資訊。",
+        "實作可證明正確的常數與型別特化。",
+        "為每個pass加入語意與來源標記保留測試。"
+      ],
+      "deliverables": [
+        "優化IR",
+        "pass測試",
+        "最佳化開關"
+      ],
+      "exit_gate": "最佳化前後輸出、警告、callback、政策與取消行為一致。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-016",
+        "REQ-024",
+        "REQ-034",
+        "REQ-054"
+      ],
+      "tests": [
+        "T-031",
+        "T-032",
+        "T-047",
+        "T-048",
+        "T-067",
+        "T-068",
+        "T-107",
+        "T-108"
+      ]
+    },
+    {
+      "id": "W-16",
+      "phase": "M2",
+      "title": "Bytecode格式與驗證器",
+      "dependencies": [
+        "W-11",
+        "W-14"
+      ],
+      "owner_role": "VM／安全維護者",
+      "implementation_steps": [
+        "定義有版本與能力的Bytecode格式。",
+        "實作編碼、解碼及載入前驗證。",
+        "驗證長度、索引、控制流程、frame與格式fuzz。"
+      ],
+      "deliverables": [
+        "格式文件",
+        "編碼器／驗證器",
+        "惡意輸入corpus"
+      ],
+      "exit_gate": "損毀輸入有界拒絕，沒有任意Go指標或原生位址。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-025",
+        "REQ-061",
+        "REQ-064"
+      ],
+      "tests": [
+        "T-049",
+        "T-050",
+        "T-121",
+        "T-122",
+        "T-127",
+        "T-128"
+      ]
+    },
+    {
+      "id": "W-17",
+      "phase": "M2",
+      "title": "VM通用執行路徑",
+      "dependencies": [
+        "W-12",
+        "W-14",
+        "W-16"
+      ],
+      "owner_role": "VM維護者",
+      "implementation_steps": [
+        "實作通用PHP操作與暫存器式基準。",
+        "加入取消／配額檢查點與診斷來源。",
+        "保留可比較的指令分派與資料布局基準。"
+      ],
+      "deliverables": [
+        "VM",
+        "核心語意測試",
+        "分派基準"
+      ],
+      "exit_gate": "核心程式可執行，錯誤與邊界皆有測試，未支援功能明確回報。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-001",
+        "REQ-005",
+        "REQ-011",
+        "REQ-015",
+        "REQ-016",
+        "REQ-025",
+        "REQ-026"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-009",
+        "T-010",
+        "T-021",
+        "T-022",
+        "T-029",
+        "T-030",
+        "T-031",
+        "T-032",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052"
+      ]
+    },
+    {
+      "id": "W-18",
+      "phase": "M3",
+      "title": "動態載入、eval與autoload",
+      "dependencies": [
+        "W-10",
+        "W-13",
+        "W-17",
+        "W-20"
+      ],
+      "owner_role": "動態語言維護者",
+      "implementation_steps": [
+        "實作include／require／once身分與scope。",
+        "eval使用同一編譯與政策路徑。",
+        "處理請求專屬符號登錄與autoload。"
+      ],
+      "deliverables": [
+        "動態載入器",
+        "eval路徑",
+        "動態語意測試"
+      ],
+      "exit_gate": "不啟動Zend，不繞過能力，動態宣告不跨請求殘留。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-004",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "REQ-055",
+        "REQ-059"
+      ],
+      "tests": [
+        "T-007",
+        "T-008",
+        "T-023",
+        "T-024",
+        "T-025",
+        "T-026",
+        "T-027",
+        "T-028",
+        "T-109",
+        "T-110",
+        "T-117",
+        "T-118"
+      ]
+    },
+    {
+      "id": "W-19",
+      "phase": "M3",
+      "title": "Generator與Fiber",
+      "dependencies": [
+        "W-13",
+        "W-14",
+        "W-17"
+      ],
+      "owner_role": "執行引擎維護者",
+      "implementation_steps": [
+        "實作可保存frame與continuation。",
+        "處理yield／resume／throw／解構與取消。",
+        "為原生不可支援的暫停點建立明確VM邊界。"
+      ],
+      "deliverables": [
+        "Generator／Fiber",
+        "續行測試",
+        "native邊界規則"
+      ],
+      "exit_gate": "PHP順序與例外語意成立，同Execution無任意平行修改。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-027",
+        "REQ-055"
+      ],
+      "tests": [
+        "T-053",
+        "T-054",
+        "T-109",
+        "T-110"
+      ]
+    },
+    {
+      "id": "W-20",
+      "phase": "M2",
+      "title": "能力與配額核心",
+      "dependencies": [
+        "W-01",
+        "W-05",
+        "W-08"
+      ],
+      "owner_role": "安全Runtime維護者",
+      "implementation_steps": [
+        "建立檔案、網路、DB、exec與callback能力。",
+        "實作Execution、Engine與外部配置的分開計量。",
+        "定義取消、過量輸入與安全事件錯誤。"
+      ],
+      "deliverables": [
+        "能力介面",
+        "資源預算",
+        "安全錯誤契約"
+      ],
+      "exit_gate": "所有入口可共用，長度溢位與初始化失敗不繞過限制。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-008",
+        "REQ-009",
+        "REQ-013",
+        "REQ-014",
+        "REQ-019",
+        "REQ-022",
+        "REQ-026",
+        "REQ-029",
+        "REQ-031",
+        "REQ-033",
+        "REQ-036",
+        "REQ-037",
+        "REQ-042",
+        "REQ-045",
+        "REQ-049",
+        "REQ-059",
+        "REQ-069"
+      ],
+      "tests": [
+        "T-015",
+        "T-016",
+        "T-017",
+        "T-018",
+        "T-025",
+        "T-026",
+        "T-027",
+        "T-028",
+        "T-037",
+        "T-038",
+        "T-043",
+        "T-044",
+        "T-051",
+        "T-052",
+        "T-057",
+        "T-058",
+        "T-061",
+        "T-062",
+        "T-065",
+        "T-066",
+        "T-071",
+        "T-072",
+        "T-073",
+        "T-074",
+        "T-083",
+        "T-084",
+        "T-089",
+        "T-090",
+        "T-097",
+        "T-098",
+        "T-117",
+        "T-118",
+        "T-137",
+        "T-138"
+      ]
+    },
+    {
+      "id": "W-21",
+      "phase": "M5",
+      "title": "來源追蹤與脈絡政策",
+      "dependencies": [
+        "W-12",
+        "W-15",
+        "W-20"
+      ],
+      "owner_role": "安全分析維護者",
+      "implementation_steps": [
+        "實作來源標籤、區段與保守合併。",
+        "定義sink與脈絡別證據，不使用全域safe布林。",
+        "驗證VM、callback與native傳播，提供observe／enforce。"
+      ],
+      "deliverables": [
+        "追蹤模型",
+        "規則庫",
+        "誤判與缺口報告"
+      ],
+      "exit_gate": "來源不無故遺失，資源受限，防護範圍與未知可辨識。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-008",
+        "REQ-014",
+        "REQ-031",
+        "REQ-034",
+        "REQ-035",
+        "REQ-036",
+        "REQ-049"
+      ],
+      "tests": [
+        "T-015",
+        "T-016",
+        "T-027",
+        "T-028",
+        "T-061",
+        "T-062",
+        "T-067",
+        "T-068",
+        "T-069",
+        "T-070",
+        "T-071",
+        "T-072",
+        "T-097",
+        "T-098"
+      ]
+    },
+    {
+      "id": "W-22",
+      "phase": "M4",
+      "title": "Goroutine接納與Execution隔離",
+      "dependencies": [
+        "W-05",
+        "W-14",
+        "W-17",
+        "W-20"
+      ],
+      "owner_role": "並行Runtime維護者",
+      "implementation_steps": [
+        "實作有界連線／佇列／活躍執行控制。",
+        "建立每請求環境、工作目錄與設定視圖。",
+        "驗證取消、重載、名額與收尾交錯。"
+      ],
+      "deliverables": [
+        "scheduler／admission",
+        "Execution隔離",
+        "race與過載測試"
+      ],
+      "exit_gate": "無跨請求污染、無無界等待goroutine，取消不遺失名額。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-006",
+        "REQ-009",
+        "REQ-023",
+        "REQ-028",
+        "REQ-029",
+        "REQ-030",
+        "REQ-043",
+        "REQ-062",
+        "REQ-063",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-011",
+        "T-012",
+        "T-017",
+        "T-018",
+        "T-045",
+        "T-046",
+        "T-055",
+        "T-056",
+        "T-057",
+        "T-058",
+        "T-059",
+        "T-060",
+        "T-085",
+        "T-086",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-139",
+        "T-140"
+      ]
+    },
+    {
+      "id": "W-23",
+      "phase": "M4",
+      "title": "共享編譯快取",
+      "dependencies": [
+        "W-16",
+        "W-17",
+        "W-22"
+      ],
+      "owner_role": "編譯服務維護者",
+      "implementation_steps": [
+        "定義完整快取指紋與唯讀Program。",
+        "實作合併編譯、容量、逐出與磁碟驗證。",
+        "測試取消等待者、檔案更新與多租戶邊界。"
+      ],
+      "deliverables": [
+        "快取",
+        "磁碟格式",
+        "並行命中／逐出測試"
+      ],
+      "exit_gate": "無請求資料進入共用Program，過期與損毀快取不能執行。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-006",
+        "REQ-013",
+        "REQ-023",
+        "REQ-028",
+        "REQ-061",
+        "REQ-062",
+        "REQ-063",
+        "REQ-064"
+      ],
+      "tests": [
+        "T-011",
+        "T-012",
+        "T-025",
+        "T-026",
+        "T-045",
+        "T-046",
+        "T-055",
+        "T-056",
+        "T-121",
+        "T-122",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-127",
+        "T-128"
+      ]
+    },
+    {
+      "id": "W-24",
+      "phase": "M4",
+      "title": "正式SDK與HostCall",
+      "dependencies": [
+        "W-08",
+        "W-17",
+        "W-20",
+        "W-22"
+      ],
+      "owner_role": "SDK維護者",
+      "implementation_steps": [
+        "完成Run／Compile／RunFile／Close與型別轉換。",
+        "實作輸出快照、錯誤及受限HostContext。",
+        "加入callback重入、panic、取消與並行範例。"
+      ],
+      "deliverables": [
+        "公開SDK",
+        "可編譯範例",
+        "SDK測試"
+      ],
+      "exit_gate": "單函式使用成立，生命週期與擁有權不依賴聊天說明。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-030",
+        "REQ-033",
+        "REQ-034"
+      ],
+      "tests": [
+        "T-009",
+        "T-010",
+        "T-011",
+        "T-012",
+        "T-013",
+        "T-014",
+        "T-015",
+        "T-016",
+        "T-017",
+        "T-018",
+        "T-059",
+        "T-060",
+        "T-065",
+        "T-066",
+        "T-067",
+        "T-068"
+      ]
+    },
+    {
+      "id": "W-25",
+      "phase": "M4",
+      "title": "FastCGI adapter",
+      "dependencies": [
+        "W-14",
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "owner_role": "Web協定維護者",
+      "implementation_steps": [
+        "審查標準fcgi適用性，補足有界解析與原始參數。",
+        "實作Responder、串流、重用、abort與finish_request。",
+        "完成Apache與Nginx互通矩陣。"
+      ],
+      "deliverables": [
+        "FastCGI服務",
+        "協定fixture",
+        "部署範例"
+      ],
+      "exit_gate": "socket／TCP皆通過互通與負面測試，不將finish等同Execution結束。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-029",
+        "REQ-038",
+        "REQ-039",
+        "REQ-040",
+        "REQ-045",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-057",
+        "T-058",
+        "T-075",
+        "T-076",
+        "T-077",
+        "T-078",
+        "T-079",
+        "T-080",
+        "T-089",
+        "T-090",
+        "T-139",
+        "T-140"
+      ]
+    },
+    {
+      "id": "W-26",
+      "phase": "M4",
+      "title": "內建HTTP與公開目錄路由",
+      "dependencies": [
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "owner_role": "HTTP維護者",
+      "implementation_steps": [
+        "建立Site路由、front controller與安全靜態服務。",
+        "分離管理與流量入口，加入body／連線上限。",
+        "保留原始路徑與回應狀態契約。"
+      ],
+      "deliverables": [
+        "HTTP服務",
+        "靜態資源政策",
+        "HTTP負面測試"
+      ],
+      "exit_gate": "PHP原始碼、設定與非公開目錄不外洩，錯誤不fallback成下載。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-029",
+        "REQ-039",
+        "REQ-040",
+        "REQ-041"
+      ],
+      "tests": [
+        "T-057",
+        "T-058",
+        "T-077",
+        "T-078",
+        "T-079",
+        "T-080",
+        "T-081",
+        "T-082"
+      ]
+    },
+    {
+      "id": "W-27",
+      "phase": "M4",
+      "title": "PHP請求映射與上傳",
+      "dependencies": [
+        "W-20",
+        "W-25",
+        "W-26"
+      ],
+      "owner_role": "Web相容性維護者",
+      "implementation_steps": [
+        "實作PHP欄位解析、超全域與input stream。",
+        "加入multipart暫存登錄與受控移動。",
+        "對照重複鍵、深度、上限與中斷。"
+      ],
+      "deliverables": [
+        "請求解析器",
+        "上傳服務",
+        "資料映射矩陣"
+      ],
+      "exit_gate": "不是直接以Go ParseForm冒充PHP；失敗時所有暫存資源清理。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-039",
+        "REQ-042"
+      ],
+      "tests": [
+        "T-077",
+        "T-078",
+        "T-083",
+        "T-084"
+      ]
+    },
+    {
+      "id": "W-28",
+      "phase": "M4",
+      "title": "Session與共享狀態",
+      "dependencies": [
+        "W-14",
+        "W-20",
+        "W-22",
+        "W-27"
+      ],
+      "owner_role": "Session維護者",
+      "implementation_steps": [
+        "實作格式、儲存、鎖定、ID與Cookie契約。",
+        "處理read-close、寫回失敗與upload progress特殊路徑。",
+        "建立舊PHP共存與格式切換安全測試。"
+      ],
+      "deliverables": [
+        "Session provider",
+        "序列化與鎖定矩陣",
+        "遷移fixture"
+      ],
+      "exit_gate": "同ID不遺失更新，格式與生命週期一致，未驗證功能不回報支援。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-043",
+        "REQ-044",
+        "REQ-045",
+        "REQ-046"
+      ],
+      "tests": [
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-088",
+        "T-089",
+        "T-090",
+        "T-091",
+        "T-092"
+      ]
+    },
+    {
+      "id": "W-29",
+      "phase": "M3",
+      "title": "核心函式與模組登錄",
+      "dependencies": [
+        "W-10",
+        "W-13",
+        "W-17",
+        "W-20"
+      ],
+      "owner_role": "標準函式庫維護者",
+      "implementation_steps": [
+        "從官方stubs建立能力清單。",
+        "實作核心、Reflection、SPL與Web Base所需行為。",
+        "每個模組宣告生命週期、INI、權限與測試。"
+      ],
+      "deliverables": [
+        "模組契約",
+        "核心函式",
+        "能力產生器"
+      ],
+      "exit_gate": "每個已宣告功能有真實實作與測試，stub不被當成完成。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-003",
+        "REQ-012",
+        "REQ-018",
+        "REQ-047"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-023",
+        "T-024",
+        "T-035",
+        "T-036",
+        "T-093",
+        "T-094"
+      ]
+    },
+    {
+      "id": "W-30",
+      "phase": "M5",
+      "title": "字串、編碼與PCRE",
+      "dependencies": [
+        "W-12",
+        "W-20",
+        "W-29"
+      ],
+      "owner_role": "字串／regex維護者",
+      "implementation_steps": [
+        "比較可維持PHP語意的安全實作。",
+        "實作limits、錯誤碼、位元組與Unicode邊界。",
+        "將原生依賴與純Go profile清楚分開。"
+      ],
+      "deliverables": [
+        "字串／編碼／regex功能",
+        "相容矩陣",
+        "長操作限制"
+      ],
+      "exit_gate": "PCRE能力不能由不相容子集假裝，回溯與配置受限。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-026",
+        "REQ-035",
+        "REQ-048"
+      ],
+      "tests": [
+        "T-051",
+        "T-052",
+        "T-069",
+        "T-070",
+        "T-095",
+        "T-096"
+      ]
+    },
+    {
+      "id": "W-31",
+      "phase": "M5",
+      "title": "資料庫與PDO／mysqli",
+      "dependencies": [
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "owner_role": "資料庫相容性維護者",
+      "implementation_steps": [
+        "實作明列驅動、參數、型別、fetch與交易。",
+        "隔離請求連線物件與共享池。",
+        "處理重設、取消、持久連線與SQL安全邊界。"
+      ],
+      "deliverables": [
+        "DB模組",
+        "驅動能力清單",
+        "交易／池重設測試"
+      ],
+      "exit_gate": "不洩漏前一請求狀態，錯誤與資料格式符合宣告profile。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-019",
+        "REQ-033",
+        "REQ-035",
+        "REQ-049"
+      ],
+      "tests": [
+        "T-037",
+        "T-038",
+        "T-065",
+        "T-066",
+        "T-069",
+        "T-070",
+        "T-097",
+        "T-098"
+      ]
+    },
+    {
+      "id": "W-32",
+      "phase": "M5",
+      "title": "HTTP、crypto與網路政策",
+      "dependencies": [
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "owner_role": "網路／密碼模組維護者",
+      "implementation_steps": [
+        "實作宣告的cURL、TLS與crypto相容能力。",
+        "整合DNS、redirect、proxy與實際目的地政策。",
+        "追蹤解壓縮與第三方依賴安全。"
+      ],
+      "deliverables": [
+        "HTTP／crypto模組",
+        "SSRF矩陣",
+        "依賴報告"
+      ],
+      "exit_gate": "不默認停用TLS驗證，不把Go client的子集冒充全部cURL。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-033",
+        "REQ-035",
+        "REQ-037",
+        "REQ-050"
+      ],
+      "tests": [
+        "T-065",
+        "T-066",
+        "T-069",
+        "T-070",
+        "T-073",
+        "T-074",
+        "T-099",
+        "T-100"
+      ]
+    },
+    {
+      "id": "W-33",
+      "phase": "M5",
+      "title": "XML、封存、國際化與網站額外模組",
+      "dependencies": [
+        "W-20",
+        "W-29",
+        "W-30"
+      ],
+      "owner_role": "擴充功能維護者",
+      "implementation_steps": [
+        "依Web Data與網站認證清單實作函式族。",
+        "固定Unicode、時區、資料格式與native依賴。",
+        "防止外部資源、解壓縮與格式解析繞過限制。"
+      ],
+      "deliverables": [
+        "模組集合",
+        "功能級矩陣",
+        "解析與資料版本測試"
+      ],
+      "exit_gate": "每個網站需要的能力具明確實作與證據，未支援項目可定位。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-050"
+      ],
+      "tests": [
+        "T-099",
+        "T-100"
+      ]
+    },
+    {
+      "id": "W-34",
+      "phase": "M5",
+      "title": "Composer與網站認證場景",
+      "dependencies": [
+        "W-18",
+        "W-25",
+        "W-26",
+        "W-27",
+        "W-28",
+        "W-29",
+        "W-30",
+        "W-31",
+        "W-32",
+        "W-33"
+      ],
+      "owner_role": "網站整合維護者",
+      "implementation_steps": [
+        "固定WordPress與Laravel基線及依賴。",
+        "建立資料副本與登入、CRUD、上傳、CLI流程。",
+        "盤點設定與不改碼遷移範圍。"
+      ],
+      "deliverables": [
+        "網站fixture",
+        "認證測試",
+        "遷移差異報告"
+      ],
+      "exit_gate": "主要流程與例外通過，不將基線結果推論至任意外掛。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-003",
+        "REQ-004",
+        "REQ-046",
+        "REQ-051",
+        "REQ-071"
+      ],
+      "tests": [
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-008",
+        "T-091",
+        "T-092",
+        "T-101",
+        "T-102",
+        "T-141",
+        "T-142"
+      ]
+    },
+    {
+      "id": "W-35",
+      "phase": "M4",
+      "title": "CLI、設定與相容檢查入口",
+      "dependencies": [
+        "W-10",
+        "W-20",
+        "W-24",
+        "W-29"
+      ],
+      "owner_role": "CLI／設定維護者",
+      "implementation_steps": [
+        "實作run、serve、fastcgi、check與報告格式。",
+        "定義設定schema、優先序、INI匯入與錯誤。",
+        "輸出預定部署設定，不未授權覆寫正式環境。"
+      ],
+      "deliverables": [
+        "CLI",
+        "設定schema",
+        "相容性報告"
+      ],
+      "exit_gate": "未知設定報錯，安全上限不被ini_set提高，範例可驗證。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-030",
+        "REQ-036",
+        "REQ-039",
+        "REQ-041",
+        "REQ-047",
+        "REQ-068"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-005",
+        "T-006",
+        "T-007",
+        "T-008",
+        "T-059",
+        "T-060",
+        "T-071",
+        "T-072",
+        "T-077",
+        "T-078",
+        "T-081",
+        "T-082",
+        "T-093",
+        "T-094",
+        "T-135",
+        "T-136"
+      ]
+    },
+    {
+      "id": "W-36",
+      "phase": "M6",
+      "title": "單檔封裝與VFS",
+      "dependencies": [
+        "W-18",
+        "W-23",
+        "W-26",
+        "W-35"
+      ],
+      "owner_role": "部署工具維護者",
+      "implementation_steps": [
+        "實作manifest、嵌入資源與路徑映射。",
+        "分離唯讀程式、可寫資料與受控materialize。",
+        "檢查動態未知、祕密、平台與執行依賴。"
+      ],
+      "deliverables": [
+        "build指令",
+        "封裝Runtime",
+        "VFS測試",
+        "依賴報告"
+      ],
+      "exit_gate": "乾淨環境可執行，檔案語意與限制明確，不把單檔誤稱完全無外部依賴。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-013",
+        "REQ-057",
+        "REQ-058",
+        "REQ-059",
+        "REQ-060"
+      ],
+      "tests": [
+        "T-025",
+        "T-026",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-117",
+        "T-118",
+        "T-119",
+        "T-120"
+      ]
+    },
+    {
+      "id": "W-37",
+      "phase": "M6",
+      "title": "LLVM降低與AOT產生",
+      "dependencies": [
+        "W-07",
+        "W-15",
+        "W-17"
+      ],
+      "owner_role": "Native編譯器維護者",
+      "implementation_steps": [
+        "從共用IR產生受控LLVM IR。",
+        "正確處理PHP數值、效果與取消點。",
+        "產生目標原生物件並記錄CPU／ABI與工具指紋。"
+      ],
+      "deliverables": [
+        "LLVM後端",
+        "lowering測試",
+        "原生建置腳本"
+      ],
+      "exit_gate": "LLVM驗證與PHP差異測試通過，不錯用未定義行為假設。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-011",
+        "REQ-052",
+        "REQ-054",
+        "REQ-058",
+        "REQ-061"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-103",
+        "T-104",
+        "T-107",
+        "T-108",
+        "T-115",
+        "T-116",
+        "T-121",
+        "T-122"
+      ]
+    },
+    {
+      "id": "W-38",
+      "phase": "M6",
+      "title": "正式Native Runtime ABI",
+      "dependencies": [
+        "W-07",
+        "W-14",
+        "W-20",
+        "W-24",
+        "W-37"
+      ],
+      "owner_role": "Native Runtime維護者",
+      "implementation_steps": [
+        "完成handle registry、buffer、狀態與回呼。",
+        "驗證生命週期、GC、取消與原生配置計量。",
+        "連結單檔與VM混合執行。"
+      ],
+      "deliverables": [
+        "版本化ABI",
+        "指標／GC壓力測試",
+        "連結矩陣"
+      ],
+      "exit_gate": "無Go指標違規或過期handle，panic／exception不跨界傳播。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-019",
+        "REQ-031",
+        "REQ-052",
+        "REQ-053",
+        "REQ-055",
+        "REQ-058"
+      ],
+      "tests": [
+        "T-037",
+        "T-038",
+        "T-061",
+        "T-062",
+        "T-103",
+        "T-104",
+        "T-105",
+        "T-106",
+        "T-109",
+        "T-110",
+        "T-115",
+        "T-116"
+      ]
+    },
+    {
+      "id": "W-39",
+      "phase": "M6",
+      "title": "後端等價與安全整合",
+      "dependencies": [
+        "W-15",
+        "W-18",
+        "W-19",
+        "W-21",
+        "W-38"
+      ],
+      "owner_role": "後端驗證維護者",
+      "implementation_steps": [
+        "比較VM、AOT與混合路徑。",
+        "驗證guard、回復、來源追蹤與一次性副作用。",
+        "停用未通過的原生功能，發布明確能力。"
+      ],
+      "deliverables": [
+        "等價矩陣",
+        "安全後端報告",
+        "native啟用清單"
+      ],
+      "exit_gate": "相同輸入的可觀察結果與政策一致，沒有重複外部操作。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-011",
+        "REQ-014",
+        "REQ-024",
+        "REQ-027",
+        "REQ-033",
+        "REQ-034",
+        "REQ-054",
+        "REQ-055",
+        "REQ-056",
+        "REQ-074"
+      ],
+      "tests": [
+        "T-021",
+        "T-022",
+        "T-027",
+        "T-028",
+        "T-047",
+        "T-048",
+        "T-053",
+        "T-054",
+        "T-065",
+        "T-066",
+        "T-067",
+        "T-068",
+        "T-107",
+        "T-108",
+        "T-109",
+        "T-110",
+        "T-111",
+        "T-112",
+        "T-147",
+        "T-148"
+      ]
+    },
+    {
+      "id": "W-40",
+      "phase": "M7",
+      "title": "維運、重載、遷移與回復",
+      "dependencies": [
+        "W-22",
+        "W-25",
+        "W-26",
+        "W-28",
+        "W-35"
+      ],
+      "owner_role": "維運整合維護者",
+      "implementation_steps": [
+        "建立readiness、metrics、事件與管理權限。",
+        "實作設定代次、drain、關閉與回復演練。",
+        "提供非破壞的部署設定與資料相容檢查。"
+      ],
+      "deliverables": [
+        "維運指南",
+        "觀測介面",
+        "切換／回復演練證據"
+      ],
+      "exit_gate": "不洩漏祕密，不無授權雙寫／刪資料，流量中可受控重載與關閉。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-028",
+        "REQ-032",
+        "REQ-036",
+        "REQ-046",
+        "REQ-051",
+        "REQ-068",
+        "REQ-069",
+        "REQ-070",
+        "REQ-071",
+        "REQ-078"
+      ],
+      "tests": [
+        "T-055",
+        "T-056",
+        "T-063",
+        "T-064",
+        "T-071",
+        "T-072",
+        "T-091",
+        "T-092",
+        "T-101",
+        "T-102",
+        "T-135",
+        "T-136",
+        "T-137",
+        "T-138",
+        "T-139",
+        "T-140",
+        "T-141",
+        "T-142",
+        "T-155",
+        "T-156"
+      ]
+    },
+    {
+      "id": "W-41",
+      "phase": "M7",
+      "title": "全系統fuzz、race與故障注入",
+      "dependencies": [
+        "W-05",
+        "W-16",
+        "W-17",
+        "W-22",
+        "W-25",
+        "W-27",
+        "W-28",
+        "W-30"
+      ],
+      "owner_role": "安全測試維護者",
+      "implementation_steps": [
+        "覆蓋高風險parser、decoder、資源與交錯。",
+        "建立受控CVE回歸性質測試。",
+        "加入native檢查與長操作超限，保存最小重現案例。"
+      ],
+      "deliverables": [
+        "fuzz corpus",
+        "race／故障報告",
+        "安全回歸清單"
+      ],
+      "exit_gate": "重大缺陷全部處理，任何新失敗留作回歸，不以skip掩蓋。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-010",
+        "REQ-017",
+        "REQ-021",
+        "REQ-022",
+        "REQ-025",
+        "REQ-026",
+        "REQ-027",
+        "REQ-028",
+        "REQ-031",
+        "REQ-032",
+        "REQ-037",
+        "REQ-038",
+        "REQ-040",
+        "REQ-041",
+        "REQ-042",
+        "REQ-043",
+        "REQ-044",
+        "REQ-045",
+        "REQ-048",
+        "REQ-050",
+        "REQ-053",
+        "REQ-062",
+        "REQ-063",
+        "REQ-064",
+        "REQ-067",
+        "REQ-068",
+        "REQ-073",
+        "REQ-075"
+      ],
+      "tests": [
+        "T-019",
+        "T-020",
+        "T-033",
+        "T-034",
+        "T-041",
+        "T-042",
+        "T-043",
+        "T-044",
+        "T-049",
+        "T-050",
+        "T-051",
+        "T-052",
+        "T-053",
+        "T-054",
+        "T-055",
+        "T-056",
+        "T-061",
+        "T-062",
+        "T-063",
+        "T-064",
+        "T-073",
+        "T-074",
+        "T-075",
+        "T-076",
+        "T-079",
+        "T-080",
+        "T-081",
+        "T-082",
+        "T-083",
+        "T-084",
+        "T-085",
+        "T-086",
+        "T-087",
+        "T-088",
+        "T-089",
+        "T-090",
+        "T-095",
+        "T-096",
+        "T-099",
+        "T-100",
+        "T-105",
+        "T-106",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-127",
+        "T-128",
+        "T-133",
+        "T-134",
+        "T-135",
+        "T-136",
+        "T-145",
+        "T-146",
+        "T-149",
+        "T-150"
+      ]
+    },
+    {
+      "id": "W-42",
+      "phase": "M7",
+      "title": "完整相容性與網站驗收",
+      "dependencies": [
+        "W-04",
+        "W-19",
+        "W-29",
+        "W-34",
+        "W-39",
+        "W-41",
+        "W-52",
+        "W-53",
+        "W-56",
+        "W-57",
+        "W-58"
+      ],
+      "owner_role": "相容性審查者",
+      "implementation_steps": [
+        "跑完整宣告範圍與平台矩陣。",
+        "審查所有排除理由、差異與網站結果。",
+        "建立可發布的功能清單與未涵蓋項目。"
+      ],
+      "deliverables": [
+        "相容性證據",
+        "網站認證報告",
+        "允許差異清單"
+      ],
+      "exit_gate": "全部歷史相容目標與第38章真實網站矩陣完整；失敗、未實作、未執行、未知及 runner 缺口不能算通過，未完成時只可交付標示範圍的預覽。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-018",
+        "REQ-038",
+        "REQ-046",
+        "REQ-048",
+        "REQ-049",
+        "REQ-051",
+        "REQ-066",
+        "REQ-071",
+        "REQ-072",
+        "REQ-073",
+        "REQ-075",
+        "REQ-076",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-035",
+        "T-036",
+        "T-075",
+        "T-076",
+        "T-091",
+        "T-092",
+        "T-095",
+        "T-096",
+        "T-097",
+        "T-098",
+        "T-101",
+        "T-102",
+        "T-131",
+        "T-132",
+        "T-141",
+        "T-142",
+        "T-143",
+        "T-144",
+        "T-145",
+        "T-146",
+        "T-149",
+        "T-150",
+        "T-151",
+        "T-152",
+        "T-157",
+        "T-158"
+      ]
+    },
+    {
+      "id": "W-43",
+      "phase": "M7",
+      "title": "效能、容量與長時間測試",
+      "dependencies": [
+        "W-17",
+        "W-22",
+        "W-23",
+        "W-34",
+        "W-39",
+        "W-40",
+        "W-54"
+      ],
+      "owner_role": "效能維護者",
+      "implementation_steps": [
+        "固定完整競品與 workload 清冊，建立正確性優先的效能與資源測試。",
+        "完成冷熱、並行、過載與長時間測試。",
+        "據實選擇最佳化預設與資源上限建議。"
+      ],
+      "deliverables": [
+        "benchmark資料",
+        "長時間報告",
+        "最佳化ADR"
+      ],
+      "exit_gate": "達成第23章條件，改善有證據且不犧牲正確性或安全。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-023",
+        "REQ-056",
+        "REQ-074",
+        "REQ-075",
+        "REQ-077"
+      ],
+      "tests": [
+        "T-045",
+        "T-046",
+        "T-111",
+        "T-112",
+        "T-147",
+        "T-148",
+        "T-149",
+        "T-150",
+        "T-153",
+        "T-154"
+      ]
+    },
+    {
+      "id": "W-44",
+      "phase": "M7",
+      "title": "供應鏈與發布候選",
+      "dependencies": [
+        "W-02",
+        "W-03",
+        "W-36",
+        "W-40",
+        "W-42",
+        "W-43"
+      ],
+      "owner_role": "發布維護者",
+      "implementation_steps": [
+        "產生依賴／授權／安全清單與簽章候選。",
+        "在乾淨目標環境驗證單檔與依賴。",
+        "整理完整交接與發布門檻，等待正式發布授權。"
+      ],
+      "deliverables": [
+        "候選產物",
+        "SBOM／授權清單",
+        "證據包",
+        "發布說明"
+      ],
+      "exit_gate": "所有必需閘門通過，未取得發布授權前不對外發布。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-001",
+        "REQ-047",
+        "REQ-050",
+        "REQ-052",
+        "REQ-057",
+        "REQ-058",
+        "REQ-060",
+        "REQ-064",
+        "REQ-067",
+        "REQ-076",
+        "REQ-078",
+        "REQ-079"
+      ],
+      "tests": [
+        "T-001",
+        "T-002",
+        "T-093",
+        "T-094",
+        "T-099",
+        "T-100",
+        "T-103",
+        "T-104",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-119",
+        "T-120",
+        "T-127",
+        "T-128",
+        "T-133",
+        "T-134",
+        "T-151",
+        "T-152",
+        "T-155",
+        "T-156",
+        "T-157",
+        "T-158"
+      ]
+    },
+    {
+      "id": "W-45",
+      "phase": "M8",
+      "title": "上游版本追蹤",
+      "dependencies": [
+        "W-02",
+        "W-03",
+        "W-04",
+        "W-10"
+      ],
+      "owner_role": "語言演進維護者",
+      "implementation_steps": [
+        "定期比對官方tag、stubs、語法、測試與公告。",
+        "產生差異分類、影響工作與新profile測試。",
+        "保留舊profile回歸與安全例外。"
+      ],
+      "deliverables": [
+        "更新流水線",
+        "差異報告",
+        "多版本矩陣"
+      ],
+      "exit_gate": "發現與驗證自動化可重現，不把簽章同步等同實作完成。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-065",
+        "REQ-066",
+        "REQ-067"
+      ],
+      "tests": [
+        "T-129",
+        "T-130",
+        "T-131",
+        "T-132",
+        "T-133",
+        "T-134"
+      ]
+    },
+    {
+      "id": "W-46",
+      "phase": "M5",
+      "title": "高風險worker隔離模式",
+      "dependencies": [
+        "W-05",
+        "W-20",
+        "W-22",
+        "W-24"
+      ],
+      "owner_role": "隔離／平台維護者",
+      "implementation_steps": [
+        "設計受限程序IPC與能力序列化。",
+        "施加OS檔案、網路與硬性資源限制。",
+        "驗證強制終止、原生崩潰與資料清理。"
+      ],
+      "deliverables": [
+        "隔離執行器",
+        "IPC契約",
+        "硬性限制測試"
+      ],
+      "exit_gate": "控制程序不受worker失控影響；同程序模式不冒稱具有同等保證。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-009",
+        "REQ-032",
+        "REQ-070"
+      ],
+      "tests": [
+        "T-017",
+        "T-018",
+        "T-063",
+        "T-064",
+        "T-139",
+        "T-140"
+      ]
+    },
+    {
+      "id": "W-47",
+      "phase": "M8",
+      "title": "可選JIT實驗",
+      "dependencies": [
+        "W-37",
+        "W-38",
+        "W-39",
+        "W-43"
+      ],
+      "owner_role": "Native後端維護者",
+      "implementation_steps": [
+        "建立W^X、code cache、平台簽章與CPU偵測。",
+        "比較編譯成本與熱門區段收益。",
+        "驗證取消、失效、回復與後端安全等價。"
+      ],
+      "deliverables": [
+        "JIT實驗",
+        "平台限制",
+        "啟用或拒絕ADR"
+      ],
+      "exit_gate": "只有通過全部安全／語意／效能門檻的平台與功能可啟用。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-056"
+      ],
+      "tests": [
+        "T-111",
+        "T-112"
+      ]
+    },
+    {
+      "id": "W-48",
+      "phase": "M8",
+      "title": "自適應接納與池化實驗",
+      "dependencies": [
+        "W-22",
+        "W-23",
+        "W-41",
+        "W-43"
+      ],
+      "owner_role": "並行／效能維護者",
+      "implementation_steps": [
+        "以固定上限為基準研究控制訊號與反饋。",
+        "測試負載震盪、飢餓、尖峰與大buffer保留。",
+        "保留停用與退回固定策略的方式。"
+      ],
+      "deliverables": [
+        "自適應策略實驗",
+        "池化證據",
+        "預設決策ADR"
+      ],
+      "exit_gate": "有代表性改善且不增加污染、失控資源或容量震盪。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-023",
+        "REQ-029"
+      ],
+      "tests": [
+        "T-045",
+        "T-046",
+        "T-057",
+        "T-058"
+      ]
+    },
+    {
+      "id": "W-49",
+      "phase": "M0",
+      "title": "全歷史版本清冊與隔離參考環境",
+      "dependencies": [
+        "W-01",
+        "W-02",
+        "W-03"
+      ],
+      "owner_role": "歷史相容性維護者",
+      "implementation_steps": [
+        "交叉盤點 PHP Tools 第一版、FI、Construction Kit、PHP/FI 及後續全部發行，保存每個實際來源及缺失。",
+        "建立無外網、無憑證、唯讀來源與受限資源的歷史引擎建置環境，保留必要建置修補及其語意影響分析。",
+        "產生精確版本、平台與測試來源清冊；區分官方發布、開發快照、來源缺失及重建狀態。"
+      ],
+      "deliverables": [
+        "歷史發行清冊",
+        "oracle 來源鎖與建置環境",
+        "缺失證據清單"
+      ],
+      "exit_gate": "每一個發現版本有獨立紀錄；沒有以 php-108 封存檔代替第一版或以主版本別名吞掉修補版。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-002",
+        "REQ-080",
+        "REQ-081",
+        "REQ-082",
+        "REQ-084",
+        "REQ-085"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-159",
+        "T-160",
+        "T-161",
+        "T-162",
+        "T-163",
+        "T-164",
+        "T-167",
+        "T-168",
+        "T-169",
+        "T-170"
+      ]
+    },
+    {
+      "id": "W-50",
+      "phase": "M2",
+      "title": "早期 PHP Tools／PHP-FI 前端與工具語意",
+      "dependencies": [
+        "W-49",
+        "W-11",
+        "W-17"
+      ],
+      "owner_role": "歷史前端維護者",
+      "implementation_steps": [
+        "根據最早期來源與文件實作獨立 lexer／parser／工具適配器，轉成共用語意表示。",
+        "以原始頁面與歷史工具流程比較輸出、表單輸入、日誌、計數器與檔案副作用。",
+        "保存來源位置、版本識別與政策檢查，不用現代 parser 靜默略過舊語法。"
+      ],
+      "deliverables": [
+        "早期前端",
+        "工具行為測試",
+        "歷史來源對照報告"
+      ],
+      "exit_gate": "具有來源的全部早期行為已重播；缺失原始版本仍明列未驗證，不冒充完成。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-082",
+        "REQ-095"
+      ],
+      "tests": [
+        "T-163",
+        "T-164",
+        "T-189",
+        "T-190"
+      ]
+    },
+    {
+      "id": "W-51",
+      "phase": "M3",
+      "title": "完整版本與平台語意規則",
+      "dependencies": [
+        "W-49",
+        "W-06",
+        "W-07",
+        "W-10",
+        "W-19"
+      ],
+      "owner_role": "版本語意維護者",
+      "implementation_steps": [
+        "建立 PHP 3／4／5／7／8 與後續版本的規則差異圖，納入公開預覽與修補差異。",
+        "處理整數寬度、物件複製／參照、比較、錯誤、函式與設定變更，不將 Go 宿主語意硬套。",
+        "為共同 helper 建立跨版本差異回歸；別名解析固定精確 profile。"
+      ],
+      "deliverables": [
+        "版本規則套件",
+        "平台語意測試",
+        "完整差異矩陣"
+      ],
+      "exit_gate": "所有清冊項目的必要行為可追溯；共享最佳化不改變其他版本行為。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-002",
+        "REQ-081",
+        "REQ-083",
+        "REQ-084",
+        "REQ-087"
+      ],
+      "tests": [
+        "T-003",
+        "T-004",
+        "T-161",
+        "T-162",
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168",
+        "T-173",
+        "T-174"
+      ]
+    },
+    {
+      "id": "W-52",
+      "phase": "M5",
+      "title": "歷史內建函式與擴充相容",
+      "dependencies": [
+        "W-50",
+        "W-51",
+        "W-29",
+        "W-30",
+        "W-31",
+        "W-32",
+        "W-33"
+      ],
+      "owner_role": "模組相容性維護者",
+      "implementation_steps": [
+        "建立歷史函式／常數／INI／擴充功能的出現與移除清冊。",
+        "以受控 Go 模組或獨立 native profile 實作必要語意，不提供會回傳假成功的空函式。",
+        "驗證舊資料庫協定、字元編碼、PCRE／POSIX 正規表示式、Session 與可持久化資料。"
+      ],
+      "deliverables": [
+        "歷史模組能力表",
+        "功能級相容測試",
+        "安全差異報告"
+      ],
+      "exit_gate": "舊網站依賴皆有實作與證據；外部服務不可取得時明列 blocker。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-083",
+        "REQ-084",
+        "REQ-086",
+        "REQ-095"
+      ],
+      "tests": [
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168",
+        "T-171",
+        "T-172",
+        "T-189",
+        "T-190"
+      ]
+    },
+    {
+      "id": "W-53",
+      "phase": "M5",
+      "title": "混合版本並行與安全契約",
+      "dependencies": [
+        "W-49",
+        "W-50",
+        "W-51",
+        "W-22",
+        "W-23",
+        "W-41"
+      ],
+      "owner_role": "並行／安全維護者",
+      "implementation_steps": [
+        "驗證不同 PHP 版本共享 Engine 時的 Execution、快取、配置、符號、Session 及 callback 邊界。",
+        "為危險舊功能制定最小權限實作、差異說明及受控故障測試。",
+        "在多版本交錯與取消情境驗證無跨請求資料外洩；歷史 oracle 永遠不接正式流量。"
+      ],
+      "deliverables": [
+        "跨版本隔離報告",
+        "舊功能安全案例",
+        "差異登錄"
+      ],
+      "exit_gate": "沒有混用狀態或政策旁路；無法兼得的條件有明確阻擋與待決策紀錄。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-081",
+        "REQ-085",
+        "REQ-086",
+        "REQ-087",
+        "REQ-097"
+      ],
+      "tests": [
+        "T-161",
+        "T-162",
+        "T-169",
+        "T-170",
+        "T-171",
+        "T-172",
+        "T-173",
+        "T-174",
+        "T-193",
+        "T-194"
+      ]
+    },
+    {
+      "id": "W-54",
+      "phase": "M0",
+      "title": "全競品與工作負載登錄",
+      "dependencies": [
+        "W-01",
+        "W-02",
+        "W-03"
+      ],
+      "owner_role": "比較研究維護者",
+      "implementation_steps": [
+        "以可重跑的搜尋來源建立現行與歷史 PHP 編譯器、引擎及網站服務清冊，分開類別。",
+        "固定比較版本與最佳合理設定，保留不能建置或不能跑相同程式的理由。",
+        "預先定義 workload、正確性對照、適用矩陣、資源及安全條件，禁止量測後刪掉失利格。"
+      ],
+      "deliverables": [
+        "競品清冊",
+        "基準矩陣",
+        "可比性與未完成登錄"
+      ],
+      "exit_gate": "清冊經審查且有覆蓋缺口追蹤；尚未執行不會被標成勝出。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-074",
+        "REQ-088",
+        "REQ-089",
+        "REQ-090"
+      ],
+      "tests": [
+        "T-147",
+        "T-148",
+        "T-175",
+        "T-176",
+        "T-177",
+        "T-178",
+        "T-179",
+        "T-180"
+      ]
+    },
+    {
+      "id": "W-55",
+      "phase": "M7",
+      "title": "嚴格效能比較與統計驗收",
+      "dependencies": [
+        "W-54",
+        "W-43",
+        "W-56",
+        "W-57",
+        "W-58"
+      ],
+      "owner_role": "效能工程師",
+      "implementation_steps": [
+        "建立正確性優先的可重現比較 runner，分開單請求、並行、冷熱、CPU 與真實外部服務負載。",
+        "以成對隨機化多輪樣本計算信賴區間，控制多重比較並保留所有負面結果。",
+        "執行第37章逐格最快閘門，提供原始樣本、重播命令、容量及尾端延遲。"
+      ],
+      "deliverables": [
+        "原始測量資料",
+        "逐格比較矩陣",
+        "最快目標達成報告"
+      ],
+      "exit_gate": "所有必要可比格嚴格勝出且無未測可比競品才可宣稱目標達成；否則保持未達成。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-074",
+        "REQ-089",
+        "REQ-090",
+        "REQ-091",
+        "REQ-092"
+      ],
+      "tests": [
+        "T-147",
+        "T-148",
+        "T-177",
+        "T-178",
+        "T-179",
+        "T-180",
+        "T-181",
+        "T-182",
+        "T-183",
+        "T-184"
+      ]
+    },
+    {
+      "id": "W-56",
+      "phase": "M5",
+      "title": "WordPress 與 WooCommerce 真實驗收",
+      "dependencies": [
+        "W-34",
+        "W-40",
+        "W-41"
+      ],
+      "owner_role": "WordPress 測試維護者",
+      "implementation_steps": [
+        "鎖定多個 WordPress 世代、WooCommerce、官方測試、佈景與資料庫 fixture。",
+        "建立實際 HTTP／瀏覽器、CLI、外掛、媒體、權限、交易及排程工作流，不修改應用來源以迎合引擎。",
+        "跨 Apache／Nginx、內建 HTTP、可寫與封裝模式比較，執行升級、故障與回復。"
+      ],
+      "deliverables": [
+        "WordPress 完整驗收套件",
+        "資料不變條件",
+        "部署矩陣與證據"
+      ],
+      "exit_gate": "全部必測流程及錯誤情境通過；首頁成功或僅內部 mock 不構成認證。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-091",
+        "REQ-093",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-185",
+        "T-186",
+        "T-191",
+        "T-192"
+      ]
+    },
+    {
+      "id": "W-57",
+      "phase": "M5",
+      "title": "Laravel 與 BookStack 真實驗收",
+      "dependencies": [
+        "W-34",
+        "W-40",
+        "W-41"
+      ],
+      "owner_role": "Laravel 測試維護者",
+      "implementation_steps": [
+        "鎖定框架測試與至少一個非展示用實際應用 BookStack，保存 Composer lock 與外部服務版本。",
+        "測試真實 HTTP、瀏覽器、登入、權限、資料庫、模板、queue、schedule、CLI、加密及檔案。",
+        "驗證不同 PHP 世代的合法配對、框架快取與 Phego 快取失效、升級回復與錯誤清理。"
+      ],
+      "deliverables": [
+        "Laravel／BookStack 驗收套件",
+        "服務與資料 fixture",
+        "真實 HTTP 及 CLI 證據"
+      ],
+      "exit_gate": "框架測試與應用測試分開通過；空專案不能替代實際應用。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-091",
+        "REQ-094",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-187",
+        "T-188",
+        "T-191",
+        "T-192"
+      ]
+    },
+    {
+      "id": "W-58",
+      "phase": "M5",
+      "title": "多生態與歷史專案驗收",
+      "dependencies": [
+        "W-50",
+        "W-52",
+        "W-34",
+        "W-40"
+      ],
+      "owner_role": "生態相容性維護者",
+      "implementation_steps": [
+        "納入 Drupal、Symfony 應用、MediaWiki、phpMyAdmin、phpBB 與可取得的早期真實站台。",
+        "按官方 PHP 需求及歷史資料選擇合法版本配對，保留來源、授權與不可取得項目。",
+        "重播跨框架關鍵工作、資料交換與維運操作，審查未知差異。"
+      ],
+      "deliverables": [
+        "應用來源清冊",
+        "合法版本配對表",
+        "跨生態驗收證據"
+      ],
+      "exit_gate": "沒有用單一框架或合成範例代表全部歷史相容；缺失仍阻擋相應完整認證。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-091",
+        "REQ-095",
+        "REQ-096"
+      ],
+      "tests": [
+        "T-181",
+        "T-182",
+        "T-189",
+        "T-190",
+        "T-191",
+        "T-192"
+      ]
+    },
+    {
+      "id": "W-59",
+      "phase": "M7",
+      "title": "資料完整、故障、長時間與遷移驗收",
+      "dependencies": [
+        "W-53",
+        "W-56",
+        "W-57",
+        "W-58",
+        "W-41"
+      ],
+      "owner_role": "可靠性審查者",
+      "implementation_steps": [
+        "在隔離資料副本上跑至少24小時及100萬混合請求，追蹤每類資料不變條件。",
+        "注入取消、重載、資料庫斷線、Session 競爭、磁碟／配額失敗及程序隔離終止。",
+        "對每個必測站台完成原 PHP 切換至 Phego 與切回演練，保留未解決缺陷與副作用證據。"
+      ],
+      "deliverables": [
+        "長測原始資料",
+        "資料完整報告",
+        "遷移／回復證據",
+        "缺陷清冊"
+      ],
+      "exit_gate": "無未處理資料不一致、污染、無界資源成長或無法回復情形；不能以服務未崩潰代替成功。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-086",
+        "REQ-093",
+        "REQ-094",
+        "REQ-096",
+        "REQ-097",
+        "REQ-098"
+      ],
+      "tests": [
+        "T-171",
+        "T-172",
+        "T-185",
+        "T-186",
+        "T-187",
+        "T-188",
+        "T-191",
+        "T-192",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196"
+      ]
+    },
+    {
+      "id": "W-60",
+      "phase": "M7",
+      "title": "全目標認證與專案文件發布",
+      "dependencies": [
+        "W-49",
+        "W-52",
+        "W-54",
+        "W-55",
+        "W-59",
+        "W-44"
+      ],
+      "owner_role": "整合／發布維護者",
+      "implementation_steps": [
+        "維護英文 README、MIT、來源授權與本版規格；本次文件準備及已授權推送不必等待引擎實作。",
+        "對最終發布核對全部歷史版本、競品比較、真實網站與安全門檻，所有證據綁定同一候選 commit。",
+        "區分文件發布、實驗引擎與完整認證；任何未知、未測、未解決缺陷或失利保留真實狀態。"
+      ],
+      "deliverables": [
+        "MIT 與英文 README",
+        "全目標驗收報告",
+        "可重現證據包",
+        "發布授權紀錄"
+      ],
+      "exit_gate": "完整產品必須全部目標閘門通過；文件可先發布但不得包裝成已完成引擎。",
+      "status": "not_started",
+      "requirements": [
+        "REQ-078",
+        "REQ-080",
+        "REQ-088",
+        "REQ-090",
+        "REQ-092",
+        "REQ-097",
+        "REQ-098",
+        "REQ-099",
+        "REQ-100"
+      ],
+      "tests": [
+        "T-155",
+        "T-156",
+        "T-159",
+        "T-160",
+        "T-175",
+        "T-176",
+        "T-179",
+        "T-180",
+        "T-183",
+        "T-184",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196",
+        "T-197",
+        "T-198",
+        "T-199",
+        "T-200"
+      ]
+    }
+  ]
+}

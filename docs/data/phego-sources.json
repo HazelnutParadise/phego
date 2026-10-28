@@ -1,0 +1,515 @@
+[
+  {
+    "id": "R01",
+    "title": "PHP 2026 年公告",
+    "publisher": "PHP",
+    "url": "https://www.php.net/archive/2026.php/",
+    "purpose": "PHP 穩定／預覽版與 2026 年 10 月安全公告。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R02",
+    "title": "PHP 8.5.12 發布公告",
+    "publisher": "PHP",
+    "url": "https://www.php.net/releases/8_5_12.php",
+    "purpose": "語言測試基準的發布來源。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R03",
+    "title": "Today’s PHP security release and how we’re strengthening PHP security",
+    "publisher": "The PHP Foundation",
+    "url": "https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/",
+    "purpose": "初始化失敗、資源清理與安全設計背景。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R04",
+    "title": "Running tests",
+    "publisher": "php-src 官方文件",
+    "url": "https://php.github.io/php-src/miscellaneous/running-tests.html",
+    "purpose": "官方 PHPT 執行方法與測試環境。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R05",
+    "title": "Stubs",
+    "publisher": "php-src 官方文件",
+    "url": "https://php.github.io/php-src/miscellaneous/stubs.html",
+    "purpose": "函式宣告與 stub 的用途及限制。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R06",
+    "title": "A Guide to the Go Garbage Collector",
+    "publisher": "Go",
+    "url": "https://go.dev/doc/gc-guide",
+    "purpose": "GC、軟性記憶體限制與程序層資源。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R07",
+    "title": "The Go Memory Model",
+    "publisher": "Go",
+    "url": "https://go.dev/ref/mem",
+    "purpose": "並行存取、同步與競態的語言基礎。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R08",
+    "title": "context package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/context",
+    "purpose": "取消與期限傳遞的契約。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R09",
+    "title": "Command cgo",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/cmd/cgo",
+    "purpose": "跨語言指標、pinning 與呼叫規則。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R10",
+    "title": "runtime/cgo package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/runtime/cgo",
+    "purpose": "Handle 等跨界物件識別機制。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R11",
+    "title": "net/http/fcgi package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/net/http/fcgi",
+    "purpose": "FastCGI responder 與 ProcessEnv 介面。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R12",
+    "title": "Arrays",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.types.array.php",
+    "purpose": "有序陣列、鍵與值的語言行為。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R13",
+    "title": "Objects and references",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.oop5.references.php",
+    "purpose": "物件識別與 PHP 參照的區別。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R14",
+    "title": "Constructors and Destructors",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.oop5.decon.php",
+    "purpose": "解構與可觀察生命週期行為。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R15",
+    "title": "The WeakMap class",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/class.weakmap.php",
+    "purpose": "弱鍵與物件生命週期。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R16",
+    "title": "Fibers",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.fibers.php",
+    "purpose": "協作式暫停、恢復與控制流程。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R17",
+    "title": "Integers",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.types.integer.php",
+    "purpose": "整數範圍、平台差異與溢位語意。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R18",
+    "title": "Garbage Collection with LLVM",
+    "publisher": "LLVM",
+    "url": "https://llvm.org/docs/GarbageCollection.html",
+    "purpose": "LLVM 與語言 Runtime 的垃圾回收責任。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R19",
+    "title": "LLVM Language Reference Manual",
+    "publisher": "LLVM",
+    "url": "https://llvm.org/docs/LangRef.html",
+    "purpose": "IR、最佳化前提、poison 與語意限制。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R20",
+    "title": "Traversal-resistant file APIs",
+    "publisher": "Go",
+    "url": "https://go.dev/blog/osroot",
+    "purpose": "以目錄根為界的檔案存取與路徑穿越防護。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R21",
+    "title": "FastCGI Specification",
+    "publisher": "FastCGI 原始規格存檔",
+    "url": "https://fastcgi-archives.github.io/FastCGI_Specification.html",
+    "purpose": "協定記錄、請求結束、角色與管理訊息。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R22",
+    "title": "Module ngx_http_fastcgi_module",
+    "publisher": "NGINX",
+    "url": "https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html",
+    "purpose": "FastCGI 連接、參數與 Web 伺服器整合。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R23",
+    "title": "Apache Module mod_proxy_fcgi",
+    "publisher": "Apache HTTP Server",
+    "url": "https://httpd.apache.org/docs/2.4/mod/mod_proxy_fcgi.html",
+    "purpose": "FastCGI 代理、BackendType 與路徑參數。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R24",
+    "title": "session_start",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/function.session-start.php",
+    "purpose": "Session 載入、處理器與生命週期介面。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R25",
+    "title": "register_shutdown_function",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/function.register-shutdown-function.php",
+    "purpose": "結束 callback 與清理行為。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R26",
+    "title": "fastcgi_finish_request",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/function.fastcgi-finish-request.php",
+    "purpose": "回應結束與後續程式執行的區別。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R27",
+    "title": "PCRE Introduction",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/regexp.introduction.php",
+    "purpose": "PHP 正規表示式的 PCRE 基礎。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R28",
+    "title": "regexp package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/regexp",
+    "purpose": "Go 正規表示式語法與執行模型。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R29",
+    "title": "Go Fuzzing",
+    "publisher": "Go",
+    "url": "https://go.dev/doc/security/fuzz/",
+    "purpose": "原生模糊測試工具。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R30",
+    "title": "Data Race Detector",
+    "publisher": "Go",
+    "url": "https://go.dev/doc/articles/race_detector",
+    "purpose": "競態檢查與使用限制。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R31",
+    "title": "Server-Side Request Forgery Prevention Cheat Sheet",
+    "publisher": "OWASP",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+    "purpose": "SSRF、DNS、重新導向與網路允許規則。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R32",
+    "title": "Cross Site Scripting Prevention Cheat Sheet",
+    "publisher": "OWASP",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+    "purpose": "輸出位置與編碼脈絡。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R33",
+    "title": "The Go Programming Language Specification",
+    "publisher": "Go",
+    "url": "https://go.dev/ref/spec",
+    "purpose": "宿主語言型別與運算規則。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R34",
+    "title": "Supported Versions",
+    "publisher": "PHP",
+    "url": "https://www.php.net/supported-versions.php",
+    "purpose": "上游維護階段與版本政策。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R35",
+    "title": "zend_language_parser.y",
+    "publisher": "php-src",
+    "url": "https://github.com/php/php-src/blob/master/Zend/zend_language_parser.y",
+    "purpose": "語法差異追蹤來源；實作必須鎖定 commit。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R36",
+    "title": "Variable scope",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/language.variables.scope.php",
+    "purpose": "PHP 全域與 static 變數語意。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R37",
+    "title": "embed package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/embed",
+    "purpose": "將指定資源嵌入 Go 程式。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R38",
+    "title": "database/sql package",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/database/sql",
+    "purpose": "連線池、交易與取消介面。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R39",
+    "title": "go command",
+    "publisher": "Go",
+    "url": "https://pkg.go.dev/cmd/go",
+    "purpose": "模組、建置與工具鏈行為。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R40",
+    "title": "llc: LLVM static compiler",
+    "publisher": "LLVM",
+    "url": "https://llvm.org/docs/CommandGuide/llc.html",
+    "purpose": "由 LLVM IR 產生目標程式碼。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R41",
+    "title": "go-llvm",
+    "publisher": "TinyGo 專案",
+    "url": "https://github.com/tinygo-org/go-llvm",
+    "purpose": "Go LLVM 綁定候選，不代表本計劃已採用或通過驗證。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R42",
+    "title": "All releases",
+    "publisher": "Go",
+    "url": "https://go.dev/dl/",
+    "purpose": "Go 工具鏈發布版與下載摘要。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R43",
+    "title": "SQL Injection",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/security.database.sql-injection.php",
+    "purpose": "SQL 資料與結構分離的安全背景。",
+    "checked_on": "2026-10-28",
+    "provenance": "carried_from_v1.0_source_register"
+  },
+  {
+    "id": "R44",
+    "title": "History of PHP",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/history.php.php",
+    "purpose": "第一代工具、FI、PHP/FI 與後續語言世代；PHP 6 歷史。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R45",
+    "title": "PHP Release Archives: PHP 1",
+    "publisher": "PHP",
+    "url": "https://museum.php.net/php1/",
+    "purpose": "歷史來源證據；目前頁面顯示 php-108，不等同第一個公開版本。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R46",
+    "title": "PHP/FI Version 2.0 Documentation",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/phpfi2.php",
+    "purpose": "歷史語法、內建功能、CGI 與模組行為。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R47",
+    "title": "PHP Releases",
+    "publisher": "PHP",
+    "url": "https://www.php.net/releases/",
+    "purpose": "發行來源清冊；不可只依現代手冊補齊歷史版本。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R48",
+    "title": "PHP versions documented in this manual",
+    "publisher": "PHP",
+    "url": "https://www.php.net/manual/en/about.phpversions.php",
+    "purpose": "現代手冊範圍與修補版本仍可能包含行為變更。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R49",
+    "title": "Run Automated Tests",
+    "publisher": "WordPress",
+    "url": "https://make.wordpress.org/test/handbook/get-setup-for-testing/run-automated-tests/",
+    "purpose": "PHP 與瀏覽器端對端測試的官方基礎。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R50",
+    "title": "Testing: Getting Started",
+    "publisher": "Laravel",
+    "url": "https://laravel.com/docs/13.x/testing",
+    "purpose": "框架單元、功能與測試環境。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R51",
+    "title": "Laravel Dusk",
+    "publisher": "Laravel",
+    "url": "https://laravel.com/framework/docs/dusk",
+    "purpose": "真實瀏覽器、HTTP 與資料庫重設的限制。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R52",
+    "title": "KPHP: a PHP compiler",
+    "publisher": "KPHP",
+    "url": "https://vkcom.github.io/kphp/",
+    "purpose": "編譯子集合與公平比較條件。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R53",
+    "title": "Compatibility",
+    "publisher": "PeachPie",
+    "url": "https://docs.peachpie.io/php/compatibility/",
+    "purpose": "獨立 Runtime 與支援範圍盤點。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R54",
+    "title": "Ending PHP Support, and The Future Of Hack",
+    "publisher": "HHVM",
+    "url": "https://hhvm.com/blog/2018/09/12/end-of-php-support-future-of-hack.html",
+    "purpose": "PHP 相容期 HHVM 的版本選擇。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R55",
+    "title": "The MIT License",
+    "publisher": "Open Source Initiative",
+    "url": "https://opensource.org/license/mit",
+    "purpose": "MIT 授權本文與 SPDX 識別。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R56",
+    "title": "BookStack Release v26.09",
+    "publisher": "BookStack",
+    "url": "https://www.bookstackapp.com/blog/bookstack-release-v26-09/",
+    "purpose": "真實應用候選來源，正式測試仍須鎖定實際 tag 與相依。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  },
+  {
+    "id": "R57",
+    "title": "Module API history",
+    "publisher": "PHP",
+    "url": "https://wiki.php.net/internals/module_api_no",
+    "purpose": "早期版本日期與原始名稱的交叉證據。",
+    "checked_on": "2026-10-28",
+    "provenance": "primary_source_verified_for_v1.1"
+  }
+]
