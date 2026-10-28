@@ -10,7 +10,7 @@ import reference_php
 
 class TestAmd64CLI(unittest.TestCase):
     def setUp(self):
-        self.lock = {"schema_version": 1, "php": {"archive_sha256": "a" * 64},
+        self.lock = {"schema_version": 1, "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
             "reference_build": {"platform": "linux/arm64", "image": "buildpack-deps@sha256:" + "b" * 64,
                                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]},
             "additional_reference_builds": [{"platform": "linux/amd64", "image": "buildpack-deps@sha256:" + "c" * 64,

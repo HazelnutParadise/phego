@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import signal
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -20,6 +21,43 @@ _PINNED_IMAGE_RE = re.compile(
     r"(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*@sha256:[0-9a-fA-F]{64}$"
 )
 _CONFIGURE_OPTIONS = ["--disable-all", "--enable-cli", "--without-pear"]
+_VERSION_RE = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+\Z")
+
+# Executed inside the reference container against JSON emitted by the freshly
+# built PHP binary. The same code can be exercised with controlled inputs.
+_PROFILE_VALIDATOR = r'''
+import json, re, sys
+
+def reject(message):
+    print("PHP profile mismatch: " + message, file=sys.stderr)
+    raise SystemExit(1)
+
+try:
+    version, platform = sys.argv[1:]
+    raw = sys.stdin.read(1024 * 1024 + 1)
+    if len(raw) > 1024 * 1024:
+        reject("profile exceeds size limit")
+    profile = json.loads(raw)
+    if not isinstance(profile, dict):
+        reject("profile must be an object")
+    machines = {"linux/arm64": "aarch64", "linux/amd64": "x86_64"}
+    expected = {"version": version, "int_size": 8, "sapi": "cli", "os_family": "Linux",
+                "machine": machines.get(platform), "ini_loaded": "", "ini_scanned": ""}
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version) or platform not in machines:
+        reject("invalid expected version or platform")
+    for key, value in expected.items():
+        if type(profile.get(key)) is not type(value) or profile.get(key) != value:
+            reject(key)
+    for key in ("extensions", "zend_extensions"):
+        values = profile.get(key)
+        if not isinstance(values, list) or len(values) > 1024 or any(
+                not isinstance(item, str) or not item or len(item) > 1024 for item in values):
+            reject(key)
+        profile[key] = sorted(values)
+    print(json.dumps(profile, sort_keys=True, separators=(",", ":")))
+except (ValueError, TypeError, UnicodeError) as exc:
+    reject(str(exc))
+'''
 
 
 def _validate_lock_profile(compat: dict) -> None:
@@ -132,6 +170,9 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: 
     if not isinstance(expected_sha, str) or not _HEX64_RE.fullmatch(expected_sha):
         raise ValueError("php.archive_sha256 must be a 64-hex digit digest")
     expected_sha = expected_sha.lower()
+    version = compat.get("php", {}).get("version")
+    if not isinstance(version, str) or not _VERSION_RE.fullmatch(version):
+        raise ValueError("php.version must be an exact numeric release version")
 
     argv = [
         "docker", "run", "--pull", "never", "--hostname", "phego-reference",
@@ -155,7 +196,21 @@ def _build_command(archive: Path, timeout_seconds: int, compat: dict, platform: 
         "cd \"$1\"; "
         "./configure --disable-all --enable-cli --without-pear; make -j2; "
         "echo '=== php -n -v ==='; ./sapi/cli/php -n -v; "
-        "echo '=== binary sha256 ==='; sha256sum ./sapi/cli/php; "
+        "echo '=== PHP_PROFILE ==='; "
+        + "./sapi/cli/php -n -r " + shlex.quote(
+            '$p=["version"=>PHP_VERSION,"int_size"=>PHP_INT_SIZE,"sapi"=>PHP_SAPI,'
+            '"os_family"=>PHP_OS_FAMILY,"machine"=>php_uname("m"),'
+            '"ini_loaded"=>(string)(php_ini_loaded_file() ?: ""),'
+            '"ini_scanned"=>(string)(php_ini_scanned_files() ?: ""),'
+            '"extensions"=>get_loaded_extensions(),"zend_extensions"=>get_loaded_extensions(true),'
+            '"session_available"=>extension_loaded("session"),'
+            '"session_upload_progress"=>ini_get("session.upload_progress.enabled")];'
+            'echo json_encode($p, JSON_THROW_ON_ERROR);'
+        ) + " > /tmp/phego-profile.json; "
+        + "_PROFILE_VALIDATOR=" + shlex.quote(_PROFILE_VALIDATOR) + "; "
+        + "python3 -c \"$_PROFILE_VALIDATOR\" " + shlex.quote(version) + " " + shlex.quote(platform)
+        + " < /tmp/phego-profile.json; "
+        + "echo '=== binary sha256 ==='; sha256sum ./sapi/cli/php; "
         "TEST_PHP_EXECUTABLE=./sapi/cli/php ./sapi/cli/php -n run-tests.php -P tests/basic/001.phpt"
     )
     argv.append(script)

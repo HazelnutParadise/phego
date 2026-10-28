@@ -70,7 +70,7 @@ class TestBuildCommand(unittest.TestCase):
         self.assertEqual(argv[0], "docker")
 
     def test_unpinned_image_is_rejected(self):
-        lock = {"schema_version": 1, "php": {"archive_sha256": "0" * 64},
+        lock = {"schema_version": 1, "php": {"version": "8.5.12", "archive_sha256": "0" * 64},
                 "reference_build": {"image": "--privileged", "platform": "linux/arm64",
                                     "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]}}
         with tempfile.TemporaryDirectory() as td, patch("reference_php._load_compat", return_value=lock):
@@ -80,7 +80,7 @@ class TestBuildCommand(unittest.TestCase):
     def test_uppercase_digest_is_normalized_for_container_verification(self):
         lock = {
             "schema_version": 1,
-            "php": {"archive_sha256": "A" * 64},
+            "php": {"version": "8.5.12", "archive_sha256": "A" * 64},
             "reference_build": {"image": "buildpack-deps@sha256:" + "0" * 64,
                                 "platform": "linux/arm64",
                                 "configure_options": ["--disable-all", "--enable-cli", "--without-pear"]},
@@ -92,7 +92,7 @@ class TestBuildCommand(unittest.TestCase):
     def test_unsupported_lock_profile_is_rejected(self):
         base = {
             "schema_version": 1,
-            "php": {"archive_sha256": "0" * 64},
+            "php": {"version": "8.5.12", "archive_sha256": "0" * 64},
             "reference_build": {
                 "image": "buildpack-deps@sha256:" + "0" * 64,
                 "platform": "linux/arm64",

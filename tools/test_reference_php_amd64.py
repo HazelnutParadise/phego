@@ -16,7 +16,7 @@ class TestReferencePhpAmd64(unittest.TestCase):
     def _make_compat(self):
         return {
             "schema_version": 1,
-            "php": {"archive_sha256": "a" * 64},
+            "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
             "reference_build": {
                 "platform": "linux/arm64",
                 "image": "buildpack-deps@sha256:" + "b" * 64,

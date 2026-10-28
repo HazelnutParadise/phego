@@ -16,7 +16,7 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
     def _compat(self):
         return {
             "schema_version": 1,
-            "php": {"archive_sha256": "a" * 64},
+            "php": {"version": "8.5.12", "archive_sha256": "a" * 64},
             "reference_build": {
                 "platform": "linux/arm64",
                 "image": "buildpack-deps@sha256:" + "b" * 64,
@@ -161,6 +161,7 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
             script = script.replace("/input/php.tar.xz", str(mounted))
             script = script.replace(container_copy, str(private))
             script = script.replace("/tmp/build", str(build_dir))
+            script = script.replace("/tmp/phego-profile.json", str(root / "profile.json"))
 
             sha_tool = bin_dir / "sha256sum"
             sha_tool.write_text(
@@ -178,6 +179,14 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
             sha_tool.chmod(0o755)
 
             tar_tool = bin_dir / "tar"
+            php_stub = (
+                '#!/bin/sh\nif [ "$2" = -r ]; then\n'
+                "cat <<'PROFILE'\n"
+                '{"version":"8.5.12","int_size":8,"sapi":"cli",'
+                '"os_family":"Linux","machine":"aarch64","ini_loaded":"",'
+                '"ini_scanned":"","extensions":["Core"],"zend_extensions":[]}\n'
+                'PROFILE\nfi\nexit 0\n'
+            )
             tar_tool.write_text(
                 "#!/usr/bin/env python3\n"
                 "import pathlib, sys\n"
@@ -191,7 +200,7 @@ class TestReferencePhpArchiveRace(unittest.TestCase):
                 "cli = source / 'sapi' / 'cli'\n"
                 "cli.mkdir(parents=True, exist_ok=True)\n"
                 "php = cli / 'php'\n"
-                "php.write_text('#!/bin/sh\\nexit 0\\n')\n"
+                f"php.write_text({php_stub!r})\n"
                 "php.chmod(0o755)\n"
                 "(source / 'run-tests.php').write_text('')\n",
                 encoding="utf-8",

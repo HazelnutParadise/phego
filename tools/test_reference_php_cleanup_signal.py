@@ -21,7 +21,7 @@ CONTAINER_ID = "a" * 64
 def valid_lock(archive):
     return {
         "schema_version": 1,
-        "php": {"archive_sha256": hashlib.sha256(archive).hexdigest()},
+        "php": {"version": "8.5.12", "archive_sha256": hashlib.sha256(archive).hexdigest()},
         "reference_build": {
             "platform": "linux/arm64",
             "configure_options": ["--disable-all", "--enable-cli", "--without-pear"],
