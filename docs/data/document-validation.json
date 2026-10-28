@@ -273,9 +273,14 @@
     "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
     "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
     "docs/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
+    "docs/implementation/W-03.md": "aa23694674786407c63e0f8c140af5ea1f1d664985d85d5eb7be9e8a61188cf2",
+    "docs/implementation/evidence/W-03.json": "9574548b8361fd14a7fc6c7b1abae0b478974ab6caee8be8d826e0469f65a884",
     "docs/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
     "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+    "tools/test_traceability.py": "e3f334f265743334b51ddde7fd4b66fcb63a76dc8f26b258bec0ade38513672b",
+    "tools/test_traceability_profile.py": "f5e36dec9e863306ffdd4ab38f10f19b267e8fe147c01499eca5dddce38c4fc4",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
+    "tools/traceability.py": "338ebeb1db300a86a652e9c2f1cfd764cd3976205b8cabd2cfa5c61ff63d25ca",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
   }
 }
