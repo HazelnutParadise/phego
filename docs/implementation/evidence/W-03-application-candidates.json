@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "observed_on": "2026-10-29",
+  "scope": "Candidate inputs for downstream application acceptance; these are not locked distributions or completed tests.",
+  "requirements": [
+    "REQ-093",
+    "REQ-094"
+  ],
+  "acceptance_scenarios": [
+    "T-185",
+    "T-186",
+    "T-187",
+    "T-188"
+  ],
+  "execution_status": "not_run",
+  "candidates": [
+    {
+      "id": "APP-01",
+      "name": "WordPress",
+      "release": "6.9",
+      "commit": "ec24ee6087dad52052c7d8a11d50c24c9ba89a3b",
+      "file": "wp-includes/version.php",
+      "file_sha256": "e33575e8f1df8f4732ae2826db40237f88e3f75f954a8dd4692bd7f748c9aa75",
+      "source": "https://github.com/WordPress/WordPress/blob/ec24ee6087dad52052c7d8a11d50c24c9ba89a3b/wp-includes/version.php",
+      "declared_minimum_php": "7.2.24",
+      "candidate_php_series": "8.3",
+      "compatibility_source": "https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/",
+      "work_package": "W-56"
+    },
+    {
+      "id": "APP-02",
+      "name": "WooCommerce",
+      "release": "10.8.0",
+      "commit": "eb0531a7a9871ec1a89797b94a59353f0debde97",
+      "file": "plugins/woocommerce/woocommerce.php",
+      "file_sha256": "9483248eb436e463f3fc954744d682bca62a2778ff23f39728176d9286bd9935",
+      "source": "https://github.com/woocommerce/woocommerce/blob/eb0531a7a9871ec1a89797b94a59353f0debde97/plugins/woocommerce/woocommerce.php",
+      "declared_minimum_wordpress": "6.9",
+      "declared_minimum_php": "7.4",
+      "candidate_php_series": "8.3",
+      "recommendations_source": "https://woocommerce.com/document/server-requirements/",
+      "work_package": "W-56"
+    },
+    {
+      "id": "APP-03",
+      "name": "Laravel framework",
+      "release": "v13.39.0",
+      "commit": "d52c3b3129e4c8e213c97cdc68f94b0b7d27f181",
+      "file": "composer.json",
+      "file_sha256": "bb3b4d6c00f90fa5b9b26b503dff9128e0259776fa01593c5eb06a6f26d2e344",
+      "source": "https://github.com/laravel/framework/blob/d52c3b3129e4c8e213c97cdc68f94b0b7d27f181/composer.json",
+      "declared_php_constraint": "^8.3",
+      "candidate_php_series": "8.3",
+      "work_package": "W-57"
+    },
+    {
+      "id": "APP-04",
+      "name": "BookStack",
+      "release": "v26.09.2",
+      "commit": "6265d5667dd6904b7aa0d05a8c60795cf104011b",
+      "file": "composer.json",
+      "file_sha256": "abe57daa0814512736331a9ad19047fbec23db89ae34fc585d289fd2bc856800",
+      "source": "https://github.com/BookStackApp/BookStack/blob/6265d5667dd6904b7aa0d05a8c60795cf104011b/composer.json",
+      "lock_file": "https://github.com/BookStackApp/BookStack/blob/6265d5667dd6904b7aa0d05a8c60795cf104011b/composer.lock",
+      "lock_file_sha256": "1f47ba9c1cb63ca60fe1f0d1d6804994dc0c4d1e47063a4fad2e1d3a6988aaf9",
+      "declared_php_constraint": "^8.2.0",
+      "declared_laravel_constraint": "^v12.26.4",
+      "locked_laravel_version": "v12.70.0",
+      "locked_laravel_commit": "4a4554f4d81f4095c8ff1911ec8a58144b0ed71b",
+      "candidate_php_series": "8.3",
+      "requirements_source": "https://www.bookstackapp.com/docs/admin/installation/",
+      "work_package": "W-57"
+    }
+  ],
+  "pairings": [
+    {
+      "applications": [
+        "APP-01",
+        "APP-02"
+      ],
+      "status": "candidate_not_verified",
+      "reason": "WooCommerce 10.8.0 declares WordPress >=6.9; upstream compatibility tables and recommendations include PHP 8.3. The exact PHP patch, source archives, extensions and database still need validation."
+    },
+    {
+      "applications": [
+        "APP-04"
+      ],
+      "status": "candidate_not_verified",
+      "reason": "BookStack v26.09.2 locks Laravel v12.70.0 and declares PHP ^8.2.0. Resolve the locked dependencies and choose an exact supported PHP patch."
+    },
+    {
+      "applications": [
+        "APP-03"
+      ],
+      "status": "candidate_not_verified",
+      "reason": "Run Laravel 13 framework tests separately; BookStack v26.09.2 requires Laravel 12 and cannot be paired with Laravel 13 under its declared constraint."
+    }
+  ],
+  "next_steps": [
+    "Choose and verify exact PHP patch, platform, database and extension versions for each pairing.",
+    "Retrieve and hash authentic distributions and dependency artifacts; verify licenses and source provenance.",
+    "Prepare isolated reproducible databases, filesystem, sessions and test identities for install, access control, content and upgrade/rollback.",
+    "Use authorized test doubles or sandboxes for payments, email and external effects.",
+    "Record expected observable state and fault cases without modifying application PHP to conceal incompatibility.",
+    "Complete sources and compatible pairings for other ecosystems and historical applications; preserve unavailable evidence as open."
+  ],
+  "limits": [
+    "File digests identify only the fetched individual files, not complete application archives or dependency artifacts.",
+    "The PHP version series is a candidate, not a locked release or proof of compatibility.",
+    "No application, dependency installation, fixture or Phego test has been run."
+  ]
+}
