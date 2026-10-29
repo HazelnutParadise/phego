@@ -1,0 +1,16 @@
+name: PHPT runner checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  phpt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test PHPT parsing and result classification
+        run: python3 -m unittest discover -s tests/runner -p 'test_phpt_*.py'
