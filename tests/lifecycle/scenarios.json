@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope": "Lifecycle model preparation only; no engine or model has executed these cases.",
+  "scope": "Lifecycle fixtures for local model replay; product acceptance remains not run.",
   "requirements": [
     "REQ-022",
     "REQ-073"
