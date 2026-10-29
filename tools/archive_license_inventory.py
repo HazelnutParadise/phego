@@ -229,7 +229,7 @@ def inventory(f, fmt, root):
                     record(member.filename, member.file_size, kind, None)
     else:
         if fmt == 'tar.gz':
-            stream = gzip.GzipFile(fileobj=f)
+            stream = gzip.GzipFile(fileobj=f, mode='rb')
         else:
             try:
                 from compression import zstd
