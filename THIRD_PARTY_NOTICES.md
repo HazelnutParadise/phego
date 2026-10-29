@@ -6,6 +6,6 @@ This specification package does not vendor PHP, WordPress, WooCommerce, Laravel,
 
 Before copying or deriving any third-party code, tests, or fixtures, record its upstream URL, exact version/commit, retrieved artifact digest, applicable license, modifications, and attribution requirements. Maintain the notices with the resulting distribution. Prefer fetching pinned test targets into an isolated test workspace rather than implying that third-party application code is part of the project's MIT grant.
 
-The complete reference register is [docs/data/phego-sources.json](docs/data/phego-sources.json). Sources carried forward from the original specification are distinguished from sources checked for this revision. Source-lock and license-review work is still required before implementation imports or redistributes third-party artifacts.
+The complete reference register is [docs/data/phego-sources.json](docs/data/phego-sources.json). Sources carried forward from the original specification are distinguished from sources checked for this revision. A [partial source lock](compat.lock.json) and [license-document inventory](docs/implementation/evidence/W-02-license-probe.md) are available. Complete source locking and license review are still required before implementation imports or redistributes third-party artifacts.
 
 The MIT license text is available from the [Open Source Initiative](https://opensource.org/license/mit).
