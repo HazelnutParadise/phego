@@ -32,7 +32,7 @@
   ],
   "limits": [
     "Retrieved source observations do not establish a complete public-release inventory or release date.",
-    "No reference engine was built or executed; no PHP behavior or product compatibility was verified.",
+    "This source inspection did not build or execute a reference engine; the subsequent W-49-phpfi20-probe.json records a limited reference run, not product compatibility.",
     "The README and COPYING observations are not a complete licensing review of the archive.",
     "A source archive named 2.0 does not establish the identity or availability of the first PHP Tools release."
   ],
