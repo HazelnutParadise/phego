@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   w03-local-checks:
-    runs-on: ubuntu-24.04
+    runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
