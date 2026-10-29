@@ -51,8 +51,8 @@ def validate(root: Path) -> dict:
         check(name + " unexecuted planning state", all(x.get("status") == status for x in items))
         return {x["id"]: x for x in items if isinstance(x.get("id"), str)}
 
-    reqs = records("phego-requirements.json", "REQ", 100, "planned")
-    tests = records("phego-acceptance-tests.json", "T", 200, "not_run")
+    reqs = records("phego-requirements.json", "REQ", 101, "planned")
+    tests = records("phego-acceptance-tests.json", "T", 202, "not_run")
     works = records("phego-work-packages.json", "W", 60, "not_started")
 
     relation_errors: list[str] = []
@@ -91,6 +91,28 @@ def validate(root: Path) -> dict:
                 relation_errors.append(wid + " lacks " + field)
     check("bidirectional requirement/test/work traceability", not relation_errors,
           "; ".join(relation_errors))
+
+    try:
+        index = json.loads((root / "docs/implementation/github-index.json").read_text(encoding="utf-8"))
+        owners = index["acceptance_owner"]
+        indexed = index["items"]
+        if not isinstance(owners, dict) or not isinstance(indexed, list):
+            raise ValueError("invalid owner registry")
+        assignments = {}
+        for item in indexed:
+            wid = item["id"]
+            for tid in item["acceptance_owner_for"]:
+                assignments.setdefault(tid, []).append(wid)
+        owner_errors = []
+        if set(owners) != set(tests) or set(assignments) != set(tests):
+            owner_errors.append("owner IDs differ from acceptance registry")
+        for tid in tests:
+            wid = owners.get(tid)
+            if wid not in works or assignments.get(tid) != [wid] or tid not in works[wid].get("tests", []):
+                owner_errors.append(f"{tid}: missing, duplicate or invalid owner")
+        check("acceptance owner consistency", not owner_errors, "; ".join(owner_errors))
+    except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
+        check("acceptance owner consistency", False, str(exc))
 
     colors: dict[str, int] = {}
     order: list[str] = []
