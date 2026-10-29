@@ -1,0 +1,40 @@
+name: W-03 local tool checks
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/w03-local-gate.yml'
+      - 'tools/**'
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  w03-local-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Run committed local checks
+        env:
+          EXPECTED_REV: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_REV"
+          python3 tools/w03_local_gate.py --commit "$EXPECTED_REV" --timeout 1200 > "$RUNNER_TEMP/w03-local-gate.json"
+      - name: Retain observed result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: w03-local-gate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/w03-local-gate.json
+          if-no-files-found: warn
+          retention-days: 30

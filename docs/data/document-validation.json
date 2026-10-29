@@ -10,7 +10,7 @@
     "work_packages": 60,
     "decisions": 28,
     "sources": 57,
-    "local_markdown_links": 92,
+    "local_markdown_links": 95,
     "checks": 33,
     "catalogs": {
       "php-history-policy.json": 7,
@@ -255,6 +255,7 @@
   "input_sha256": {
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
     ".github/workflows/docs.yml": "399d56f9590b0aec1b0226ae49e928777f2d54b8487f325ddae1ae9fe4724f1d",
+    ".github/workflows/w03-local-gate.yml": "13ec4abb92277cd69a23154d2416bf171628308b2bdfdce0f1767e3d4763b59e",
     ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
     "AGENTS.md": "e3b1388608d8d977ed39baf2569cc6624cc41e67b4c8d3d98e3d5744424d288c",
     "CHANGELOG.md": "c6320531f024a8616007b30f23b6103d72b778e2fc6754b2028125532625daf8",
@@ -279,10 +280,12 @@
     "docs/implementation/README.md": "e4a2325e661f1f33dffe05fbaf7183dea2e96e2e1361f114ef18987a2ef171ae",
     "docs/implementation/W-01.md": "512c8992cd4976fac1f509603d257f21dfca911171bf2891b5fb84207f5c7ca8",
     "docs/implementation/W-03-commit-check.md": "cbaade48313d422b4e94d9c3d2985d3ebbe2d3d8ffc9efdc2d1c17ab524f97cb",
-    "docs/implementation/W-03.md": "10089b1a67a539e3a921ce743fd4d160fb626eb99c371124e17cec03a8f75323",
+    "docs/implementation/W-03.md": "fc80d17149c49ece60b5da3fe28bffff66f12eedd7e13b0dc4a3ff360e307bbd",
     "docs/implementation/evidence/W-01-contract-review.md": "6bd6fe1bc0053ad15051d6e0dd29cff9b6821edf07e3f9a3c1a558c75ab896d1",
     "docs/implementation/evidence/W-01.json": "09f5f1967fb5f4cd5d491959d94d7fa18a5d71e56921ae906abaa418d39dfd54",
     "docs/implementation/evidence/W-03-application-candidates.json": "5c3f10893a4b484a005af9ac3326096ccc39682cced2977231a213c0eabf1a58",
+    "docs/implementation/evidence/W-03-local-gate-concurrent-failure.json.gz": "90052f2e4e33ba941711410b5439a0099efc7455783ba0cf863c5848de4302bd",
+    "docs/implementation/evidence/W-03-local-gate-timeout-regression-failure.json.gz": "e23164cdd76c75dc080b0bc21c9ffb5f0ca3852551ec9db269566a31bdc913a9",
     "docs/implementation/evidence/W-03-w01-status-claim.json": "b84084834f939d75446d2136e457a98286a956dac01a2c7536ceeb02310cf64f",
     "docs/implementation/evidence/W-03.json": "9574548b8361fd14a7fc6c7b1abae0b478974ab6caee8be8d826e0469f65a884",
     "docs/implementation/github-index.json": "d96ed639e78a56944640faca7ce692ad8f5435e2c4866501345508ba191649d7",
@@ -299,10 +302,16 @@
     "tools/test_traceability.py": "e3f334f265743334b51ddde7fd4b66fcb63a76dc8f26b258bec0ade38513672b",
     "tools/test_traceability_profile.py": "f5e36dec9e863306ffdd4ab38f10f19b267e8fe147c01499eca5dddce38c4fc4",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
+    "tools/test_w03_gate_cli.py": "81d4cf781c55ec0cb69e14dcb75940dd9e64929f7b41b2cf11d2cfc433c7e506",
+    "tools/test_w03_local_gate.py": "b83961766ddd09d533a8c182b28285f899af4af9e6bae0dbd127dd6b82ff2cb9",
+    "tools/test_w03_local_manifest.py": "dd7f712b9eef99066cea3c613e3f44ad542ca54fff0523823e9ffc2e434f76a1",
+    "tools/test_w03_local_snapshot.py": "c58e265091e2a62b325134d47577bc95a2fd4139f7f3a7f632197385ca1fe89e",
     "tools/test_work_status.py": "05713d040a7cfde5e5c7b233b284ae367224cbe3194a1133644f49970792492b",
     "tools/traceability.py": "338ebeb1db300a86a652e9c2f1cfd764cd3976205b8cabd2cfa5c61ff63d25ca",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127",
     "tools/verify_evidence_schema.py": "513bdf5a50794956fadcc9d7cf4a2ad7e65ce272bef24149e8a6895a8796ee75",
+    "tools/w03-local-checks.json": "c1a5e3003eb08732ad9ddb1ac813ef8f4e374c655e1f90e65587054bda4372fa",
+    "tools/w03_local_gate.py": "925807a5d3acc3e7ab27554c65f844d362df7624435c9b68e2dfe762dc1843b8",
     "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3"
   }
 }
