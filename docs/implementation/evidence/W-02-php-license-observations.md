@@ -54,3 +54,41 @@ with tarfile.open(archive, 'r:xz') as source:
 print(f"VERIFIED_FILES {len(inventory['files'])}")
 PYCODE
 ```
+
+## bcmath 原始檔的授權標記
+
+2026-10-29 對同一封存檔的 `ext/bcmath/libbcmath/` 下 28 個一般 `.c`／`.h` 檔案，檢查各檔前 4096 bytes。結果及各檔完整內容摘要記錄於 [標記清單](W-02-bcmath-headers.json)，SHA-256 為 `eded231667ca8efac8415e485624b6d3ba12c97b431b244b31345683ed8d3542`。兩次獨立受限容器執行的輸出逐位元相同。
+
+21 個檔案的標頭文字指定 GNU Lesser General Public License 第 2 版或更新版本，5 個標示 PHP License 3.01，`xsse.h` 標示 MIT License，`config.h` 沒有命中這三種文字。目錄內的 `LICENSE` 文件是 LGPL 2.1 通用文字，不能把該檔名自動套用到目錄內每個檔案。未命中不代表無授權，這些字串比對也不是完整授權分類或分發義務判斷。其他檔案、依賴及實際產物的適用條件仍待審查。
+
+重跑時將 `ARCHIVE` 設為固定來源封存檔的絕對路徑；指令檢查封存檔摘要後只讀取資料，不執行來源。輸出與上述清單比對需逐位元一致。
+
+```sh
+docker run --rm -i --pull never --platform linux/arm64 --network none --read-only \
+  --user 65534:65534 --pids-limit 32 --memory 512m --cpus 1 \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --mount "type=bind,src=$ARCHIVE,dst=/input/source.tar.xz,readonly" \
+  buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3 \
+  python3 - <<'PYCODE'
+import hashlib,json,re,tarfile
+from pathlib import Path
+p=Path('/input/source.tar.xz')
+h=hashlib.sha256()
+with p.open('rb') as stream:
+ for block in iter(lambda: stream.read(1024*1024),b''): h.update(block)
+expected='08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209'
+if h.hexdigest()!=expected: raise SystemExit('source digest mismatch')
+files=[]
+with tarfile.open(p,'r:xz') as a:
+ for m in a:
+  if not m.isfile() or not m.name.startswith('php-8.5.12/ext/bcmath/libbcmath/') or not m.name.endswith(('.c','.h')): continue
+  f=a.extractfile(m); data=f.read(); prefix=' '.join(data[:4096].decode('utf-8','replace').split()); markers=[]
+  if re.search(r'GNU Lesser General Public License.*?version 2 of the License.*?any later version',prefix,re.I): markers.append('LGPL version 2 or later text')
+  if 'version 3.01 of the PHP license' in prefix: markers.append('PHP license 3.01 text')
+  if 'MIT License' in prefix: markers.append('MIT License text')
+  files.append({'path':m.name,'size':len(data),'sha256':hashlib.sha256(data).hexdigest(),'markers':markers})
+files.sort(key=lambda x:x['path'])
+if len(files)!=28 or len({x['path'] for x in files})!=28: raise SystemExit('unexpected source inventory')
+print(json.dumps({'scope':'first 4096 bytes of regular .c/.h files under ext/bcmath/libbcmath; marker matches only, not license classification','archive_sha256':expected,'status':'partial','files':files},indent=2))
+PYCODE
+```
