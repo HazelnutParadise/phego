@@ -22,6 +22,7 @@ _WORKER = r'''
 import json, sys, unittest
 from pathlib import Path
 root, output, encoded = sys.argv[1:]
+sys.path.insert(0, str(Path(root)))
 sys.path.insert(0, str(Path(root) / 'tools'))
 names = json.loads(encoded)
 def emit(value):
@@ -333,6 +334,7 @@ _DISCOVER = r'''
 import json, sys, unittest
 from pathlib import Path
 root = Path(sys.argv[1])
+sys.path.insert(0, str(root))
 suite = unittest.defaultTestLoader.discover(str(root / 'tools'), pattern='test_*.py')
 def flatten(group):
     for item in group:

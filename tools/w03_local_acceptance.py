@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Evaluate W-03 local exit from checks executed in this invocation."""
-from __future__ import annotations
+import sys
+
+if __name__ == '__main__' and not sys.flags.isolated:
+    print('w03_local_acceptance: use python3 -I to run this tool', file=sys.stderr)
+    raise SystemExit(2)
 
 import argparse
 import contextlib
@@ -12,7 +16,6 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
-import sys
 
 
 
@@ -23,6 +26,9 @@ REQUIRED_CASES = frozenset({
     'test_w03_local_gate.ObservedExecutionTests.test_failure_and_skip_are_not_pass',
     'test_w03_gate_cli.LocalGateCLITests.test_imported_results_are_not_accepted',
     'test_w03_local_acceptance.LocalExitTests.test_completed_claim_must_have_matching_finished_observation',
+    'test_w03_local_acceptance.LocalExitTests.test_nonisolated_cli_is_rejected',
+    'test_w03_local_acceptance.LocalExitTests.test_isolated_cli_ignores_uncommitted_shadow_modules',
+    'test_w03_local_gate.ObservedExecutionTests.test_snapshot_package_imports_work_for_discovery_and_execution',
 })
 
 
@@ -83,7 +89,7 @@ def committed_blob(root: Path, commit: str, relative: str) -> bytes:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, epilog=(
-        'Example: python3 tools/w03_local_acceptance.py --commit <full-commit-sha>. '
+        'Example: python3 -I tools/w03_local_acceptance.py --commit <full-commit-sha>. '
         'Executes trusted committed checks; this is not a security sandbox or product certification.'))
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1], help='Git worktree root')
     parser.add_argument('--commit', required=True, help='full lowercase SHA-1 of the trusted source commit')

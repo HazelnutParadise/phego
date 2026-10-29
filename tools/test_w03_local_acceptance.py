@@ -68,7 +68,7 @@ class LocalExitTests(unittest.TestCase):
             git('add', 'evidence.txt')
             git('commit', '-qm', 'unrelated evidence')
             commit = git('rev-parse', 'HEAD')
-            result = subprocess.run([sys.executable, str(script), '--root', str(root), '--commit', commit], capture_output=True, text=True, timeout=30)
+            result = subprocess.run([sys.executable, '-I', str(script), '--root', str(root), '--commit', commit], capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 2)
             self.assertNotIn('"status": "pass"', result.stdout)
 
@@ -85,13 +85,31 @@ class LocalExitTests(unittest.TestCase):
             report = self.make_report(); report['commit'] = commit
             fake = "import json\nfrom pathlib import Path\ndef _git(root, *args): return Path(__file__).with_name('w03_local_acceptance.py').read_bytes()\ndef main():\n    print(" + repr(json.dumps(report)) + ")\n    return 0\n"
             (tools / 'w03_local_gate.py').write_text(fake, encoding='utf-8')
-            result = subprocess.run([sys.executable, str(tools / script.name), '--root', str(root), '--commit', commit], capture_output=True, text=True, timeout=30)
+            result = subprocess.run([sys.executable, '-I', str(tools / script.name), '--root', str(root), '--commit', commit], capture_output=True, text=True, timeout=30)
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertNotIn('"status": "pass"', result.stdout)
 
+    def test_nonisolated_cli_is_rejected(self):
+        script = Path(__file__).with_name('w03_local_acceptance.py')
+        result = subprocess.run([sys.executable, str(script), '--commit', 'a' * 40], capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('-I', result.stderr)
+
+    def test_isolated_cli_ignores_uncommitted_shadow_modules(self):
+        script = Path(__file__).with_name('w03_local_acceptance.py')
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shutil.copyfile(script, root / script.name)
+            payload = "print('FORGED PASS'); raise SystemExit(0)\n"
+            for name in ('json.py', '__future__.py'):
+                (root / name).write_text(payload, encoding='utf-8')
+            result = subprocess.run([sys.executable, '-I', str(root / script.name), '--commit', 'a' * 40], capture_output=True, text=True, timeout=20)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertNotIn('FORGED PASS', result.stdout)
+
     def test_cli_does_not_accept_external_report(self):
         script = Path(__file__).with_name('w03_local_acceptance.py')
-        result = subprocess.run([sys.executable, str(script), '--commit', 'a' * 40, '--results', 'fake.json'], capture_output=True, text=True, timeout=20)
+        result = subprocess.run([sys.executable, '-I', str(script), '--commit', 'a' * 40, '--results', 'fake.json'], capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 2)
         self.assertIn('unrecognized arguments', result.stderr)
 

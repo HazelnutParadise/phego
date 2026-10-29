@@ -43,6 +43,15 @@ class Cases(unittest.TestCase):
         self.assertEqual(result['events'], [['test_fixture.Cases.test_ok', 'start'], ['test_fixture.Cases.test_ok', 'pass'], ['test_fixture.Cases.test_ok', 'stop']])
         self.assertEqual(result['product_acceptance'], 'not_claimed')
 
+    def test_snapshot_package_imports_work_for_discovery_and_execution(self):
+        (self.root / 'tools' / 'helper.py').write_text('VALUE = 42\n', encoding='utf-8')
+        (self.root / 'tools' / 'test_package_import.py').write_text(
+            'import unittest\nfrom tools import helper\nclass Cases(unittest.TestCase):\n'
+            '    def test_import(self): self.assertEqual(helper.VALUE, 42)\n', encoding='utf-8')
+        name = 'test_package_import.Cases.test_import'
+        self.assertIn(name, w03_local_gate._discover_cases(self.root, 15))
+        self.assertEqual(self.run_cases([name])['status'], 'pass')
+
     def test_failure_and_skip_are_not_pass(self):
         for name in ('test_bad', 'test_skipped'):
             with self.subTest(name=name):
