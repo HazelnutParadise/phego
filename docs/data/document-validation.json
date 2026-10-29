@@ -488,6 +488,7 @@
     "docs/spec/specification.zh-TW.md": "60640f95ba4368201dab7d5a6f70e9953e4c0ce702e3ca0f279f50a377982d52",
     "go.mod": "c3ccfc7a527ffe6d5b4c65a459a5264d4c7227a0638b8e0a13216c37ba8c7c28",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
     "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
     "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
     "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
