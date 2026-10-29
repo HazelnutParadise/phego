@@ -59,6 +59,8 @@
     "test_compare_no_loss.NoLossTests.test_previous_results_are_not_silently_removed_or_reclassified",
     "test_contract_document.ContractDocumentTests.test_invariant_checklist_matches_specification",
     "test_diagnostic_registry.DiagnosticRegistryTests.test_additive_requirement_and_unrun_scenarios",
+    "test_diagnostic_registry.DiagnosticRegistryTests.test_duplicate_owner_json_key_is_rejected",
+    "test_diagnostic_registry.DiagnosticRegistryTests.test_index_relationships_cannot_diverge_from_plan",
     "test_diagnostic_registry.DiagnosticRegistryTests.test_missing_or_duplicate_owner_is_rejected",
     "test_diagnostic_registry.DiagnosticRegistryTests.test_missing_reverse_work_package_link_is_rejected",
     "test_diagnostic_registry.DiagnosticRegistryTests.test_new_id_accepts_evidence_but_unknown_and_duplicate_do_not",

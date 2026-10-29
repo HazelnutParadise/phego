@@ -54,6 +54,28 @@ class DiagnosticRegistryTests(unittest.TestCase):
                 self.assertEqual(result["status"], "fail")
                 self.assertTrue(any("acceptance owner" in e for e in result["errors"]), result["errors"])
 
+    def test_duplicate_owner_json_key_is_rejected(self):
+        path = self.root / "docs/implementation/github-index.json"
+        original = path.read_text()
+        marker = '"T-201": "W-42"'
+        self.assertEqual(original.count(marker), 1)
+        path.write_text(original.replace(marker, '"T-201": "W-08", "T-201": "W-42"'))
+        result = validate(self.root)
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(any("acceptance owner" in e for e in result["errors"]))
+
+    def test_index_relationships_cannot_diverge_from_plan(self):
+        path = self.root / "docs/implementation/github-index.json"
+        original = json.loads(path.read_text())
+        for field, value in (("requirements", "REQ-101"), ("tests", "T-201")):
+            with self.subTest(field=field):
+                data = json.loads(json.dumps(original))
+                next(x for x in data["items"] if x["id"] == "W-42")[field].remove(value)
+                path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+                result = validate(self.root)
+                self.assertEqual(result["status"], "fail")
+                self.assertTrue(any("acceptance owner" in e for e in result["errors"]))
+
     def test_missing_reverse_work_package_link_is_rejected(self):
         path = self.root / "docs/data/phego-work-packages.json"
         value = json.loads(path.read_text())
