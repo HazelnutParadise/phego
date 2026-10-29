@@ -10,7 +10,7 @@
     "work_packages": 60,
     "decisions": 28,
     "sources": 57,
-    "local_markdown_links": 96,
+    "local_markdown_links": 97,
     "checks": 33,
     "catalogs": {
       "php-history-policy.json": 7,
@@ -255,6 +255,7 @@
   "input_sha256": {
     ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
     ".github/workflows/docs.yml": "399d56f9590b0aec1b0226ae49e928777f2d54b8487f325ddae1ae9fe4724f1d",
+    ".github/workflows/w03-local-acceptance.yml": "d4b1797d4f1a62c1445435f7ca344a18b927165fe4f811f4b476d77f796e1dd7",
     ".github/workflows/w03-local-gate.yml": "77470ad879edf61f0b495fbb09a4535abd4edfed609ca89ff2c50aa148770035",
     ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
     "AGENTS.md": "e3b1388608d8d977ed39baf2569cc6624cc41e67b4c8d3d98e3d5744424d288c",
@@ -280,11 +281,12 @@
     "docs/implementation/README.md": "e4a2325e661f1f33dffe05fbaf7183dea2e96e2e1361f114ef18987a2ef171ae",
     "docs/implementation/W-01.md": "512c8992cd4976fac1f509603d257f21dfca911171bf2891b5fb84207f5c7ca8",
     "docs/implementation/W-03-commit-check.md": "cbaade48313d422b4e94d9c3d2985d3ebbe2d3d8ffc9efdc2d1c17ab524f97cb",
-    "docs/implementation/W-03.md": "a92596a20f6a46fcdb5bf01f050ba2f593f1801e1559b2738206651ed2793230",
+    "docs/implementation/W-03.md": "b55f5bb3c67a7f055a633fd3d8c7d680f40e25013c7d14d687f8991014eed461",
     "docs/implementation/evidence/W-01-contract-review.md": "6bd6fe1bc0053ad15051d6e0dd29cff9b6821edf07e3f9a3c1a558c75ab896d1",
     "docs/implementation/evidence/W-01.json": "09f5f1967fb5f4cd5d491959d94d7fa18a5d71e56921ae906abaa418d39dfd54",
     "docs/implementation/evidence/W-03-application-candidates.json": "5c3f10893a4b484a005af9ac3326096ccc39682cced2977231a213c0eabf1a58",
     "docs/implementation/evidence/W-03-linux-ci-skip.json.gz": "b10982223d65c31449d101f93a08d4f4d96233c8e27b6497a1ad85e592f71670",
+    "docs/implementation/evidence/W-03-local-exit-20261029.json.gz": "2888b394dc3dd8894dd0a79c63c4abf6ac59d7d50f9532ce40c50942e9180433",
     "docs/implementation/evidence/W-03-local-gate-concurrent-failure.json.gz": "90052f2e4e33ba941711410b5439a0099efc7455783ba0cf863c5848de4302bd",
     "docs/implementation/evidence/W-03-local-gate-timeout-regression-failure.json.gz": "e23164cdd76c75dc080b0bc21c9ffb5f0ca3852551ec9db269566a31bdc913a9",
     "docs/implementation/evidence/W-03-w01-status-claim.json": "b84084834f939d75446d2136e457a98286a956dac01a2c7536ceeb02310cf64f",
@@ -304,6 +306,7 @@
     "tools/test_traceability_profile.py": "f5e36dec9e863306ffdd4ab38f10f19b267e8fe147c01499eca5dddce38c4fc4",
     "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
     "tools/test_w03_gate_cli.py": "81d4cf781c55ec0cb69e14dcb75940dd9e64929f7b41b2cf11d2cfc433c7e506",
+    "tools/test_w03_local_acceptance.py": "603f3010d04e379805e4e15b4a8c790107802b207e8429c02184915aa7ded953",
     "tools/test_w03_local_gate.py": "b83961766ddd09d533a8c182b28285f899af4af9e6bae0dbd127dd6b82ff2cb9",
     "tools/test_w03_local_manifest.py": "dd7f712b9eef99066cea3c613e3f44ad542ca54fff0523823e9ffc2e434f76a1",
     "tools/test_w03_local_snapshot.py": "c58e265091e2a62b325134d47577bc95a2fd4139f7f3a7f632197385ca1fe89e",
@@ -311,7 +314,8 @@
     "tools/traceability.py": "338ebeb1db300a86a652e9c2f1cfd764cd3976205b8cabd2cfa5c61ff63d25ca",
     "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127",
     "tools/verify_evidence_schema.py": "513bdf5a50794956fadcc9d7cf4a2ad7e65ce272bef24149e8a6895a8796ee75",
-    "tools/w03-local-checks.json": "c1a5e3003eb08732ad9ddb1ac813ef8f4e374c655e1f90e65587054bda4372fa",
+    "tools/w03-local-checks.json": "91d81ba38222bde659b64a24fbf9f04eb65abf63ed45d08dd6430ae2ed456991",
+    "tools/w03_local_acceptance.py": "e5a9ee5e55164df8c45561e50f9fcfd6f33b0c4abcc36c858bf07ea345af31d7",
     "tools/w03_local_gate.py": "925807a5d3acc3e7ab27554c65f844d362df7624435c9b68e2dfe762dc1843b8",
     "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3"
   }

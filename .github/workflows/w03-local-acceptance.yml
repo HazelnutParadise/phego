@@ -1,0 +1,40 @@
+name: W-03 local exit condition
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/w03-local-acceptance.yml'
+      - 'tools/**'
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  w03-local-exit:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Evaluate current committed local checks
+        env:
+          EXPECTED_REV: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_REV"
+          python3 tools/w03_local_acceptance.py --commit "$EXPECTED_REV" --timeout 1200 > "$RUNNER_TEMP/w03-local-exit.json"
+      - name: Retain observation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: w03-local-exit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/w03-local-exit.json
+          if-no-files-found: warn
+          retention-days: 30
