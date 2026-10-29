@@ -5,8 +5,8 @@
   "scope": "implementation_planning_only",
   "counts": {
     "work_packages": 60,
-    "requirements": 100,
-    "acceptance_scenarios": 200
+    "requirements": 101,
+    "acceptance_scenarios": 202
   },
   "dependency_waves": [
     [
@@ -310,7 +310,9 @@
     "T-197": "W-60",
     "T-198": "W-60",
     "T-199": "W-60",
-    "T-200": "W-60"
+    "T-200": "W-60",
+    "T-201": "W-42",
+    "T-202": "W-42"
   },
   "integration_gate_reasons": {
     "W-35": {
@@ -782,7 +784,8 @@
         "REQ-005",
         "REQ-006",
         "REQ-007",
-        "REQ-008"
+        "REQ-008",
+        "REQ-101"
       ],
       "tests": [
         "T-001",
@@ -794,7 +797,9 @@
         "T-013",
         "T-014",
         "T-015",
-        "T-016"
+        "T-016",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -843,11 +848,14 @@
       ],
       "integration_dependencies": [],
       "requirements": [
-        "REQ-010"
+        "REQ-010",
+        "REQ-101"
       ],
       "tests": [
         "T-019",
-        "T-020"
+        "T-020",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -900,7 +908,8 @@
         "REQ-004",
         "REQ-010",
         "REQ-011",
-        "REQ-066"
+        "REQ-066",
+        "REQ-101"
       ],
       "tests": [
         "T-003",
@@ -912,7 +921,9 @@
         "T-021",
         "T-022",
         "T-131",
-        "T-132"
+        "T-132",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -2625,7 +2636,8 @@
         "REQ-039",
         "REQ-041",
         "REQ-047",
-        "REQ-068"
+        "REQ-068",
+        "REQ-101"
       ],
       "tests": [
         "T-003",
@@ -2645,7 +2657,9 @@
         "T-093",
         "T-094",
         "T-135",
-        "T-136"
+        "T-136",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [
         "T-003",
@@ -3308,7 +3322,8 @@
         "REQ-073",
         "REQ-075",
         "REQ-076",
-        "REQ-079"
+        "REQ-079",
+        "REQ-101"
       ],
       "tests": [
         "T-035",
@@ -3336,7 +3351,9 @@
         "T-151",
         "T-152",
         "T-157",
-        "T-158"
+        "T-158",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [
         "T-035",
@@ -3360,7 +3377,9 @@
         "T-145",
         "T-146",
         "T-149",
-        "T-150"
+        "T-150",
+        "T-201",
+        "T-202"
       ],
       "implementation_status": "not_started",
       "product_test_status": "not_run",
@@ -4682,5 +4701,10 @@
         "status": "pass"
       }
     }
-  ]
+  ],
+  "baseline_counts": {
+    "requirements": 100,
+    "acceptance_scenarios": 200,
+    "source_commit": "6e2e701174a2f8d7afb0a884305007923684f1a9"
+  }
 }
