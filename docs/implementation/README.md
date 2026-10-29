@@ -49,7 +49,7 @@ Ready for review前須補齊本票實作與測試。PR描述使用 `Refs` 連結
 ## 早期工作與完整驗收分開
 
 - W-02在M0建立最小上游差異偵測：官方tag、stubs、parser、測試與公告來源清單，重跑命令及來源快照。最少在每次來源鎖更新與認證候選前執行；持續排程的頻率與實際設定須隨實作提交。W-45補上完整分類與多版本回歸。
-- W-49與W-54在W-01～W-03完成後立即進行正式清冊與隔離環境工作。唯讀來源發現可更早並行。PHP第一版來源缺失、競品無法建置、工作負載不可比都保留原狀態。
+- W-49與W-54在W-01～W-03完成後立即進行正式清冊與隔離環境工作。唯讀來源發現可更早並行。[歷史首版與早期版本線索](evidence/W-49-early-history.md)及[競品候選調查](evidence/W-54-competitor-discovery.md)保留原始出處及未知事項。PHP第一版來源缺失、競品無法建置、工作負載不可比都保留原狀態。
 - W-03先整理真實應用來源與合法版本配對需求，W-34、W-56～W-58建立參考流程及預期資料。受測端沒有完成時保留預期失敗，不能改應用PHP來源。
 - 階段標籤表示能力成熟階段，不是全域等待閘門。W-40、W-41所需能力完成後即可整合，W-56～W-58不必等其他無關M7工作。可選W-47、W-48沒有通過時保持停用。
 
@@ -100,9 +100,9 @@ Ready for review前須補齊本票實作與測試。PR描述使用 `Refs` 連結
 
 | 工作包 | 階段 | 原規格工作 | 規格及整合依賴 | Issue | Draft PR | 詳細計畫 |
 |---|---|---|---|---|---|---|
-| W-01 | M0 | 建立產品契約與威脅模型 | 無 | [#1](https://github.com/HazelnutParadise/phego/issues/1) | [#61](https://github.com/HazelnutParadise/phego/pull/61) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-01-implementation/docs/implementation/W-01.md) |
-| W-02 | M0 | 鎖定官方與工具基準 | [W-01](https://github.com/HazelnutParadise/phego/issues/1) | [#2](https://github.com/HazelnutParadise/phego/issues/2) | [#62](https://github.com/HazelnutParadise/phego/pull/62) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-02-implementation/docs/implementation/W-02.md) |
-| W-03 | M0 | 建立追蹤與證據工具 | [W-01](https://github.com/HazelnutParadise/phego/issues/1)、[W-02](https://github.com/HazelnutParadise/phego/issues/2) | [#3](https://github.com/HazelnutParadise/phego/issues/3) | [#63](https://github.com/HazelnutParadise/phego/pull/63) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-03-implementation/docs/implementation/W-03.md) |
+| W-01 | M0 | 建立產品契約與威脅模型 | 無 | [#1](https://github.com/HazelnutParadise/phego/issues/1) | [#61](https://github.com/HazelnutParadise/phego/pull/61) | [計畫](https://github.com/HazelnutParadise/phego/blob/main/docs/implementation/W-01.md) |
+| W-02 | M0 | 鎖定官方與工具基準 | [W-01](https://github.com/HazelnutParadise/phego/issues/1) | [#2](https://github.com/HazelnutParadise/phego/issues/2) | [#62](https://github.com/HazelnutParadise/phego/pull/62) | [計畫](https://github.com/HazelnutParadise/phego/blob/main/docs/implementation/W-02.md) |
+| W-03 | M0 | 建立追蹤與證據工具 | [W-01](https://github.com/HazelnutParadise/phego/issues/1)、[W-02](https://github.com/HazelnutParadise/phego/issues/2) | [#3](https://github.com/HazelnutParadise/phego/issues/3) | [#63](https://github.com/HazelnutParadise/phego/pull/63) | [計畫](https://github.com/HazelnutParadise/phego/blob/main/docs/implementation/W-03.md) |
 | W-04 | M0 | 建立官方測試與差異runner | [W-02](https://github.com/HazelnutParadise/phego/issues/2)、[W-03](https://github.com/HazelnutParadise/phego/issues/3) | [#4](https://github.com/HazelnutParadise/phego/issues/4) | [#64](https://github.com/HazelnutParadise/phego/pull/64) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-04-implementation/docs/implementation/W-04.md) |
 | W-05 | M1 | 生命週期與資源狀態模型 | [W-01](https://github.com/HazelnutParadise/phego/issues/1)、[W-03](https://github.com/HazelnutParadise/phego/issues/3) | [#5](https://github.com/HazelnutParadise/phego/issues/5) | [#65](https://github.com/HazelnutParadise/phego/pull/65) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-05-implementation/docs/implementation/W-05.md) |
 | W-06 | M1 | 值／參照／生命週期原型 | [W-02](https://github.com/HazelnutParadise/phego/issues/2)、[W-04](https://github.com/HazelnutParadise/phego/issues/4)、[W-05](https://github.com/HazelnutParadise/phego/issues/5) | [#8](https://github.com/HazelnutParadise/phego/issues/8) | [#66](https://github.com/HazelnutParadise/phego/pull/66) | [計畫](https://github.com/HazelnutParadise/phego/blob/codex/w-06-implementation/docs/implementation/W-06.md) |
