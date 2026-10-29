@@ -52,8 +52,18 @@ def classify(sections: dict, observation: Observation) -> dict:
     if observation.status in {"environment_skip", "unsupported", "runner_gap", "timeout"}:
         result["status"] = observation.status
         return result
-    if observation.status != "completed" or type(observation.exit_code) is not int:
-        result["reason"] = "missing or invalid completed observation"
+    if observation.status != "completed" or type(observation.exit_code) is not int or observation.exit_code < 0:
+        result["reason"] = "missing, invalid, or signal-terminated observation"
+        return result
+    if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
+        result["reason"] = "invalid PHPT sections"
+        return result
+    if "REDIRECTTEST" in sections:
+        result["reason"] = "redirected tests are not yet supported"
+        return result
+    variants = {"EXPECT", "EXPECTF", "EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL"}
+    if len(variants.intersection(sections)) != 1:
+        result["reason"] = "expected exactly one PHPT expectation section"
         return result
     if set(sections).intersection({"EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL"}):
         result["reason"] = "expectation format is not yet implemented"

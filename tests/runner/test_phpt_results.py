@@ -40,6 +40,26 @@ class PHPTClassificationTests(unittest.TestCase):
         section = {"EXPECTF": b"%r.+%r"}
         self.assertEqual(results.classify(section, results.Observation("completed", b"ok", 0))["status"], "runner_gap")
 
+    def test_ambiguous_and_invalid_sections_cannot_claim_success(self):
+        from itertools import combinations
+        names = ("EXPECT", "EXPECTF", "EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL")
+        for first, second in combinations(names, 2):
+            for xfail in (False, True):
+                section = {first: b"%d", second: b"42"}
+                if xfail: section["XFAIL"] = b"known issue"
+                with self.subTest(first=first, second=second, xfail=xfail):
+                    status = results.classify(section, results.Observation("completed", b"42", 0))["status"]
+                    self.assertEqual(status, "runner_gap")
+        for section in ({}, [], {"EXPECT": "x"}, {"EXPECT": b"x", "XFAIL": None},
+                        {"EXPECT": b"x", "REDIRECTTEST": b"code"}):
+            with self.subTest(section=section):
+                self.assertEqual(results.classify(section, results.Observation("completed", b"x", 0))["status"], "runner_gap")
+
+    def test_signal_termination_is_not_a_completed_observation(self):
+        result = results.classify({"EXPECT": b"x"}, results.Observation("completed", b"x", -9))
+        self.assertEqual(result["status"], "runner_gap")
+        self.assertEqual(result["exit_code"], -9)
+
     def test_exit_code_is_retained_and_unhandled_expectation_is_not_pass(self):
         # PHP run-tests.php compares expected output even for fatal exits.
         actual = results.classify({"EXPECT": b"ok"}, results.Observation("completed", b"ok", 2))
