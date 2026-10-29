@@ -61,6 +61,8 @@ PYCODE
 
 21 個檔案的標頭文字指定 GNU Lesser General Public License 第 2 版或更新版本，5 個標示 PHP License 3.01，`xsse.h` 標示 MIT License，`config.h` 沒有命中這三種文字。目錄內的 `LICENSE` 文件是 LGPL 2.1 通用文字，不能把該檔名自動套用到目錄內每個檔案。未命中不代表無授權，這些字串比對也不是完整授權分類或分發義務判斷。其他檔案、依賴及實際產物的適用條件仍待審查。
 
+同目錄的 [README](https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/ext/bcmath/libbcmath/README.md) 將 bcmath library 描述為 LGPL 2.1，並記錄它是原始 bcmath 的 PHP fork。該文件在固定來源封存檔與固定 Git 提交的 SHA-256 均為 `b8280ba681743c519e8c2d7314a0b4321505323d833e5ed5e028af9cfffe43cd`。這份通用描述與個別檔案標頭需一併審查，不能據此單獨判定 `config.h` 的條件。
+
 重跑時將 `ARCHIVE` 設為固定來源封存檔的絕對路徑；指令檢查封存檔摘要後只讀取資料，不執行來源。輸出與上述清單比對需逐位元一致。
 
 ```sh
