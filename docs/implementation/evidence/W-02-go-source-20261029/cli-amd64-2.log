@@ -1,0 +1,17 @@
+Building Go cmd/dist using /tmp/bootstrap/go. (go1.27.3 linux/amd64)
+Building Go toolchain1 using /tmp/bootstrap/go.
+Building Go bootstrap cmd/go (go_bootstrap) using Go toolchain1.
+Building Go toolchain2 using go_bootstrap and Go toolchain1.
+Building Go toolchain3 using go_bootstrap and Go toolchain2.
+Building packages and commands for linux/amd64.
+---
+Installed Go for linux/amd64 in /tmp/source/go
+Installed commands in /tmp/source/go/bin
+*** You need to add /tmp/source/go/bin to your PATH.
+=== go version ===
+go version go1.27.3 linux/amd64
+=== binary sha256 ===
+fea858cf420141c20f0ac45b84595e416ee66b14d8c308068037ec771a0bc236  /tmp/source/go/bin/go
+850c3000c369daed039ec0e0e217f38a09bdb11e1146675be42488e153647410  /tmp/probe
+source_build_probe_ok
+f237e90b78628c1ef80d4099b489fc564af1d998c6012e81c5738947dbc92407
