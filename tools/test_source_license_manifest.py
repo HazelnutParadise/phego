@@ -1080,6 +1080,26 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 result = self.assert_rejected_without_json(repo)
                 self.assertIn(expected_error.encode(), result.stderr)
 
+    def test_native_vm_go_probe_is_completed_but_not_valid_for_llvm(self):
+        lock = self.read_json("compat.lock.json")
+        lock["go"]["probe_status"] = "native_vm_pure_go_build_passed"
+        lock["llvm"]["probe_status"] = "native_vm_pure_go_build_passed"
+        self.write_json("compat.lock.json", lock)
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        gaps = json.loads(result.stdout)["gaps"]
+        self.assertFalse(any(gap.get("scope") == "Go binary probe linux/arm64" for gap in gaps))
+        self.assertTrue(any(gap.get("scope") == "LLVM binary probe linux/arm64" and gap.get("status") == "unknown" for gap in gaps))
+
+    def test_unrecognized_native_vm_probe_status_remains_unknown(self):
+        lock = self.read_json("compat.lock.json")
+        lock["go"]["probe_status"] = "native_vm_pure_go_build_passed_v2"
+        self.write_json("compat.lock.json", lock)
+        result = self.generate()
+        self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
+        gaps = json.loads(result.stdout)["gaps"]
+        self.assertTrue(any(gap.get("scope") == "Go binary probe linux/arm64" and gap.get("status") == "unknown" for gap in gaps))
+
     def test_failed_and_unknown_probe_statuses_remain_gaps(self):
         lock = self.read_json("compat.lock.json")
         lock["go"]["probe_status"] = "failed"

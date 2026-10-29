@@ -46,7 +46,9 @@
         "archive_url": "https://go.dev/dl/go1.27.3.darwin-amd64.tar.gz",
         "archive_sha256": "b6f8e931e4ab497fcde6da8ae4499a58f9d258e55c8a80824a516eae5950a750",
         "source_status": "downloaded_and_digest_verified",
-        "probe_status": "not_run"
+        "probe_status": "isolated_pure_go_build_passed",
+        "probe_scope": "GitHub-hosted Intel macOS VM; restricted source rebuild and minimal Go program, not full Go tests",
+        "probe_evidence": "docs/implementation/evidence/W-02-macos-intel-go-source-20261029.md"
       },
       {
         "platform": "darwin/arm64",
@@ -60,7 +62,9 @@
         "archive_url": "https://go.dev/dl/go1.27.3.windows-amd64.zip",
         "archive_sha256": "f26081f438319757f8a1b46d7d0b2c5ec7583d4038e485e0aa725cfde7885fff",
         "source_status": "downloaded_and_digest_verified",
-        "probe_status": "not_run"
+        "probe_status": "native_vm_pure_go_build_passed",
+        "probe_scope": "GitHub-hosted disposable Windows VM; minimal Go program and source rebuild, network was not denied",
+        "probe_evidence": "docs/implementation/evidence/W-02-windows-go-source-20261029.md"
       }
     ]
   },
@@ -72,7 +76,7 @@
       "--enable-cli",
       "--without-pear"
     ],
-    "status": "in_progress",
+    "status": "complete",
     "expected_profile": {
       "extensions": [
         "Core",
@@ -93,12 +97,13 @@
       ],
       "session_available": false,
       "session_upload_progress": false
-    }
+    },
+    "status_scope": "Two clean PHP 8.5.12 CLI reference builds and one PHPT per run on the locked linux/arm64 profile; not PHP or Phego compatibility certification."
   },
   "remaining": [
-    "Extend isolated reference builds and reproducibility evidence beyond the current PHP 8.5.12 linux/arm64 profile.",
-    "Validate the optional LLVM toolchain on remaining platforms and execute the remaining Go platform probes.",
-    "Create upstream change detection and complete source and license records."
+    "Historical PHP releases, additional PHP profiles and cross-environment binary differences remain to be investigated in the corresponding work packages.",
+    "Optional LLVM platform coverage, native ABI and backend verification remain with the native work packages.",
+    "Release-specific redistribution obligations and complete upstream security and behavior analysis remain with W-44 and W-45."
   ],
   "llvm": {
     "version": "23.1.4",
@@ -139,7 +144,7 @@
         "--enable-cli",
         "--without-pear"
       ],
-      "status": "in_progress",
+      "status": "complete",
       "expected_profile": {
         "extensions": [
           "Core",
@@ -160,7 +165,8 @@
         ],
         "session_available": false,
         "session_upload_progress": false
-      }
+      },
+      "status_scope": "Two clean PHP 8.5.12 CLI reference builds and one PHPT per run on a native linux/amd64 VM; not PHP or Phego compatibility certification."
     }
   ],
   "inventory_tool_image": {

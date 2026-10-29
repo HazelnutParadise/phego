@@ -656,7 +656,10 @@ def _build(repo):
             source_context = f"compat.lock.json.{component_name.lower()} {archive['platform']}"
             probe_status = _optional_string(source_record, "probe_status", source_context)
             archive["probe_status"] = probe_status
-            if probe_status not in COMPLETED_PROBE_STATUSES:
+            completed_probe = probe_status in COMPLETED_PROBE_STATUSES or (
+                component_name == "Go binary" and probe_status == "native_vm_pure_go_build_passed"
+            )
+            if not completed_probe:
                 gaps.append(
                     {
                         "scope": f"{component_name} probe {archive['platform']}",

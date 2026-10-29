@@ -772,7 +772,7 @@
         "license_applicability": "unknown",
         "license_inventory_status": "partial_filename_inventory",
         "platform": "darwin/amd64",
-        "probe_status": "not_run",
+        "probe_status": "isolated_pure_go_build_passed",
         "url_identity_status": "matches_known_official_pattern",
         "version": "1.27.3"
       },
@@ -1288,7 +1288,7 @@
         "license_applicability": "unknown",
         "license_inventory_status": "partial_filename_inventory",
         "platform": "windows/amd64",
-        "probe_status": "not_run",
+        "probe_status": "native_vm_pure_go_build_passed",
         "url_identity_status": "matches_known_official_pattern",
         "version": "1.27.3"
       }
@@ -21178,17 +21178,17 @@
   },
   "gaps": [
     {
-      "reason": "Extend isolated reference builds and reproducibility evidence beyond the current PHP 8.5.12 linux/arm64 profile.",
+      "reason": "Historical PHP releases, additional PHP profiles and cross-environment binary differences remain to be investigated in the corresponding work packages.",
       "scope": "project",
       "status": "unknown"
     },
     {
-      "reason": "Validate the optional LLVM toolchain on remaining platforms and execute the remaining Go platform probes.",
+      "reason": "Optional LLVM platform coverage, native ABI and backend verification remain with the native work packages.",
       "scope": "project",
       "status": "unknown"
     },
     {
-      "reason": "Create upstream change detection and complete source and license records.",
+      "reason": "Release-specific redistribution obligations and complete upstream security and behavior analysis remain with W-44 and W-45.",
       "scope": "project",
       "status": "unknown"
     },
@@ -21245,28 +21245,6 @@
       "status": "unknown"
     },
     {
-      "probe_status": "not_run",
-      "reason": "probe status is not a recognized completed result",
-      "scope": "Go binary probe darwin/amd64",
-      "status": "unknown"
-    },
-    {
-      "probe_status": "not_run",
-      "reason": "probe status is not a recognized completed result",
-      "scope": "Go binary probe windows/amd64",
-      "status": "unknown"
-    },
-    {
-      "reason": "locked build status is in_progress",
-      "scope": "PHP reference build linux/amd64",
-      "status": "unknown"
-    },
-    {
-      "reason": "locked build status is in_progress",
-      "scope": "PHP reference build linux/arm64",
-      "status": "unknown"
-    },
-    {
       "reason": "license terms, applicability and redistribution obligations have not been reviewed",
       "scope": "PHP source license applicability",
       "status": "unknown"
@@ -21290,7 +21268,7 @@
   "inputs": [
     {
       "path": "compat.lock.json",
-      "sha256": "e2ab2c8af2c9411e2e7b8774da0a196c3f1c21206b3e3ec04eab7ed543bbceeb"
+      "sha256": "3e3c2c12fcc867b6a8a175743d83f6d06fa973e85df15137c331cfb61cbdd17f"
     },
     {
       "path": "docs/implementation/evidence/W-02-php-license-files.json",
