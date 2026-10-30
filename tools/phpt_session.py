@@ -378,7 +378,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                     else:
                         phases["profile"] = observation("completed", output, code)
                     current_pids, process_error = process_snapshot(container_id)
-                    if current_pids is None or current_pids != baseline_pids:
+                    if (current_pids is None or current_pids != baseline_pids) and phases["profile"].status not in ("timeout", "output_limit"):
                         phases["profile"] = observation("runner_gap", phases["profile"].output,
                                                          phases["profile"].exit_code,
                                                          process_error or "profile left additional container processes")
@@ -435,7 +435,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                         phases["program"] = observation("completed", output, code,
                                                                          "" if code == 0 else "FILE exited with status " + str(code))
                                 current_pids, process_error = process_snapshot(container_id)
-                                if current_pids is None or current_pids != baseline_pids:
+                                if (current_pids is None or current_pids != baseline_pids) and phases["program"].status not in ("timeout", "output_limit"):
                                     phases["program"] = observation("runner_gap", phases["program"].output,
                                                                      phases["program"].exit_code,
                                                                      process_error or "FILE left additional container processes")

@@ -210,6 +210,35 @@ class PHPTSessionDockerTests(unittest.TestCase):
                 self.assertNotEqual(result.status, "pass")
                 self.assertFalse(result.effects_complete)
 
+    def test_file_timeout_and_output_limit_keep_their_diagnostics(self):
+        for source, expected in (
+            (b"<?php while (true) {} ?>", "timeout"),
+            (b"<?php while (true) { echo str_repeat('x', 8192); } ?>", "output_limit"),
+        ):
+            for ini in (None, (b"precision=12",)):
+                with self.subTest(expected=expected, ini=ini):
+                    result = self.invoke(source, timeout=2, output_limit=256, ini=ini)
+                    self.assertIsNotNone(result.program)
+                    self.assertEqual(result.program.status, expected)
+                    self.assertEqual(result.status, expected)
+                    self.assertTrue(result.cleanup_confirmed)
+                    self.assertFalse(result.effects_complete)
+
+    def test_profile_timeout_keeps_its_diagnostic_when_process_remains(self):
+        popen = subprocess.Popen
+
+        def slow_profile(args, *positional, **keywords):
+            if isinstance(args, list) and args[-1:] == ["/work/.phego-profile.php"]:
+                args = args[:-3] + ["sh", "-c", "while :; do :; done"]
+            return popen(args, *positional, **keywords)
+
+        with patch.object(session.subprocess, "Popen", side_effect=slow_profile):
+            result = self.invoke(b"<?php echo 'must not run'; ?>", timeout=2)
+        self.assertEqual(result.profile.status, "timeout")
+        self.assertEqual(result.status, "timeout")
+        self.assertIsNone(result.skipif)
+        self.assertTrue(result.cleanup_confirmed)
+
     def test_infinite_output_is_bounded_under_an_outer_process_deadline(self):
         """A child process keeps a pipe stall or a stuck runner from hanging unittest."""
         worker = self.root / "run_session_worker.py"
