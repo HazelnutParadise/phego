@@ -65,7 +65,7 @@ def _parse_env_for_release(data, release):
     return parser.parse_env(data, release)
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None):
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -87,6 +87,13 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise TypeError("source and skipif must be bytes")
     if clean is not None and not isinstance(clean, bytes):
         raise TypeError("clean must be bytes")
+    if stdin is not None:
+        if release != "8.5.12":
+            raise ValueError("STDIN is supported only for PHP 8.5.12")
+        if not isinstance(stdin, bytes):
+            raise TypeError("STDIN must be bytes")
+        if len(stdin) > 1024 * 1024:
+            raise ValueError("STDIN exceeds 1 MiB")
     if clean is not None and release != "8.5.12":
         raise ValueError("CLEAN is supported only for PHP 8.5.12")
     if len(source) > 1024 * 1024 or len(skipif) > 1024 * 1024 or (clean is not None and len(clean) > 1024 * 1024):
@@ -136,7 +143,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise TypeError("fixture values must be bytes")
         fixture_names.add(name)
         total += len(data)
-    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php") + ((".phego-clean.php",) if clean is not None else ())
+    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php") + ((".phego-clean.php",) if clean is not None else ()) + ((".phego-stdin-run.sh",) if stdin is not None and (ini is not None or env is not None) else ())
     for name in fixture_names:
         if any(name == phase or name.startswith(phase + "/") or phase.startswith(name + "/")
                for phase in phase_names):
@@ -160,7 +167,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("shell argument contains NUL")
         return b"'" + value.replace(b"'", b"'\\''") + b"'"
 
-    def php_script(path, settings=(), environment=None):
+    def php_script(path, settings=(), environment=None, *, remove_self=False):
         args = [os.fsencode(executable), b"-n"]
         for setting in settings:
             # run-tests.php escapes apostrophes before embedding -d values in a
@@ -171,12 +178,26 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             # Start the command shell with the test environment, as PHP does.
             # Keep PHP arguments separate to avoid the shell's single-argument limit.
             args = [b"env", *environment, b"/bin/sh", b"-c", b'exec "$@"', b"phego-php", *args]
-        return b"exec " + b" ".join(shell_quote(arg) for arg in args) + b" </dev/null\n"
+        command = b"exec " + b" ".join(shell_quote(arg) for arg in args)
+        if remove_self:
+            return b'rm -- "$0" || exit 125\n' + command + b"\n"
+        return command + b" </dev/null\n"
 
     def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout):
         # PHP arguments travel only in the bounded stdin script, never host argv.
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-s"],
                       php_script(path, settings, environment), limit=limit, seconds=seconds)
+
+    def exec_php_stdin_script(container_id, path, payload, settings=(), environment=None):
+        script_path = "/work/.phego-stdin-run.sh"
+        no_clobber = "test ! -e " + script_path + " && test ! -L " + script_path + " && umask 077 && set -C && cat > " + script_path
+        code, _, err, failure, why = docker(
+            ["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-c", no_clobber],
+            php_script(path, settings, environment, remove_self=True), limit=4096, seconds=30)
+        if failure or code != 0 or err:
+            return code, b"", err, failure or "runner_gap", why or "STDIN runner script staging failed"
+        return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", script_path],
+                      payload, limit=output_limit, seconds=timeout)
 
     def docker(args, payload=None, limit=output_limit, seconds=timeout):
         if sigterm_event[0] is not None:
@@ -452,7 +473,14 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                     phases["program"] = observation("runner_gap", b"", code,
                                                                      "FILE phase path already exists or source staging failed: " + repr(err))
                                 else:
-                                    if ini is None and env is None:
+                                    if stdin is not None and ini is None and env is None:
+                                        code, output, err, failure, why = docker(
+                                            ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
+                                            stdin, limit=output_limit, seconds=timeout)
+                                    elif stdin is not None:
+                                        code, output, err, failure, why = exec_php_stdin_script(
+                                            container_id, file_path, stdin, ini or (), environment=env)
+                                    elif ini is None and env is None:
                                         code, output, err, failure, why = docker(
                                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
                                             limit=output_limit, seconds=timeout)

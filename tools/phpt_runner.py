@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Inspect and run PHPT tests in a restricted execution environment."""
 
+import io
 import re
 
 
@@ -19,7 +20,7 @@ def parse_phpt(data: bytes, path: str) -> dict[str, bytes]:
     current = None
     chunks: list[bytes] = []
     marker = re.compile(rb"--([A-Z][A-Z0-9_]*)--")
-    for line_number, line in enumerate(data.splitlines(keepends=True), 1):
+    for line_number, line in enumerate(io.BytesIO(data), 1):
         match = marker.fullmatch(line.rstrip(b"\r\n"))
         if match:
             if current is not None:

@@ -150,7 +150,7 @@ class PHPTExecutionTests(unittest.TestCase):
 
     def test_only_test_file_expect_expectf_and_xfail_sections_start_sandbox(self):
         unsupported = (
-            "ARGS", "STDIN", "EXPECTREGEX",
+            "ARGS", "EXPECTREGEX",
             "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL",
             "REDIRECTTEST", "UNKNOWN_SECTION",
         )

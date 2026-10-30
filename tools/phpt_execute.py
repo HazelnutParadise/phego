@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI and ENV are supported.
+TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI, ENV and STDIN are supported.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
@@ -24,7 +24,7 @@ from phpt_env import parse_env
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -43,6 +43,11 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
     """Run a narrowly supported case and return a sanitized result record."""
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
         return _gap("invalid PHPT sections")
+    if "STDIN" in sections:
+        if release != "8.5.12":
+            return _gap("PHPT STDIN is supported only for PHP 8.5.12")
+        if len(sections["STDIN"]) > 1024 * 1024:
+            return _gap("PHPT STDIN exceeds 1 MiB limit")
     ini = None
     env = None
     if "INI" in sections:
@@ -96,7 +101,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None:
+    if clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None or "STDIN" in sections:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -115,6 +120,8 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 timeout=timeout,
                 output_limit=output_limit,
             )
+            if "STDIN" in sections:
+                session_kwargs["stdin"] = sections["STDIN"]
             if clean_requested:
                 if len(sections["CLEAN"]) > 1024 * 1024:
                     return _gap("CLEAN source exceeds sandbox limit")
