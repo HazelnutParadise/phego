@@ -5,6 +5,22 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
+MAX_NUMERIC_CHARS = 4096
+# 10**4096 needs fewer than 13609 bits; reject larger values before str().
+MAX_NUMERIC_BITS = 13608
+
+
+def _bounded_integer(value):
+    if value.bit_length() > MAX_NUMERIC_BITS:
+        raise ValueError("integer exceeds 4096 characters")
+    try:
+        length = len(str(value))
+    except ValueError as exc:
+        raise ValueError("integer exceeds the interpreter integer conversion limit") from exc
+    if length > MAX_NUMERIC_CHARS:
+        raise ValueError("integer exceeds 4096 characters")
+
+
 @dataclass(frozen=True)
 class Observation:
     test_id: str
@@ -39,6 +55,8 @@ def compare(reference: Observation, candidate: Observation, *, normalize_crlf: b
             raise ValueError("completed observation requires a nonnegative exit code")
         if observation.status != "completed" and observation.exit_code is not None and type(observation.exit_code) is not int:
             raise ValueError("partial exit code must be an integer or absent")
+        if type(observation.exit_code) is int:
+            _bounded_integer(observation.exit_code)
         if not isinstance(observation.stdout, bytes) or not isinstance(observation.stderr, bytes):
             raise ValueError("output must be bytes")
         if len(observation.stdout) + len(observation.stderr) > 4 * 1024 * 1024:
@@ -68,8 +86,8 @@ def compare(reference: Observation, candidate: Observation, *, normalize_crlf: b
                 elif value is None or type(value) in (str, int, float, bool):
                     if isinstance(value, str) and len(value) > 1024 * 1024:
                         raise ValueError("effects string exceeds limit")
-                    if type(value) is int and value.bit_length() > 3500000:
-                        raise ValueError("effects integer exceeds limit")
+                    if type(value) is int:
+                        _bounded_integer(value)
                     charge(len(json.dumps(value, ensure_ascii=True, allow_nan=False)))
                 else:
                     raise ValueError("effects contain a non-JSON value")
@@ -79,6 +97,8 @@ def compare(reference: Observation, candidate: Observation, *, normalize_crlf: b
                 raise ValueError("effects exceed 1 MiB")
             effects = json.loads(encoded)
         except (TypeError, ValueError, RecursionError) as exc:
+            if str(exc) == "integer exceeds the interpreter integer conversion limit":
+                raise ValueError("effects integer exceeds the interpreter integer conversion limit") from exc
             raise ValueError("effects must be a bounded JSON object") from exc
         return {"test_id":observation.test_id, "test_sha256":observation.test_sha256,
                 "release":observation.release, "platform":observation.platform, "build":observation.build,
