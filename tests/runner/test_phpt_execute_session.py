@@ -149,6 +149,19 @@ class PHPTExecutionSessionTests(unittest.TestCase):
         session.assert_not_called()
         self.assertNotIn("secret", repr(result))
 
+    def test_fixtures_without_skipif_use_shared_session(self):
+        sections = self.sections()
+        with patch.object(executor, "execute_php") as execute, patch.object(
+            executor, "run_case", return_value=observation(output=OUTPUT)
+        ) as session:
+            result = executor.run(sections, IMAGE, EXECUTABLE, PLATFORM, RELEASE,
+                                  5, 1024, fixtures=FIXTURES)
+        execute.assert_not_called()
+        self.assertEqual(session.call_args.kwargs["skipif"], b"")
+        self.assertIs(session.call_args.kwargs["fixtures"], FIXTURES)
+        self.assertEqual(result["status"], "pass")
+        self.assertFalse(result["effects_complete"])
+
     def test_cases_without_skipif_keep_single_file_executor_behavior(self):
         sections = self.sections()
         with patch.object(executor, "execute_php", side_effect=(

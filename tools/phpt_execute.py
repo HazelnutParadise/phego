@@ -54,8 +54,8 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if "SKIPIF" in sections:
-        if len(sections["SKIPIF"]) > 1024 * 1024:
+    if "SKIPIF" in sections or fixtures is not None:
+        if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
             fixtures = {}
@@ -68,7 +68,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 platform=platform,
                 release=release,
                 source=sections["FILE"],
-                skipif=sections["SKIPIF"],
+                skipif=sections.get("SKIPIF", b""),
                 fixtures=fixtures,
                 timeout=timeout,
                 output_limit=output_limit,
