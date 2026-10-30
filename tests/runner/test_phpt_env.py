@@ -166,7 +166,7 @@ class PHPTEnvExecutionTests(unittest.TestCase):
             "ENV": env_data,
             "INI": b"precision=17\n",
             "SKIPIF": (
-                b"<?php if (getenv('PHEGO_ENV_EMPTY') !== '' || "
+                b"<?php if (getenv('PHEGO_ENV_EMPTY') !== false || "
                 b"getenv('PHEGO_ENV_LITERAL') !== " + repr(literal).encode("ascii") +
                 b" || ini_get('precision') !== '14') exit(1); ?>"
             ),

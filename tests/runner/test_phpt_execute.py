@@ -16,11 +16,11 @@ spec.loader.exec_module(executor)
 
 IMAGE = "fixture@sha256:" + "a" * 64
 PLATFORM = "linux/amd64"
-RELEASE = "8.5.12"
+RELEASE = "8.5.11"
 EXECUTABLE = "/usr/bin/php"
 FILE_SOURCE = b"<?php echo \"secret php source\"; ?>\x00\xff\r\n"
 PROGRAM_OUTPUT = b"private program output\n"
-PROFILE_OUTPUT = b"8.5.12\n8\n"
+PROFILE_OUTPUT = b"8.5.11\n8\n"
 BASE_SECTIONS = {
     "TEST": b"classification fixture",
     "FILE": FILE_SOURCE,
@@ -67,10 +67,10 @@ class PHPTExecutionTests(unittest.TestCase):
 
     def test_exact_release_and_platform_integer_width_are_required_before_file(self):
         for profile_output, platform, release in (
-            (b"8.5.11\n8\n", PLATFORM, RELEASE),
-            (b"8.5.12\n4\n", PLATFORM, RELEASE),
-            (b"8.5.12\n8\n", "linux/386", RELEASE),
-            (b"8.5.12\n8\n", PLATFORM, "8.5.11"),
+            (b"8.5.10\n8\n", PLATFORM, RELEASE),
+            (b"8.5.11\n4\n", PLATFORM, RELEASE),
+            (b"8.5.11\n8\n", "linux/386", RELEASE),
+            (b"8.5.11\n8\n", PLATFORM, "8.5.10"),
         ):
             with self.subTest(profile_output=profile_output, platform=platform, release=release):
                 result, mocked = self.invoke(
@@ -80,9 +80,9 @@ class PHPTExecutionTests(unittest.TestCase):
                 self.assertEqual(mocked.call_count, 1, "FILE must not run after a profile mismatch")
 
     def test_profile_mismatch_identifies_the_field(self):
-        version, _ = self.invoke(profile=completed(b"8.5.11\n8\n"))
-        width, _ = self.invoke(profile=completed(b"8.5.12\n4\n"))
-        malformed, _ = self.invoke(profile=completed(b"\xff8.5.12\n8\n"))
+        version, _ = self.invoke(profile=completed(b"8.5.10\n8\n"))
+        width, _ = self.invoke(profile=completed(b"8.5.11\n4\n"))
+        malformed, _ = self.invoke(profile=completed(b"\xff8.5.11\n8\n"))
         self.assertIn("release", version["reason"])
         self.assertNotIn("width", version["reason"])
         self.assertIn("width", width["reason"])
@@ -91,10 +91,10 @@ class PHPTExecutionTests(unittest.TestCase):
 
     def test_malformed_or_nonzero_profile_never_runs_file(self):
         for observation in (
-            completed(b"8.5.12\nnot-an-int\n"),
-            completed(b"8.5.12\n8\nextra\n"),
+            completed(b"8.5.11\nnot-an-int\n"),
+            completed(b"8.5.11\n8\nextra\n"),
             completed(PROFILE_OUTPUT, exit_code=1),
-            executor.Observation("completed", b"8.5.12\n8\n", None),
+            executor.Observation("completed", b"8.5.11\n8\n", None),
         ):
             with self.subTest(profile=observation):
                 result, mocked = self.invoke(profile=observation)
@@ -103,9 +103,9 @@ class PHPTExecutionTests(unittest.TestCase):
 
     def test_invalid_profile_encodings_are_runner_gaps_without_echo_or_file_execution(self):
         invalid_profiles = (
-            b"\xff8.5.12\n8\n",
-            b"8.5.12\n0008\n",
-            b"8.5.12\n999999999999999999999999999999999999999999999999\n",
+            b"\xff8.5.11\n8\n",
+            b"8.5.11\n0008\n",
+            b"8.5.11\n999999999999999999999999999999999999999999999999\n",
             "non-byte profile output",
         )
         for profile_output in invalid_profiles:
@@ -127,7 +127,7 @@ class PHPTExecutionTests(unittest.TestCase):
         blocked = (
             executor.Observation("timeout", reason="probe timed out"),
             executor.Observation("runner_error", reason="container cleanup could not be confirmed"),
-            executor.Observation("output_limit", b"8.5.12\n8\n"),
+            executor.Observation("output_limit", b"8.5.11\n8\n"),
             executor.Observation("runner_error", reason="container operation failed"),
         )
         for observation in blocked:
@@ -214,7 +214,7 @@ class PHPTExecutionTests(unittest.TestCase):
         self.assertNotIn(FILE_SOURCE.decode("utf-8", "replace"), rendered)
         self.assertNotIn("secret php source", rendered)
         self.assertNotIn(PROGRAM_OUTPUT.decode(), rendered)
-        self.assertNotIn("8.5.12\n8\n", rendered)
+        self.assertNotIn("8.5.11\n8\n", rendered)
 
 
 if __name__ == "__main__":

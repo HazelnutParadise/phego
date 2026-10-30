@@ -86,7 +86,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise ValueError("release must be an exact version")
     if cgi_executable is not None and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
         raise ValueError("CGI executable must be an absolute path")
-    request_active = request_sections is not None or cgi_executable is not None
+    request_active = request_sections is not None or cgi_executable is not None or release == "8.5.12"
     query, cookie, post = b"", b"", None
     if request_active:
         if release != "8.5.12":
@@ -146,6 +146,11 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         if normalized_env != env:
             raise ValueError("ENV settings are not parser-normalized")
         env = normalized_env
+    # PHP's proc_open omits empty environment values; unset them explicitly
+    # so an inherited image value does not reappear.
+    env_args = tuple(item for setting in (env or ()) if setting.partition(b"=")[2] == b""
+                     for item in (b"-u", setting[:-1]))
+    env_args += tuple(setting for setting in (env or ()) if setting.partition(b"=")[2] != b"")
     if not isinstance(fixtures, dict):
         raise TypeError("fixtures must be a mapping")
     if len(fixtures) > 128:
@@ -457,9 +462,15 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                                          process_error or "profile left additional container processes")
                 if phases["profile"].status == "completed" and cgi_executable is not None:
                     probe = b'<?php echo PHP_SAPI, "\\n", PHP_VERSION, "\\n", PHP_INT_SIZE; ?>'
+                    # A CGI request inherited from the image would turn this
+                    # stdin probe into an HTTP request instead of running it.
+                    probe_reset = ("REQUEST_METHOD", "QUERY_STRING", "REDIRECT_STATUS", "PATH_TRANSLATED",
+                                   "SCRIPT_FILENAME", "CONTENT_TYPE", "CONTENT_LENGTH", "HTTP_COOKIE", "TZ",
+                                   "SERVER_NAME", "SERVER_SOFTWARE", "GATEWAY_INTERFACE")
+                    probe_unset = [item for name in probe_reset for item in ("-u", name)]
                     code, output, err, failure, why = docker(
-                        ["docker", "exec", "-i", "-w", "/work", container_id, cgi_executable, "-n", "-q"],
-                        probe, limit=output_limit, seconds=timeout)
+                        ["docker", "exec", "-i", "-w", "/work", container_id, "env", *probe_unset,
+                         cgi_executable, "-n", "-q"], probe, limit=output_limit, seconds=timeout)
                     expected = b"cgi-fcgi\n" + release.encode("ascii") + b"\n" + expected_int_size
                     if failure:
                         phases["cgi_profile"] = observation(failure, output, code, why)
@@ -471,10 +482,14 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                     if (current_pids is None or current_pids != baseline_pids) and phases["cgi_profile"].status not in ("timeout", "output_limit"):
                         phases["cgi_profile"] = observation("runner_gap", output, code, process_error or "CGI profile left additional container processes")
                 if phases["profile"].status == "completed" and (cgi_executable is None or phases["cgi_profile"].status == "completed"):
-                    if cgi_executable is not None:
+                    if request_active:
+                        reset = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME",
+                                 b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"TZ")
+                        skip_env = tuple(item for name in reset for item in (b"-u", name)) + env_args
+                        options = (b"-C", b"-q") if cgi_executable is not None else ()
                         code, output, err, failure, why = exec_php(
-                            container_id, "/work/.phego-skipif.php", environment=env,
-                            binary=cgi_executable, options=(b"-C", b"-q"))
+                            container_id, "/work/.phego-skipif.php", environment=skip_env,
+                            binary=cgi_executable, options=options)
                     elif env is None:
                         code, output, err, failure, why = docker(
                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"],
@@ -513,8 +528,8 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                 else:
                                     if request_active:
                                         # PHP's runner removes empty request environment variables.
-                                        names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE")
-                                        request_env = tuple(item for name in names for item in (b"-u", name)) + (env or ())
+                                        names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE", b"TZ")
+                                        request_env = tuple(item for name in names for item in (b"-u", name)) + env_args
                                         request_env += (b"REDIRECT_STATUS=1", b"REQUEST_METHOD=" + (b"POST" if post is not None else b"GET"), b"PATH_TRANSLATED=" + file_path.encode(), b"SCRIPT_FILENAME=" + file_path.encode())
                                         if query:
                                             request_env += (b"QUERY_STRING=" + query,)
@@ -575,8 +590,8 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                                                       "CLEAN phase path already exists or source staging failed")
                                     else:
                                         if request_active:
-                                            names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE")
-                                            clean_env = tuple(item for name in names for item in (b"-u", name)) + (env or ()) + (b"REDIRECT_STATUS=1",)
+                                            names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE", b"TZ")
+                                            clean_env = tuple(item for name in names for item in (b"-u", name)) + env_args + (b"REDIRECT_STATUS=1",)
                                             if cookie:
                                                 clean_env += (b"HTTP_COOKIE=" + cookie,)
                                             if post is not None:

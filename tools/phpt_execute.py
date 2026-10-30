@@ -51,6 +51,9 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             return _gap("PHPT STDIN exceeds 1 MiB limit")
     request_active = phpt_cgi.requested(sections)
     cgi_needed = phpt_cgi.needs_cgi(sections)
+    # PHP 8.5.12 run-tests.php initializes CGI-style request variables for
+    # every FILE phase, including ordinary CLI cases with no request sections.
+    cli_request_active = release == "8.5.12"
     if request_active:
         if release != "8.5.12":
             return _gap("PHPT request sections are supported only for PHP 8.5.12")
@@ -114,7 +117,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if request_active or clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None or "STDIN" in sections:
+    if cli_request_active or request_active or clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None or "STDIN" in sections:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -133,7 +136,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 timeout=timeout,
                 output_limit=output_limit,
             )
-            if request_active:
+            if cli_request_active:
                 session_kwargs["request_sections"] = {k: sections[k] for k in ("GET", "POST", "COOKIE") if k in sections}
             if cgi_needed:
                 session_kwargs["cgi_executable"] = cgi_executable
@@ -178,9 +181,20 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             clean_exit_code = getattr(clean_phase, "exit_code", None)
             if case_status == "cleanup_uncertain" or cleanup_confirmed is False:
                 diagnostic = "PHP case cleanup could not be confirmed"
+            elif profile_status == "profile_mismatch":
+                match = (re.fullmatch(rb"([0-9]{1,20}\.[0-9]{1,20}\.[0-9]{1,20})\n([48])", profile_output)
+                         if isinstance(profile_output, bytes) else None)
+                if match is None:
+                    diagnostic = "PHP profile output is malformed"
+                elif match.group(1) != release.encode("ascii"):
+                    diagnostic = "PHP release does not match requested release"
+                elif match.group(2) != str(_INT_WIDTH[platform]).encode("ascii"):
+                    diagnostic = "PHP integer width does not match requested platform"
+                else:
+                    diagnostic = "PHP profile could not be verified"
             elif cgi_needed and cgi_status != "completed":
                 diagnostic = "CGI profile could not be verified"
-            elif case_status == "profile_mismatch" or profile_status == "profile_mismatch":
+            elif case_status == "profile_mismatch":
                 diagnostic = "PHP profile does not match the requested release or platform"
             elif case_status == "skipped_unknown" or skipif_status == "skipped_unknown":
                 diagnostic = "SKIPIF requested a skip with an unknown cause"

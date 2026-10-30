@@ -59,7 +59,7 @@ class PHPTExecutionSessionTests(unittest.TestCase):
         self.assertEqual(kwargs, {
             "image": IMAGE, "executable": EXECUTABLE, "platform": PLATFORM,
             "release": RELEASE, "source": SOURCE, "skipif": SKIPIF,
-            "fixtures": FIXTURES, "timeout": 5, "output_limit": 1024,
+            "fixtures": FIXTURES, "timeout": 5, "output_limit": 1024, "request_sections": {},
         })
         self.assertIs(kwargs["source"], SOURCE)
         self.assertIs(kwargs["skipif"], SKIPIF)
@@ -138,6 +138,18 @@ class PHPTExecutionSessionTests(unittest.TestCase):
                 result, _, _ = self.invoke(result_value, fixtures=FIXTURES)
                 self.assertNotEqual(result["status"], "pass")
 
+    def test_profile_mismatch_identifies_release_width_and_malformed_output(self):
+        phase = executor.run_case.__globals__["PhaseObservation"]
+        case = executor.run_case.__globals__["CaseObservation"]
+        for output, expected in ((b"8.5.11\n8", "release"),
+                                 (b"8.5.12\n4", "width"),
+                                 (b"bad", "malformed")):
+            with self.subTest(output=output):
+                result, _, _ = self.invoke(case("profile_mismatch", phase("profile_mismatch", output, 0),
+                                                None, None, False, True))
+                self.assertEqual(result["status"], "runner_gap")
+                self.assertIn(expected, result["reason"])
+
     def test_unsupported_sections_stop_before_profile_or_session(self):
         with patch.object(executor, "execute_php") as profile, patch.object(executor, "run_case") as session:
             result = executor.run(self.sections(SKIPIF=SKIPIF, ARGS=b"secret"), IMAGE,
@@ -162,13 +174,13 @@ class PHPTExecutionSessionTests(unittest.TestCase):
         self.assertEqual(result["status"], "pass")
         self.assertFalse(result["effects_complete"])
 
-    def test_cases_without_skipif_keep_single_file_executor_behavior(self):
+    def test_older_cases_without_skipif_keep_single_file_executor_behavior(self):
         sections = self.sections()
         with patch.object(executor, "execute_php", side_effect=(
-            type("Profile", (), {"status": "completed", "output": b"8.5.12\n8\n", "exit_code": 0})(),
+            type("Profile", (), {"status": "completed", "output": b"8.5.11\n8\n", "exit_code": 0})(),
             type("File", (), {"status": "completed", "output": OUTPUT, "exit_code": 0})(),
         )) as execute, patch.object(executor, "run_case") as session:
-            result = executor.run(sections, IMAGE, EXECUTABLE, PLATFORM, RELEASE, 5, 1024)
+            result = executor.run(sections, IMAGE, EXECUTABLE, PLATFORM, "8.5.11", 5, 1024)
         self.assertEqual(result["status"], "pass")
         self.assertEqual(execute.call_count, 2)
         session.assert_not_called()

@@ -94,17 +94,18 @@ class PHPTCleanInputTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), b"must remain unchanged")
 
     def test_empty_clean_is_absent_but_whitespace_clean_is_php_trimmed(self):
-        # Empty section takes the ordinary single-file route. A truthy section
-        # with surrounding trim bytes is staged only after PHP trim semantics.
+        # Empty CLEAN does not schedule a cleanup phase, even though FILE
+        # now uses a session for the PHP 8.5.12 request environment.
         phase = session.PhaseObservation
-        profile = phase("completed", b"8.5.12\n4\n", 0)
-        program = phase("completed", b"", 0)
-        with mock.patch.object(executor, "execute_php", side_effect=(profile, program)) as execute, \
-             mock.patch.object(executor, "run_case") as run_case:
+        observation = SimpleNamespace(
+            status="completed", profile=phase("completed", b"8.5.12\n4", 0),
+            skipif=phase("completed", b"", 0), program=phase("completed", b"", 0),
+            effects_complete=False, cleanup_confirmed=True)
+        with mock.patch.object(executor, "run_case", return_value=observation) as run_case:
             result = executor.run({"TEST": b"empty clean", "FILE": b"<?php ?>", "EXPECT": b"", "CLEAN": b""},
                                   IMAGE, EXECUTABLE, PLATFORM, RELEASE, 5, 128)
-        self.assertEqual(execute.call_count, 2)  # profile and FILE only
-        run_case.assert_not_called()
+        self.assertEqual(result["status"], "pass")
+        self.assertNotIn("clean", run_case.call_args.kwargs)
         with mock.patch.object(executor, "run_case", return_value=SimpleNamespace(
                 status="completed", profile=phase("completed", b"8.5.12\n4", 0),
                 skipif=phase("completed", b"", 0), program=phase("completed", b"", 0),
@@ -116,13 +117,15 @@ class PHPTCleanInputTests(unittest.TestCase):
 
     def test_php_section_not_empty_zero_edge_and_trimmed_staging(self):
         phase = session.PhaseObservation
-        with mock.patch.object(executor, "execute_php", side_effect=(
-                phase("completed", b"8.5.12\n4\n", 0), phase("completed", b"", 0))) as execute, \
-             mock.patch.object(executor, "run_case") as run_case:
+        observation = SimpleNamespace(
+            status="completed", profile=phase("completed", b"8.5.12\n4", 0),
+            skipif=phase("completed", b"", 0), program=phase("completed", b"", 0),
+            effects_complete=False, cleanup_confirmed=True)
+        with mock.patch.object(executor, "run_case", return_value=observation) as run_case:
             result = executor.run({"TEST": b"zero clean", "FILE": b"<?php ?>", "EXPECT": b"", "CLEAN": b"0"},
                                   IMAGE, EXECUTABLE, PLATFORM, RELEASE, 5, 128)
-        self.assertEqual(execute.call_count, 2)
-        run_case.assert_not_called()
+        self.assertEqual(result["status"], "pass")
+        self.assertNotIn("clean", run_case.call_args.kwargs)
 
         observation = SimpleNamespace(
             status="completed", profile=phase("completed", b"8.5.12\n4", 0),
