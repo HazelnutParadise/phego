@@ -542,7 +542,7 @@
     "tools/upstream_watch.py": "6ed30328f03ec9fe406f1c8bc15017fc310310751c7006cde2b57cc66681b9e0",
     "tools/validate_docs.py": "f7d97aa057520d40c11debdc407e767e3dcbf9bbffd47895b4dc53f98b4933af",
     "tools/verify_evidence_schema.py": "513bdf5a50794956fadcc9d7cf4a2ad7e65ce272bef24149e8a6895a8796ee75",
-    "tools/w03-local-checks.json": "004d275b8c22cad5a8352bbbf8011e2493859c01b03d0ab93ebc877e466378f2",
+    "tools/w03-local-checks.json": "a6e31c714276e9e4b59e1723a7535eecf18aed6458d64d1b479c4004e565977e",
     "tools/w03_local_acceptance.py": "ade3703642eeec7c35a5bf5df17313d980832ec30d20da8619bfc577c300fb5b",
     "tools/w03_local_gate.py": "15871d95213a5928e8ec4767f8c498ec4a302a3de96cfe186663469fee0f2e65",
     "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3"
