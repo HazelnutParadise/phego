@@ -42,6 +42,7 @@ class CaseObservation:
     cleanup_confirmed: bool
     reason: str = ""
     clean_phase: Optional[PhaseObservation] = None
+    cgi_profile: Optional[PhaseObservation] = None
 
 
 def _parse_ini_for_release(data, release):
@@ -65,7 +66,7 @@ def _parse_env_for_release(data, release):
     return parser.parse_env(data, release)
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None):
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None, cgi_executable=None, request_sections=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -83,6 +84,24 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise ValueError("unsupported platform")
     if not isinstance(release, str) or not re.fullmatch(r"[0-9]{1,20}\.[0-9]{1,20}\.[0-9]{1,20}", release):
         raise ValueError("release must be an exact version")
+    if cgi_executable is not None and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
+        raise ValueError("CGI executable must be an absolute path")
+    request_active = request_sections is not None or cgi_executable is not None
+    query, cookie, post = b"", b"", None
+    if request_active:
+        if release != "8.5.12":
+            raise ValueError("CGI request is supported only for PHP 8.5.12")
+        if request_sections is None:
+            request_sections = {}
+        if not isinstance(request_sections, dict) or any(k not in ("GET", "POST", "COOKIE") or not isinstance(v, bytes) for k, v in request_sections.items()):
+            raise ValueError("invalid CGI request sections")
+        parser_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phpt_cgi.py")
+        spec = importlib.util.spec_from_file_location("_phego_phpt_cgi_parser", parser_path)
+        if spec is None or spec.loader is None:
+            raise ValueError("CGI request parser is unavailable")
+        parser = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(parser)
+        query, cookie, post = parser.request(request_sections)
     if not isinstance(source, bytes) or not isinstance(skipif, bytes):
         raise TypeError("source and skipif must be bytes")
     if clean is not None and not isinstance(clean, bytes):
@@ -143,7 +162,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise TypeError("fixture values must be bytes")
         fixture_names.add(name)
         total += len(data)
-    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php") + ((".phego-clean.php",) if clean is not None else ()) + ((".phego-stdin-run.sh",) if stdin is not None and (ini is not None or env is not None) else ())
+    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php") + ((".phego-clean.php",) if clean is not None else ()) + ((".phego-stdin-run.sh",) if (stdin is not None and (ini is not None or env is not None)) or request_active else ())
     for name in fixture_names:
         if any(name == phase or name.startswith(phase + "/") or phase.startswith(name + "/")
                for phase in phase_names):
@@ -167,8 +186,8 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("shell argument contains NUL")
         return b"'" + value.replace(b"'", b"'\\''") + b"'"
 
-    def php_script(path, settings=(), environment=None, *, remove_self=False):
-        args = [os.fsencode(executable), b"-n"]
+    def php_script(path, settings=(), environment=None, *, remove_self=False, binary=None, options=()):
+        args = [os.fsencode(binary or executable), b"-n", *options]
         for setting in settings:
             # run-tests.php escapes apostrophes before embedding -d values in a
             # double-quoted shell argument; retain that literal backslash in PHP.
@@ -183,17 +202,17 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             return b'rm -- "$0" || exit 125\n' + command + b"\n"
         return command + b" </dev/null\n"
 
-    def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout):
+    def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout, *, binary=None, options=()):
         # PHP arguments travel only in the bounded stdin script, never host argv.
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-s"],
-                      php_script(path, settings, environment), limit=limit, seconds=seconds)
+                      php_script(path, settings, environment, binary=binary, options=options), limit=limit, seconds=seconds)
 
-    def exec_php_stdin_script(container_id, path, payload, settings=(), environment=None):
+    def exec_php_stdin_script(container_id, path, payload, settings=(), environment=None, *, binary=None, options=()):
         script_path = "/work/.phego-stdin-run.sh"
         no_clobber = "test ! -e " + script_path + " && test ! -L " + script_path + " && umask 077 && set -C && cat > " + script_path
         code, _, err, failure, why = docker(
             ["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-c", no_clobber],
-            php_script(path, settings, environment, remove_self=True), limit=4096, seconds=30)
+            php_script(path, settings, environment, remove_self=True, binary=binary, options=options), limit=4096, seconds=30)
         if failure or code != 0 or err:
             return code, b"", err, failure or "runner_gap", why or "STDIN runner script staging failed"
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", script_path],
@@ -375,7 +394,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                    False, cleaned, cleanup_reason or "SIGTERM interrupted container creation")
         raise
 
-    phases = {"profile": None, "skipif": None, "program": None, "clean": None}
+    phases = {"profile": None, "cgi_profile": None, "skipif": None, "program": None, "clean": None}
     status, reason = "runner_gap", "container cleanup not confirmed"
     interrupted_sigterm = None
     cleanup_interruption = None
@@ -436,8 +455,27 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                         phases["profile"] = observation("runner_gap", phases["profile"].output,
                                                          phases["profile"].exit_code,
                                                          process_error or "profile left additional container processes")
-                if phases["profile"].status == "completed":
-                    if env is None:
+                if phases["profile"].status == "completed" and cgi_executable is not None:
+                    probe = b'<?php echo PHP_SAPI, "\\n", PHP_VERSION, "\\n", PHP_INT_SIZE; ?>'
+                    code, output, err, failure, why = docker(
+                        ["docker", "exec", "-i", "-w", "/work", container_id, cgi_executable, "-n", "-q"],
+                        probe, limit=output_limit, seconds=timeout)
+                    expected = b"cgi-fcgi\n" + release.encode("ascii") + b"\n" + expected_int_size
+                    if failure:
+                        phases["cgi_profile"] = observation(failure, output, code, why)
+                    elif code != 0 or err or output != expected:
+                        phases["cgi_profile"] = observation("profile_mismatch", output, code, "CGI profile does not match release, SAPI or platform")
+                    else:
+                        phases["cgi_profile"] = observation("completed", output, code)
+                    current_pids, process_error = process_snapshot(container_id)
+                    if (current_pids is None or current_pids != baseline_pids) and phases["cgi_profile"].status not in ("timeout", "output_limit"):
+                        phases["cgi_profile"] = observation("runner_gap", output, code, process_error or "CGI profile left additional container processes")
+                if phases["profile"].status == "completed" and (cgi_executable is None or phases["cgi_profile"].status == "completed"):
+                    if cgi_executable is not None:
+                        code, output, err, failure, why = exec_php(
+                            container_id, "/work/.phego-skipif.php", environment=env,
+                            binary=cgi_executable, options=(b"-C", b"-q"))
+                    elif env is None:
                         code, output, err, failure, why = docker(
                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"],
                             limit=output_limit, seconds=timeout)
@@ -473,7 +511,27 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                     phases["program"] = observation("runner_gap", b"", code,
                                                                      "FILE phase path already exists or source staging failed: " + repr(err))
                                 else:
-                                    if stdin is not None and ini is None and env is None:
+                                    if request_active:
+                                        # PHP's runner removes empty request environment variables.
+                                        names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE")
+                                        request_env = tuple(item for name in names for item in (b"-u", name)) + (env or ())
+                                        request_env += (b"REDIRECT_STATUS=1", b"REQUEST_METHOD=" + (b"POST" if post is not None else b"GET"), b"PATH_TRANSLATED=" + file_path.encode(), b"SCRIPT_FILENAME=" + file_path.encode())
+                                        if query:
+                                            request_env += (b"QUERY_STRING=" + query,)
+                                        if cookie:
+                                            request_env += (b"HTTP_COOKIE=" + cookie,)
+                                        if post is not None:
+                                            request_env += (b"CONTENT_TYPE=application/x-www-form-urlencoded", b"CONTENT_LENGTH=" + str(len(post)).encode())
+                                        body = post if post is not None else stdin
+                                        binary = cgi_executable or executable
+                                        options = (b"-C",) if cgi_executable is not None else ()
+                                        if body is None:
+                                            code, output, err, failure, why = exec_php(
+                                                container_id, file_path, ini or (), environment=request_env, binary=binary, options=options)
+                                        else:
+                                            code, output, err, failure, why = exec_php_stdin_script(
+                                                container_id, file_path, body, ini or (), environment=request_env, binary=binary, options=options)
+                                    elif stdin is not None and ini is None and env is None:
                                         code, output, err, failure, why = docker(
                                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
                                             stdin, limit=output_limit, seconds=timeout)
@@ -516,7 +574,15 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                         phases["clean"] = observation("runner_gap", b"", code,
                                                                       "CLEAN phase path already exists or source staging failed")
                                     else:
-                                        if env is None:
+                                        if request_active:
+                                            names = (b"REDIRECT_STATUS", b"QUERY_STRING", b"PATH_TRANSLATED", b"SCRIPT_FILENAME", b"REQUEST_METHOD", b"CONTENT_TYPE", b"CONTENT_LENGTH", b"HTTP_COOKIE")
+                                            clean_env = tuple(item for name in names for item in (b"-u", name)) + (env or ()) + (b"REDIRECT_STATUS=1",)
+                                            if cookie:
+                                                clean_env += (b"HTTP_COOKIE=" + cookie,)
+                                            if post is not None:
+                                                clean_env += (b"CONTENT_TYPE=application/x-www-form-urlencoded", b"CONTENT_LENGTH=" + str(len(post)).encode())
+                                            code, output, err, failure, why = exec_php(container_id, clean_path, environment=clean_env)
+                                        elif env is None:
                                             code, output, err, failure, why = docker(
                                                 ["docker", "exec", "-i", "-w", "/work", container_id, executable,
                                                  "-n", clean_path], limit=output_limit, seconds=timeout)
@@ -550,6 +616,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                 status = (phases["clean"].status if phases["clean"] and phases["clean"].status != "completed" else
                           phases["program"].status if phases["program"] else
                           phases["skipif"].status if phases["skipif"] and phases["skipif"].status != "completed" else
+                          phases["cgi_profile"].status if phases["cgi_profile"] and phases["cgi_profile"].status != "completed" else
                           phases["profile"].status if phases["profile"] else "runner_gap")
         reason = ""
     except BaseException as exc:
@@ -604,9 +671,9 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         elif callable(previous_sigterm):
             previous_sigterm(interrupted_sigterm.signum, interrupted_sigterm.frame)
         return CaseObservation(status, phases["profile"], phases["skipif"], phases["program"], False,
-                               cleaned, reason or "SIGTERM interrupted PHPT execution", phases["clean"])
+                               cleaned, reason or "SIGTERM interrupted PHPT execution", phases["clean"], phases["cgi_profile"])
     return CaseObservation(status, phases["profile"], phases["skipif"], phases["program"], False, cleaned, reason,
-                           phases["clean"])
+                           phases["clean"], phases["cgi_profile"])
 
 
 def shutil_which(name):

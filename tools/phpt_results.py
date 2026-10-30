@@ -45,7 +45,7 @@ def match_format(expected: bytes, actual: bytes) -> Optional[bool]:
     return run.stdout == b"1\n"
 
 
-def classify(sections: dict, observation: Observation) -> dict:
+def classify(sections: dict, observation: Observation, *, normalize_output=True, headers_match=True) -> dict:
     """Return a distinct result for pass, failure, skip, unsupported and runner gaps."""
     result = {"status": "runner_gap", "basis": "supplied_observation", "exit_code": observation.exit_code,
               "reason": observation.reason}
@@ -75,12 +75,15 @@ def classify(sections: dict, observation: Observation) -> dict:
     # PHP 8.5.12's reference runner trims surrounding PHP whitespace and
     # normalizes CRLF before comparing plain EXPECT. Exit codes remain evidence.
     trim = b" \t\n\r\x00\x0b"
-    actual = observation.output.strip(trim).replace(b"\r\n", b"\n")
+    actual = observation.output.strip(trim)
+    if normalize_output:
+        actual = actual.replace(b"\r\n", b"\n")
     expected = expected.strip(trim).replace(b"\r\n", b"\n")
     matched = match_format(expected, actual) if "EXPECTF" in sections else actual == expected
     if matched is None:
         result["reason"] = "unsupported or timed-out EXPECTF pattern"
         return result
+    matched = matched and headers_match
     if "XFAIL" in sections:
         result["status"] = "xpass" if matched else "xfail"
     else:

@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI, ENV and STDIN are supported.
+TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI, ENV, STDIN and CGI requests are supported. CGI cases require --cgi-executable.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
@@ -21,10 +21,11 @@ from phpt_results import Observation, classify
 from phpt_session import run_case
 from phpt_ini import parse_ini
 from phpt_env import parse_env
+import phpt_cgi
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -39,7 +40,7 @@ def _gap(reason):
     return _result("runner_gap", reason, execution="not_run", basis="not_observed")
 
 
-def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None):
+def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None, cgi_executable=None):
     """Run a narrowly supported case and return a sanitized result record."""
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
         return _gap("invalid PHPT sections")
@@ -48,6 +49,18 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             return _gap("PHPT STDIN is supported only for PHP 8.5.12")
         if len(sections["STDIN"]) > 1024 * 1024:
             return _gap("PHPT STDIN exceeds 1 MiB limit")
+    request_active = phpt_cgi.requested(sections)
+    cgi_needed = phpt_cgi.needs_cgi(sections)
+    if request_active:
+        if release != "8.5.12":
+            return _gap("PHPT request sections are supported only for PHP 8.5.12")
+        try:
+            phpt_cgi.request(sections)
+        except (ValueError, TypeError) as error:
+            known = {"CGI query or cookie exceeds 64 KiB", "CGI query or cookie contains NUL", "CGI POST exceeds 1 MiB", "CGI query would disable command options"}
+            return _gap(str(error) if str(error) in known else "invalid CGI request")
+    if cgi_needed and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
+        return _gap("CGI executable must be provided as an absolute path")
     ini = None
     env = None
     if "INI" in sections:
@@ -101,7 +114,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None or "STDIN" in sections:
+    if request_active or clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None or "STDIN" in sections:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -120,6 +133,10 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 timeout=timeout,
                 output_limit=output_limit,
             )
+            if request_active:
+                session_kwargs["request_sections"] = {k: sections[k] for k in ("GET", "POST", "COOKIE") if k in sections}
+            if cgi_needed:
+                session_kwargs["cgi_executable"] = cgi_executable
             if "STDIN" in sections:
                 session_kwargs["stdin"] = sections["STDIN"]
             if clean_requested:
@@ -142,6 +159,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             skipif = getattr(case, "skipif", None)
             program = getattr(case, "program", None)
             clean_phase = getattr(case, "clean_phase", None)
+            cgi_profile = getattr(case, "cgi_profile", None)
             case_status = getattr(case, "status", None)
             cleanup_confirmed = getattr(case, "cleanup_confirmed", None)
             profile_status = getattr(profile, "status", None)
@@ -152,11 +170,16 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             program_status = getattr(program, "status", None)
             program_output = getattr(program, "output", None)
             program_exit_code = getattr(program, "exit_code", None)
+            cgi_status = getattr(cgi_profile, "status", None)
+            cgi_output = getattr(cgi_profile, "output", None)
+            cgi_code = getattr(cgi_profile, "exit_code", None)
             clean_status = getattr(clean_phase, "status", None)
             clean_output = getattr(clean_phase, "output", None)
             clean_exit_code = getattr(clean_phase, "exit_code", None)
             if case_status == "cleanup_uncertain" or cleanup_confirmed is False:
                 diagnostic = "PHP case cleanup could not be confirmed"
+            elif cgi_needed and cgi_status != "completed":
+                diagnostic = "CGI profile could not be verified"
             elif case_status == "profile_mismatch" or profile_status == "profile_mismatch":
                 diagnostic = "PHP profile does not match the requested release or platform"
             elif case_status == "skipped_unknown" or skipif_status == "skipped_unknown":
@@ -187,6 +210,8 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 and profile_output == release.encode("ascii") + b"\n" + str(_INT_WIDTH[platform]).encode("ascii")
                 and type(profile_exit_code) is int
                 and profile_exit_code == 0
+                and (not cgi_needed or (cgi_status == "completed" and type(cgi_code) is int and cgi_code == 0
+                     and cgi_output == b"cgi-fcgi\n" + release.encode("ascii") + b"\n" + str(_INT_WIDTH[platform]).encode("ascii")))
                 and skipif_status == "completed"
                 and isinstance(skipif_output, bytes)
                 and program_status == "completed"
@@ -208,10 +233,14 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             # are not supported by this executor.
             return _result("runner_gap", "SKIPIF did not produce a classifiable observation",
                            execution="not_completed", effects_complete=False)
-        classified = classify(
-            sections,
-            Observation(program_status, program_output, program_exit_code, ""),
-        )
+        if cgi_needed:
+            body, headers_match, had_headers = phpt_cgi.response(program_output, sections.get("EXPECTHEADERS", b""), _INT_WIDTH[platform] * 8)
+            if headers_match is None:
+                return _result("runner_gap", "CGI header numeric comparison is not supported", execution="reference_executed", effects_complete=False)
+            classified = classify(sections, Observation(program_status, body, program_exit_code, ""),
+                                  normalize_output=not had_headers, headers_match=headers_match)
+        else:
+            classified = classify(sections, Observation(program_status, program_output, program_exit_code, ""))
         status = classified.get("status", "runner_gap")
         if clean_requested and status in {"pass", "xpass"} and clean_output not in (b"", b"0"):
             return _result("runner_gap", "CLEAN produced truthy output", execution="reference_executed",
@@ -333,6 +362,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image", required=True, help="digest-pinned reference image")
     parser.add_argument("--executable", default="/usr/bin/php")
+    parser.add_argument("--cgi-executable", help="absolute path to reference php-cgi when a case requires CGI")
     parser.add_argument("--platform", required=True, choices=tuple(_INT_WIDTH))
     parser.add_argument("--release", required=True, help="exact PHP release, for example 8.5.12")
     parser.add_argument("--timeout", type=float, default=10)
@@ -361,7 +391,10 @@ def main(argv=None):
         reason = diagnostic if diagnostic in known else "fixture input error"
         print(json.dumps(_gap(reason), sort_keys=True))
         return 2
-    result = run(sections, args.image, args.executable, args.platform, args.release, args.timeout, args.output_limit, fixtures=fixtures)
+    run_options = {"fixtures": fixtures}
+    if args.cgi_executable is not None:
+        run_options["cgi_executable"] = args.cgi_executable
+    result = run(sections, args.image, args.executable, args.platform, args.release, args.timeout, args.output_limit, **run_options)
     result["input_sha256"] = hashlib.sha256(data).hexdigest()
     print(json.dumps(result, sort_keys=True))
     return 0 if result["status"] in {"pass", "xfail"} else 1

@@ -289,7 +289,7 @@ class PHPTStdinExecutionTests(unittest.TestCase):
             rendered = repr(argv).encode("utf-8")
             self.assertNotIn(sentinel, rendered)
             self.assertNotIn(b"PHEGO_STDIN_ARGV_SECRET", rendered)
-            self.assertNotIn(b"f2c9", rendered)
+            self.assertNotIn(sentinel.hex().encode(), rendered)
             self.assertNotIn(b"not-on-argv", rendered)
 
     def test_parse_and_execute_keep_cr_before_env_marker_inside_stdin(self):
