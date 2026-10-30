@@ -12,5 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare pinned PHP 8.5.12 reference image
+        run: docker pull --platform linux/386 i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049
       - name: Test PHPT parsing and result classification
         run: python3 -m unittest discover -s tests/runner -p 'test_phpt_*.py'

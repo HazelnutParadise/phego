@@ -267,7 +267,7 @@
     ".github/workflows/native-reference.yml": "a6d2e582249444103a3488f3d1e398230da1ea9c42e75620a4a7089fee27b162",
     ".github/workflows/native-windows-go-source.yml": "c602ef9904057842279f49f33884332abc49c74143f07c2a937471c85a531653",
     ".github/workflows/native-windows-go.yml": "1cd97067f777cd00a73316486c5a36c7a43311dcf59bce64c4cd122b1193b902",
-    ".github/workflows/phpt.yml": "380f6029156849b6283b94547722b9f6d7ceedbdedea8aae3433ad4af21b071a",
+    ".github/workflows/phpt.yml": "5609d636a638e08b7b8221f45136c0ec338068744620f927e3765f747b812c8e",
     ".github/workflows/upstream-watch.yml": "78c4daf44c4942d5038fd31d1a2474a578739309f38acd3a8cd43d5494ccdd28",
     ".github/workflows/w03-local-acceptance.yml": "71fc4835f8abede1ebdd1690ab6608a4ce2b11bf14ff63733557f88250d08560",
     ".github/workflows/w03-local-gate.yml": "77470ad879edf61f0b495fbb09a4535abd4edfed609ca89ff2c50aa148770035",
