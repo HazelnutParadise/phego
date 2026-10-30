@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF and partial INI and ENV are supported.
+TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI and ENV are supported.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
@@ -24,7 +24,7 @@ from phpt_env import parse_env
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "INI", "ENV"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -87,13 +87,16 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported PHPT section: " + ", ".join(sorted(unsupported)))
     if not {"TEST", "FILE"}.issubset(sections) or ("EXPECT" in sections) == ("EXPECTF" in sections):
         return _gap("required sections missing or conflicting")
+    clean_requested = "CLEAN" in sections and sections["CLEAN"] not in (b"", b"0")
+    if clean_requested and release != "8.5.12":
+        return _gap("CLEAN is supported only for PHP 8.5.12")
     if not isinstance(release, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", release):
         return _gap("exact PHP release is required")
     if platform not in _INT_WIDTH:
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None:
+    if clean_requested or "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -112,6 +115,12 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 timeout=timeout,
                 output_limit=output_limit,
             )
+            if clean_requested:
+                if len(sections["CLEAN"]) > 1024 * 1024:
+                    return _gap("CLEAN source exceeds sandbox limit")
+                # PHP trims CLEAN when staging its source file, while PHP's
+                # own string conversion determines whether the section runs.
+                session_kwargs["clean"] = sections["CLEAN"].strip(b" \x00\t\n\r\v")
             if ini is not None:
                 session_kwargs["ini"] = ini
             if env is not None:
@@ -125,6 +134,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             profile = getattr(case, "profile", None)
             skipif = getattr(case, "skipif", None)
             program = getattr(case, "program", None)
+            clean_phase = getattr(case, "clean_phase", None)
             case_status = getattr(case, "status", None)
             cleanup_confirmed = getattr(case, "cleanup_confirmed", None)
             profile_status = getattr(profile, "status", None)
@@ -135,16 +145,28 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             program_status = getattr(program, "status", None)
             program_output = getattr(program, "output", None)
             program_exit_code = getattr(program, "exit_code", None)
+            clean_status = getattr(clean_phase, "status", None)
+            clean_output = getattr(clean_phase, "output", None)
+            clean_exit_code = getattr(clean_phase, "exit_code", None)
             if case_status == "cleanup_uncertain" or cleanup_confirmed is False:
                 diagnostic = "PHP case cleanup could not be confirmed"
             elif case_status == "profile_mismatch" or profile_status == "profile_mismatch":
                 diagnostic = "PHP profile does not match the requested release or platform"
             elif case_status == "skipped_unknown" or skipif_status == "skipped_unknown":
                 diagnostic = "SKIPIF requested a skip with an unknown cause"
+            elif clean_requested and clean_status == "timeout":
+                diagnostic = "CLEAN phase timed out"
+            elif clean_requested and clean_status == "output_limit":
+                diagnostic = "CLEAN phase exceeded the output limit"
             elif "timeout" in (case_status, profile_status, skipif_status, program_status):
                 diagnostic = "PHP case phase timed out"
             elif "output_limit" in (case_status, profile_status, skipif_status, program_status):
                 diagnostic = "PHP case phase exceeded the output limit"
+            elif clean_requested and clean_status != "completed":
+                diagnostic = "CLEAN phase did not produce a completed observation"
+            elif clean_requested and (not isinstance(clean_output, bytes) or type(clean_exit_code) is not int
+                                      or not 0 <= clean_exit_code <= 124):
+                diagnostic = "CLEAN phase observation is incomplete or ambiguous"
             else:
                 diagnostic = ""
             if diagnostic:
@@ -164,6 +186,9 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 and isinstance(program_output, bytes)
                 and type(program_exit_code) is int
                 and 0 <= program_exit_code <= 124
+                and (not clean_requested or
+                     (clean_status == "completed" and isinstance(clean_output, bytes)
+                      and type(clean_exit_code) is int and 0 <= clean_exit_code <= 124))
             )
         except Exception:
             complete = False
@@ -181,6 +206,9 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             Observation(program_status, program_output, program_exit_code, ""),
         )
         status = classified.get("status", "runner_gap")
+        if clean_requested and status in {"pass", "xpass"} and clean_output not in (b"", b"0"):
+            return _result("runner_gap", "CLEAN produced truthy output", execution="reference_executed",
+                           effects_complete=False)
         reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "PHP observation could not be classified by supported PHPT expectations"
         return _result(status, reason, execution="reference_executed", effects_complete=False,
                        exit_code=program_exit_code, image=image, platform=platform, release=release)

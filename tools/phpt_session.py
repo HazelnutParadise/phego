@@ -41,6 +41,7 @@ class CaseObservation:
     effects_complete: bool
     cleanup_confirmed: bool
     reason: str = ""
+    clean_phase: Optional[PhaseObservation] = None
 
 
 def _parse_ini_for_release(data, release):
@@ -64,7 +65,7 @@ def _parse_env_for_release(data, release):
     return parser.parse_env(data, release)
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None):
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -84,7 +85,11 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise ValueError("release must be an exact version")
     if not isinstance(source, bytes) or not isinstance(skipif, bytes):
         raise TypeError("source and skipif must be bytes")
-    if len(source) > 1024 * 1024 or len(skipif) > 1024 * 1024:
+    if clean is not None and not isinstance(clean, bytes):
+        raise TypeError("clean must be bytes")
+    if clean is not None and release != "8.5.12":
+        raise ValueError("CLEAN is supported only for PHP 8.5.12")
+    if len(source) > 1024 * 1024 or len(skipif) > 1024 * 1024 or (clean is not None and len(clean) > 1024 * 1024):
         raise ValueError("phase source exceeds 1 MiB")
     if ini is not None:
         if not isinstance(ini, tuple) or len(ini) > 256:
@@ -131,7 +136,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise TypeError("fixture values must be bytes")
         fixture_names.add(name)
         total += len(data)
-    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php")
+    phase_names = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php") + ((".phego-clean.php",) if clean is not None else ())
     for name in fixture_names:
         if any(name == phase or name.startswith(phase + "/") or phase.startswith(name + "/")
                for phase in phase_names):
@@ -349,7 +354,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                    False, cleaned, cleanup_reason or "SIGTERM interrupted container creation")
         raise
 
-    phases = {"profile": None, "skipif": None, "program": None}
+    phases = {"profile": None, "skipif": None, "program": None, "clean": None}
     status, reason = "runner_gap", "container cleanup not confirmed"
     interrupted_sigterm = None
     cleanup_interruption = None
@@ -471,12 +476,51 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                     phases["program"] = observation("runner_gap", phases["program"].output,
                                                                      phases["program"].exit_code,
                                                                      process_error or "FILE left additional container processes")
+                                if clean is not None and phases["program"].status == "completed":
+                                    clean_path = "/work/.phego-clean.php"
+                                    no_clobber = "test ! -e " + clean_path + " && test ! -L " + clean_path + " && umask 077 && set -C && cat > " + clean_path
+                                    code, _, err, failure, why = docker(
+                                        ["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-c", no_clobber],
+                                        clean, limit=4096, seconds=30)
+                                    if failure:
+                                        phases["clean"] = observation(failure, b"", code, why)
+                                    elif code != 0 or err:
+                                        phases["clean"] = observation("runner_gap", b"", code,
+                                                                      "CLEAN phase path already exists or source staging failed")
+                                    else:
+                                        if env is None:
+                                            code, output, err, failure, why = docker(
+                                                ["docker", "exec", "-i", "-w", "/work", container_id, executable,
+                                                 "-n", clean_path], limit=output_limit, seconds=timeout)
+                                        else:
+                                            code, output, err, failure, why = exec_php(
+                                                container_id, clean_path, environment=env)
+                                        if failure:
+                                            phases["clean"] = observation(failure, output, code, why)
+                                        elif code in (125, 126, 127):
+                                            phases["clean"] = observation("runner_gap", output, code,
+                                                                           "Docker exec failure is ambiguous")
+                                        elif err:
+                                            phases["clean"] = observation("runner_gap", output, code,
+                                                                           "CLEAN wrote to stderr")
+                                        elif not isinstance(code, int) or code < 0 or code > 124:
+                                            phases["clean"] = observation("runner_gap", output, code,
+                                                                           "CLEAN exit status may represent Docker failure or signal termination")
+                                        else:
+                                            phases["clean"] = observation("completed", output, code,
+                                                                          "" if code == 0 else "CLEAN exited with status " + str(code))
+                                    current_pids, process_error = process_snapshot(container_id)
+                                    if (current_pids is None or current_pids != baseline_pids) and phases["clean"].status not in ("timeout", "output_limit"):
+                                        phases["clean"] = observation("runner_gap", phases["clean"].output,
+                                                                       phases["clean"].exit_code,
+                                                                       process_error or "CLEAN left additional container processes")
                             elif token[:4].lower() == b"skip":
                                 phases["skipif"] = observation("skipped_unknown", output, 0, "SKIPIF requested skip; cause unknown")
                             else:
                                 phases["skipif"] = observation("runner_gap", output, 0,
                                                                "non-empty SKIPIF directive is unsupported; FILE was not run")
-                status = (phases["program"].status if phases["program"] else
+                status = (phases["clean"].status if phases["clean"] and phases["clean"].status != "completed" else
+                          phases["program"].status if phases["program"] else
                           phases["skipif"].status if phases["skipif"] and phases["skipif"].status != "completed" else
                           phases["profile"].status if phases["profile"] else "runner_gap")
         reason = ""
@@ -532,8 +576,9 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         elif callable(previous_sigterm):
             previous_sigterm(interrupted_sigterm.signum, interrupted_sigterm.frame)
         return CaseObservation(status, phases["profile"], phases["skipif"], phases["program"], False,
-                               cleaned, reason or "SIGTERM interrupted PHPT execution")
-    return CaseObservation(status, phases["profile"], phases["skipif"], phases["program"], False, cleaned, reason)
+                               cleaned, reason or "SIGTERM interrupted PHPT execution", phases["clean"])
+    return CaseObservation(status, phases["profile"], phases["skipif"], phases["program"], False, cleaned, reason,
+                           phases["clean"])
 
 
 def shutil_which(name):

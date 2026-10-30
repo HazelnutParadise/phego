@@ -140,7 +140,7 @@ class PHPTExecutionSessionTests(unittest.TestCase):
 
     def test_unsupported_sections_stop_before_profile_or_session(self):
         with patch.object(executor, "execute_php") as profile, patch.object(executor, "run_case") as session:
-            result = executor.run(self.sections(SKIPIF=SKIPIF, CLEAN=b"secret"), IMAGE,
+            result = executor.run(self.sections(SKIPIF=SKIPIF, ARGS=b"secret"), IMAGE,
                                   EXECUTABLE, PLATFORM, RELEASE, 5, 1024,
                                   fixtures=FIXTURES)
         self.assertEqual(result["status"], "runner_gap")
