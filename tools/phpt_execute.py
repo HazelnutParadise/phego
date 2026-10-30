@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, and optional XFAIL and SKIPIF are supported.
+TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF and partial INI are supported.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
@@ -19,10 +19,11 @@ from phpt_runner import PHPTError, parse_phpt
 from phpt_sandbox import execute_php
 from phpt_results import Observation, classify
 from phpt_session import run_case
+from phpt_ini import parse_ini
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "INI"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -41,6 +42,24 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
     """Run a narrowly supported case and return a sanitized result record."""
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
         return _gap("invalid PHPT sections")
+    ini = None
+    if "INI" in sections:
+        try:
+            ini = parse_ini(sections["INI"], release)
+        except TypeError:
+            return _gap("PHPT INI section could not be parsed")
+        except ValueError as error:
+            reasons = {
+                "unsupported PHP release": "PHPT INI parser does not support the requested PHP release",
+                "INI input must be bytes": "PHPT INI input has an invalid type",
+                "INI input exceeds byte limit": "PHPT INI input exceeds the parser byte limit",
+                "INI input contains NUL byte": "PHPT INI input contains a NUL byte",
+                "INI input contains shell expansion syntax": "PHPT INI input contains unsupported shell expansion syntax",
+                "INI input exceeds line limit": "PHPT INI input exceeds the parser line limit",
+                "malformed INI setting name": "PHPT INI input contains a malformed setting name",
+                "unsupported INI substitution": "PHPT INI input contains an unsupported substitution",
+            }
+            return _gap(reasons.get(str(error), "PHPT INI input is invalid or unsupported"))
     unsupported = set(sections) - _SUPPORTED
     if unsupported:
         if any(not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", name) for name in unsupported):
@@ -54,7 +73,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if "SKIPIF" in sections or fixtures is not None:
+    if "SKIPIF" in sections or fixtures is not None or ini is not None:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -62,7 +81,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         if not isinstance(fixtures, dict):
             return _gap("invalid fixture mapping")
         try:
-            case = run_case(
+            session_kwargs = dict(
                 image=image,
                 executable=executable,
                 platform=platform,
@@ -73,6 +92,9 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 timeout=timeout,
                 output_limit=output_limit,
             )
+            if ini is not None:
+                session_kwargs["ini"] = ini
+            case = run_case(**session_kwargs)
         except Exception:
             return _result("runner_gap", "PHP case session could not be completed",
                            execution="not_completed", effects_complete=False)

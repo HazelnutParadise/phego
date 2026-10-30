@@ -9,6 +9,7 @@ This module does not claim Phego product acceptance.
 """
 from dataclasses import dataclass
 from typing import Optional
+import importlib.util
 import io
 import os
 import re
@@ -42,7 +43,18 @@ class CaseObservation:
     reason: str = ""
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit):
+def _parse_ini_for_release(data, release):
+    """Load the sibling parser by exact path, without ambient module lookup."""
+    parser_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phpt_ini.py")
+    spec = importlib.util.spec_from_file_location("_phego_phpt_ini_parser", parser_path)
+    if spec is None or spec.loader is None:
+        raise ValueError("PHPT INI parser is unavailable")
+    parser = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(parser)
+    return parser.parse_ini(data, release)
+
+
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -64,6 +76,21 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise TypeError("source and skipif must be bytes")
     if len(source) > 1024 * 1024 or len(skipif) > 1024 * 1024:
         raise ValueError("phase source exceeds 1 MiB")
+    if ini is not None:
+        if not isinstance(ini, tuple) or len(ini) > 256:
+            raise ValueError("INI settings must be a bounded tuple")
+        ini_total = 0
+        for setting in ini:
+            if not isinstance(setting, bytes) or not setting or b"=" not in setting or b"\0" in setting:
+                raise ValueError("invalid INI setting")
+            ini_total += len(setting)
+        if ini_total > 64 * 1024:
+            raise ValueError("INI settings exceed 64 KiB")
+        # Revalidate direct run_case callers through the same release-aware parser.
+        normalized_ini = _parse_ini_for_release(b"\n".join(ini), release)
+        if normalized_ini != ini:
+            raise ValueError("INI settings are not parser-normalized")
+        ini = normalized_ini
     if not isinstance(fixtures, dict):
         raise TypeError("fixtures must be a mapping")
     if len(fixtures) > 128:
@@ -98,6 +125,25 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
 
     def observation(status, output=b"", code=None, reason=""):
         return PhaseObservation(status, output, code, reason)
+
+    def shell_quote(value):
+        if not isinstance(value, bytes) or b"\0" in value:
+            raise ValueError("shell argument contains NUL")
+        return b"'" + value.replace(b"'", b"'\\''") + b"'"
+
+    def php_script(path, settings=()):
+        args = [os.fsencode(executable), b"-n"]
+        for setting in settings:
+            # run-tests.php escapes apostrophes before embedding -d values in a
+            # double-quoted shell argument; retain that literal backslash in PHP.
+            args.extend((b"-d", setting.replace(b"'", b"\\'")))
+        args.append(path.encode("ascii"))
+        return b"exec " + b" ".join(shell_quote(arg) for arg in args) + b" </dev/null\n"
+
+    def exec_php(container_id, path, settings=(), limit=output_limit, seconds=timeout):
+        # PHP arguments travel only in the bounded stdin script, never host argv.
+        return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-s"],
+                      php_script(path, settings), limit=limit, seconds=seconds)
 
     def docker(args, payload=None, limit=output_limit, seconds=timeout):
         if sigterm_event[0] is not None:
@@ -337,7 +383,9 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                                          phases["profile"].exit_code,
                                                          process_error or "profile left additional container processes")
                 if phases["profile"].status == "completed":
-                    code, output, err, failure, why = docker(["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"], limit=output_limit, seconds=timeout)
+                    code, output, err, failure, why = docker(
+                        ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"],
+                        limit=output_limit, seconds=timeout)
                     if failure:
                         phases["skipif"] = observation(failure, output, code, why)
                     elif code in (125, 126, 127):
@@ -367,9 +415,13 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                     phases["program"] = observation("runner_gap", b"", code,
                                                                      "FILE phase path already exists or source staging failed: " + repr(err))
                                 else:
-                                    code, output, err, failure, why = docker(
-                                        ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
-                                        limit=output_limit, seconds=timeout)
+                                    if ini is None:
+                                        code, output, err, failure, why = docker(
+                                            ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
+                                            limit=output_limit, seconds=timeout)
+                                    else:
+                                        code, output, err, failure, why = exec_php(
+                                            container_id, file_path, ini)
                                     if failure:
                                         phases["program"] = observation(failure, output, code, why)
                                     elif code in (125, 126, 127):
