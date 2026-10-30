@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF and partial INI are supported.
+TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF and partial INI and ENV are supported.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
@@ -20,10 +20,11 @@ from phpt_sandbox import execute_php
 from phpt_results import Observation, classify
 from phpt_session import run_case
 from phpt_ini import parse_ini
+from phpt_env import parse_env
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "INI"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "INI", "ENV"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -43,6 +44,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
         return _gap("invalid PHPT sections")
     ini = None
+    env = None
     if "INI" in sections:
         try:
             ini = parse_ini(sections["INI"], release)
@@ -52,14 +54,32 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             reasons = {
                 "unsupported PHP release": "PHPT INI parser does not support the requested PHP release",
                 "INI input must be bytes": "PHPT INI input has an invalid type",
-                "INI input exceeds byte limit": "PHPT INI input exceeds the parser byte limit",
+                "INI input exceeds byte limit": "PHPT INI input exceeds 64 KiB limit",
                 "INI input contains NUL byte": "PHPT INI input contains a NUL byte",
                 "INI input contains shell expansion syntax": "PHPT INI input contains unsupported shell expansion syntax",
-                "INI input exceeds line limit": "PHPT INI input exceeds the parser line limit",
+                "INI input exceeds line limit": "PHPT INI input exceeds 256 lines limit",
                 "malformed INI setting name": "PHPT INI input contains a malformed setting name",
                 "unsupported INI substitution": "PHPT INI input contains an unsupported substitution",
             }
             return _gap(reasons.get(str(error), "PHPT INI input is invalid or unsupported"))
+    if "ENV" in sections:
+        try:
+            env = parse_env(sections["ENV"], release)
+        except (TypeError, ValueError) as error:
+            message = str(error)
+            # Parser diagnostics carry names only for reserved variables; values
+            # are never included in public runner results.
+            if message.startswith("reserved ENV variable name:"):
+                return _gap(message)
+            messages = {
+                "unsupported PHP release": "PHPT ENV parser does not support the requested PHP release",
+                "ENV input must be bytes": "PHPT ENV input has an invalid type",
+                "ENV input exceeds 64 KiB": "PHPT ENV input exceeds 64 KiB limit",
+                "ENV input contains a NUL byte": "PHPT ENV input contains a NUL byte",
+                "ENV input exceeds 256 lines": "PHPT ENV input exceeds 256 lines limit",
+                "invalid ENV variable name": "PHPT ENV input contains an invalid variable name",
+            }
+            return _gap(messages.get(message, "PHPT ENV input is invalid or unsupported"))
     unsupported = set(sections) - _SUPPORTED
     if unsupported:
         if any(not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", name) for name in unsupported):
@@ -73,7 +93,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
-    if "SKIPIF" in sections or fixtures is not None or ini is not None:
+    if "SKIPIF" in sections or fixtures is not None or ini is not None or env is not None:
         if len(sections.get("SKIPIF", b"")) > 1024 * 1024:
             return _gap("SKIPIF source exceeds sandbox limit")
         if fixtures is None:
@@ -94,6 +114,8 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             )
             if ini is not None:
                 session_kwargs["ini"] = ini
+            if env is not None:
+                session_kwargs["env"] = env
             case = run_case(**session_kwargs)
         except Exception:
             return _result("runner_gap", "PHP case session could not be completed",

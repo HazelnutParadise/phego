@@ -54,7 +54,17 @@ def _parse_ini_for_release(data, release):
     return parser.parse_ini(data, release)
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None):
+def _parse_env_for_release(data, release):
+    parser_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phpt_env.py")
+    spec = importlib.util.spec_from_file_location("_phego_phpt_env_parser", parser_path)
+    if spec is None or spec.loader is None:
+        raise ValueError("PHPT ENV parser is unavailable")
+    parser = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(parser)
+    return parser.parse_env(data, release)
+
+
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -91,6 +101,20 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         if normalized_ini != ini:
             raise ValueError("INI settings are not parser-normalized")
         ini = normalized_ini
+    if env is not None:
+        if not isinstance(env, tuple) or len(env) > 256:
+            raise ValueError("ENV settings must be a bounded tuple")
+        env_total = 0
+        for setting in env:
+            if not isinstance(setting, bytes) or b"=" not in setting or b"\0" in setting:
+                raise ValueError("invalid ENV setting")
+            env_total += len(setting)
+        if env_total > 64 * 1024:
+            raise ValueError("ENV settings exceed 64 KiB")
+        normalized_env = _parse_env_for_release(b"\n".join(env), release)
+        if normalized_env != env:
+            raise ValueError("ENV settings are not parser-normalized")
+        env = normalized_env
     if not isinstance(fixtures, dict):
         raise TypeError("fixtures must be a mapping")
     if len(fixtures) > 128:
@@ -131,19 +155,23 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("shell argument contains NUL")
         return b"'" + value.replace(b"'", b"'\\''") + b"'"
 
-    def php_script(path, settings=()):
+    def php_script(path, settings=(), environment=None):
         args = [os.fsencode(executable), b"-n"]
         for setting in settings:
             # run-tests.php escapes apostrophes before embedding -d values in a
             # double-quoted shell argument; retain that literal backslash in PHP.
             args.extend((b"-d", setting.replace(b"'", b"\\'")))
         args.append(path.encode("ascii"))
+        if environment is not None:
+            # Start the command shell with the test environment, as PHP does.
+            # Keep PHP arguments separate to avoid the shell's single-argument limit.
+            args = [b"env", *environment, b"/bin/sh", b"-c", b'exec "$@"', b"phego-php", *args]
         return b"exec " + b" ".join(shell_quote(arg) for arg in args) + b" </dev/null\n"
 
-    def exec_php(container_id, path, settings=(), limit=output_limit, seconds=timeout):
+    def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout):
         # PHP arguments travel only in the bounded stdin script, never host argv.
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-s"],
-                      php_script(path, settings), limit=limit, seconds=seconds)
+                      php_script(path, settings, environment), limit=limit, seconds=seconds)
 
     def docker(args, payload=None, limit=output_limit, seconds=timeout):
         if sigterm_event[0] is not None:
@@ -383,9 +411,13 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                                          phases["profile"].exit_code,
                                                          process_error or "profile left additional container processes")
                 if phases["profile"].status == "completed":
-                    code, output, err, failure, why = docker(
-                        ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"],
-                        limit=output_limit, seconds=timeout)
+                    if env is None:
+                        code, output, err, failure, why = docker(
+                            ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", "/work/.phego-skipif.php"],
+                            limit=output_limit, seconds=timeout)
+                    else:
+                        code, output, err, failure, why = exec_php(
+                            container_id, "/work/.phego-skipif.php", environment=env)
                     if failure:
                         phases["skipif"] = observation(failure, output, code, why)
                     elif code in (125, 126, 127):
@@ -415,13 +447,13 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                     phases["program"] = observation("runner_gap", b"", code,
                                                                      "FILE phase path already exists or source staging failed: " + repr(err))
                                 else:
-                                    if ini is None:
+                                    if ini is None and env is None:
                                         code, output, err, failure, why = docker(
                                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],
                                             limit=output_limit, seconds=timeout)
                                     else:
                                         code, output, err, failure, why = exec_php(
-                                            container_id, file_path, ini)
+                                            container_id, file_path, ini or (), environment=env)
                                     if failure:
                                         phases["program"] = observation(failure, output, code, why)
                                     elif code in (125, 126, 127):
