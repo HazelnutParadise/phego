@@ -66,6 +66,27 @@ def _parse_env_for_release(data, release):
     return parser.parse_env(data, release)
 
 
+def validate_fixture_path(name):
+    """Bound and validate paths before creating host-side archive metadata."""
+    if type(name) is not str or not name or "\x00" in name or "\\" in name:
+        raise ValueError("invalid fixture path")
+    if len(name) > 4096:
+        raise ValueError("fixture path exceeds 4096 bytes")
+    try:
+        encoded = os.fsencode(name)
+    except UnicodeError:
+        raise ValueError("fixture path has unsupported encoding") from None
+    if len(encoded) > 4096:
+        raise ValueError("fixture path exceeds 4096 bytes")
+    parts = encoded.split(b"/")
+    if len(parts) > 64:
+        raise ValueError("fixture path exceeds 64 components")
+    if any(len(part) > 255 for part in parts):
+        raise ValueError("fixture path component exceeds 255 bytes")
+    if any(part in (b"", b".", b"..") for part in parts):
+        raise ValueError("unsafe fixture path")
+
+
 def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None, cgi_executable=None, request_sections=None, args=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
@@ -87,9 +108,9 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
     if cgi_executable is not None and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
         raise ValueError("CGI executable must be an absolute path")
     if args is not None:
-        if release != "8.5.12" or not isinstance(args, tuple) or len(args) > 4096:
+        if release != "8.5.12" or type(args) is not tuple or len(args) > 4096:
             raise ValueError("invalid PHPT ARGS")
-        if any(not isinstance(arg, bytes) or b"\0" in arg for arg in args) or sum(map(len, args)) > 64 * 1024:
+        if any(type(arg) is not bytes or b"\0" in arg for arg in args) or sum(map(len, args)) > 64 * 1024:
             raise ValueError("invalid PHPT ARGS")
     request_active = request_sections is not None or cgi_executable is not None or release == "8.5.12"
     query, cookie, post = b"", b"", None
@@ -98,7 +119,7 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("CGI request is supported only for PHP 8.5.12")
         if request_sections is None:
             request_sections = {}
-        if not isinstance(request_sections, dict) or any(k not in ("GET", "POST", "COOKIE") or not isinstance(v, bytes) for k, v in request_sections.items()):
+        if not isinstance(request_sections, dict) or any(k not in ("GET", "POST", "COOKIE") or type(v) is not bytes for k, v in request_sections.items()):
             raise ValueError("invalid CGI request sections")
         parser_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phpt_cgi.py")
         spec = importlib.util.spec_from_file_location("_phego_phpt_cgi_parser", parser_path)
@@ -107,14 +128,14 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         parser = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(parser)
         query, cookie, post = parser.request(request_sections)
-    if not isinstance(source, bytes) or not isinstance(skipif, bytes):
+    if type(source) is not bytes or type(skipif) is not bytes:
         raise TypeError("source and skipif must be bytes")
-    if clean is not None and not isinstance(clean, bytes):
+    if clean is not None and type(clean) is not bytes:
         raise TypeError("clean must be bytes")
     if stdin is not None:
         if release != "8.5.12":
             raise ValueError("STDIN is supported only for PHP 8.5.12")
-        if not isinstance(stdin, bytes):
+        if type(stdin) is not bytes:
             raise TypeError("STDIN must be bytes")
         if len(stdin) > 1024 * 1024:
             raise ValueError("STDIN exceeds 1 MiB")
@@ -123,11 +144,11 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
     if len(source) > 1024 * 1024 or len(skipif) > 1024 * 1024 or (clean is not None and len(clean) > 1024 * 1024):
         raise ValueError("phase source exceeds 1 MiB")
     if ini is not None:
-        if not isinstance(ini, tuple) or len(ini) > 256:
+        if type(ini) is not tuple or len(ini) > 256:
             raise ValueError("INI settings must be a bounded tuple")
         ini_total = 0
         for setting in ini:
-            if not isinstance(setting, bytes) or not setting or b"=" not in setting or b"\0" in setting:
+            if type(setting) is not bytes or not setting or b"=" not in setting or b"\0" in setting:
                 raise ValueError("invalid INI setting")
             ini_total += len(setting)
         if ini_total > 64 * 1024:
@@ -138,11 +159,11 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("INI settings are not parser-normalized")
         ini = normalized_ini
     if env is not None:
-        if not isinstance(env, tuple) or len(env) > 256:
+        if type(env) is not tuple or len(env) > 256:
             raise ValueError("ENV settings must be a bounded tuple")
         env_total = 0
         for setting in env:
-            if not isinstance(setting, bytes) or b"=" not in setting or b"\0" in setting:
+            if type(setting) is not bytes or b"=" not in setting or b"\0" in setting:
                 raise ValueError("invalid ENV setting")
             env_total += len(setting)
         if env_total > 64 * 1024:
@@ -158,17 +179,16 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
     env_args += tuple(setting for setting in (env or ()) if setting.partition(b"=")[2] != b"")
     if not isinstance(fixtures, dict):
         raise TypeError("fixtures must be a mapping")
+    if dict.__len__(fixtures) > 128:
+        raise ValueError("too many fixtures")
+    fixtures = dict.copy(fixtures)
     if len(fixtures) > 128:
         raise ValueError("too many fixtures")
     total = 0
     fixture_names = set()
     for name, data in fixtures.items():
-        if not isinstance(name, str) or not name or "\x00" in name or "\\" in name:
-            raise ValueError("invalid fixture path")
-        parts = name.split("/")
-        if any(p in ("", ".", "..") for p in parts) or name.startswith("/"):
-            raise ValueError("unsafe fixture path")
-        if not isinstance(data, bytes):
+        validate_fixture_path(name)
+        if type(data) is not bytes:
             raise TypeError("fixture values must be bytes")
         fixture_names.add(name)
         total += len(data)

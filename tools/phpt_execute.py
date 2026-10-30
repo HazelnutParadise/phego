@@ -18,7 +18,7 @@ import sys
 from phpt_runner import PHPTError, parse_phpt
 from phpt_sandbox import execute_php
 from phpt_results import Observation, classify
-from phpt_session import run_case
+from phpt_session import run_case, validate_fixture_path
 from phpt_ini import parse_ini
 from phpt_env import parse_env
 import phpt_cgi
@@ -26,8 +26,10 @@ import phpt_args
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS", "ARGS"}
+_SUPPORTED = {"TEST", "FILE", "FILEEOF", "FILE_EXTERNAL", "EXPECT", "EXPECTF", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS", "ARGS"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
+_EXTERNAL_SOURCE = {"FILE", "FILEEOF", "FILE_EXTERNAL"}
+_EXTERNAL_EXPECT = {"EXPECT", "EXPECTF", "EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL"}
 
 
 def _result(status, reason="", **extra):
@@ -39,6 +41,15 @@ def _result(status, reason="", **extra):
 
 def _gap(reason):
     return _result("runner_gap", reason, execution="not_run", basis="not_observed")
+
+
+def _truncate_done(source):
+    """Retain a FILE-section DONE marker and discard following lines."""
+    chunks = source.split(b"\n")
+    for index, line in enumerate(chunks):
+        if re.fullmatch(rb"===DONE===[\t\r\f\v ]*", line):
+            return b"\n".join(chunks[:index + 1]) + (b"\n" if index < len(chunks) - 1 else b"")
+    return source
 
 
 def _normalize_file_section(sections, release):
@@ -59,15 +70,7 @@ def _normalize_file_section(sections, release):
     if len(source) > 1024 * 1024:
         return None, "FILE source exceeds sandbox limit"
     if release == "8.5.12":
-        # run-tests.php readFile stops after a line beginning at column zero
-        # with ===DONE=== followed only by PCRE whitespace, retaining marker.
-        chunks = source.split(b"\n")
-        for index, line in enumerate(chunks):
-            if re.fullmatch(rb"===DONE===[\t\r\f\v ]*", line):
-                source = b"\n".join(chunks[:index + 1])
-                if index < len(chunks) - 1:
-                    source += b"\n"
-                break
+        source = _truncate_done(source)
     if file_eof:
         source = source.rstrip(b"\r\n")
     normalized = dict(sections)
@@ -76,10 +79,133 @@ def _normalize_file_section(sections, release):
     return normalized, ""
 
 
+def _resolve_external_sections(sections, fixtures, release):
+    if not any(name in sections for name in ("FILE_EXTERNAL", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL")):
+        return dict(sections), ""
+    source_forms = _EXTERNAL_SOURCE.intersection(sections)
+    expect_forms = _EXTERNAL_EXPECT.intersection(sections)
+    if len(source_forms) != 1:
+        return None, "conflicting or missing FILE section forms"
+    if len(expect_forms) != 1:
+        names = ", ".join(sorted(expect_forms))
+        return None, "conflicting expectation section forms: " + names
+    if not any(name.endswith("_EXTERNAL") for name in source_forms | expect_forms):
+        return dict(sections), ""
+    if release != "8.5.12":
+        return None, "external PHPT sections require verified PHP release 8.5.12"
+    if "EXPECTREGEX_EXTERNAL" in expect_forms:
+        return None, "unsupported expectation section: EXPECTREGEX_EXTERNAL"
+    if not isinstance(fixtures, dict):
+        name = sorted(name for name in source_forms | expect_forms if name.endswith("_EXTERNAL"))[0]
+        return None, name + " requires explicit fixtures"
+    snapshot = {}
+    total = 0
+    try:
+        items = tuple(fixtures.items())
+    except Exception:
+        return None, "external PHPT fixture mapping is invalid"
+    if len(items) > 128:
+        return None, "external PHPT fixture mapping exceeds limit"
+    for name, content in items:
+        try:
+            validate_fixture_path(name)
+        except ValueError as error:
+            return None, str(error)
+        if type(content) is not bytes:
+            return None, "external PHPT fixture mapping is unsafe or invalid"
+        total += len(content)
+        if total > 8 * 1024 * 1024:
+            return None, "external PHPT fixture mapping exceeds 8 MiB"
+        snapshot[name] = content
+
+    normalized = dict(sections)
+    for section in source_forms | expect_forms:
+        if section.endswith("_EXTERNAL") and len(sections[section]) > 64 * 1024:
+            return None, section + " reference exceeds 64 KiB"
+
+    def resolve(section):
+        # FILE_EXTERNAL reference text is a FILE section while reading PHPT;
+        # the bytes loaded from its referenced fixture are not truncated.
+        raw = sections[section]
+        if section == "FILE_EXTERNAL":
+            raw = _truncate_done(raw)
+        # PHP removes double dots before trim; trim leaves FF unchanged.
+        raw = raw.replace(b"..", b"").strip(b"\x00\t\n\v\r ")
+        try:
+            name = raw.decode("utf-8", "strict")
+        except UnicodeDecodeError:
+            return None, section + " reference encoding is unsupported"
+        try:
+            validate_fixture_path(name)
+        except ValueError:
+            return None, section + " reference is unsafe or exceeds path limits"
+        if name not in snapshot:
+            return None, section + " fixture was not supplied"
+        return snapshot[name], ""
+
+    if "FILE_EXTERNAL" in source_forms:
+        source, error = resolve("FILE_EXTERNAL")
+        if error:
+            return None, error
+        if len(source) > 1024 * 1024:
+            return None, "FILE_EXTERNAL fixture exceeds 1 MiB"
+        normalized["FILE"] = source
+        normalized.pop("FILE_EXTERNAL", None)
+    expected_name = next(iter(expect_forms))
+    if expected_name.endswith("_EXTERNAL"):
+        expected, error = resolve(expected_name)
+        if error:
+            return None, error
+        base = expected_name.removesuffix("_EXTERNAL")
+        normalized[base] = expected
+        normalized.pop(expected_name, None)
+    return normalized, ""
+
+
 def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None, cgi_executable=None):
     """Run a narrowly supported case and return a sanitized result record."""
-    if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
+    if not isinstance(sections, dict) or any(not isinstance(k, str) or type(v) is not bytes for k, v in sections.items()):
         return _gap("invalid PHPT sections")
+    has_external = any(name in sections for name in ("FILE_EXTERNAL", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL"))
+    if has_external:
+        sections = dict(sections)
+    if fixtures is not None and has_external:
+        if not isinstance(fixtures, dict):
+            return _gap("external PHPT fixture mapping is invalid")
+        # Validate type/count/total size before retaining a bounded snapshot.
+        try:
+            if dict.__len__(fixtures) > 128:
+                return _gap("external PHPT fixture mapping exceeds limit")
+            fixtures = dict.copy(fixtures)
+            if len(fixtures) > 128:
+                return _gap("external PHPT fixture mapping exceeds limit")
+            items = tuple(fixtures.items())
+            total = 0
+            for name, content in items:
+                try:
+                    validate_fixture_path(name)
+                except ValueError as error:
+                    return _gap(str(error))
+                if type(content) is not bytes:
+                    return _gap("external PHPT fixture mapping is unsafe or invalid")
+                total += len(content)
+                if total > 8 * 1024 * 1024:
+                    return _gap("external PHPT fixture mapping exceeds 8 MiB")
+            fixtures = dict(items)
+        except Exception:
+            return _gap("external PHPT fixture mapping is invalid")
+    original_sections = sections
+    source_forms = _EXTERNAL_SOURCE.intersection(sections)
+    if len(source_forms) > 1:
+        return _gap("conflicting FILE section forms")
+    expect_forms = _EXTERNAL_EXPECT.intersection(sections)
+    if len(expect_forms) > 1:
+        return _gap("conflicting expectation section forms: " + ", ".join(sorted(expect_forms)))
+    if "FILE_EXTERNAL" in sections and "FILEEOF" in sections:
+        return _gap("conflicting FILE section forms")
+    sections, external_error = _resolve_external_sections(sections, fixtures, release)
+    if external_error:
+        return _gap(external_error)
     if "STDIN" in sections:
         if release != "8.5.12":
             return _gap("PHPT STDIN is supported only for PHP 8.5.12")
@@ -161,7 +287,10 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         if any(not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", name) for name in unsupported):
             return _gap("invalid PHPT section name")
         return _gap("unsupported PHPT section: " + ", ".join(sorted(unsupported)))
-    sections, file_error = _normalize_file_section(sections, release)
+    if "FILE_EXTERNAL" not in original_sections:
+        sections, file_error = _normalize_file_section(sections, release)
+    else:
+        file_error = ""
     if file_error:
         return _gap(file_error)
     if not {"TEST", "FILE"}.issubset(sections) or ("EXPECT" in sections) == ("EXPECTF" in sections):
@@ -383,7 +512,7 @@ def _read_phpt(path):
 
 def _load_fixtures(specifications):
     """Load explicit NAME=PATH fixtures within session bounds."""
-    if not isinstance(specifications, (list, tuple)):
+    if type(specifications) not in (list, tuple):
         raise ValueError("fixture must use NAME=PATH format")
     if len(specifications) > 128:
         raise ValueError("fixture count exceeds the limit of 128")
@@ -395,10 +524,12 @@ def _load_fixtures(specifications):
         if not isinstance(specification, str) or "=" not in specification:
             raise ValueError("fixture must use NAME=PATH format")
         name, path = specification.split("=", 1)
-        parts = name.split("/")
-        if (not name or "\x00" in name or name.startswith("/") or "\\" in name
-                or any(part in {"", ".", ".."} for part in parts)):
-            raise ValueError("fixture destination must be a safe relative path")
+        try:
+            validate_fixture_path(name)
+        except ValueError as error:
+            if str(error) in ("invalid fixture path", "unsafe fixture path"):
+                raise ValueError("fixture destination must be a safe relative path") from None
+            raise
         if any(name == item or name.startswith(item + "/") or item.startswith(name + "/")
                for item in reserved):
             raise ValueError("fixture destination conflicts with an internal phase file")
@@ -467,6 +598,8 @@ def main(argv=None):
             "fixture destination conflicts with a fixture directory", "fixture source path is empty", "fixture source file does not exist",
             "fixture source file cannot be opened safely", "fixture source must be a regular file", "fixture files exceed the 8 MiB total limit",
             "fixture safe opening is unavailable on this platform",
+            "fixture path exceeds 4096 bytes", "fixture path exceeds 64 components",
+            "fixture path component exceeds 255 bytes", "fixture path has unsupported encoding",
         }
         reason = diagnostic if diagnostic in known else "fixture input error"
         print(json.dumps(_gap(reason), sort_keys=True))
