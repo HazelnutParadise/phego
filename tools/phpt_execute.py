@@ -1,10 +1,11 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-Only TEST, FILE, EXPECT or EXPECTF, and optional XFAIL are supported. Any
-other section produces runner_gap before a container is started. The caller
-must provide an exact release and platform. Probe PHP_VERSION and PHP_INT_SIZE
-in the same pinned image before running the case; a mismatched or malformed
-profile is a runner_gap, never a pass. This does not claim product acceptance.
+TEST, FILE, EXPECT or EXPECTF, and optional XFAIL and SKIPIF are supported.
+Other sections produce runner_gap before a container is started. The caller
+must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
+in the pinned image before running the case. SKIPIF and FILE share a case
+workspace; the CLI does not load external fixtures. Incomplete observations or
+unknown skip causes are runner gaps. This does not claim product acceptance.
 """
 import argparse
 import hashlib
@@ -17,10 +18,11 @@ import sys
 from phpt_runner import PHPTError, parse_phpt
 from phpt_sandbox import execute_php
 from phpt_results import Observation, classify
+from phpt_session import run_case
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -35,7 +37,7 @@ def _gap(reason):
     return _result("runner_gap", reason, execution="not_run", basis="not_observed")
 
 
-def run(sections, image, executable, platform, release, timeout, output_limit):
+def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None):
     """Run a narrowly supported case and return a sanitized result record."""
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
         return _gap("invalid PHPT sections")
@@ -52,6 +54,93 @@ def run(sections, image, executable, platform, release, timeout, output_limit):
         return _gap("unsupported platform profile")
     if not isinstance(sections["FILE"], bytes) or len(sections["FILE"]) > 1024 * 1024:
         return _gap("FILE source exceeds sandbox limit")
+    if "SKIPIF" in sections:
+        if len(sections["SKIPIF"]) > 1024 * 1024:
+            return _gap("SKIPIF source exceeds sandbox limit")
+        if fixtures is None:
+            fixtures = {}
+        if not isinstance(fixtures, dict):
+            return _gap("invalid fixture mapping")
+        try:
+            case = run_case(
+                image=image,
+                executable=executable,
+                platform=platform,
+                release=release,
+                source=sections["FILE"],
+                skipif=sections["SKIPIF"],
+                fixtures=fixtures,
+                timeout=timeout,
+                output_limit=output_limit,
+            )
+        except Exception:
+            return _result("runner_gap", "PHP case session could not be completed",
+                           execution="not_completed", effects_complete=False)
+
+        try:
+            profile = getattr(case, "profile", None)
+            skipif = getattr(case, "skipif", None)
+            program = getattr(case, "program", None)
+            case_status = getattr(case, "status", None)
+            cleanup_confirmed = getattr(case, "cleanup_confirmed", None)
+            profile_status = getattr(profile, "status", None)
+            profile_output = getattr(profile, "output", None)
+            profile_exit_code = getattr(profile, "exit_code", None)
+            skipif_status = getattr(skipif, "status", None)
+            skipif_output = getattr(skipif, "output", None)
+            program_status = getattr(program, "status", None)
+            program_output = getattr(program, "output", None)
+            program_exit_code = getattr(program, "exit_code", None)
+            if case_status == "cleanup_uncertain" or cleanup_confirmed is False:
+                diagnostic = "PHP case cleanup could not be confirmed"
+            elif case_status == "profile_mismatch" or profile_status == "profile_mismatch":
+                diagnostic = "PHP profile does not match the requested release or platform"
+            elif case_status == "skipped_unknown" or skipif_status == "skipped_unknown":
+                diagnostic = "SKIPIF requested a skip with an unknown cause"
+            elif "timeout" in (case_status, profile_status, skipif_status, program_status):
+                diagnostic = "PHP case phase timed out"
+            elif "output_limit" in (case_status, profile_status, skipif_status, program_status):
+                diagnostic = "PHP case phase exceeded the output limit"
+            else:
+                diagnostic = ""
+            if diagnostic:
+                return _result("runner_gap", diagnostic, execution="not_completed",
+                               effects_complete=False)
+            complete = (
+                case_status == "completed"
+                and cleanup_confirmed is True
+                and getattr(case, "effects_complete", None) is False
+                and profile_status == "completed"
+                and profile_output == release.encode("ascii") + b"\n" + str(_INT_WIDTH[platform]).encode("ascii")
+                and type(profile_exit_code) is int
+                and profile_exit_code == 0
+                and skipif_status == "completed"
+                and isinstance(skipif_output, bytes)
+                and program_status == "completed"
+                and isinstance(program_output, bytes)
+                and type(program_exit_code) is int
+                and 0 <= program_exit_code <= 124
+            )
+        except Exception:
+            complete = False
+        if not complete:
+            return _result("runner_gap", "PHP case session did not produce a complete observation",
+                           execution="not_completed", effects_complete=False)
+        skip_token = skipif_output.strip(b" \x00\t\n\r\v")
+        if skip_token:
+            # SKIPIF skip reasons are intentionally unknown; other directives
+            # are not supported by this executor.
+            return _result("runner_gap", "SKIPIF did not produce a classifiable observation",
+                           execution="not_completed", effects_complete=False)
+        classified = classify(
+            sections,
+            Observation(program_status, program_output, program_exit_code, ""),
+        )
+        status = classified.get("status", "runner_gap")
+        reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "PHP observation could not be classified by supported PHPT expectations"
+        return _result(status, reason, execution="reference_executed", effects_complete=False,
+                       exit_code=program_exit_code, image=image, platform=platform, release=release)
+
     try:
         profile = execute_php(image, executable, _PROFILE_SOURCE, timeout, output_limit, platform)
     except (OSError, ValueError, TypeError):
