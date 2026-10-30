@@ -22,10 +22,11 @@ from phpt_session import run_case
 from phpt_ini import parse_ini
 from phpt_env import parse_env
 import phpt_cgi
+import phpt_args
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS"}
+_SUPPORTED = {"TEST", "FILE", "EXPECT", "EXPECTF", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS", "ARGS"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 
 
@@ -98,6 +99,24 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         except (ValueError, TypeError) as error:
             known = {"CGI query or cookie exceeds 64 KiB", "CGI query or cookie contains NUL", "CGI POST exceeds 1 MiB", "CGI query would disable command options"}
             return _gap(str(error) if str(error) in known else "invalid CGI request")
+    parsed_args = ()
+    if "ARGS" in sections:
+        if release != "8.5.12":
+            return _gap("PHPT ARGS is supported only for PHP 8.5.12")
+        args_data = sections["ARGS"]
+        if len(args_data) > phpt_args.MAX_ARGS:
+            return _gap("ARGS exceeds 64 KiB")
+        nul = args_data.find(b"\0")
+        if nul >= 0:
+            return _gap(f"ARGS contains NUL at byte {nul + 1}")
+        # Official run-tests does not append ARGS for nonempty POST bodies.
+        if not ("POST" in sections and sections["POST"] not in (b"", b"0")):
+            try:
+                parsed_args = phpt_args.parse_args(args_data)
+            except ValueError as error:
+                return _gap(str(error))
+        if len(parsed_args) > phpt_args.MAX_WORDS:
+            return _gap("ARGS exceeds 4096 arguments")
     if cgi_needed and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
         return _gap("CGI executable must be provided as an absolute path")
     ini = None
@@ -177,6 +196,8 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             )
             if cli_request_active:
                 session_kwargs["request_sections"] = {k: sections[k] for k in ("GET", "POST", "COOKIE") if k in sections}
+            if "ARGS" in sections and not ("POST" in sections and sections["POST"] not in (b"", b"0")):
+                session_kwargs["args"] = parsed_args
             if cgi_needed:
                 session_kwargs["cgi_executable"] = cgi_executable
             if "STDIN" in sections:

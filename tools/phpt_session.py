@@ -66,7 +66,7 @@ def _parse_env_for_release(data, release):
     return parser.parse_env(data, release)
 
 
-def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None, cgi_executable=None, request_sections=None):
+def run_case(image, executable, platform, release, source, skipif, fixtures, timeout, output_limit, *, ini=None, env=None, clean=None, stdin=None, cgi_executable=None, request_sections=None, args=None):
     """Execute a case and preserve bounded observations and cleanup status.
 
     Validate all inputs before creating resources, reject unsafe or ambiguous
@@ -86,6 +86,11 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
         raise ValueError("release must be an exact version")
     if cgi_executable is not None and (not isinstance(cgi_executable, str) or not cgi_executable.startswith("/") or "\x00" in cgi_executable):
         raise ValueError("CGI executable must be an absolute path")
+    if args is not None:
+        if release != "8.5.12" or not isinstance(args, tuple) or len(args) > 4096:
+            raise ValueError("invalid PHPT ARGS")
+        if any(not isinstance(arg, bytes) or b"\0" in arg for arg in args) or sum(map(len, args)) > 64 * 1024:
+            raise ValueError("invalid PHPT ARGS")
     request_active = request_sections is not None or cgi_executable is not None or release == "8.5.12"
     query, cookie, post = b"", b"", None
     if request_active:
@@ -191,13 +196,16 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             raise ValueError("shell argument contains NUL")
         return b"'" + value.replace(b"'", b"'\\''") + b"'"
 
-    def php_script(path, settings=(), environment=None, *, remove_self=False, binary=None, options=()):
+    def php_script(path, settings=(), environment=None, *, remove_self=False, binary=None, options=(), arguments=()):
         args = [os.fsencode(binary or executable), b"-n", *options]
         for setting in settings:
             # run-tests.php escapes apostrophes before embedding -d values in a
             # double-quoted shell argument; retain that literal backslash in PHP.
             args.extend((b"-d", setting.replace(b"'", b"\\'")))
-        args.append(path.encode("ascii"))
+        if arguments:
+            args.extend((b"-f", path.encode("ascii"), b"--", *arguments))
+        else:
+            args.append(path.encode("ascii"))
         if environment is not None:
             # Start the command shell with the test environment, as PHP does.
             # Keep PHP arguments separate to avoid the shell's single-argument limit.
@@ -207,17 +215,17 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
             return b'rm -- "$0" || exit 125\n' + command + b"\n"
         return command + b" </dev/null\n"
 
-    def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout, *, binary=None, options=()):
+    def exec_php(container_id, path, settings=(), environment=None, limit=output_limit, seconds=timeout, *, binary=None, options=(), arguments=()):
         # PHP arguments travel only in the bounded stdin script, never host argv.
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-s"],
-                      php_script(path, settings, environment, binary=binary, options=options), limit=limit, seconds=seconds)
+                      php_script(path, settings, environment, binary=binary, options=options, arguments=arguments), limit=limit, seconds=seconds)
 
-    def exec_php_stdin_script(container_id, path, payload, settings=(), environment=None, *, binary=None, options=()):
+    def exec_php_stdin_script(container_id, path, payload, settings=(), environment=None, *, binary=None, options=(), arguments=()):
         script_path = "/work/.phego-stdin-run.sh"
         no_clobber = "test ! -e " + script_path + " && test ! -L " + script_path + " && umask 077 && set -C && cat > " + script_path
         code, _, err, failure, why = docker(
             ["docker", "exec", "-i", "-w", "/work", container_id, "sh", "-c", no_clobber],
-            php_script(path, settings, environment, remove_self=True, binary=binary, options=options), limit=4096, seconds=30)
+            php_script(path, settings, environment, remove_self=True, binary=binary, options=options, arguments=arguments), limit=4096, seconds=30)
         if failure or code != 0 or err:
             return code, b"", err, failure or "runner_gap", why or "STDIN runner script staging failed"
         return docker(["docker", "exec", "-i", "-w", "/work", container_id, "sh", script_path],
@@ -542,10 +550,12 @@ def run_case(image, executable, platform, release, source, skipif, fixtures, tim
                                         options = (b"-C",) if cgi_executable is not None else ()
                                         if body is None:
                                             code, output, err, failure, why = exec_php(
-                                                container_id, file_path, ini or (), environment=request_env, binary=binary, options=options)
+                                                container_id, file_path, ini or (), environment=request_env, binary=binary, options=options,
+                                                arguments=(args or ()) if post is None else ())
                                         else:
                                             code, output, err, failure, why = exec_php_stdin_script(
-                                                container_id, file_path, body, ini or (), environment=request_env, binary=binary, options=options)
+                                                container_id, file_path, body, ini or (), environment=request_env, binary=binary, options=options,
+                                                arguments=(args or ()) if post is None else ())
                                     elif stdin is not None and ini is None and env is None:
                                         code, output, err, failure, why = docker(
                                             ["docker", "exec", "-i", "-w", "/work", container_id, executable, "-n", file_path],

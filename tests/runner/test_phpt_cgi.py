@@ -125,14 +125,14 @@ class PHPTCGRoutingTests(unittest.TestCase):
         self.assertEqual(result["execution"], "not_completed")
 
     def test_cgi_required_sections_and_unsupported_request_modes_are_explicit_gaps(self):
-        for name in ("POST_RAW", "PUT", "GZIP_POST", "DEFLATE_POST", "ARGS"):
+        for name in ("POST_RAW", "PUT", "GZIP_POST", "DEFLATE_POST"):
             sections = {**base_sections(), name: b"payload"}
             with self.subTest(section=name), mock.patch.object(executor, "run_case") as mocked:
                 result = self.run_sections(sections, cgi_executable=CGI)
-            self.assertEqual(result["status"], "runner_gap")
-            self.assertEqual(result["execution"], "not_run")
-            self.assertIn(name, result.get("reason", ""))
-            mocked.assert_not_called()
+                self.assertEqual(result["status"], "runner_gap")
+                self.assertEqual(result["execution"], "not_run")
+                self.assertIn(name, result.get("reason", ""))
+                mocked.assert_not_called()
 
     @unittest.skipUnless(PHP_IMAGE_AVAILABLE, "pinned PHP 8.5.12 linux/386 image and Docker are required")
     def test_supported_empty_cgi_section_runs_reference_case(self):
