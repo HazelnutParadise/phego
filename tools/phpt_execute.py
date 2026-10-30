@@ -4,8 +4,8 @@ TEST, FILE, EXPECT or EXPECTF, and optional XFAIL and SKIPIF are supported.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
-workspace; the CLI does not load external fixtures. Incomplete observations or
-unknown skip causes are runner gaps. This does not claim product acceptance.
+workspace; --fixture NAME=PATH explicitly supplies files to that workspace.
+Incomplete observations or unknown skip causes are runner gaps. This does not claim product acceptance.
 """
 import argparse
 import hashlib
@@ -193,6 +193,63 @@ def _read_phpt(path):
     return data
 
 
+def _load_fixtures(specifications):
+    """Load explicit NAME=PATH fixtures within session bounds."""
+    if not isinstance(specifications, (list, tuple)):
+        raise ValueError("fixture must use NAME=PATH format")
+    if len(specifications) > 128:
+        raise ValueError("fixture count exceeds the limit of 128")
+
+    fixtures = {}
+    sources = []
+    reserved = (".phego-profile.php", ".phego-skipif.php", ".phego-file.php")
+    for specification in specifications:
+        if not isinstance(specification, str) or "=" not in specification:
+            raise ValueError("fixture must use NAME=PATH format")
+        name, path = specification.split("=", 1)
+        parts = name.split("/")
+        if (not name or "\x00" in name or name.startswith("/") or "\\" in name
+                or any(part in {"", ".", ".."} for part in parts)):
+            raise ValueError("fixture destination must be a safe relative path")
+        if any(name == item or name.startswith(item + "/") or item.startswith(name + "/")
+               for item in reserved):
+            raise ValueError("fixture destination conflicts with an internal phase file")
+        if name in fixtures:
+            raise ValueError("fixture destination is duplicated")
+        for existing in fixtures:
+            if name.startswith(existing + "/") or existing.startswith(name + "/"):
+                raise ValueError("fixture destination conflicts with a fixture directory")
+        if not path:
+            raise ValueError("fixture source path is empty")
+        fixtures[name] = None
+        sources.append((name, path))
+
+    if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_NONBLOCK"):
+        raise ValueError("fixture safe opening is unavailable on this platform")
+
+    total = 0
+    for name, path in sources:
+        remaining = MAX_INPUT - total
+        try:
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        except FileNotFoundError:
+            raise ValueError("fixture source file does not exist") from None
+        except (OSError, ValueError):
+            raise ValueError("fixture source file cannot be opened safely") from None
+        with os.fdopen(fd, "rb") as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ValueError("fixture source must be a regular file")
+            if metadata.st_size > remaining:
+                raise ValueError("fixture files exceed the 8 MiB total limit")
+            data = stream.read(remaining + 1)
+        if len(data) > remaining:
+            raise ValueError("fixture files exceed the 8 MiB total limit")
+        fixtures[name] = data
+        total += len(data)
+    return fixtures
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image", required=True, help="digest-pinned reference image")
@@ -201,6 +258,7 @@ def main(argv=None):
     parser.add_argument("--release", required=True, help="exact PHP release, for example 8.5.12")
     parser.add_argument("--timeout", type=float, default=10)
     parser.add_argument("--output-limit", type=int, default=1024 * 1024)
+    parser.add_argument("--fixture", action="append", metavar="NAME=PATH", help="copy NAME=PATH into the case workspace; repeat up to 128 times, total at most 8 MiB")
     parser.add_argument("path", help="one PHPT input file")
     args = parser.parse_args(argv)
     try:
@@ -209,7 +267,22 @@ def main(argv=None):
     except (OSError, ValueError, PHPTError):
         print(json.dumps(_gap("PHPT input could not be safely read or parsed"), sort_keys=True))
         return 2
-    result = run(sections, args.image, args.executable, args.platform, args.release, args.timeout, args.output_limit)
+    try:
+        fixtures = _load_fixtures(args.fixture) if args.fixture is not None else None
+    except (OSError, ValueError) as error:
+        # Exception text may contain user-controlled paths or fixture names.
+        diagnostic = str(error)
+        known = {
+            "fixture must use NAME=PATH format", "fixture count exceeds the limit of 128", "fixture destination must be a safe relative path",
+            "fixture destination conflicts with an internal phase file", "fixture destination is duplicated",
+            "fixture destination conflicts with a fixture directory", "fixture source path is empty", "fixture source file does not exist",
+            "fixture source file cannot be opened safely", "fixture source must be a regular file", "fixture files exceed the 8 MiB total limit",
+            "fixture safe opening is unavailable on this platform",
+        }
+        reason = diagnostic if diagnostic in known else "fixture input error"
+        print(json.dumps(_gap(reason), sort_keys=True))
+        return 2
+    result = run(sections, args.image, args.executable, args.platform, args.release, args.timeout, args.output_limit, fixtures=fixtures)
     result["input_sha256"] = hashlib.sha256(data).hexdigest()
     print(json.dumps(result, sort_keys=True))
     return 0 if result["status"] in {"pass", "xfail"} else 1
