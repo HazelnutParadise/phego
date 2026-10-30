@@ -301,26 +301,18 @@ class PHPTExternalFixtureTests(unittest.TestCase):
             with self.subTest(data=data), self.assertRaises(parser.PHPTError):
                 parser.parse_phpt(data, "conflict.phpt")
 
-    def test_unverified_release_and_expectregex_external_stay_gaps(self):
-        external = parser.parse_phpt(external_case(), "external.phpt")
-        fixtures = {"nested/body.php": b"<?php echo 'body'; ?>",
-                    "nested/expect.bin": b"body"}
-        with mock.patch.object(executor, "run_case") as run_case, \
-             mock.patch.object(session.subprocess, "Popen") as popen:
-            unsupported_release = executor.run(external, IMAGE, CLI, PLATFORM,
-                                               "8.5.11", 10, 4096, fixtures=fixtures)
-            regex_external = parser.parse_phpt(
-                external_case(expectation="EXPECTREGEX_EXTERNAL"), "regex-external.phpt")
-            unsupported_regex = executor.run(regex_external, IMAGE, CLI, PLATFORM,
-                                             RELEASE, 10, 4096,
-                                             fixtures={**fixtures, "nested/expect.bin": b"body"})
-        for result in (unsupported_release, unsupported_regex):
-            self.assertEqual(result["status"], "runner_gap", result)
-            self.assertEqual(result["execution"], "not_run", result)
-        self.assertIn("release", unsupported_release["reason"].lower())
-        self.assertIn("EXPECTREGEX_EXTERNAL", unsupported_regex["reason"])
-        run_case.assert_not_called()
-        popen.assert_not_called()
+    def test_unverified_release_external_expectations_stay_gaps(self):
+        fixtures = {"nested/body.php": b"<?php echo 'body'; ?>", "nested/expect.bin": b"body"}
+        for expectation in ("EXPECT_EXTERNAL", "EXPECTREGEX_EXTERNAL"):
+            sections = parser.parse_phpt(external_case(expectation=expectation), "external.phpt")
+            with self.subTest(expectation=expectation), mock.patch.object(executor, "run_case") as run_case, \
+                 mock.patch.object(session.subprocess, "Popen") as popen:
+                result = executor.run(sections, IMAGE, CLI, PLATFORM, "8.5.11", 10, 4096, fixtures=fixtures)
+                self.assertEqual(result["status"], "runner_gap", result)
+                self.assertEqual(result["execution"], "not_run", result)
+                self.assertIn("release", result["reason"].lower())
+                run_case.assert_not_called()
+                popen.assert_not_called()
 
     def test_external_fixture_errors_do_not_echo_host_paths_or_contents(self):
         with tempfile.TemporaryDirectory() as directory:

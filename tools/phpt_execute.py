@@ -18,6 +18,7 @@ import sys
 from phpt_runner import PHPTError, parse_phpt
 from phpt_sandbox import execute_php
 from phpt_results import Observation, classify
+from phpt_pcre import match_reference
 from phpt_session import run_case, validate_fixture_path
 from phpt_ini import parse_ini
 from phpt_env import parse_env
@@ -26,7 +27,7 @@ import phpt_args
 
 MAX_INPUT = 8 *  1024 * 1024
 _PROFILE_SOURCE = b'<?php echo PHP_VERSION, "\\n", PHP_INT_SIZE, "\\n"; ?>'
-_SUPPORTED = {"TEST", "FILE", "FILEEOF", "FILE_EXTERNAL", "EXPECT", "EXPECTF", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS", "ARGS"}
+_SUPPORTED = {"TEST", "FILE", "FILEEOF", "FILE_EXTERNAL", "EXPECT", "EXPECTF", "EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL", "XFAIL", "SKIPIF", "CLEAN", "INI", "ENV", "STDIN", "CGI", "GET", "POST", "COOKIE", "EXPECTHEADERS", "ARGS"}
 _INT_WIDTH = {"linux/386": 4, "linux/amd64": 8, "linux/arm64": 8}
 _EXTERNAL_SOURCE = {"FILE", "FILEEOF", "FILE_EXTERNAL"}
 _EXTERNAL_EXPECT = {"EXPECT", "EXPECTF", "EXPECTREGEX", "EXPECT_EXTERNAL", "EXPECTF_EXTERNAL", "EXPECTREGEX_EXTERNAL"}
@@ -93,8 +94,6 @@ def _resolve_external_sections(sections, fixtures, release):
         return dict(sections), ""
     if release != "8.5.12":
         return None, "external PHPT sections require verified PHP release 8.5.12"
-    if "EXPECTREGEX_EXTERNAL" in expect_forms:
-        return None, "unsupported expectation section: EXPECTREGEX_EXTERNAL"
     if not isinstance(fixtures, dict):
         name = sorted(name for name in source_forms | expect_forms if name.endswith("_EXTERNAL"))[0]
         return None, name + " requires explicit fixtures"
@@ -160,6 +159,39 @@ def _resolve_external_sections(sections, fixtures, release):
         normalized[base] = expected
         normalized.pop(expected_name, None)
     return normalized, ""
+
+
+def _classify_reference(sections, observation, image, executable, platform, release, timeout,
+                        *, normalize_output=True, headers_match=True, path_separator=None):
+    """Use PHP's PCRE for verified raw patterns after ordinary validation."""
+    classified = classify(sections, observation, normalize_output=normalize_output,
+                          headers_match=headers_match, path_separator=path_separator)
+    formatted = "EXPECTF" in sections and b"%r" in sections["EXPECTF"]
+    regex = "EXPECTREGEX" in sections
+    if classified.get("status") != "runner_gap" or not (formatted or regex):
+        return classified
+    expected_reason = "unsupported or timed-out EXPECTF pattern" if formatted else "expectation format is not yet implemented"
+    if classified.get("reason") != expected_reason:
+        return classified
+    if release != "8.5.12":
+        classified["reason"] = "PHPT PCRE requires verified PHP release 8.5.12"
+        return classified
+    trim = b" \t\n\r\x00\x0b"
+    expected = sections["EXPECTF" if formatted else "EXPECTREGEX"].strip(trim).replace(b"\r\n", b"\n")
+    actual = observation.output.strip(trim)
+    if normalize_output:
+        actual = actual.replace(b"\r\n", b"\n")
+    try:
+        matched, error = match_reference(expected, actual, formatted, image, executable, platform, release, timeout)
+    except Exception:
+        matched, error = None, "PHPT PCRE comparison could not be completed"
+    if type(matched) is not bool:
+        classified["reason"] = error if isinstance(error, str) and error.startswith("PHPT PCRE ") else "PHPT PCRE comparison could not be completed"
+        return classified
+    matched = matched and headers_match
+    classified["status"] = ("xpass" if matched else "xfail") if "XFAIL" in sections else ("pass" if matched else "fail")
+    classified["reason"] = ""
+    return classified
 
 
 def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None, cgi_executable=None):
@@ -293,7 +325,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         file_error = ""
     if file_error:
         return _gap(file_error)
-    if not {"TEST", "FILE"}.issubset(sections) or ("EXPECT" in sections) == ("EXPECTF" in sections):
+    if not {"TEST", "FILE"}.issubset(sections) or len({"EXPECT", "EXPECTF", "EXPECTREGEX"}.intersection(sections)) != 1:
         return _gap("required sections missing or conflicting")
     clean_requested = "CLEAN" in sections and sections["CLEAN"] not in (b"", b"0")
     if clean_requested and release != "8.5.12":
@@ -440,18 +472,20 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             body, headers_match, had_headers = phpt_cgi.response(program_output, sections.get("EXPECTHEADERS", b""), _INT_WIDTH[platform] * 8)
             if headers_match is None:
                 return _result("runner_gap", "CGI header numeric comparison is not supported", execution="reference_executed", effects_complete=False)
-            classified = classify(sections, Observation(program_status, body, program_exit_code, ""),
+            classified = _classify_reference(sections, Observation(program_status, body, program_exit_code, ""),
+                                  image, executable, platform, release, timeout,
                                   normalize_output=not had_headers, headers_match=headers_match,
                                   path_separator=path_separator)
         else:
-            classified = classify(sections, Observation(program_status, program_output, program_exit_code, ""),
-                                  path_separator=path_separator)
+            classified = _classify_reference(sections, Observation(program_status, program_output, program_exit_code, ""),
+                                  image, executable, platform, release, timeout, path_separator=path_separator)
         status = classified.get("status", "runner_gap")
         if clean_requested and status in {"pass", "xpass"} and clean_output not in (b"", b"0"):
             return _result("runner_gap", "CLEAN produced truthy output", execution="reference_executed",
                            effects_complete=False)
         reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "PHP observation could not be classified by supported PHPT expectations"
-        if status == "runner_gap" and classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile":
+        if status == "runner_gap" and (classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile"
+                                        or classified.get("reason", "").startswith("PHPT PCRE ")):
             reason = classified["reason"]
         return _result(status, reason, execution="reference_executed", effects_complete=False,
                        exit_code=program_exit_code, image=image, platform=platform, release=release)
@@ -484,11 +518,12 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
         return _result("runner_gap", "PHP execution returned an invalid observation", execution="not_completed")
     if observation.status in {"timeout", "output_limit", "runner_error"}:
         return _result("runner_gap", "PHP execution did not produce a complete bounded observation", execution="not_completed")
-    classified = classify(sections, Observation(observation.status, observation.output, observation.exit_code,
-                                               ""), path_separator=path_separator)
+    classified = _classify_reference(sections, Observation(observation.status, observation.output, observation.exit_code,
+                                               ""), image, executable, platform, release, timeout, path_separator=path_separator)
     status = classified.get("status", "runner_gap")
     reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "observation could not be classified"
-    if status == "runner_gap" and classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile":
+    if status == "runner_gap" and (classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile"
+                                    or classified.get("reason", "").startswith("PHPT PCRE ")):
         reason = classified["reason"]
     return _result(status, reason, exit_code=observation.exit_code,
                    image=image, platform=platform, release=release)
