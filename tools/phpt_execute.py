@@ -1,6 +1,6 @@
 """Execute a supported PHPT case in the restricted reference sandbox.
 
-TEST, FILE, EXPECT or EXPECTF, optional XFAIL, SKIPIF, CLEAN and partial INI, ENV, STDIN and CGI requests are supported. CGI cases require --cgi-executable.
+TEST, FILE, EXPECT, EXPECTF or EXPECTREGEX, optional XFAIL, SKIPIF, CLEAN and partial INI, ENV, STDIN and CGI requests are supported. CGI cases require --cgi-executable.
 Other sections produce runner_gap before a container is started. The caller
 must provide an exact release and platform. Verify PHP_VERSION and PHP_INT_SIZE
 in the pinned image before running the case. SKIPIF and FILE share a case
