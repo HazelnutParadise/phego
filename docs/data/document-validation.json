@@ -573,7 +573,7 @@
     "tools/test_w03_local_gate.py": "a1e387fd32d68c0993176f820c9811984a5c7c8b3665b0070e6cc9eb53b5a691",
     "tools/test_w03_local_manifest.py": "dd7f712b9eef99066cea3c613e3f44ad542ca54fff0523823e9ffc2e434f76a1",
     "tools/test_w03_local_snapshot.py": "c58e265091e2a62b325134d47577bc95a2fd4139f7f3a7f632197385ca1fe89e",
-    "tools/test_w03_snapshot_batch.py": "4d45a3a4372a6e19918c10b0cea91a37fa915b8d00ff097b71a26fc65a43932d",
+    "tools/test_w03_snapshot_batch.py": "9cea16462c3ad76421a4b94e3e78b6eb261fb0d386b7bb62898b097579143cd1",
     "tools/test_work_status.py": "05713d040a7cfde5e5c7b233b284ae367224cbe3194a1133644f49970792492b",
     "tools/traceability.py": "338ebeb1db300a86a652e9c2f1cfd764cd3976205b8cabd2cfa5c61ff63d25ca",
     "tools/upstream_snapshot.py": "f5e462dff260892461dd1f94964eb1965f62e817d0eb7a488ce2d4d83c12ecb6",
