@@ -301,7 +301,7 @@
     "docs/implementation/W-01.md": "512c8992cd4976fac1f509603d257f21dfca911171bf2891b5fb84207f5c7ca8",
     "docs/implementation/W-02.md": "27a2644f8d64984bc9bcbf2528649ac472e05099bc8933af1572019e0daae9e6",
     "docs/implementation/W-03-commit-check.md": "cbaade48313d422b4e94d9c3d2985d3ebbe2d3d8ffc9efdc2d1c17ab524f97cb",
-    "docs/implementation/W-03.md": "2a8d23c4c210bc5b2dcd96af925d133fc015515d03a8fa8ba86381bd647980e5",
+    "docs/implementation/W-03.md": "146c5469c664c25b2dd8edd7a50fc8438c46af280aa75f8c6ed07318ffa6ec6f",
     "docs/implementation/W-05.md": "6b8ed1567243b78b7e8beef70cc9b99eefa9d2627b8f94b8b4edc81648254bb8",
     "docs/implementation/W-07.md": "4923c87ad6b101195faf33fd2e46d60c2ade3a47aa072048500ed9190fb6680c",
     "docs/implementation/diagnostics-requirement.md": "6a2945e0446006024cf2beca4610096a354cffc5654962e5738c88c52c9e6230",
@@ -551,15 +551,16 @@
     "tools/test_w03_local_gate.py": "a1e387fd32d68c0993176f820c9811984a5c7c8b3665b0070e6cc9eb53b5a691",
     "tools/test_w03_local_manifest.py": "dd7f712b9eef99066cea3c613e3f44ad542ca54fff0523823e9ffc2e434f76a1",
     "tools/test_w03_local_snapshot.py": "c58e265091e2a62b325134d47577bc95a2fd4139f7f3a7f632197385ca1fe89e",
+    "tools/test_w03_snapshot_batch.py": "4d45a3a4372a6e19918c10b0cea91a37fa915b8d00ff097b71a26fc65a43932d",
     "tools/test_work_status.py": "05713d040a7cfde5e5c7b233b284ae367224cbe3194a1133644f49970792492b",
     "tools/traceability.py": "338ebeb1db300a86a652e9c2f1cfd764cd3976205b8cabd2cfa5c61ff63d25ca",
     "tools/upstream_snapshot.py": "f5e462dff260892461dd1f94964eb1965f62e817d0eb7a488ce2d4d83c12ecb6",
     "tools/upstream_watch.py": "6ed30328f03ec9fe406f1c8bc15017fc310310751c7006cde2b57cc66681b9e0",
     "tools/validate_docs.py": "f7d97aa057520d40c11debdc407e767e3dcbf9bbffd47895b4dc53f98b4933af",
     "tools/verify_evidence_schema.py": "513bdf5a50794956fadcc9d7cf4a2ad7e65ce272bef24149e8a6895a8796ee75",
-    "tools/w03-local-checks.json": "004d275b8c22cad5a8352bbbf8011e2493859c01b03d0ab93ebc877e466378f2",
+    "tools/w03-local-checks.json": "44911822dc57599aed8acdd63580d9a3bf1845131702f9bfdb4830423d7b9775",
     "tools/w03_local_acceptance.py": "ade3703642eeec7c35a5bf5df17313d980832ec30d20da8619bfc577c300fb5b",
-    "tools/w03_local_gate.py": "15871d95213a5928e8ec4767f8c498ec4a302a3de96cfe186663469fee0f2e65",
+    "tools/w03_local_gate.py": "291d9c189942b867954640865e21e6cce2896152ca9b3349f7ea8dbc8f6c234c",
     "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3"
   }
 }
