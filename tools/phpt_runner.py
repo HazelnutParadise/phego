@@ -21,7 +21,9 @@ def parse_phpt(data: bytes, path: str) -> dict[str, bytes]:
     chunks: list[bytes] = []
     marker = re.compile(rb"--([A-Z][A-Z0-9_]*)--")
     for line_number, line in enumerate(io.BytesIO(data), 1):
-        match = marker.fullmatch(line.rstrip(b"\r\n"))
+        # Retain strict full-line detection for unknown numeric section names,
+        # and recognize PHP's letter/underscore markers with trailing text.
+        match = marker.fullmatch(line.rstrip(b"\r\n")) or re.match(rb"--([_A-Z]+)--", line)
         if match:
             if current is not None:
                 sections[current] = b"".join(chunks)

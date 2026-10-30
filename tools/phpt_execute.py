@@ -40,6 +40,41 @@ def _gap(reason):
     return _result("runner_gap", reason, execution="not_run", basis="not_observed")
 
 
+def _normalize_file_section(sections, release):
+    """Apply the verified PHP 8.5.12 run-tests FILE/FILEEOF rules locally."""
+    if "FILE" in sections and "FILEEOF" in sections:
+        return None, "FILE and FILEEOF sections conflict"
+    file_eof = "FILEEOF" in sections
+    if file_eof:
+        source = sections["FILEEOF"]
+        if len(source) > 1024 * 1024:
+            return None, "FILE source exceeds sandbox limit"
+        if release != "8.5.12":
+            return None, "FILEEOF is unsupported for the requested PHP release"
+    else:
+        source = sections.get("FILE")
+    if source is None:
+        return None, "required sections missing or conflicting"
+    if len(source) > 1024 * 1024:
+        return None, "FILE source exceeds sandbox limit"
+    if release == "8.5.12":
+        # run-tests.php readFile stops after a line beginning at column zero
+        # with ===DONE=== followed only by PCRE whitespace, retaining marker.
+        chunks = source.split(b"\n")
+        for index, line in enumerate(chunks):
+            if re.fullmatch(rb"===DONE===[\t\r\f\v ]*", line):
+                source = b"\n".join(chunks[:index + 1])
+                if index < len(chunks) - 1:
+                    source += b"\n"
+                break
+    if file_eof:
+        source = source.rstrip(b"\r\n")
+    normalized = dict(sections)
+    normalized.pop("FILEEOF", None)
+    normalized["FILE"] = source
+    return normalized, ""
+
+
 def run(sections, image, executable, platform, release, timeout, output_limit, *, fixtures=None, cgi_executable=None):
     """Run a narrowly supported case and return a sanitized result record."""
     if not isinstance(sections, dict) or any(not isinstance(k, str) or not isinstance(v, bytes) for k, v in sections.items()):
@@ -101,11 +136,14 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 "invalid ENV variable name": "PHPT ENV input contains an invalid variable name",
             }
             return _gap(messages.get(message, "PHPT ENV input is invalid or unsupported"))
-    unsupported = set(sections) - _SUPPORTED
+    unsupported = set(sections) - (_SUPPORTED | {"FILEEOF"})
     if unsupported:
         if any(not re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", name) for name in unsupported):
             return _gap("invalid PHPT section name")
         return _gap("unsupported PHPT section: " + ", ".join(sorted(unsupported)))
+    sections, file_error = _normalize_file_section(sections, release)
+    if file_error:
+        return _gap(file_error)
     if not {"TEST", "FILE"}.issubset(sections) or ("EXPECT" in sections) == ("EXPECTF" in sections):
         return _gap("required sections missing or conflicting")
     clean_requested = "CLEAN" in sections and sections["CLEAN"] not in (b"", b"0")
