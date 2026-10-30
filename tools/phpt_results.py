@@ -14,7 +14,7 @@ class Observation:
     exit_code: Optional[int] = None
     reason: str = ""
 
-def match_format(expected: bytes, actual: bytes) -> Optional[bool]:
+def match_format(expected: bytes, actual: bytes, *, path_separator=None) -> Optional[bool]:
     """Evaluate supported EXPECTF tokens in a bounded helper process."""
     if len(expected) > 1024 * 1024 or len(actual) > 1024 * 1024:
         return None
@@ -27,8 +27,12 @@ def match_format(expected: bytes, actual: bytes) -> Optional[bool]:
     while i < len(expected):
         if expected[i] == ord("%") and i + 1 < len(expected):
             token = expected[i + 1]
-            if token in (ord("r"), ord("e")):
-                return None  # Raw PCRE and platform separator need their own profile-aware handling.
+            if token == ord("e"):
+                if path_separator != b"/":
+                    return None
+                pattern.extend(re.escape(path_separator)); i += 2; continue
+            if token == ord("r"):
+                return None  # Raw PCRE needs profile-aware handling.
             if token in tokens:
                 pattern.extend(tokens[token]); i += 2; continue
         pattern.extend(re.escape(expected[i:i + 1])); i += 1
@@ -45,7 +49,8 @@ def match_format(expected: bytes, actual: bytes) -> Optional[bool]:
     return run.stdout == b"1\n"
 
 
-def classify(sections: dict, observation: Observation, *, normalize_output=True, headers_match=True) -> dict:
+def classify(sections: dict, observation: Observation, *, normalize_output=True, headers_match=True,
+             path_separator=None) -> dict:
     """Return a distinct result for pass, failure, skip, unsupported and runner gaps."""
     result = {"status": "runner_gap", "basis": "supplied_observation", "exit_code": observation.exit_code,
               "reason": observation.reason}
@@ -79,9 +84,12 @@ def classify(sections: dict, observation: Observation, *, normalize_output=True,
     if normalize_output:
         actual = actual.replace(b"\r\n", b"\n")
     expected = expected.strip(trim).replace(b"\r\n", b"\n")
-    matched = match_format(expected, actual) if "EXPECTF" in sections else actual == expected
+    matched = match_format(expected, actual, path_separator=path_separator) if "EXPECTF" in sections else actual == expected
     if matched is None:
-        result["reason"] = "unsupported or timed-out EXPECTF pattern"
+        if b"%e" in expected and b"%r" not in expected and path_separator != b"/":
+            result["reason"] = "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile"
+        else:
+            result["reason"] = "unsupported or timed-out EXPECTF pattern"
         return result
     matched = matched and headers_match
     if "XFAIL" in sections:

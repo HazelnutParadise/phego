@@ -86,6 +86,7 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             return _gap("PHPT STDIN exceeds 1 MiB limit")
     request_active = phpt_cgi.requested(sections)
     cgi_needed = phpt_cgi.needs_cgi(sections)
+    path_separator = b"/" if release == "8.5.12" and platform in _INT_WIDTH else None
     # PHP 8.5.12 run-tests.php initializes CGI-style request variables for
     # every FILE phase, including ordinary CLI cases with no request sections.
     cli_request_active = release == "8.5.12"
@@ -290,14 +291,18 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
             if headers_match is None:
                 return _result("runner_gap", "CGI header numeric comparison is not supported", execution="reference_executed", effects_complete=False)
             classified = classify(sections, Observation(program_status, body, program_exit_code, ""),
-                                  normalize_output=not had_headers, headers_match=headers_match)
+                                  normalize_output=not had_headers, headers_match=headers_match,
+                                  path_separator=path_separator)
         else:
-            classified = classify(sections, Observation(program_status, program_output, program_exit_code, ""))
+            classified = classify(sections, Observation(program_status, program_output, program_exit_code, ""),
+                                  path_separator=path_separator)
         status = classified.get("status", "runner_gap")
         if clean_requested and status in {"pass", "xpass"} and clean_output not in (b"", b"0"):
             return _result("runner_gap", "CLEAN produced truthy output", execution="reference_executed",
                            effects_complete=False)
         reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "PHP observation could not be classified by supported PHPT expectations"
+        if status == "runner_gap" and classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile":
+            reason = classified["reason"]
         return _result(status, reason, execution="reference_executed", effects_complete=False,
                        exit_code=program_exit_code, image=image, platform=platform, release=release)
 
@@ -330,9 +335,11 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
     if observation.status in {"timeout", "output_limit", "runner_error"}:
         return _result("runner_gap", "PHP execution did not produce a complete bounded observation", execution="not_completed")
     classified = classify(sections, Observation(observation.status, observation.output, observation.exit_code,
-                                               ""))
+                                               ""), path_separator=path_separator)
     status = classified.get("status", "runner_gap")
     reason = "" if status in {"pass", "fail", "xfail", "xpass"} else "observation could not be classified"
+    if status == "runner_gap" and classified.get("reason") == "EXPECTF %e requires a verified PHP 8.5.12 Linux platform profile":
+        reason = classified["reason"]
     return _result(status, reason, exit_code=observation.exit_code,
                    image=image, platform=platform, release=release)
 
