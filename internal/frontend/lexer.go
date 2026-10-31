@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"strings"
 )
 
@@ -145,8 +146,60 @@ func (l *lexer) emit(k Kind, start int) { l.emitRaw(k, start, l.pos) }
 
 func (l *lexer) emitRaw(k Kind, start, end int) {
 	text := l.src[start:end]
+	switch {
+	case k == TConstantEncapsedString && (strings.HasPrefix(text, "\"") || strings.HasPrefix(text, "b\"") || strings.HasPrefix(text, "B\"")):
+		l.checkCodepointEscapes(text)
+	case k == TEncapsedAndWhitespace:
+		switch l.top() {
+		case stDoubleQuotes, stBackquote, stHeredoc:
+			l.checkCodepointEscapes(text)
+		}
+	}
 	l.out = append(l.out, Token{Kind: k, Text: text, Line: l.line})
 	l.line += countLines(text)
+}
+
+// checkCodepointEscapes reports PHP 8.5.12's ParseError for an invalid
+// \u{...} escape in an interpolating string segment, on the escape's line.
+func (l *lexer) checkCodepointEscapes(text string) {
+	for i := 0; i < len(text); i++ {
+		if text[i] != '\\' || i+1 >= len(text) {
+			continue
+		}
+		if text[i+1] != 'u' || i+2 >= len(text) || text[i+2] != '{' {
+			i++ // skip the escaped byte, including another backslash
+			continue
+		}
+		j := i + 3
+		for j < len(text) && isHexDigit(text[j]) {
+			j++
+		}
+		line := l.line + countLines(text[:i])
+		switch {
+		case j == i+3 || j >= len(text) || text[j] != '}':
+			l.fatal(-1, line, "Invalid UTF-8 codepoint escape sequence")
+			return
+		case j-(i+3) > 8 || parseHex(text[i+3:j]) > 0x10FFFF:
+			l.fatal(-1, line, "Invalid UTF-8 codepoint escape sequence: Codepoint too large")
+			return
+		}
+		i = j
+	}
+}
+
+func isHexDigit(c byte) bool { return isDigit(c) || (c|0x20 >= 'a' && c|0x20 <= 'f') }
+
+func parseHex(s string) uint64 {
+	var v uint64
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		d := uint64(c - '0')
+		if !isDigit(c) {
+			d = uint64(c|0x20-'a') + 10
+		}
+		v = v*16 + d
+	}
+	return v
 }
 
 func (l *lexer) diag(format string, args ...any) {
@@ -602,7 +655,8 @@ func (l *lexer) number(start int) {
 	}
 	end := digitsWith(i, isDigit)
 	float := false
-	if end < len(src) && src[end] == '.' && !(end+2 < len(src) && src[end+1] == '.' && src[end+2] == '.') {
+	if end < len(src) && src[end] == '.' {
+		// Longest match, as PHP's scanner does: "1...2" is "1." "." ".2".
 		float = true
 		end = digitsWith(end+1, isDigit)
 	}
@@ -1280,14 +1334,31 @@ func (l *lexer) lexProperty() {
 	}
 }
 
+var varOffsetNumbers = []*regexp.Regexp{
+	regexp.MustCompile(`^0[xX][0-9a-fA-F]+(?:_[0-9a-fA-F]+)*`),
+	regexp.MustCompile(`^0[bB][01]+(?:_[01]+)*`),
+	regexp.MustCompile(`^0[oO][0-7]+(?:_[0-7]+)*`),
+	regexp.MustCompile(`^[0-9]+(?:_[0-9]+)*`),
+}
+
+func varOffsetNumber(s string) int {
+	best := 0
+	for _, re := range varOffsetNumbers {
+		if m := re.FindStringIndex(s); m != nil && m[1] > best {
+			best = m[1]
+		}
+	}
+	return best
+}
+
 func (l *lexer) lexVarOffset() {
 	start := l.pos
 	c := l.src[l.pos]
 	switch {
 	case isDigit(c):
-		for l.pos < len(l.src) && isLabelChar(l.src[l.pos]) {
-			l.pos++
-		}
+		// PHP takes the longest decimal, hex, binary, or octal literal here;
+		// anything after it starts the next token.
+		l.pos = start + varOffsetNumber(l.src[start:])
 		l.emit(TNumString, start)
 	case c == '$' && isLabelStart(l.peek(1)):
 		l.pos = l.labelEnd(l.pos + 1)

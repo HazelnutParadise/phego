@@ -14,6 +14,8 @@ This list describes what `internal/frontend` accepts for the PHP 8.5.12 profile.
 
 ## Known gaps
 
+- The nesting limit protects the Go stack but is not PHP's: PHP's parser stack accepts up to 9995 nested parentheses yet only 2499 nested if statements, while Phego allows about 5000 parentheses and up to 10000 levels of most other constructs. Such input is rejected with a different message (PHP reports "memory exhausted").
+
 - Of 16320 token-level mutants of the corpus, all receive PHP's accept or reject decision and 16318 the same error line; two heredoc indentation errors are reported on a different line.
 
 - Error messages are located like PHP's but do not reproduce Bison's "expecting ..." lists.

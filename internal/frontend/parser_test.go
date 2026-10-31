@@ -174,6 +174,40 @@ func TestGrammarGridRepresentatives(t *testing.T) {
 	}
 }
 
+func TestOpusReviewCases(t *testing.T) {
+	// Decisions and lines are PHP 8.5.12 token_get_all(..., TOKEN_PARSE)
+	// results; 0 means the source is valid.
+	for src, line := range map[string]int{
+		"<?php\n\"\\u{zz}\";":                         2,
+		"<?php\n\"\n\n\\u{zz}\";":                     4,
+		"<?php\n<<<E\n\\u{zz}\nE;":                    3,
+		"<?php\n\"\\u{110000}\";":                     2,
+		"<?php\n\"\\u{10FFFF}\";":                     0,
+		"<?php\n'\\u{zz}';":                           0,
+		"<?php\n\"\\\\u{zz}\";":                       0,
+		"<?php\n\"$a[1abc]\";":                        2,
+		"<?php\n\"$a[0x1F]\";":                        0,
+		"<?php\n\"$a[1_0]\";":                         0,
+		"<?php\nclass C { use T { f insteadof B; } }": 2,
+		"<?php\nclass C { use T { f as var g; } }":    2,
+		"<?php\nclass C { use T { f as var; } }":      0,
+		"<?php\n$a = 1...2;":                          0,
+		"<?php\n'a\nb\nc":                             2,
+	} {
+		_, err := parse(t, src)
+		var se *SyntaxError
+		got := 0
+		if errors.As(err, &se) {
+			got = se.Line
+		} else if err != nil {
+			t.Fatalf("%q: %v", src, err)
+		}
+		if got != line {
+			t.Errorf("%q: line %d (%v), want %d", src, got, err, line)
+		}
+	}
+}
+
 func TestMatchArmsNeedConditions(t *testing.T) {
 	// PHP 8.5.12 rejects an arm without conditions unless it is default.
 	for src, ok := range map[string]bool{
