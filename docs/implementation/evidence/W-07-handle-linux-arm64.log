@@ -1,0 +1,18 @@
+container-start
+llvm-extracted
+clang version 23.1.4 (https://github.com/llvm/llvm-project 7a941dfb2877a0b8cf30323fefa85ad019e0b0f5)
+go version go1.27.3 linux/arm64
+warning: overriding the module target triple with aarch64-unknown-linux-gnu [-Woverride-module]
+1 warning generated.
+--- PASS: TestWeightedSumObservesElementOrder (0.00s)
+--- PASS: TestRegisteredValueIsCopied (0.00s)
+--- PASS: TestInvalidHandlesAreRejectedWithoutWritingResult (0.00s)
+--- PASS: TestReleasedSlotReuseInvalidatesOldGeneration (0.00s)
+--- PASS: TestExhaustedGenerationRetiresSlot (0.00s)
+--- PASS: TestExceptionStatusPropagatesWithoutResult (0.00s)
+--- PASS: TestGoPanicIsContainedAtBoundary (0.00s)
+--- PASS: TestValuesSurviveGCPressureWhileNativeReads (0.22s)
+--- PASS: TestConcurrentReleaseNeverReturnsPartialResult (0.00s)
+PASS
+ok  	_/src	1.232s
+ok  	_/src	0.037s

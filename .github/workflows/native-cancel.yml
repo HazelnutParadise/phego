@@ -1,0 +1,44 @@
+name: Native cancellation probe
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cancellation-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Exercise cooperative cancellation
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang --version | head -1
+          go version
+          uname -sm
+          probe_dir=$(mktemp -d)
+          clang -O2 -c experiments/nativecancel/loop.ll -o "$probe_dir/loop.o"
+          ar rcs "$probe_dir/libphegocancel.a" "$probe_dir/loop.o"
+          CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir -lphegocancel" go test -race -count=1 -tags=phego_native_probe ./experiments/nativecancel
+          GODEBUG=panicnil=1 CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir -lphegocancel" go test -count=1 -tags=phego_native_probe -run '^TestNilPanicCannotBeReportedAsSuccess$' ./experiments/nativecancel
+          printf 'define i32 @phego_cancel_run(i64 %%token, i64 %%limit) { ret i32 0 }\n' > "$probe_dir/invalid.ll"
+          clang -O2 -c "$probe_dir/invalid.ll" -o "$probe_dir/invalid.o"
+          mkdir "$probe_dir/invalid"
+          ar rcs "$probe_dir/invalid/libphegocancel.a" "$probe_dir/invalid.o"
+          if CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir/invalid -lphegocancel" go test -count=1 -tags=phego_native_probe -run '^(TestInvalidTokenIsRejectedBeforeLimit|TestNormalCompletionCountsEveryCheckpoint)$' ./experiments/nativecancel > "$probe_dir/negative.log" 2>&1; then
+            echo 'error: missing native cancellation checks were accepted' >&2
+            exit 1
+          fi
+          cat "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestNormalCompletionCountsEveryCheckpoint' "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestInvalidTokenIsRejectedBeforeLimit' "$probe_dir/negative.log"
