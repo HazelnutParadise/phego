@@ -1,0 +1,82 @@
+name: Native Linux reference PHP
+
+on:
+  push:
+    paths:
+      - '.github/workflows/native-reference.yml'
+      - 'compat.lock.json'
+      - 'tools/reference_php.py'
+  pull_request:
+    paths:
+      - '.github/workflows/native-reference.yml'
+      - 'compat.lock.json'
+      - 'tools/reference_php.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-amd64-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check runner and locked inputs
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/phego-evidence"
+          test "$(uname -m)" = x86_64
+          uname -a | tee "$RUNNER_TEMP/phego-evidence/kernel.txt"
+          lscpu | tee "$RUNNER_TEMP/phego-evidence/cpu.txt"
+          docker version | tee "$RUNNER_TEMP/phego-evidence/docker.txt"
+          python3 - <<'PY'
+          import json
+          with open('compat.lock.json', encoding='utf-8') as f:
+              lock = json.load(f)
+          assert lock['php']['archive_url'] == 'https://www.php.net/distributions/php-8.5.12.tar.xz'
+          assert lock['php']['archive_sha256'] == '08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209'
+          assert any(p['platform'] == 'linux/amd64' and p['image'] == 'buildpack-deps@sha256:702b53c861e19913b8720993a4032b13441ed63916e123b403301423977f818f' for p in lock['additional_reference_builds'])
+          PY
+          sha256sum compat.lock.json tools/reference_php.py | tee "$RUNNER_TEMP/phego-evidence/input-sha256.txt"
+      - name: Acquire pinned inputs
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 \
+            https://www.php.net/distributions/php-8.5.12.tar.xz -o "$RUNNER_TEMP/php.tar.xz"
+          printf '%s  %s\n' 08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209 "$RUNNER_TEMP/php.tar.xz" | sha256sum -c -
+          docker pull --platform linux/amd64 buildpack-deps@sha256:702b53c861e19913b8720993a4032b13441ed63916e123b403301423977f818f
+      - name: Rebuild twice in isolated containers
+        run: |
+          set -euo pipefail
+          for run in 1 2; do
+            python3 tools/reference_php.py "$RUNNER_TEMP/php.tar.xz" --platform linux/amd64 --timeout 900 2>&1 | tee "$RUNNER_TEMP/phego-evidence/build-${run}.log"
+          done
+          python3 - <<'PY'
+          import os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phego-evidence'
+          hashes = []
+          for n in (1, 2):
+              text = (root / f'build-{n}.log').read_text()
+              text = re.sub(r'\x1b\[[0-9;]*m', '', text).replace('\r', '\n')
+              matches = re.findall(r'(?m)^([0-9a-f]{64})\s+\./sapi/cli/php$', text)
+              outcomes = re.findall(r'(?m)^(PASS|FAIL|SKIP|WARN|BORK|XFAIL|XLEAK|LEAK) [^\n]*\[tests/basic/001\.phpt\]', text)
+              if outcomes != ['PASS']:
+                  raise SystemExit(f'run {n}: expected one passing PHPT, got {outcomes}')
+              if len(matches) != 1:
+                  raise SystemExit(f'run {n}: missing or ambiguous PHP digest')
+              hashes.append(matches[0])
+          if hashes[0] != hashes[1]:
+              raise SystemExit('reference builds differ')
+          print('Both builds produced SHA-256', hashes[0])
+          PY
+      - name: Retain raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-amd64-reference-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/phego-evidence/
+          if-no-files-found: warn
+          retention-days: 30

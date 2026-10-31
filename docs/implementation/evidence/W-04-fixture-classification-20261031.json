@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "scope": "runner_self_check_only",
+  "requirement": "REQ-072",
+  "scenarios": [
+    "T-143",
+    "T-144"
+  ],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-10-31",
+  "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+  "platform": "linux/386",
+  "emulated": true,
+  "host": "macOS arm64, Docker 29.8.2",
+  "command": "python3 tools/phpt_execute.py --image <image> --executable /usr/local/bin/php --platform linux/386 --release 8.5.12 --timeout 60 <fixture>",
+  "tool_sha256": {
+    "tools/phpt_execute.py": "2bb8ad38cc7efda32c6f449a26f2b6a153865032c490e6d361edf7a52d3151a0",
+    "tools/phpt_results.py": "370bab98dd35b6b12f75064ab9a309ac318d6963c7a5692f3e1630b5fcbdd9d9",
+    "tools/phpt_pcre.py": "1b412740802175c08ef631abc07692bda739a9cff98424e11a61c3231cc12cc8",
+    "tools/phpt_runner.py": "efc4d34a21e46d63a888dd05c0131893cd47c165b23f3fae95ebd1d240882e49",
+    "tools/phpt_session.py": "dcba9de73b85255ecebe4056866b63f0d6702d6384b3d01253bb153075a0c909"
+  },
+  "items": [
+    {
+      "file": "bork.phpt",
+      "sha256": "67cd88e91371820a3939e735e88fa90469695e202fbc2653a495965ac5df0698",
+      "reference_runner_status": "BORK",
+      "phego_runner_status": "runner_gap",
+      "reason": "PHPT input could not be safely read or parsed",
+      "execution": "not_run",
+      "exit_code": 2
+    },
+    {
+      "file": "environment-skip.phpt",
+      "sha256": "4b539ecbda8bf222aa21fbc49edbd945e0044af2271f93c28247dd43bb0a2def",
+      "reference_runner_status": "SKIP",
+      "phego_runner_status": "runner_gap",
+      "reason": "SKIPIF requested a skip with an unknown cause",
+      "execution": "not_completed",
+      "exit_code": 1
+    },
+    {
+      "file": "expectf.phpt",
+      "sha256": "1ca48964441a977c5ccccf89952138248c543040bd0a2c16d202e67784bf2999",
+      "reference_runner_status": "PASS",
+      "phego_runner_status": "pass",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 0
+    },
+    {
+      "file": "fail.phpt",
+      "sha256": "2a1485c3c98a5472f424f591b9aa73629b6803f97dd44badd7138e668653c0a6",
+      "reference_runner_status": "FAIL",
+      "phego_runner_status": "fail",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 1
+    },
+    {
+      "file": "feature-skipif.phpt",
+      "sha256": "043b0d4f8ca09c4e49b6479dee5b7a1dbd292330415a987bcea6b215c7fc1d8d",
+      "reference_runner_status": "PASS",
+      "phego_runner_status": "pass",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 0
+    },
+    {
+      "file": "pass.phpt",
+      "sha256": "963853a797b680c264ba69be3d95cfc2e90f0633fc3736791267f7dddd9272a5",
+      "reference_runner_status": "PASS",
+      "phego_runner_status": "pass",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 0
+    },
+    {
+      "file": "xfail.phpt",
+      "sha256": "b2a0d406899f93db555d5d710133f653d98dac539d4e616500f48081d677d155",
+      "reference_runner_status": "XFAIL",
+      "phego_runner_status": "xfail",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 0
+    },
+    {
+      "file": "xpass.phpt",
+      "sha256": "cd6c17896ac8dbe971708e5245dd450f00fbf6a2bade6b5d60ec04c1398b5b91",
+      "reference_runner_status": "WARN",
+      "phego_runner_status": "xpass",
+      "reason": "",
+      "execution": "reference_executed",
+      "exit_code": 1
+    }
+  ],
+  "limits": [
+    "Reference statuses come from the 2026-10-29 linux/arm64 source-built run; this check used the prebuilt linux/386 image.",
+    "An unconfirmed SKIPIF skip is reported as runner_gap by design; environment skip and unsupported are only verified with supplied observations.",
+    "No Phego engine was executed."
+  ]
+}

@@ -1,0 +1,52 @@
+name: Native ABI handle probe
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  handle-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Exercise generation-checked handles
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang --version | head -1
+          go version
+          uname -sm
+          probe_dir=$(mktemp -d)
+          clang -c experiments/nativehandle/sum.ll -o "$probe_dir/sum.o"
+          ar rcs "$probe_dir/libphegohandle.a" "$probe_dir/sum.o"
+          export CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir -lphegohandle"
+          go test -race -count=1 -tags=phego_native_probe ./experiments/nativehandle
+          GOEXPERIMENT=cgocheck2 go test -count=1 -tags=phego_native_probe ./experiments/nativehandle
+          # A native side that ignores accessor status must be rejected.
+          cat > "$probe_dir/invalid.ll" <<'LL'
+          define i32 @phego_native_weighted_sum(i64 %owner, i64 %handle, ptr %result) {
+            store i64 0, ptr %result
+            ret i32 0
+          }
+          LL
+          clang -c "$probe_dir/invalid.ll" -o "$probe_dir/invalid.o"
+          mkdir "$probe_dir/invalid"
+          ar rcs "$probe_dir/invalid/libphegohandle.a" "$probe_dir/invalid.o"
+          if CGO_LDFLAGS="-L$probe_dir/invalid -lphegohandle" go test -count=1 -tags=phego_native_probe ./experiments/nativehandle > "$probe_dir/negative.log" 2>&1; then
+            echo 'error: native code ignoring handle status was accepted' >&2
+            exit 1
+          fi
+          cat "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestWeightedSumObservesElementOrder' "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestExceptionStatusPropagatesWithoutResult' "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestInvalidHandlesAreRejectedWithoutWritingResult' "$probe_dir/negative.log"

@@ -4,6 +4,8 @@
 
 Read `docs/spec/specification.zh-TW.md`, especially chapters 01-11, 22-28, and 36-40. Load the requirement, acceptance-test, and work-package JSON records under `docs/data/`. This repository is at the specification stage; do not mistake planned APIs for implemented APIs.
 
+Before selecting a work package, read `docs/implementation/README.md` and `docs/implementation/github-index.json` for its issue, draft PR, integration dependencies, and acceptance owner. Read the package plan on its draft branch before implementing it.
+
 ## Fixed product direction
 
 1. Keep the core Go-native and embeddable through a Go function. The default core must build without cgo or LLVM. Optional native builds must disclose their dependencies.

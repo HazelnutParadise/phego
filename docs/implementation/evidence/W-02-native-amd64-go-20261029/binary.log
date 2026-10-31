@@ -1,0 +1,6 @@
+=== go version ===
+go version go1.27.3 linux/amd64
+=== binary sha256 ===
+96c8702847c103a68d37637c41c7f7cc8c260b5b736541dd1728a4c0ef4393ec  probe
+probe ok
+b3ca385aece9340f2b4cba4b9fbb08d36ca2857cce8ce1ae5250c389e3e53a08
