@@ -1065,6 +1065,8 @@ func (p *parser) member() *Node {
 }
 
 func (p *parser) propertyHooks() *Node {
+	p.enter()
+	defer p.leave()
 	t := p.expect('{')
 	n := node("hooks", t.Line)
 	for !p.at('}') {
