@@ -104,3 +104,34 @@ func TestBraceCacheMatchesOriginalScanner(t *testing.T) {
 		}
 	}
 }
+
+func TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically(t *testing.T) {
+	source := func(depth int) string {
+		return "<?php $q = <<<Q\n{$x}\n'\nQ;\n" + strings.TrimPrefix(nestedHeredoc(depth), "<?php ")
+	}
+	if _, err := parse(t, source(3)); err != nil {
+		t.Fatalf("PHP accepts nested heredoc after quoted text: %v", err)
+	}
+	want := "T_OPEN_TAG T_VARIABLE T_WHITESPACE = T_WHITESPACE T_START_HEREDOC T_CURLY_OPEN T_VARIABLE } " +
+		"T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC ; T_WHITESPACE T_VARIABLE T_WHITESPACE = T_WHITESPACE " +
+		"T_START_HEREDOC T_CURLY_OPEN T_VARIABLE [ T_START_HEREDOC T_CURLY_OPEN T_VARIABLE [ " +
+		"T_START_HEREDOC T_CURLY_OPEN T_VARIABLE [ T_CONSTANT_ENCAPSED_STRING ] } " +
+		"T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC T_WHITESPACE ] } T_ENCAPSED_AND_WHITESPACE " +
+		"T_END_HEREDOC T_WHITESPACE ] } T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC T_WHITESPACE ;"
+	if got := kinds(lex(t, source(3))); got != want {
+		t.Fatalf("PHP token sequence differs: %s", got)
+	}
+	measure := func(depth int) time.Duration {
+		src := []byte(source(depth))
+		start := time.Now()
+		if _, _, err := Lex(src, LexOptions{IntWidth: 64, MaxBytes: 1 << 22}); err != nil {
+			t.Fatal(err)
+		}
+		return time.Since(start)
+	}
+	measure(500)
+	small, large := measure(1000), measure(10000)
+	if large > 30*small+100*time.Millisecond {
+		t.Fatalf("nested heredoc after quoted text scales superlinearly: 1000=%v 10000=%v", small, large)
+	}
+}
