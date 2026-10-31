@@ -570,3 +570,82 @@ func TestShutdownDestructsObjectsCreatedByDestructors(t *testing.T) {
 	must(t, s.h.shutdown(&globals))
 	expectOutput(t, s.out, "end", "destruct parent", "destruct child")
 }
+
+func TestForeachByReferenceFollowsReplacedArray(t *testing.T) {
+	// PHP 8.5.12: replacing [1,2,3] with [4,5] at 1 visits 1,4,5; with
+	// [7,8,9,10] at 2 visits 1,2,7,8,9,10.
+	for _, c := range []struct {
+		at          int64
+		replacement []int64
+		want        []int64
+	}{{1, []int64{4, 5}, []int64{1, 4, 5}}, {2, []int64{7, 8, 9, 10}, []int64{1, 2, 7, 8, 9, 10}}} {
+		h := testHeap(t)
+		var arr, item value
+		for i := int64(1); i <= 3; i++ {
+			must(t, h.appendValue(&arr, num(t, i)))
+		}
+		var seen []int64
+		must(t, h.foreachRef(&arr, &item, func(arrayKey) error {
+			v := item.deref().integer
+			seen = append(seen, v)
+			if v == c.at {
+				var next value
+				for _, n := range c.replacement {
+					if err := h.appendValue(&next, num(t, n)); err != nil {
+						return err
+					}
+				}
+				if err := h.assign(&arr, next); err != nil {
+					return err
+				}
+				return h.unset(&next)
+			}
+			return nil
+		}))
+		if !slices.Equal(seen, c.want) {
+			t.Fatalf("seen %v, want %v", seen, c.want)
+		}
+	}
+}
+
+func TestForeachByReferenceKeepsCursorWhenSeparatingSharedArray(t *testing.T) {
+	h := testHeap(t)
+	var arr, copyOf, item value
+	for i := int64(1); i <= 3; i++ {
+		must(t, h.appendValue(&arr, num(t, i)))
+	}
+	var seen []int64
+	must(t, h.foreachRef(&arr, &item, func(k arrayKey) error {
+		seen = append(seen, item.deref().integer)
+		if k == intKey(0) {
+			// Sharing the inner array forces the next step to separate it.
+			return h.assign(&copyOf, arr)
+		}
+		return nil
+	}))
+	if !slices.Equal(seen, []int64{1, 2, 3}) {
+		t.Fatalf("seen %v", seen)
+	}
+}
+
+func TestCycleMembersFreedByDestructorsAreNotCounted(t *testing.T) {
+	// PHP 8.5.12 returns 1 when each destructor clears its peer.
+	s := &script{h: testHeap(t)}
+	c := &class{destructor: func(h *heap, this value) error {
+		p, _ := h.property(this, "name")
+		s.echo("destruct " + p.deref().text)
+		return h.setProperty(this, "peer", nullValue())
+	}}
+	var a, b value
+	must(t, s.h.assign(&a, s.object(t, c, "a")))
+	must(t, s.h.assign(&b, s.object(t, c, "b")))
+	must(t, s.h.setProperty(a, "peer", b))
+	must(t, s.h.setProperty(b, "peer", a))
+	must(t, s.h.unset(&a))
+	must(t, s.h.unset(&b))
+	n, err := s.h.collectCycles()
+	must(t, err)
+	if n != 1 || len(s.h.live) != 0 || len(s.out) != 2 {
+		t.Fatalf("collected %d, live %d, output %v", n, len(s.h.live), s.out)
+	}
+}

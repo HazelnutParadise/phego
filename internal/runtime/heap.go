@@ -387,23 +387,39 @@ func (h *heap) unsetElement(slot *value, key value) error {
 // foreachRef iterates an array by reference. As in PHP, the iterated variable
 // becomes a shared location that the loop owns, so writes and appends in the
 // body modify the iterated array rather than a separated copy. Each element is
-// bound to item, and appended elements are visited.
+// bound to item, and appended elements are visited. If the body assigns a
+// different array to the variable, iteration continues from that array's
+// start; if the loop itself has to separate a shared array, the cursor moves
+// to the copy after the last visited key.
 func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
 	var loop value
 	if err := h.bind(&loop, arr); err != nil {
 		return err
 	}
 	defer h.release(loop)
+	var cur *phpArray
+	var last arrayKey
 	pos := 0
 	for {
+		if t := loop.ref.target; cur != nil && (t.kind != valueArray || t.array != cur) {
+			cur, pos = nil, 0
+		}
 		a, err := h.separate(&loop)
 		if err != nil {
 			return err
 		}
+		if cur != nil && a != cur {
+			pos = 0
+			if i, ok := a.find(last); ok {
+				pos = i + 1
+			}
+		}
+		cur = a
 		b, ok := a.next(&pos)
 		if !ok {
 			return nil
 		}
+		last = b.key
 		if err := h.bind(item, &b.val); err != nil {
 			return err
 		}
@@ -590,7 +606,15 @@ func (h *heap) collectCycles() (int, error) {
 		}
 	}
 	if ranDestructor {
-		white = garbage(white)
+		// Destructors may break the cycle so that members are freed by
+		// ordinary counting; those are no longer garbage and are not counted.
+		// A destructed object whose count fell to zero is still freed here.
+		white = garbage(slices.DeleteFunc(white, func(n gcNode) bool {
+			if o, ok := n.(*object); ok {
+				return o.freed
+			}
+			return refcountOf(n) == 0
+		}))
 	}
 	dead := map[gcNode]bool{}
 	for _, n := range white {
