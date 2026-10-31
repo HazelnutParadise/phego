@@ -5,8 +5,8 @@
   "scope": "implementation_planning_only",
   "counts": {
     "work_packages": 60,
-    "requirements": 100,
-    "acceptance_scenarios": 200
+    "requirements": 101,
+    "acceptance_scenarios": 202
   },
   "dependency_waves": [
     [
@@ -310,7 +310,9 @@
     "T-197": "W-60",
     "T-198": "W-60",
     "T-199": "W-60",
-    "T-200": "W-60"
+    "T-200": "W-60",
+    "T-201": "W-42",
+    "T-202": "W-42"
   },
   "integration_gate_reasons": {
     "W-35": {
@@ -373,9 +375,32 @@
       "plan_sha256": "067c1f50e13b2335d03d7dad3aed54e109a0a99613ae21f46602dc7692eeb8fd",
       "issue": {
         "number": 1,
-        "url": "https://github.com/HazelnutParadise/phego/issues/1"
+        "url": "https://github.com/HazelnutParadise/phego/issues/1",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/1#issuecomment-6469346697",
+          "id": 6469346697
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 61,
+        "url": "https://github.com/HazelnutParadise/phego/pull/61",
+        "head_sha": "99ed795eabfcf66ea86789be2a436109e7467c43",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-01",
+        "branch": "codex/w-01-implementation",
+        "source_validation_commit": "fcf9d7d846c5e261e1044b777f7e292d2f2f29d0",
+        "commit": "99ed795eabfcf66ea86789be2a436109e7467c43",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-01.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-02",
@@ -408,9 +433,32 @@
       "plan_sha256": "1f61ab5b4a42933c41d1e02327dee710792b12227fc4b55b37fdd7a428718da4",
       "issue": {
         "number": 2,
-        "url": "https://github.com/HazelnutParadise/phego/issues/2"
+        "url": "https://github.com/HazelnutParadise/phego/issues/2",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/2#issuecomment-6469347124",
+          "id": 6469347124
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 62,
+        "url": "https://github.com/HazelnutParadise/phego/pull/62",
+        "head_sha": "52c09c0f6eb461950dd5950c5f9f9541e3b5d35d",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-02",
+        "branch": "codex/w-02-implementation",
+        "source_validation_commit": "bb5546892032c5bf4b4bbef9f8f8dcd161763910",
+        "commit": "52c09c0f6eb461950dd5950c5f9f9541e3b5d35d",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-02.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-03",
@@ -450,9 +498,32 @@
       "plan_sha256": "48c1de43b076df4ebf1db48ac43c851b9dc6d485c949577d88e6f9cdfa30ae07",
       "issue": {
         "number": 3,
-        "url": "https://github.com/HazelnutParadise/phego/issues/3"
+        "url": "https://github.com/HazelnutParadise/phego/issues/3",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/3#issuecomment-6469347507",
+          "id": 6469347507
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 63,
+        "url": "https://github.com/HazelnutParadise/phego/pull/63",
+        "head_sha": "3a2682a69e45aea6a0ac47a3fa23996956b29088",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-03",
+        "branch": "codex/w-03-implementation",
+        "source_validation_commit": "54f55642a73c3f9e46d0e250e28c0dd296401e3a",
+        "commit": "3a2682a69e45aea6a0ac47a3fa23996956b29088",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-03.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-04",
@@ -480,9 +551,32 @@
       "plan_sha256": "7bdb58f59adc8c6e92f05e64a654537d211cf2f7bb93e6bea6d67d2904de7402",
       "issue": {
         "number": 4,
-        "url": "https://github.com/HazelnutParadise/phego/issues/4"
+        "url": "https://github.com/HazelnutParadise/phego/issues/4",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/4#issuecomment-6469347824",
+          "id": 6469347824
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 64,
+        "url": "https://github.com/HazelnutParadise/phego/pull/64",
+        "head_sha": "1f74086ef3d132915fb6575983b1362eaa24c91a",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-04",
+        "branch": "codex/w-04-implementation",
+        "source_validation_commit": "57f19a93a872cee5ccaaaacff470284f9114666e",
+        "commit": "1f74086ef3d132915fb6575983b1362eaa24c91a",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-04.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-05",
@@ -519,9 +613,32 @@
       "plan_sha256": "3982a7e16f163527570aca040825c99c94ec382b471a76761db612b323d4a933",
       "issue": {
         "number": 5,
-        "url": "https://github.com/HazelnutParadise/phego/issues/5"
+        "url": "https://github.com/HazelnutParadise/phego/issues/5",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/5#issuecomment-6469348242",
+          "id": 6469348242
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 65,
+        "url": "https://github.com/HazelnutParadise/phego/pull/65",
+        "head_sha": "20ee261b98b3285ac27209d23012e5187465c6c5",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-05",
+        "branch": "codex/w-05-implementation",
+        "source_validation_commit": "8b1b27d2a99efb2a493dd168513005d75dbe7dbe",
+        "commit": "20ee261b98b3285ac27209d23012e5187465c6c5",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-05.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-06",
@@ -565,9 +682,32 @@
       "plan_sha256": "20b423e1f8d4867ec22f03a18f3622cadd7d5000f70661031bb2cf0be7dad2e0",
       "issue": {
         "number": 8,
-        "url": "https://github.com/HazelnutParadise/phego/issues/8"
+        "url": "https://github.com/HazelnutParadise/phego/issues/8",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/8#issuecomment-6469348581",
+          "id": 6469348581
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 66,
+        "url": "https://github.com/HazelnutParadise/phego/pull/66",
+        "head_sha": "51d43d6cb45dd7155a4d7407746acddb7d2423f1",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-06",
+        "branch": "codex/w-06-implementation",
+        "source_validation_commit": "4ef804f72bb0ab3bc7922ece300c03a1f7c93210",
+        "commit": "51d43d6cb45dd7155a4d7407746acddb7d2423f1",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-06.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-07",
@@ -598,9 +738,32 @@
       "plan_sha256": "c2ad17406e71b73185cd134325961e79a4b1e3980f9dba021ecd6dd58dc7632a",
       "issue": {
         "number": 9,
-        "url": "https://github.com/HazelnutParadise/phego/issues/9"
+        "url": "https://github.com/HazelnutParadise/phego/issues/9",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/9#issuecomment-6469348925",
+          "id": 6469348925
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 67,
+        "url": "https://github.com/HazelnutParadise/phego/pull/67",
+        "head_sha": "25fd3cf19558d858a86aa2716bca3dba5e1a6039",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-07",
+        "branch": "codex/w-07-implementation",
+        "source_validation_commit": "5d7e2ea22ec37f9dd5f09024689af551cc83f1a1",
+        "commit": "25fd3cf19558d858a86aa2716bca3dba5e1a6039",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-07.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-08",
@@ -621,7 +784,8 @@
         "REQ-005",
         "REQ-006",
         "REQ-007",
-        "REQ-008"
+        "REQ-008",
+        "REQ-101"
       ],
       "tests": [
         "T-001",
@@ -633,7 +797,9 @@
         "T-013",
         "T-014",
         "T-015",
-        "T-016"
+        "T-016",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -641,9 +807,32 @@
       "plan_sha256": "93574805a2a3755d5670e5f8d63ae12b46e483472d11181b766ec262cdb627d5",
       "issue": {
         "number": 11,
-        "url": "https://github.com/HazelnutParadise/phego/issues/11"
+        "url": "https://github.com/HazelnutParadise/phego/issues/11",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/11#issuecomment-6469349288",
+          "id": 6469349288
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 68,
+        "url": "https://github.com/HazelnutParadise/phego/pull/68",
+        "head_sha": "4fd6435b024fd16683712236702ea28565f35ffe",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-08",
+        "branch": "codex/w-08-implementation",
+        "source_validation_commit": "2c81309850a41db563d77355e2c400936ceab5e4",
+        "commit": "4fd6435b024fd16683712236702ea28565f35ffe",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-08.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-09",
@@ -659,11 +848,14 @@
       ],
       "integration_dependencies": [],
       "requirements": [
-        "REQ-010"
+        "REQ-010",
+        "REQ-101"
       ],
       "tests": [
         "T-019",
-        "T-020"
+        "T-020",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -671,9 +863,32 @@
       "plan_sha256": "065de798268e3d1a705cc72bddb6ca93446d8ebb66f773e244767daeb3f29e75",
       "issue": {
         "number": 10,
-        "url": "https://github.com/HazelnutParadise/phego/issues/10"
+        "url": "https://github.com/HazelnutParadise/phego/issues/10",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/10#issuecomment-6469349680",
+          "id": 6469349680
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 69,
+        "url": "https://github.com/HazelnutParadise/phego/pull/69",
+        "head_sha": "4231e92d3eb1415eaa96ed7a049d03f7ede3ac9b",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-09",
+        "branch": "codex/w-09-implementation",
+        "source_validation_commit": "5e45af2c8e3e1d82b07c4107976452159a63fc21",
+        "commit": "4231e92d3eb1415eaa96ed7a049d03f7ede3ac9b",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-09.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-10",
@@ -693,7 +908,8 @@
         "REQ-004",
         "REQ-010",
         "REQ-011",
-        "REQ-066"
+        "REQ-066",
+        "REQ-101"
       ],
       "tests": [
         "T-003",
@@ -705,7 +921,9 @@
         "T-021",
         "T-022",
         "T-131",
-        "T-132"
+        "T-132",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [],
       "implementation_status": "not_started",
@@ -713,9 +931,32 @@
       "plan_sha256": "0213fc5e2987074ef5e58f0f847dd266ca742a7fda9aa4b460ec2715822b97ef",
       "issue": {
         "number": 12,
-        "url": "https://github.com/HazelnutParadise/phego/issues/12"
+        "url": "https://github.com/HazelnutParadise/phego/issues/12",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/12#issuecomment-6469350022",
+          "id": 6469350022
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 70,
+        "url": "https://github.com/HazelnutParadise/phego/pull/70",
+        "head_sha": "40256a8f066caaebccd215392da1413db56c9914",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-10",
+        "branch": "codex/w-10-implementation",
+        "source_validation_commit": "0910e97a4cde27f31b0a268ff38395872b3437f1",
+        "commit": "40256a8f066caaebccd215392da1413db56c9914",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-10.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-11",
@@ -753,9 +994,32 @@
       "plan_sha256": "ee5f168c08dc2a6ccbd30329ace50cc5b45db435ff6d46688bad27c6253e2f47",
       "issue": {
         "number": 13,
-        "url": "https://github.com/HazelnutParadise/phego/issues/13"
+        "url": "https://github.com/HazelnutParadise/phego/issues/13",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/13#issuecomment-6469350387",
+          "id": 6469350387
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 71,
+        "url": "https://github.com/HazelnutParadise/phego/pull/71",
+        "head_sha": "3173de779d45c3713b5183dbc99a9940a33b2ddb",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-11",
+        "branch": "codex/w-11-implementation",
+        "source_validation_commit": "49d402ba272963c3de5305587d78749c4a6e9ae2",
+        "commit": "3173de779d45c3713b5183dbc99a9940a33b2ddb",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-11.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-12",
@@ -789,9 +1053,32 @@
       "plan_sha256": "96886159d5e83d71a75ebc248b0261563610d32987d031ced5fd6cd62193fe24",
       "issue": {
         "number": 16,
-        "url": "https://github.com/HazelnutParadise/phego/issues/16"
+        "url": "https://github.com/HazelnutParadise/phego/issues/16",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/16#issuecomment-6469350735",
+          "id": 6469350735
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 72,
+        "url": "https://github.com/HazelnutParadise/phego/pull/72",
+        "head_sha": "44fb89bd87b55fbc7f3345428eee16f1a75953fa",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-12",
+        "branch": "codex/w-12-implementation",
+        "source_validation_commit": "c1c56115856f2ca7f8340b69d2bcd0536c7f3a9c",
+        "commit": "44fb89bd87b55fbc7f3345428eee16f1a75953fa",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-12.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-13",
@@ -836,9 +1123,32 @@
       "plan_sha256": "d19b7de8e3c2b1201d1f1439d8603c44e031a130b903f67958378b36b55d91e5",
       "issue": {
         "number": 18,
-        "url": "https://github.com/HazelnutParadise/phego/issues/18"
+        "url": "https://github.com/HazelnutParadise/phego/issues/18",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/18#issuecomment-6469351098",
+          "id": 6469351098
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 73,
+        "url": "https://github.com/HazelnutParadise/phego/pull/73",
+        "head_sha": "be46d8139ca8a3ee2ecfe0301072045bc2f8cf74",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-13",
+        "branch": "codex/w-13-implementation",
+        "source_validation_commit": "9f5a6ae3ae092844febad05c4db0429e140425dd",
+        "commit": "be46d8139ca8a3ee2ecfe0301072045bc2f8cf74",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-13.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-14",
@@ -882,9 +1192,32 @@
       "plan_sha256": "9087a0ac9fa81eb0928ed6ef480614024e6819578c30be79e27936ed5456c6e3",
       "issue": {
         "number": 17,
-        "url": "https://github.com/HazelnutParadise/phego/issues/17"
+        "url": "https://github.com/HazelnutParadise/phego/issues/17",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/17#issuecomment-6469351434",
+          "id": 6469351434
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 74,
+        "url": "https://github.com/HazelnutParadise/phego/pull/74",
+        "head_sha": "1b9a1aa0b91e6720972f02b6034bc1e1a05a2850",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-14",
+        "branch": "codex/w-14-implementation",
+        "source_validation_commit": "ce5ae09cc3b38d647d33c8238eca66ffb55f44ee",
+        "commit": "1b9a1aa0b91e6720972f02b6034bc1e1a05a2850",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-14.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-15",
@@ -922,9 +1255,32 @@
       "plan_sha256": "eb02657eed2c0f32de815591371a25fbc57dba43c1ac675861f8fcd655d3eb0e",
       "issue": {
         "number": 19,
-        "url": "https://github.com/HazelnutParadise/phego/issues/19"
+        "url": "https://github.com/HazelnutParadise/phego/issues/19",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/19#issuecomment-6469351789",
+          "id": 6469351789
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 75,
+        "url": "https://github.com/HazelnutParadise/phego/pull/75",
+        "head_sha": "0675253db9f2b218ae9081318da6c0e4f2e34f8f",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-15",
+        "branch": "codex/w-15-implementation",
+        "source_validation_commit": "ccbf29512b5aab3f0e1f950018b0f485e717acbd",
+        "commit": "0675253db9f2b218ae9081318da6c0e4f2e34f8f",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-15.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-16",
@@ -958,9 +1314,32 @@
       "plan_sha256": "c11bcc45e9f3a149e40712c641fdfb2bb03dfa611e6ff7c1ceaf3d720649b475",
       "issue": {
         "number": 20,
-        "url": "https://github.com/HazelnutParadise/phego/issues/20"
+        "url": "https://github.com/HazelnutParadise/phego/issues/20",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/20#issuecomment-6469352144",
+          "id": 6469352144
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 76,
+        "url": "https://github.com/HazelnutParadise/phego/pull/76",
+        "head_sha": "6c922527ce76f2399aac8d07374d6f5e5e0010fd",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-16",
+        "branch": "codex/w-16-implementation",
+        "source_validation_commit": "65f4b979b2a0031e3423c3e0cd495cc14aff7192",
+        "commit": "6c922527ce76f2399aac8d07374d6f5e5e0010fd",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-16.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-17",
@@ -1012,9 +1391,32 @@
       "plan_sha256": "b18fce8a7002e4a2b10eed3c5ba5e5c9cab204b7b84b834ee66d565f25569b0b",
       "issue": {
         "number": 21,
-        "url": "https://github.com/HazelnutParadise/phego/issues/21"
+        "url": "https://github.com/HazelnutParadise/phego/issues/21",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/21#issuecomment-6469352540",
+          "id": 6469352540
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 77,
+        "url": "https://github.com/HazelnutParadise/phego/pull/77",
+        "head_sha": "b104c91278e756546aa5b60ef3e77b7f6c1f3c82",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-17",
+        "branch": "codex/w-17-implementation",
+        "source_validation_commit": "9371cc9fe0574863e88000c523487b0cd6ad81e8",
+        "commit": "b104c91278e756546aa5b60ef3e77b7f6c1f3c82",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-17.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-18",
@@ -1059,9 +1461,32 @@
       "plan_sha256": "64ef770b95bcabd9db3391dbcd333db8ec6412ca2747aa07758369bf92a53216",
       "issue": {
         "number": 23,
-        "url": "https://github.com/HazelnutParadise/phego/issues/23"
+        "url": "https://github.com/HazelnutParadise/phego/issues/23",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/23#issuecomment-6469352984",
+          "id": 6469352984
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 78,
+        "url": "https://github.com/HazelnutParadise/phego/pull/78",
+        "head_sha": "25ec453b0c8a1d88311dbe78d3a630d12b27c6f3",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-18",
+        "branch": "codex/w-18-implementation",
+        "source_validation_commit": "c2f01919109714596e6f43556d54ba79a5470214",
+        "commit": "25ec453b0c8a1d88311dbe78d3a630d12b27c6f3",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-18.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-19",
@@ -1093,9 +1518,32 @@
       "plan_sha256": "cd67a238360abfa724ac313375c0f380619e16e09ed6e068a6890c3b02ee6c65",
       "issue": {
         "number": 24,
-        "url": "https://github.com/HazelnutParadise/phego/issues/24"
+        "url": "https://github.com/HazelnutParadise/phego/issues/24",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/24#issuecomment-6469353390",
+          "id": 6469353390
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 79,
+        "url": "https://github.com/HazelnutParadise/phego/pull/79",
+        "head_sha": "731fe9a742085ed543db60bd598cf85755fe053a",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-19",
+        "branch": "codex/w-19-implementation",
+        "source_validation_commit": "56945e7d96db336449d448dc0e0d165a846e74e6",
+        "commit": "731fe9a742085ed543db60bd598cf85755fe053a",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-19.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-20",
@@ -1172,9 +1620,32 @@
       "plan_sha256": "a1f70b7d9e92dabb42cf395532fe2c4248fb93aa29e30774fe5851af1b73efb3",
       "issue": {
         "number": 14,
-        "url": "https://github.com/HazelnutParadise/phego/issues/14"
+        "url": "https://github.com/HazelnutParadise/phego/issues/14",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/14#issuecomment-6469353766",
+          "id": 6469353766
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 80,
+        "url": "https://github.com/HazelnutParadise/phego/pull/80",
+        "head_sha": "ec2ff84cfce013a0704bf20bf2ec10823af99b0b",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-20",
+        "branch": "codex/w-20-implementation",
+        "source_validation_commit": "d8286646a940ead8598428753c8f2e7ed96450a6",
+        "commit": "ec2ff84cfce013a0704bf20bf2ec10823af99b0b",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-20.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-21",
@@ -1221,9 +1692,32 @@
       "plan_sha256": "d3702fe27775c89a8ef564bd70c0e538ab7be22a653ae1f354a969464025d914",
       "issue": {
         "number": 22,
-        "url": "https://github.com/HazelnutParadise/phego/issues/22"
+        "url": "https://github.com/HazelnutParadise/phego/issues/22",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/22#issuecomment-6469354144",
+          "id": 6469354144
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 81,
+        "url": "https://github.com/HazelnutParadise/phego/pull/81",
+        "head_sha": "0353b79cac1a499899cf0369346f560ef1a05819",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-21",
+        "branch": "codex/w-21-implementation",
+        "source_validation_commit": "033b2ff60d9ead6919fafa04e1e78bddc152663a",
+        "commit": "0353b79cac1a499899cf0369346f560ef1a05819",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-21.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-22",
@@ -1280,9 +1774,32 @@
       "plan_sha256": "525de6dac6c87713eedfa12f5cac78074d53394f65418266de10a0763444b932",
       "issue": {
         "number": 25,
-        "url": "https://github.com/HazelnutParadise/phego/issues/25"
+        "url": "https://github.com/HazelnutParadise/phego/issues/25",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/25#issuecomment-6469354496",
+          "id": 6469354496
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 82,
+        "url": "https://github.com/HazelnutParadise/phego/pull/82",
+        "head_sha": "db2e625ade0cee6c1ad5077312c8af78871fdd31",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-22",
+        "branch": "codex/w-22-implementation",
+        "source_validation_commit": "52ba8414bc98fc96c62c4b31561f710537ffcbf7",
+        "commit": "db2e625ade0cee6c1ad5077312c8af78871fdd31",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-22.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-23",
@@ -1335,9 +1852,32 @@
       "plan_sha256": "a87fb22db7cd46aba04d4e35d02cceb1dd31324a3cc3d2f47a6e397a8a4a6b06",
       "issue": {
         "number": 29,
-        "url": "https://github.com/HazelnutParadise/phego/issues/29"
+        "url": "https://github.com/HazelnutParadise/phego/issues/29",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/29#issuecomment-6469354897",
+          "id": 6469354897
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 83,
+        "url": "https://github.com/HazelnutParadise/phego/pull/83",
+        "head_sha": "8cd2adb19d1fc9335768820dd1b3e4755a11a6f8",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-23",
+        "branch": "codex/w-23-implementation",
+        "source_validation_commit": "f42ce2483f2db366f3a21dc69e05cde085120a34",
+        "commit": "8cd2adb19d1fc9335768820dd1b3e4755a11a6f8",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-23.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-24",
@@ -1397,9 +1937,32 @@
       "plan_sha256": "65e28c2cb24daf5fa589a414e3899f17d614c2e8217b3d0e80286af86fe9d625",
       "issue": {
         "number": 30,
-        "url": "https://github.com/HazelnutParadise/phego/issues/30"
+        "url": "https://github.com/HazelnutParadise/phego/issues/30",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/30#issuecomment-6469355331",
+          "id": 6469355331
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 84,
+        "url": "https://github.com/HazelnutParadise/phego/pull/84",
+        "head_sha": "d11ea9741470fb3e49ca361072714cbf50ad18f0",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-24",
+        "branch": "codex/w-24-implementation",
+        "source_validation_commit": "74a25f20d3d8cf24e82d355a983567cb538fdc15",
+        "commit": "d11ea9741470fb3e49ca361072714cbf50ad18f0",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-24.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-25",
@@ -1444,9 +2007,32 @@
       "plan_sha256": "c4b572f91d975a2364fa549baafcdc807aa6d7304be4729b0944cce2004ca715",
       "issue": {
         "number": 33,
-        "url": "https://github.com/HazelnutParadise/phego/issues/33"
+        "url": "https://github.com/HazelnutParadise/phego/issues/33",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/33#issuecomment-6469355777",
+          "id": 6469355777
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 85,
+        "url": "https://github.com/HazelnutParadise/phego/pull/85",
+        "head_sha": "ff0933694d83f35a0f686b3b8cf94d5b1f90eb95",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-25",
+        "branch": "codex/w-25-implementation",
+        "source_validation_commit": "5987c4fbd3420c08016e4742cf1b57171f44f1a4",
+        "commit": "ff0933694d83f35a0f686b3b8cf94d5b1f90eb95",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-25.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-26",
@@ -1487,9 +2073,32 @@
       "plan_sha256": "938247848d0ef42525004d64373b39f2d6aef43aefd0da95ecc7c1481dba5f41",
       "issue": {
         "number": 34,
-        "url": "https://github.com/HazelnutParadise/phego/issues/34"
+        "url": "https://github.com/HazelnutParadise/phego/issues/34",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/34#issuecomment-6469356128",
+          "id": 6469356128
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 86,
+        "url": "https://github.com/HazelnutParadise/phego/pull/86",
+        "head_sha": "35d2041c79864d9fcb2023bfd9db286e139cad03",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-26",
+        "branch": "codex/w-26-implementation",
+        "source_validation_commit": "4de4af4e2c5eca0b08e25404657291cc3aeb083e",
+        "commit": "35d2041c79864d9fcb2023bfd9db286e139cad03",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-26.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-27",
@@ -1521,9 +2130,32 @@
       "plan_sha256": "32c11c3af04fc979804bf4ebac4439c4b66807b0bef9b7fe8cf30aab3476ebd4",
       "issue": {
         "number": 40,
-        "url": "https://github.com/HazelnutParadise/phego/issues/40"
+        "url": "https://github.com/HazelnutParadise/phego/issues/40",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/40#issuecomment-6469356520",
+          "id": 6469356520
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 87,
+        "url": "https://github.com/HazelnutParadise/phego/pull/87",
+        "head_sha": "a541f7361992a5aa93fe6c1a7833ea5dc8a115a2",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-27",
+        "branch": "codex/w-27-implementation",
+        "source_validation_commit": "d2751f7a7a460c7956b897497fcf06569b946456",
+        "commit": "a541f7361992a5aa93fe6c1a7833ea5dc8a115a2",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-27.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-28",
@@ -1562,9 +2194,32 @@
       "plan_sha256": "1f23d7f024af1db0fa1708873c0f6e3e3538caeb4e325ea6ea19fc091122a33c",
       "issue": {
         "number": 44,
-        "url": "https://github.com/HazelnutParadise/phego/issues/44"
+        "url": "https://github.com/HazelnutParadise/phego/issues/44",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/44#issuecomment-6469356934",
+          "id": 6469356934
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 88,
+        "url": "https://github.com/HazelnutParadise/phego/pull/88",
+        "head_sha": "26e7ed31dcb551f4153f99c4c587714fccd8f46f",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-28",
+        "branch": "codex/w-28-implementation",
+        "source_validation_commit": "2d6a0f0fd81803739592405f3d32139b11e8f12f",
+        "commit": "26e7ed31dcb551f4153f99c4c587714fccd8f46f",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-28.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-29",
@@ -1606,9 +2261,32 @@
       "plan_sha256": "915c71a576f39a9423cd370c873e7499d6ca86edbca94f7095ab169a2f17a0f5",
       "issue": {
         "number": 26,
-        "url": "https://github.com/HazelnutParadise/phego/issues/26"
+        "url": "https://github.com/HazelnutParadise/phego/issues/26",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/26#issuecomment-6469357354",
+          "id": 6469357354
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 89,
+        "url": "https://github.com/HazelnutParadise/phego/pull/89",
+        "head_sha": "6f26000868d190729b5e8b4102d3583de63c091b",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-29",
+        "branch": "codex/w-29-implementation",
+        "source_validation_commit": "2f9ef2f98ecf78b5f24895bd82788f3b581c7455",
+        "commit": "6f26000868d190729b5e8b4102d3583de63c091b",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-29.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-30",
@@ -1643,9 +2321,32 @@
       "plan_sha256": "aeb98125b51d6607f0fabab252d7b52d6b1cb64a9f48859ba03c6540e1c4c451",
       "issue": {
         "number": 31,
-        "url": "https://github.com/HazelnutParadise/phego/issues/31"
+        "url": "https://github.com/HazelnutParadise/phego/issues/31",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/31#issuecomment-6469357769",
+          "id": 6469357769
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 90,
+        "url": "https://github.com/HazelnutParadise/phego/pull/90",
+        "head_sha": "c3ab49ce8ffec3a18dea140b237b137e5d24c4a8",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-30",
+        "branch": "codex/w-30-implementation",
+        "source_validation_commit": "6fff5bb13e6f0388dbf1576b0acea485d6e465ce",
+        "commit": "c3ab49ce8ffec3a18dea140b237b137e5d24c4a8",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-30.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-31",
@@ -1683,9 +2384,32 @@
       "plan_sha256": "c3c81c355c9b37d15b92c5c33390d1f9fe19c31171e335e4adb6ba4fc290ebe9",
       "issue": {
         "number": 35,
-        "url": "https://github.com/HazelnutParadise/phego/issues/35"
+        "url": "https://github.com/HazelnutParadise/phego/issues/35",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/35#issuecomment-6469419696",
+          "id": 6469419696
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 91,
+        "url": "https://github.com/HazelnutParadise/phego/pull/91",
+        "head_sha": "c4e22281d369b7b6c9ea8e6e5558cf6968e85c61",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-31",
+        "branch": "codex/w-31-implementation",
+        "source_validation_commit": "43dd6b49afc2f782a43b4751e5e31a30db08f207",
+        "commit": "c4e22281d369b7b6c9ea8e6e5558cf6968e85c61",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-31.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-32",
@@ -1726,9 +2450,32 @@
       "plan_sha256": "56fb0967bac190ea539636912a25f3d76dc39041238bdef471097b12131f745d",
       "issue": {
         "number": 36,
-        "url": "https://github.com/HazelnutParadise/phego/issues/36"
+        "url": "https://github.com/HazelnutParadise/phego/issues/36",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/36#issuecomment-6469420113",
+          "id": 6469420113
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 92,
+        "url": "https://github.com/HazelnutParadise/phego/pull/92",
+        "head_sha": "7cf99699bc9b49157845e84a6924af2c0d9acce5",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-32",
+        "branch": "codex/w-32-implementation",
+        "source_validation_commit": "b6ab43a8381bcdb89fa66c6eb950c6b1c2914169",
+        "commit": "7cf99699bc9b49157845e84a6924af2c0d9acce5",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-32.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-33",
@@ -1757,9 +2504,32 @@
       "plan_sha256": "0ffd02394ea8babc55c08cf2359e03365f0aeb03d9e6b84c7d3ea395908366f1",
       "issue": {
         "number": 37,
-        "url": "https://github.com/HazelnutParadise/phego/issues/37"
+        "url": "https://github.com/HazelnutParadise/phego/issues/37",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/37#issuecomment-6469420539",
+          "id": 6469420539
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 93,
+        "url": "https://github.com/HazelnutParadise/phego/pull/93",
+        "head_sha": "0e315a1a3dd2899f24a3a5249e76cc3ded5021fa",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-33",
+        "branch": "codex/w-33-implementation",
+        "source_validation_commit": "1d78fc555829d743aa25601a84ef88a30fb0e009",
+        "commit": "0e315a1a3dd2899f24a3a5249e76cc3ded5021fa",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-33.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-34",
@@ -1812,9 +2582,32 @@
       "plan_sha256": "2d571c683d607077ab4646ed16d2fcdb0c39dcdae3679c865888979951bcd98c",
       "issue": {
         "number": 46,
-        "url": "https://github.com/HazelnutParadise/phego/issues/46"
+        "url": "https://github.com/HazelnutParadise/phego/issues/46",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/46#issuecomment-6469420904",
+          "id": 6469420904
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 94,
+        "url": "https://github.com/HazelnutParadise/phego/pull/94",
+        "head_sha": "fc0d459fae69adfd59e47ccb916ed75083f33998",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-34",
+        "branch": "codex/w-34-implementation",
+        "source_validation_commit": "9cadab5a6f6cbdc2a25e1250bd99587285aba8e3",
+        "commit": "fc0d459fae69adfd59e47ccb916ed75083f33998",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-34.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-35",
@@ -1843,7 +2636,8 @@
         "REQ-039",
         "REQ-041",
         "REQ-047",
-        "REQ-068"
+        "REQ-068",
+        "REQ-101"
       ],
       "tests": [
         "T-003",
@@ -1863,7 +2657,9 @@
         "T-093",
         "T-094",
         "T-135",
-        "T-136"
+        "T-136",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [
         "T-003",
@@ -1878,9 +2674,32 @@
       "plan_sha256": "9fc0eef36aded0eb4489c87bcf8ac73b9f8ff0e9ccd28d724aaac6119854498e",
       "issue": {
         "number": 41,
-        "url": "https://github.com/HazelnutParadise/phego/issues/41"
+        "url": "https://github.com/HazelnutParadise/phego/issues/41",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/41#issuecomment-6469421273",
+          "id": 6469421273
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 95,
+        "url": "https://github.com/HazelnutParadise/phego/pull/95",
+        "head_sha": "b91d3f39132cd1188a7c59358f527be011795c45",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-35",
+        "branch": "codex/w-35-implementation",
+        "source_validation_commit": "ac550ac934f04de33ce20298a1d96ce16ce1a74b",
+        "commit": "b91d3f39132cd1188a7c59358f527be011795c45",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-35.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-36",
@@ -1927,9 +2746,32 @@
       "plan_sha256": "30cad246358f0550bd363014f47d83ca2e78f51114781e45ef3f843d3eebecd0",
       "issue": {
         "number": 45,
-        "url": "https://github.com/HazelnutParadise/phego/issues/45"
+        "url": "https://github.com/HazelnutParadise/phego/issues/45",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/45#issuecomment-6469421617",
+          "id": 6469421617
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 96,
+        "url": "https://github.com/HazelnutParadise/phego/pull/96",
+        "head_sha": "67afa240189c7b0531b7029d85b5a5b34ab29a23",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-36",
+        "branch": "codex/w-36-implementation",
+        "source_validation_commit": "9adc8e359c1d8affef3aa4ab5374e2564ec7a5e9",
+        "commit": "67afa240189c7b0531b7029d85b5a5b34ab29a23",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-36.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-37",
@@ -1970,9 +2812,32 @@
       "plan_sha256": "178314a6650acd77441e4ff8ebd3346efba69f3d3560a4a609d0e227895a39e0",
       "issue": {
         "number": 27,
-        "url": "https://github.com/HazelnutParadise/phego/issues/27"
+        "url": "https://github.com/HazelnutParadise/phego/issues/27",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/27#issuecomment-6469421969",
+          "id": 6469421969
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 97,
+        "url": "https://github.com/HazelnutParadise/phego/pull/97",
+        "head_sha": "4410207c31fac453bb0e159b6e67eb4f37f63248",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-37",
+        "branch": "codex/w-37-implementation",
+        "source_validation_commit": "c5b5e317b0828a0de7160760831afd5196f1e4da",
+        "commit": "4410207c31fac453bb0e159b6e67eb4f37f63248",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-37.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-38",
@@ -2021,9 +2886,32 @@
       "plan_sha256": "4e2f9277e52484c0eba5c6ff90fb16ebb83da8794f5c1fb8f78c0cd198612af8",
       "issue": {
         "number": 38,
-        "url": "https://github.com/HazelnutParadise/phego/issues/38"
+        "url": "https://github.com/HazelnutParadise/phego/issues/38",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/38#issuecomment-6469423665",
+          "id": 6469423665
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 98,
+        "url": "https://github.com/HazelnutParadise/phego/pull/98",
+        "head_sha": "daf2739bc4f72d16304ffbf6d7e31281905a0f8c",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-38",
+        "branch": "codex/w-38-implementation",
+        "source_validation_commit": "2697a926c3c28a75d559e0fdbbe0af495b274686",
+        "commit": "daf2739bc4f72d16304ffbf6d7e31281905a0f8c",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-38.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-39",
@@ -2096,9 +2984,32 @@
       "plan_sha256": "0acc06aec05b422c22e87a664e2356ec6af29e980a89aad9f01b3ecb305eb088",
       "issue": {
         "number": 42,
-        "url": "https://github.com/HazelnutParadise/phego/issues/42"
+        "url": "https://github.com/HazelnutParadise/phego/issues/42",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/42#issuecomment-6469423969",
+          "id": 6469423969
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 99,
+        "url": "https://github.com/HazelnutParadise/phego/pull/99",
+        "head_sha": "7cbb910432994e65db0af7a6a99bb9a72ce24e92",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-39",
+        "branch": "codex/w-39-implementation",
+        "source_validation_commit": "49279a536fffa54e20cf7aba828bf0a46cd52427",
+        "commit": "7cbb910432994e65db0af7a6a99bb9a72ce24e92",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-39.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-40",
@@ -2163,9 +3074,32 @@
       "plan_sha256": "03ff1487861779e0446ba0d8780e9d34002e8b300be4edd168c681e04fc82d18",
       "issue": {
         "number": 47,
-        "url": "https://github.com/HazelnutParadise/phego/issues/47"
+        "url": "https://github.com/HazelnutParadise/phego/issues/47",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/47#issuecomment-6469424291",
+          "id": 6469424291
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 100,
+        "url": "https://github.com/HazelnutParadise/phego/pull/100",
+        "head_sha": "2efe6d1908bb2248876cc1e6c2c750de312d668a",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-40",
+        "branch": "codex/w-40-implementation",
+        "source_validation_commit": "8a6a5d110f263fe689283055a0776a5246d01da1",
+        "commit": "2efe6d1908bb2248876cc1e6c2c750de312d668a",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-40.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-41",
@@ -2326,9 +3260,32 @@
       "plan_sha256": "282ad37a940ecfdbcbaf6d877d35f0e52eb9af6b47954526c88470bd122958c7",
       "issue": {
         "number": 48,
-        "url": "https://github.com/HazelnutParadise/phego/issues/48"
+        "url": "https://github.com/HazelnutParadise/phego/issues/48",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/48#issuecomment-6469424612",
+          "id": 6469424612
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 101,
+        "url": "https://github.com/HazelnutParadise/phego/pull/101",
+        "head_sha": "f5f683ccaac03f58641948bf8b487f712c8f319b",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-41",
+        "branch": "codex/w-41-implementation",
+        "source_validation_commit": "72e7e404a4dbf141298b0726fdc4f7d4db629645",
+        "commit": "f5f683ccaac03f58641948bf8b487f712c8f319b",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-41.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-42",
@@ -2365,7 +3322,8 @@
         "REQ-073",
         "REQ-075",
         "REQ-076",
-        "REQ-079"
+        "REQ-079",
+        "REQ-101"
       ],
       "tests": [
         "T-035",
@@ -2393,7 +3351,9 @@
         "T-151",
         "T-152",
         "T-157",
-        "T-158"
+        "T-158",
+        "T-201",
+        "T-202"
       ],
       "acceptance_owner_for": [
         "T-035",
@@ -2417,16 +3377,41 @@
         "T-145",
         "T-146",
         "T-149",
-        "T-150"
+        "T-150",
+        "T-201",
+        "T-202"
       ],
       "implementation_status": "not_started",
       "product_test_status": "not_run",
       "plan_sha256": "b947e890339dabe7be658218d70e325276d6d75e24583f4a77980dc47f295cb9",
       "issue": {
         "number": 54,
-        "url": "https://github.com/HazelnutParadise/phego/issues/54"
+        "url": "https://github.com/HazelnutParadise/phego/issues/54",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/54#issuecomment-6469425050",
+          "id": 6469425050
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 102,
+        "url": "https://github.com/HazelnutParadise/phego/pull/102",
+        "head_sha": "21df3dff41a9100c931b56ffd463d0b7257f5045",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-42",
+        "branch": "codex/w-42-implementation",
+        "source_validation_commit": "cc58ff415775ed033cf22efa09e65ba95a83c9d4",
+        "commit": "21df3dff41a9100c931b56ffd463d0b7257f5045",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-42.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-43",
@@ -2480,9 +3465,32 @@
       "plan_sha256": "b03a29ed6ab20d9ab63af2eabfc2a47226922a536cc7a3115e917300e395f90c",
       "issue": {
         "number": 49,
-        "url": "https://github.com/HazelnutParadise/phego/issues/49"
+        "url": "https://github.com/HazelnutParadise/phego/issues/49",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/49#issuecomment-6469425503",
+          "id": 6469425503
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 103,
+        "url": "https://github.com/HazelnutParadise/phego/pull/103",
+        "head_sha": "ce134fd40c60b00a10f1670ca6201c9d22f2e0d8",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-43",
+        "branch": "codex/w-43-implementation",
+        "source_validation_commit": "e49f2e640edebfa355482dcd64f30e7afffd05d2",
+        "commit": "ce134fd40c60b00a10f1670ca6201c9d22f2e0d8",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-43.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-44",
@@ -2570,9 +3578,32 @@
       "plan_sha256": "8eb74d99b711ac4ad5284bb3da7d4773e9f27cf9ab875cdb364fd4000669a71d",
       "issue": {
         "number": 59,
-        "url": "https://github.com/HazelnutParadise/phego/issues/59"
+        "url": "https://github.com/HazelnutParadise/phego/issues/59",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/59#issuecomment-6469425903",
+          "id": 6469425903
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 104,
+        "url": "https://github.com/HazelnutParadise/phego/pull/104",
+        "head_sha": "f0bd3e478d72c5864c09cd5d3673c7106c2a8e5b",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-44",
+        "branch": "codex/w-44-implementation",
+        "source_validation_commit": "155415f0efda774126f156663671b69b7d7aa371",
+        "commit": "f0bd3e478d72c5864c09cd5d3673c7106c2a8e5b",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-44.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-45",
@@ -2611,9 +3642,32 @@
       "plan_sha256": "16a7de96fb7479c07dff8f093f711aca008261cfe4b919a325bbf2fb2d23a2bb",
       "issue": {
         "number": 15,
-        "url": "https://github.com/HazelnutParadise/phego/issues/15"
+        "url": "https://github.com/HazelnutParadise/phego/issues/15",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/15#issuecomment-6469426280",
+          "id": 6469426280
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 105,
+        "url": "https://github.com/HazelnutParadise/phego/pull/105",
+        "head_sha": "79a19382e41510a177d3e1294719985527fc46c8",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-45",
+        "branch": "codex/w-45-implementation",
+        "source_validation_commit": "687fd449bd15ed567e57d74b174636ccda999610",
+        "commit": "79a19382e41510a177d3e1294719985527fc46c8",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-45.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-46",
@@ -2652,9 +3706,32 @@
       "plan_sha256": "1941cef39ba3398cdebbb5335f40fdb4c9ed6c65170da29360db2c1632b14afe",
       "issue": {
         "number": 39,
-        "url": "https://github.com/HazelnutParadise/phego/issues/39"
+        "url": "https://github.com/HazelnutParadise/phego/issues/39",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/39#issuecomment-6469612916",
+          "id": 6469612916
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 106,
+        "url": "https://github.com/HazelnutParadise/phego/pull/106",
+        "head_sha": "8e580069509a3a2bd8fccbbda540f99f537eb831",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-46",
+        "branch": "codex/w-46-implementation",
+        "source_validation_commit": "931a0378632113a16225b91eb8eefdfec7852bec",
+        "commit": "8e580069509a3a2bd8fccbbda540f99f537eb831",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-46.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-47",
@@ -2684,9 +3761,32 @@
       "plan_sha256": "3b7c27681b68204d501ac135bc09d6a8f61a7c29c4184645ea75ce559eb70ca7",
       "issue": {
         "number": 55,
-        "url": "https://github.com/HazelnutParadise/phego/issues/55"
+        "url": "https://github.com/HazelnutParadise/phego/issues/55",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/55#issuecomment-6469613334",
+          "id": 6469613334
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 107,
+        "url": "https://github.com/HazelnutParadise/phego/pull/107",
+        "head_sha": "a8c544676f1c0b73101cd47506bc761fc6340f67",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-47",
+        "branch": "codex/w-47-implementation",
+        "source_validation_commit": "193d68ac1c8f36b012d4599685542f19fee2dded",
+        "commit": "a8c544676f1c0b73101cd47506bc761fc6340f67",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-47.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-48",
@@ -2719,9 +3819,32 @@
       "plan_sha256": "5f96de01fe8dd29184222c496c2547288063acdd17cfa590d6848b205d8a5662",
       "issue": {
         "number": 56,
-        "url": "https://github.com/HazelnutParadise/phego/issues/56"
+        "url": "https://github.com/HazelnutParadise/phego/issues/56",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/56#issuecomment-6469613786",
+          "id": 6469613786
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 108,
+        "url": "https://github.com/HazelnutParadise/phego/pull/108",
+        "head_sha": "7223b14db07aaac9e8eda9de8b1d0672f079114f",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-48",
+        "branch": "codex/w-48-implementation",
+        "source_validation_commit": "f679f60f6991fbea35650f401f2654e8eaea1d93",
+        "commit": "7223b14db07aaac9e8eda9de8b1d0672f079114f",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-48.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-49",
@@ -2765,9 +3888,32 @@
       "plan_sha256": "24bb4f6d7268f794eee06e3aac8b20373c461b61cefbafbbe5f28e8857ebd00c",
       "issue": {
         "number": 6,
-        "url": "https://github.com/HazelnutParadise/phego/issues/6"
+        "url": "https://github.com/HazelnutParadise/phego/issues/6",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/6#issuecomment-6469614214",
+          "id": 6469614214
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 109,
+        "url": "https://github.com/HazelnutParadise/phego/pull/109",
+        "head_sha": "d22ab1c8bb9d0c461034584d73865221dff80a0f",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-49",
+        "branch": "codex/w-49-implementation",
+        "source_validation_commit": "52f3e124f13ed1ba26187290512969bf0f2aa3f5",
+        "commit": "d22ab1c8bb9d0c461034584d73865221dff80a0f",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-49.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-50",
@@ -2802,9 +3948,32 @@
       "plan_sha256": "c0259540f5d3f9da5238dfe1d86974344f3361189e041592a6ca04258aaeb4fe",
       "issue": {
         "number": 28,
-        "url": "https://github.com/HazelnutParadise/phego/issues/28"
+        "url": "https://github.com/HazelnutParadise/phego/issues/28",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/28#issuecomment-6469614626",
+          "id": 6469614626
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 110,
+        "url": "https://github.com/HazelnutParadise/phego/pull/110",
+        "head_sha": "1769b09d3fcc77dd636746e0548596a95463f698",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-50",
+        "branch": "codex/w-50-implementation",
+        "source_validation_commit": "812e4be6ad83db8bd056d3db11f2aa3dec0df811",
+        "commit": "1769b09d3fcc77dd636746e0548596a95463f698",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-50.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-51",
@@ -2847,9 +4016,32 @@
       "plan_sha256": "0e05366a114f2d20b998487254657753023ba501af5f7db3a2d48664045fa80a",
       "issue": {
         "number": 32,
-        "url": "https://github.com/HazelnutParadise/phego/issues/32"
+        "url": "https://github.com/HazelnutParadise/phego/issues/32",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/32#issuecomment-6469614959",
+          "id": 6469614959
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 111,
+        "url": "https://github.com/HazelnutParadise/phego/pull/111",
+        "head_sha": "7117692b5872e5b0ed1601e86a0be0e0f828f44d",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-51",
+        "branch": "codex/w-51-implementation",
+        "source_validation_commit": "b0648e898e1afb29f839e922e97ec925e3cc5596",
+        "commit": "7117692b5872e5b0ed1601e86a0be0e0f828f44d",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-51.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-52",
@@ -2896,9 +4088,32 @@
       "plan_sha256": "9223ae0b97aaa7827fc8a17c83503b58ca77a4d51df87d4a7b7bd034214210ab",
       "issue": {
         "number": 43,
-        "url": "https://github.com/HazelnutParadise/phego/issues/43"
+        "url": "https://github.com/HazelnutParadise/phego/issues/43",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/43#issuecomment-6469615311",
+          "id": 6469615311
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 112,
+        "url": "https://github.com/HazelnutParadise/phego/pull/112",
+        "head_sha": "d28f724d7f0553c6e2478dd20b5cd47846223936",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-52",
+        "branch": "codex/w-52-implementation",
+        "source_validation_commit": "fdf22208fc68133f49f734ac0a489ef8cff72b69",
+        "commit": "d28f724d7f0553c6e2478dd20b5cd47846223936",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-52.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-53",
@@ -2949,9 +4164,32 @@
       "plan_sha256": "67476251387cb8f46f8bbc7f4e4b9b9ea5d8c3b5965cba42ab5e31faa5bf3618",
       "issue": {
         "number": 50,
-        "url": "https://github.com/HazelnutParadise/phego/issues/50"
+        "url": "https://github.com/HazelnutParadise/phego/issues/50",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/50#issuecomment-6469615710",
+          "id": 6469615710
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 113,
+        "url": "https://github.com/HazelnutParadise/phego/pull/113",
+        "head_sha": "a123014773fbeae0301097b2a74682fa817f354f",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-53",
+        "branch": "codex/w-53-implementation",
+        "source_validation_commit": "c8a39ee760c6b956f9b835c6fefab67df04f25c5",
+        "commit": "a123014773fbeae0301097b2a74682fa817f354f",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-53.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-54",
@@ -2989,9 +4227,32 @@
       "plan_sha256": "9382760d09349b80b4c05a3b4cae478d9efc2977a937e6266cfd495de9d7c2dc",
       "issue": {
         "number": 7,
-        "url": "https://github.com/HazelnutParadise/phego/issues/7"
+        "url": "https://github.com/HazelnutParadise/phego/issues/7",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/7#issuecomment-6469616107",
+          "id": 6469616107
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 114,
+        "url": "https://github.com/HazelnutParadise/phego/pull/114",
+        "head_sha": "2c74bda007f279a77db37627c5d4097f2e995dc3",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-54",
+        "branch": "codex/w-54-implementation",
+        "source_validation_commit": "c29af5b55599e267b56c37707674bf0e4be9a0c7",
+        "commit": "2c74bda007f279a77db37627c5d4097f2e995dc3",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-54.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-55",
@@ -3041,9 +4302,32 @@
       "plan_sha256": "c9e45190945a2fae378065c7b3b96577419fefefeab253cadee4dd788a313848",
       "issue": {
         "number": 57,
-        "url": "https://github.com/HazelnutParadise/phego/issues/57"
+        "url": "https://github.com/HazelnutParadise/phego/issues/57",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/57#issuecomment-6469616494",
+          "id": 6469616494
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 115,
+        "url": "https://github.com/HazelnutParadise/phego/pull/115",
+        "head_sha": "c3d91ddfcc1d5796ef31433b22b320f31b30d291",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-55",
+        "branch": "codex/w-55-implementation",
+        "source_validation_commit": "be1509e69bb2b31d05b6ebbd3f38c60e684e5b91",
+        "commit": "c3d91ddfcc1d5796ef31433b22b320f31b30d291",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-55.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-56",
@@ -3080,9 +4364,32 @@
       "plan_sha256": "17f5ff4bc58adfc6645f894e09535eb2cd58d9c1c154720c5f2c8e836875f08c",
       "issue": {
         "number": 51,
-        "url": "https://github.com/HazelnutParadise/phego/issues/51"
+        "url": "https://github.com/HazelnutParadise/phego/issues/51",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/51#issuecomment-6469616873",
+          "id": 6469616873
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 116,
+        "url": "https://github.com/HazelnutParadise/phego/pull/116",
+        "head_sha": "3939dfe604ab4cb9b87f5d1405e3c236b1b967d3",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-56",
+        "branch": "codex/w-56-implementation",
+        "source_validation_commit": "54580de13ac5fc194103d3e7041dfa82c16dba66",
+        "commit": "3939dfe604ab4cb9b87f5d1405e3c236b1b967d3",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-56.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-57",
@@ -3119,9 +4426,32 @@
       "plan_sha256": "cf1e40bc38f12c5851195124dea10234d83d1abb514246253ea42eac1655556f",
       "issue": {
         "number": 52,
-        "url": "https://github.com/HazelnutParadise/phego/issues/52"
+        "url": "https://github.com/HazelnutParadise/phego/issues/52",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/52#issuecomment-6469617230",
+          "id": 6469617230
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 117,
+        "url": "https://github.com/HazelnutParadise/phego/pull/117",
+        "head_sha": "2652f8415323cb9e9f5dadd8ed54a702687f3982",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-57",
+        "branch": "codex/w-57-implementation",
+        "source_validation_commit": "c9608feb46620d6caa8870c914680ae7ab9a433d",
+        "commit": "2652f8415323cb9e9f5dadd8ed54a702687f3982",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-57.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-58",
@@ -3162,9 +4492,32 @@
       "plan_sha256": "e91ab7946a3b93cbe2ad5902fcb425e29f00144e63cb15d48dd687eb5bb49173",
       "issue": {
         "number": 53,
-        "url": "https://github.com/HazelnutParadise/phego/issues/53"
+        "url": "https://github.com/HazelnutParadise/phego/issues/53",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/53#issuecomment-6469617605",
+          "id": 6469617605
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 118,
+        "url": "https://github.com/HazelnutParadise/phego/pull/118",
+        "head_sha": "2b5d537183b50bb1fdbffdb7cb4926183c0f40ee",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-58",
+        "branch": "codex/w-58-implementation",
+        "source_validation_commit": "a08373456073c5f18ce046dc9ab44b150a72a8bd",
+        "commit": "2b5d537183b50bb1fdbffdb7cb4926183c0f40ee",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-58.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-59",
@@ -3219,9 +4572,32 @@
       "plan_sha256": "e2ff894701dc86a4213acf50260696c24f2aa922fcc2442748fd8dc70aceac42",
       "issue": {
         "number": 58,
-        "url": "https://github.com/HazelnutParadise/phego/issues/58"
+        "url": "https://github.com/HazelnutParadise/phego/issues/58",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/58#issuecomment-6469617978",
+          "id": 6469617978
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 119,
+        "url": "https://github.com/HazelnutParadise/phego/pull/119",
+        "head_sha": "6024917d8d36f7f2d651414fcd0356568b6f2aca",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-59",
+        "branch": "codex/w-59-implementation",
+        "source_validation_commit": "428bd74c7a650787c58969a0838ee50566f32cda",
+        "commit": "6024917d8d36f7f2d651414fcd0356568b6f2aca",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-59.json",
+        "status": "pass"
+      }
     },
     {
       "id": "W-60",
@@ -3298,9 +4674,37 @@
       "plan_sha256": "1485779376821d6d2da9961a70d8251b0841c8838a55adf59623a561a37eb39b",
       "issue": {
         "number": 60,
-        "url": "https://github.com/HazelnutParadise/phego/issues/60"
+        "url": "https://github.com/HazelnutParadise/phego/issues/60",
+        "tracking_comment": {
+          "url": "https://github.com/HazelnutParadise/phego/issues/60#issuecomment-6469618373",
+          "id": 6469618373
+        }
       },
-      "pull_request": null
+      "pull_request": {
+        "number": 120,
+        "url": "https://github.com/HazelnutParadise/phego/pull/120",
+        "head_sha": "0ade6a63fd955b9703ad15f5779aae0114e26bff",
+        "draft": true,
+        "state": "open",
+        "check_count": null,
+        "mergeable": "not_queried",
+        "checks_status": "not_queried"
+      },
+      "planning_validation": {
+        "id": "W-60",
+        "branch": "codex/w-60-implementation",
+        "source_validation_commit": "bc6e769b0ee52cee8130cab4ab1637bd93fffaf6",
+        "commit": "0ade6a63fd955b9703ad15f5779aae0114e26bff",
+        "document_checks": 33,
+        "tool_tests": 11,
+        "evidence_path": "docs/implementation/evidence/W-60.json",
+        "status": "pass"
+      }
     }
-  ]
+  ],
+  "baseline_counts": {
+    "requirements": 100,
+    "acceptance_scenarios": 200,
+    "source_commit": "6e2e701174a2f8d7afb0a884305007923684f1a9"
+  }
 }

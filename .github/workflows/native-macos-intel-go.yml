@@ -1,0 +1,149 @@
+name: Native macOS Intel reference Go
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/native-macos-intel-go.yml'
+      - 'compat.lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos-intel-go:
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify runner and locked inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/phego-macos-intel-go-evidence"
+          mkdir "$evidence"
+          test "$(uname -m)" = x86_64
+          uname -a > "$evidence/kernel.txt"
+          sw_vers > "$evidence/os.txt"
+          sysctl -n machdep.cpu.brand_string > "$evidence/cpu.txt"
+          printf 'ImageOS=%s\nImageVersion=%s\nRunnerOS=%s\nRunnerArch=%s\n' "${ImageOS:-}" "${ImageVersion:-}" "${RUNNER_OS:-}" "${RUNNER_ARCH:-}" > "$evidence/runner.txt"
+          git rev-parse HEAD > "$evidence/commit.txt"
+          shasum -a 256 compat.lock.json > "$evidence/lock-sha256.txt"
+          python3 - <<'PYLOCK'
+          import json
+          with open('compat.lock.json', encoding='utf-8') as f:
+              lock = json.load(f)
+          go = lock['go']
+          assert go['version'] == '1.27.3'
+          src = go['source_build']
+          assert src['version'] == go['version']
+          assert src['archive_url'] == 'https://go.dev/dl/go1.27.3.src.tar.gz'
+          assert src['archive_sha256'] == '6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb'
+          entries = [x for x in go['additional_archives'] if x['platform'] == 'darwin/amd64']
+          assert len(entries) == 1
+          assert entries[0]['archive_url'] == 'https://go.dev/dl/go1.27.3.darwin-amd64.tar.gz'
+          assert entries[0]['archive_sha256'] == 'b6f8e931e4ab497fcde6da8ae4499a58f9d258e55c8a80824a516eae5950a750'
+          PYLOCK
+      - name: Download and verify locked archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 https://go.dev/dl/go1.27.3.darwin-amd64.tar.gz -o "$RUNNER_TEMP/phego-go-bootstrap.tar.gz"
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 https://go.dev/dl/go1.27.3.src.tar.gz -o "$RUNNER_TEMP/phego-go-source.tar.gz"
+          test "$(shasum -a 256 "$RUNNER_TEMP/phego-go-bootstrap.tar.gz" | cut -d ' ' -f 1)" = b6f8e931e4ab497fcde6da8ae4499a58f9d258e55c8a80824a516eae5950a750
+          test "$(shasum -a 256 "$RUNNER_TEMP/phego-go-source.tar.gz" | cut -d ' ' -f 1)" = 6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb
+      - name: Rebuild and execute twice in restricted sandboxes
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/phego-macos-intel-go-evidence"
+          root="$RUNNER_TEMP/phego-macos-intel-go"
+          mkdir "$root"
+          cat > "$root/restrict.sb" <<'SB'
+          (version 1)
+          (allow default)
+          (deny network*)
+          (deny file-write*)
+          (allow file-write* (subpath (param "PROBE_DIR")) (literal "/dev/null"))
+          SB
+          for n in 1 2; do
+            run="$root/run$n"
+            mkdir -p "$run/source" "$run/bootstrap" "$run/home" "$run/cache" "$run/tmp" "$run/probe"
+            cat > "$run/check-sandbox.py" <<'PYPROBE'
+          import errno, os, socket, sys
+          try:
+              with socket.socket() as sock:
+                  sock.connect(('127.0.0.1', 9))
+          except PermissionError as exc:
+              if exc.errno != errno.EPERM:
+                  raise
+          else:
+              raise SystemExit('network was not denied')
+          try:
+              fd = os.open(sys.argv[1], os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+          except PermissionError as exc:
+              if exc.errno != errno.EPERM:
+                  raise
+          else:
+              os.close(fd)
+              raise SystemExit('outside write was not denied')
+          print('network and outside write denied')
+          PYPROBE
+            set +e
+            env -i PATH=/usr/bin:/bin HOME="$run/home" TMPDIR="$run/tmp" /usr/bin/sandbox-exec -f "$root/restrict.sb" -D PROBE_DIR="$run" /usr/bin/python3 "$run/check-sandbox.py" "$root/outside-$n" > "$evidence/sandbox-$n.log" 2>&1
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$evidence/sandbox-$n-exit.txt"
+            if test "$code" -ne 0; then echo "sandbox check $n failed" >&2; exit 1; fi
+            tar -xzf "$RUNNER_TEMP/phego-go-bootstrap.tar.gz" -C "$run/bootstrap"
+            tar -xzf "$RUNNER_TEMP/phego-go-source.tar.gz" -C "$run/source"
+            printf 'module example.com/phego/source-probe\n\ngo 1.27\n' > "$run/probe/go.mod"
+            cat > "$run/probe/main.go" <<'GO'
+          package main
+          import ("fmt"; "runtime")
+          func main() { fmt.Printf("probe %s %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH) }
+          GO
+            set +e
+            (cd "$run/source/go/src" && env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$run/home" TMPDIR="$run/tmp" GOCACHE="$run/cache" GOROOT_BOOTSTRAP="$run/bootstrap/go" CGO_ENABLED=0 GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOENV=off GOWORK=off /usr/bin/sandbox-exec -f "$root/restrict.sb" -D PROBE_DIR="$run" ./make.bash) > "$evidence/build-$n.log" 2>&1
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$evidence/build-$n-exit.txt"
+            if test "$code" -ne 0; then echo "source build $n failed" >&2; exit 1; fi
+            go="$run/source/go/bin/go"
+            set +e
+            env -i PATH=/usr/bin:/bin HOME="$run/home" TMPDIR="$run/tmp" /usr/bin/sandbox-exec -f "$root/restrict.sb" -D PROBE_DIR="$run" "$go" version > "$evidence/version-$n.txt" 2>&1
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$evidence/version-$n-exit.txt"
+            test "$code" -eq 0
+            test "$(cat "$evidence/version-$n.txt")" = 'go version go1.27.3 darwin/amd64'
+            set +e
+            (cd "$run/probe" && env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$run/home" TMPDIR="$run/tmp" GOCACHE="$run/cache" CGO_ENABLED=0 GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOENV=off GOWORK=off /usr/bin/sandbox-exec -f "$root/restrict.sb" -D PROBE_DIR="$run" "$go" build -trimpath -buildvcs=false -o "$run/probe-bin" .) > "$evidence/probe-build-$n.log" 2>&1
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$evidence/probe-build-$n-exit.txt"
+            if test "$code" -ne 0; then echo "probe build $n failed" >&2; exit 1; fi
+            set +e
+            env -i PATH=/usr/bin:/bin HOME="$run/home" TMPDIR="$run/tmp" /usr/bin/sandbox-exec -f "$root/restrict.sb" -D PROBE_DIR="$run" "$run/probe-bin" > "$evidence/probe-run-$n.log" 2>&1
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$evidence/probe-run-$n-exit.txt"
+            test "$code" -eq 0
+            test "$(cat "$evidence/probe-run-$n.log")" = 'probe go1.27.3 darwin/amd64'
+            shasum -a 256 "$go" | cut -d ' ' -f 1 > "$evidence/go-$n.sha256"
+            shasum -a 256 "$run/probe-bin" | cut -d ' ' -f 1 > "$evidence/probe-$n.sha256"
+          done
+          cmp "$evidence/go-1.sha256" "$evidence/go-2.sha256"
+          cmp "$evidence/probe-1.sha256" "$evidence/probe-2.sha256"
+          echo 'Independent Go and probe binaries match' > "$evidence/comparison.txt"
+      - name: Retain raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-macos-intel-go-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/phego-macos-intel-go-evidence/
+          if-no-files-found: warn
+          retention-days: 30

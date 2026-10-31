@@ -1,0 +1,18 @@
+name: Documentation checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate planning records
+        run: python3 tools/validate_docs.py --no-write
+      - name: Test documentation validator
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
