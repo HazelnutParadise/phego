@@ -314,7 +314,6 @@ func (l *lexer) lexScripting() {
 			}
 		}
 		l.emit(TCloseTag, start)
-		l.states = l.states[:1]
 		l.setTop(stInitial)
 		return
 	case c == '#' && l.peek(1) == '[':
@@ -932,7 +931,7 @@ func (l *lexer) indexBraces(from int) {
 		l.braceEnds = make([]int, len(l.src))
 	}
 	type frame struct {
-		mode   byte // c: code, q: quoted body, h: heredoc/nowdoc body
+		mode   byte // c: code, q: quoted body, h: heredoc, i: inline HTML
 		quote  byte
 		marker string
 		nowdoc bool
@@ -942,6 +941,17 @@ func (l *lexer) indexBraces(from int) {
 	stack := make([]int, 0)
 	for i := from; i < len(l.src); {
 		f := frames[len(frames)-1]
+		if f.mode == 'i' {
+			if l.src[i] == '<' {
+				if _, n := l.openTagAt(i); n > 0 {
+					frames = frames[:len(frames)-1]
+					i += n
+					continue
+				}
+			}
+			i++
+			continue
+		}
 		if f.mode == 'h' {
 			if i == 0 || l.src[i-1] == '\n' || l.src[i-1] == '\r' {
 				j := i
@@ -1040,9 +1050,16 @@ func (l *lexer) indexBraces(from int) {
 					i = len(l.src)
 				}
 			} else if c == '#' && (i+1 >= len(l.src) || l.src[i+1] != '[') || c == '/' && i+1 < len(l.src) && l.src[i+1] == '/' {
-				for i < len(l.src) && l.src[i] != '\n' && l.src[i] != '\r' {
+				for i < len(l.src) && l.src[i] != '\n' && l.src[i] != '\r' && !(l.src[i] == '?' && i+1 < len(l.src) && l.src[i+1] == '>') {
 					i++
 				}
+			} else {
+				i++
+			}
+		case '?':
+			if i+1 < len(l.src) && l.src[i+1] == '>' {
+				frames = append(frames, frame{mode: 'i'})
+				i += 2
 			} else {
 				i++
 			}
