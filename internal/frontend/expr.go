@@ -369,6 +369,12 @@ func (p *parser) postfix(n *Node) *Node {
 	}
 	for {
 		t := p.peek()
+		if n.Kind == "literal" && !callable(n) && (t.Kind == '[' || t.Kind == TObjectOperator || t.Kind == TNullsafeObjectOperator || t.Kind == TDoubleColon) {
+			return n
+		}
+		if n.Kind == "magic_const" && t.Kind == TDoubleColon {
+			return n
+		}
 		switch t.Kind {
 		case '[':
 			p.next()
