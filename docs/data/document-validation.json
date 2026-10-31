@@ -324,6 +324,7 @@
     "docs/implementation/W-05.md": "6b8ed1567243b78b7e8beef70cc9b99eefa9d2627b8f94b8b4edc81648254bb8",
     "docs/implementation/W-06.md": "f38a31005df7f0092db1f906a0ef64642ff2954088e2765b2de876d596d2c0ac",
     "docs/implementation/W-07.md": "4923c87ad6b101195faf33fd2e46d60c2ade3a47aa072048500ed9190fb6680c",
+    "docs/implementation/W-08-values.md": "181886cb39cfa420b893bc7996efea96c5fee7589f4ed1a22ef4f0504f73ea17",
     "docs/implementation/W-08.md": "93574805a2a3755d5670e5f8d63ae12b46e483472d11181b766ec262cdb627d5",
     "docs/implementation/W-49.md": "aa977b7e0ef84993f836fe34ead6201c63ae615a54af98ea5028a588c993c7dd",
     "docs/implementation/W-54.md": "7b1cd67c1f755559e6fe8dd953649f39654046a4ae14309716b6021f72edfdca",
@@ -714,6 +715,8 @@
     "tools/w03-local-checks.json": "28c259e4f705890bc6b558a143f00a241f0b96ed73e28c507ab51d71e6fced95",
     "tools/w03_local_acceptance.py": "ade3703642eeec7c35a5bf5df17313d980832ec30d20da8619bfc577c300fb5b",
     "tools/w03_local_gate.py": "291d9c189942b867954640865e21e6cce2896152ca9b3349f7ea8dbc8f6c234c",
-    "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3"
+    "tools/work_status.py": "dba37ee50f4d8ccdcab8c894e5fef6fa5af2d32712973710e160eddc0c88ace3",
+    "value.go": "20cb57661ee5e76b46ead948b608f6ebb4df2a7e4b47915c2f08cec184feab6d",
+    "value_test.go": "95d6daf894baa7014844c25f7c178f33209657e3ebebc05fd28aef197002a063"
   }
 }
