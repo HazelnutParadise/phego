@@ -11,8 +11,9 @@ import (
 
 // TestParseMatchesReferenceCorpus compares acceptance and error lines with
 // PHP 8.5.12 token_get_all($src, TOKEN_PARSE) for the corpus described in
-// TestLexMatchesReferenceCorpus. The reference is parse-reference.jsonl,
-// produced by tests/frontend/parse_dump.php.
+// TestLexMatchesReferenceCorpus. PHEGO_PARSER_REFERENCE selects the reference
+// dump (default parse-reference.jsonl), produced by tests/frontend/parse_dump.php.
+// PHEGO_LEXER_INT_WIDTH selects the same integer width as the lexer test.
 // CompileError records ("other") are checks PHP performs while building the
 // tree; they must be rejected on the same line as well.
 func TestParseMatchesReferenceCorpus(t *testing.T) {
@@ -20,7 +21,14 @@ func TestParseMatchesReferenceCorpus(t *testing.T) {
 	if dir == "" {
 		t.Skip("PHEGO_LEXER_CORPUS is not set")
 	}
-	f, err := os.Open(filepath.Join(dir, "parse-reference.jsonl"))
+	reference, width := os.Getenv("PHEGO_PARSER_REFERENCE"), 32
+	if reference == "" {
+		reference = "parse-reference.jsonl"
+	}
+	if os.Getenv("PHEGO_LEXER_INT_WIDTH") == "64" {
+		width = 64
+	}
+	f, err := os.Open(filepath.Join(dir, reference))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +74,7 @@ func TestParseMatchesReferenceCorpus(t *testing.T) {
 			t.Fatal(err)
 		}
 		files++
-		_, perr := Parse(src, LexOptions{ShortOpenTag: true, IntWidth: 32, MaxBytes: 1 << 24})
+		_, perr := Parse(src, LexOptions{ShortOpenTag: true, IntWidth: width, MaxBytes: 1 << 24})
 		var se *SyntaxError
 		got := "ok"
 		gotLine := 0
