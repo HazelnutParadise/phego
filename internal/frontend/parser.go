@@ -149,6 +149,10 @@ func (p *parser) endStatement() {
 func (p *parser) unexpected() {
 	t := p.peek()
 	line := t.Line + countLines(t.Text)
+	if t.Kind == TEncapsedAndWhitespace && (strings.HasPrefix(t.Text, "'") || strings.HasPrefix(t.Text, "b'") || strings.HasPrefix(t.Text, "B'")) {
+		// An unterminated single-quoted string is reported where it starts.
+		line = t.Line
+	}
 	if t.Kind == TCloseTag {
 		// PHP's parser sees a close tag as ';' on the line where it starts.
 		line = t.Line
@@ -1229,6 +1233,9 @@ func (p *parser) traitUse() *Node {
 				method = node("method_ref", line, nil, p.identifier())
 			}
 			switch {
+			case p.at(TInsteadof) && method.Children[0] == nil:
+				// insteadof needs Trait::method on its left.
+				p.unexpected()
 			case p.accept(TInsteadof):
 				rules.Children = append(rules.Children, node("insteadof", line, method, p.nameList()))
 			case p.accept(TAs):
@@ -1240,7 +1247,8 @@ func (p *parser) traitUse() *Node {
 						p.checkModifiers(node("modifiers", mod.Line, mod), targetMethod)
 					}
 				}
-				if isIdentifier(p.peek().Kind) {
+				if isIdentifier(p.peek().Kind) && !(mod != nil && kindOfModifier(mod.Text) == TVar) {
+					// "as var" takes no alias name.
 					alias = p.identifier()
 				}
 				if mod == nil && alias == nil {
