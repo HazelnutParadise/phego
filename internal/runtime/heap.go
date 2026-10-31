@@ -388,18 +388,22 @@ func (h *heap) unsetElement(slot *value, key value) error {
 // becomes a shared location that the loop owns, so writes and appends in the
 // body modify the iterated array. Each element is bound to item, and appended
 // elements are visited. When the array is separated by copy-on-write, in the
-// body or by the loop, the cursor moves to the copy after the last visited
-// key; when the body assigns an unrelated array, iteration restarts at its
+// body or by the loop, the cursor moves to the same place in the copy; when the body assigns an unrelated array, iteration restarts at its
 // first element. A tail deletion clamps the cursor, as PHP does, so an
 // element appended into the freed slot is still visited.
-func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
+func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err error) {
 	var loop value
 	if err := h.bind(&loop, arr); err != nil {
 		return err
 	}
-	defer h.release(loop)
+	defer func() {
+		// Releasing the loop's hold can destroy the array if the body unset
+		// the variable; destructor errors then surface from the loop.
+		if rerr := h.release(loop); err == nil {
+			err = rerr
+		}
+	}()
 	var cur *phpArray
-	var last arrayKey
 	pos := 0
 	defer func() {
 		if cur != nil {
@@ -417,10 +421,15 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
 		case replaced:
 			pos = 0
 		case cur != nil && a != cur:
-			pos = 0
-			if i, ok := a.find(last); ok {
-				pos = i + 1
+			// A copy keeps the live elements in order without holes, so the
+			// cursor becomes the number of live elements already passed.
+			rank := 0
+			for _, b := range cur.buckets[:min(pos, len(cur.buckets))] {
+				if b != nil {
+					rank++
+				}
 			}
+			pos = rank
 		}
 		if a != cur {
 			if cur != nil {
@@ -436,7 +445,6 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
 		if !ok {
 			return nil
 		}
-		last = b.key
 		if err := h.bind(item, &b.val); err != nil {
 			return err
 		}

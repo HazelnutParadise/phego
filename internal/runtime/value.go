@@ -79,9 +79,10 @@ func (v value) deref() value {
 // that contain themselves.
 var ErrRecursiveDependency = errors.New("Nesting level too deep - recursive dependency?")
 
-// identical implements PHP === for the kinds modeled here. Comparing distinct
-// arrays that re-enter an array already being compared returns
-// ErrRecursiveDependency instead of recursing without bound.
+// identical implements PHP === for the kinds modeled here. As in PHP 8.5.12,
+// only the left operand's arrays are guarded: re-entering a left array that is
+// already being compared returns ErrRecursiveDependency instead of recursing
+// without bound, while shared but acyclic storage compares normally.
 func identical(a, b value) (bool, error) {
 	return identicalIn(a, b, map[*phpArray]bool{})
 }
@@ -111,12 +112,11 @@ func identicalIn(a, b value, active map[*phpArray]bool) (bool, error) {
 		if a.array.count() != b.array.count() {
 			return false, nil
 		}
-		if active[a.array] || active[b.array] {
+		if active[a.array] {
 			return false, ErrRecursiveDependency
 		}
-		active[a.array], active[b.array] = true, true
+		active[a.array] = true
 		defer delete(active, a.array)
-		defer delete(active, b.array)
 		ai, bi := 0, 0
 		for {
 			ab, aok := a.array.next(&ai)

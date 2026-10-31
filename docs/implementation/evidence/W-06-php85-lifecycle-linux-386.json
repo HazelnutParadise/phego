@@ -59,6 +59,13 @@
       "result": "pass"
     },
     {
+      "fixture": "tests/semantics/w06-php85/foreach_destructor_exception.phpt",
+      "sha256": "b0b9adc8d0ac55b6f7a3b509f905f537a8ae6d594a684146d15d9550c8affc07",
+      "exit_code": 0,
+      "stdout_sha256": "293215f7caf5d61d1f77d9af1657c47d60195cba3dc89d65fd7c04b39175be25",
+      "result": "pass"
+    },
+    {
       "fixture": "tests/semantics/w06-php85/foreach_reference_replacement.phpt",
       "sha256": "588fd182314fae038234f1e07729d0863fb2bc79f89ff43affb0a25e0bcc68dd",
       "exit_code": 0,
@@ -108,6 +115,13 @@
       "result": "pass"
     },
     {
+      "fixture": "tests/semantics/w06-php85/shared_storage_and_deleted_cursor.phpt",
+      "sha256": "d9f54e91a3f02dc81a9ccc869298cffd5c423b8bd4c45e59a1fd3579cee7aa13",
+      "exit_code": 0,
+      "stdout_sha256": "daef478ee2e02bba295d5e7a98bebf51c314a68c83becbc419e6680f6a8e0051",
+      "result": "pass"
+    },
+    {
       "fixture": "tests/semantics/w06-php85/shutdown_order.phpt",
       "sha256": "123a11456ea2c49346b0e8399667b2dd78ecd769ead1336bd87e8d4f5df75277",
       "exit_code": 0,
@@ -122,7 +136,7 @@
       "result": "pass"
     }
   ],
-  "passed": 16,
+  "passed": 18,
   "failed": 0,
   "go_model_tests": {
     "command": "go test ./internal/runtime/ && go test -race ./... && CGO_ENABLED=0 go test ./...",
@@ -151,7 +165,7 @@
     ]
   },
   "limits": [
-    "Expected outputs of the twelve new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
+    "Expected outputs of the fourteen new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
     "The image is the prebuilt one recorded in W-06-php85-i386-image-source.json; its binary is not proven to be built from the locked source archive.",
     "No other PHP release, native 64-bit platform, or historical generation was exercised.",
     "Go tests exercise the candidate value model directly; no PHP source is parsed or executed by Phego.",

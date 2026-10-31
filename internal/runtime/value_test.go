@@ -748,3 +748,58 @@ func TestIdenticalRejectsRecursiveArrays(t *testing.T) {
 		t.Fatal("equal arrays differ")
 	}
 }
+
+func TestIdenticalAllowsSharedAcyclicStorage(t *testing.T) {
+	// PHP 8.5.12: $x = [1]; $a = [$x]; $b = [$a]; $a === $b is false.
+	h := testHeap(t)
+	var x, a, b value
+	must(t, h.appendValue(&x, num(t, 1)))
+	must(t, h.appendValue(&a, x))
+	must(t, h.appendValue(&b, a))
+	ok, err := identical(a, b)
+	if err != nil || ok {
+		t.Fatalf("identical = %v, %v", ok, err)
+	}
+}
+
+func TestForeachCursorSurvivesDeletingCurrentThenSharing(t *testing.T) {
+	// PHP 8.5.12: unset($arr[1]); $copy = $arr while visiting 2 visits 1,2,3.
+	h := testHeap(t)
+	var arr, cp, item value
+	for i := int64(1); i <= 3; i++ {
+		must(t, h.appendValue(&arr, num(t, i)))
+	}
+	once := false
+	var seen []int64
+	must(t, h.foreachRef(&arr, &item, func(arrayKey) error {
+		v := item.deref().integer
+		seen = append(seen, v)
+		if v != 2 || once {
+			return nil
+		}
+		once = true
+		if err := h.unsetElement(&arr, num(t, 1)); err != nil {
+			return err
+		}
+		return h.assign(&cp, arr)
+	}))
+	if !slices.Equal(seen, []int64{1, 2, 3}) {
+		t.Fatalf("seen %v", seen)
+	}
+}
+
+func TestForeachReturnsDestructorErrorFromFinalRelease(t *testing.T) {
+	// PHP 8.5.12: unsetting the iterated array inside foreach destroys it
+	// when the loop ends, and a destructor exception escapes the loop.
+	h := testHeap(t)
+	boom := errors.New("from destructor")
+	o, err := h.newObject(&class{destructor: func(*heap, value) error { return boom }})
+	must(t, err)
+	var list, item value
+	must(t, h.appendValue(&list, o))
+	must(t, h.appendValue(&list, num(t, 1)))
+	err = h.foreachRef(&list, &item, func(arrayKey) error { return h.unset(&list) })
+	if !errors.Is(err, boom) {
+		t.Fatalf("foreach error = %v", err)
+	}
+}
