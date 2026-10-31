@@ -156,6 +156,11 @@ func (p *parser) assignment(left *Node) *Node {
 		if !assignOps[t.Kind] || !isAssignTarget(left) {
 			return left
 		}
+		if left.Kind == "array" || left.Kind == "list" {
+			if t.Kind != '=' || left.Kind == "array" && left.Text == "array" || isAmpersand(p.tok(1).Kind) {
+				return left
+			}
+		}
 		p.next()
 		if t.Kind == '=' && isAmpersand(p.peek().Kind) {
 			p.next()
@@ -278,7 +283,9 @@ func (p *parser) primary() *Node {
 	case TArray:
 		if p.tok(1).Kind == '(' {
 			p.next()
-			return p.arrayLiteral('(', ')', "array")
+			n := p.arrayLiteral('(', ')', "array")
+			n.Text = "array"
+			return n
 		}
 	case TList:
 		p.next()
