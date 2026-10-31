@@ -717,6 +717,9 @@ func (p *parser) useStatement() *Node {
 	for {
 		name := p.name()
 		if p.accept(TNsSeparator) {
+			if len(n.Children) != 0 {
+				p.unexpected()
+			}
 			p.expect('{')
 			group := node("group_use", name.Line, name)
 			for {
@@ -735,6 +738,7 @@ func (p *parser) useStatement() *Node {
 			}
 			p.expect('}')
 			n.Children = append(n.Children, group)
+			break
 		} else {
 			n.Children = append(n.Children, node("use_item", name.Line, name, p.useAlias()))
 		}
