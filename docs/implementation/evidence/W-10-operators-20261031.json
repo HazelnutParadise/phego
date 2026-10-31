@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "scope": "php8512_operator_differential_check",
+  "requirements": [
+    "REQ-002",
+    "REQ-011",
+    "REQ-066"
+  ],
+  "scenarios": [
+    "T-003",
+    "T-004",
+    "T-021",
+    "T-022",
+    "T-131"
+  ],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-10-31",
+  "implementation_commit": "ed4ac99252213648a97a4aea54fbdb9136999d54",
+  "php_version": "8.5.12",
+  "reference_images": {
+    "int32": {
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "platform": "linux/386 under QEMU user-mode emulation on linux/arm64; regenerated natively on x86-64 by the semantics-ops workflow with an identical SHA-256 of the uncompressed output (7b286db0e46da10d7ba07de720b7e47fbac84ff7a878ded32e1fde9735e8d68b)",
+      "libc": "Debian GLIBC 2.41-12+deb13u4"
+    },
+    "int64": {
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "platform": "linux/arm64 native",
+      "libc": "Debian GLIBC 2.41-12+deb13u4",
+      "ci_platform_image": {
+        "image": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f",
+        "platform": "linux/amd64 native in the semantics-ops workflow",
+        "provenance": "Both add6a138 (arm64) and 35fd7ee3 (amd64) are entries of the php:8.5.12-cli manifest list as listed by docker manifest inspect on 2026-10-31."
+      }
+    }
+  },
+  "reference_scripts_sha256": {
+    "tests/semantics/w10-ops/matrix.php": "ac651bdff4c79f108113101930fcc4b3b57e04c114b25cfeb9f0eb53fcddeb6d",
+    "tests/semantics/w10-ops/strings.php": "ab9ee40f9ebf8ef7e49e1b5d70773696b978f3a7154490ad31840d26e4e0a86f",
+    "tests/semantics/w10-ops/enc.php": "91e3f510d59246c69ccabefa9a7a7397ebce95fff0b2d80a18ad651871f388cd",
+    "tests/semantics/w10-ops/pow.php": "69516a985d8065e3d39e5fc4885ef81661c1c1db263e1b8d07c27fc64f286c04"
+  },
+  "reference_commands": [
+    "docker run --rm --network none -v tests/semantics/w10-ops:/w:ro IMAGE php -n /w/matrix.php | gzip -9 -n > internal/runtime/testdata/php8512-ops-WIDTH.json.gz",
+    "python3 tools/w10_numeric_strings.py > internal/runtime/testdata/php8512-numeric-strings.txt",
+    "docker run --rm -i --network none -v tests/semantics/w10-ops:/w:ro IMAGE php -n /w/strings.php < internal/runtime/testdata/php8512-numeric-strings.txt | gzip -9 -n > internal/runtime/testdata/php8512-numeric-strings-WIDTH.jsonl.gz",
+    "python3 tools/w10_pow_pairs.py | gzip -9 -n > internal/runtime/testdata/php8512-pow-pairs.txt.gz; gzip -dc internal/runtime/testdata/php8512-pow-pairs.txt.gz | docker run --rm -i --network none -v tests/semantics/w10-ops:/w:ro php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 php -n /w/pow.php | gzip -9 -n > internal/runtime/testdata/php8512-pow-64.txt.gz"
+  ],
+  "reference_sha256": {
+    "php8512-ops-32.json.gz": "98f4d79968fc3ac2942dac20cd0b7c606d21c65c276993e073de9bde60e04d06",
+    "php8512-ops-64.json.gz": "0bf76ed02fb7bf53f5150045ccf4b1ef3903696032c77b3a84c5cf710598b032",
+    "php8512-numeric-strings.txt": "5c4b73c5694b7407b524a9eb48b3e4717c3beb160a427eebeb6a281fb81c370d",
+    "php8512-numeric-strings-32.jsonl.gz": "ab44bd95143a1d4724a181d6dfc9177f0874b843db48a9fc9caeaf15e88f90b0",
+    "php8512-numeric-strings-64.jsonl.gz": "cee897289b6d293a9bef10d20b957c42001bbb7a459f35ad55b6bfc1a391aaf9",
+    "php8512-pow-pairs.txt.gz": "ef33a68dc0df23d61b9ebec3b0a88a6b160cc0c937022e7708ea2b3ffeeeacbf",
+    "php8512-pow-64.txt.gz": "163ac8097bd97afa799f971ad11e987048cc18faabac657e1d759d26aa3802fb"
+  },
+  "test_command": "CGO_ENABLED=0 go test -count=1 -v -run 'TestPHP8512|TestNumericString|TestGlibcPow' ./internal/runtime; GOARCH=amd64 go test -count=1 -run 'TestPHP8512|TestNumericString|TestGlibcPow' ./internal/runtime",
+  "test_environment": "go1.26.5 darwin/arm64",
+  "result": {
+    "operator_matrix": {
+      "operands": 48,
+      "unary_operations": 8,
+      "binary_operations": 20,
+      "cases_per_width": 46464,
+      "int64_matching": 46464,
+      "int32_matching": 46413,
+      "int32_pow_within_64_ulp_of_i386_glibc": 51
+    },
+    "numeric_strings": {
+      "strings": 20000,
+      "operations": 8,
+      "cases_per_width": 160000,
+      "int32_matching": 160000,
+      "int64_matching": 160000
+    },
+    "fuzz": "FuzzNumericString checks internal consistency between strict and lenient recognition, not PHP results: 60 s, about 11.9 million executions; the one failure it found was fixed and the fixed values were confirmed in PHP 8.5.12.",
+    "pow_corpus": {
+      "pairs": 30000,
+      "matching_go_arm64_build": 30000,
+      "matching_go_amd64_build": 30000,
+      "reference": "arm64 PHP",
+      "larger_offline_corpus": {
+        "seed": 7,
+        "pairs": 400000,
+        "matching": 400000,
+        "note": "not committed; the underflow branch fix removed the previous 8 differences"
+      },
+      "amd64_php": {
+        "pairs": 30000,
+        "matching": 30000,
+        "environment": "GitHub ubuntu-24.04 x86-64 runner with fma and avx2, semantics-ops workflow at commit e061ad0, image php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f"
+      }
+    },
+    "i386_pow_corpus": {
+      "pairs": 30000,
+      "differing": 15613,
+      "max_ulp": 346,
+      "source": "second review run under QEMU; not regenerated natively"
+    }
+  },
+  "comparison": "Each case compares the exact result encoding (float bits, string bytes, array keys and values), the thrown class and message, and every diagnostic level and message in order. NaN results compare as NaN regardless of sign and payload, which come from the host CPU and are visible to PHP only through pack().",
+  "limitations": [
+    "The 32-bit profile does not reproduce i386 glibc pow, which computes with x87 instructions: 51 operator-matrix results differ by at most 64 ULP, and about half of the 30000 pow pairs differ by up to 346 ULP. The native x86-64 regeneration of the i386 matrix reference is byte-identical to the emulated one.",
+    "PHP 8.5.12 only; no other release has a profile or reference run.",
+    "Objects, resources, increment and decrement, compound assignment, intdiv, fmod, and string functions are not modeled.",
+    "The implemented operations are only called by tests; no execution path uses them until the VM exists.",
+    "pow matches arm64 PHP and amd64 PHP on an FMA-capable CPU; amd64 glibc without FMA uses another code path that is not verified."
+  ],
+  "implementation_commit_note": "The evidence was first recorded at implementation_commit; the pow translation, profile, and scanner fixes were made on the same branch afterwards and are covered by the same test command."
+}

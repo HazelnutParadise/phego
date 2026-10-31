@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
 // SupportedRelease is the PHP release whose syntax this build implements.
@@ -23,7 +24,9 @@ const (
 // The zero value selects PHP 8.5.12 with 64-bit integers.
 type Config struct {
 	// Release is the exact PHP release, for example "8.5.12". Empty selects
-	// SupportedRelease. Other releases are rejected, not approximated.
+	// SupportedRelease. A known release this build does not implement yet is
+	// an UnsupportedError and a version not recorded in the release
+	// inventory is a ConfigError; neither is approximated by another release.
 	Release string
 	// IntSize is the guest integer width in bits: 32 or 64. Zero selects 64.
 	IntSize int
@@ -102,13 +105,14 @@ func asciiLower(s string) string {
 // Engine compiles and runs PHP programs. It is safe for concurrent use;
 // every run gets an isolated execution.
 type Engine struct {
-	cfg   Config
-	host  map[string]HostFunction // lower-cased name -> snapshot
-	mu    sync.Mutex
-	runs  sync.WaitGroup
-	shut  bool
-	drain chan struct{}
-	ready bool // set by NewEngine; a zero Engine is unusable
+	cfg     Config
+	profile profile.Profile
+	host    map[string]HostFunction // lower-cased name -> snapshot
+	mu      sync.Mutex
+	runs    sync.WaitGroup
+	shut    bool
+	drain   chan struct{}
+	ready   bool // set by NewEngine; a zero Engine is unusable
 }
 
 // errZeroEngine rejects use of an Engine not created by NewEngine.
@@ -119,15 +123,22 @@ func NewEngine(cfg Config) (*Engine, error) {
 	if cfg.Release == "" {
 		cfg.Release = SupportedRelease
 	}
-	if cfg.Release != SupportedRelease {
-		return nil, &UnsupportedError{Feature: "PHP release " + cfg.Release}
-	}
-	switch cfg.IntSize {
-	case 0:
+	if cfg.IntSize == 0 {
 		cfg.IntSize = 64
-	case 32, 64:
-	default:
+	}
+	prof, err := profile.Resolve(cfg.Release, cfg.IntSize, cfg.ShortOpenTag)
+	var pe *profile.Error
+	if errors.As(err, &pe) {
+		switch {
+		case pe.Status == profile.NotImplemented:
+			return nil, &UnsupportedError{Feature: "PHP release " + cfg.Release}
+		case pe.Status == profile.Unrecorded:
+			return nil, &ConfigError{Field: "Release", Reason: pe.Reason}
+		}
 		return nil, &ConfigError{Field: "IntSize", Reason: fmt.Sprintf("%d is not 32 or 64", cfg.IntSize)}
+	}
+	if err != nil {
+		return nil, err
 	}
 	for name, v := range map[string]*int{"MaxSourceBytes": &cfg.MaxSourceBytes, "OutputLimit": &cfg.OutputLimit} {
 		if *v < 0 {
@@ -166,15 +177,18 @@ func NewEngine(cfg Config) (*Engine, error) {
 		host[key] = f
 	}
 	cfg.HostFunctions = nil
-	return &Engine{cfg: cfg, host: host, drain: make(chan struct{}), ready: true}, nil
+	return &Engine{cfg: cfg, profile: prof, host: host, drain: make(chan struct{}), ready: true}, nil
 }
 
 // Program is an immutable compiled program bound to the engine that made it.
 // It may be run concurrently.
 type Program struct {
 	engine *Engine
-	name   string
-	tree   *frontend.Node
+	// profile is the profile the program was compiled for. A program never
+	// runs under a different profile, even through a shared cache.
+	profile profile.Profile
+	name    string
+	tree    *frontend.Node
 }
 
 // Name returns the source name used in diagnostics.
@@ -221,7 +235,7 @@ func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, er
 	if err != nil {
 		return nil, err
 	}
-	return &Program{engine: e, name: name, tree: tree}, nil
+	return &Program{engine: e, profile: e.profile, name: name, tree: tree}, nil
 }
 
 // Status is how a run ended.
@@ -306,6 +320,10 @@ func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (
 	defer e.runs.Done()
 	if program == nil || program.engine != e {
 		return &Result{Status: StatusFailed}, &ConfigError{Field: "program", Reason: "was not compiled by this engine"}
+	}
+	if program.profile != e.profile {
+		return &Result{Status: StatusFailed}, &ConfigError{Field: "program",
+			Reason: "was compiled for " + program.profile.String() + ", not " + e.profile.String()}
 	}
 	var rc runConfig
 	for _, opt := range opts {

@@ -4,9 +4,13 @@ package frontend
 // identifying source text for leaves (names, operators, literals), and Line is
 // the line where the construct starts. Children are in source order; an
 // omitted optional part is a nil child so positions stay stable per Kind.
+// Token is the token kind of a leaf, which tells an integer literal from a
+// float literal; whether a number fits the integer type depends on the
+// profile's integer width.
 type Node struct {
 	Kind     string
 	Text     string
+	Token    Kind
 	Line     int
 	Children []*Node
 }
@@ -16,7 +20,7 @@ func node(kind string, line int, children ...*Node) *Node {
 }
 
 func leaf(kind string, t Token) *Node {
-	return &Node{Kind: kind, Text: t.Text, Line: t.Line}
+	return &Node{Kind: kind, Text: t.Text, Token: t.Kind, Line: t.Line}
 }
 
 // SyntaxError is a located parse failure. Compile marks errors PHP raises
