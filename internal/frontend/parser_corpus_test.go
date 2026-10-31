@@ -28,6 +28,7 @@ func TestParseMatchesReferenceCorpus(t *testing.T) {
 	scanner := bufio.NewScanner(f)
 	scanner.Buffer(make([]byte, 1<<20), 1<<20)
 	files, mismatched := 0, 0
+	seen := make(map[string]bool)
 	stats := map[string]int{}
 	for scanner.Scan() {
 		line := scanner.Bytes()
@@ -38,11 +39,28 @@ func TestParseMatchesReferenceCorpus(t *testing.T) {
 		if json.Unmarshal(line, &rec) != nil || len(rec) < 2 {
 			t.Fatalf("malformed reference record: %.120s", line)
 		}
-		name, _ := rec[0].(string)
-		status, _ := rec[1].(string)
-		if status != "ok" && (len(rec) < 4 || rec[2] == nil) {
-			t.Fatalf("malformed reference record: %.120s", line)
+		name, okName := rec[0].(string)
+		status, okStatus := rec[1].(string)
+		if !okName || !validCorpusFileName(name) || !okStatus || (status != "ok" && status != "error" && status != "other") {
+			t.Fatal("malformed reference record: invalid name or status")
 		}
+		if status == "ok" && len(rec) != 2 {
+			t.Fatal("malformed reference record: unexpected successful record fields")
+		}
+		if status != "ok" {
+			if len(rec) != 4 {
+				t.Fatal("malformed reference record: missing error fields")
+			}
+			line, okLine := rec[2].(float64)
+			_, okMessage := rec[3].(string)
+			if !okLine || line < 1 || line > 1<<31 || line != float64(int64(line)) || !okMessage {
+				t.Fatal("malformed reference record: invalid error line or message")
+			}
+		}
+		if seen[name] {
+			t.Fatalf("duplicate reference record for %s", name)
+		}
+		seen[name] = true
 		src, err := os.ReadFile(filepath.Join(dir, "corpus", name))
 		if err != nil {
 			t.Fatal(err)

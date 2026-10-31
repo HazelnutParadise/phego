@@ -35,6 +35,7 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 	scanner := bufio.NewScanner(f)
 	scanner.Buffer(make([]byte, 64<<20), 64<<20)
 	files, mismatched := 0, 0
+	seen := make(map[string]bool)
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		if len(line) == 0 || line[0] != '[' {
@@ -43,10 +44,29 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 		}
 		var rec []json.RawMessage
 		var name string
-		var want [][3]any
+		var want [][]any
 		if json.Unmarshal(line, &rec) != nil || len(rec) != 2 ||
-			json.Unmarshal(rec[0], &name) != nil || json.Unmarshal(rec[1], &want) != nil {
+			json.Unmarshal(rec[0], &name) != nil || json.Unmarshal(rec[1], &want) != nil || want == nil {
 			t.Fatalf("malformed reference record: %.120s", line)
+		}
+		if !validCorpusFileName(name) {
+			t.Fatal("malformed reference record: invalid corpus filename")
+		}
+		if seen[name] {
+			t.Fatalf("duplicate reference record for %s", name)
+		}
+		seen[name] = true
+		for _, token := range want {
+			if len(token) != 3 {
+				t.Fatalf("malformed token in reference record for %s", name)
+			}
+			kind, okKind := token[0].(string)
+			encoded, okText := token[1].(string)
+			line, okLine := token[2].(float64)
+			_, decodeErr := base64.StdEncoding.Strict().DecodeString(encoded)
+			if !okKind || kind == "" || !okText || decodeErr != nil || !okLine || line < 0 || (line == 0 && len(kind) != 1) || line > 1<<31 || line != float64(int64(line)) {
+				t.Fatalf("malformed token in reference record for %s", name)
+			}
 		}
 		src, err := os.ReadFile(filepath.Join(dir, "corpus", name))
 		if err != nil {
@@ -80,7 +100,20 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 	}
 }
 
-func firstDifference(got []Token, want [][3]any) (int, string) {
+// validCorpusFileName matches the source extractor's hashed filenames.
+func validCorpusFileName(name string) bool {
+	if len(name) != 20 || name[16:] != ".php" {
+		return false
+	}
+	for _, c := range name[:16] {
+		if !(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f') {
+			return false
+		}
+	}
+	return true
+}
+
+func firstDifference(got []Token, want [][]any) (int, string) {
 	for i := 0; i < len(got) || i < len(want); i++ {
 		if i >= len(got) || i >= len(want) {
 			return i, "token count differs"
