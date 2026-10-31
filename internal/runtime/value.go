@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"errors"
 	"fmt"
 	"math"
 )
@@ -74,43 +75,62 @@ func (v value) deref() value {
 	return v
 }
 
-// identical implements PHP === for the kinds modeled here.
-func identical(a, b value) bool {
+// ErrRecursiveDependency mirrors PHP 8.5.12's Error when comparing arrays
+// that contain themselves.
+var ErrRecursiveDependency = errors.New("Nesting level too deep - recursive dependency?")
+
+// identical implements PHP === for the kinds modeled here. Comparing distinct
+// arrays that re-enter an array already being compared returns
+// ErrRecursiveDependency instead of recursing without bound.
+func identical(a, b value) (bool, error) {
+	return identicalIn(a, b, map[*phpArray]bool{})
+}
+
+func identicalIn(a, b value, active map[*phpArray]bool) (bool, error) {
 	a, b = a.deref(), b.deref()
 	if a.kind != b.kind {
-		return false
+		return false, nil
 	}
 	switch a.kind {
 	case valueUndefined, valueNull:
-		return true
+		return true, nil
 	case valueBool:
-		return a.boolean == b.boolean
+		return a.boolean == b.boolean, nil
 	case valueInt:
-		return a.integer == b.integer
+		return a.integer == b.integer, nil
 	case valueFloat:
-		return a.floating == b.floating
+		return a.floating == b.floating, nil
 	case valueString:
-		return a.text == b.text
+		return a.text == b.text, nil
 	case valueObject:
-		return a.object == b.object
+		return a.object == b.object, nil
 	case valueArray:
 		if a.array == b.array {
-			return true
+			return true, nil
 		}
 		if a.array.count() != b.array.count() {
-			return false
+			return false, nil
 		}
+		if active[a.array] || active[b.array] {
+			return false, ErrRecursiveDependency
+		}
+		active[a.array], active[b.array] = true, true
+		defer delete(active, a.array)
+		defer delete(active, b.array)
 		ai, bi := 0, 0
 		for {
 			ab, aok := a.array.next(&ai)
 			bb, bok := b.array.next(&bi)
 			if !aok || !bok {
-				return aok == bok
+				return aok == bok, nil
 			}
-			if ab.key != bb.key || !identical(ab.val, bb.val) {
-				return false
+			if ab.key != bb.key {
+				return false, nil
+			}
+			if same, err := identicalIn(ab.val, bb.val, active); err != nil || !same {
+				return false, err
 			}
 		}
 	}
-	return false
+	return false, nil
 }

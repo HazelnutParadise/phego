@@ -28,6 +28,13 @@ func must(t *testing.T, err error) {
 	}
 }
 
+func same(t *testing.T, a, b value) bool {
+	t.Helper()
+	ok, err := identical(a, b)
+	must(t, err)
+	return ok
+}
+
 func str(s string) value { return value{kind: valueString, text: s} }
 
 func num(t *testing.T, i int64) value {
@@ -81,7 +88,7 @@ func TestValueKindsRemainDistinct(t *testing.T) {
 			t.Fatalf("kind %d = %d", i, a.kind)
 		}
 		for j, b := range kinds {
-			if identical(a, b) != (i == j) {
+			if same(t, a, b) != (i == j) {
 				t.Fatalf("identical(%d, %d) = %v", i, j, !(i == j))
 			}
 		}
@@ -245,7 +252,7 @@ func TestPackedAndIndexedArraysAgree(t *testing.T) {
 	if !packed.array.packed() || indexed.array.packed() {
 		t.Fatal("unexpected representations")
 	}
-	if !identical(packed, indexed) {
+	if !same(t, packed, indexed) {
 		t.Fatal("packed and indexed arrays differ")
 	}
 	must(t, h.unsetElement(&packed, num(t, 1)))
@@ -384,7 +391,7 @@ func TestCycleResurrectionSurvivesAndIsCollectedLater(t *testing.T) {
 		t.Fatalf("collected %d", n)
 	}
 	self, _ := s.h.property(saved, "self")
-	if !identical(*self, saved) {
+	if !same(t, *self, saved) {
 		t.Fatal("resurrected cycle was damaged")
 	}
 	must(t, s.h.assign(&saved, nullValue()))
@@ -450,7 +457,7 @@ func TestWeakReferencesAndWeakMaps(t *testing.T) {
 	if again != wr {
 		t.Fatal("WeakReference identity differs")
 	}
-	if got, ok := wr.get(); !ok || !identical(got, o) {
+	if got, ok := wr.get(); !ok || !same(t, got, o) {
 		t.Fatal("weak target missing")
 	}
 	m := newWeakMap()
@@ -716,4 +723,28 @@ func TestWeakMapValueReferringToItsKeyIsCollected(t *testing.T) {
 		t.Fatalf("collected %d, map %d, alive %v", n, m.count(), alive)
 	}
 	expectOutput(t, s.out, "destruct X")
+}
+
+func TestIdenticalRejectsRecursiveArrays(t *testing.T) {
+	// PHP 8.5.12: $a[0] =& $a; $b[0] =& $b; $a === $b throws "Nesting level
+	// too deep - recursive dependency?", while $a === $a is true.
+	h := testHeap(t)
+	var a, b value
+	for _, v := range []*value{&a, &b} {
+		e, err := h.element(v, num(t, 0))
+		must(t, err)
+		must(t, h.bind(e, v))
+	}
+	if _, err := identical(a, b); !errors.Is(err, ErrRecursiveDependency) {
+		t.Fatalf("error = %v", err)
+	}
+	if !same(t, a, a) {
+		t.Fatal("an array is not identical to itself")
+	}
+	var c, d value
+	must(t, h.appendValue(&c, num(t, 1)))
+	must(t, h.appendValue(&d, num(t, 1)))
+	if !same(t, c, d) {
+		t.Fatal("equal arrays differ")
+	}
 }

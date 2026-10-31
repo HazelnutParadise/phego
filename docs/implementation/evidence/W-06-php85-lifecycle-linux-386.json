@@ -73,6 +73,13 @@
       "result": "pass"
     },
     {
+      "fixture": "tests/semantics/w06-php85/recursive_identity.phpt",
+      "sha256": "82fdb0d87df73970a9bf565d32266b5f51c5d072e9aa417e0306ac74f946eb94",
+      "exit_code": 0,
+      "stdout_sha256": "251825163a795427e28c18546a9637926e9172c6ae1b827171d6323d5c32024a",
+      "result": "pass"
+    },
+    {
       "fixture": "tests/semantics/w06-php85/reentrant_destructors.phpt",
       "sha256": "d45173efd3272083113bd1758f6db39a703073149b160aea785f6d78c526b344",
       "exit_code": 0,
@@ -115,7 +122,7 @@
       "result": "pass"
     }
   ],
-  "passed": 15,
+  "passed": 16,
   "failed": 0,
   "go_model_tests": {
     "command": "go test ./internal/runtime/ && go test -race ./... && CGO_ENABLED=0 go test ./...",
@@ -144,7 +151,7 @@
     ]
   },
   "limits": [
-    "Expected outputs of the eleven new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
+    "Expected outputs of the twelve new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
     "The image is the prebuilt one recorded in W-06-php85-i386-image-source.json; its binary is not proven to be built from the locked source archive.",
     "No other PHP release, native 64-bit platform, or historical generation was exercised.",
     "Go tests exercise the candidate value model directly; no PHP source is parsed or executed by Phego.",
