@@ -37,9 +37,9 @@ type opsReferenceRun struct {
 // The semantics-ops workflow sets it on an x86-64 runner.
 const nativeOpsReferenceEnv = "PHEGO_NATIVE_OPS_REFERENCE"
 
-// loadOpsReference returns the reference for width and whether it was
-// produced natively rather than read from the committed testdata.
-func loadOpsReference(t *testing.T, width int) (opsReference, bool) {
+// loadOpsReference returns the reference for width, read from the native
+// directory when it is set and from the committed testdata otherwise.
+func loadOpsReference(t *testing.T, width int) opsReference {
 	t.Helper()
 	var r io.Reader
 	native := os.Getenv(nativeOpsReferenceEnv) != ""
@@ -69,7 +69,7 @@ func loadOpsReference(t *testing.T, width int) (opsReference, bool) {
 	if ref.PHP != "8.5.12" || ref.IntSize*8 != width {
 		t.Fatalf("reference is PHP %s with %d-byte integers, want 8.5.12 at %d bits", ref.PHP, ref.IntSize, width)
 	}
-	return ref, native
+	return ref
 }
 
 // decodeOperand builds a value from matrix.php's exact encoding.
@@ -266,14 +266,14 @@ func ulpDistance(a, b string) int64 {
 	return d
 }
 
-// emulatedPowDifferences is the number of 32-bit ** results that differ from
-// the reference by at most 64 units in the last place. The pinned i386 image runs
-// under QEMU user-mode emulation on the evidence host, and QEMU computes x87
-// transcendental instructions with less precision than hardware, so those
-// reference values are not a trustworthy oracle. Phego rounds pow correctly,
-// which matches the native 64-bit reference exactly. A native i386 run is
-// still required; see docs/implementation/W-10.md.
-const emulatedPowDifferences = 51
+// i386PowDifferences is the number of 32-bit ** results that differ from
+// PHP 8.5.12 by at most 64 units in the last place. The linux/386 PHP build
+// calls glibc's i386 pow, which computes with x87 instructions and is not
+// rounded to nearest; Phego rounds pow to nearest, which matches the 64-bit
+// glibc builds exactly. The i386 reference is byte-identical whether it runs
+// natively on x86-64 or under QEMU, so this is a real libm difference of the
+// 32-bit profile, recorded as a known gap in docs/implementation/W-10.md.
+const i386PowDifferences = 51
 
 func sameRun(a, b opsReferenceRun) bool {
 	return canonicalNaN(a.R) == canonicalNaN(b.R) && slices.Equal(a.E, b.E) && slices.EqualFunc(a.D, b.D, func(x, y [2]any) bool { return x == y })
@@ -285,7 +285,7 @@ func sameRun(a, b opsReferenceRun) bool {
 func TestPHP8512OperatorsMatchReference(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprintf("int%d", width), func(t *testing.T) {
-			ref, native := loadOpsReference(t, width)
+			ref := loadOpsReference(t, width)
 			h, err := newHeap(width)
 			if err != nil {
 				t.Fatal(err)
@@ -334,14 +334,10 @@ func TestPHP8512OperatorsMatchReference(t *testing.T) {
 			if failures > 0 {
 				t.Fatalf("%d cases differ from PHP 8.5.12", failures)
 			}
-			want := map[int]int{32: emulatedPowDifferences, 64: 0}[width]
-			if native {
-				want = 0
+			if want := map[int]int{32: i386PowDifferences, 64: 0}[width]; powDiffs != want {
+				t.Fatalf("%d ** results are within 64 ULP of the i386 libm result, want exactly %d", powDiffs, want)
 			}
-			if powDiffs != want {
-				t.Fatalf("%d ** results are within 64 ULP of the emulated reference, want exactly %d", powDiffs, want)
-			}
-			t.Logf("%d cases match PHP 8.5.12; %d ** results differ from the emulated reference by at most 64 ULP", checked, powDiffs)
+			t.Logf("%d cases match PHP 8.5.12; %d ** results differ from the i386 libm result by at most 64 ULP", checked, powDiffs)
 		})
 	}
 }
