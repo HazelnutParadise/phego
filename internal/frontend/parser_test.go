@@ -119,6 +119,37 @@ func TestLanguageConstructResultsNeedParentheses(t *testing.T) {
 	}
 }
 
+func TestInterpolationOffsetsKeepStringKeySemantics(t *testing.T) {
+	root, err := parse(t, `<?php "$a[01] $a[1] $a[key] $a[-1]"; "{$a[01]}";`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	simple := root.Children[0].Children[0]
+	var kinds []string
+	for _, part := range simple.Children {
+		if part.Kind == "dim" {
+			kinds = append(kinds, part.Children[1].Kind+":"+part.Children[1].Text)
+		}
+	}
+	if got := strings.Join(kinds, " "); got != "num_string:01 num_string:1 string_offset:key num_string:-1" {
+		t.Fatalf("simple offsets: %s", got)
+	}
+	complexDim := root.Children[1].Children[0].Children[0]
+	if complexDim.Kind != "dim" || complexDim.Children[1].Kind != "literal" {
+		t.Fatalf("complex offset: %+v", complexDim)
+	}
+}
+
+func TestCloneOfParenthesizedCallContinues(t *testing.T) {
+	root, err := parse(t, `<?php $x = clone($f)();`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := shape(root.Children[0].Children[0]); got != "(= $x (clone (call (paren $f) (args))))" {
+		t.Fatalf("tree %s", got)
+	}
+}
+
 func TestMatchArmsNeedConditions(t *testing.T) {
 	// PHP 8.5.12 rejects an arm without conditions unless it is default.
 	for src, ok := range map[string]bool{

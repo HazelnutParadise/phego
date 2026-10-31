@@ -226,7 +226,7 @@ func (p *parser) unary(min int) *Node {
 			// parenthesized operand may continue with member access.
 			args := p.arguments()
 			if len(args.Children) == 1 && args.Children[0].Kind != "spread" && args.Children[0].Kind != "named_arg" &&
-				p.atAny(TObjectOperator, TNullsafeObjectOperator, TDoubleColon, '[') {
+				p.atAny(TObjectOperator, TNullsafeObjectOperator, TDoubleColon, '[', '(') {
 				return node("clone", t.Line, p.postfix(node("paren", args.Line, args.Children[0])))
 			}
 			return node("clone", t.Line, args)
@@ -755,13 +755,19 @@ func (p *parser) encapsList(end Kind) []*Node {
 				p.next()
 				off := p.peek()
 				var idx *Node
+				// Simple interpolation offsets keep PHP's string-key rules: a
+				// num_string is an integer key only in canonical decimal form
+				// ("$a[01]" uses key "01"), and a bare word is a string key.
 				switch off.Kind {
-				case TNumString, TString:
+				case TNumString:
 					p.next()
-					idx = leaf("literal", off)
+					idx = leaf("num_string", off)
+				case TString:
+					p.next()
+					idx = leaf("string_offset", off)
 				case '-':
 					p.next()
-					idx = &Node{Kind: "literal", Text: "-" + p.expect(TNumString).Text, Line: off.Line}
+					idx = &Node{Kind: "num_string", Text: "-" + p.expect(TNumString).Text, Line: off.Line}
 				case TVariable:
 					p.next()
 					idx = leaf("variable", off)
