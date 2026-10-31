@@ -86,7 +86,11 @@
         "matching": 400000,
         "note": "not committed; the underflow branch fix removed the previous 8 differences"
       },
-      "amd64_php": "compared natively by the semantics-ops workflow"
+      "amd64_php": {
+        "pairs": 30000,
+        "matching": 30000,
+        "environment": "GitHub ubuntu-24.04 x86-64 runner with fma and avx2, semantics-ops workflow at commit e061ad0, image php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f"
+      }
     },
     "i386_pow_corpus": {
       "pairs": 30000,
@@ -101,7 +105,7 @@
     "PHP 8.5.12 only; no other release has a profile or reference run.",
     "Objects, resources, increment and decrement, compound assignment, intdiv, fmod, and string functions are not modeled.",
     "The implemented operations are only called by tests; no execution path uses them until the VM exists.",
-    "pow reproduces arm64 glibc 2.41; amd64 glibc without FMA uses another code path that may round differently."
+    "pow matches arm64 PHP and amd64 PHP on an FMA-capable CPU; amd64 glibc without FMA uses another code path that is not verified."
   ],
   "implementation_commit_note": "The evidence was first recorded at implementation_commit; the pow translation, profile, and scanner fixes were made on the same branch afterwards and are covered by the same test command."
 }
