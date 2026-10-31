@@ -8,7 +8,7 @@ Use immutable language profiles that specify exact release, language generation,
 
 Known engine memory corruption and permission escapes are not compatibility features. Deliberate historical language behavior and security-policy restrictions must be distinguished. A policy denial that prevents a normal historical workflow must be reported, not counted as transparent compatibility.
 
-The [history policy](../data/php-history-policy.json) is a planning catalog, not a list of certified releases. Build the exact source inventory and isolated reference environments under W-49. Never fabricate checksums, substitute an adjacent version, or remove an unavailable historical release from the goal.
+The [history policy](../data/php-history-policy.json) is a planning catalog, not a list of certified releases. Build the exact source inventory and isolated reference environments under W-49. The current, still incomplete, [release inventory](php-release-inventory.json) lists one record per discovered release with its source and evidence status. Never fabricate checksums, substitute an adjacent version, or remove an unavailable historical release from the goal.
 
 Required evidence includes source identity, license, build environment, matching oracle, semantic tests, applicable real applications, and documented security differences. Unknowns and unavailable evidence remain completion blockers.
 
