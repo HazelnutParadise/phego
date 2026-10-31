@@ -621,7 +621,7 @@ func (p *parser) newExpr(attrs *Node) *Node {
 	for p.atAny(TReadonly, TFinal, TAbstract) && p.tok(1).Kind != '(' {
 		mods.Children = append(mods.Children, leaf("modifier", p.next()))
 	}
-	if len(mods.Children) > 0 && !p.at(TClass) {
+	if (attrs != nil || len(mods.Children) > 0) && !p.at(TClass) {
 		p.unexpected()
 	}
 	p.checkClassModifiers(mods, true)

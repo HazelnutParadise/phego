@@ -41,6 +41,10 @@ func TestAttributesMustFollowNewForAnonymousClasses(t *testing.T) {
 		{"#[A] new C();", false},
 		{"#[A] new class {};", false},
 		{"new #[A] class {};", true},
+		{"new #[A] readonly class {};", true},
+		{"new #[A] C();", false},
+		{"new #[A] $class();", false},
+		{"new C();", true},
 		{"#[A] function() {};", true},
 	} {
 		_, err := parse(t, "<?php "+tc.source)
