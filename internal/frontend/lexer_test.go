@@ -131,3 +131,13 @@ func FuzzLex(f *testing.F) {
 		}
 	})
 }
+
+func TestHaltCompilerTakesExactlyThreeTokens(t *testing.T) {
+	// PHP 8.5.12 token_get_all keeps lexing three significant tokens after
+	// __halt_compiler, even when they are not "();".
+	got := kinds(lex(t, "<?php __halt_compiler);\n\n?>\ndata"))
+	want := "T_OPEN_TAG T_HALT_COMPILER ) ; T_WHITESPACE T_CLOSE_TAG T_INLINE_HTML"
+	if got != want {
+		t.Fatalf("got  %s\nwant %s", got, want)
+	}
+}

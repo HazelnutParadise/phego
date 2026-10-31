@@ -89,7 +89,7 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 			halted = 0
 		} else if halted >= 0 && !isTrivia(l.out[len(l.out)-1].Kind) {
 			halted++
-			if k := l.out[len(l.out)-1].Kind; halted == 3 || k == TCloseTag || k == ';' {
+			if halted == 3 {
 				if l.pos < len(l.src) {
 					l.emitRaw(TInlineHTML, l.pos, len(l.src))
 					l.pos = len(l.src)

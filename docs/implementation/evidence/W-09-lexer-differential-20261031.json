@@ -101,6 +101,13 @@
       "same_line": 16318,
       "different_line": 2,
       "different_line_cause": "heredoc indentation errors"
+    },
+    "lexer": {
+      "reference_sha256": "a70fccce2fa585a3ad5a4879da7fc36eec01a8348fc4125bd9ced9bc3409cf6c",
+      "result": {
+        "files": 16320,
+        "matching": 16320
+      }
     }
   }
 }
