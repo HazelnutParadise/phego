@@ -87,6 +87,10 @@ func TestParseMatchesReferenceCorpus(t *testing.T) {
 		if status != "ok" {
 			want, wantLine = "error", int(rec[2].(float64))
 		}
+		// "other" records are CompileErrors PHP raises while parsing.
+		if se != nil && se.Compile != (status == "other") {
+			got = "misclassified"
+		}
 		key := status + "->" + got
 		if got == want && gotLine == wantLine {
 			stats[key+" (same line)"]++

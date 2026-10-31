@@ -80,6 +80,11 @@ func (p *parser) parse() (root *Node, err error) {
 	return root, nil
 }
 
+// failCompile reports an error PHP raises as CompileError during parsing.
+func (p *parser) failCompile(line int, format string, args ...any) {
+	panic(parseFailure{&SyntaxError{Line: line, Message: fmt.Sprintf(format, args...), Compile: true}})
+}
+
 func (p *parser) fail(line int, format string, args ...any) {
 	panic(parseFailure{&SyntaxError{Line: line, Message: fmt.Sprintf(format, args...)}})
 }
@@ -391,7 +396,8 @@ func (p *parser) statementContext(top, single bool) *Node {
 			p.next()
 			p.unexpected()
 		}
-		if t.Kind != TReadonly || p.classModifiersAhead() {
+		// readonly( is a call to a function named readonly.
+		if t.Kind != TReadonly || p.tok(1).Kind != '(' {
 			if t.Kind != TClass || isIdentifier(p.tok(1).Kind) {
 				if single {
 					p.unexpected()
@@ -456,13 +462,14 @@ func (p *parser) statementContext(top, single bool) *Node {
 			return p.constStatement()
 		}
 	case THaltCompiler:
-		if top {
-			p.next()
-			p.expect('(')
-			p.expect(')')
-			p.endStatement()
-			return node("halt_compiler", t.Line)
+		p.next()
+		p.expect('(')
+		p.expect(')')
+		p.endStatement()
+		if !top {
+			p.failCompile(t.Line, "__HALT_COMPILER() can only be used from the outermost scope")
 		}
+		return node("halt_compiler", t.Line)
 	}
 	e := p.expr()
 	p.endStatement()
@@ -669,7 +676,7 @@ func (p *parser) declareStatement() *Node {
 		p.expect('=')
 		v := p.expr()
 		if strings.EqualFold(name.Text, "encoding") && v.Kind != "literal" {
-			p.fail(p.peek().Line, "Encoding must be a literal")
+			p.failCompile(p.peek().Line, "Encoding must be a literal")
 		}
 		n.Children = append(n.Children, node("directive", name.Line, name, v))
 		if !p.accept(',') {
@@ -1038,6 +1045,10 @@ func (p *parser) classDecl(attrs *Node) *Node {
 		mods.Children = append(mods.Children, leaf("modifier", p.next()))
 	}
 	p.checkClassModifiers(mods, false)
+	if len(mods.Children) > 0 && !p.at(TClass) {
+		// Only class declarations take modifiers.
+		p.unexpected()
+	}
 	t := p.next()
 	n := &Node{Kind: strings.ToLower(t.Text), Line: line}
 	name := p.className()

@@ -19,10 +19,12 @@ func leaf(kind string, t Token) *Node {
 	return &Node{Kind: kind, Text: t.Text, Line: t.Line}
 }
 
-// SyntaxError is a located parse failure.
+// SyntaxError is a located parse failure. Compile marks errors PHP raises
+// as CompileError while building the tree rather than as ParseError.
 type SyntaxError struct {
 	Line    int
 	Message string
+	Compile bool
 }
 
 func (e *SyntaxError) Error() string { return e.Message }

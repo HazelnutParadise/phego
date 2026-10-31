@@ -40,8 +40,17 @@ func (p *parser) checkModifiers(mods *Node, target string) {
 		for _, t := range modifierTargets[k] {
 			allowed = allowed || t == target
 		}
+		if !allowed && k == TVar {
+			// var is property-only grammar, so misplacing it is a syntax
+			// error: at var itself where no member modifiers are allowed,
+			// otherwise at the token after the list.
+			if target == targetParameter || target == targetPropertyHook {
+				p.fail(m.Line, "syntax error, unexpected token %q", m.Text)
+			}
+			p.unexpected()
+		}
 		if !allowed {
-			p.fail(line, "Cannot use the %s modifier on a %s", strings.ToLower(m.Text), target)
+			p.failCompile(line, "Cannot use the %s modifier on a %s", strings.ToLower(m.Text), target)
 		}
 		group := strings.ToLower(m.Text)
 		switch k {
@@ -52,13 +61,13 @@ func (p *parser) checkModifiers(mods *Node, target string) {
 		}
 		if seen[group] {
 			if strings.HasSuffix(group, "access") {
-				p.fail(line, "Multiple access type modifiers are not allowed")
+				p.failCompile(line, "Multiple access type modifiers are not allowed")
 			}
-			p.fail(line, "Multiple %s modifiers are not allowed", group)
+			p.failCompile(line, "Multiple %s modifiers are not allowed", group)
 		}
 		seen[group] = true
 		if seen["abstract"] && seen["final"] {
-			p.fail(line, "Cannot use the final modifier on an abstract %s", target)
+			p.failCompile(line, "Cannot use the final modifier on an abstract %s", target)
 		}
 	}
 }
@@ -73,14 +82,14 @@ func (p *parser) checkClassModifiers(mods *Node, anonymous bool) {
 	for _, m := range mods.Children {
 		name := strings.ToLower(m.Text)
 		if anonymous && name != "readonly" {
-			p.fail(line, "Cannot use the %s modifier on an anonymous class", name)
+			p.failCompile(line, "Cannot use the %s modifier on an anonymous class", name)
 		}
 		if seen[name] {
-			p.fail(line, "Multiple %s modifiers are not allowed", name)
+			p.failCompile(line, "Multiple %s modifiers are not allowed", name)
 		}
 		seen[name] = true
 		if seen["abstract"] && seen["final"] {
-			p.fail(line, "Cannot use the final modifier on an abstract class")
+			p.failCompile(line, "Cannot use the final modifier on an abstract class")
 		}
 	}
 }

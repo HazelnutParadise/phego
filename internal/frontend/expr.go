@@ -628,10 +628,12 @@ func (p *parser) newExpr(attrs *Node) *Node {
 	for p.atAny(TReadonly, TFinal, TAbstract) && p.tok(1).Kind != '(' {
 		mods.Children = append(mods.Children, leaf("modifier", p.next()))
 	}
+	// PHP checks anonymous class modifiers as soon as the list ends,
+	// before it knows whether class follows.
+	p.checkClassModifiers(mods, true)
 	if (attrs != nil || len(mods.Children) > 0) && !p.at(TClass) {
 		p.unexpected()
 	}
-	p.checkClassModifiers(mods, true)
 	if p.at(TClass) {
 		c := p.next()
 		var args *Node
