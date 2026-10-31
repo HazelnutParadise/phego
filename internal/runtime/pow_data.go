@@ -1,7 +1,7 @@
 // Code generated from ARM optimized-routines math/pow_log_data.c and
 // math/exp_data.c at commit 2ee4b0d45680a9880412c1d186224b08652c35f6; DO NOT EDIT.
 //
-// Copyright (c) 2018, Arm Limited.
+// Copyright (c) 2018-2023, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 // See third_party/optimized-routines/LICENSE.
 

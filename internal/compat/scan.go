@@ -6,6 +6,7 @@ package compat
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
@@ -57,7 +58,8 @@ var callbackArgument = map[string]int{
 	"spl_autoload_register": 0, "set_error_handler": 0, "set_exception_handler": 0,
 	"ob_start": 0, "register_tick_function": 0, "header_register_callback": 0,
 	"preg_replace_callback_array": 0,
-	"array_filter":                1, "array_walk": 1, "array_walk_recursive": 1, "array_reduce": 1,
+	"array_find":                  1, "array_find_key": 1, "array_any": 1, "array_all": 1,
+	"array_filter": 1, "array_walk": 1, "array_walk_recursive": 1, "array_reduce": 1,
 	"usort": 1, "uasort": 1, "uksort": 1, "iterator_apply": 1,
 	"preg_replace_callback": 1, "mb_ereg_replace_callback": 1,
 	"array_udiff": lastArgument, "array_udiff_assoc": lastArgument, "array_udiff_uassoc": lastArgument,
@@ -71,7 +73,7 @@ var callbackArgument = map[string]int{
 // configured sendmail program.
 var processFunctions = map[string]bool{
 	"exec": true, "shell_exec": true, "system": true, "passthru": true,
-	"popen": true, "proc_open": true, "pcntl_exec": true, "mail": true,
+	"popen": true, "proc_open": true, "pcntl_exec": true, "mail": true, "mb_send_mail": true,
 }
 
 // writeFunctions write to the file system; the value is the path argument.
@@ -129,12 +131,15 @@ func (s *scanner) walk(n *frontend.Node) {
 		if member != nil && (!isName(child(member, 0)) || !isName(child(member, 1))) {
 			s.add(n, "dynamic-static-call", Unknown, "", source(member), "the class or method is computed at run time; confirm every reachable target exists")
 		} else if member != nil && strings.EqualFold(strings.TrimPrefix(child(member, 0).Text, `\`), "closure") &&
-			strings.EqualFold(child(member, 1).Text, "fromCallable") && !staticCallable(argument(child(n, 1), 0)) {
-			s.add(n, "dynamic-callback", Unknown, "", "Closure::fromCallable("+source(argument(child(n, 1), 0))+")", "the callback is computed at run time; confirm every reachable callable exists")
+			strings.EqualFold(child(member, 1).Text, "fromCallable") {
+			s.callback(n, "Closure::fromCallable", argument(child(n, 1), 0), child(n, 1) != nil && len(child(n, 1).Children) > 0)
 		}
 	case "new":
-		if class := child(n, 0); class != nil && class.Kind != "name" && class.Kind != "new_class" {
+		class := child(n, 0)
+		if class != nil && class.Kind != "name" && class.Kind != "new_class" {
 			s.add(n, "dynamic-new", Unknown, "", source(class), "the class is computed at run time; confirm every reachable class can be loaded")
+		} else if class != nil && class.Kind == "name" && strings.EqualFold(strings.TrimPrefix(class.Text, `\`), "ReflectionFunction") {
+			s.callback(n, "ReflectionFunction", argument(child(n, 1), 0), child(n, 1) != nil && len(child(n, 1).Children) > 0)
 		}
 	case "include":
 		s.include(n)
@@ -189,6 +194,13 @@ func (s *scanner) importFunctions(n *frontend.Node) {
 // the namespace defines one, which this scan assumes it does not.
 func (s *scanner) globalFunction(name string) string {
 	lower := strings.ToLower(name)
+	if rest, ok := strings.CutPrefix(lower, `namespace\`); ok {
+		// namespace\f names f in the current namespace.
+		lower = `\` + rest
+		if s.namespace != "" {
+			lower = `\` + s.namespace + lower
+		}
+	}
 	switch {
 	case strings.HasPrefix(lower, `\`):
 		lower = lower[1:]
@@ -228,28 +240,65 @@ func (s *scanner) call(n *frontend.Node) {
 	name := s.globalFunction(callee.Text)
 	args := child(n, 1)
 	if args != nil && args.Kind == "callable_args" {
-		return // first-class callable syntax creates a closure without calling
+		// First-class callable syntax creates a closure that may be called
+		// later, so it needs whatever the function needs.
+		s.function(n, name, nil, callee.Text+"(...)")
+		return
 	}
 	if pos, ok := callbackArgument[name]; ok {
-		if pos == lastArgument {
-			pos = len(args.Children) - 1
+		count := 0
+		if args != nil {
+			count = len(args.Children)
 		}
-		cb := argument(args, pos)
+		if pos == lastArgument {
+			pos = count - 1
+		}
+		spread := false
+		for i := 0; args != nil && i < count && i <= pos; i++ {
+			if a := args.Children[i]; a != nil && (a.Kind == "spread" || a.Kind == "named_arg") {
+				spread = true
+			}
+		}
 		switch {
-		case cb == nil && args != nil && pos < len(args.Children):
-			s.add(n, "dynamic-callback", Unknown, "", callee.Text+"(...)", "the callback is computed at run time; confirm every reachable callable exists")
-		case cb == nil, isNull(cb):
-			// No callback is passed, so none is called.
-		case isStringLiteral(cb):
-			s.function(n, callbackFunction(unquote(cb.Text)), nil, callee.Text+"("+cb.Text+")")
-		case !staticCallable(cb):
-			s.add(n, "dynamic-callback", Unknown, "", callee.Text+"("+source(cb)+")", "the callback is computed at run time; confirm every reachable callable exists")
+		case spread:
+			s.add(n, "dynamic-callback", Unknown, "", callee.Text+"(...)", "the callback is passed through unpacked or named arguments; confirm every reachable callable exists")
+		case pos >= 0 && pos < count:
+			s.callback(n, callee.Text, argument(args, pos), true)
 		}
 	}
-	if name == "extract" {
-		s.add(n, "extract", Unknown, "", callee.Text+"("+source(argument(args, 0))+")", "creates variables whose names come from data at run time")
+	if (name == "filter_var" || name == "filter_var_array" || name == "filter_input" || name == "filter_input_array") && mentions(args, "filter_callback") {
+		s.add(n, "dynamic-callback", Unknown, "", callee.Text+"(FILTER_CALLBACK)", "the filter callback is read from the options at run time; confirm every reachable callable exists")
 	}
 	s.function(n, name, args, callee.Text+"()")
+}
+
+// callback reports a callable passed to via. A string literal names a global
+// function; closures are written in the source; anything else is Unknown.
+func (s *scanner) callback(n *frontend.Node, via string, cb *frontend.Node, passed bool) {
+	switch {
+	case !passed || isNull(cb):
+		// No callback is passed, so none is called.
+	case isStringLiteral(cb):
+		s.function(n, callbackFunction(literalValue(cb.Text)), nil, via+"("+cb.Text+")")
+	case !staticCallable(cb):
+		s.add(n, "dynamic-callback", Unknown, "", via+"("+source(cb)+")", "the callback is computed at run time; confirm every reachable callable exists")
+	}
+}
+
+// mentions reports whether a constant with the lower-cased name appears in n.
+func mentions(n *frontend.Node, name string) bool {
+	if n == nil {
+		return false
+	}
+	if n.Kind == "name" && strings.EqualFold(strings.TrimPrefix(n.Text, `\`), name) {
+		return true
+	}
+	for _, c := range n.Children {
+		if mentions(c, name) {
+			return true
+		}
+	}
+	return false
 }
 
 // function reports the capability a call to the global function name needs.
@@ -259,12 +308,26 @@ func (s *scanner) function(n *frontend.Node, name string, args *frontend.Node, e
 	if processFunctions[name] {
 		s.add(n, "process", Capability, "process", evidence, "starts an operating system process; requires the process capability")
 	}
+	if name == "extract" {
+		s.add(n, "extract", Unknown, "", evidence, "creates variables whose names come from data at run time")
+	}
+	if name == "error_log" {
+		switch kind := argument(args, 1); {
+		case args == nil:
+			s.add(n, "file-write", Unknown, "filesystem.write", evidence, "may append to a file whose path is computed at run time")
+		case kind == nil:
+		case kind.Kind == "literal" && kind.Text == "3":
+			s.writeFinding(n, name, argument(args, 2), evidence)
+		case kind.Kind != "literal":
+			s.add(n, "file-write", Unknown, "filesystem.write", evidence, "the message type is computed at run time; it may append to a file")
+		}
+	}
 	if name == "fopen" {
 		mode := argument(args, 1)
 		switch {
 		case args == nil || !isStringLiteral(mode):
 			s.add(n, "file-write", Unknown, "filesystem.write", evidence, "opens a file with a mode computed at run time; it may write")
-		case strings.ContainsAny(unquote(mode.Text), "waxc+"):
+		case strings.ContainsAny(literalValue(mode.Text), "waxc+"):
 			s.writeFinding(n, name, argument(args, 0), evidence)
 		}
 	}
@@ -291,11 +354,16 @@ func (s *scanner) include(n *frontend.Node) {
 		target = child(target, 0)
 	}
 	if path, ok := staticPath(target); ok {
+		lower := strings.ToLower(literalValue(strings.TrimPrefix(path, "__DIR__.")))
 		for _, scheme := range remoteSchemes {
-			if strings.HasPrefix(strings.ToLower(unquote(path)), scheme) {
+			if strings.HasPrefix(lower, scheme) {
 				s.add(n, "remote-include", Capability, "network", n.Text+" "+path, "reads source code over the network; requires the network capability")
 				return
 			}
+		}
+		if strings.Contains(lower, "://") {
+			s.add(n, "stream-include", Unknown, "stream", n.Text+" "+path, "reads source code through a stream wrapper such as php://input or data://, whose content is not a checked file")
+			return
 		}
 		s.add(n, "include", Capability, "filesystem.read", n.Text+" "+path, "reads a source file; the file must be inside the granted source tree")
 		return
@@ -350,13 +418,83 @@ func isNull(n *frontend.Node) bool {
 	return n != nil && n.Kind == "name" && strings.EqualFold(n.Text, "null")
 }
 
-// unquote strips the quotes of a simple string literal.
-func unquote(s string) string {
-	if len(s) >= 2 && (s[0] == '\'' || s[0] == '"') && s[len(s)-1] == s[0] {
-		return s[1 : len(s)-1]
+// literalValue decodes a PHP string literal that has no interpolation, so a
+// name or mode written with escapes is checked as PHP sees it.
+func literalValue(lit string) string {
+	if lit != "" && (lit[0] == 'b' || lit[0] == 'B') {
+		lit = lit[1:]
 	}
-	return s
+	if len(lit) < 2 || (lit[0] != '\'' && lit[0] != '"') || lit[len(lit)-1] != lit[0] {
+		return lit
+	}
+	body, quote := lit[1:len(lit)-1], lit[0]
+	var out strings.Builder
+	for i := 0; i < len(body); i++ {
+		c := body[i]
+		if c != '\\' || i+1 == len(body) {
+			out.WriteByte(c)
+			continue
+		}
+		next := body[i+1]
+		if quote == '\'' {
+			if next == '\\' || next == '\'' {
+				out.WriteByte(next)
+				i++
+			} else {
+				out.WriteByte(c)
+			}
+			continue
+		}
+		i++
+		switch {
+		case next == 'n':
+			out.WriteByte('\n')
+		case next == 't':
+			out.WriteByte('\t')
+		case next == 'r':
+			out.WriteByte('\r')
+		case next == 'v':
+			out.WriteByte('\v')
+		case next == 'e':
+			out.WriteByte(0x1b)
+		case next == 'f':
+			out.WriteByte('\f')
+		case next == '\\' || next == '$' || next == '"':
+			out.WriteByte(next)
+		case next == 'x' && i+1 < len(body) && isHex(body[i+1]):
+			j := i + 1
+			for j < len(body) && j < i+3 && isHex(body[j]) {
+				j++
+			}
+			v, _ := strconv.ParseUint(body[i+1:j], 16, 8)
+			out.WriteByte(byte(v))
+			i = j - 1
+		case next == 'u' && strings.HasPrefix(body[i+1:], "{") && strings.IndexByte(body[i:], '}') > 2:
+			end := i + strings.IndexByte(body[i:], '}')
+			v, err := strconv.ParseUint(body[i+2:end], 16, 32)
+			if err != nil {
+				out.WriteString(`\u`)
+				continue
+			}
+			out.WriteRune(rune(v))
+			i = end
+		case next >= '0' && next <= '7':
+			j := i
+			for j < len(body) && j < i+3 && body[j] >= '0' && body[j] <= '7' {
+				j++
+			}
+			v, _ := strconv.ParseUint(body[i:j], 8, 16)
+			out.WriteByte(byte(v))
+			i = j - 1
+		default:
+			out.WriteByte('\\')
+			out.WriteByte(next)
+		}
+	}
+	return out.String()
 }
+
+func isHex(c byte) bool { return c >= '0' && c <= '9' || c|0x20 >= 'a' && c|0x20 <= 'f' }
 
 func isName(n *frontend.Node) bool { return n != nil && (n.Kind == "name" || n.Kind == "identifier") }
 

@@ -32,6 +32,11 @@ jobs:
             -v "$PWD/tests/semantics/w10-ops:/w:ro" \
             php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f \
             php -n /w/matrix.php > "$out/ref-64.json"
-          sha256sum "$out"/*.json
+          gzip -dc internal/runtime/testdata/php8512-pow-pairs.txt.gz | docker run --rm -i --network none --platform linux/amd64 \
+            -v "$PWD/tests/semantics/w10-ops:/w:ro" \
+            php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f \
+            php -n /w/pow.php > "$out/pow-64.txt"
+          { grep -o -w -E 'fma|avx2' /proc/cpuinfo || true; } | sort -u
+          sha256sum "$out"/*
       - name: Compare operators with the native references
-        run: PHEGO_NATIVE_OPS_REFERENCE="$RUNNER_TEMP/ops-reference" go test -run TestPHP8512OperatorsMatchReference -v ./internal/runtime
+        run: PHEGO_NATIVE_OPS_REFERENCE="$RUNNER_TEMP/ops-reference" go test -run "TestPHP8512OperatorsMatchReference|TestGlibcPowMatchesPHP" -v ./internal/runtime

@@ -313,4 +313,12 @@ func TestProgramNeverRunsUnderAnotherProfile(t *testing.T) {
 	if res, err := e32.Run(ctx, &stale); !errors.As(err, &ce) || res.Status != StatusFailed || !strings.Contains(ce.Reason, "64-bit") {
 		t.Fatalf("result %+v error %v", res, err)
 	}
+	short, err := NewEngine(Config{ShortOpenTag: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stale.engine = short
+	if res, err := short.Run(ctx, &stale); !errors.As(err, &ce) || res.Status != StatusFailed || !strings.Contains(ce.Reason, "short_open_tag off, not") {
+		t.Fatalf("short_open_tag mismatch: result %+v error %v", res, err)
+	}
 }

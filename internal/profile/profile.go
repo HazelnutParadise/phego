@@ -24,7 +24,11 @@ func (p Profile) Key() string {
 }
 
 func (p Profile) String() string {
-	return fmt.Sprintf("PHP %s with %d-bit integers", p.Release, p.IntWidth)
+	tag := "off"
+	if p.ShortOpenTag {
+		tag = "on"
+	}
+	return fmt.Sprintf("PHP %s with %d-bit integers and short_open_tag %s", p.Release, p.IntWidth, tag)
 }
 
 // Generation is the language generation of the release, such as "php8".

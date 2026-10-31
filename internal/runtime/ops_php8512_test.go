@@ -268,9 +268,9 @@ func ulpDistance(a, b string) int64 {
 
 // i386PowDifferences is the number of 32-bit ** results that differ from
 // PHP 8.5.12 by at most 64 units in the last place. The linux/386 PHP build
-// calls glibc's i386 pow, which computes with x87 instructions and is not
-// rounded to nearest; Phego rounds pow to nearest, which matches the 64-bit
-// glibc builds exactly. The i386 reference is byte-identical whether it runs
+// calls glibc's i386 pow, which computes with x87 instructions; Phego
+// reproduces the arm64 glibc pow, which matches the 64-bit reference exactly.
+// The i386 reference is byte-identical whether it runs
 // natively on x86-64 or under QEMU, so this is a real libm difference of the
 // 32-bit profile, recorded as a known gap in docs/implementation/W-10.md.
 const i386PowDifferences = 51

@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"math"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -48,6 +49,14 @@ func hexBits(t *testing.T, s string) float64 {
 func TestGlibcPowMatchesPHP(t *testing.T) {
 	pairs := readGzipLines(t, "testdata/php8512-pow-pairs.txt.gz")
 	want := readGzipLines(t, "testdata/php8512-pow-64.txt.gz")
+	if dir := os.Getenv(nativeOpsReferenceEnv); dir != "" {
+		// The semantics-ops workflow regenerates the results with amd64 PHP.
+		raw, err := os.ReadFile(filepath.Join(dir, "pow-64.txt"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		want = strings.Split(strings.TrimRight(string(raw), "\n"), "\n")
+	}
 	if len(pairs) != len(want) || len(pairs) == 0 {
 		t.Fatalf("%d pairs, %d results", len(pairs), len(want))
 	}
@@ -78,6 +87,7 @@ func TestGlibcPowKnownCases(t *testing.T) {
 		{math.Copysign(0, -1), -1, math.Inf(-1)},
 		{-8, 1.0 / 3, math.NaN()},
 		{-2, 3, -8},
+		{2.3239543184695544, -823.428927093435, math.Float64frombits(0x0152c8b022d050ca)}, // underflow branch
 	} {
 		got := glibcPow(tc.x, tc.y)
 		if math.Float64bits(got) != math.Float64bits(tc.want) && !(math.IsNaN(got) && math.IsNaN(tc.want)) {

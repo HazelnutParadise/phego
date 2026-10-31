@@ -77,23 +77,31 @@
     "fuzz": "FuzzNumericString checks internal consistency between strict and lenient recognition, not PHP results: 60 s, about 11.9 million executions; the one failure it found was fixed and the fixed values were confirmed in PHP 8.5.12.",
     "pow_corpus": {
       "pairs": 30000,
-      "matching_arm64_build": 30000,
-      "matching_amd64_build": 30000,
+      "matching_go_arm64_build": 30000,
+      "matching_go_amd64_build": 30000,
+      "reference": "arm64 PHP",
       "larger_offline_corpus": {
         "seed": 7,
         "pairs": 400000,
-        "differing_by_one_ulp": 8,
-        "note": "all with |y*log(x)| above about 300; corpus not committed"
-      }
+        "matching": 400000,
+        "note": "not committed; the underflow branch fix removed the previous 8 differences"
+      },
+      "amd64_php": "compared natively by the semantics-ops workflow"
+    },
+    "i386_pow_corpus": {
+      "pairs": 30000,
+      "differing": 15613,
+      "max_ulp": 346,
+      "source": "second review run under QEMU; not regenerated natively"
     }
   },
-  "comparison": "Each case compares the exact result encoding (float bits, string bytes, array keys and values), the thrown class and message, and every diagnostic level and message in order. NaN results compare as NaN regardless of sign and payload, which come from the host CPU and libm and are visible to PHP only through pack().",
+  "comparison": "Each case compares the exact result encoding (float bits, string bytes, array keys and values), the thrown class and message, and every diagnostic level and message in order. NaN results compare as NaN regardless of sign and payload, which come from the host CPU and are visible to PHP only through pack().",
   "limitations": [
-    "The 32-bit profile has 51 ** results that differ from PHP by at most 64 ULP. PHP on linux/386 calls i386 glibc pow, which computes with x87 instructions and is not rounded to nearest; Phego rounds to nearest. The native x86-64 regeneration of the i386 reference is byte-identical to the emulated one, so this is a real libm difference, not emulation error.",
+    "The 32-bit profile does not reproduce i386 glibc pow, which computes with x87 instructions: 51 operator-matrix results differ by at most 64 ULP, and about half of the 30000 pow pairs differ by up to 346 ULP. The native x86-64 regeneration of the i386 matrix reference is byte-identical to the emulated one.",
     "PHP 8.5.12 only; no other release has a profile or reference run.",
     "Objects, resources, increment and decrement, compound assignment, intdiv, fmod, and string functions are not modeled.",
     "The implemented operations are only called by tests; no execution path uses them until the VM exists.",
-    "64-bit pow differs from glibc by one ULP in 8 of 400000 offline pairs, all with large |y*log(x)|; the cause is not identified and does not depend on where multiply-add is fused."
+    "pow reproduces arm64 glibc 2.41; amd64 glibc without FMA uses another code path that may round differently."
   ],
   "implementation_commit_note": "The evidence was first recorded at implementation_commit; the pow translation, profile, and scanner fixes were made on the same branch afterwards and are covered by the same test command."
 }

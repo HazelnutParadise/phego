@@ -1,6 +1,6 @@
 // This file is a Go translation of math/pow.c from ARM optimized-routines at
 // commit 2ee4b0d45680a9880412c1d186224b08652c35f6, the algorithm glibc uses
-// for pow on 64-bit platforms.
+// for pow; it reproduces the results of glibc 2.41 on arm64.
 //
 // Copyright (c) 2018-2026, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -10,13 +10,14 @@ package runtime
 
 import "math"
 
-// glibcPow returns x**y as glibc 2.41's pow does on 64-bit Linux with fused
+// glibcPow returns x**y as glibc 2.41's pow does on arm64 Linux with fused
 // multiply-add, so PHP-visible results match bit for bit. PHP's ** calls the
 // C library pow, and Go's math.Pow can be several units in the last place
 // away from it, which PHP code observes through printing or comparison.
 //
 // glibc on arm64 is compiled with GCC's default multiply-add contraction, so
-// a product that feeds an addition is fused. Go fuses only on some
+// a product that feeds an addition is usually fused; which operations are
+// fused was checked against the disassembly of Debian's glibc 2.41 libm. Go fuses only on some
 // architectures and by its own rules, even across statements, so every such
 // operation is written as math.FMA and every other product is wrapped in
 // float64(), which the Go specification requires to round.
@@ -193,15 +194,18 @@ func powExpSpecial(tmp float64, sbits, ki uint64) float64 {
 		y := math.FMA(scale, tmp, scale)
 		return 0x1p1009 * y
 	}
+	// glibc's arm64 build does not fuse this branch: scale*tmp is rounded
+	// once and shared, as its disassembly shows.
 	sbits += 1022 << 52
 	scale := math.Float64frombits(sbits)
-	y := math.FMA(scale, tmp, scale)
+	m := float64(scale * tmp)
+	y := scale + m
 	if math.Abs(y) < 1.0 {
 		one := 1.0
 		if y < 0.0 {
 			one = -1.0
 		}
-		lo := math.FMA(scale, tmp, scale-y)
+		lo := scale - y + m
 		hi := one + y
 		lo = one - hi + y + lo
 		y = (hi + lo) - one
