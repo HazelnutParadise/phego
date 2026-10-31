@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 MAX_INDEX_BYTES = 4 * 1024 * 1024
 INDEX_URL = re.compile(r"https://museum\.php\.net/php(?:1|2|3|4|5|7|8)/\Z")
 SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+-]*\Z")
-FILENAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+-]*\.(?:tar\.gz|tar\.bz2|tar\.xz|zip)\Z")
+FILENAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+-]*\.(?:tar\.gz|tar\.bz2|tar\.xz|zip|exe|msi)\Z")
 
 
 class IndexParser(HTMLParser):

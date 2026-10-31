@@ -25,6 +25,15 @@ class ClassifyNameTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(inv.classify_name(name)[0], version)
 
+    def test_installers_keep_museum_urls_and_dotless_names_stay_unresolved(self):
+        out = BuildTests().build(["php-4.0.4-installer.exe", "php405-installer.exe"], {})
+        by_version = {r["version"]: r for r in out["releases"]}
+        artifact = by_version["4.0.4"]["artifacts"][0]
+        self.assertEqual(artifact["platform"], "installer")
+        self.assertTrue(artifact["url"].endswith("/php-4.0.4-installer.exe"))
+        self.assertEqual([u["filename"] for u in out["unresolved"]], ["php405-installer.exe"])
+        self.assertNotIn("4.0.5", by_version)
+
     def test_pre_suffix_is_a_prerelease(self):
         out = BuildTests().build(["php-4.3.0pre2-Win32.zip", "php-4.3.0.tar.gz"], {})
         by_version = {r["version"]: r for r in out["releases"]}

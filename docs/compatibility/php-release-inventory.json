@@ -54,7 +54,7 @@
   ],
   "counts": {
     "versions": 667,
-    "unresolved_names": 0,
+    "unresolved_names": 4,
     "missing_source": 4,
     "prereleases": 73
   },
@@ -880,8 +880,8 @@
           "filename": "php-4.0.3pl1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.0.3pl1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.0.3pl1.tar.gz",
@@ -924,6 +924,13 @@
           "platform": "Win32",
           "url": "https://museum.php.net/php4/php-4.0.4-Win32.zip",
           "listed_by": "museum+releases"
+        },
+        {
+          "filename": "php-4.0.4-installer.exe",
+          "kind": "php",
+          "platform": "installer",
+          "url": "https://museum.php.net/php4/php-4.0.4-installer.exe",
+          "listed_by": "museum"
         },
         {
           "filename": "php-4.0.4-installer.zip",
@@ -1418,8 +1425,8 @@
           "filename": "php-4.1.1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.1.1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.1.1.tar.gz",
@@ -1450,8 +1457,8 @@
           "filename": "php-4.1.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.1.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.1.2.tar.gz",
@@ -1482,8 +1489,8 @@
           "filename": "php-4.2.0-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.2.0-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.2.0.tar.gz",
@@ -1582,8 +1589,8 @@
           "filename": "php-4.2.1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.2.1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.2.1.tar.gz",
@@ -1648,8 +1655,8 @@
           "filename": "php-4.2.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.2.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.2.2.tar.gz",
@@ -1680,8 +1687,8 @@
           "filename": "php-4.2.3-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.2.3-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.2.3.tar.gz",
@@ -1760,8 +1767,8 @@
           "filename": "php-4.3.0-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.0-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.0.tar.gz",
@@ -1942,8 +1949,8 @@
           "filename": "php-4.3.1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.1.tar.gz",
@@ -1974,8 +1981,8 @@
           "filename": "php-4.3.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.2.tar.bz2",
@@ -2213,8 +2220,8 @@
           "filename": "php-4.3.4-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.4-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.4.tar.gz",
@@ -2317,8 +2324,8 @@
           "filename": "php-4.3.5-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.5-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.5.tar.gz",
@@ -2445,8 +2452,8 @@
           "filename": "php-4.3.6-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.6-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.6.tar.gz",
@@ -2549,8 +2556,8 @@
           "filename": "php-4.3.7-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.7-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.7.tar.gz",
@@ -2605,8 +2612,8 @@
           "filename": "php-4.3.8-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.8-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.8.tar.gz",
@@ -2637,8 +2644,8 @@
           "filename": "php-4.3.9-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.9-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.9.tar.bz2",
@@ -2700,8 +2707,8 @@
           "filename": "php-4.3.10-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.10-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.10.tar.bz2",
@@ -2739,8 +2746,8 @@
           "filename": "php-4.3.11-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.3.11-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.3.11.tar.bz2",
@@ -2778,8 +2785,8 @@
           "filename": "php-4.4.0-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.4.0-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.4.0.tar.bz2",
@@ -2817,8 +2824,8 @@
           "filename": "php-4.4.1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.4.1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.4.1.tar.bz2",
@@ -2856,8 +2863,8 @@
           "filename": "php-4.4.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.4.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.4.2.tar.bz2",
@@ -2895,8 +2902,8 @@
           "filename": "php-4.4.3-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.4.3-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.4.3.tar.bz2",
@@ -2934,8 +2941,8 @@
           "filename": "php-4.4.4-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php4/php-4.4.4-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-4.4.4.tar.bz2",
@@ -3152,8 +3159,8 @@
           "filename": "php-5.0.0-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.0.0-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.0.0.tar.gz",
@@ -3302,8 +3309,8 @@
           "filename": "php-5.0.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.0.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.0.2.tar.bz2",
@@ -3348,8 +3355,8 @@
           "filename": "php-5.0.3-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.0.3-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.0.3.tar.bz2",
@@ -3394,8 +3401,8 @@
           "filename": "php-5.0.4-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.0.4-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.0.4.tar.bz2",
@@ -3447,8 +3454,8 @@
           "filename": "php-5.0.5-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.0.5-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.0.5.tar.bz2",
@@ -3493,8 +3500,8 @@
           "filename": "php-5.1.0-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.0-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.0.tar.bz2",
@@ -3546,8 +3553,8 @@
           "filename": "php-5.1.1-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.1-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.1.tar.bz2",
@@ -3599,8 +3606,8 @@
           "filename": "php-5.1.2-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.2-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.2.tar.bz2",
@@ -3652,8 +3659,8 @@
           "filename": "php-5.1.3-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.3-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.3.tar.bz2",
@@ -3705,8 +3712,8 @@
           "filename": "php-5.1.4-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.4-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.4.tar.bz2",
@@ -3751,8 +3758,8 @@
           "filename": "php-5.1.5-installer.exe",
           "kind": "php",
           "platform": "installer",
-          "url": null,
-          "listed_by": "releases"
+          "url": "https://museum.php.net/php5/php-5.1.5-installer.exe",
+          "listed_by": "museum+releases"
         },
         {
           "filename": "php-5.1.5.tar.bz2",
@@ -3849,6 +3856,13 @@
           "md5": "910734e96f41190020272d80b82ce553"
         },
         {
+          "filename": "php-5.2.0-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.0-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
           "filename": "php-5.2.0.tar.bz2",
           "kind": "php",
           "platform": "source",
@@ -3910,6 +3924,13 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.1-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.1-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.1-win32-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -3984,6 +4005,13 @@
           "listed_by": "museum"
         },
         {
+          "filename": "php-5.2.2-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.2-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
           "filename": "php-5.2.2.tar.bz2",
           "kind": "php",
           "platform": "source",
@@ -4052,6 +4080,13 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.3-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.3-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.3-win32-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -4126,6 +4161,13 @@
           "listed_by": "museum"
         },
         {
+          "filename": "php-5.2.4-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.4-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
           "filename": "php-5.2.4.tar.bz2",
           "kind": "php",
           "platform": "source",
@@ -4194,6 +4236,13 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.5-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.5-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.5-win32-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -4273,16 +4322,16 @@
           "filename": "php-5.2.6-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.6-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "96a2326b16bda488734d3956a48201b7"
         },
         {
           "filename": "php-5.2.6-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.6-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "94e551037e7c9c056f90179f351c0560"
         },
         {
@@ -4348,16 +4397,16 @@
           "filename": "php-5.2.8-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.8-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "d4490964818542c416644b3d67f5b350"
         },
         {
           "filename": "php-5.2.8-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.8-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "159def484800411060a9eacccafd2253"
         },
         {
@@ -4420,6 +4469,22 @@
           "listed_by": "museum"
         },
         {
+          "filename": "php-5.2.9-1-nts-win32-installer.msi",
+          "kind": "php",
+          "platform": "nts-win32-installer",
+          "build": "1",
+          "url": "https://museum.php.net/php5/php-5.2.9-1-nts-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.9-1-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "build": "1",
+          "url": "https://museum.php.net/php5/php-5.2.9-1-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
           "filename": "php-5.2.9-2-Win32.zip",
           "kind": "php",
           "platform": "Win32",
@@ -4442,8 +4507,8 @@
           "kind": "php",
           "platform": "nts-win32-installer",
           "build": "2",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.9-2-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "4e7a1bec2b268d3d2d28cb89f629b680"
         },
         {
@@ -4451,8 +4516,8 @@
           "kind": "php",
           "platform": "win32-installer",
           "build": "2",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.9-2-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "e2162faa3467aed01651df4269aa6944"
         },
         {
@@ -4467,6 +4532,20 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.9-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.9-nts-win32-installer.msi",
+          "kind": "php",
+          "platform": "nts-win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.9-nts-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.9-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.9-win32-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -4548,16 +4627,16 @@
           "filename": "php-5.2.10-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.10-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "e341deb2872d3f8f4589593da88bbede"
         },
         {
           "filename": "php-5.2.10-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.10-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "38b65bc57f64c66ff73f6f4e2db2cbb4"
         },
         {
@@ -4623,16 +4702,16 @@
           "filename": "php-5.2.11-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.11-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "4fe1344093e26c2a51a82094bac131ad"
         },
         {
           "filename": "php-5.2.11-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.11-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "3cedc71fc90f88239d629cdb735d87c0"
         },
         {
@@ -4698,16 +4777,16 @@
           "filename": "php-5.2.12-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.12-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "418656307a52c99f2175c748da31a9d8"
         },
         {
           "filename": "php-5.2.12-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.12-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "df73529935bb855842e38afda8a295d7"
         },
         {
@@ -4773,16 +4852,16 @@
           "filename": "php-5.2.13-nts-win32-installer.msi",
           "kind": "php",
           "platform": "nts-win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.13-nts-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "d0e502db99565afde77b4f58f13fbad2"
         },
         {
           "filename": "php-5.2.13-win32-installer.msi",
           "kind": "php",
           "platform": "win32-installer",
-          "url": null,
-          "listed_by": "releases",
+          "url": "https://museum.php.net/php5/php-5.2.13-win32-installer.msi",
+          "listed_by": "museum+releases",
           "md5": "891e3262428851ebe71d5432a97be6d5"
         },
         {
@@ -4840,6 +4919,20 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.14-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.14-nts-win32-installer.msi",
+          "kind": "php",
+          "platform": "nts-win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.14-nts-win32-installer.msi",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.14-win32-installer.msi",
+          "kind": "php",
+          "platform": "win32-installer",
+          "url": "https://museum.php.net/php5/php-5.2.14-win32-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -4925,6 +5018,20 @@
           "listed_by": "museum"
         },
         {
+          "filename": "php-5.2.16-nts-win32-VC6-x86-installer.msi",
+          "kind": "php",
+          "platform": "nts-win32-VC6-x86-installer",
+          "url": "https://museum.php.net/php5/php-5.2.16-nts-win32-VC6-x86-installer.msi",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.16-win32-VC6-x86-installer.msi",
+          "kind": "php",
+          "platform": "win32-VC6-x86-installer",
+          "url": "https://museum.php.net/php5/php-5.2.16-win32-VC6-x86-installer.msi",
+          "listed_by": "museum"
+        },
+        {
           "filename": "php-5.2.16.tar.bz2",
           "kind": "php",
           "platform": "source",
@@ -4977,6 +5084,20 @@
           "kind": "php",
           "platform": "nts-Win32",
           "url": "https://museum.php.net/php5/php-5.2.17-nts-Win32.zip",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.17-nts-win32-VC6-x86-installer.msi",
+          "kind": "php",
+          "platform": "nts-win32-VC6-x86-installer",
+          "url": "https://museum.php.net/php5/php-5.2.17-nts-win32-VC6-x86-installer.msi",
+          "listed_by": "museum"
+        },
+        {
+          "filename": "php-5.2.17-win32-VC6-x86-installer.msi",
+          "kind": "php",
+          "platform": "win32-VC6-x86-installer",
+          "url": "https://museum.php.net/php5/php-5.2.17-win32-VC6-x86-installer.msi",
           "listed_by": "museum"
         },
         {
@@ -39032,7 +39153,32 @@
       "date": "21 Oct 2026"
     }
   ],
-  "unresolved": [],
+  "unresolved": [
+    {
+      "generation": "php4",
+      "filename": "php404pl1-installer.exe",
+      "url": "https://museum.php.net/php4/php404pl1-installer.exe",
+      "reason": "archive name does not state an exact version"
+    },
+    {
+      "generation": "php4",
+      "filename": "php405-installer.exe",
+      "url": "https://museum.php.net/php4/php405-installer.exe",
+      "reason": "archive name does not state an exact version"
+    },
+    {
+      "generation": "php4",
+      "filename": "php406-installer.exe",
+      "url": "https://museum.php.net/php4/php406-installer.exe",
+      "reason": "archive name does not state an exact version"
+    },
+    {
+      "generation": "php4",
+      "filename": "php410-installer.exe",
+      "url": "https://museum.php.net/php4/php410-installer.exe",
+      "reason": "archive name does not state an exact version"
+    }
+  ],
   "limits": [
     "Archives were listed, not downloaded or hash-checked; listed_unverified is not a source lock.",
     "Prereleases are only those named by these official listings; snapshot servers, git tags, and mailing-list announcements are not yet cross-checked.",
