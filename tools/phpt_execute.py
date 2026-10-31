@@ -414,7 +414,11 @@ def run(sections, image, executable, platform, release, timeout, output_limit, *
                 else:
                     diagnostic = "PHP profile could not be verified"
             elif cgi_needed and cgi_status != "completed":
-                diagnostic = "CGI profile could not be verified"
+                diagnostic = {
+                    "timeout": "CGI profile verification timed out",
+                    "output_limit": "CGI profile verification exceeded the output limit",
+                    "profile_mismatch": "CGI profile does not match the requested release, SAPI or platform",
+                }.get(cgi_status, "CGI profile could not be verified")
             elif case_status == "profile_mismatch":
                 diagnostic = "PHP profile does not match the requested release or platform"
             elif case_status == "skipped_unknown" or skipif_status == "skipped_unknown":
