@@ -84,6 +84,18 @@ func TestSyntaxErrorsAreLocated(t *testing.T) {
 	}
 }
 
+func TestMatchArmsNeedConditions(t *testing.T) {
+	// PHP 8.5.12 rejects an arm without conditions unless it is default.
+	for src, ok := range map[string]bool{
+		`<?php match (1) { => 2 };`: false, `<?php match (1) { 1, 2, => 2 };`: true,
+		`<?php match (1) { default, => 2 };`: true, `<?php match (1) {};`: true,
+	} {
+		if _, err := parse(t, src); (err == nil) != ok {
+			t.Errorf("%s: %v", src, err)
+		}
+	}
+}
+
 func TestImportNamesFollowUseGrammar(t *testing.T) {
 	// PHP 8.5.12 rejects namespace-relative imports and accepts \X.
 	for src, ok := range map[string]bool{

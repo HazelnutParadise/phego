@@ -692,6 +692,10 @@ func (p *parser) match() *Node {
 			p.accept(',')
 		} else {
 			conds := node("conditions", p.peek().Line)
+			if p.at(TDoubleArrow) {
+				// Only a default arm may omit its conditions.
+				p.unexpected()
+			}
 			for !p.at(TDoubleArrow) {
 				conds.Children = append(conds.Children, p.expr())
 				if !p.accept(',') {
