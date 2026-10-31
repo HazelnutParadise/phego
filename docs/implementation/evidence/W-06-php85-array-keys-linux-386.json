@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "scope": "prebuilt_reference_fixture_only",
+  "requirement": "REQ-017",
+  "partial_scenarios": [
+    "T-033",
+    "T-034"
+  ],
+  "php_release": "8.5.12",
+  "platform": "linux/386",
+  "emulated": true,
+  "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+  "php_binary_sha256": "2dae53fafa90dad8ba0c8a9f77c1090e49e07287240b08f285ab86e2e69491dc",
+  "php_int_size_bytes": 4,
+  "fixture": "tests/semantics/w06-php85/array_numeric_keys.phpt",
+  "fixture_sha256": "a47acafd308fcf9c522c067555619ed61b80bb8267ecadec970fc7e544699356",
+  "extracted_file_sha256": "05d3012f672471c7867a77e73ef19e797ca72e9defa48ef119763815c085feb1",
+  "expected_output_sha256": "c332d5767f8466cd3474fb532980fcdfa17742c69dd8417b45b7b13c5d6ff309",
+  "actual_output_sha256": "c332d5767f8466cd3474fb532980fcdfa17742c69dd8417b45b7b13c5d6ff309",
+  "comparison": "exact_bytes_match",
+  "container_exit_code": 0,
+  "stderr_bytes": 0,
+  "stdout_gzip": "W-06-php85-array-keys-linux-386.log.gz",
+  "stdout_uncompressed_sha256": "04a9bd018caa68fd81da55a5a21416996657fda22b98d1e4f78652fee0e98490",
+  "container_cleanup_observed": "docker inspect reported no such object after normal completion",
+  "environment": "Docker linux/386, emulated on arm64 host; network none, read-only root, uid/gid 65534, 2 CPUs, 256 MiB memory, 64 pids, all capabilities dropped, no-new-privileges, noexec tmpfs. PHP invoked with -n.",
+  "method": "Extracted FILE and EXPECT sections from the committed PHPT; invoked the extracted FILE directly using php -n, then compared stdout with EXPECT byte for byte. The PHP version and PHP_INT_SIZE were checked inside the container.",
+  "earlier_source_build_attempt": "Building PHP from the locked source in an emulated i386 build container hit a 1800-second timeout (exit 124) before the test ran; that container was removed.",
+  "limitations": [
+    "The image is digest-pinned, but its binary has not been verified against the locked PHP source archive.",
+    "This is an emulated 32-bit CLI check of the extracted fixture, not execution by run-tests.php or a native 32-bit host.",
+    "The fixture checks resulting key types, not the numeric values of converted keys.",
+    "This is not Phego execution or work-package acceptance.",
+    "A complete replay script and interruption-cleanup validation are not recorded."
+  ]
+}
