@@ -151,8 +151,12 @@ func describe(t Token) string {
 		return fmt.Sprintf("variable %q", t.Text)
 	case TString:
 		return fmt.Sprintf("identifier %q", t.Text)
-	case TNameQualified, TNameFullyQualified, TNameRelative:
+	case TNameQualified:
+		return fmt.Sprintf("namespaced name %q", t.Text)
+	case TNameFullyQualified:
 		return fmt.Sprintf("fully qualified name %q", t.Text)
+	case TNameRelative:
+		return fmt.Sprintf("namespace-relative name %q", t.Text)
 	case TLNumber:
 		return fmt.Sprintf("integer %q", t.Text)
 	case TDNumber:
@@ -739,11 +743,20 @@ func (p *parser) useKind() string {
 	return ""
 }
 
+// importName accepts the names PHP allows in use declarations: plain,
+// qualified, or fully qualified, but not namespace-relative names or static.
+func (p *parser) importName() *Node {
+	if !p.atAny(TString, TNameQualified, TNameFullyQualified) {
+		p.unexpected()
+	}
+	return leaf("name", p.next())
+}
+
 func (p *parser) useStatement() *Node {
 	t := p.next()
 	n := &Node{Kind: "use", Text: p.useKind(), Line: t.Line}
 	for {
-		name := p.name()
+		name := p.importName()
 		if p.accept(TNsSeparator) {
 			if len(n.Children) != 0 {
 				p.unexpected()

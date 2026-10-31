@@ -84,6 +84,20 @@ func TestSyntaxErrorsAreLocated(t *testing.T) {
 	}
 }
 
+func TestImportNamesFollowUseGrammar(t *testing.T) {
+	// PHP 8.5.12 rejects namespace-relative imports and accepts \X.
+	for src, ok := range map[string]bool{
+		`<?php use namespace\X;`: false, `<?php use function namespace\f;`: false,
+		`<?php use const namespace\C;`: false, `<?php use static;`: false,
+		`<?php use \X;`: true, `<?php use A\B as C, function f;`: false, `<?php use A\{B, function f};`: true,
+	} {
+		_, err := parse(t, src)
+		if (err == nil) != ok {
+			t.Errorf("%s: %v", src, err)
+		}
+	}
+}
+
 func TestBinaryPrefixedStringsAreCallable(t *testing.T) {
 	for _, src := range []string{`<?php b"strlen"("x");`, `<?php B'strlen'("x");`} {
 		if _, err := parse(t, src); err != nil {
