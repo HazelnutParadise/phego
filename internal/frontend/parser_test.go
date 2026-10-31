@@ -84,11 +84,26 @@ func TestSyntaxErrorsAreLocated(t *testing.T) {
 	}
 }
 
+func TestBinaryPrefixedStringsAreCallable(t *testing.T) {
+	for _, src := range []string{`<?php b"strlen"("x");`, `<?php B'strlen'("x");`} {
+		if _, err := parse(t, src); err != nil {
+			t.Errorf("%s: %v", src, err)
+		}
+	}
+}
+
 func TestDeepNestingIsBoundedNotFatal(t *testing.T) {
 	_, err := parse(t, "<?php "+strings.Repeat("(", MaxNesting+10)+"1"+strings.Repeat(")", MaxNesting+10)+";")
 	var se *SyntaxError
 	if !errors.As(err, &se) || !strings.Contains(se.Message, "nesting") {
 		t.Fatalf("deep nesting: %v", err)
+	}
+	_, err = parse(t, "<?php "+strings.Repeat("$", MaxNesting+10)+"x;")
+	if !errors.As(err, &se) || !strings.Contains(se.Message, "nesting") {
+		t.Fatalf("deep variable variables: %v", err)
+	}
+	if _, err := parse(t, "<?php "+strings.Repeat("$", 9000)+"x;"); err != nil {
+		t.Fatalf("variable-variable depth PHP accepts was rejected: %v", err)
 	}
 	if _, err := parse(t, "<?php "+strings.Repeat("~", 7676)+"1;"); err != nil {
 		t.Fatalf("depth PHP accepts was rejected: %v", err)

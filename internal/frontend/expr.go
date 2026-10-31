@@ -342,6 +342,8 @@ func (p *parser) primary() *Node {
 }
 
 func (p *parser) simpleVariable() *Node {
+	p.enter()
+	defer p.leave()
 	t := p.peek()
 	switch t.Kind {
 	case TVariable:
@@ -426,7 +428,12 @@ func (p *parser) postfix(n *Node) *Node {
 func callable(n *Node) bool {
 	switch n.Kind {
 	case "literal":
-		return n.Text != "" && (n.Text[0] == '\'' || n.Text[0] == '"')
+		// A binary prefix (b or B) does not change callability.
+		text := n.Text
+		if text != "" && (text[0] == 'b' || text[0] == 'B') {
+			text = text[1:]
+		}
+		return text != "" && (text[0] == '\'' || text[0] == '"')
 	case "magic_const", "isset", "builtin", "exit", "print", "yield", "post_inc", "class_name":
 		return false
 	}
