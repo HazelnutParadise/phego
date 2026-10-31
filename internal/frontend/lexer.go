@@ -36,14 +36,16 @@ const (
 )
 
 type lexer struct {
-	src    string
-	pos    int
-	line   int
-	opts   LexOptions
-	states []state
-	labels []heredocLabel
-	out    []Token
-	diags  []Diagnostic
+	src       string
+	pos       int
+	line      int
+	opts      LexOptions
+	states    []state
+	labels    []heredocLabel
+	out       []Token
+	diags     []Diagnostic
+	braceEnds []int
+	braceFrom int
 }
 
 type heredocLabel struct {
@@ -880,6 +882,16 @@ func (l *lexer) heredocBodyLimit(from int, interpolates bool) (int, int) {
 // skipBraces returns the index of the brace closing the one at i, ignoring
 // braces inside quoted strings, or the end of input.
 func (l *lexer) skipBraces(i int) int {
+	if i >= 0 && i < len(l.src) && l.src[i] == '{' {
+		if l.braceEnds == nil {
+			l.indexBraces(i)
+		}
+		// Zero is the unset value; every valid match or EOF result is after
+		// its opening brace and therefore has a nonzero offset.
+		if i >= l.braceFrom && l.braceEnds[i] != 0 {
+			return l.braceEnds[i]
+		}
+	}
 	depth := 0
 	for ; i < len(l.src); i++ {
 		switch c := l.src[i]; c {
@@ -899,6 +911,37 @@ func (l *lexer) skipBraces(i int) int {
 		}
 	}
 	return len(l.src)
+}
+
+// indexBraces records matching braces while applying skipBraces' quote and
+// escape rules. Unclosed opening braces point to end of input, matching the
+// result skipBraces returns for an unclosed expression.
+func (l *lexer) indexBraces(from int) {
+	l.braceEnds = make([]int, len(l.src))
+	l.braceFrom = from
+	stack := make([]int, 0)
+	for i := from; i < len(l.src); i++ {
+		switch c := l.src[i]; c {
+		case '{':
+			stack = append(stack, i)
+		case '}':
+			if len(stack) == 0 {
+				continue
+			}
+			start := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			l.braceEnds[start] = i
+		case '\'', '"':
+			for i++; i < len(l.src) && l.src[i] != c; i++ {
+				if l.src[i] == '\\' {
+					i++
+				}
+			}
+		}
+	}
+	for _, start := range stack {
+		l.braceEnds[start] = len(l.src)
+	}
 }
 
 func (l *lexer) lexNowdoc() {
