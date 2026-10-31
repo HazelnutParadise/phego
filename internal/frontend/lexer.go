@@ -601,6 +601,9 @@ func (l *lexer) number(start int) {
 	}
 	text := src[i:end]
 	if len(text) > 1 && text[0] == '0' {
+		if strings.ContainsAny(text, "89") {
+			l.fatal(-1, l.line, "Invalid numeric literal")
+		}
 		l.emit(l.intKind(text[1:], 8), start)
 		return
 	}
