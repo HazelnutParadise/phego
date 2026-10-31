@@ -535,13 +535,13 @@ func (p *parser) arrayItem() *Node {
 	}
 	if isAmpersand(t.Kind) {
 		p.next()
-		return node("item", t.Line, nil, node("by_ref", t.Line, p.exprPrec(precUnary)))
+		return node("item", t.Line, nil, node("by_ref", t.Line, p.referenceTarget()))
 	}
 	v := p.expr()
 	if p.accept(TDoubleArrow) {
 		if r := p.peek(); isAmpersand(r.Kind) {
 			p.next()
-			return node("item", t.Line, v, node("by_ref", r.Line, p.exprPrec(precUnary)))
+			return node("item", t.Line, v, node("by_ref", r.Line, p.referenceTarget()))
 		}
 		return node("item", t.Line, v, p.expr())
 	}
@@ -747,7 +747,7 @@ func (p *parser) encapsList(end Kind) []*Node {
 			out = append(out, v)
 		case TCurlyOpen:
 			p.next()
-			e := p.expr()
+			e := p.referenceTarget()
 			p.expect('}')
 			out = append(out, e)
 		case TDollarOpenCurlyBraces:
