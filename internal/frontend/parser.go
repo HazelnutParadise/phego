@@ -385,7 +385,7 @@ func (p *parser) statement(top bool) *Node {
 				return n
 			}
 		}
-		e := p.exprWithAttributes(attrs)
+		e := p.exprRest(p.exprWithAttributes(attrs), precLowest)
 		p.endStatement()
 		return node("expr", t.Line, e)
 	case TString:
@@ -509,6 +509,9 @@ func (p *parser) forStatement() *Node {
 			}
 			if !p.accept(',') {
 				break
+			}
+			if p.at(end) {
+				p.unexpected()
 			}
 		}
 		p.expect(end)

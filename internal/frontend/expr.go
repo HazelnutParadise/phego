@@ -65,7 +65,11 @@ func (p *parser) expr() *Node { return p.exprPrec(precLowest) }
 func (p *parser) exprPrec(min int) *Node {
 	p.enter()
 	defer p.leave()
-	left := p.unary(min)
+	return p.exprRest(p.unary(min), min)
+}
+
+// exprRest continues operator parsing after the first operand.
+func (p *parser) exprRest(left *Node, min int) *Node {
 	for {
 		t := p.peek()
 		if t.Kind == '?' && precTernary >= min {
