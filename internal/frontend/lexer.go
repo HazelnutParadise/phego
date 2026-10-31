@@ -102,9 +102,24 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 	if len(l.out) > opts.MaxTokens {
 		return nil, nil, ErrTooManyTokens
 	}
-	switch l.top() {
-	case stDoubleQuotes, stBackquote, stHeredoc, stNowdoc, stVarOffset, stLookingForVarname:
-		l.diag("Unterminated string at end of file")
+	unterminated := false
+	for _, state := range l.states {
+		switch state {
+		case stDoubleQuotes, stBackquote, stHeredoc, stNowdoc:
+			unterminated = true
+		}
+	}
+	if unterminated {
+		alreadyReported := false
+		for _, d := range l.diags {
+			if strings.HasPrefix(d.Message, "Unterminated ") {
+				alreadyReported = true
+				break
+			}
+		}
+		if !alreadyReported {
+			l.diag("Unterminated string at end of file")
+		}
 	}
 	return l.out, l.diags, nil
 }
@@ -659,6 +674,7 @@ func (l *lexer) singleQuoted(start int) {
 		i++
 	}
 	l.pos = len(l.src)
+	l.diag("Unterminated single-quoted string")
 	l.emit(TEncapsedAndWhitespace, start)
 }
 
