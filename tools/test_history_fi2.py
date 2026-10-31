@@ -13,6 +13,18 @@ from unittest.mock import Mock, patch
 
 import history_fi2
 
+_identity = patch.object(history_fi2, "_host_identity", return_value=(1000, 1000))
+
+
+def setUpModule():
+    # Tests must not depend on the account running them; root is covered by
+    # its own rejection test.
+    _identity.start()
+
+
+def tearDownModule():
+    _identity.stop()
+
 
 class SnapshotTests(unittest.TestCase):
     def test_copies_regular_file_and_returns_sha256(self):
@@ -63,6 +75,7 @@ class SnapshotTests(unittest.TestCase):
                 "import sys\n"
                 "from pathlib import Path\n"
                 "import history_fi2\n"
+                "history_fi2._host_identity = lambda: (1000, 1000)\n"
                 "source, target = map(Path, sys.argv[1:])\n"
                 "try:\n"
                 "    history_fi2.snapshot(source, target, 1024)\n"
@@ -129,6 +142,18 @@ class BuildCommandTests(unittest.TestCase):
             comma_archive, comma_program, comma_cidfile = self._paths(comma_root)
             with self.assertRaises(ValueError):
                 history_fi2.build_command(comma_archive, comma_program, comma_cidfile, 30, "linux/arm64")
+
+    def test_root_host_identity_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory, "php.tar.gz")
+            program = Path(directory, "program.phtml")
+            archive.write_bytes(b"a")
+            program.write_bytes(b"p")
+            for identity in ((0, 1000), (1000, 0)):
+                with self.subTest(identity=identity), \
+                     patch.object(history_fi2, "_host_identity", return_value=identity), \
+                     self.assertRaises(ValueError):
+                    history_fi2.build_command(archive, program, Path(directory, "c.cid"), 30, "linux/arm64")
 
     def test_successful_argv_has_isolation_limits_and_keeps_paths_out_of_shell(self):
         with tempfile.TemporaryDirectory(prefix="fi2 paths ") as directory:
@@ -396,6 +421,7 @@ class ExecuteAndMainTests(unittest.TestCase):
                 "import hashlib, sys\n"
                 "from pathlib import Path\n"
                 "import history_fi2\n"
+                "history_fi2._host_identity = lambda: (1000, 1000)\n"
                 "def fake_snapshot(source, target, max_bytes, expected_sha256=None):\n"
                 "    data = Path(source).read_bytes()\n"
                 "    Path(target).write_bytes(data)\n"
@@ -527,6 +553,7 @@ class ExecuteAndMainTests(unittest.TestCase):
                 "import hashlib, os, sys\n"
                 "from pathlib import Path\n"
                 "import history_fi2\n"
+                "history_fi2._host_identity = lambda: (1000, 1000)\n"
                 "def fake_snapshot(source, target, max_bytes, expected_sha256=None):\n"
                 "    data = Path(source).read_bytes()\n"
                 "    Path(target).write_bytes(data)\n"
@@ -602,6 +629,7 @@ class ExecuteAndMainTests(unittest.TestCase):
                 "import hashlib, os, signal, sys\n"
                 "from pathlib import Path\n"
                 "import history_fi2\n"
+                "history_fi2._host_identity = lambda: (1000, 1000)\n"
                 "def snapshot_and_signal(source, target, max_bytes, expected_sha256=None):\n"
                 "    calls = Path(os.environ['FI2_SNAPSHOT_CALLS'])\n"
                 "    count = len(calls.read_text().splitlines()) if calls.exists() else 0\n"
@@ -700,6 +728,7 @@ class ExecuteAndMainTests(unittest.TestCase):
                 "import hashlib, sys\n"
                 "from pathlib import Path\n"
                 "import history_fi2\n"
+                "history_fi2._host_identity = lambda: (1000, 1000)\n"
                 "def fake_snapshot(source, target, max_bytes, expected_sha256=None):\n"
                 "    data = Path(source).read_bytes()\n"
                 "    Path(target).write_bytes(data)\n"

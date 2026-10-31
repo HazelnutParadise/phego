@@ -34,6 +34,21 @@ class ClassifyNameTests(unittest.TestCase):
         self.assertEqual([u["filename"] for u in out["unresolved"]], ["php405-installer.exe"])
         self.assertNotIn("4.0.5", by_version)
 
+    def test_dates_are_not_copied_across_versions_in_one_entry(self):
+        releases = {"3.0.x (latest)": {"date": "20 Oct 2000",
+                                        "source": [{"filename": "php-3.0.18.tar.gz"}],
+                                        "windows": [{"filename": "php-3.0.17-win32.zip"}]},
+                    "4.0.1": {"date": "28 Jun 2000", "source": [{"filename": "php-4.0.1pl2.tar.gz"}]},
+                    "8.5.12": {"source": [{"filename": "php-8.5.12.tar.xz", "date": "21 Oct 2026"}]}}
+        out = BuildTests().build(["php-1.99s.tar.gz", "php-2.0.tar.gz"], releases)
+        by_version = {r["version"]: r for r in out["releases"]}
+        self.assertNotIn("date", by_version["3.0.18"])
+        self.assertNotIn("date", by_version["3.0.17"])
+        self.assertNotIn("date", by_version["4.0.1pl2"])
+        self.assertEqual(by_version["4.0.1"]["date"], "28 Jun 2000")
+        self.assertEqual(by_version["8.5.12"]["date"], "21 Oct 2026")
+        self.assertEqual(by_version["3.0.18"]["artifacts"][0]["release_entry"], "3.0.x (latest)")
+
     def test_pre_suffix_is_a_prerelease(self):
         out = BuildTests().build(["php-4.3.0pre2-Win32.zip", "php-4.3.0.tar.gz"], {})
         by_version = {r["version"]: r for r in out["releases"]}

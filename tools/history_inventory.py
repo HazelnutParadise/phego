@@ -118,8 +118,12 @@ def build(museum, releases):
         inputs.append({"url": url, "sha256": hashlib.sha256(data).hexdigest()})
         doc = json.loads(data)
         for key, entry in doc.items():
+            # A date belongs to a version only when the entry names that exact
+            # version or the dated item is that version's own archive.
             if VERSION_KEY.fullmatch(key):
-                record(key, f"php{major}").setdefault("date", entry.get("date"))
+                r = record(key, f"php{major}")
+                if entry.get("date") and "date" not in r:
+                    r["date"] = entry["date"]
             for kind in ("source", "windows"):
                 for item in entry.get(kind, []):
                     if "filename" not in item:
@@ -146,8 +150,11 @@ def build(museum, releases):
                     else:
                         match["listed_by"] = "museum+releases"
                     match.update(checksum)
-                    if "date" in entry and "date" not in r:
+                    match["release_entry"] = key
+                    if version == key and entry.get("date") and "date" not in r:
                         r["date"] = entry["date"]
+                    elif item.get("date") and "date" not in r:
+                        r["date"] = item["date"]
 
     out = []
     for announced in ANNOUNCED_WITHOUT_ARCHIVE:

@@ -89,6 +89,11 @@ def snapshot(source: Path, target: Path, max_bytes: int, expected_sha256: str | 
     return digest
 
 
+def _host_identity():
+    """Return the host uid and gid used for the container user."""
+    return os.getuid(), os.getgid()
+
+
 def build_command(archive: Path, program: Path, cidfile: Path, timeout: int, platform: str) -> list[str]:
     """Build an argv, never a shell command, for the locked isolated reference.
 
@@ -100,7 +105,7 @@ def build_command(archive: Path, program: Path, cidfile: Path, timeout: int, pla
         raise ValueError(f"unsupported platform: {platform!r}; expected linux/arm64")
     if type(timeout) is not int or not 1 <= timeout <= 1800:
         raise ValueError("timeout must be an integer from 1 through 1800")
-    uid, gid = os.getuid(), os.getgid()
+    uid, gid = _host_identity()
     if uid == 0 or gid == 0:
         raise ValueError("host uid:gid must be non-zero to preserve private snapshot permissions")
     paths = []
