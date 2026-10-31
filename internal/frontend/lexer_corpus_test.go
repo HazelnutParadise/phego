@@ -36,14 +36,17 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 	scanner.Buffer(make([]byte, 64<<20), 64<<20)
 	files, mismatched := 0, 0
 	for scanner.Scan() {
-		var rec []json.RawMessage
-		if json.Unmarshal(scanner.Bytes(), &rec) != nil || len(rec) != 2 {
+		line := scanner.Bytes()
+		if len(line) == 0 || line[0] != '[' {
+			// PHP warnings printed by the dump script are not records.
 			continue
 		}
+		var rec []json.RawMessage
 		var name string
 		var want [][3]any
-		if json.Unmarshal(rec[0], &name) != nil || json.Unmarshal(rec[1], &want) != nil {
-			continue
+		if json.Unmarshal(line, &rec) != nil || len(rec) != 2 ||
+			json.Unmarshal(rec[0], &name) != nil || json.Unmarshal(rec[1], &want) != nil {
+			t.Fatalf("malformed reference record: %.120s", line)
 		}
 		src, err := os.ReadFile(filepath.Join(dir, "corpus", name))
 		if err != nil {
@@ -60,6 +63,16 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 				t.Errorf("%s token %d: %s", name, i, msg)
 			}
 		}
+	}
+	if err := scanner.Err(); err != nil {
+		t.Fatal(err)
+	}
+	corpus, err := filepath.Glob(filepath.Join(dir, "corpus", "*.php"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if files == 0 || files != len(corpus) {
+		t.Fatalf("compared %d reference records for %d corpus files", files, len(corpus))
 	}
 	t.Logf("%d of %d files match", files-mismatched, files)
 	if mismatched > 0 {

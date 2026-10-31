@@ -233,8 +233,11 @@ type Token struct {
 	Line int
 }
 
-// Diagnostic is a located lexing problem. Lexing continues after it.
+// Diagnostic is a located lexing problem. Lexing continues after it; a
+// Fatal diagnostic is a ParseError in PHP once the parser reaches it.
 type Diagnostic struct {
 	Line    int
 	Message string
+	Fatal   bool
+	Token   int // index of the token the problem belongs to
 }

@@ -47,7 +47,12 @@ type lexer struct {
 }
 
 type heredocLabel struct {
-	name string
+	name   string
+	marker int // start of the closing marker line, or -1 when unterminated
+	indent string
+	// unindented records an interpolation that starts a body line without
+	// the closing marker's indentation; PHP reports it at the marker.
+	unindented bool
 }
 
 // Lex tokenizes PHP 8.5.12 source the way token_get_all() does without
@@ -66,11 +71,11 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 	l := &lexer{src: string(src), line: 1, opts: opts, states: []state{stInitial}}
 	halted := -1
 	for l.pos < len(l.src) {
-		if len(l.out) >= opts.MaxTokens {
-			return nil, nil, ErrTooManyTokens
-		}
 		start, depth := l.pos, len(l.states)
 		l.next()
+		if len(l.out) > opts.MaxTokens {
+			return nil, nil, ErrTooManyTokens
+		}
 		if l.pos == start {
 			// Only a state pop may consume nothing; anything else would loop.
 			if len(l.states) >= depth {
@@ -86,10 +91,18 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 			if k := l.out[len(l.out)-1].Kind; halted == 3 || k == TCloseTag || k == ';' {
 				if l.pos < len(l.src) {
 					l.emitRaw(TInlineHTML, l.pos, len(l.src))
+					l.pos = len(l.src)
 				}
 				break
 			}
 		}
+	}
+	if len(l.out) > opts.MaxTokens {
+		return nil, nil, ErrTooManyTokens
+	}
+	switch l.top() {
+	case stDoubleQuotes, stBackquote, stHeredoc, stNowdoc, stVarOffset, stLookingForVarname:
+		l.diag("Unterminated string at end of file")
 	}
 	return l.out, l.diags, nil
 }
@@ -114,7 +127,16 @@ func (l *lexer) emitRaw(k Kind, start, end int) {
 }
 
 func (l *lexer) diag(format string, args ...any) {
-	l.diags = append(l.diags, Diagnostic{Line: l.line, Message: fmt.Sprintf(format, args...)})
+	l.diags = append(l.diags, Diagnostic{Line: l.line, Message: fmt.Sprintf(format, args...), Token: len(l.out)})
+}
+
+// fatal records a ParseError for the token about to be emitted (or, with
+// token >= 0, an already emitted one).
+func (l *lexer) fatal(token, line int, format string, args ...any) {
+	if token < 0 {
+		token = len(l.out)
+	}
+	l.diags = append(l.diags, Diagnostic{Line: line, Message: fmt.Sprintf(format, args...), Fatal: true, Token: token})
 }
 
 // countLines counts \n, \r\n, and lone \r as PHP's scanner does.
@@ -391,7 +413,7 @@ func (l *lexer) blockComment(start int) {
 	}
 	end := strings.Index(l.src[l.pos+2:], "*/")
 	if end < 0 {
-		l.diag("Unterminated comment starting line %d", l.line)
+		l.fatal(-1, l.line, "Unterminated comment starting line %d", l.line)
 		l.pos = len(l.src)
 	} else {
 		l.pos += 2 + end + 2
@@ -408,7 +430,8 @@ func (l *lexer) cast(start int) bool {
 	for j < len(l.src) && (l.src[j]|0x20 >= 'a' && l.src[j]|0x20 <= 'z') {
 		j++
 	}
-	k, ok := casts[strings.ToLower(l.src[i:j])]
+	word := strings.ToLower(l.src[i:j])
+	k, ok := casts[word]
 	if !ok {
 		return false
 	}
@@ -419,6 +442,9 @@ func (l *lexer) cast(start int) bool {
 		return false
 	}
 	l.pos = j + 1
+	if word == "real" {
+		l.fatal(-1, l.line, "The (real) cast has been removed, use (float) instead")
+	}
 	l.emit(k, start)
 	return true
 }
@@ -700,7 +726,18 @@ func (l *lexer) heredocStart(start int) bool {
 	}
 	l.pos = end
 	l.emit(TStartHeredoc, start)
-	l.labels = append(l.labels, heredocLabel{name: name})
+	l.labels = append(l.labels, heredocLabel{name: name, marker: -1})
+	// Find the closing marker once; body segments reuse it instead of
+	// rescanning the remaining source after every interpolation.
+	label := &l.labels[len(l.labels)-1]
+	_, label.marker = l.heredocBodyLimit(l.pos, quote != '\'')
+	if label.marker >= 0 {
+		m := label.marker
+		for m < len(l.src) && (l.src[m] == ' ' || l.src[m] == '\t') {
+			m++
+		}
+		label.indent = l.src[label.marker:m]
+	}
 	if quote == '\'' {
 		l.push(stNowdoc)
 	} else {
@@ -735,20 +772,98 @@ func (l *lexer) closingMarkerAt(i int) int {
 
 func (l *lexer) endHeredoc(at, n int) {
 	l.pos = at + n
+	indent := l.src[at : at+n-len(l.labels[len(l.labels)-1].name)]
+	if strings.Contains(indent, " ") && strings.Contains(indent, "\t") {
+		l.fatal(-1, l.line, "Invalid indentation - tabs and spaces cannot be mixed")
+	} else if l.labels[len(l.labels)-1].unindented {
+		l.fatal(-1, l.line, "Invalid body indentation level (expecting an indentation level of at least %d)", len(indent))
+	}
 	l.emit(TEndHeredoc, at)
 	l.labels = l.labels[:len(l.labels)-1]
 	l.pop()
 }
 
+// checkIndent applies PHP 8.5.12's flexible heredoc rule to the body segment
+// src[start:end]: every line the segment begins must start with the closing
+// marker's indentation, using the same character, except whitespace-only
+// lines. A segment that does not begin a line skips its first line.
+func (l *lexer) checkIndent(start, end int, atLineStart bool) {
+	label := l.labels[len(l.labels)-1]
+	indent := label.indent
+	if indent == "" || label.marker < 0 {
+		return
+	}
+	spaces := indent[0] == ' '
+	line := l.line
+	i := start
+	nextLine := func() bool {
+		for i < end && l.src[i] != '\n' && l.src[i] != '\r' {
+			i++
+		}
+		if i >= end {
+			return false
+		}
+		if l.src[i] == '\r' && i+1 < end && l.src[i+1] == '\n' {
+			i++
+		}
+		i++
+		line++
+		return true
+	}
+	if !atLineStart && !nextLine() {
+		return
+	}
+	for i < end || (i == end && end < label.marker) {
+		for k := 0; k < len(indent); k++ {
+			c := byte(0)
+			if i < len(l.src) {
+				c = l.src[i]
+			}
+			if i < end && (c == '\n' || c == '\r') {
+				break // whitespace-only line
+			}
+			if i >= end || (c != ' ' && c != '\t') {
+				l.fatal(-1, line, "Invalid body indentation level (expecting an indentation level of at least %d)", len(indent))
+				return
+			}
+			if (c == ' ') != spaces {
+				l.fatal(-1, line, "Invalid indentation - tabs and spaces cannot be mixed")
+				return
+			}
+			i++
+		}
+		if i >= end || !nextLine() {
+			return
+		}
+	}
+}
+
 // bodyEnd finds where a heredoc body segment stops: before the newline that
 // precedes the closing marker. It returns that index and the marker start.
-func (l *lexer) heredocBodyLimit(from int) (int, int) {
+func (l *lexer) heredocBodyLimit(from int, interpolates bool) (int, int) {
 	for i := from; i < len(l.src); i++ {
-		if l.src[i] != '\n' && l.src[i] != '\r' {
+		c := l.src[i]
+		if interpolates {
+			if c == '\\' && i+1 < len(l.src) && l.src[i+1] != '\n' && l.src[i+1] != '\r' {
+				i++
+				continue
+			}
+			// Interpolated code is not body text; skip it so a marker-like
+			// line inside it is not taken as the end.
+			if c == '{' && i+1 < len(l.src) && l.src[i+1] == '$' {
+				i = l.skipBraces(i)
+				continue
+			}
+			if c == '$' && i+1 < len(l.src) && l.src[i+1] == '{' {
+				i = l.skipBraces(i + 1)
+				continue
+			}
+		}
+		if c != '\n' && c != '\r' {
 			continue
 		}
 		lineStart := i + 1
-		if l.src[i] == '\r' && lineStart < len(l.src) && l.src[lineStart] == '\n' {
+		if c == '\r' && lineStart < len(l.src) && l.src[lineStart] == '\n' {
 			lineStart++
 		}
 		if n := l.closingMarkerAt(lineStart); n > 0 {
@@ -759,9 +874,36 @@ func (l *lexer) heredocBodyLimit(from int) (int, int) {
 	return len(l.src), -1
 }
 
+// skipBraces returns the index of the brace closing the one at i, ignoring
+// braces inside quoted strings, or the end of input.
+func (l *lexer) skipBraces(i int) int {
+	depth := 0
+	for ; i < len(l.src); i++ {
+		switch c := l.src[i]; c {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return i
+			}
+		case '\'', '"':
+			for i++; i < len(l.src) && l.src[i] != c; i++ {
+				if l.src[i] == '\\' {
+					i++
+				}
+			}
+		}
+	}
+	return len(l.src)
+}
+
 func (l *lexer) lexNowdoc() {
 	start := l.pos
-	limit, marker := l.heredocBodyLimit(start)
+	marker := l.labels[len(l.labels)-1].marker
+	if marker >= 0 && marker < l.pos {
+		_, marker = l.heredocBodyLimit(l.pos, false)
+	}
 	if marker < 0 {
 		l.diag("Unterminated nowdoc")
 		l.pos = len(l.src)
@@ -769,8 +911,8 @@ func (l *lexer) lexNowdoc() {
 		return
 	}
 	l.pos = marker
+	l.checkIndent(start, marker, true)
 	l.emitRaw(TEncapsedAndWhitespace, start, marker)
-	_ = limit
 	l.endHeredoc(marker, l.closingMarkerAt(marker))
 }
 
@@ -791,15 +933,25 @@ func (l *lexer) lexInterpolated(end byte) {
 		}
 	}
 	if l.interpolationAt(l.pos) {
+		if end == 0 && (l.pos == 0 || l.src[l.pos-1] == '\n' || l.src[l.pos-1] == '\r') {
+			if label := &l.labels[len(l.labels)-1]; label.indent != "" {
+				label.unindented = true
+			}
+		}
 		l.interpolation(start)
 		return
 	}
-	limit, marker := len(l.src), -1
+	limit := len(l.src)
 	if end == 0 {
-		limit, marker = l.heredocBodyLimit(l.pos)
-		if marker >= 0 {
+		label := &l.labels[len(l.labels)-1]
+		if label.marker >= 0 && label.marker < l.pos {
+			// The cached marker sat inside an interpolated expression, which
+			// PHP lexes as code; search again from here.
+			_, label.marker = l.heredocBodyLimit(l.pos, true)
+		}
+		if label.marker >= 0 {
 			// The newline before the marker belongs to the body.
-			limit = marker
+			limit = label.marker
 		}
 	}
 	i := l.pos
@@ -818,6 +970,10 @@ func (l *lexer) lexInterpolated(end byte) {
 		i = limit
 	}
 	l.pos = i
+	if end == 0 {
+		atLineStart := start > 0 && (l.src[start-1] == '\n' || l.src[start-1] == '\r')
+		l.checkIndent(start, i, atLineStart)
+	}
 	l.emit(TEncapsedAndWhitespace, start)
 	if l.pos >= len(l.src) && end != 0 {
 		l.diag("Unterminated string")

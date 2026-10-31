@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope": "lexer_differential_check",
+  "scope": "frontend_differential_check",
   "requirement": "REQ-010",
   "scenarios": [
     "T-019",
@@ -60,9 +60,30 @@
     "result": "no failure; every input byte covered by exactly one token"
   },
   "limits": [
-    "short_open_tag was on in both references; the off setting is covered only by unit tests.",
-    "Only PHP 8.5.12 lexing is implemented; historical releases need their own profiles.",
+    "short_open_tag was on in the references; the off setting is covered only by unit tests.",
+    "Only PHP 8.5.12 is implemented; historical releases need their own profiles.",
     "The corpus is php-src's own Zend and tokenizer tests, not real applications.",
-    "The parser, AST, and source maps are not yet implemented."
-  ]
+    "Error messages are not compared; only acceptance and error lines are.",
+    "Tree shapes are checked by unit tests only."
+  ],
+  "parser": {
+    "reference_command": "docker run --rm --network none --read-only --cap-drop ALL --platform linux/386 -v CORPUS:/corpus:ro -v tests/frontend/parse_dump.php:/dump.php:ro IMAGE php -n -d memory_limit=1G /dump.php > parse-reference.jsonl",
+    "reference_sha256": "e93e6bc6de11405df53763e064ad2db4e3490b2ac0de9d678df57a89c4a41e9a",
+    "reference_counts": {
+      "ok": 5307,
+      "parse_error": 112,
+      "compile_error_during_parse": 30
+    },
+    "phego_command": "PHEGO_LEXER_CORPUS=DIR go test -run ParseMatches ./internal/frontend",
+    "result": {
+      "files": 5449,
+      "agreeing": 5449,
+      "compared": "accept or reject, and the reported line for rejections"
+    },
+    "fuzz": {
+      "command": "go test -run '^$' -fuzz FuzzParse -fuzztime 90s ./internal/frontend",
+      "execs": 10767949,
+      "result": "no failure"
+    }
+  }
 }
