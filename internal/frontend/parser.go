@@ -329,6 +329,9 @@ func (p *parser) statement(top bool) *Node {
 	case TUnset:
 		p.next()
 		p.expect('(')
+		if p.at(')') {
+			p.unexpected()
+		}
 		n := node("unset", t.Line)
 		for !p.at(')') {
 			v := p.expr()
@@ -786,6 +789,9 @@ func (p *parser) attributes() *Node {
 	n := node("attributes", p.peek().Line)
 	for p.at(TAttribute) {
 		g := node("attribute_group", p.next().Line)
+		if p.at(']') {
+			p.unexpected()
+		}
 		for !p.at(']') {
 			a := node("attribute", p.peek().Line, p.name())
 			if p.at('(') {
@@ -908,6 +914,9 @@ func (p *parser) typeExpr() *Node {
 			n.Children = append(n.Children, p.singleType())
 		}
 		return n
+	}
+	if first.Kind == "intersection_type" {
+		p.unexpected()
 	}
 	return first
 }
