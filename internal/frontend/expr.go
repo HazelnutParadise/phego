@@ -377,6 +377,10 @@ func (p *parser) postfix(n *Node) *Node {
 		p.noPostfix = false
 		return n
 	}
+	// PHP requires parentheses before postfix access on these expressions.
+	if n.Kind == "match" || n.Kind == "closure" || n.Kind == "heredoc" {
+		return n
+	}
 	for {
 		t := p.peek()
 		if n.Kind == "literal" && !callable(n) && (t.Kind == '[' || t.Kind == TObjectOperator || t.Kind == TNullsafeObjectOperator || t.Kind == TDoubleColon) {
