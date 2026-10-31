@@ -1,0 +1,43 @@
+name: Native ABI callback probe
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  callback-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Exercise native-to-Go callbacks
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang --version | head -1
+          go version
+          uname -sm
+          probe_dir=$(mktemp -d)
+          clang -c experiments/nativecallback/invoke.ll -o "$probe_dir/invoke.o"
+          ar rcs "$probe_dir/libphegocallback.a" "$probe_dir/invoke.o"
+          CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir -lphegocallback" go test -race -count=1 -tags=phego_native_probe ./experiments/nativecallback
+          printf 'define i32 @phego_native_invoke(i64 %%owner, i64 %%token) {\n  ret i32 0\n}\n' > "$probe_dir/invalid.ll"
+          clang -c "$probe_dir/invalid.ll" -o "$probe_dir/invalid.o"
+          mkdir "$probe_dir/invalid"
+          ar rcs "$probe_dir/invalid/libphegocallback.a" "$probe_dir/invalid.o"
+          if CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir/invalid -lphegocallback" go test -count=1 -tags=phego_native_probe ./experiments/nativecallback > "$probe_dir/negative.log" 2>&1; then
+            echo 'error: missing native callback was accepted' >&2
+            exit 1
+          fi
+          cat "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestNativeInvokeCountsValidCalls' "$probe_dir/negative.log"
+          grep -F -- '--- FAIL: TestNativeInvokeRejectsInvalidOwnerAndTokensWithoutCounting' "$probe_dir/negative.log"

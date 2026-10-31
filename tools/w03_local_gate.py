@@ -8,6 +8,7 @@ import json
 import platform
 import re
 import os
+import selectors
 from pathlib import Path
 import signal
 import stat
@@ -255,6 +256,7 @@ def _snapshot_commit(root: Path, commit: str, destination: Path) -> str:
         raise ValueError('invalid file count')
     total = 0
     seen = set()
+    checked = []
     for entry in entries:
         if time.monotonic() >= deadline:
             raise ValueError('snapshot timed out')
@@ -271,25 +273,118 @@ def _snapshot_commit(root: Path, commit: str, destination: Path) -> str:
                 or name in seen):
             raise ValueError('unsafe or unsupported committed path')
         seen.add(name)
+        checked.append((mode, oid, parts))
+
+    proc = None
+    selector = selectors.DefaultSelector()
+    try:
+        env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+        env.update({'GIT_NO_REPLACE_OBJECTS': '1', 'GIT_CONFIG_NOSYSTEM': '1',
+                    'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_TERMINAL_PROMPT': '0'})
         try:
-            size = int(_git(root, 'cat-file', '-s', oid).strip())
-        except ValueError as exc:
-            raise ValueError('invalid blob size') from exc
-        total += size
-        if size < 0 or size > _MAX_FILE or total > _MAX_TOTAL:
-            raise ValueError('committed tree exceeds size limit')
-        data = _git(root, 'cat-file', 'blob', oid)
-        if len(data) != size or hashlib.sha1(b'blob ' + str(size).encode() + b'\0' + data).hexdigest() != oid:
-            raise ValueError('committed blob does not match its object ID')
-        target = destination.joinpath(*parts)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            with target.open('xb') as f:
-                f.write(data)
+            proc = subprocess.Popen(
+                ['git', '-C', str(root), 'cat-file', '--batch'], env=env,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                bufsize=0,
+            )
         except OSError as exc:
-            raise ValueError('cannot create snapshot file') from exc
-        if mode == '100755':
-            target.chmod(0o755)
+            raise ValueError('cannot start Git batch reader') from exc
+        assert proc.stdin is not None and proc.stdout is not None
+        in_fd, out_fd = proc.stdin.fileno(), proc.stdout.fileno()
+        os.set_blocking(in_fd, False)
+        os.set_blocking(out_fd, False)
+        def ready(fd: int, event: int) -> None:
+            for key in list(selector.get_map().values()):
+                selector.unregister(key.fd)
+            selector.register(fd, event)
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise ValueError('snapshot timed out')
+                if selector.select(remaining):
+                    return
+
+        def write_request(payload: bytes) -> None:
+            offset = 0
+            while offset < len(payload):
+                ready(in_fd, selectors.EVENT_WRITE)
+                try:
+                    offset += os.write(in_fd, payload[offset:])
+                except BlockingIOError:
+                    continue
+                except OSError as exc:
+                    raise ValueError('Git batch reader failed') from exc
+
+        def read_exact(size: int) -> bytes:
+            chunks = bytearray()
+            while len(chunks) < size:
+                ready(out_fd, selectors.EVENT_READ)
+                try:
+                    chunk = os.read(out_fd, min(65536, size - len(chunks)))
+                except BlockingIOError:
+                    continue
+                except OSError as exc:
+                    raise ValueError('Git batch reader failed') from exc
+                if not chunk:
+                    raise ValueError('truncated Git batch response')
+                chunks.extend(chunk)
+            return bytes(chunks)
+
+        def read_header() -> bytes:
+            line = bytearray()
+            while len(line) <= 128:
+                char = read_exact(1)
+                if char == b'\n':
+                    return bytes(line)
+                line.extend(char)
+            raise ValueError('invalid Git batch header')
+
+        for mode, oid, parts in checked:
+            if time.monotonic() >= deadline:
+                raise ValueError('snapshot timed out')
+            write_request(oid.encode('ascii') + b'\n')
+            header = read_header().split(b' ')
+            if len(header) != 3 or header[0] != oid.encode('ascii') or header[1] != b'blob':
+                raise ValueError('invalid Git batch header')
+            if not header[2].isdigit():
+                raise ValueError('invalid blob size')
+            size = int(header[2])
+            total += size
+            if size > _MAX_FILE or total > _MAX_TOTAL:
+                raise ValueError('committed tree exceeds size limit')
+            data = read_exact(size)
+            if read_exact(1) != b'\n':
+                raise ValueError('invalid Git batch framing')
+            if hashlib.sha1(b'blob ' + str(size).encode() + b'\0' + data).hexdigest() != oid:
+                raise ValueError('committed blob does not match its object ID')
+            target = destination.joinpath(*parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                with target.open('xb') as f:
+                    f.write(data)
+            except OSError as exc:
+                raise ValueError('cannot create snapshot file') from exc
+            if mode == '100755':
+                target.chmod(0o755)
+        proc.stdin.close()
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise ValueError('snapshot timed out')
+        try:
+            code = proc.wait(timeout=remaining)
+        except subprocess.TimeoutExpired as exc:
+            raise ValueError('snapshot timed out') from exc
+        if code != 0:
+            raise ValueError('Git batch reader failed')
+    finally:
+        selector.close()
+        if proc is not None:
+            for stream in (proc.stdin, proc.stdout):
+                if stream is not None and not stream.closed:
+                    stream.close()
+            if proc.poll() is None:
+                proc.kill()
+            proc.wait()
     if time.monotonic() >= deadline:
         raise ValueError('snapshot timed out')
     return tree
