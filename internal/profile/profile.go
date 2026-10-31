@@ -12,11 +12,16 @@ type Profile struct {
 	Release string
 	// IntWidth is the guest integer width in bits: 32 or 64.
 	IntWidth int
+	// ShortOpenTag mirrors the short_open_tag INI setting, which changes how
+	// source is parsed.
+	ShortOpenTag bool
 }
 
 // Key is the profile identity used by caches and compiled artifacts. Two
 // profiles share a key only when every field is equal.
-func (p Profile) Key() string { return fmt.Sprintf("php-%s/int%d", p.Release, p.IntWidth) }
+func (p Profile) Key() string {
+	return fmt.Sprintf("php-%s/int%d/short_open_tag=%t", p.Release, p.IntWidth, p.ShortOpenTag)
+}
 
 func (p Profile) String() string {
 	return fmt.Sprintf("PHP %s with %d-bit integers", p.Release, p.IntWidth)
@@ -44,9 +49,10 @@ var implemented = map[string]bool{"8.5.12": true}
 type Status uint8
 
 const (
-	// Unknown means the version names no release in the PHP release
-	// inventory.
-	Unknown Status = iota
+	// Unrecorded means the version is not recorded in the PHP release
+	// inventory. The inventory is still incomplete, so this does not prove
+	// that no such release exists; it means this build cannot confirm it.
+	Unrecorded Status = iota
 	// NotImplemented means the release exists but this build cannot run it
 	// yet. It stays inside the compatibility goal.
 	NotImplemented
@@ -61,7 +67,7 @@ func (s Status) String() string {
 	case Implemented:
 		return "implemented"
 	}
-	return "unknown"
+	return "unrecorded"
 }
 
 func find(version string) (knownRelease, bool) {
@@ -76,7 +82,7 @@ func find(version string) (knownRelease, bool) {
 // ReleaseStatus reports what this build can do with a release.
 func ReleaseStatus(version string) Status {
 	if _, ok := find(version); !ok {
-		return Unknown
+		return Unrecorded
 	}
 	if implemented[version] {
 		return Implemented
@@ -88,20 +94,21 @@ func ReleaseStatus(version string) Status {
 type Error struct {
 	Release  string
 	IntWidth int
-	Status   Status // Unknown or NotImplemented for release errors
+	Status   Status // Unrecorded or NotImplemented for release errors
 	Reason   string
 }
 
 func (e *Error) Error() string { return e.Reason }
 
-// Resolve returns the profile for an exact release and integer width. An
-// unknown version, a known but unimplemented release, and an unsupported
-// width are distinct errors; none falls back to another release.
-func Resolve(release string, intWidth int) (Profile, error) {
+// Resolve returns the profile for an exact release, integer width, and
+// short_open_tag setting. An unrecorded version, a known but unimplemented
+// release, and an unsupported width are distinct errors; none falls back to
+// another release.
+func Resolve(release string, intWidth int, shortOpenTag bool) (Profile, error) {
 	switch ReleaseStatus(release) {
-	case Unknown:
-		return Profile{}, &Error{Release: release, IntWidth: intWidth, Status: Unknown,
-			Reason: fmt.Sprintf("PHP release %q is not a known PHP release", release)}
+	case Unrecorded:
+		return Profile{}, &Error{Release: release, IntWidth: intWidth, Status: Unrecorded,
+			Reason: fmt.Sprintf("PHP release %q is not recorded in the PHP release inventory, which is still incomplete", release)}
 	case NotImplemented:
 		return Profile{}, &Error{Release: release, IntWidth: intWidth, Status: NotImplemented,
 			Reason: fmt.Sprintf("PHP release %s is a known release that this build does not implement yet", release)}
@@ -110,7 +117,7 @@ func Resolve(release string, intWidth int) (Profile, error) {
 		return Profile{}, &Error{Release: release, IntWidth: intWidth, Status: Implemented,
 			Reason: fmt.Sprintf("integer width %d is not 32 or 64", intWidth)}
 	}
-	return Profile{Release: release, IntWidth: intWidth}, nil
+	return Profile{Release: release, IntWidth: intWidth, ShortOpenTag: shortOpenTag}, nil
 }
 
 // ImplementedReleases returns the releases this build implements.

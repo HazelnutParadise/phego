@@ -76,3 +76,51 @@ func TestScanNeverDropsDynamicTargets(t *testing.T) {
 		}
 	}
 }
+
+// TestScanResolvesNamesAndCallbacks covers aliases, callback strings, and the
+// functions that need a capability through any call form.
+func TestScanResolvesNamesAndCallbacks(t *testing.T) {
+	for _, tc := range []struct {
+		src  string
+		want string // "kind class capability" of the first finding, or "" for none
+	}{
+		{`<?php namespace A; use function shell_exec as sh; sh('id');`, "process capability process"},
+		{`<?php use function call_user_func as cuf; cuf($x);`, "dynamic-callback unknown "},
+		{`<?php use function B\{file_put_contents as fpc}; fpc($p, 'x');`, ""},
+		{`<?php use function file_put_contents as fpc; fpc($p, 'x');`, "file-write unknown filesystem.write"},
+		{`<?php call_user_func('system', 'id');`, "process capability process"},
+		{`<?php array_map('shell_exec', $c);`, "process capability process"},
+		{`<?php call_user_func('file_put_contents', $p, 'x');`, "file-write unknown filesystem.write"},
+		{`<?php fopen($p, 'w');`, "file-write unknown filesystem.write"},
+		{`<?php fopen('/tmp/x', 'a+');`, "file-write capability filesystem.write"},
+		{`<?php fopen($p, 'r');`, ""},
+		{`<?php fopen($p, $mode);`, "file-write unknown filesystem.write"},
+		{`<?php symlink($a, $b);`, "file-write unknown filesystem.write"},
+		{`<?php ob_start($cb);`, "dynamic-callback unknown "},
+		{`<?php array_udiff($a, $b, $cb);`, "dynamic-callback unknown "},
+		{`<?php preg_replace_callback_array($m, $s);`, "dynamic-callback unknown "},
+		{`<?php Closure::fromCallable($x);`, "dynamic-callback unknown "},
+		{`<?php extract($_GET);`, "extract unknown "},
+		{`<?php mail($to, $s, $b);`, "process capability process"},
+		{`<?php include('a.php');`, "include capability filesystem.read"},
+		{`<?php require_once(__DIR__ . '/x.php');`, "include capability filesystem.read"},
+		{`<?php include 'http://example.test/a.php';`, "remote-include capability network"},
+		{`<?php array_filter($a);`, ""},
+		{`<?php array_map(null, $a);`, ""},
+		{`<?php \App\exec('x');`, ""},
+		{`<?php namespace App; exec('x');`, "process capability process"},
+		{`<?php $f = strlen(...);`, ""},
+	} {
+		tree, err := frontend.Parse([]byte(tc.src), frontend.LexOptions{IntWidth: 64, MaxBytes: len(tc.src)})
+		if err != nil {
+			t.Fatalf("%s: %v", tc.src, err)
+		}
+		got := ""
+		if fs := Scan("t.php", tree); len(fs) > 0 {
+			got = fmt.Sprintf("%s %s %s", fs[0].Kind, fs[0].Class, fs[0].Capability)
+		}
+		if got != tc.want {
+			t.Errorf("%s: got %q, want %q", tc.src, got, tc.want)
+		}
+	}
+}

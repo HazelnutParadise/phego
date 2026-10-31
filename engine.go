@@ -25,8 +25,8 @@ const (
 type Config struct {
 	// Release is the exact PHP release, for example "8.5.12". Empty selects
 	// SupportedRelease. A known release this build does not implement yet is
-	// an UnsupportedError and a version that names no PHP release is a
-	// ConfigError; neither is approximated by another release.
+	// an UnsupportedError and a version not recorded in the release
+	// inventory is a ConfigError; neither is approximated by another release.
 	Release string
 	// IntSize is the guest integer width in bits: 32 or 64. Zero selects 64.
 	IntSize int
@@ -126,13 +126,13 @@ func NewEngine(cfg Config) (*Engine, error) {
 	if cfg.IntSize == 0 {
 		cfg.IntSize = 64
 	}
-	prof, err := profile.Resolve(cfg.Release, cfg.IntSize)
+	prof, err := profile.Resolve(cfg.Release, cfg.IntSize, cfg.ShortOpenTag)
 	var pe *profile.Error
 	if errors.As(err, &pe) {
 		switch {
 		case pe.Status == profile.NotImplemented:
 			return nil, &UnsupportedError{Feature: "PHP release " + cfg.Release}
-		case pe.Status == profile.Unknown:
+		case pe.Status == profile.Unrecorded:
 			return nil, &ConfigError{Field: "Release", Reason: pe.Reason}
 		}
 		return nil, &ConfigError{Field: "IntSize", Reason: fmt.Sprintf("%d is not 32 or 64", cfg.IntSize)}

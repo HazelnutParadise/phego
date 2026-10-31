@@ -344,7 +344,7 @@ func (h *heap) safePow(base, exp float64) float64 {
 	if base == 0 && exp < 0 {
 		h.warn(levelDeprecated, "Power of base 0 and negative exponent is deprecated")
 	}
-	return correctlyRoundedPow(base, exp)
+	return glibcPow(base, exp)
 }
 
 // mulExact multiplies within the platform integer range.

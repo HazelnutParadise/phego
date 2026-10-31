@@ -44,19 +44,19 @@ func TestResolveClassifiesReleases(t *testing.T) {
 	}{
 		{"8.4.1", 64, NotImplemented}, // a real release not built yet
 		{"1.0", 64, NotImplemented},   // the first public release stays in the goal
-		{"8.5.99", 64, Unknown},       // no such release
-		{"8.5", 64, Unknown},          // not an exact release
-		{"", 64, Unknown},
+		{"8.5.99", 64, Unrecorded},    // no such release
+		{"8.5", 64, Unrecorded},       // not an exact release
+		{"", 64, Unrecorded},
 		{"8.5.12", 16, Implemented}, // release is fine, width is not
 	} {
-		_, err := Resolve(tc.release, tc.width)
+		_, err := Resolve(tc.release, tc.width, false)
 		var pe *Error
 		if !errors.As(err, &pe) || pe.Status != tc.status {
 			t.Errorf("Resolve(%q, %d) = %v, want status %v", tc.release, tc.width, err, tc.status)
 		}
 	}
 	for _, w := range []int{32, 64} {
-		p, err := Resolve("8.5.12", w)
+		p, err := Resolve("8.5.12", w, false)
 		if err != nil || p.Generation() != "php8" {
 			t.Fatalf("Resolve(8.5.12, %d) = %+v, %v", w, p, err)
 		}
@@ -67,8 +67,10 @@ func TestProfileKeysSeparateEveryField(t *testing.T) {
 	a := Profile{Release: "8.5.12", IntWidth: 32}
 	b := Profile{Release: "8.5.12", IntWidth: 64}
 	c := Profile{Release: "8.4.1", IntWidth: 64}
-	if a.Key() == b.Key() || b.Key() == c.Key() || a.Key() == c.Key() {
-		t.Fatalf("keys collide: %s %s %s", a.Key(), b.Key(), c.Key())
+	d := Profile{Release: "8.5.12", IntWidth: 64, ShortOpenTag: true}
+	keys := map[string]bool{a.Key(): true, b.Key(): true, c.Key(): true, d.Key(): true}
+	if len(keys) != 4 {
+		t.Fatalf("keys collide: %v", keys)
 	}
 	if got := ImplementedReleases(); len(got) != 1 || got[0] != "8.5.12" {
 		t.Fatalf("implemented releases %v", got)

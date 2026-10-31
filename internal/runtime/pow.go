@@ -1,117 +1,213 @@
+// This file is a Go translation of math/pow.c from ARM optimized-routines at
+// commit 2ee4b0d45680a9880412c1d186224b08652c35f6, the algorithm glibc uses
+// for pow on 64-bit platforms.
+//
+// Copyright (c) 2018-2026, Arm Limited.
+// SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+// See third_party/optimized-routines/LICENSE.
+
 package runtime
 
-import (
-	"math"
-	"math/big"
+import "math"
+
+// glibcPow returns x**y as glibc 2.41's pow does on 64-bit Linux with fused
+// multiply-add, so PHP-visible results match bit for bit. PHP's ** calls the
+// C library pow, and Go's math.Pow can be several units in the last place
+// away from it, which PHP code observes through printing or comparison.
+//
+// glibc on arm64 is compiled with GCC's default multiply-add contraction, so
+// a product that feeds an addition is fused. Go fuses only on some
+// architectures and by its own rules, even across statements, so every such
+// operation is written as math.FMA and every other product is wrapped in
+// float64(), which the Go specification requires to round.
+func glibcPow(x, y float64) float64 {
+	var signBias uint64
+	ix, iy := math.Float64bits(x), math.Float64bits(y)
+	topx, topy := uint32(ix>>52), uint32(iy>>52)
+	if topx-0x001 >= 0x7ff-0x001 || (topy&0x7ff)-0x3be >= 0x43e-0x3be {
+		if zeroInfNaN(iy) {
+			switch {
+			case 2*iy == 0:
+				return 1.0
+			case ix == math.Float64bits(1.0):
+				return 1.0
+			case 2*ix > 2*math.Float64bits(math.Inf(1)) || 2*iy > 2*math.Float64bits(math.Inf(1)):
+				return x + y
+			case 2*ix == 2*math.Float64bits(1.0):
+				return 1.0
+			case (2*ix < 2*math.Float64bits(1.0)) == (iy>>63 == 0):
+				return 0.0
+			}
+			return y * y
+		}
+		if zeroInfNaN(ix) {
+			x2 := float64(x * x)
+			if ix>>63 != 0 && checkInt(iy) == 1 {
+				x2 = -x2
+			}
+			if iy>>63 != 0 {
+				return 1 / x2
+			}
+			return x2
+		}
+		if ix>>63 != 0 {
+			switch checkInt(iy) {
+			case 0:
+				return math.NaN()
+			case 1:
+				signBias = expSignBias
+			}
+			ix &= 0x7fffffffffffffff
+			topx &= 0x7ff
+		}
+		if (topy&0x7ff)-0x3be >= 0x43e-0x3be {
+			if ix == math.Float64bits(1.0) {
+				return 1.0
+			}
+			if topy&0x7ff < 0x3be {
+				if ix > math.Float64bits(1.0) {
+					return 1.0 + y
+				}
+				return 1.0 - y
+			}
+			if (ix > math.Float64bits(1.0)) == (topy < 0x800) {
+				return math.Inf(1)
+			}
+			return 0
+		}
+		if topx == 0 {
+			// Normalize a subnormal x so its exponent becomes negative.
+			ix = math.Float64bits(math.Float64frombits(ix) * 0x1p52)
+			ix &= 0x7fffffffffffffff
+			ix -= 52 << 52
+		}
+	}
+	hi, lo := powLog(ix)
+	ehi := float64(y * hi)
+	elo := math.FMA(y, lo, math.FMA(y, hi, -ehi))
+	return powExp(ehi, elo, signBias)
+}
+
+// checkInt returns 0 when the finite non-zero value with bits iy is not an
+// integer, 1 when it is odd, and 2 when it is even.
+func checkInt(iy uint64) int {
+	e := int(iy >> 52 & 0x7ff)
+	switch {
+	case e < 0x3ff:
+		return 0
+	case e > 0x3ff+52:
+		return 2
+	case iy&(1<<(0x3ff+52-e)-1) != 0:
+		return 0
+	case iy&(1<<(0x3ff+52-e)) != 0:
+		return 1
+	}
+	return 2
+}
+
+func zeroInfNaN(i uint64) bool { return 2*i-1 >= 2*math.Float64bits(math.Inf(1))-1 }
+
+const (
+	powLogOffset = 0x3fe6955500000000
+	expSignBias  = 0x800 << 7
 )
 
-// powPrecision is the working precision of correctlyRoundedPow in bits. It
-// leaves enough guard bits that rounding the result to float64 is correct
-// except in cases far closer to a rounding boundary than any test input.
-const powPrecision = 256
-
-// correctlyRoundedPow returns x**y rounded to the nearest float64. PHP's **
-// calls the C library pow, and glibc rounds it to nearest; Go's math.Pow can
-// be several units in the last place away, which PHP code observes through
-// printing or comparison. Special values keep math.Pow's IEEE results, which
-// match C pow.
-func correctlyRoundedPow(x, y float64) float64 {
-	if x == 0 || y == 0 || x == 1 || math.IsNaN(x) || math.IsNaN(y) || math.IsInf(x, 0) || math.IsInf(y, 0) {
-		return math.Pow(x, y)
-	}
-	negative := false
-	if x < 0 {
-		if y != math.Trunc(y) {
-			return math.Pow(x, y) // NaN
-		}
-		x = -x
-		negative = math.Mod(y, 2) != 0
-	}
-	if y == 1 {
-		if negative {
-			return -x
-		}
-		return x
-	}
-	// Results that certainly overflow or underflow need no extra precision.
-	t := y * math.Log(x)
-	if t > 720 || t < -760 {
-		r := math.Pow(x, y)
-		if negative {
-			return -r
-		}
-		return r
-	}
-	prec := uint(powPrecision)
-	lx := bigLog(new(big.Float).SetPrec(prec).SetFloat64(x), prec)
-	e := bigExp(lx.Mul(lx, new(big.Float).SetPrec(prec).SetFloat64(y)), prec)
-	r, _ := e.Float64()
-	if negative {
-		return -r
-	}
-	return r
+// powLog returns hi+lo = log(x) for the normalized bits ix, with lo carrying
+// about 15 more bits of precision.
+func powLog(ix uint64) (float64, float64) {
+	tmp := ix - powLogOffset
+	i := (tmp >> (52 - 7)) % 128
+	k := int64(tmp) >> 52
+	iz := ix - (tmp & (0xfff << 52))
+	z := math.Float64frombits(iz)
+	kd := float64(k)
+	t := powLogTable[i]
+	r := math.FMA(z, t.invc, -1.0)
+	t1 := math.FMA(kd, powLn2hi, t.logc)
+	t2 := t1 + r
+	lo1 := math.FMA(kd, powLn2lo, t.logctail)
+	lo2 := t1 - t2 + r
+	A := &powLogPoly
+	ar := float64(A[0] * r)
+	ar2 := float64(r * ar)
+	ar3 := float64(r * ar2)
+	hi := t2 + ar2
+	lo3 := math.FMA(ar, r, -ar2)
+	lo4 := t2 - hi + ar2
+	q := math.FMA(ar2, math.FMA(ar2, math.FMA(r, A[6], A[5]), math.FMA(r, A[4], A[3])), math.FMA(r, A[2], A[1]))
+	lo := math.FMA(ar3, q, lo1+lo2+lo3+lo4) // lo1+lo2+lo3+lo4 + ar3*q
+	y := hi + lo
+	return y, hi - y + lo
 }
 
-// bigLn2 returns ln 2 at the given precision as 2*atanh(1/3).
-func bigLn2(prec uint) *big.Float {
-	third := new(big.Float).SetPrec(prec).Quo(big.NewFloat(1).SetPrec(prec), big.NewFloat(3).SetPrec(prec))
-	return bigAtanhDoubled(third, prec)
-}
-
-// bigAtanhDoubled returns 2*atanh(z) for |z| <= 1/3 by its power series.
-func bigAtanhDoubled(z *big.Float, prec uint) *big.Float {
-	z2 := new(big.Float).SetPrec(prec).Mul(z, z)
-	term := new(big.Float).SetPrec(prec).Set(z)
-	sum := new(big.Float).SetPrec(prec).Set(z)
-	piece := new(big.Float).SetPrec(prec)
-	for k := int64(3); ; k += 2 {
-		term.Mul(term, z2)
-		piece.Quo(term, new(big.Float).SetPrec(prec).SetInt64(k))
-		if piece.Sign() == 0 || piece.MantExp(nil)-sum.MantExp(nil) < -int(prec) {
-			break
+// powExp returns sign*exp(x+xtail) where signBias selects the sign.
+func powExp(x, xtail float64, signBias uint64) float64 {
+	abstop := uint32(math.Float64bits(x)>>52) & 0x7ff
+	if abstop-top12(0x1p-54) >= top12(512.0)-top12(0x1p-54) {
+		if abstop-top12(0x1p-54) >= 0x80000000 {
+			one := 1.0 + x
+			if signBias != 0 {
+				return -one
+			}
+			return one
 		}
-		sum.Add(sum, piece)
-	}
-	return sum.Mul(sum, big.NewFloat(2).SetPrec(prec))
-}
-
-// bigLog returns ln x for x > 0.
-func bigLog(x *big.Float, prec uint) *big.Float {
-	m := new(big.Float).SetPrec(prec)
-	exp := x.MantExp(m) // x = m * 2**exp, 0.5 <= m < 1
-	// Move m into [sqrt(1/2), sqrt(2)) so the series argument stays small.
-	if m.Cmp(big.NewFloat(math.Sqrt2/2)) < 0 {
-		m.SetMantExp(m, 1)
-		exp--
-	}
-	one := big.NewFloat(1).SetPrec(prec)
-	num := new(big.Float).SetPrec(prec).Sub(m, one)
-	den := new(big.Float).SetPrec(prec).Add(m, one)
-	ln := bigAtanhDoubled(num.Quo(num, den), prec)
-	return ln.Add(ln, new(big.Float).SetPrec(prec).Mul(bigLn2(prec), new(big.Float).SetPrec(prec).SetInt64(int64(exp))))
-}
-
-// bigExp returns e**t for |t| below about 800.
-func bigExp(t *big.Float, prec uint) *big.Float {
-	ln2 := bigLn2(prec)
-	kf, _ := new(big.Float).SetPrec(prec).Quo(t, ln2).Float64()
-	k := math.Round(kf)
-	r := new(big.Float).SetPrec(prec).Sub(t, new(big.Float).SetPrec(prec).Mul(ln2, new(big.Float).SetPrec(prec).SetFloat64(k)))
-	// Halve the argument before the Taylor series, then square back.
-	const halvings = 24
-	r.SetMantExp(r, -halvings)
-	sum := big.NewFloat(1).SetPrec(prec)
-	term := big.NewFloat(1).SetPrec(prec)
-	for n := int64(1); ; n++ {
-		term.Mul(term, r)
-		term.Quo(term, new(big.Float).SetPrec(prec).SetInt64(n))
-		if term.Sign() == 0 || term.MantExp(nil) < -int(prec) {
-			break
+		if abstop >= top12(1024.0) {
+			sign := 1.0
+			if signBias != 0 {
+				sign = -1.0
+			}
+			if math.Float64bits(x)>>63 != 0 {
+				return sign * 0
+			}
+			return sign * math.Inf(1)
 		}
-		sum.Add(sum, term)
+		abstop = 0
 	}
-	for range halvings {
-		sum.Mul(sum, sum)
+	z := float64(expInvLn2N * x)
+	kd := math.Round(z) // glibc on arm64 rounds half away from zero here
+	ki := uint64(int64(kd))
+	r := math.FMA(kd, expNegLn2loN, math.FMA(kd, expNegLn2hiN, x))
+	r += xtail
+	idx := 2 * (ki % 128)
+	top := (ki + signBias) << (52 - 7)
+	tail := math.Float64frombits(expTable[idx])
+	sbits := expTable[idx+1] + top
+	r2 := float64(r * r)
+	C := &expPoly
+	tmp := math.FMA(float64(r2*r2), math.FMA(r, C[3], C[2]), math.FMA(r2, math.FMA(r, C[1], C[0]), tail+r))
+	if abstop == 0 {
+		return powExpSpecial(tmp, sbits, ki)
 	}
-	return sum.SetMantExp(sum, int(k))
+	scale := math.Float64frombits(sbits)
+	return math.FMA(scale, tmp, scale)
+}
+
+func top12(x float64) uint32 { return uint32(math.Float64bits(x) >> 52) }
+
+// powExpSpecial computes scale*(1+tmp) when it may overflow or underflow,
+// rounding once in the subnormal range.
+func powExpSpecial(tmp float64, sbits, ki uint64) float64 {
+	if ki&0x80000000 == 0 {
+		sbits -= 1009 << 52
+		scale := math.Float64frombits(sbits)
+		y := math.FMA(scale, tmp, scale)
+		return 0x1p1009 * y
+	}
+	sbits += 1022 << 52
+	scale := math.Float64frombits(sbits)
+	y := math.FMA(scale, tmp, scale)
+	if math.Abs(y) < 1.0 {
+		one := 1.0
+		if y < 0.0 {
+			one = -1.0
+		}
+		lo := math.FMA(scale, tmp, scale-y)
+		hi := one + y
+		lo = one - hi + y + lo
+		y = (hi + lo) - one
+		if y == 0 {
+			y = math.Float64frombits(sbits & 0x8000000000000000)
+		}
+	}
+	return 0x1p-1022 * y
 }
