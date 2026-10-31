@@ -85,5 +85,22 @@
       "execs": 10767949,
       "result": "no failure"
     }
+  },
+  "mutation": {
+    "generator": "tests/frontend/mutate.php (mt_srand 20261031, three mutants per corpus file)",
+    "command": "docker run ... -v CORPUS:/corpus:ro -v OUT:/out -v tests/frontend/mutate.php:/m.php:ro IMAGE php -n /m.php; then parse_dump.php over OUT",
+    "files": 16320,
+    "reference_sha256": "63ba890a34cde4df613f903fe4ac1b6f80d3aefbfd3b7afada85d8ff5f196b28",
+    "reference_counts": {
+      "ok": 2586,
+      "parse_error": 13572,
+      "compile_error_during_parse": 162
+    },
+    "result": {
+      "same_decision": 16320,
+      "same_line": 16318,
+      "different_line": 2,
+      "different_line_cause": "heredoc indentation errors"
+    }
   }
 }

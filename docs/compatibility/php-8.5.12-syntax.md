@@ -14,6 +14,8 @@ This list describes what `internal/frontend` accepts for the PHP 8.5.12 profile.
 
 ## Known gaps
 
+- Of 16320 token-level mutants of the corpus, all receive PHP's accept or reject decision and 16318 the same error line; two heredoc indentation errors are reported on a different line.
+
 - Error messages are located like PHP's but do not reproduce Bison's "expecting ..." lists.
 - Tree shapes are checked by unit tests; their meaning is verified only once execution exists.
 - The reference ran with `short_open_tag` on; the off setting is covered by unit tests only.

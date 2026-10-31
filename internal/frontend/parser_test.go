@@ -84,6 +84,28 @@ func TestSyntaxErrorsAreLocated(t *testing.T) {
 	}
 }
 
+func TestCloseTagActsAsSemicolonAndKeywordsReportNextToken(t *testing.T) {
+	// Lines come from PHP 8.5.12 token_get_all(..., TOKEN_PARSE).
+	for src, line := range map[string]int{
+		"<?php\nfor ( ?>\n$i = 0; $i < 9; $i++) {}":                 3,
+		"<?php\nabstract class A { abstract function f() ?>\n {} }": 3,
+		"<?php\nf(); array\n?>":                                     3,
+		"<?php\nA::f(); static\n?>":                                 3,
+		"<?php\nclass \n{}":                                         3,
+	} {
+		_, err := parse(t, src)
+		var se *SyntaxError
+		if !errors.As(err, &se) || se.Line != line {
+			t.Errorf("%q: %v, want line %d", src, err, line)
+		}
+	}
+	for _, src := range []string{"<?php\nfoo(); ?>\n?>\n", "<?php\nabstract class A { abstract function f() ?>\n<?php }"} {
+		if _, err := parse(t, src); err != nil {
+			t.Errorf("%q: %v", src, err)
+		}
+	}
+}
+
 func TestMatchArmsNeedConditions(t *testing.T) {
 	// PHP 8.5.12 rejects an arm without conditions unless it is default.
 	for src, ok := range map[string]bool{

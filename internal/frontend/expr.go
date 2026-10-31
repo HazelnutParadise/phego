@@ -360,6 +360,12 @@ func (p *parser) primary() *Node {
 		p.next()
 		return leaf("name", t)
 	}
+	switch t.Kind {
+	case TArray, TStatic, TClass, TList, TIsset, TEmpty, TEval, TMatch:
+		// These keywords begin a construct, so PHP reports the token after
+		// them when that construct cannot continue.
+		p.next()
+	}
 	p.unexpected()
 	return nil
 }

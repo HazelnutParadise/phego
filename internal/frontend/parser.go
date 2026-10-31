@@ -130,6 +130,9 @@ func (p *parser) expect(k Kind) Token {
 }
 
 // endStatement accepts ';' or a close tag, which PHP treats as ';'.
+// acceptSemi accepts ';' or a close tag, which PHP's parser reads as ';'.
+func (p *parser) acceptSemi() bool { return p.accept(';') || p.accept(TCloseTag) }
+
 func (p *parser) endStatement() {
 	if !p.accept(';') && !p.accept(TCloseTag) {
 		p.unexpected()
@@ -140,7 +143,12 @@ func (p *parser) endStatement() {
 // token ends, which differs for tokens that span lines.
 func (p *parser) unexpected() {
 	t := p.peek()
-	p.fail(t.Line+countLines(t.Text), "syntax error, unexpected %s", describe(t))
+	line := t.Line + countLines(t.Text)
+	if t.Kind == TCloseTag {
+		// PHP's parser sees a close tag as ';' on the line where it starts.
+		line = t.Line
+	}
+	p.fail(line, "syntax error, unexpected %s", describe(t))
 }
 
 func describe(t Token) string {
@@ -166,8 +174,10 @@ func describe(t Token) string {
 			return fmt.Sprintf("single-quoted string %q", strings.Trim(t.Text, "bB'"))
 		}
 		return fmt.Sprintf("double-quoted string %q", strings.Trim(t.Text, "bB\""))
+	case TCloseTag:
+		return `token ";"`
 	case TInlineHTML:
-		return "inline html"
+		return fmt.Sprintf("T_INLINE_HTML %q", t.Text)
 	case TStartHeredoc:
 		return fmt.Sprintf("heredoc start %q", strings.TrimRight(t.Text, "\r\n"))
 	case TBadCharacter:
@@ -375,6 +385,11 @@ func (p *parser) statementContext(top, single bool) *Node {
 			return p.functionDecl(nil)
 		}
 	case TAbstract, TFinal, TReadonly, TClass, TInterface, TTrait:
+		if t.Kind == TClass && !isIdentifier(p.tok(1).Kind) && p.tok(1).Kind != '(' {
+			// A class declaration needs a name; PHP reports the next token.
+			p.next()
+			p.unexpected()
+		}
 		if t.Kind != TReadonly || p.classModifiersAhead() {
 			if t.Kind != TClass || isIdentifier(p.tok(1).Kind) {
 				if single {
@@ -401,6 +416,10 @@ func (p *parser) statementContext(top, single bool) *Node {
 				return p.functionDecl(attrs)
 			}
 		case TAbstract, TFinal, TReadonly, TClass, TInterface, TTrait, TEnum:
+			if p.peek().Kind == TClass && !isIdentifier(p.tok(1).Kind) {
+				p.next()
+				p.unexpected()
+			}
 			if p.peek().Kind != TClass || isIdentifier(p.tok(1).Kind) {
 				if single {
 					p.unexpected()
@@ -523,7 +542,7 @@ func (p *parser) forStatement() *Node {
 	parts := make([]*Node, 0, 4)
 	for i, end := range []Kind{';', ';', ')'} {
 		n := node("for_exprs", p.peek().Line)
-		for !p.at(end) {
+		for !p.at(end) && !(end == ';' && p.at(TCloseTag)) {
 			// (void) may discard any for expression except the final
 			// condition, whose value decides the loop.
 			e := p.peek()
@@ -543,7 +562,13 @@ func (p *parser) forStatement() *Node {
 				p.unexpected()
 			}
 		}
-		p.expect(end)
+		if end == ';' {
+			if !p.acceptSemi() {
+				p.unexpected()
+			}
+		} else {
+			p.expect(end)
+		}
 		parts = append(parts, n)
 	}
 	if p.accept(':') {
@@ -606,7 +631,7 @@ func (p *parser) switchStatement() *Node {
 	} else {
 		p.expect('{')
 	}
-	p.accept(';')
+	p.acceptSemi()
 	n := node("switch", t.Line, subject)
 	end := func() bool { return (!alt && p.at('}')) || (alt && p.at(TEndswitch)) }
 	for !end() {
@@ -619,7 +644,7 @@ func (p *parser) switchStatement() *Node {
 		default:
 			p.unexpected()
 		}
-		if !p.accept(':') && !p.accept(';') {
+		if !p.accept(':') && !p.acceptSemi() {
 			p.unexpected()
 		}
 		body := p.statements(false, func() bool { return p.atAny(TCase, TDefault) || end() })
@@ -1097,7 +1122,7 @@ func (p *parser) member() *Node {
 		params := p.parameters()
 		ret := p.returnType()
 		var body *Node
-		if !p.accept(';') {
+		if !p.acceptSemi() {
 			body = p.block()
 		}
 		return &Node{Kind: "method", Text: byRef, Line: line, Children: []*Node{attrs, mods, name, params, ret, body}}
