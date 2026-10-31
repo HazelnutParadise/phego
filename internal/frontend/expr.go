@@ -120,6 +120,16 @@ func isAssignTarget(n *Node) bool {
 	return isAssignable(n)
 }
 
+// referenceTarget parses a PHP variable or call usable after & or prefix ++/--.
+func (p *parser) referenceTarget() *Node {
+	start := p.peek()
+	target := p.postfix(p.primary())
+	if !isAssignTarget(target) || target.Kind == "array" || target.Kind == "list" {
+		p.fail(start.Line+countLines(start.Text), "invalid variable target: %s cannot be used here", describe(start))
+	}
+	return target
+}
+
 // canStartExpr reports whether k can begin an expression; yield without a
 // value is followed by anything else.
 func canStartExpr(k Kind) bool {
@@ -145,7 +155,7 @@ func (p *parser) assignment(left *Node) *Node {
 		p.next()
 		if t.Kind == '=' && isAmpersand(p.peek().Kind) {
 			p.next()
-			left = node("assign_ref", t.Line, left, p.exprPrec(precAssign))
+			left = node("assign_ref", t.Line, left, p.referenceTarget())
 			continue
 		}
 		left = &Node{Kind: "assign", Text: t.Text, Line: t.Line, Children: []*Node{left, p.exprPrec(precAssign)}}
@@ -173,7 +183,7 @@ func (p *parser) unary(min int) *Node {
 		return &Node{Kind: "cast", Text: t.Text, Line: t.Line, Children: []*Node{p.exprPrec(precUnary)}}
 	case t.Kind == TInc || t.Kind == TDec:
 		p.next()
-		return &Node{Kind: "pre_inc", Text: t.Text, Line: t.Line, Children: []*Node{p.postfix(p.primary())}}
+		return &Node{Kind: "pre_inc", Text: t.Text, Line: t.Line, Children: []*Node{p.referenceTarget()}}
 	case t.Kind == TPrint:
 		p.next()
 		return node("print", t.Line, p.exprPrec(precPrint))
