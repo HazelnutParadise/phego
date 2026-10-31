@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "scope": "partial_candidate_inventory",
+  "coverage_review_status": "incomplete",
+  "benchmark_status": "not_run",
+  "source_inputs": [
+    {
+      "path": "docs/data/competitor-catalog.json",
+      "sha256": "c4c3d61cd9056ccb9a1220f213a1db82a5cd4b08ca03d572d0b571e92853bd43"
+    },
+    {
+      "path": "docs/implementation/evidence/W-54-candidate-sources.json",
+      "sha256": "c0377307277a0596e5f4fa88a08b3b2e1b2e0bd073560845edb1b4010c189ef4"
+    }
+  ],
+  "limitations": [
+    "The seed entries are discovery targets, not evidence of working artifacts.",
+    "Observed source files and commits are not locked releases or executable build evidence.",
+    "No competitor has been built, tested, or compared by this inventory.",
+    "Missing versions, engines, stacks and configurations remain open; absence from this list is not exclusion."
+  ],
+  "items": [
+    {
+      "id": "COMP-01",
+      "name": "Official PHP / Zend",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://www.php.net/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "COMP-02",
+      "name": "KPHP",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://vkcom.github.io/kphp/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler"
+    },
+    {
+      "id": "COMP-03",
+      "name": "PeachPie",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://docs.peachpie.io/php/compatibility/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler_runtime"
+    },
+    {
+      "id": "COMP-04",
+      "name": "HHVM PHP-compatible releases",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://hhvm.com/blog/2018/09/12/end-of-php-support-future-of-hack.html"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "historical_execution_engine"
+    },
+    {
+      "id": "COMP-05",
+      "name": "Goro",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://github.com/KarpelesLab",
+        "https://github.com/KarpelesLab/goro"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "alternative_execution_engine"
+    },
+    {
+      "id": "COMP-06",
+      "name": "FrankenPHP",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://frankenphp.dev/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "deployment_stack"
+    },
+    {
+      "id": "COMP-07",
+      "name": "RoadRunner",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://roadrunner.dev/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "deployment_stack"
+    },
+    {
+      "id": "COMP-08",
+      "name": "OpenSwoole / Swoole family",
+      "discovery_kind": "planning_seed",
+      "sources": [
+        "https://openswoole.com/"
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "deployment_stack"
+    },
+    {
+      "id": "DISC-01",
+      "name": "HippyVM",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/hippyvm/hippyvm",
+      "observed_commit": "2ae35b80023dbc4f0735e1388528d28ed7b234fd",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/hippyvm/hippyvm/2ae35b80023dbc4f0735e1388528d28ed7b234fd/README.md",
+          "sha256": "0f5512c02d48898c0c8ab1d2547fc865170071524610632cdb80c8595872fc7b",
+          "bytes": 3934
+        },
+        {
+          "url": "https://raw.githubusercontent.com/hippyvm/hippyvm/2ae35b80023dbc4f0735e1388528d28ed7b234fd/LICENSE",
+          "sha256": "29b0d6417b8d436911704260f606a6ec65049004f573e7cca8e6163337693dc3",
+          "bytes": 1053
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "DISC-02",
+      "name": "JPHP",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/jphp-group/jphp",
+      "observed_commit": "eefaac6d8195025ba53c2b7b0996a9c128b2ffb7",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/jphp-group/jphp/eefaac6d8195025ba53c2b7b0996a9c128b2ffb7/README.md",
+          "sha256": "4dd3aa9ef6f430e6ddaebbff8ed75f9b16fc7604ab0eb6c3afd9bb59d83fc616",
+          "bytes": 5165
+        },
+        {
+          "url": "https://raw.githubusercontent.com/jphp-group/jphp/eefaac6d8195025ba53c2b7b0996a9c128b2ffb7/LICENSE",
+          "sha256": "c005fe158c42796e4398f135db889b27120b0c57423ff375f5ce134a243dbede",
+          "bytes": 10273
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler_runtime"
+    },
+    {
+      "id": "DISC-03",
+      "name": "phc",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/pbiggar/phc",
+      "observed_commit": "96adc7bef3e222532196846c1f11ea4b2bc7930e",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/pbiggar/phc/96adc7bef3e222532196846c1f11ea4b2bc7930e/README.md",
+          "sha256": "8c714e93df8b5ffdbda3c5a808031ba6265d20c916598c0b7729997c5efd5df4",
+          "bytes": 3243
+        },
+        {
+          "url": "https://raw.githubusercontent.com/pbiggar/phc/96adc7bef3e222532196846c1f11ea4b2bc7930e/configure.ac",
+          "sha256": "c7911204f1557f6aba83cf7edd42027a2a45cb751649e38f8ab0bce76a12c479",
+          "bytes": 3973
+        },
+        {
+          "url": "https://raw.githubusercontent.com/pbiggar/phc/96adc7bef3e222532196846c1f11ea4b2bc7930e/doc/license/README.license",
+          "sha256": "dc9ec193f1b701151a2175b58c08fae957ab7afa72c4d0f12fe418baa3f577e0",
+          "bytes": 2424
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler"
+    },
+    {
+      "id": "DISC-04",
+      "name": "ePHP",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/bragful/ephp",
+      "observed_commit": "0384f8d3c726be3cd7641e5cb18fb9feae370ea4",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/bragful/ephp/0384f8d3c726be3cd7641e5cb18fb9feae370ea4/README.md",
+          "sha256": "a2828ac782fde63488eb0bd3aefffa07f1a3801b7e7900712730ce3299676bc1",
+          "bytes": 6693
+        },
+        {
+          "url": "https://raw.githubusercontent.com/bragful/ephp/0384f8d3c726be3cd7641e5cb18fb9feae370ea4/COPYING",
+          "sha256": "5525fbd0911b8dcbdc6f0c081ac27fd55b75d6d261c62fa05b9bdc0b72b481f6",
+          "bytes": 26462
+        },
+        {
+          "url": "https://raw.githubusercontent.com/bragful/ephp/0384f8d3c726be3cd7641e5cb18fb9feae370ea4/src/ephp.app.src",
+          "sha256": "bbfd7660fc7ecc5f547310d1f678feac3616a95232171c366a1cdbf47cdf7790",
+          "bytes": 323
+        },
+        {
+          "url": "https://raw.githubusercontent.com/bragful/ephp/0384f8d3c726be3cd7641e5cb18fb9feae370ea4/COMPATIBILITY.md",
+          "sha256": "db5df18542d33b3d6543e13817363efd9835e99b3566b326a963d5bd64390f53",
+          "bytes": 9120
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "DISC-05",
+      "name": "GraalPHP",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/abertschi/graalphp",
+      "observed_commit": "29e22de14d919ccd5647603b54ccd9eb25725d50",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/abertschi/graalphp/29e22de14d919ccd5647603b54ccd9eb25725d50/README.md",
+          "sha256": "f461da04b5f7e8ee668aa365609f2b50f0871bc633f520c5042e3346f9b07bff",
+          "bytes": 3566
+        },
+        {
+          "url": "https://raw.githubusercontent.com/abertschi/graalphp/29e22de14d919ccd5647603b54ccd9eb25725d50/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "bytes": 11357
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler_runtime"
+    },
+    {
+      "id": "DISC-06",
+      "name": "Phalanger",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/DEVSENSE/Phalanger",
+      "observed_commit": "d6d9b30c06786b42238b4101da189a9e9ba818b6",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/DEVSENSE/Phalanger/d6d9b30c06786b42238b4101da189a9e9ba818b6/README.md",
+          "sha256": "33ce1b69ce9819422aba9a09e30585ee25ab16718fd58707f7ecf848463878ae",
+          "bytes": 924
+        },
+        {
+          "url": "https://raw.githubusercontent.com/DEVSENSE/Phalanger/d6d9b30c06786b42238b4101da189a9e9ba818b6/LICENSE.txt",
+          "sha256": "fb037f6f621ba5a3a8d218550e6b5e7b9b0b74ff815e57f135c9d014473f7ba9",
+          "bytes": 9198
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler_runtime"
+    },
+    {
+      "id": "DISC-07",
+      "name": "Roadsend PHP",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/weyrick/roadsend-php",
+      "observed_commit": "d6301a897b1a02d7a85bdb915bea91d0991eb158",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/weyrick/roadsend-php/d6301a897b1a02d7a85bdb915bea91d0991eb158/README",
+          "sha256": "3b714124a52d3498c1c454edd6f5e043fc4603aeeed4d9037749f1705da51a3f",
+          "bytes": 174
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler"
+    },
+    {
+      "id": "DISC-08",
+      "name": "Roadsend Raven",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/weyrick/roadsend-php-raven",
+      "observed_commit": "ef608d3a0d27c4d30575afba58bc0c9c7e005acc",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/weyrick/roadsend-php-raven/ef608d3a0d27c4d30575afba58bc0c9c7e005acc/README",
+          "sha256": "39f01c94ee38f72a4c3563fa0792daf48a6b29165e38defdc90c558d739b9c29",
+          "bytes": 3932
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler"
+    },
+    {
+      "id": "DISC-09",
+      "name": "phprs",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/yingkitw/phprs",
+      "observed_commit": "a616a5eaa9207ec12bdc5cf3e96e4cd6c22a5d99",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/yingkitw/phprs/a616a5eaa9207ec12bdc5cf3e96e4cd6c22a5d99/README.md",
+          "sha256": "eab59a7e03d510a17c2e9a040ada48cef501c0d5d219152678e276388e52c71b",
+          "bytes": 28437
+        },
+        {
+          "url": "https://raw.githubusercontent.com/yingkitw/phprs/a616a5eaa9207ec12bdc5cf3e96e4cd6c22a5d99/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358
+        },
+        {
+          "url": "https://raw.githubusercontent.com/yingkitw/phprs/a616a5eaa9207ec12bdc5cf3e96e4cd6c22a5d99/Cargo.toml",
+          "sha256": "5068d93d696629f3bca3d3f1701c56302b2b8ae21fe7f1f7e321aede3178ea74",
+          "bytes": 2512
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "DISC-10",
+      "name": "php-rust / phpr",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/francescotinti/php-rust",
+      "observed_commit": "f89ae085be78503e9048ecc448fc1ef1f87a8a0f",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/francescotinti/php-rust/f89ae085be78503e9048ecc448fc1ef1f87a8a0f/README.md",
+          "sha256": "5a8c5ed01d113e0fa9348a5447402a6aa2c80037742a483134811f25955bb4e6",
+          "bytes": 18741
+        },
+        {
+          "url": "https://raw.githubusercontent.com/francescotinti/php-rust/f89ae085be78503e9048ecc448fc1ef1f87a8a0f/LICENSE",
+          "sha256": "df4a373e2f363591f160c7a3dbe98fb2a82ff08eb801728bd7f9824a07c9e392",
+          "bytes": 3335
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "DISC-11",
+      "name": "phpscript",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/titpetric/phpscript",
+      "observed_commit": "ee889febddf9d789ae216451e89eb4cacdee6dd4",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/titpetric/phpscript/ee889febddf9d789ae216451e89eb4cacdee6dd4/README.md",
+          "sha256": "6cab735fe1cd6069af4f86d914a01006c56458461a7de9ba43421636db16d527",
+          "bytes": 5108
+        },
+        {
+          "url": "https://raw.githubusercontent.com/titpetric/phpscript/ee889febddf9d789ae216451e89eb4cacdee6dd4/LICENSE",
+          "sha256": "8e76e0be6d27aeca57ea0db30d803648991748776983f83fa085760261d49354",
+          "bytes": 1089
+        },
+        {
+          "url": "https://raw.githubusercontent.com/titpetric/phpscript/ee889febddf9d789ae216451e89eb4cacdee6dd4/version.go",
+          "sha256": "010af3644df7ad968977ac5dc1d8c42ad270ca0a6faf8fe8e8c4acf9b9c6b64b",
+          "bytes": 172
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    },
+    {
+      "id": "DISC-12",
+      "name": "Elephc",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/illegalstudio/elephc",
+      "observed_commit": "6dd2e16e4f49f1f3a2944b11342a8f5c9baa96a7",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/illegalstudio/elephc/6dd2e16e4f49f1f3a2944b11342a8f5c9baa96a7/README.md",
+          "sha256": "15dc2f1605331f462c5428cbb1a25f006cfd3667b42d309f842c845058fc8004",
+          "bytes": 64374
+        },
+        {
+          "url": "https://raw.githubusercontent.com/illegalstudio/elephc/6dd2e16e4f49f1f3a2944b11342a8f5c9baa96a7/LICENSE",
+          "sha256": "139cf37b636cb81ff073176909cf06d438d21469cd5f01dfafc1d1d2e632bbe2",
+          "bytes": 1074
+        },
+        {
+          "url": "https://raw.githubusercontent.com/illegalstudio/elephc/6dd2e16e4f49f1f3a2944b11342a8f5c9baa96a7/Cargo.toml",
+          "sha256": "2e80fcb0af2e168e3e1d5ff4693461c72708868b9e33387e0c2ae8e2a1da6ee4",
+          "bytes": 10651
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "compiler"
+    },
+    {
+      "id": "DISC-13",
+      "name": "Quercus development copy",
+      "discovery_kind": "upstream_source_observation",
+      "repository": "https://github.com/CleverCloud/Quercus",
+      "observed_commit": "d60c80f3d24cdf6fef26a2c3065d1fae093133f4",
+      "source_files": [
+        {
+          "url": "https://raw.githubusercontent.com/CleverCloud/Quercus/d60c80f3d24cdf6fef26a2c3065d1fae093133f4/README",
+          "sha256": "0df6f2ec88ef61c7d1f1bfacf84cd3088be2b1c495a4e368a7aeb629671be50e",
+          "bytes": 1410
+        },
+        {
+          "url": "https://raw.githubusercontent.com/CleverCloud/Quercus/d60c80f3d24cdf6fef26a2c3065d1fae093133f4/LICENSE",
+          "sha256": "204d8eff92f95aac4df6c8122bc1505f468f3a901e5a4cc08940e0ede1938994",
+          "bytes": 18009
+        },
+        {
+          "url": "https://raw.githubusercontent.com/CleverCloud/Quercus/d60c80f3d24cdf6fef26a2c3065d1fae093133f4/README.caucho",
+          "sha256": "e5d931db438de33f8a35a90e907ca86f3d53acc44222713cccfb217f41665869",
+          "bytes": 3706
+        }
+      ],
+      "source_lock_status": "not_locked",
+      "comparison_status": "not_run",
+      "category": "execution_engine"
+    }
+  ]
+}
