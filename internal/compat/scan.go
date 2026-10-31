@@ -101,6 +101,7 @@ type scanner struct {
 	// the lower-cased alias of each "use function" import to its target.
 	namespace string
 	functions map[string]string
+	classes   map[string]string // lower-cased class alias -> target
 }
 
 func (s *scanner) add(n *frontend.Node, kind string, class Class, capability, evidence, impact string) {
@@ -115,10 +116,13 @@ func (s *scanner) walk(n *frontend.Node) {
 	switch n.Kind {
 	case "namespace":
 		s.namespace = strings.ToLower(textOf(child(n, 0), ""))
-		s.functions = nil
+		s.functions, s.classes = nil, nil
 	case "use":
-		if n.Text == "function" {
+		switch n.Text {
+		case "function":
 			s.importFunctions(n)
+		case "":
+			s.importClasses(n)
 		}
 	case "call":
 		s.call(n)
@@ -130,7 +134,7 @@ func (s *scanner) walk(n *frontend.Node) {
 		member := child(n, 0)
 		if member != nil && (!isName(child(member, 0)) || !isName(child(member, 1))) {
 			s.add(n, "dynamic-static-call", Unknown, "", source(member), "the class or method is computed at run time; confirm every reachable target exists")
-		} else if member != nil && strings.EqualFold(strings.TrimPrefix(child(member, 0).Text, `\`), "closure") &&
+		} else if member != nil && s.className(child(member, 0).Text) == "closure" &&
 			strings.EqualFold(child(member, 1).Text, "fromCallable") {
 			s.callback(n, "Closure::fromCallable", argument(child(n, 1), 0), child(n, 1) != nil && len(child(n, 1).Children) > 0)
 		}
@@ -138,7 +142,7 @@ func (s *scanner) walk(n *frontend.Node) {
 		class := child(n, 0)
 		if class != nil && class.Kind != "name" && class.Kind != "new_class" {
 			s.add(n, "dynamic-new", Unknown, "", source(class), "the class is computed at run time; confirm every reachable class can be loaded")
-		} else if class != nil && class.Kind == "name" && strings.EqualFold(strings.TrimPrefix(class.Text, `\`), "ReflectionFunction") {
+		} else if class != nil && class.Kind == "name" && s.className(class.Text) == "reflectionfunction" {
 			s.callback(n, "ReflectionFunction", argument(child(n, 1), 0), child(n, 1) != nil && len(child(n, 1).Children) > 0)
 		}
 	case "include":
@@ -186,6 +190,42 @@ func (s *scanner) importFunctions(n *frontend.Node) {
 			}
 		}
 	}
+}
+
+// importClasses records the class aliases of a plain "use" statement.
+func (s *scanner) importClasses(n *frontend.Node) {
+	if s.classes == nil {
+		s.classes = map[string]string{}
+	}
+	for _, c := range n.Children {
+		if c == nil || c.Kind != "use_item" {
+			continue
+		}
+		target := strings.ToLower(strings.TrimPrefix(textOf(child(c, 0), ""), `\`))
+		alias := strings.ToLower(textOf(child(c, 1), target[strings.LastIndexByte(target, '\\')+1:]))
+		s.classes[alias] = target
+	}
+}
+
+// className resolves a class name to its lower-cased fully qualified name.
+// Unlike functions, an unqualified class name never falls back to the
+// global namespace.
+func (s *scanner) className(name string) string {
+	lower := strings.ToLower(name)
+	if rest, ok := strings.CutPrefix(lower, `\`); ok {
+		return rest
+	}
+	first, rest, qualified := strings.Cut(lower, `\`)
+	if target, ok := s.classes[first]; ok {
+		if qualified {
+			return target + `\` + rest
+		}
+		return target
+	}
+	if s.namespace != "" {
+		return s.namespace + `\` + lower
+	}
+	return lower
 }
 
 // globalFunction resolves a called name to the global function PHP would
@@ -266,10 +306,120 @@ func (s *scanner) call(n *frontend.Node) {
 			s.callback(n, callee.Text, argument(args, pos), true)
 		}
 	}
-	if (name == "filter_var" || name == "filter_var_array" || name == "filter_input" || name == "filter_input_array") && mentions(args, "filter_callback") {
-		s.add(n, "dynamic-callback", Unknown, "", callee.Text+"(FILTER_CALLBACK)", "the filter callback is read from the options at run time; confirm every reachable callable exists")
+	if pos, ok := filterArgument[name]; ok && mayFilterCallback(args, pos) {
+		s.add(n, "dynamic-callback", Unknown, "", callee.Text+"(...)", "the filter may be FILTER_CALLBACK, whose callback is read from the options at run time; confirm every reachable callable exists")
 	}
 	s.function(n, name, args, callee.Text+"()")
+}
+
+// filterArgument is the position of the filter or definition argument of
+// the filter functions.
+var filterArgument = map[string]int{"filter_var": 1, "filter_input": 2, "filter_var_array": 1, "filter_input_array": 1}
+
+// filterCallback is the value of PHP's FILTER_CALLBACK.
+const filterCallback = "1024"
+
+// mayFilterCallback reports whether the filter argument at pos can select
+// FILTER_CALLBACK: anything other than an absent argument, another FILTER_
+// constant, a different integer, or an array literal free of callbacks.
+func mayFilterCallback(args *frontend.Node, pos int) bool {
+	if args == nil {
+		return false
+	}
+	for i, a := range args.Children {
+		if a != nil && (a.Kind == "spread" || a.Kind == "named_arg") && i <= pos {
+			return true
+		}
+	}
+	f := argument(args, pos)
+	switch {
+	case f == nil:
+		return false
+	case f.Kind == "name":
+		return strings.EqualFold(strings.TrimPrefix(f.Text, `\`), "FILTER_CALLBACK") || !strings.HasPrefix(strings.ToUpper(strings.TrimPrefix(f.Text, `\`)), "FILTER_")
+	case f.Kind == "literal":
+		v, _ := literalInt(f)
+		return v == filterCallback || v == "?"
+	case f.Kind == "array":
+		return mentions(f, "filter_callback") || mentionsLiteral(f, filterCallback) || containsDynamic(f)
+	}
+	return true
+}
+
+// literalArgument returns the integer value of a literal argument as a
+// decimal string, "?" when it is not a literal, "" when it is absent, and
+// whether an unpacked or named argument hides its value.
+func literalArgument(args *frontend.Node, pos int) (string, bool) {
+	if args == nil {
+		return "", false
+	}
+	for i, a := range args.Children {
+		if a != nil && (a.Kind == "spread" || a.Kind == "named_arg") && i <= pos {
+			return "", true
+		}
+	}
+	a := argument(args, pos)
+	if a == nil {
+		return "", false
+	}
+	v, _ := literalInt(a)
+	return v, false
+}
+
+// literalInt converts a numeric or string literal to the decimal integer PHP
+// would use, or "?" when it is not a literal.
+func literalInt(n *frontend.Node) (string, bool) {
+	if n == nil || n.Kind != "literal" {
+		return "?", false
+	}
+	text := n.Text
+	if n.Token == frontend.TConstantEncapsedString {
+		text = strings.TrimSpace(literalValue(text))
+	}
+	text = strings.ReplaceAll(text, "_", "")
+	if i, err := strconv.ParseInt(text, 0, 64); err == nil {
+		return strconv.FormatInt(i, 10), true
+	}
+	if f, err := strconv.ParseFloat(text, 64); err == nil && f == float64(int64(f)) {
+		return strconv.FormatInt(int64(f), 10), true
+	}
+	return "?", false
+}
+
+// mentionsLiteral reports whether an integer literal with value v appears in n.
+func mentionsLiteral(n *frontend.Node, v string) bool {
+	if n == nil {
+		return false
+	}
+	if n.Kind == "literal" && n.Token != frontend.TConstantEncapsedString {
+		if got, ok := literalInt(n); ok && got == v {
+			return true
+		}
+	}
+	for _, c := range n.Children {
+		if mentionsLiteral(c, v) {
+			return true
+		}
+	}
+	return false
+}
+
+// containsDynamic reports whether n holds a variable or call, whose value
+// could be FILTER_CALLBACK.
+func containsDynamic(n *frontend.Node) bool {
+	if n == nil {
+		return false
+	}
+	switch n.Kind {
+	case "variable", "variable_variable", "call", "method_call", "static_call", "dim", "prop", "static_prop", "spread":
+		return true
+	}
+	for _, c := range n.Children {
+		if containsDynamic(c) {
+			return true
+		}
+	}
+	return false
 }
 
 // callback reports a callable passed to via. A string literal names a global
@@ -312,14 +462,15 @@ func (s *scanner) function(n *frontend.Node, name string, args *frontend.Node, e
 		s.add(n, "extract", Unknown, "", evidence, "creates variables whose names come from data at run time")
 	}
 	if name == "error_log" {
-		switch kind := argument(args, 1); {
-		case args == nil:
-			s.add(n, "file-write", Unknown, "filesystem.write", evidence, "may append to a file whose path is computed at run time")
-		case kind == nil:
-		case kind.Kind == "literal" && kind.Text == "3":
+		switch kind, spread := literalArgument(args, 1); {
+		case args == nil || spread:
+			s.add(n, "error-log", Unknown, "filesystem.write", evidence, "the message type is computed at run time; it may append to a file or run sendmail")
+		case kind == "3":
 			s.writeFinding(n, name, argument(args, 2), evidence)
-		case kind.Kind != "literal":
-			s.add(n, "file-write", Unknown, "filesystem.write", evidence, "the message type is computed at run time; it may append to a file")
+		case kind == "1":
+			s.add(n, "process", Capability, "process", evidence, "sends mail through the sendmail program; requires the process capability")
+		case kind == "?":
+			s.add(n, "error-log", Unknown, "filesystem.write", evidence, "the message type is computed at run time; it may append to a file or run sendmail")
 		}
 	}
 	if name == "fopen" {
@@ -361,7 +512,7 @@ func (s *scanner) include(n *frontend.Node) {
 				return
 			}
 		}
-		if strings.Contains(lower, "://") {
+		if strings.Contains(lower, "://") || strings.HasPrefix(lower, "data:") {
 			s.add(n, "stream-include", Unknown, "stream", n.Text+" "+path, "reads source code through a stream wrapper such as php://input or data://, whose content is not a checked file")
 			return
 		}
@@ -461,7 +612,7 @@ func literalValue(lit string) string {
 			out.WriteByte('\f')
 		case next == '\\' || next == '$' || next == '"':
 			out.WriteByte(next)
-		case next == 'x' && i+1 < len(body) && isHex(body[i+1]):
+		case next|0x20 == 'x' && i+1 < len(body) && isHex(body[i+1]):
 			j := i + 1
 			for j < len(body) && j < i+3 && isHex(body[j]) {
 				j++
