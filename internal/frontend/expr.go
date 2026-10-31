@@ -250,8 +250,6 @@ func (p *parser) exprWithAttributes(attrs *Node) *Node {
 			p.next()
 			return p.closure(attrs, leaf("modifier", t))
 		}
-	case TNew:
-		return p.postfix(p.newExpr(attrs))
 	}
 	p.unexpected()
 	return nil

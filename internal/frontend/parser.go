@@ -241,7 +241,13 @@ func (p *parser) altBody(ends ...Kind) *Node {
 	return node("block", line, p.statements(false, func() bool { return p.atAny(ends...) })...)
 }
 
-func (p *parser) statement(top bool) *Node {
+// singleStatement excludes declarations, which PHP permits in statement lists
+// but not as an unbraced control-flow body.
+func (p *parser) singleStatement() *Node { return p.statementContext(false, true) }
+
+func (p *parser) statement(top bool) *Node { return p.statementContext(top, false) }
+
+func (p *parser) statementContext(top, single bool) *Node {
 	p.enter()
 	defer p.leave()
 	t := p.peek()
@@ -276,10 +282,10 @@ func (p *parser) statement(top bool) *Node {
 			p.endStatement()
 			return node("while", t.Line, cond, body)
 		}
-		return node("while", t.Line, cond, p.statement(false))
+		return node("while", t.Line, cond, p.singleStatement())
 	case TDo:
 		p.next()
-		body := p.statement(false)
+		body := p.singleStatement()
 		p.expect(TWhile)
 		cond := p.parenExpr()
 		p.endStatement()
@@ -357,25 +363,44 @@ func (p *parser) statement(top bool) *Node {
 		return node("goto", t.Line, label)
 	case TFunction:
 		if k := p.tok(1).Kind; isIdentifier(k) || (isAmpersand(k) && isIdentifier(p.tok(2).Kind)) {
+			if single {
+				p.next()
+				p.byRef()
+				p.unexpected()
+			}
 			return p.functionDecl(nil)
 		}
 	case TAbstract, TFinal, TReadonly, TClass, TInterface, TTrait:
 		if t.Kind != TReadonly || p.classModifiersAhead() {
 			if t.Kind != TClass || isIdentifier(p.tok(1).Kind) {
+				if single {
+					p.unexpected()
+				}
 				return p.classDecl(nil)
 			}
 		}
 	case TEnum:
+		if single {
+			p.unexpected()
+		}
 		return p.classDecl(nil)
 	case TAttribute:
 		attrs := p.attributes()
 		switch p.peek().Kind {
 		case TFunction:
 			if k := p.tok(1).Kind; isIdentifier(k) || (isAmpersand(k) && isIdentifier(p.tok(2).Kind)) {
+				if single {
+					p.next()
+					p.byRef()
+					p.unexpected()
+				}
 				return p.functionDecl(attrs)
 			}
 		case TAbstract, TFinal, TReadonly, TClass, TInterface, TTrait, TEnum:
 			if p.peek().Kind != TClass || isIdentifier(p.tok(1).Kind) {
+				if single {
+					p.unexpected()
+				}
 				return p.classDecl(attrs)
 			}
 		case TConst:
@@ -472,17 +497,17 @@ func (p *parser) ifStatement() *Node {
 		p.endStatement()
 		return n
 	}
-	n := node("if", t.Line, cond, p.statement(false))
+	n := node("if", t.Line, cond, p.singleStatement())
 	for {
 		switch {
 		case p.at(TElseif):
 			e := p.next()
 			c := p.parenExpr()
-			n.Children = append(n.Children, node("elseif", e.Line, c, p.statement(false)))
+			n.Children = append(n.Children, node("elseif", e.Line, c, p.singleStatement()))
 			continue
 		case p.at(TElse):
 			e := p.next()
-			n.Children = append(n.Children, node("else", e.Line, p.statement(false)))
+			n.Children = append(n.Children, node("else", e.Line, p.singleStatement()))
 		}
 		return n
 	}
@@ -523,7 +548,7 @@ func (p *parser) forStatement() *Node {
 		p.endStatement()
 		return node("for", t.Line, append(parts, body)...)
 	}
-	return node("for", t.Line, append(parts, p.statement(false))...)
+	return node("for", t.Line, append(parts, p.singleStatement())...)
 }
 
 func (p *parser) foreachStatement() *Node {
@@ -543,7 +568,7 @@ func (p *parser) foreachStatement() *Node {
 		p.endStatement()
 		return node("foreach", t.Line, subject, key, target, body)
 	}
-	return node("foreach", t.Line, subject, key, target, p.statement(false))
+	return node("foreach", t.Line, subject, key, target, p.singleStatement())
 }
 
 func (p *parser) foreachTarget() *Node {
@@ -631,7 +656,7 @@ func (p *parser) declareStatement() *Node {
 	case p.atAny(';', TCloseTag):
 		p.next()
 	default:
-		n.Children = append(n.Children, p.statement(false))
+		n.Children = append(n.Children, p.singleStatement())
 	}
 	return n
 }
