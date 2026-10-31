@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io/fs"
 	"strings"
 	"sync"
 	"testing"
@@ -85,7 +86,8 @@ func TestProgramsAreBoundToTheirEngineAndShareable(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if _, err := a.Run(context.Background(), p); errors.As(err, &ce) {
+			var ue *UnsupportedError
+			if _, err := a.Run(context.Background(), p); !errors.As(err, &ue) {
 				t.Errorf("concurrent run: %v", err)
 			}
 		}()
@@ -158,4 +160,73 @@ func TestCloseStopsNewWorkAndHonoursDeadline(t *testing.T) {
 	if err := e.Close(context.Background()); err != nil {
 		t.Fatalf("second close: %v", err)
 	}
+}
+
+func TestZeroEngineIsRejectedWithoutPanicking(t *testing.T) {
+	var e Engine
+	var ce *ConfigError
+	if err := e.Close(context.Background()); !errors.As(err, &ce) {
+		t.Fatalf("Close on zero Engine: %v", err)
+	}
+	if _, err := e.Compile(context.Background(), "a.php", "<?php"); !errors.As(err, &ce) {
+		t.Fatalf("Compile on zero Engine: %v", err)
+	}
+	if _, err := e.RunFile(context.Background(), "a.php"); !errors.As(err, &ce) {
+		t.Fatalf("RunFile on zero Engine: %v", err)
+	}
+}
+
+func TestHostFunctionNamesFollowPHPBytes(t *testing.T) {
+	for name, ok := range map[string]bool{
+		"\xe5\x87\xbd\xe5\xbc\x8f": true, "\x80abc": true, "f\xff": true, "readonly": true, "f1": true,
+		"echo": false, "isset": false, "1f": false, "": false, "a-b": false, "a\\b": false,
+	} {
+		_, err := NewEngine(Config{HostFunctions: []HostFunction{{Name: name, Func: noop}}})
+		if (err == nil) != ok {
+			t.Errorf("%q: %v", name, err)
+		}
+	}
+	if _, err := NewEngine(Config{HostFunctions: []HostFunction{{Name: "\xc3\x89", Func: noop}, {Name: "\xc3\xa9", Func: noop}}}); err != nil {
+		t.Fatalf("non-ASCII names differing in case are distinct in PHP: %v", err)
+	}
+	for _, caps := range [][]string{{""}, {"net", "net"}} {
+		if _, err := NewEngine(Config{HostFunctions: []HostFunction{{Name: "f", Func: noop, Capabilities: caps}}}); err == nil {
+			t.Errorf("capabilities %q accepted", caps)
+		}
+	}
+	e, _ := NewEngine(Config{})
+	p, _ := e.Compile(context.Background(), "a.php", "<?php")
+	if _, err := e.Run(context.Background(), p, WithGlobal("\x80v", Int64(1))); errors.As(err, new(*ConfigError)) {
+		t.Fatalf("byte-label global rejected: %v", err)
+	}
+}
+
+func TestRunFileChecksStateBeforeTouchingFiles(t *testing.T) {
+	opened := 0
+	files := countingFS{MapFS: fstest.MapFS{"a.php": {Data: []byte("<?php")}}, opened: &opened}
+	e, _ := NewEngine(Config{Files: files})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if r, err := e.RunFile(ctx, "a.php"); !errors.Is(err, context.Canceled) || r.Status != StatusCancelled {
+		t.Fatalf("cancelled RunFile: %+v %v", r, err)
+	}
+	if err := e.Close(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.RunFile(context.Background(), "a.php"); !errors.Is(err, ErrEngineClosed) {
+		t.Fatalf("RunFile after Close: %v", err)
+	}
+	if opened != 0 {
+		t.Fatalf("files were opened %d times", opened)
+	}
+}
+
+type countingFS struct {
+	fstest.MapFS
+	opened *int
+}
+
+func (f countingFS) Open(name string) (fs.File, error) {
+	*f.opened++
+	return f.MapFS.Open(name)
 }

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
@@ -64,7 +62,42 @@ type HostContext interface {
 	Function() string
 }
 
-var phpIdentifier = regexp.MustCompile(`^[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*$`)
+// isPHPLabel reports whether s is a PHP label: an ASCII letter, underscore,
+// or any byte 0x80-0xff, followed by those or digits. PHP works on bytes, so
+// UTF-8 is not required.
+func isPHPLabel(s string) bool {
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if !(c == '_' || c >= 0x80 || (c|0x20 >= 'a' && c|0x20 <= 'z') || (i > 0 && c >= '0' && c <= '9')) {
+			return false
+		}
+	}
+	return true
+}
+
+// isPHPFunctionName reports whether PHP 8.5.12 lexes name as a plain
+// function name, which excludes reserved words such as echo or isset.
+func isPHPFunctionName(name string) bool {
+	if !isPHPLabel(name) {
+		return false
+	}
+	toks, _, err := frontend.Lex([]byte("<?php "+name), frontend.LexOptions{IntWidth: 64, MaxBytes: len(name) + 6})
+	return err == nil && len(toks) == 2 && (toks[1].Kind == frontend.TString || toks[1].Kind == frontend.TReadonly)
+}
+
+// asciiLower folds only ASCII letters, as PHP 8 does for function names.
+func asciiLower(s string) string {
+	b := []byte(s)
+	for i, c := range b {
+		if c >= 'A' && c <= 'Z' {
+			b[i] = c + 32
+		}
+	}
+	return string(b)
+}
 
 // Engine compiles and runs PHP programs. It is safe for concurrent use;
 // every run gets an isolated execution.
@@ -75,7 +108,11 @@ type Engine struct {
 	runs  sync.WaitGroup
 	shut  bool
 	drain chan struct{}
+	ready bool // set by NewEngine; a zero Engine is unusable
 }
+
+// errZeroEngine rejects use of an Engine not created by NewEngine.
+var errZeroEngine = &ConfigError{Field: "Engine", Reason: "was not created by NewEngine"}
 
 // NewEngine validates cfg and returns an engine whose settings cannot change.
 func NewEngine(cfg Config) (*Engine, error) {
@@ -107,14 +144,21 @@ func NewEngine(cfg Config) (*Engine, error) {
 	for i, f := range cfg.HostFunctions {
 		field := fmt.Sprintf("HostFunctions[%d]", i)
 		switch {
-		case !phpIdentifier.MatchString(f.Name):
+		case !isPHPFunctionName(f.Name):
 			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("name %q is not a PHP function name", f.Name)}
 		case f.Func == nil:
 			return nil, &ConfigError{Field: field, Reason: "Func is nil"}
 		case f.MinArgs < 0 || (f.MaxArgs != -1 && f.MaxArgs < f.MinArgs):
 			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("invalid argument range %d..%d", f.MinArgs, f.MaxArgs)}
 		}
-		key := strings.ToLower(f.Name)
+		seenCap := map[string]bool{}
+		for _, c := range f.Capabilities {
+			if c == "" || seenCap[c] {
+				return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("capability %q is empty or repeated", c)}
+			}
+			seenCap[c] = true
+		}
+		key := asciiLower(f.Name)
 		if _, dup := host[key]; dup {
 			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("duplicate function name %q (PHP names are case-insensitive)", f.Name)}
 		}
@@ -122,7 +166,7 @@ func NewEngine(cfg Config) (*Engine, error) {
 		host[key] = f
 	}
 	cfg.HostFunctions = nil
-	return &Engine{cfg: cfg, host: host, drain: make(chan struct{})}, nil
+	return &Engine{cfg: cfg, host: host, drain: make(chan struct{}), ready: true}, nil
 }
 
 // Program is an immutable compiled program bound to the engine that made it.
@@ -140,6 +184,9 @@ func (p *Program) Name() string { return p.name }
 func (e *Engine) begin() error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	if !e.ready {
+		return errZeroEngine
+	}
 	if e.shut {
 		return ErrEngineClosed
 	}
@@ -240,7 +287,7 @@ func WithOutput(w io.Writer) RunOption {
 // is already a Go-owned copy, so later changes by the caller cannot reach it.
 func WithGlobal(name string, v Value) RunOption {
 	return func(c *runConfig) error {
-		if !phpIdentifier.MatchString(name) || name == "this" {
+		if !isPHPLabel(name) || name == "this" {
 			return &ConfigError{Field: "WithGlobal", Reason: fmt.Sprintf("%q is not a PHP variable name", name)}
 		}
 		if c.inputs == nil {
@@ -278,6 +325,13 @@ func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (
 
 // RunFile reads path through Config.Files, then compiles and runs it.
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
+	if err := e.begin(); err != nil {
+		return &Result{Status: StatusFailed}, err
+	}
+	defer e.runs.Done()
+	if err := ctx.Err(); err != nil {
+		return &Result{Status: StatusCancelled}, err
+	}
 	if e.cfg.Files == nil {
 		return &Result{Status: StatusPolicyDenied}, &ConfigError{Field: "Files", Reason: "file access is not granted"}
 	}
@@ -300,10 +354,15 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	return e.Run(ctx, program, opts...)
 }
 
-// Close stops new work and waits for running work until ctx ends. It is
-// safe to call more than once; later calls wait the same way.
+// Close stops new work and waits for running work until ctx ends. It does
+// not yet cancel work in progress; that arrives with execution. It is safe to
+// call more than once; later calls wait the same way.
 func (e *Engine) Close(ctx context.Context) error {
 	e.mu.Lock()
+	if !e.ready {
+		e.mu.Unlock()
+		return errZeroEngine
+	}
 	if !e.shut {
 		e.shut = true
 		go func() {
