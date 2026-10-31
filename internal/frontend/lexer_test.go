@@ -158,3 +158,18 @@ func TestHeredocBraceIndexMemoryFollowsBraceCount(t *testing.T) {
 		t.Fatalf("lexing a %d-byte heredoc allocated %d bytes", len(src), grown)
 	}
 }
+
+func TestBraceHeavyHeredocStopsAtTokenBudget(t *testing.T) {
+	src := []byte("<?php $s = <<<EOT\n{$a[" + strings.Repeat("{", 1<<20) + "\nEOT;\n")
+	var before, after runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+	_, _, err := Lex(src, LexOptions{IntWidth: 64, MaxBytes: len(src), MaxTokens: 20})
+	runtime.ReadMemStats(&after)
+	if !errors.Is(err, ErrTooManyTokens) {
+		t.Fatalf("err = %v", err)
+	}
+	if grown := after.TotalAlloc - before.TotalAlloc; grown > uint64(4*len(src)) {
+		t.Fatalf("brace prescan allocated %d bytes for a %d-byte input", grown, len(src))
+	}
+}

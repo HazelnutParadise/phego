@@ -106,6 +106,19 @@ func TestCloseTagActsAsSemicolonAndKeywordsReportNextToken(t *testing.T) {
 	}
 }
 
+func TestLanguageConstructResultsNeedParentheses(t *testing.T) {
+	// PHP 8.5.12 rejects direct access on isset/empty/eval/exit results.
+	for src, ok := range map[string]bool{
+		`<?php isset($a)[0];`: false, `<?php empty($a)->x;`: false, `<?php exit()[0];`: false,
+		`<?php eval("1;")[0];`: false, `<?php exit::X;`: false, `<?php isset($a)::X;`: false,
+		`<?php (isset($a))[0];`: true, `<?php print(1)[0];`: true, `<?php include("x")[0];`: true,
+	} {
+		if _, err := parse(t, src); (err == nil) != ok {
+			t.Errorf("%s: %v", src, err)
+		}
+	}
+}
+
 func TestMatchArmsNeedConditions(t *testing.T) {
 	// PHP 8.5.12 rejects an arm without conditions unless it is default.
 	for src, ok := range map[string]bool{

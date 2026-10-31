@@ -51,7 +51,7 @@ func TestNestedHeredocDoesNotRescanQuadratically(t *testing.T) {
 }
 
 func TestBraceCacheDoesNotTreatUnindexedBraceAsMatched(t *testing.T) {
-	l := &lexer{src: "{}'{}"}
+	l := &lexer{src: "{}'{}", braceBudget: 6}
 	if got := l.skipBraces(0); got != 1 {
 		t.Fatalf("first brace: got %d", got)
 	}
@@ -91,7 +91,7 @@ func TestBraceCacheMatchesOriginalScanner(t *testing.T) {
 			data[i] = alphabet[rng.Intn(len(alphabet))]
 		}
 		src := string(data)
-		l := &lexer{src: src}
+		l := &lexer{src: src, braceBudget: len(src) + 1}
 		if start := strings.IndexByte(src, '{'); start >= 0 {
 			l.skipBraces(start)
 		}

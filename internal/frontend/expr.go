@@ -397,7 +397,8 @@ func (p *parser) postfix(n *Node) *Node {
 		return n
 	}
 	// PHP requires parentheses before postfix access on these expressions.
-	if n.Kind == "match" || n.Kind == "closure" || n.Kind == "heredoc" || n.Kind == "list" {
+	switch n.Kind {
+	case "match", "closure", "heredoc", "list", "isset", "builtin", "exit":
 		return n
 	}
 	for {

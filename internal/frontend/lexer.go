@@ -47,6 +47,11 @@ type lexer struct {
 	// braceEnds maps each indexed opening brace to its closing brace; only
 	// braces actually seen are stored, so memory follows the brace count.
 	braceEnds map[int]int
+	// braceBudget counts braces the prescan may still record; every brace
+	// it records becomes a token, so exhausting it means MaxTokens will be
+	// exceeded and lexing stops early.
+	braceBudget int
+	overBudget  bool
 }
 
 type heredocLabel struct {
@@ -71,12 +76,12 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 	if opts.MaxTokens <= 0 {
 		opts.MaxTokens = len(src) + 1
 	}
-	l := &lexer{src: string(src), line: 1, opts: opts, states: []state{stInitial}}
+	l := &lexer{src: string(src), line: 1, opts: opts, states: []state{stInitial}, braceBudget: opts.MaxTokens}
 	halted := -1
 	for l.pos < len(l.src) {
 		start, depth := l.pos, len(l.states)
 		l.next()
-		if len(l.out) > opts.MaxTokens {
+		if len(l.out) > opts.MaxTokens || l.overBudget {
 			return nil, nil, ErrTooManyTokens
 		}
 		if l.pos == start {
@@ -899,10 +904,15 @@ func (l *lexer) heredocBodyLimit(from int, interpolates bool) (int, int) {
 // braces inside quoted strings, or the end of input.
 func (l *lexer) skipBraces(i int) int {
 	if i >= 0 && i < len(l.src) && l.src[i] == '{' {
-		if _, ok := l.braceEnds[i]; !ok {
+		if _, ok := l.braceEnds[i]; !ok && !l.overBudget {
 			l.indexBraces(i)
 		}
-		return l.braceEnds[i]
+		if end, ok := l.braceEnds[i]; ok {
+			return end
+		}
+		// The prescan ran out of budget; lexing will stop with
+		// ErrTooManyTokens, so treat the rest of the input as skipped.
+		return len(l.src)
 	}
 	depth := 0
 	for ; i < len(l.src); i++ {
@@ -923,6 +933,16 @@ func (l *lexer) skipBraces(i int) int {
 		}
 	}
 	return len(l.src)
+}
+
+// recordBrace charges one brace to the prescan budget.
+func (l *lexer) recordBrace() bool {
+	if l.braceBudget <= 0 {
+		l.overBudget = true
+		return false
+	}
+	l.braceBudget--
+	return true
 }
 
 // indexBraces scans PHP code and nested string bodies in one pass. Braces in
@@ -978,6 +998,9 @@ func (l *lexer) indexBraces(from int) {
 					i++
 				}
 				frames = append(frames, frame{mode: 'c', base: len(stack)})
+				if !l.recordBrace() {
+					return
+				}
 				stack = append(stack, i)
 				i++
 				continue
@@ -1000,6 +1023,9 @@ func (l *lexer) indexBraces(from int) {
 					i++
 				}
 				frames = append(frames, frame{mode: 'c', base: len(stack)})
+				if !l.recordBrace() {
+					return
+				}
 				stack = append(stack, i)
 				i++
 				continue
@@ -1009,6 +1035,9 @@ func (l *lexer) indexBraces(from int) {
 		}
 		switch c := l.src[i]; c {
 		case '{':
+			if !l.recordBrace() {
+				return
+			}
 			stack = append(stack, i)
 			i++
 		case '}':
