@@ -552,10 +552,10 @@ func (p *parser) foreachTarget() *Node {
 		p.next()
 	}
 	start := p.peek()
-	if start.Kind == TArray {
+	target := p.unary(precUnary)
+	if start.Kind == TArray && target.Kind == "array" {
 		p.fail(start.Line, "invalid foreach target: array() is not a destructuring target")
 	}
-	target := p.unary(precUnary)
 	if !isAssignTarget(target) || (byRef && (target.Kind == "array" || target.Kind == "list")) {
 		p.fail(start.Line+countLines(start.Text), "invalid foreach target: %s cannot be used here", describe(start))
 	}

@@ -15,7 +15,7 @@ func TestForeachTargetsFollowPHPParsing(t *testing.T) {
 			}
 		})
 	}
-	for _, target := range []string{"$x", "$x[0]", "$o->p", "C::$x", "[$x]", "list($x)", "&$x", "foo()", "$x => $y", "&$x => &$y", "$x?->p", "[1]"} {
+	for _, target := range []string{"$x", "$x[0]", "$o->p", "C::$x", "[$x]", "list($x)", "&$x", "foo()", "$x => $y", "&$x => &$y", "$x?->p", "[1]", "array(1)[0]", "array(1)->x"} {
 		t.Run("valid/"+target, func(t *testing.T) {
 			if _, err := parse(t, "<?php foreach ($a as "+target+") {}"); err != nil {
 				t.Fatalf("valid PHP rejected: %v", err)
