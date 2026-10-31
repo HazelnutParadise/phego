@@ -2,6 +2,10 @@
   "schema_version": 1,
   "scope": "W-03 local tool checks; not product acceptance",
   "cases": [
+    "competitors.test_plan.FrozenPlanTests.test_coverage_gaps_stay_visible",
+    "competitors.test_plan.FrozenPlanTests.test_every_inventoried_competitor_has_every_cell",
+    "competitors.test_plan.FrozenPlanTests.test_no_cell_claims_a_result_without_evidence",
+    "competitors.test_plan.FrozenPlanTests.test_workload_sources_and_oracles_match_recorded_hashes",
     "competitors.test_registry.RegistryTests.test_archived_bundle_tampering_is_rejected",
     "competitors.test_registry.RegistryTests.test_cartesian_product_missing_cell_is_rejected",
     "competitors.test_registry.RegistryTests.test_cli_freeze_and_verify_use_single_archive_path",
