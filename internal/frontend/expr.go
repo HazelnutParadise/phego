@@ -584,7 +584,11 @@ func (p *parser) classReference() *Node {
 				n = node("dim", s.Line, n, idx)
 			case TObjectOperator, TNullsafeObjectOperator:
 				p.next()
-				n = node("prop", s.Line, n, p.memberName())
+				kind := "prop"
+				if s.Kind == TNullsafeObjectOperator {
+					kind = "nullsafe_prop"
+				}
+				n = node(kind, s.Line, n, p.memberName())
 			case TDoubleColon:
 				p.next()
 				n = node("static_prop", s.Line, n, p.simpleVariable())
@@ -648,6 +652,9 @@ func (p *parser) closure(attrs, static *Node) *Node {
 		u := p.next()
 		uses = node("uses", u.Line)
 		p.expect('(')
+		if p.at(')') {
+			p.unexpected()
+		}
 		for !p.at(')') {
 			ref := p.byRef()
 			v := p.expect(TVariable)
