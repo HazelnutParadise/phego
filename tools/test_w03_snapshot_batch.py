@@ -237,10 +237,9 @@ class SnapshotBatchTests(unittest.TestCase):
                         if pid_file.exists():
                             try:
                                 pid_parts = pid_file.read_text(encoding='ascii').split()
-                                git_pid = int(pid_parts[0])
                                 if len(pid_parts) == 2 and pid_parts[1] == stage:
+                                    git_pid = int(pid_parts[0])
                                     break
-                                git_pid = None
                             except (OSError, ValueError):
                                 pass
                         time.sleep(0.02)
