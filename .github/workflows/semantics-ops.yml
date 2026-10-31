@@ -1,0 +1,37 @@
+name: PHP 8.5.12 operator semantics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  native-reference:
+    # x86-64 runs both the i386 and amd64 reference images without emulation,
+    # so their libm results are a trustworthy oracle for both integer widths.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Generate native PHP 8.5.12 references
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          out="$RUNNER_TEMP/ops-reference"
+          mkdir -p "$out"
+          docker run --rm --network none --platform linux/386 \
+            -v "$PWD/tests/semantics/w10-ops/matrix.php:/m.php:ro" \
+            i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 \
+            php -n /m.php > "$out/ref-32.json"
+          docker run --rm --network none --platform linux/amd64 \
+            -v "$PWD/tests/semantics/w10-ops/matrix.php:/m.php:ro" \
+            php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f \
+            php -n /m.php > "$out/ref-64.json"
+          sha256sum "$out"/*.json
+      - name: Compare operators with the native references
+        run: PHEGO_NATIVE_OPS_REFERENCE="$RUNNER_TEMP/ops-reference" go test -run TestPHP8512OperatorsMatchReference -v ./internal/runtime

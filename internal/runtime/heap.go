@@ -46,7 +46,9 @@ type heap struct {
 	roots      map[gcNode]uint64 // possible cycle roots with buffering order
 	rootSeq    uint64
 	closed     bool
-	warnings   []string // PHP warnings raised by modeled operations, in order
+	// diagnostics are the PHP warnings and deprecations raised by modeled
+	// operations, in order.
+	diagnostics []diagnostic
 }
 
 func newHeap(width int) (*heap, error) {
@@ -465,7 +467,7 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 }
 
 func (h *heap) warnForeach(v value) {
-	h.warnings = append(h.warnings, "foreach() argument must be of type array|object, "+typeName(v)+" given")
+	h.warn(levelWarning, "foreach() argument must be of type array|object, "+typeName(v)+" given")
 }
 
 // typeName is PHP's get_debug_type() spelling for the modeled kinds.

@@ -821,15 +821,15 @@ func TestForeachStopsWhenTargetIsNoLongerAnArray(t *testing.T) {
 			t.Fatalf("seen %v, a %+v", seen, a.deref())
 		}
 		want := "foreach() argument must be of type array|object, " + typeName(replacement) + " given"
-		if !slices.Equal(h.warnings, []string{want}) {
-			t.Fatalf("warnings %v", h.warnings)
+		if !slices.Equal(h.diagnostics, []diagnostic{{levelWarning, want}}) {
+			t.Fatalf("diagnostics %v", h.diagnostics)
 		}
 	}
 	h := testHeap(t)
 	var notArray, item value
 	must(t, h.foreachRef(&notArray, &item, func(arrayKey) error { t.Fatal("body ran"); return nil }))
-	if notArray.deref().kind != valueUndefined || len(h.warnings) != 1 {
-		t.Fatalf("non-array foreach changed value or missed warning: %+v %v", notArray, h.warnings)
+	if notArray.deref().kind != valueUndefined || len(h.diagnostics) != 1 {
+		t.Fatalf("non-array foreach changed value or missed warning: %+v %v", notArray, h.diagnostics)
 	}
 }
 

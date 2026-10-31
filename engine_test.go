@@ -10,6 +10,8 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
+
+	"github.com/HazelnutParadise/phego/internal/frontend"
 )
 
 func TestRunReportsParseErrorsWithLocation(t *testing.T) {
@@ -34,7 +36,7 @@ func TestRunNeverClaimsSuccessWithoutExecution(t *testing.T) {
 
 func TestConfigIsValidatedAndSnapshotted(t *testing.T) {
 	for _, cfg := range []Config{
-		{Release: "8.4.0"}, {IntSize: 16}, {MaxSourceBytes: -1}, {OutputLimit: -1},
+		{Release: "8.4.1"}, {Release: "8.5.99"}, {IntSize: 16}, {MaxSourceBytes: -1}, {OutputLimit: -1},
 		{HostFunctions: []HostFunction{{Name: "1bad", Func: noop}}},
 		{HostFunctions: []HostFunction{{Name: "f"}}},
 		{HostFunctions: []HostFunction{{Name: "f", MinArgs: 2, MaxArgs: 1, Func: noop}}},
@@ -229,4 +231,86 @@ type countingFS struct {
 func (f countingFS) Open(name string) (fs.File, error) {
 	*f.opened++
 	return f.MapFS.Open(name)
+}
+
+func TestReleaseErrorsKeepTheirClass(t *testing.T) {
+	var ue *UnsupportedError
+	if _, err := NewEngine(Config{Release: "8.4.1"}); !errors.As(err, &ue) {
+		t.Errorf("known but unimplemented release: %v", err)
+	}
+	if _, err := NewEngine(Config{Release: "1.0"}); !errors.As(err, &ue) {
+		t.Errorf("first public release: %v", err)
+	}
+	var ce *ConfigError
+	if _, err := NewEngine(Config{Release: "8.5.99"}); !errors.As(err, &ce) || ce.Field != "Release" {
+		t.Errorf("unknown release: %v", err)
+	}
+}
+
+// TestProfilesGiveTheirOwnResults compiles the same source under the 32-bit
+// and 64-bit profiles. PHP 8.5.12 lexes 2147483648 as an integer only when it
+// fits the platform integer.
+func TestProfilesGiveTheirOwnResults(t *testing.T) {
+	ctx := context.Background()
+	kinds := map[int]string{}
+	for _, width := range []int{32, 64} {
+		e, err := NewEngine(Config{IntSize: width})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p, err := e.Compile(ctx, "w.php", `<?php echo 2147483648;`)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if p.profile != e.profile || p.profile.IntWidth != width {
+			t.Fatalf("program profile %+v, engine %+v", p.profile, e.profile)
+		}
+		kinds[width] = literalKind(p.tree)
+	}
+	if kinds[32] != "float" || kinds[64] != "int" {
+		t.Fatalf("literal kinds %v", kinds)
+	}
+}
+
+// literalKind finds the first numeric literal of a tree.
+func literalKind(n *frontend.Node) string {
+	if n == nil {
+		return ""
+	}
+	switch n.Token {
+	case frontend.TLNumber:
+		return "int"
+	case frontend.TDNumber:
+		return "float"
+	}
+	for _, c := range n.Children {
+		if k := literalKind(c); k != "" {
+			return k
+		}
+	}
+	return ""
+}
+
+// TestProgramNeverRunsUnderAnotherProfile models a cache that hands a program
+// compiled for one profile to an engine of another profile.
+func TestProgramNeverRunsUnderAnotherProfile(t *testing.T) {
+	ctx := context.Background()
+	e32, err := NewEngine(Config{IntSize: 32})
+	if err != nil {
+		t.Fatal(err)
+	}
+	e64, err := NewEngine(Config{IntSize: 64})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := e64.Compile(ctx, "w.php", `<?php echo 1;`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stale := *p
+	stale.engine = e32
+	var ce *ConfigError
+	if res, err := e32.Run(ctx, &stale); !errors.As(err, &ce) || res.Status != StatusFailed || !strings.Contains(ce.Reason, "64-bit") {
+		t.Fatalf("result %+v error %v", res, err)
+	}
 }
