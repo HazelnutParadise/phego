@@ -946,6 +946,18 @@ func (l *lexer) indexBraces(from int) {
 			if len(stack) == 0 {
 				return
 			}
+		case '/', '#':
+			if c == '/' && i+1 < len(l.src) && l.src[i+1] == '*' {
+				i += 2
+				for i+1 < len(l.src) && !(l.src[i] == '*' && l.src[i+1] == '/') {
+					i++
+				}
+				i++
+			} else if c == '#' && (i+1 >= len(l.src) || l.src[i+1] != '[') || c == '/' && i+1 < len(l.src) && l.src[i+1] == '/' {
+				for i+1 < len(l.src) && l.src[i+1] != '\n' && l.src[i+1] != '\r' {
+					i++
+				}
+			}
 		case '\'', '"':
 			for i++; i < len(l.src) && l.src[i] != c; i++ {
 				if l.src[i] == '\\' {

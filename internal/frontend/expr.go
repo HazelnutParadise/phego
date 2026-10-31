@@ -559,46 +559,48 @@ func (p *parser) classReference() *Node {
 	case t.Kind == TStatic || isName(t.Kind):
 		p.next()
 		n := leaf("name", t)
-		for p.at(TDoubleColon) {
-			s := p.next()
-			n = node("static_prop", s.Line, n, p.simpleVariable())
+		if !p.at(TDoubleColon) {
+			return n
 		}
-		return n
+		return p.classReferenceSuffix(n)
 	case t.Kind == '(':
 		p.next()
 		e := p.expr()
 		p.expect(')')
 		return node("paren", t.Line, e)
 	case t.Kind == TVariable || t.Kind == '$':
-		n := p.simpleVariable()
-		for {
-			s := p.peek()
-			switch s.Kind {
-			case '[':
-				p.next()
-				var idx *Node
-				if !p.at(']') {
-					idx = p.expr()
-				}
-				p.expect(']')
-				n = node("dim", s.Line, n, idx)
-			case TObjectOperator, TNullsafeObjectOperator:
-				p.next()
-				kind := "prop"
-				if s.Kind == TNullsafeObjectOperator {
-					kind = "nullsafe_prop"
-				}
-				n = node(kind, s.Line, n, p.memberName())
-			case TDoubleColon:
-				p.next()
-				n = node("static_prop", s.Line, n, p.simpleVariable())
-			default:
-				return n
-			}
-		}
+		return p.classReferenceSuffix(p.simpleVariable())
 	}
 	p.unexpected()
 	return nil
+}
+
+func (p *parser) classReferenceSuffix(n *Node) *Node {
+	for {
+		s := p.peek()
+		switch s.Kind {
+		case '[':
+			p.next()
+			var idx *Node
+			if !p.at(']') {
+				idx = p.expr()
+			}
+			p.expect(']')
+			n = node("dim", s.Line, n, idx)
+		case TObjectOperator, TNullsafeObjectOperator:
+			p.next()
+			kind := "prop"
+			if s.Kind == TNullsafeObjectOperator {
+				kind = "nullsafe_prop"
+			}
+			n = node(kind, s.Line, n, p.memberName())
+		case TDoubleColon:
+			p.next()
+			n = node("static_prop", s.Line, n, p.simpleVariable())
+		default:
+			return n
+		}
+	}
 }
 
 func (p *parser) newExpr(attrs *Node) *Node {

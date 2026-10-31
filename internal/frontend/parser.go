@@ -335,7 +335,7 @@ func (p *parser) statement(top bool) *Node {
 		n := node("unset", t.Line)
 		for !p.at(')') {
 			v := p.expr()
-			if !isAssignTarget(v) {
+			if !isVariableTarget(v) {
 				p.unexpected()
 			}
 			n.Children = append(n.Children, v)
