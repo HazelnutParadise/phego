@@ -38,6 +38,13 @@
       "result": "pass"
     },
     {
+      "fixture": "tests/semantics/w06-php85/cycle_destructor_breaks_cycle.phpt",
+      "sha256": "e3c23ce50d611ee6ccb1133daa24c38a9fb239a5707ea7eac99dc1c23e1e0396",
+      "exit_code": 0,
+      "stdout_sha256": "c903973a101fd997f6f236f9d9481a675aa88f349c533cf7760a15bd2dd19acc",
+      "result": "pass"
+    },
+    {
       "fixture": "tests/semantics/w06-php85/cycle_resurrection.phpt",
       "sha256": "e41a04ddaa13f86ce32053f96b4bb525eae599f3cda4ed76f3d516a238b9b18d",
       "exit_code": 0,
@@ -49,6 +56,20 @@
       "sha256": "ca9e74791acab2e13b188dec8d07b0b58a8c7790e2ee64559c496774527c8b8e",
       "exit_code": 0,
       "stdout_sha256": "88a9583035c268f02771927dbb9efd515bedcbe9f40f3e46ccaa02a63952dbf7",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_reference_replacement.phpt",
+      "sha256": "588fd182314fae038234f1e07729d0863fb2bc79f89ff43affb0a25e0bcc68dd",
+      "exit_code": 0,
+      "stdout_sha256": "9d116aa7e211f699c978fe9043ac5ef8557169a799a5aad4cb048522021d5fa1",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_reference_separation.phpt",
+      "sha256": "42be83c75a9bcdbc5d0a4176b47847172c56bd9124febb4a43bd0a1c5a744cf7",
+      "exit_code": 0,
+      "stdout_sha256": "bf36c42a0a6f57d6d86242886692466b9b2873e160eab35a081357fadf12f6b3",
       "result": "pass"
     },
     {
@@ -94,7 +115,7 @@
       "result": "pass"
     }
   ],
-  "passed": 12,
+  "passed": 15,
   "failed": 0,
   "go_model_tests": {
     "command": "go test ./internal/runtime/ && go test -race ./... && CGO_ENABLED=0 go test ./...",
@@ -123,7 +144,7 @@
     ]
   },
   "limits": [
-    "Expected outputs of the eight new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
+    "Expected outputs of the eleven new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
     "The image is the prebuilt one recorded in W-06-php85-i386-image-source.json; its binary is not proven to be built from the locked source archive.",
     "No other PHP release, native 64-bit platform, or historical generation was exercised.",
     "Go tests exercise the candidate value model directly; no PHP source is parsed or executed by Phego.",

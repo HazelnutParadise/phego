@@ -35,6 +35,12 @@ type phpArray struct {
 	index    map[arrayKey]int
 	live     int
 	nextFree int64 // math.MinInt64 until an integer key is inserted
+	// copiedFrom is the array this one was separated from, so an active
+	// foreach can tell copy-on-write separation from replacement.
+	copiedFrom *phpArray
+	// cursors are active foreach positions; a tail deletion clamps them so an
+	// element appended into the freed slot is still visited, as in PHP.
+	cursors map[*int]struct{}
 }
 
 func newArray() *phpArray { return &phpArray{nextFree: math.MinInt64} }
@@ -149,6 +155,9 @@ func (a *phpArray) remove(k arrayKey) (value, bool) {
 	old := a.buckets[i].val
 	if a.packed() {
 		a.buckets = a.buckets[:i]
+		for c := range a.cursors {
+			*c = min(*c, i)
+		}
 	} else {
 		a.buckets[i] = nil
 		delete(a.index, k)

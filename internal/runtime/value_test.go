@@ -649,3 +649,71 @@ func TestCycleMembersFreedByDestructorsAreNotCounted(t *testing.T) {
 		t.Fatalf("collected %d, live %d, output %v", n, len(s.h.live), s.out)
 	}
 }
+
+func TestForeachByReferenceKeepsCursorAcrossBodySeparation(t *testing.T) {
+	// PHP 8.5.12: $c = $arr; $arr[2] = 30 on the first element visits 1,2,30.
+	h := testHeap(t)
+	var arr, c, item value
+	for i := int64(1); i <= 3; i++ {
+		must(t, h.appendValue(&arr, num(t, i)))
+	}
+	done := false
+	var seen []int64
+	must(t, h.foreachRef(&arr, &item, func(arrayKey) error {
+		seen = append(seen, item.deref().integer)
+		if done {
+			return nil
+		}
+		done = true
+		if err := h.assign(&c, arr); err != nil {
+			return err
+		}
+		return h.setElement(&arr, num(t, 2), num(t, 30))
+	}))
+	if !slices.Equal(seen, []int64{1, 2, 30}) {
+		t.Fatalf("seen %v", seen)
+	}
+}
+
+func TestForeachByReferenceVisitsElementAppendedAfterTailDelete(t *testing.T) {
+	// PHP 8.5.12: iterating [1] with unset($a[0]); $a[] = 2 visits 1,2.
+	h := testHeap(t)
+	var a, item value
+	must(t, h.appendValue(&a, num(t, 1)))
+	once := false
+	var seen []int64
+	must(t, h.foreachRef(&a, &item, func(arrayKey) error {
+		seen = append(seen, item.deref().integer)
+		if once {
+			return nil
+		}
+		once = true
+		if err := h.unsetElement(&a, num(t, 0)); err != nil {
+			return err
+		}
+		return h.appendValue(&a, num(t, 2))
+	}))
+	if !slices.Equal(seen, []int64{1, 2}) {
+		t.Fatalf("seen %v", seen)
+	}
+}
+
+func TestWeakMapValueReferringToItsKeyIsCollected(t *testing.T) {
+	// PHP 8.5.12: $m[$o] = $o; unset($o); gc_collect_cycles() collects 1 and
+	// empties the map.
+	s := &script{h: testHeap(t)}
+	c := &class{destructor: func(*heap, value) error { s.echo("destruct X"); return nil }}
+	var o value
+	must(t, s.h.assign(&o, s.object(t, c, "x")))
+	m := newWeakMap()
+	must(t, s.h.weakMapSet(m, o, o))
+	w, err := s.h.weakReferenceFor(o)
+	must(t, err)
+	must(t, s.h.unset(&o))
+	n, err := s.h.collectCycles()
+	must(t, err)
+	if _, alive := w.get(); n != 1 || m.count() != 0 || alive {
+		t.Fatalf("collected %d, map %d, alive %v", n, m.count(), alive)
+	}
+	expectOutput(t, s.out, "destruct X")
+}

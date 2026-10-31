@@ -156,7 +156,7 @@ func (h *heap) freeArray(a *phpArray) error {
 			first = err
 		}
 	}
-	a.buckets, a.index, a.live = nil, nil, 0
+	a.buckets, a.index, a.live, a.copiedFrom = nil, nil, 0, nil
 	return first
 }
 
@@ -278,7 +278,7 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
-	dup := &phpArray{nextFree: src.nextFree}
+	dup := &phpArray{nextFree: src.nextFree, copiedFrom: src}
 	if !src.packed() {
 		dup.index = make(map[arrayKey]int, src.live)
 	}
@@ -386,11 +386,12 @@ func (h *heap) unsetElement(slot *value, key value) error {
 
 // foreachRef iterates an array by reference. As in PHP, the iterated variable
 // becomes a shared location that the loop owns, so writes and appends in the
-// body modify the iterated array rather than a separated copy. Each element is
-// bound to item, and appended elements are visited. If the body assigns a
-// different array to the variable, iteration continues from that array's
-// start; if the loop itself has to separate a shared array, the cursor moves
-// to the copy after the last visited key.
+// body modify the iterated array. Each element is bound to item, and appended
+// elements are visited. When the array is separated by copy-on-write, in the
+// body or by the loop, the cursor moves to the copy after the last visited
+// key; when the body assigns an unrelated array, iteration restarts at its
+// first element. A tail deletion clamps the cursor, as PHP does, so an
+// element appended into the freed slot is still visited.
 func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
 	var loop value
 	if err := h.bind(&loop, arr); err != nil {
@@ -400,19 +401,35 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) error {
 	var cur *phpArray
 	var last arrayKey
 	pos := 0
-	for {
-		if t := loop.ref.target; cur != nil && (t.kind != valueArray || t.array != cur) {
-			cur, pos = nil, 0
+	defer func() {
+		if cur != nil {
+			delete(cur.cursors, &pos)
 		}
+	}()
+	for {
+		t := loop.ref.target
+		replaced := cur != nil && (t.kind != valueArray || (t.array != cur && t.array.copiedFrom != cur))
 		a, err := h.separate(&loop)
 		if err != nil {
 			return err
 		}
-		if cur != nil && a != cur {
+		switch {
+		case replaced:
+			pos = 0
+		case cur != nil && a != cur:
 			pos = 0
 			if i, ok := a.find(last); ok {
 				pos = i + 1
 			}
+		}
+		if a != cur {
+			if cur != nil {
+				delete(cur.cursors, &pos)
+			}
+			if a.cursors == nil {
+				a.cursors = make(map[*int]struct{})
+			}
+			a.cursors[&pos] = struct{}{}
 		}
 		cur = a
 		b, ok := a.next(&pos)
@@ -511,6 +528,13 @@ func edges(n gcNode, visit func(gcNode)) {
 		arr = x
 	case *object:
 		arr = x.props
+		// A WeakMap entry value is kept alive through its key, so a value
+		// that refers back to its key forms a collectable cycle.
+		for _, m := range x.weakMaps {
+			if v, ok := m.entries[x]; ok {
+				cell(v)
+			}
+		}
 	case *reference:
 		cell(x.target)
 		return
