@@ -529,3 +529,44 @@ func TestSnapshotOwnsDataAndRejectsLiveObjects(t *testing.T) {
 		t.Fatal("snapshot exported a live object")
 	}
 }
+
+func TestAppendingArrayToItselfCopiesIt(t *testing.T) {
+	h := testHeap(t)
+	// $x = [1]; $x[] = $x; => [1,[1]]; $y = ['k' => 1]; $y['self'] = $y; => {"k":1,"self":{"k":1}}
+	var x, y value
+	must(t, h.appendValue(&x, num(t, 1)))
+	must(t, h.appendValue(&x, x))
+	inner, ok, _ := h.getElement(x, num(t, 1))
+	if !ok || inner.kind != valueArray || inner.array == x.array || inner.array.count() != 1 {
+		t.Fatalf("self append produced %+v", inner)
+	}
+	if _, err := exportSnapshot(x); err != nil {
+		t.Fatal(err)
+	}
+	must(t, h.setElement(&y, str("k"), num(t, 1)))
+	must(t, h.setElement(&y, str("self"), y))
+	self, _, _ := h.getElement(y, str("self"))
+	if self.array == y.array || self.array.count() != 1 {
+		t.Fatal("self assignment produced a recursive array")
+	}
+}
+
+func TestShutdownDestructsObjectsCreatedByDestructors(t *testing.T) {
+	s := &script{h: testHeap(t)}
+	var globals value
+	var c *class
+	c = &class{destructor: func(h *heap, this value) error {
+		p, _ := h.property(this, "name")
+		s.echo("destruct " + p.deref().text)
+		if p.deref().text == "parent" {
+			return h.setElement(&globals, str("child"), s.object(t, c, "child"))
+		}
+		return nil
+	}}
+	parent := s.object(t, c, "parent")
+	must(t, s.h.setElement(&globals, str("a"), parent))
+	must(t, s.h.setElement(&globals, str("b"), parent))
+	s.echo("end")
+	must(t, s.h.shutdown(&globals))
+	expectOutput(t, s.out, "end", "destruct parent", "destruct child")
+}

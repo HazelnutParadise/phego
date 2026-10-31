@@ -328,19 +328,27 @@ func (h *heap) appendElement(slot *value) (*value, error) {
 }
 
 func (h *heap) setElement(slot *value, key, v value) error {
-	e, err := h.element(slot, key)
-	if err != nil {
-		return err
-	}
-	return h.assign(e, v)
+	return h.storeElement(v, func() (*value, error) { return h.element(slot, key) })
 }
 
 func (h *heap) appendValue(slot *value, v value) error {
-	e, err := h.appendElement(slot)
-	if err != nil {
-		return err
+	return h.storeElement(v, func() (*value, error) { return h.appendElement(slot) })
+}
+
+// storeElement holds the right-hand side while the destination element is
+// created, so writing an array into itself separates it first: $a[] = $a
+// yields [1, [1]] rather than a recursive array.
+func (h *heap) storeElement(v value, element func() (*value, error)) error {
+	v = v.deref()
+	retain(v)
+	e, err := element()
+	if err == nil {
+		err = h.assign(e, v)
 	}
-	return h.assign(e, v)
+	if rerr := h.release(v); err == nil {
+		err = rerr
+	}
+	return err
 }
 
 func (h *heap) getElement(container value, key value) (value, bool, error) {
@@ -697,12 +705,9 @@ func (h *heap) shutdown(globals *value) error {
 			}
 		}
 	}
-	handles := make([]uint64, 0, len(h.live))
-	for id := range h.live {
-		handles = append(handles, id)
-	}
-	slices.Sort(handles)
-	for _, id := range handles {
+	// Objects created by these destructors get later handles and are visited
+	// too, as PHP's object store walk reads its growing top each step.
+	for id := uint64(1); id <= h.nextHandle; id++ {
 		o, ok := h.live[id]
 		if !ok || o.destructorCalled {
 			continue
