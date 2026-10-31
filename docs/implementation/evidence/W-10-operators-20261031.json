@@ -17,7 +17,7 @@
     "tests/semantics/w10-ops/enc.php": "91e3f510d59246c69ccabefa9a7a7397ebce95fff0b2d80a18ad651871f388cd"
   },
   "reference_commands": [
-    "docker run --rm --network none -v tests/semantics/w10-ops/matrix.php:/m.php:ro IMAGE php -n /m.php | gzip -9 -n > internal/runtime/testdata/php8512-ops-WIDTH.json.gz",
+    "docker run --rm --network none -v tests/semantics/w10-ops:/w:ro IMAGE php -n /w/matrix.php | gzip -9 -n > internal/runtime/testdata/php8512-ops-WIDTH.json.gz",
     "python3 tools/w10_numeric_strings.py > internal/runtime/testdata/php8512-numeric-strings.txt",
     "docker run --rm -i --network none -v tests/semantics/w10-ops:/w:ro IMAGE php -n /w/strings.php < internal/runtime/testdata/php8512-numeric-strings.txt | gzip -9 -n > internal/runtime/testdata/php8512-numeric-strings-WIDTH.jsonl.gz"
   ],
