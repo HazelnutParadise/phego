@@ -56,7 +56,7 @@
     "versions": 667,
     "unresolved_names": 0,
     "missing_source": 4,
-    "prereleases": 72
+    "prereleases": 73
   },
   "releases": [
     {
@@ -1844,7 +1844,7 @@
     {
       "version": "4.3.0pre2",
       "generation": "php4",
-      "release_type": "release",
+      "release_type": "prerelease",
       "artifacts": [
         {
           "filename": "php-4.3.0pre2-Win32.zip",

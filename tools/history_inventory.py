@@ -19,7 +19,7 @@ PREFIXES = (("php-debug-pack-", "debug-pack"), ("php-devel-pack-", "devel-pack")
             ("php-test-pack-", "test-pack"), ("pecl-", "pecl"), ("php-", "php"), ("php", "php"))
 CORE_VERSION = re.compile(r"\d+\.\d+(?:\.\d+)*[A-Za-z0-9]*\Z")
 VERSION_KEY = re.compile(r"\d+\.\d+\.\d+")
-PRERELEASE = re.compile(r"(alpha|beta|RC|rc|b\d|a\d|dev)", re.I)
+PRERELEASE = re.compile(r"(alpha|beta|RC|rc|pre|b\d|a\d|dev)", re.I)
 
 # Releases known only from historical announcements. They have no retrievable
 # archive in the official sources read by this tool and remain blockers.

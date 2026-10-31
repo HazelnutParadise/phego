@@ -25,6 +25,12 @@ class ClassifyNameTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(inv.classify_name(name)[0], version)
 
+    def test_pre_suffix_is_a_prerelease(self):
+        out = BuildTests().build(["php-4.3.0pre2-Win32.zip", "php-4.3.0.tar.gz"], {})
+        by_version = {r["version"]: r for r in out["releases"]}
+        self.assertEqual(by_version["4.3.0pre2"]["release_type"], "prerelease")
+        self.assertEqual(by_version["4.3.0"]["release_type"], "release")
+
     def test_windows_rebuild_is_an_artifact_not_a_release(self):
         version, artifact = inv.classify_name("php-5.2.9-2-nts-Win32.zip")
         self.assertEqual((version, artifact["build"], artifact["platform"]), ("5.2.9", "2", "nts-Win32"))
