@@ -924,51 +924,177 @@ func (l *lexer) skipBraces(i int) int {
 	return len(l.src)
 }
 
-// indexBraces records matching braces while applying skipBraces' quote and
-// escape rules. Unclosed opening braces point to end of input, matching the
-// result skipBraces returns for an unclosed expression.
+// indexBraces scans PHP code and nested string bodies in one pass. Braces in
+// string text and comments do not close an interpolation; interpolated code
+// inside a string is scanned as code again.
 func (l *lexer) indexBraces(from int) {
 	if l.braceEnds == nil {
 		l.braceEnds = make([]int, len(l.src))
 	}
+	type frame struct {
+		mode   byte // c: code, q: quoted body, h: heredoc/nowdoc body
+		quote  byte
+		marker string
+		nowdoc bool
+		base   int
+	}
+	frames := []frame{{mode: 'c', base: 0}}
 	stack := make([]int, 0)
-	for i := from; i < len(l.src); i++ {
+	for i := from; i < len(l.src); {
+		f := frames[len(frames)-1]
+		if f.mode == 'h' {
+			if i == 0 || l.src[i-1] == '\n' || l.src[i-1] == '\r' {
+				j := i
+				for j < len(l.src) && (l.src[j] == ' ' || l.src[j] == '\t') {
+					j++
+				}
+				if strings.HasPrefix(l.src[j:], f.marker) {
+					end := j + len(f.marker)
+					if end == len(l.src) || !isLabelChar(l.src[end]) {
+						frames = frames[:len(frames)-1]
+						i = end
+						continue
+					}
+				}
+			}
+			if !f.nowdoc && l.src[i] == '\\' && i+1 < len(l.src) && l.src[i+1] != '\n' && l.src[i+1] != '\r' {
+				i += 2
+				continue
+			}
+			if !f.nowdoc && i+1 < len(l.src) && ((l.src[i] == '{' && l.src[i+1] == '$') || (l.src[i] == '$' && l.src[i+1] == '{')) {
+				if l.src[i] == '$' {
+					i++
+				}
+				frames = append(frames, frame{mode: 'c', base: len(stack)})
+				stack = append(stack, i)
+				i++
+				continue
+			}
+			i++
+			continue
+		}
+		if f.mode == 'q' {
+			if l.src[i] == '\\' && i+1 < len(l.src) {
+				i += 2
+				continue
+			}
+			if l.src[i] == f.quote {
+				frames = frames[:len(frames)-1]
+				i++
+				continue
+			}
+			if i+1 < len(l.src) && ((l.src[i] == '{' && l.src[i+1] == '$') || (l.src[i] == '$' && l.src[i+1] == '{')) {
+				if l.src[i] == '$' {
+					i++
+				}
+				frames = append(frames, frame{mode: 'c', base: len(stack)})
+				stack = append(stack, i)
+				i++
+				continue
+			}
+			i++
+			continue
+		}
 		switch c := l.src[i]; c {
 		case '{':
 			stack = append(stack, i)
+			i++
 		case '}':
 			if len(stack) == 0 {
+				i++
 				continue
 			}
 			start := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			l.braceEnds[start] = i
-			if len(stack) == 0 {
-				return
+			i++
+			if len(stack) == f.base {
+				if len(frames) == 1 {
+					return
+				}
+				frames = frames[:len(frames)-1]
 			}
+		case '\'':
+			i++
+			for i < len(l.src) && l.src[i] != '\'' {
+				if l.src[i] == '\\' && i+1 < len(l.src) {
+					i++
+				}
+				i++
+			}
+			if i < len(l.src) {
+				i++
+			}
+		case '"', '`':
+			frames = append(frames, frame{mode: 'q', quote: c})
+			i++
 		case '/', '#':
 			if c == '/' && i+1 < len(l.src) && l.src[i+1] == '*' {
 				i += 2
 				for i+1 < len(l.src) && !(l.src[i] == '*' && l.src[i+1] == '/') {
 					i++
 				}
-				i++
+				if i+1 < len(l.src) {
+					i += 2
+				} else {
+					i = len(l.src)
+				}
 			} else if c == '#' && (i+1 >= len(l.src) || l.src[i+1] != '[') || c == '/' && i+1 < len(l.src) && l.src[i+1] == '/' {
-				for i+1 < len(l.src) && l.src[i+1] != '\n' && l.src[i+1] != '\r' {
+				for i < len(l.src) && l.src[i] != '\n' && l.src[i] != '\r' {
 					i++
 				}
+			} else {
+				i++
 			}
-		case '\'', '"':
-			for i++; i < len(l.src) && l.src[i] != c; i++ {
-				if l.src[i] == '\\' {
-					i++
-				}
+		case '<':
+			name, end, nowdoc, ok := l.braceHeredocStart(i)
+			if ok {
+				frames = append(frames, frame{mode: 'h', marker: name, nowdoc: nowdoc})
+				i = end
+			} else {
+				i++
 			}
+		default:
+			i++
 		}
 	}
 	for _, start := range stack {
 		l.braceEnds[start] = len(l.src)
 	}
+}
+
+// braceHeredocStart recognizes a heredoc opener without changing lexer state.
+func (l *lexer) braceHeredocStart(start int) (string, int, bool, bool) {
+	if !strings.HasPrefix(l.src[start:], "<<<") {
+		return "", start, false, false
+	}
+	i := start + 3
+	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
+		i++
+	}
+	quote := byte(0)
+	if i < len(l.src) && (l.src[i] == '\'' || l.src[i] == '"') {
+		quote = l.src[i]
+		i++
+	}
+	if i >= len(l.src) || !isLabelStart(l.src[i]) {
+		return "", start, false, false
+	}
+	end := l.labelEnd(i)
+	name := l.src[i:end]
+	if quote != 0 {
+		if end >= len(l.src) || l.src[end] != quote {
+			return "", start, false, false
+		}
+		end++
+	}
+	if end >= len(l.src) || (l.src[end] != '\n' && l.src[end] != '\r') {
+		return "", start, false, false
+	}
+	if l.src[end] == '\r' && end+1 < len(l.src) && l.src[end+1] == '\n' {
+		end++
+	}
+	return name, end + 1, quote == '\'', true
 }
 
 func (l *lexer) lexNowdoc() {
