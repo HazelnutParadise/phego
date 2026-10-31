@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "scope": "isolated_reference_probe_only",
+  "requirement_ids": [
+    "REQ-082",
+    "REQ-085"
+  ],
+  "test_ids": [
+    "T-163",
+    "T-164",
+    "T-169",
+    "T-170"
+  ],
+  "product_acceptance": "not_run",
+  "source_url": "https://museum.php.net/php2/php-2.0.tar.gz",
+  "source_sha256": "018f706477f4531115178c4b89b7cef1894c5b51cd27e5f9b4d9f5bb44cbeb82",
+  "platform": "linux/arm64",
+  "emulated": false,
+  "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+  "binary_sha256": "d0e4c3fd8e9c76e56e2e8f6a2ce4e777fc60b1de3acffb4835395749c6f4b54c",
+  "build_profile": {
+    "user": "65534:65534",
+    "network": "none",
+    "root_filesystem": "read-only",
+    "cpus": 2,
+    "memory": "1g",
+    "pids_limit": 128,
+    "tmpfs": "1g",
+    "timeout_seconds": 300,
+    "installation_answers": [
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "/tmp/docroot",
+      "y",
+      "n",
+      "n",
+      "n",
+      "n",
+      "n",
+      "",
+      "",
+      "n"
+    ],
+    "build_command": "make -j2 in php-2.0/src"
+  },
+  "cases": [
+    {
+      "case": "echo",
+      "input": "before <?echo \"world\";> after\n",
+      "query_string": "",
+      "output": "before world after\n"
+    },
+    {
+      "case": "get",
+      "input": "<?echo $name;>\n",
+      "request_method": "GET",
+      "query_string": "name=Jane+Doe",
+      "output": "Jane Doe\n"
+    }
+  ],
+  "runs": [
+    {
+      "case": "build",
+      "exit_code": 0,
+      "stdout_gzip": "W-49-phpfi20-build.log.gz",
+      "stdout_sha256": "4b71656683ebcca064d86f95863132d16515279b70e7fd4eb131a2f22d09e1b1"
+    },
+    {
+      "case": "echo_bad_path",
+      "exit_code": 255,
+      "stdout_gzip": "W-49-phpfi20-echo_bad_path.log.gz",
+      "stdout_sha256": "1832ff63a1dd699d9443decc55f81e2e41266c6bc135df3f8f72216dff49c924"
+    },
+    {
+      "case": "echo",
+      "exit_code": 0,
+      "stdout_gzip": "W-49-phpfi20-echo.log.gz",
+      "stdout_sha256": "1d90da3fb799f430bac7956ab49994c69aa093b9bd4fd0ccf2c05adb026e21a7"
+    },
+    {
+      "case": "get",
+      "exit_code": 0,
+      "stdout_gzip": "W-49-phpfi20-get.log.gz",
+      "stdout_sha256": "682d5e0dd54093828f01c91478c0313684077950df8a24d82f785bb57210148d"
+    }
+  ],
+  "limits": [
+    "The historical archive carries GPL notices and is not included in the repository.",
+    "The failing run used an input path outside the configured document root and an incorrectly escaped sample; it exited 255.",
+    "Only one PHP/FI release and Linux arm64 were tested; the first PHP Tools release and the full release inventory remain unresolved.",
+    "This is not Phego execution or product compatibility acceptance.",
+    "The commands and container IDs were not preserved as complete independent evidence; stdout logs do not capture stderr or prove the isolation flags, and cleanup after interruption was not tested."
+  ],
+  "stdout_hash_basis": "SHA-256 of the uncompressed stdout bytes, not the gzip file"
+}

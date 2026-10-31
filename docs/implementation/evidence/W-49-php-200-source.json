@@ -1,0 +1,41 @@
+{
+  "requirement_ids": [
+    "REQ-080",
+    "REQ-085"
+  ],
+  "test_ids": [
+    "T-159",
+    "T-160",
+    "T-169",
+    "T-170"
+  ],
+  "checked_date": "2026-10-30",
+  "source": {
+    "index": "https://museum.php.net/php2/",
+    "url": "https://museum.php.net/php2/php-2.0.tar.gz",
+    "bytes": 421547,
+    "sha256": "018f706477f4531115178c4b89b7cef1894c5b51cd27e5f9b4d9f5bb44cbeb82"
+  },
+  "archive_observations": [
+    {
+      "path": "php-2.0/README",
+      "bytes": 13604,
+      "sha256": "1afda9057c477f14d41e2fc9da72d59201d88d3b6f998ff1b4b0787965b32109",
+      "observation": "Names PHP/FI; mentions version 2.0 and describes GPL version 2 or later."
+    },
+    {
+      "path": "php-2.0/COPYING",
+      "bytes": 17982,
+      "sha256": "91df39d1816bfb17a4dda2d3d2c83b1f6f2d38d53e53e41e8f97ad5ac46a0cad",
+      "observation": "GNU General Public License version 2 text."
+    }
+  ],
+  "limits": [
+    "Retrieved source observations do not establish a complete public-release inventory or release date.",
+    "This source inspection did not build or execute a reference engine; the subsequent W-49-phpfi20-probe.json records a limited reference run, not product compatibility.",
+    "The README and COPYING observations are not a complete licensing review of the archive.",
+    "A source archive named 2.0 does not establish the identity or availability of the first PHP Tools release."
+  ],
+  "reproduction": "Download the URL with an 8 MiB limit; calculate SHA-256 of the exact compressed bytes. Inspect the named regular files in the gzip tar stream without extracting paths; calculate each file SHA-256 and read the README and COPYING. No archive code needs to be executed.",
+  "reproduction_command": "python3 - <<'PY2'\nfrom urllib.request import urlopen\nfrom io import BytesIO\nimport hashlib, tarfile\nurl = 'https://museum.php.net/php2/php-2.0.tar.gz'\nwith urlopen(url, timeout=30) as response:\n    raw = response.read(8 * 1024 * 1024 + 1)\nif len(raw) > 8 * 1024 * 1024:\n    raise SystemExit('archive exceeds limit')\nprint('archive', len(raw), hashlib.sha256(raw).hexdigest())\nif len(raw) != 421547 or hashlib.sha256(raw).hexdigest() != '018f706477f4531115178c4b89b7cef1894c5b51cd27e5f9b4d9f5bb44cbeb82':\n    raise SystemExit('archive identity mismatch; refusing to inspect')\nwith tarfile.open(fileobj=BytesIO(raw), mode='r:gz') as archive:\n    for name in ('php-2.0/README', 'php-2.0/COPYING'):\n        member = archive.getmember(name)\n        if not member.isfile() or member.size > 20000:\n            raise SystemExit('unexpected archive member')\n        contents = archive.extractfile(member).read()\n        print(name, len(contents), hashlib.sha256(contents).hexdigest())\n        lines = contents.decode('latin1').splitlines()\n        line_numbers = (1, 8, 9, 10, 36) if name.endswith('/README') else (1, 2)\n        for number in line_numbers:\n            print(f'{name}:{number}: {lines[number - 1]}')\nPY2"
+}
