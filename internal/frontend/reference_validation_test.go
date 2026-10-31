@@ -6,7 +6,7 @@ import (
 )
 
 func TestReferenceAndIncrementOperandsFollowPHPParsing(t *testing.T) {
-	for _, source := range []string{"++1;", "++[];", "++($x);", "$a = &1;", "$a = &($x);", "$a = &new C();", "$a = &[$x];", "$a = &$x = $y;"} {
+	for _, source := range []string{"++1;", "++[];", "++($x);", "$a = &1;", "$a = &($x);", "$a = &new C();", "$a = &[$x];", "$a = &$x = $y;", "[]++;", "[$a]++;", "$a++[1];", "$a++->p;", "$a++::X;"} {
 		t.Run("invalid/"+source, func(t *testing.T) {
 			_, err := parse(t, "<?php\n"+source)
 			var syntax *SyntaxError
@@ -15,7 +15,7 @@ func TestReferenceAndIncrementOperandsFollowPHPParsing(t *testing.T) {
 			}
 		})
 	}
-	for _, source := range []string{"++$x;", "++foo();", "++$x[0];", "$a = &$x;", "$a = &foo();", "$a = &$x[0];", "$a = &$x + 1;", "++$x?->p;"} {
+	for _, source := range []string{"++$x;", "++foo();", "++$x[0];", "$a = &$x;", "$a = &foo();", "$a = &$x[0];", "$a = &$x + 1;", "++$x?->p;", "foo()++;", "$a?->p++;", "($a++)[1];"} {
 		t.Run("valid/"+source, func(t *testing.T) {
 			if _, err := parse(t, "<?php "+source); err != nil {
 				t.Fatalf("valid PHP rejected: %v", err)

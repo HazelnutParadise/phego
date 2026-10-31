@@ -6,7 +6,7 @@ import (
 )
 
 func TestArrayReferencesAndCurlyInterpolationRequireVariables(t *testing.T) {
-	invalid := []string{`[&1];`, `["k"=>&1];`, `[&$a ** 2];`, `"{$a + 1}";`, `"{$a++}";`, `"{$a::C}";`}
+	invalid := []string{`[&1];`, `["k"=>&1];`, `[&$a ** 2];`, `"{$a + 1}";`, `"{$a++}";`, `"{$a::C}";`, `[&$a++[1]];`, `"{$a++[1]}";`, `[&list($a)[0]];`}
 	for _, source := range invalid {
 		t.Run("invalid/"+source, func(t *testing.T) {
 			_, err := parse(t, "<?php\n"+source)
@@ -16,7 +16,7 @@ func TestArrayReferencesAndCurlyInterpolationRequireVariables(t *testing.T) {
 			}
 		})
 	}
-	valid := []string{`[&$a];`, `["k"=>&$a];`, `[&foo()];`, `[&$a[1+2]];`, `"{$a}";`, `"{$a[1+2]}";`, `"{$a->foo()}";`, `"{$a::foo()}";`, `"{$a[foo()]}";`}
+	valid := []string{`[&$a];`, `["k"=>&$a];`, `[&foo()];`, `[&$a[1+2]];`, `"{$a}";`, `"{$a[1+2]}";`, `"{$a->foo()}";`, `"{$a::foo()}";`, `"{$a[foo()]}";`, `[&array(1)[0]];`, `[&[1][0]];`, `[&(1)[0]];`, `[&foo()[0]];`}
 	for _, source := range valid {
 		t.Run("valid/"+source, func(t *testing.T) {
 			if _, err := parse(t, "<?php "+source); err != nil {

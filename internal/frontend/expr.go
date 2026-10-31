@@ -120,11 +120,15 @@ func isAssignTarget(n *Node) bool {
 	return isAssignable(n)
 }
 
+func isVariableTarget(n *Node) bool {
+	return isAssignTarget(n) && n.Kind != "array" && n.Kind != "list"
+}
+
 // referenceTarget parses a PHP variable or call usable after & or prefix ++/--.
 func (p *parser) referenceTarget() *Node {
 	start := p.peek()
 	target := p.postfix(p.primary())
-	if !isAssignTarget(target) || target.Kind == "array" || target.Kind == "list" {
+	if !isVariableTarget(target) {
 		p.fail(start.Line+countLines(start.Text), "invalid variable target: %s cannot be used here", describe(start))
 	}
 	return target
@@ -378,7 +382,7 @@ func (p *parser) postfix(n *Node) *Node {
 		return n
 	}
 	// PHP requires parentheses before postfix access on these expressions.
-	if n.Kind == "match" || n.Kind == "closure" || n.Kind == "heredoc" {
+	if n.Kind == "match" || n.Kind == "closure" || n.Kind == "heredoc" || n.Kind == "list" {
 		return n
 	}
 	for {
@@ -434,11 +438,11 @@ func (p *parser) postfix(n *Node) *Node {
 			}
 			n = node("call", t.Line, n, p.arguments())
 		case TInc, TDec:
-			if !isAssignable(n) {
+			if !isVariableTarget(n) {
 				return n
 			}
 			p.next()
-			n = &Node{Kind: "post_inc", Text: t.Text, Line: t.Line, Children: []*Node{n}}
+			return &Node{Kind: "post_inc", Text: t.Text, Line: t.Line, Children: []*Node{n}}
 		default:
 			return n
 		}
