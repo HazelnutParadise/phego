@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "scope": "frontend_differential_check",
+  "requirement": "REQ-010",
+  "scenarios": [
+    "T-019",
+    "T-020"
+  ],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-10-31",
+  "php_source": {
+    "archive": "php-8.5.12.tar.xz",
+    "sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
+  },
+  "corpus": {
+    "command": "python3 tools/frontend_corpus.py php-8.5.12.tar.xz OUTPUT",
+    "files": 5449,
+    "sha256": "8b8fe3e0201fa62f92d62f4655d896f27dd29f2ee783c9556ba9ff2e6b4d7fdb",
+    "license_note": "Derived from PHP-licensed php-src tests; kept outside the repository."
+  },
+  "references": [
+    {
+      "platform": "linux/386",
+      "emulated": true,
+      "int_width": 32,
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "command": "docker run --rm --network none --read-only --cap-drop ALL --platform linux/386 -v CORPUS:/corpus:ro -v tests/frontend/token_dump.php:/dump.php:ro IMAGE php -n -d memory_limit=1G /dump.php > reference.jsonl",
+      "dump_sha256": "8c86f8e08d61a27a616af0f899946626f0f68e2c8df562d4216928f827bbe776"
+    },
+    {
+      "platform": "linux/arm64",
+      "emulated": false,
+      "int_width": 64,
+      "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+      "build": "./configure --disable-all --enable-cli --enable-tokenizer --without-pear; make -j4 (no network, non-root, read-only root)",
+      "binary_sha256": "aa054c2bc622b0be81f42e4395fed0e1d003078c0d067561cda1eb78eef63fcd",
+      "dump_sha256": "c8a51dc367487dedc1fbf1fd6e97bb8030b72d16c3f10dec30a748e608cfcfc3"
+    }
+  ],
+  "phego": {
+    "command": "PHEGO_LEXER_CORPUS=DIR [PHEGO_LEXER_REFERENCE=reference-arm64.jsonl PHEGO_LEXER_INT_WIDTH=64] go test -run Corpus ./internal/frontend",
+    "go": "go1.26.5 darwin/arm64",
+    "results": [
+      {
+        "int_width": 32,
+        "matching_files": 5449,
+        "files": 5449
+      },
+      {
+        "int_width": 64,
+        "matching_files": 5449,
+        "files": 5449
+      }
+    ],
+    "compared": "token name, exact text, and start line for every token"
+  },
+  "fuzz": {
+    "command": "go test -run '^$' -fuzz FuzzLex -fuzztime 90s ./internal/frontend",
+    "execs": 20626652,
+    "result": "no failure; every input byte covered by exactly one token"
+  },
+  "limits": [
+    "short_open_tag was on in the references; the off setting is covered only by unit tests.",
+    "Only PHP 8.5.12 is implemented; historical releases need their own profiles.",
+    "The corpus is php-src's own Zend and tokenizer tests, not real applications.",
+    "Error messages are not compared; only acceptance and error lines are.",
+    "Tree shapes are checked by unit tests only."
+  ],
+  "parser": {
+    "reference_command": "docker run --rm --network none --read-only --cap-drop ALL --platform linux/386 -v CORPUS:/corpus:ro -v tests/frontend/parse_dump.php:/dump.php:ro IMAGE php -n -d memory_limit=1G /dump.php > parse-reference.jsonl",
+    "reference_sha256": "e93e6bc6de11405df53763e064ad2db4e3490b2ac0de9d678df57a89c4a41e9a",
+    "reference_counts": {
+      "ok": 5307,
+      "parse_error": 112,
+      "compile_error_during_parse": 30
+    },
+    "phego_command": "PHEGO_LEXER_CORPUS=DIR go test -run ParseMatches ./internal/frontend",
+    "result": {
+      "files": 5449,
+      "agreeing": 5449,
+      "compared": "accept or reject, and the reported line for rejections"
+    },
+    "fuzz": {
+      "command": "go test -run '^$' -fuzz FuzzParse -fuzztime 90s ./internal/frontend",
+      "execs": 10767949,
+      "result": "no failure"
+    }
+  },
+  "mutation": {
+    "generator": "tests/frontend/mutate.php (mt_srand 20261031, three mutants per corpus file)",
+    "command": "docker run ... -v CORPUS:/corpus:ro -v OUT:/out -v tests/frontend/mutate.php:/m.php:ro IMAGE php -n /m.php; then parse_dump.php over OUT",
+    "files": 16320,
+    "reference_sha256": "63ba890a34cde4df613f903fe4ac1b6f80d3aefbfd3b7afada85d8ff5f196b28",
+    "reference_counts": {
+      "ok": 2586,
+      "parse_error": 13572,
+      "compile_error_during_parse": 162
+    },
+    "result": {
+      "same_decision": 16320,
+      "same_line": 16318,
+      "different_line": 2,
+      "different_line_cause": "heredoc indentation errors"
+    },
+    "lexer": {
+      "reference_sha256": "a70fccce2fa585a3ad5a4879da7fc36eec01a8348fc4125bd9ced9bc3409cf6c",
+      "result": {
+        "files": 16320,
+        "matching": 16320
+      }
+    }
+  },
+  "grids": [
+    {
+      "generator": "tests/frontend/grid_names_postfix.php",
+      "files": 3506,
+      "reference_sha256": "a5fc8c1373bed42bba5407616efbbe15ea01ec88c7122a244dc302d929d6669f",
+      "agreeing": 3506,
+      "covers": "expression forms x postfix suffixes, assignment targets, name positions x keywords"
+    },
+    {
+      "generator": "tests/frontend/grid_types_modifiers.php",
+      "files": 1319,
+      "reference_sha256": "ebb7ac3ae8d847ccc9236cb8c3c0d254b292f134861ab1b12dc1ca3d6934bc0a",
+      "agreeing": 1319,
+      "covers": "type positions x type forms, modifier pairs x member kinds, prefix operators x operands, break/continue and declare arguments"
+    }
+  ]
+}
