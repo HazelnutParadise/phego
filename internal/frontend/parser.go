@@ -543,11 +543,23 @@ func (p *parser) foreachStatement() *Node {
 func (p *parser) foreachTarget() *Node {
 	p.inTarget = true
 	defer func() { p.inTarget = false }()
-	if t := p.peek(); isAmpersand(t.Kind) {
+	ref := p.peek()
+	byRef := isAmpersand(ref.Kind)
+	if byRef {
 		p.next()
-		return node("by_ref", t.Line, p.unary(precUnary))
 	}
-	return p.unary(precUnary)
+	start := p.peek()
+	if start.Kind == TArray {
+		p.fail(start.Line, "invalid foreach target: array() is not a destructuring target")
+	}
+	target := p.unary(precUnary)
+	if !isAssignTarget(target) || (byRef && (target.Kind == "array" || target.Kind == "list")) {
+		p.fail(start.Line+countLines(start.Text), "invalid foreach target: %s cannot be used here", describe(start))
+	}
+	if byRef {
+		return node("by_ref", ref.Line, target)
+	}
+	return target
 }
 
 func (p *parser) switchStatement() *Node {
