@@ -1,0 +1,923 @@
+package frontend
+
+import (
+	"errors"
+	"fmt"
+	"math"
+	"strings"
+)
+
+// LexOptions selects the profile-dependent lexing rules.
+type LexOptions struct {
+	ShortOpenTag bool // INI short_open_tag
+	IntWidth     int  // guest integer width: 32 or 64
+	MaxBytes     int  // input limit checked before any token is allocated
+	MaxTokens    int  // token limit; 0 means len(src)+1, which cannot be exceeded
+}
+
+// ErrInputTooLarge reports a source rejected by LexOptions.MaxBytes.
+var ErrInputTooLarge = errors.New("source exceeds the configured size limit")
+
+// ErrTooManyTokens reports a source that produced more than MaxTokens tokens.
+var ErrTooManyTokens = errors.New("source exceeds the configured token limit")
+
+type state uint8
+
+const (
+	stInitial state = iota
+	stScripting
+	stDoubleQuotes
+	stBackquote
+	stHeredoc
+	stNowdoc
+	stLookingForProperty
+	stVarOffset
+	stLookingForVarname
+)
+
+type lexer struct {
+	src    string
+	pos    int
+	line   int
+	opts   LexOptions
+	states []state
+	labels []heredocLabel
+	out    []Token
+	diags  []Diagnostic
+}
+
+type heredocLabel struct {
+	name string
+}
+
+// Lex tokenizes PHP 8.5.12 source the way token_get_all() does without
+// TOKEN_PARSE. Every byte of src belongs to exactly one token. Lexing never
+// panics; problems are reported as diagnostics with their line.
+func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
+	if opts.IntWidth != 32 && opts.IntWidth != 64 {
+		return nil, nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64", opts.IntWidth)
+	}
+	if opts.MaxBytes <= 0 || len(src) > opts.MaxBytes {
+		return nil, nil, ErrInputTooLarge
+	}
+	if opts.MaxTokens <= 0 {
+		opts.MaxTokens = len(src) + 1
+	}
+	l := &lexer{src: string(src), line: 1, opts: opts, states: []state{stInitial}}
+	halted := -1
+	for l.pos < len(l.src) {
+		if len(l.out) >= opts.MaxTokens {
+			return nil, nil, ErrTooManyTokens
+		}
+		start, depth := l.pos, len(l.states)
+		l.next()
+		if l.pos == start {
+			// Only a state pop may consume nothing; anything else would loop.
+			if len(l.states) >= depth {
+				l.pos = start + 1
+				l.emit(TBadCharacter, start)
+			}
+			continue
+		}
+		if halted < 0 && len(l.out) > 0 && l.out[len(l.out)-1].Kind == THaltCompiler {
+			halted = 0
+		} else if halted >= 0 && !isTrivia(l.out[len(l.out)-1].Kind) {
+			halted++
+			if k := l.out[len(l.out)-1].Kind; halted == 3 || k == TCloseTag || k == ';' {
+				if l.pos < len(l.src) {
+					l.emitRaw(TInlineHTML, l.pos, len(l.src))
+				}
+				break
+			}
+		}
+	}
+	return l.out, l.diags, nil
+}
+
+func isTrivia(k Kind) bool { return k == TWhitespace || k == TComment || k == TDocComment }
+
+func (l *lexer) top() state     { return l.states[len(l.states)-1] }
+func (l *lexer) push(s state)   { l.states = append(l.states, s) }
+func (l *lexer) setTop(s state) { l.states[len(l.states)-1] = s }
+func (l *lexer) pop() {
+	if len(l.states) > 1 {
+		l.states = l.states[:len(l.states)-1]
+	}
+}
+
+func (l *lexer) emit(k Kind, start int) { l.emitRaw(k, start, l.pos) }
+
+func (l *lexer) emitRaw(k Kind, start, end int) {
+	text := l.src[start:end]
+	l.out = append(l.out, Token{Kind: k, Text: text, Line: l.line})
+	l.line += countLines(text)
+}
+
+func (l *lexer) diag(format string, args ...any) {
+	l.diags = append(l.diags, Diagnostic{Line: l.line, Message: fmt.Sprintf(format, args...)})
+}
+
+// countLines counts \n, \r\n, and lone \r as PHP's scanner does.
+func countLines(s string) int {
+	n := 0
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '\n':
+			n++
+		case '\r':
+			if i+1 >= len(s) || s[i+1] != '\n' {
+				n++
+			}
+		}
+	}
+	return n
+}
+
+func (l *lexer) peek(off int) byte {
+	if l.pos+off < len(l.src) {
+		return l.src[l.pos+off]
+	}
+	return 0
+}
+
+func (l *lexer) hasPrefixFold(s string) bool {
+	return len(l.src)-l.pos >= len(s) && strings.EqualFold(l.src[l.pos:l.pos+len(s)], s)
+}
+
+func isLabelStart(c byte) bool {
+	return c == '_' || (c|0x20 >= 'a' && c|0x20 <= 'z') || c >= 0x80
+}
+
+func isLabelChar(c byte) bool { return isLabelStart(c) || (c >= '0' && c <= '9') }
+
+func isDigit(c byte) bool { return c >= '0' && c <= '9' }
+
+func (l *lexer) labelEnd(i int) int {
+	for i < len(l.src) && isLabelChar(l.src[i]) {
+		i++
+	}
+	return i
+}
+
+func (l *lexer) next() {
+	switch l.top() {
+	case stInitial:
+		l.lexInitial()
+	case stScripting:
+		l.lexScripting()
+	case stDoubleQuotes:
+		l.lexInterpolated('"')
+	case stBackquote:
+		l.lexInterpolated('`')
+	case stHeredoc:
+		l.lexInterpolated(0)
+	case stNowdoc:
+		l.lexNowdoc()
+	case stLookingForProperty:
+		l.lexProperty()
+	case stVarOffset:
+		l.lexVarOffset()
+	case stLookingForVarname:
+		l.lexVarname()
+	}
+}
+
+// openTagAt reports the open tag at i and its length, or 0.
+func (l *lexer) openTagAt(i int) (Kind, int) {
+	s := l.src[i:]
+	if !strings.HasPrefix(s, "<?") {
+		return 0, 0
+	}
+	if strings.HasPrefix(s, "<?=") {
+		return TOpenTagWithEcho, 3
+	}
+	if len(s) >= 5 && strings.EqualFold(s[2:5], "php") {
+		if len(s) == 5 {
+			return TOpenTag, 5
+		}
+		switch s[5] {
+		case ' ', '\t', '\n':
+			return TOpenTag, 6
+		case '\r':
+			if len(s) > 6 && s[6] == '\n' {
+				return TOpenTag, 7
+			}
+			return TOpenTag, 6
+		}
+	}
+	if l.opts.ShortOpenTag {
+		return TOpenTag, 2
+	}
+	return 0, 0
+}
+
+func (l *lexer) lexInitial() {
+	start := l.pos
+	for i := l.pos; i < len(l.src); i++ {
+		if l.src[i] != '<' {
+			continue
+		}
+		if kind, n := l.openTagAt(i); n > 0 {
+			if i > start {
+				l.emitRaw(TInlineHTML, start, i)
+			}
+			l.pos = i + n
+			l.emit(kind, i)
+			l.setTop(stScripting)
+			return
+		}
+	}
+	l.pos = len(l.src)
+	l.emit(TInlineHTML, start)
+}
+
+var threeCharOps = map[string]Kind{
+	"<=>": TSpaceship, "===": TIsIdentical, "!==": TIsNotIdentical, "<<=": TSlEqual,
+	">>=": TSrEqual, "**=": TPowEqual, "??=": TCoalesceEqual, "...": TEllipsis,
+	"?->": TNullsafeObjectOperator,
+}
+
+var twoCharOps = map[string]Kind{
+	"++": TInc, "--": TDec, "->": TObjectOperator, "=>": TDoubleArrow, "::": TDoubleColon,
+	"==": TIsEqual, "!=": TIsNotEqual, "<>": TIsNotEqual, "<=": TIsSmallerOrEqual,
+	">=": TIsGreaterOrEqual, "+=": TPlusEqual, "-=": TMinusEqual, "*=": TMulEqual,
+	"/=": TDivEqual, ".=": TConcatEqual, "%=": TModEqual, "&=": TAndEqual, "|=": TOrEqual,
+	"^=": TXorEqual, "&&": TBooleanAnd, "||": TBooleanOr, "??": TCoalesce, "<<": TSl,
+	">>": TSr, "**": TPow, "|>": TPipe,
+}
+
+const singleChars = ";:,.[]()|^&+-/*=%!~$<>?@{}\"`"
+
+var casts = map[string]Kind{
+	"int": TIntCast, "integer": TIntCast, "bool": TBoolCast, "boolean": TBoolCast,
+	"float": TDoubleCast, "double": TDoubleCast, "real": TDoubleCast,
+	"string": TStringCast, "binary": TStringCast, "array": TArrayCast, "object": TObjectCast,
+	"unset": TUnsetCast, "void": TVoidCast,
+}
+
+func (l *lexer) lexScripting() {
+	start := l.pos
+	c := l.src[l.pos]
+	switch {
+	case c == ' ' || c == '\t' || c == '\n' || c == '\r':
+		for l.pos < len(l.src) && strings.IndexByte(" \t\n\r", l.src[l.pos]) >= 0 {
+			l.pos++
+		}
+		l.emit(TWhitespace, start)
+		return
+	case c == '?' && l.peek(1) == '>':
+		l.pos += 2
+		if l.peek(0) == '\n' {
+			l.pos++
+		} else if l.peek(0) == '\r' {
+			l.pos++
+			if l.peek(0) == '\n' {
+				l.pos++
+			}
+		}
+		l.emit(TCloseTag, start)
+		l.states = l.states[:1]
+		l.setTop(stInitial)
+		return
+	case c == '#' && l.peek(1) == '[':
+		l.pos += 2
+		l.emit(TAttribute, start)
+		return
+	case c == '#' || (c == '/' && l.peek(1) == '/'):
+		l.lineComment(start)
+		return
+	case c == '/' && l.peek(1) == '*':
+		l.blockComment(start)
+		return
+	case c == '$' && isLabelStart(l.peek(1)):
+		l.pos = l.labelEnd(l.pos + 1)
+		l.emit(TVariable, start)
+		return
+	case isDigit(c) || (c == '.' && isDigit(l.peek(1))):
+		l.number(start)
+		return
+	case c == '\'':
+		l.singleQuoted(start)
+		return
+	case c == '"':
+		l.doubleQuoted(start)
+		return
+	case c == '`':
+		l.pos++
+		l.emit('`', start)
+		l.push(stBackquote)
+		return
+	case (c == 'b' || c == 'B') && (l.peek(1) == '\'' || l.peek(1) == '"' || (l.peek(1) == '<' && strings.HasPrefix(l.src[l.pos+1:], "<<<"))):
+		l.pos++
+		switch l.peek(0) {
+		case '\'':
+			l.singleQuoted(start)
+		case '"':
+			l.doubleQuoted(start)
+		default:
+			if !l.heredocStart(start) {
+				l.pos = start
+				l.name(start)
+			}
+		}
+		return
+	case c == '<' && strings.HasPrefix(l.src[l.pos:], "<<<") && l.heredocStart(start):
+		return
+	case c == '(':
+		if l.cast(start) {
+			return
+		}
+	case isLabelStart(c) || c == '\\':
+		l.name(start)
+		return
+	}
+	if len(l.src)-l.pos >= 3 {
+		if k, ok := threeCharOps[l.src[l.pos:l.pos+3]]; ok {
+			l.pos += 3
+			l.emit(k, start)
+			if k == TNullsafeObjectOperator {
+				l.push(stLookingForProperty)
+			}
+			return
+		}
+	}
+	if len(l.src)-l.pos >= 2 {
+		if k, ok := twoCharOps[l.src[l.pos:l.pos+2]]; ok {
+			l.pos += 2
+			l.emit(k, start)
+			if k == TObjectOperator {
+				l.push(stLookingForProperty)
+			}
+			return
+		}
+	}
+	l.pos++
+	switch {
+	case c == '{':
+		l.emit('{', start)
+		l.push(stScripting)
+	case c == '}':
+		l.emit('}', start)
+		l.pop()
+	case c == '&':
+		if j := l.skipTrivia(l.pos); j < len(l.src) && (l.src[j] == '$' || strings.HasPrefix(l.src[j:], "...")) {
+			l.emit(TAmpersandFollowedByVarOrVararg, start)
+		} else {
+			l.emit(TAmpersandNotFollowedByVarOrVararg, start)
+		}
+	case strings.IndexByte(singleChars, c) >= 0:
+		l.emit(Kind(c), start)
+	default:
+		l.emit(TBadCharacter, start)
+	}
+}
+
+// lineComment ends before a newline or a close tag.
+func (l *lexer) lineComment(start int) {
+	for l.pos < len(l.src) {
+		c := l.src[l.pos]
+		if c == '\n' || c == '\r' || (c == '?' && l.peek(1) == '>') {
+			break
+		}
+		l.pos++
+	}
+	l.emit(TComment, start)
+}
+
+func (l *lexer) blockComment(start int) {
+	kind := TComment
+	if strings.HasPrefix(l.src[l.pos:], "/**") && l.pos+3 < len(l.src) && strings.IndexByte(" \t\n\r", l.src[l.pos+3]) >= 0 {
+		kind = TDocComment
+	}
+	end := strings.Index(l.src[l.pos+2:], "*/")
+	if end < 0 {
+		l.diag("Unterminated comment starting line %d", l.line)
+		l.pos = len(l.src)
+	} else {
+		l.pos += 2 + end + 2
+	}
+	l.emit(kind, start)
+}
+
+func (l *lexer) cast(start int) bool {
+	i := l.pos + 1
+	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
+		i++
+	}
+	j := i
+	for j < len(l.src) && (l.src[j]|0x20 >= 'a' && l.src[j]|0x20 <= 'z') {
+		j++
+	}
+	k, ok := casts[strings.ToLower(l.src[i:j])]
+	if !ok {
+		return false
+	}
+	for j < len(l.src) && (l.src[j] == ' ' || l.src[j] == '\t') {
+		j++
+	}
+	if j >= len(l.src) || l.src[j] != ')' {
+		return false
+	}
+	l.pos = j + 1
+	l.emit(k, start)
+	return true
+}
+
+// skipTrivia returns the index after whitespace and comments starting at i.
+func (l *lexer) skipTrivia(i int) int {
+	for i < len(l.src) {
+		switch {
+		case strings.IndexByte(" \t\n\r", l.src[i]) >= 0:
+			i++
+		case l.src[i] == '#' && (i+1 >= len(l.src) || l.src[i+1] != '['), strings.HasPrefix(l.src[i:], "//"):
+			for i < len(l.src) && l.src[i] != '\n' && l.src[i] != '\r' {
+				i++
+			}
+		case strings.HasPrefix(l.src[i:], "/*"):
+			end := strings.Index(l.src[i+2:], "*/")
+			if end < 0 {
+				return i
+			}
+			i += 2 + end + 2
+		default:
+			return i
+		}
+	}
+	return i
+}
+
+func (l *lexer) name(start int) {
+	i := l.pos
+	leading := l.src[i] == '\\'
+	if leading {
+		i++
+		if i >= len(l.src) || !isLabelStart(l.src[i]) {
+			l.pos = i
+			l.emit(TNsSeparator, start)
+			return
+		}
+	}
+	i = l.labelEnd(i)
+	first := l.src[l.pos:i]
+	segments := 1
+	for i+1 < len(l.src) && l.src[i] == '\\' && isLabelStart(l.src[i+1]) {
+		i = l.labelEnd(i + 1)
+		segments++
+	}
+	if leading {
+		l.pos = i
+		l.emit(TNameFullyQualified, start)
+		return
+	}
+	if segments > 1 {
+		l.pos = i
+		if strings.EqualFold(first, "namespace") {
+			l.emit(TNameRelative, start)
+		} else {
+			l.emit(TNameQualified, start)
+		}
+		return
+	}
+	l.pos = i
+	lower := strings.ToLower(first)
+	switch lower {
+	case "yield":
+		j := l.skipTrivia(i)
+		if j > i && len(l.src)-j >= 4 && strings.EqualFold(l.src[j:j+4], "from") && (j+4 >= len(l.src) || !isLabelChar(l.src[j+4])) {
+			l.pos = j + 4
+			l.emit(TYieldFrom, start)
+			return
+		}
+	case "enum":
+		j := l.skipTrivia(i)
+		if j > i && j < len(l.src) && isLabelStart(l.src[j]) {
+			word := strings.ToLower(l.src[j:l.labelEnd(j)])
+			if word != "extends" && word != "implements" {
+				l.emit(TEnum, start)
+				return
+			}
+		}
+		l.emit(TString, start)
+		return
+	case "public", "protected", "private":
+		if len(l.src)-i >= 5 && strings.EqualFold(l.src[i:i+5], "(set)") {
+			l.pos = i + 5
+			l.emit(map[string]Kind{"public": TPublicSet, "protected": TProtectedSet, "private": TPrivateSet}[lower], start)
+			return
+		}
+	}
+	if k, ok := keywords[lower]; ok {
+		l.emit(k, start)
+		return
+	}
+	l.emit(TString, start)
+}
+
+func (l *lexer) number(start int) {
+	src := l.src
+	i := l.pos
+	digitsWith := func(i int, ok func(byte) bool) int {
+		if i >= len(src) || !ok(src[i]) {
+			return i
+		}
+		for i < len(src) {
+			if ok(src[i]) {
+				i++
+			} else if src[i] == '_' && i+1 < len(src) && ok(src[i+1]) {
+				i += 2
+			} else {
+				break
+			}
+		}
+		return i
+	}
+	isHex := func(c byte) bool { return isDigit(c) || (c|0x20 >= 'a' && c|0x20 <= 'f') }
+	isBin := func(c byte) bool { return c == '0' || c == '1' }
+	isOct := func(c byte) bool { return c >= '0' && c <= '7' }
+	if src[i] == '0' && i+2 < len(src) {
+		var ok func(byte) bool
+		base := 0
+		switch src[i+1] | 0x20 {
+		case 'x':
+			ok, base = isHex, 16
+		case 'b':
+			ok, base = isBin, 2
+		case 'o':
+			ok, base = isOct, 8
+		}
+		if ok != nil && ok(src[i+2]) {
+			end := digitsWith(i+2, ok)
+			l.pos = end
+			l.emit(l.intKind(src[i+2:end], base), start)
+			return
+		}
+	}
+	end := digitsWith(i, isDigit)
+	float := false
+	if end < len(src) && src[end] == '.' && !(end+2 < len(src) && src[end+1] == '.' && src[end+2] == '.') {
+		float = true
+		end = digitsWith(end+1, isDigit)
+	}
+	if end < len(src) && src[end]|0x20 == 'e' {
+		j := end + 1
+		if j < len(src) && (src[j] == '+' || src[j] == '-') {
+			j++
+		}
+		if j < len(src) && isDigit(src[j]) {
+			float = true
+			end = digitsWith(j, isDigit)
+		}
+	}
+	l.pos = end
+	if float {
+		l.emit(TDNumber, start)
+		return
+	}
+	text := src[i:end]
+	if len(text) > 1 && text[0] == '0' {
+		l.emit(l.intKind(text[1:], 8), start)
+		return
+	}
+	l.emit(l.intKind(text, 10), start)
+}
+
+// intKind returns T_LNUMBER when the digits fit the profile's integer width.
+func (l *lexer) intKind(digits string, base int) Kind {
+	limit := uint64(math.MaxInt64)
+	if l.opts.IntWidth == 32 {
+		limit = math.MaxInt32
+	}
+	var v uint64
+	for i := 0; i < len(digits); i++ {
+		c := digits[i]
+		if c == '_' {
+			continue
+		}
+		d := uint64(0)
+		switch {
+		case isDigit(c):
+			d = uint64(c - '0')
+		default:
+			d = uint64(c|0x20-'a') + 10
+		}
+		if d >= uint64(base) {
+			// Octal literal with 8 or 9: PHP rejects it as an invalid
+			// numeric literal; the token remains a number.
+			return TLNumber
+		}
+		if v > (limit-d)/uint64(base) {
+			return TDNumber
+		}
+		v = v*uint64(base) + d
+	}
+	return TLNumber
+}
+
+func (l *lexer) singleQuoted(start int) {
+	i := l.pos + 1
+	for i < len(l.src) {
+		switch l.src[i] {
+		case '\\':
+			i += 2
+			continue
+		case '\'':
+			l.pos = i + 1
+			l.emit(TConstantEncapsedString, start)
+			return
+		}
+		i++
+	}
+	l.pos = len(l.src)
+	l.emit(TEncapsedAndWhitespace, start)
+}
+
+// interpolationAt reports whether an interpolation begins at i.
+func (l *lexer) interpolationAt(i int) bool {
+	if i+1 >= len(l.src) {
+		return false
+	}
+	c, n := l.src[i], l.src[i+1]
+	return (c == '$' && (isLabelStart(n) || n == '{')) || (c == '{' && n == '$')
+}
+
+func (l *lexer) doubleQuoted(start int) {
+	i := l.pos + 1
+	for i < len(l.src) {
+		switch {
+		case l.src[i] == '\\':
+			i += 2
+			continue
+		case l.src[i] == '"':
+			l.pos = i + 1
+			l.emit(TConstantEncapsedString, start)
+			return
+		case l.interpolationAt(i):
+			l.pos++
+			l.emit('"', start)
+			l.push(stDoubleQuotes)
+			return
+		}
+		i++
+	}
+	// Unterminated: PHP emits the quote and scans the rest as a string body.
+	l.pos++
+	l.emit('"', start)
+	l.push(stDoubleQuotes)
+}
+
+// heredocStart recognizes <<< [ \t]* (LABEL | "LABEL" | 'LABEL') NEWLINE.
+func (l *lexer) heredocStart(start int) bool {
+	i := l.pos + 3
+	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
+		i++
+	}
+	quote := byte(0)
+	if i < len(l.src) && (l.src[i] == '"' || l.src[i] == '\'') {
+		quote = l.src[i]
+		i++
+	}
+	if i >= len(l.src) || !isLabelStart(l.src[i]) {
+		return false
+	}
+	end := l.labelEnd(i)
+	name := l.src[i:end]
+	if quote != 0 {
+		if end >= len(l.src) || l.src[end] != quote {
+			return false
+		}
+		end++
+	}
+	switch {
+	case end < len(l.src) && l.src[end] == '\n':
+		end++
+	case end < len(l.src) && l.src[end] == '\r':
+		end++
+		if end < len(l.src) && l.src[end] == '\n' {
+			end++
+		}
+	default:
+		return false
+	}
+	l.pos = end
+	l.emit(TStartHeredoc, start)
+	l.labels = append(l.labels, heredocLabel{name: name})
+	if quote == '\'' {
+		l.push(stNowdoc)
+	} else {
+		l.push(stHeredoc)
+	}
+	// An immediately closing marker yields no body token.
+	if n := l.closingMarkerAt(l.pos); n > 0 {
+		l.endHeredoc(l.pos, n)
+	}
+	return true
+}
+
+// closingMarkerAt returns the length of indentation plus label when the
+// current heredoc's closing marker starts at line start i.
+func (l *lexer) closingMarkerAt(i int) int {
+	if len(l.labels) == 0 {
+		return 0
+	}
+	name := l.labels[len(l.labels)-1].name
+	j := i
+	for j < len(l.src) && (l.src[j] == ' ' || l.src[j] == '\t') {
+		j++
+	}
+	if !strings.HasPrefix(l.src[j:], name) {
+		return 0
+	}
+	if k := j + len(name); k < len(l.src) && isLabelChar(l.src[k]) {
+		return 0
+	}
+	return j + len(name) - i
+}
+
+func (l *lexer) endHeredoc(at, n int) {
+	l.pos = at + n
+	l.emit(TEndHeredoc, at)
+	l.labels = l.labels[:len(l.labels)-1]
+	l.pop()
+}
+
+// bodyEnd finds where a heredoc body segment stops: before the newline that
+// precedes the closing marker. It returns that index and the marker start.
+func (l *lexer) heredocBodyLimit(from int) (int, int) {
+	for i := from; i < len(l.src); i++ {
+		if l.src[i] != '\n' && l.src[i] != '\r' {
+			continue
+		}
+		lineStart := i + 1
+		if l.src[i] == '\r' && lineStart < len(l.src) && l.src[lineStart] == '\n' {
+			lineStart++
+		}
+		if n := l.closingMarkerAt(lineStart); n > 0 {
+			return i, lineStart
+		}
+		i = lineStart - 1
+	}
+	return len(l.src), -1
+}
+
+func (l *lexer) lexNowdoc() {
+	start := l.pos
+	limit, marker := l.heredocBodyLimit(start)
+	if marker < 0 {
+		l.diag("Unterminated nowdoc")
+		l.pos = len(l.src)
+		l.emit(TEncapsedAndWhitespace, start)
+		return
+	}
+	l.pos = marker
+	l.emitRaw(TEncapsedAndWhitespace, start, marker)
+	_ = limit
+	l.endHeredoc(marker, l.closingMarkerAt(marker))
+}
+
+// lexInterpolated scans double-quoted, backquoted (end '`'), or heredoc
+// (end 0) bodies.
+func (l *lexer) lexInterpolated(end byte) {
+	start := l.pos
+	if end != 0 && l.src[l.pos] == end {
+		l.pos++
+		l.emit(Kind(end), start)
+		l.pop()
+		return
+	}
+	if end == 0 {
+		if n := l.closingMarkerAt(l.pos); n > 0 && (l.pos == 0 || l.src[l.pos-1] == '\n' || l.src[l.pos-1] == '\r') {
+			l.endHeredoc(l.pos, n)
+			return
+		}
+	}
+	if l.interpolationAt(l.pos) {
+		l.interpolation(start)
+		return
+	}
+	limit, marker := len(l.src), -1
+	if end == 0 {
+		limit, marker = l.heredocBodyLimit(l.pos)
+		if marker >= 0 {
+			// The newline before the marker belongs to the body.
+			limit = marker
+		}
+	}
+	i := l.pos
+	for i < limit {
+		c := l.src[i]
+		if c == '\\' && i+1 < limit {
+			i += 2
+			continue
+		}
+		if (end != 0 && c == end) || l.interpolationAt(i) {
+			break
+		}
+		i++
+	}
+	if i > limit {
+		i = limit
+	}
+	l.pos = i
+	l.emit(TEncapsedAndWhitespace, start)
+	if l.pos >= len(l.src) && end != 0 {
+		l.diag("Unterminated string")
+	}
+}
+
+func (l *lexer) interpolation(start int) {
+	switch {
+	case l.src[l.pos] == '{':
+		l.pos++
+		l.emit(TCurlyOpen, start)
+		l.push(stScripting)
+	case l.peek(1) == '{':
+		l.pos += 2
+		l.emit(TDollarOpenCurlyBraces, start)
+		l.push(stLookingForVarname)
+	default:
+		l.pos = l.labelEnd(l.pos + 1)
+		l.emit(TVariable, start)
+		switch {
+		case l.peek(0) == '[':
+			l.push(stVarOffset)
+		case l.peek(0) == '-' && l.peek(1) == '>' && isLabelStart(l.peek(2)):
+			l.push(stLookingForProperty)
+		case l.peek(0) == '?' && l.peek(1) == '-' && l.peek(2) == '>' && isLabelStart(l.peek(3)):
+			l.push(stLookingForProperty)
+		}
+	}
+}
+
+func (l *lexer) lexProperty() {
+	start := l.pos
+	inString := len(l.states) >= 2 && l.states[len(l.states)-2] != stScripting
+	c := l.src[l.pos]
+	switch {
+	case !inString && strings.IndexByte(" \t\n\r", c) >= 0:
+		for l.pos < len(l.src) && strings.IndexByte(" \t\n\r", l.src[l.pos]) >= 0 {
+			l.pos++
+		}
+		l.emit(TWhitespace, start)
+	case !inString && (c == '#' && l.peek(1) != '[' || c == '/' && l.peek(1) == '/'):
+		l.lineComment(start)
+	case !inString && c == '/' && l.peek(1) == '*':
+		l.blockComment(start)
+	case c == '-' && l.peek(1) == '>':
+		l.pos += 2
+		l.emit(TObjectOperator, start)
+	case c == '?' && l.peek(1) == '-' && l.peek(2) == '>':
+		l.pos += 3
+		l.emit(TNullsafeObjectOperator, start)
+	case isLabelStart(c):
+		l.pos = l.labelEnd(l.pos)
+		l.emit(TString, start)
+		l.pop()
+	default:
+		l.pop()
+	}
+}
+
+func (l *lexer) lexVarOffset() {
+	start := l.pos
+	c := l.src[l.pos]
+	switch {
+	case isDigit(c):
+		for l.pos < len(l.src) && isLabelChar(l.src[l.pos]) {
+			l.pos++
+		}
+		l.emit(TNumString, start)
+	case c == '$' && isLabelStart(l.peek(1)):
+		l.pos = l.labelEnd(l.pos + 1)
+		l.emit(TVariable, start)
+	case isLabelStart(c):
+		l.pos = l.labelEnd(l.pos)
+		l.emit(TString, start)
+	case c == ']':
+		l.pos++
+		l.emit(']', start)
+		l.pop()
+	case strings.IndexByte(singleChars, c) >= 0:
+		l.pos++
+		l.emit(Kind(c), start)
+	default:
+		// Whitespace, quotes, and other bytes end the offset with an empty
+		// string-body token, and the body resumes at this byte.
+		l.emit(TEncapsedAndWhitespace, start)
+		l.pop()
+	}
+}
+
+func (l *lexer) lexVarname() {
+	start := l.pos
+	if isLabelStart(l.src[l.pos]) {
+		end := l.labelEnd(l.pos)
+		if end < len(l.src) && (l.src[end] == '[' || l.src[end] == '}') {
+			l.pos = end
+			l.emit(TStringVarname, start)
+			l.setTop(stScripting)
+			return
+		}
+	}
+	l.setTop(stScripting)
+	l.lexScripting()
+}

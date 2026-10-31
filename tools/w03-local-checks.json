@@ -72,6 +72,8 @@
     "test_evidence_commit.EvidenceCommitTests.test_parent_repository_cannot_stand_in_for_root",
     "test_evidence_commit.EvidenceCommitTests.test_real_commit_and_complete_denominator",
     "test_evidence_schema.EvidenceSchemaContract.test_outcomes_and_profile_fields_match_validator",
+    "test_frontend_corpus.CorpusTests.test_extracts_only_file_sections_from_selected_tests",
+    "test_frontend_corpus.CorpusTests.test_rejects_unlocked_archive",
     "test_phpt_fixture_evidence.PHPTReferenceEvidenceTests.test_each_reference_log_preserves_all_results_and_exit",
     "test_phpt_fixture_evidence.PHPTReferenceEvidenceTests.test_every_fixture_is_pinned_and_remains_unrun_by_phego",
     "test_reference_go.BuildCommandTests.test_archive_is_copied_before_hash_check_and_only_verified_copy_is_extracted",

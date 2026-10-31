@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "scope": "lexer_differential_check",
+  "requirement": "REQ-010",
+  "scenarios": [
+    "T-019",
+    "T-020"
+  ],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-10-31",
+  "php_source": {
+    "archive": "php-8.5.12.tar.xz",
+    "sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
+  },
+  "corpus": {
+    "command": "python3 tools/frontend_corpus.py php-8.5.12.tar.xz OUTPUT",
+    "files": 5449,
+    "sha256": "8b8fe3e0201fa62f92d62f4655d896f27dd29f2ee783c9556ba9ff2e6b4d7fdb",
+    "license_note": "Derived from PHP-licensed php-src tests; kept outside the repository."
+  },
+  "references": [
+    {
+      "platform": "linux/386",
+      "emulated": true,
+      "int_width": 32,
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "command": "docker run --rm --network none --read-only --cap-drop ALL --platform linux/386 -v CORPUS:/corpus:ro -v tests/frontend/token_dump.php:/dump.php:ro IMAGE php -n -d memory_limit=1G /dump.php > reference.jsonl",
+      "dump_sha256": "8c86f8e08d61a27a616af0f899946626f0f68e2c8df562d4216928f827bbe776"
+    },
+    {
+      "platform": "linux/arm64",
+      "emulated": false,
+      "int_width": 64,
+      "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+      "build": "./configure --disable-all --enable-cli --enable-tokenizer --without-pear; make -j4 (no network, non-root, read-only root)",
+      "binary_sha256": "aa054c2bc622b0be81f42e4395fed0e1d003078c0d067561cda1eb78eef63fcd",
+      "dump_sha256": "c8a51dc367487dedc1fbf1fd6e97bb8030b72d16c3f10dec30a748e608cfcfc3"
+    }
+  ],
+  "phego": {
+    "command": "PHEGO_LEXER_CORPUS=DIR [PHEGO_LEXER_REFERENCE=reference-arm64.jsonl PHEGO_LEXER_INT_WIDTH=64] go test -run Corpus ./internal/frontend",
+    "go": "go1.26.5 darwin/arm64",
+    "results": [
+      {
+        "int_width": 32,
+        "matching_files": 5449,
+        "files": 5449
+      },
+      {
+        "int_width": 64,
+        "matching_files": 5449,
+        "files": 5449
+      }
+    ],
+    "compared": "token name, exact text, and start line for every token"
+  },
+  "fuzz": {
+    "command": "go test -run '^$' -fuzz FuzzLex -fuzztime 90s ./internal/frontend",
+    "execs": 20626652,
+    "result": "no failure; every input byte covered by exactly one token"
+  },
+  "limits": [
+    "short_open_tag was on in both references; the off setting is covered only by unit tests.",
+    "Only PHP 8.5.12 lexing is implemented; historical releases need their own profiles.",
+    "The corpus is php-src's own Zend and tokenizer tests, not real applications.",
+    "The parser, AST, and source maps are not yet implemented."
+  ]
+}
