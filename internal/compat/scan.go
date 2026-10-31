@@ -215,6 +215,12 @@ func (s *scanner) className(name string) string {
 	if rest, ok := strings.CutPrefix(lower, `\`); ok {
 		return rest
 	}
+	if rest, ok := strings.CutPrefix(lower, `namespace\`); ok {
+		if s.namespace == "" {
+			return rest
+		}
+		return s.namespace + `\` + rest
+	}
 	first, rest, qualified := strings.Cut(lower, `\`)
 	if target, ok := s.classes[first]; ok {
 		if qualified {
@@ -341,7 +347,7 @@ func mayFilterCallback(args *frontend.Node, pos int) bool {
 		v, _ := literalInt(f)
 		return v == filterCallback || v == "?"
 	case f.Kind == "array":
-		return mentions(f, "filter_callback") || mentionsLiteral(f, filterCallback) || containsDynamic(f)
+		return !filtersAreSafe(f)
 	}
 	return true
 }
@@ -386,38 +392,29 @@ func literalInt(n *frontend.Node) (string, bool) {
 	return "?", false
 }
 
-// mentionsLiteral reports whether an integer literal with value v appears in n.
-func mentionsLiteral(n *frontend.Node, v string) bool {
+// filtersAreSafe reports whether an array of filter definitions provably
+// selects no FILTER_CALLBACK: every value is a literal other than 1024, or a
+// FILTER_ constant other than FILTER_CALLBACK. Any other expression could
+// evaluate to FILTER_CALLBACK.
+func filtersAreSafe(n *frontend.Node) bool {
 	if n == nil {
-		return false
-	}
-	if n.Kind == "literal" && n.Token != frontend.TConstantEncapsedString {
-		if got, ok := literalInt(n); ok && got == v {
-			return true
-		}
-	}
-	for _, c := range n.Children {
-		if mentionsLiteral(c, v) {
-			return true
-		}
-	}
-	return false
-}
-
-// containsDynamic reports whether n holds a variable or call, whose value
-// could be FILTER_CALLBACK.
-func containsDynamic(n *frontend.Node) bool {
-	if n == nil {
-		return false
-	}
-	switch n.Kind {
-	case "variable", "variable_variable", "call", "method_call", "static_call", "dim", "prop", "static_prop", "spread":
 		return true
 	}
-	for _, c := range n.Children {
-		if containsDynamic(c) {
-			return true
+	switch n.Kind {
+	case "array", "item":
+		for _, c := range n.Children {
+			if !filtersAreSafe(c) {
+				return false
+			}
 		}
+		return true
+	case "literal":
+		v, _ := literalInt(n)
+		return v != filterCallback
+	case "name":
+		name := strings.ToUpper(strings.TrimPrefix(n.Text, `\`))
+		return name == "TRUE" || name == "FALSE" || name == "NULL" ||
+			(strings.HasPrefix(name, "FILTER_") && name != "FILTER_CALLBACK")
 	}
 	return false
 }
@@ -457,6 +454,9 @@ func mentions(n *frontend.Node, name string) bool {
 func (s *scanner) function(n *frontend.Node, name string, args *frontend.Node, evidence string) {
 	if processFunctions[name] {
 		s.add(n, "process", Capability, "process", evidence, "starts an operating system process; requires the process capability")
+	}
+	if _, ok := filterArgument[name]; ok && args == nil {
+		s.add(n, "dynamic-callback", Unknown, "", evidence, "a filter function called as a callback may use FILTER_CALLBACK with a callback read at run time")
 	}
 	if name == "extract" {
 		s.add(n, "extract", Unknown, "", evidence, "creates variables whose names come from data at run time")
