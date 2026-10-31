@@ -46,6 +46,7 @@ type heap struct {
 	roots      map[gcNode]uint64 // possible cycle roots with buffering order
 	rootSeq    uint64
 	closed     bool
+	warnings   []string // PHP warnings raised by modeled operations, in order
 }
 
 func newHeap(width int) (*heap, error) {
@@ -403,6 +404,10 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 			err = rerr
 		}
 	}()
+	if t := loop.ref.target; t.kind != valueArray {
+		h.warnForeach(t)
+		return nil
+	}
 	var cur *phpArray
 	pos := 0
 	defer func() {
@@ -412,7 +417,12 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 	}()
 	for {
 		t := loop.ref.target
-		replaced := cur != nil && (t.kind != valueArray || (t.array != cur && t.array.copiedFrom != cur))
+		if t.kind != valueArray {
+			// PHP stops with a warning and keeps the value the body assigned.
+			h.warnForeach(t)
+			return nil
+		}
+		replaced := cur != nil && t.array != cur && t.array.copiedFrom != cur
 		a, err := h.separate(&loop)
 		if err != nil {
 			return err
@@ -452,6 +462,29 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 			return err
 		}
 	}
+}
+
+func (h *heap) warnForeach(v value) {
+	h.warnings = append(h.warnings, "foreach() argument must be of type array|object, "+typeName(v)+" given")
+}
+
+// typeName is PHP's get_debug_type() spelling for the modeled kinds.
+func typeName(v value) string {
+	switch v.deref().kind {
+	case valueNull, valueUndefined:
+		return "null"
+	case valueBool:
+		return "bool"
+	case valueInt:
+		return "int"
+	case valueFloat:
+		return "float"
+	case valueString:
+		return "string"
+	case valueArray:
+		return "array"
+	}
+	return v.deref().object.class.name
 }
 
 func (h *heap) property(obj value, name string) (*value, error) {

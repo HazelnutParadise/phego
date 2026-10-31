@@ -803,3 +803,37 @@ func TestForeachReturnsDestructorErrorFromFinalRelease(t *testing.T) {
 		t.Fatalf("foreach error = %v", err)
 	}
 }
+
+func TestForeachStopsWhenTargetIsNoLongerAnArray(t *testing.T) {
+	// PHP 8.5.12: assigning null or 5 to the iterated variable stops the loop
+	// with a warning and keeps the assigned value.
+	for _, replacement := range []value{nullValue(), {kind: valueInt, integer: 5}} {
+		h := testHeap(t)
+		var a, item value
+		must(t, h.appendValue(&a, num(t, 1)))
+		must(t, h.appendValue(&a, num(t, 2)))
+		var seen []int64
+		must(t, h.foreachRef(&a, &item, func(arrayKey) error {
+			seen = append(seen, item.deref().integer)
+			return h.assign(&a, replacement)
+		}))
+		if !slices.Equal(seen, []int64{1}) || !identicalOrFatal(t, a, replacement) {
+			t.Fatalf("seen %v, a %+v", seen, a.deref())
+		}
+		want := "foreach() argument must be of type array|object, " + typeName(replacement) + " given"
+		if !slices.Equal(h.warnings, []string{want}) {
+			t.Fatalf("warnings %v", h.warnings)
+		}
+	}
+	h := testHeap(t)
+	var notArray, item value
+	must(t, h.foreachRef(&notArray, &item, func(arrayKey) error { t.Fatal("body ran"); return nil }))
+	if notArray.deref().kind != valueUndefined || len(h.warnings) != 1 {
+		t.Fatalf("non-array foreach changed value or missed warning: %+v %v", notArray, h.warnings)
+	}
+}
+
+func identicalOrFatal(t *testing.T, a, b value) bool {
+	t.Helper()
+	return same(t, a, b)
+}

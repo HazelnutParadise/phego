@@ -6,7 +6,7 @@
   "emulated": true,
   "container_image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
   "host": "macOS arm64 (Apple M3), Docker 29.8.2, linux/386 emulated",
-  "command": "For each tests/semantics/w06-php85/*.phpt: docker run --rm -i --network none --read-only --cap-drop ALL --security-opt no-new-privileges --platform linux/386 <container_image> php -n < FILE section; compare trimmed stdout with the EXPECT section",
+  "command": "For each tests/semantics/w06-php85/*.phpt: docker run --rm -i --network none --read-only --cap-drop ALL --security-opt no-new-privileges --platform linux/386 <container_image> php -n < FILE section; compare trimmed stdout with the EXPECT section, or with EXPECTF where %s matches one line of text",
   "executed_at": "2026-10-31",
   "fixtures": [
     {
@@ -63,6 +63,13 @@
       "sha256": "b0b9adc8d0ac55b6f7a3b509f905f537a8ae6d594a684146d15d9550c8affc07",
       "exit_code": 0,
       "stdout_sha256": "293215f7caf5d61d1f77d9af1657c47d60195cba3dc89d65fd7c04b39175be25",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_non_array_replacement.phpt",
+      "sha256": "6af105ebaccc4948dc0c327b83ff56c50a5c05ade2898b933fe971640ab6485c",
+      "exit_code": 0,
+      "stdout_sha256": "b4962aa6815961badceeef8da29d351c61324dd1806beea199acaa91f31463f6",
       "result": "pass"
     },
     {
@@ -136,7 +143,7 @@
       "result": "pass"
     }
   ],
-  "passed": 18,
+  "passed": 19,
   "failed": 0,
   "go_model_tests": {
     "command": "go test ./internal/runtime/ && go test -race ./... && CGO_ENABLED=0 go test ./...",
@@ -165,7 +172,7 @@
     ]
   },
   "limits": [
-    "Expected outputs of the fourteen new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
+    "Expected outputs of the fifteen new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
     "The image is the prebuilt one recorded in W-06-php85-i386-image-source.json; its binary is not proven to be built from the locked source archive.",
     "No other PHP release, native 64-bit platform, or historical generation was exercised.",
     "Go tests exercise the candidate value model directly; no PHP source is parsed or executed by Phego.",
