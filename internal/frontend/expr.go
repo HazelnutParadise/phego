@@ -721,7 +721,8 @@ func (p *parser) interpolated(end Kind) *Node {
 func (p *parser) heredoc() *Node {
 	t := p.next()
 	n := &Node{Kind: "heredoc", Text: t.Text, Line: t.Line, Children: p.encapsList(TEndHeredoc)}
-	p.expect(TEndHeredoc)
+	// The end token includes the indentation that determines the string value.
+	n.Children = append(n.Children, leaf("heredoc_end", p.expect(TEndHeredoc)))
 	return n
 }
 

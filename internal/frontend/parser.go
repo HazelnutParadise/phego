@@ -1082,6 +1082,9 @@ func (p *parser) member() *Node {
 		}
 	}
 	if p.at('{') {
+		if len(n.Children) != 4 { // attrs, modifiers, type, and one property
+			p.unexpected()
+		}
 		n.Children = append(n.Children, p.propertyHooks())
 		return n
 	}
