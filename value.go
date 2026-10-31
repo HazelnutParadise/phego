@@ -60,11 +60,14 @@ func Int64(v int64) Value { return Value{kind: kindInt, integer: v} }
 // Float64 constructs a PHP floating-point value.
 func Float64(v float64) Value { return Value{kind: kindFloat, floating: v} }
 
-// Bytes constructs a PHP byte string and copies its input.
+// Bytes constructs a PHP byte string and copies its input. The caller must not
+// modify v concurrently during the call; after it returns, v can be changed.
 func Bytes(v []byte) Value { return Value{kind: kindBytes, text: string(v)} }
 
-// Array constructs an ordered array input and copies its entries. Key
-// conversion and duplicate-key handling belong to the selected PHP profile.
+// Array constructs an ordered array input and copies its entries. The caller
+// must not modify entries concurrently during the call; after it returns,
+// entries can be changed. Key conversion and duplicate-key handling belong
+// to the selected PHP profile.
 func Array(entries []Entry) Value {
 	return Value{kind: kindArray, entries: append([]Entry(nil), entries...)}
 }

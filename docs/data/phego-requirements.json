@@ -137,7 +137,7 @@
       "capability": "傳入明確型別資料並在請求結束後安全讀取輸出快照。",
       "acceptance": "位元組字串、有序鍵、數字範圍與複製行為有測試，無失效活物件外流。",
       "normal": "輸入有序陣列與含零位元組字串，輸出快照保留內容與順序。",
-      "adversarial": "呼叫者同時改動原始 slice，預設隔離副本不受影響；resource 不能再操作。",
+      "adversarial": "完成複製後，呼叫者在其他 goroutine 改動原始 slice，隔離副本仍不變且 race 檢查通過；resource 不能再操作。",
       "work_packages": [
         "W-06",
         "W-08",

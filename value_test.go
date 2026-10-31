@@ -118,3 +118,36 @@ func TestValuesCanBeReadConcurrently(t *testing.T) {
 		}
 	}
 }
+
+// The copy completes before another goroutine modifies the caller-owned input.
+func TestInputMutationAfterCopyIsIsolated(t *testing.T) {
+	input := []byte("original")
+	entries := []Entry{{Key: IntKey(0), Value: Int64(7)}}
+	text := Bytes(input)
+	array := Array(entries)
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < 1000; i++ {
+			input[0] = byte(i)
+			entries[0].Value = Int64(int64(i))
+		}
+	}()
+	for i := 0; i < 1000; i++ {
+		got, ok := text.Bytes()
+		if !ok || string(got) != "original" {
+			t.Errorf("byte snapshot changed: %q", got)
+			break
+		}
+		gotEntries, ok := array.Entries()
+		if !ok || len(gotEntries) != 1 {
+			t.Error("array snapshot changed")
+			break
+		}
+		if value, ok := gotEntries[0].Value.Int64(); !ok || value != 7 {
+			t.Errorf("array value changed: %d", value)
+			break
+		}
+	}
+	<-done
+}
