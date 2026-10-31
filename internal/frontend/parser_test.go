@@ -150,6 +150,30 @@ func TestCloneOfParenthesizedCallContinues(t *testing.T) {
 	}
 }
 
+func TestGrammarGridRepresentatives(t *testing.T) {
+	// One case per category found by tests/frontend/grid_*.php; expectations
+	// are PHP 8.5.12 token_get_all(..., TOKEN_PARSE) results.
+	for src, ok := range map[string]bool{
+		"<?php class C { public $x { if; } }":             false,
+		"<?php class C { public $x { get; } }":            true,
+		"<?php class C { function __halt_compiler() {} }": false,
+		"<?php A::__halt_compiler();":                     false,
+		"<?php array::class;":                             false,
+		"<?php class readonly {}":                         false,
+		"<?php `echo x`[0];":                              false,
+		"<?php (`echo x`)[0];":                            true,
+		"<?php fn() => 1->x;":                             false,
+		"<?php class C { use T { a as var; } }":           true,
+		"<?php class C { public var $x; }":                false,
+		"<?php class C { var $x; }":                       true,
+		"<?php namespace __halt_compiler;":                false,
+	} {
+		if _, err := parse(t, src); (err == nil) != ok {
+			t.Errorf("%s: %v", src, err)
+		}
+	}
+}
+
 func TestMatchArmsNeedConditions(t *testing.T) {
 	// PHP 8.5.12 rejects an arm without conditions unless it is default.
 	for src, ok := range map[string]bool{

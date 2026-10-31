@@ -355,11 +355,6 @@ func (p *parser) primary() *Node {
 		p.next()
 		return leaf("name", t)
 	}
-	if isIdentifier(t.Kind) && p.tok(1).Kind == TDoubleColon {
-		// parent::, self:: and similar are plain identifiers.
-		p.next()
-		return leaf("name", t)
-	}
 	switch t.Kind {
 	case TArray, TStatic, TClass, TList, TIsset, TEmpty, TEval, TMatch:
 		// These keywords begin a construct, so PHP reports the token after
@@ -398,8 +393,13 @@ func (p *parser) postfix(n *Node) *Node {
 	}
 	// PHP requires parentheses before postfix access on these expressions.
 	switch n.Kind {
-	case "match", "closure", "heredoc", "list", "isset", "builtin", "exit":
+	case "match", "closure", "arrow_function", "heredoc", "list", "isset", "builtin", "exit":
 		return n
+	case "interpolated":
+		if n.Text == "`" {
+			// Shell execution needs parentheses before access.
+			return n
+		}
 	}
 	for {
 		t := p.peek()

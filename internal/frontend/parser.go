@@ -198,7 +198,8 @@ func (p *parser) leave() { p.depth-- }
 func isKeyword(k Kind) bool { return k >= TAbstract && k <= THaltCompiler }
 
 // isIdentifier reports tokens usable where PHP accepts semi-reserved words.
-func isIdentifier(k Kind) bool { return k == TString || isKeyword(k) }
+// __halt_compiler is reserved even where other keywords are accepted.
+func isIdentifier(k Kind) bool { return k == TString || (isKeyword(k) && k != THaltCompiler) }
 
 func isName(k Kind) bool {
 	return k == TString || k == TNameQualified || k == TNameFullyQualified || k == TNameRelative
@@ -740,7 +741,7 @@ func (p *parser) staticVars() *Node {
 func (p *parser) namespaceStatement() *Node {
 	t := p.next()
 	var name *Node
-	if k := p.peek().Kind; k == TString || k == TNameQualified || isKeyword(k) {
+	if k := p.peek().Kind; k == TNameQualified || isIdentifier(k) {
 		// Namespace names may be reserved words.
 		name = leaf("name", p.next())
 	}
@@ -827,7 +828,7 @@ func (p *parser) useAlias() *Node {
 // traits, and enums: plain identifiers plus the soft keywords enum and
 // readonly.
 func (p *parser) className() *Node {
-	if !p.atAny(TString, TEnum, TReadonly) {
+	if !p.atAny(TString, TEnum) {
 		p.unexpected()
 	}
 	return leaf("identifier", p.next())
@@ -929,9 +930,17 @@ func isModifier(k Kind) bool {
 	return false
 }
 
+// modifiers parses a member modifier list. var stands alone in PHP's
+// grammar, so combining it with any other modifier is a syntax error at the
+// second modifier.
 func (p *parser) modifiers() *Node {
 	n := node("modifiers", p.peek().Line)
+	sawVar := false
 	for isModifier(p.peek().Kind) {
+		if p.at(TVar) && len(n.Children) > 0 || sawVar {
+			p.unexpected()
+		}
+		sawVar = p.at(TVar)
 		n.Children = append(n.Children, leaf("modifier", p.next()))
 	}
 	return n
@@ -1172,7 +1181,7 @@ func (p *parser) propertyHooks() *Node {
 		mods := p.modifiers()
 		p.checkModifiers(mods, targetPropertyHook)
 		byRef := p.byRef()
-		name := p.identifier()
+		name := p.identifierNotReserved()
 		var params *Node
 		if p.at('(') {
 			params = p.parameters()
@@ -1215,7 +1224,10 @@ func (p *parser) traitUse() *Node {
 				var mod, alias *Node
 				if isModifier(p.peek().Kind) {
 					mod = leaf("modifier", p.next())
-					p.checkModifiers(node("modifiers", mod.Line, mod), targetMethod)
+					// var parses as an alias modifier; PHP checks the others.
+					if mod.Text != "" && kindOfModifier(mod.Text) != TVar {
+						p.checkModifiers(node("modifiers", mod.Line, mod), targetMethod)
+					}
 				}
 				if isIdentifier(p.peek().Kind) {
 					alias = p.identifier()

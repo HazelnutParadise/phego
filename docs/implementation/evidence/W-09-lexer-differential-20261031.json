@@ -109,5 +109,21 @@
         "matching": 16320
       }
     }
-  }
+  },
+  "grids": [
+    {
+      "generator": "tests/frontend/grid_names_postfix.php",
+      "files": 3506,
+      "reference_sha256": "a5fc8c1373bed42bba5407616efbbe15ea01ec88c7122a244dc302d929d6669f",
+      "agreeing": 3506,
+      "covers": "expression forms x postfix suffixes, assignment targets, name positions x keywords"
+    },
+    {
+      "generator": "tests/frontend/grid_types_modifiers.php",
+      "files": 1319,
+      "reference_sha256": "ebb7ac3ae8d847ccc9236cb8c3c0d254b292f134861ab1b12dc1ca3d6934bc0a",
+      "agreeing": 1319,
+      "covers": "type positions x type forms, modifier pairs x member kinds, prefix operators x operands, break/continue and declare arguments"
+    }
+  ]
 }
