@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"errors"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -139,5 +140,21 @@ func TestHaltCompilerTakesExactlyThreeTokens(t *testing.T) {
 	want := "T_OPEN_TAG T_HALT_COMPILER ) ; T_WHITESPACE T_CLOSE_TAG T_INLINE_HTML"
 	if got != want {
 		t.Fatalf("got  %s\nwant %s", got, want)
+	}
+}
+
+func TestHeredocBraceIndexMemoryFollowsBraceCount(t *testing.T) {
+	// One interpolation in a large heredoc must not allocate per source byte.
+	body := strings.Repeat("x", 4<<20)
+	src := []byte("<?php $s = <<<EOT\n{$a}" + body + "\nEOT;\n")
+	var before, after runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+	if _, _, err := Lex(src, LexOptions{IntWidth: 64, MaxBytes: len(src)}); err != nil {
+		t.Fatal(err)
+	}
+	runtime.ReadMemStats(&after)
+	if grown := after.TotalAlloc - before.TotalAlloc; grown > uint64(3*len(src)) {
+		t.Fatalf("lexing a %d-byte heredoc allocated %d bytes", len(src), grown)
 	}
 }

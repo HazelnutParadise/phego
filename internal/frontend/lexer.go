@@ -36,15 +36,17 @@ const (
 )
 
 type lexer struct {
-	src       string
-	pos       int
-	line      int
-	opts      LexOptions
-	states    []state
-	labels    []heredocLabel
-	out       []Token
-	diags     []Diagnostic
-	braceEnds []int
+	src    string
+	pos    int
+	line   int
+	opts   LexOptions
+	states []state
+	labels []heredocLabel
+	out    []Token
+	diags  []Diagnostic
+	// braceEnds maps each indexed opening brace to its closing brace; only
+	// braces actually seen are stored, so memory follows the brace count.
+	braceEnds map[int]int
 }
 
 type heredocLabel struct {
@@ -897,7 +899,7 @@ func (l *lexer) heredocBodyLimit(from int, interpolates bool) (int, int) {
 // braces inside quoted strings, or the end of input.
 func (l *lexer) skipBraces(i int) int {
 	if i >= 0 && i < len(l.src) && l.src[i] == '{' {
-		if l.braceEnds == nil || l.braceEnds[i] == 0 {
+		if _, ok := l.braceEnds[i]; !ok {
 			l.indexBraces(i)
 		}
 		return l.braceEnds[i]
@@ -928,7 +930,7 @@ func (l *lexer) skipBraces(i int) int {
 // inside a string is scanned as code again.
 func (l *lexer) indexBraces(from int) {
 	if l.braceEnds == nil {
-		l.braceEnds = make([]int, len(l.src))
+		l.braceEnds = make(map[int]int)
 	}
 	type frame struct {
 		mode   byte // c: code, q: quoted body, h: heredoc, i: inline HTML
