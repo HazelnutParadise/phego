@@ -1,0 +1,26 @@
+name: Go checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Check formatting
+        run: test -z "$(gofmt -l internal)"
+      - name: Test without cgo
+        run: CGO_ENABLED=0 go test ./...
+      - name: Test race conditions
+        run: go test -race ./...
+      - name: Vet
+        run: go vet ./...

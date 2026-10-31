@@ -1,0 +1,46 @@
+{
+  "scope": "isolated_reference_probe_only",
+  "requirement_ids": [
+    "REQ-082",
+    "REQ-085"
+  ],
+  "test_ids": [
+    "T-163",
+    "T-164",
+    "T-169",
+    "T-170"
+  ],
+  "product_acceptance": "not_run",
+  "source_url": "https://museum.php.net/php2/php-2.0.tar.gz",
+  "source_sha256": "018f706477f4531115178c4b89b7cef1894c5b51cd27e5f9b4d9f5bb44cbeb82",
+  "helper_sha256": "2d29099b120fb3fad7ef176c4d241e8ab1a6dd91daf6c1de23bc2d8ffa3088d6",
+  "fixture": "tests/semantics/w49-fi2-echo.phtml",
+  "fixture_sha256": "10d253a52d846d52bac1ebd5af52cc6afcb321520437d3486f095a514d1016ab",
+  "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+  "host": "macOS-27.0.1-arm64",
+  "guest_platform": "linux/arm64",
+  "python": "3.9.6",
+  "result_exit_code": 0,
+  "observed_output": "before world after\n",
+  "logs": [
+    {
+      "stream": "stdout",
+      "path": "W-49-fi2-helper-stdout.log.gz",
+      "gzip_sha256": "bcfee7d19eda1a5391cbadf7fe93606d1d67ffb9e5759afad19ec75bc2dd919a",
+      "raw_sha256": "03a86cafb4fb759b1917e040bb0a49265f1ba43569a7cab1d60b2d520bf99758"
+    },
+    {
+      "stream": "stderr",
+      "path": "W-49-fi2-helper-stderr.log.gz",
+      "gzip_sha256": "05d44c9f0c20de9a9ce756aaf3a3dbced2d0e7651504df9c077f804b225a6e00",
+      "raw_sha256": "f8bd1b4764d8a99a1dd212709ca431e6cd544a958ddc73cf405e0e41d53342c4"
+    }
+  ],
+  "limitations": [
+    "One reference-only case; this does not establish product compatibility or full historical coverage.",
+    "The Docker image provides the compiler; the image is pinned but individual toolchain versions were not separately locked in this run.",
+    "Snapshot contents and process output are bounded; an interrupted or failed cleanup is reported as an error.",
+    "The result does not establish safety against other processes running as the same host user."
+  ],
+  "reproduction": "Acquire the official archive at the stated URL and verify its SHA-256, then run python3 tools/history_fi2.py --platform linux/arm64 --timeout 300 PATH_TO_ARCHIVE tests/semantics/w49-fi2-echo.phtml with the pinned image already available."
+}

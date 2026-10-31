@@ -230,7 +230,7 @@
       "category": "例外與安全",
       "title": "資料傳遞與擁有權：例外與安全",
       "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
-      "procedure": "呼叫者同時改動原始 slice，預設隔離副本不受影響；resource 不能再操作。",
+      "procedure": "完成複製後，呼叫者在其他 goroutine 改動原始 slice，隔離副本仍不變且 race 檢查通過；resource 不能再操作。",
       "expected": "位元組字串、有序鍵、數字範圍與複製行為有測試，無失效活物件外流。",
       "evidence": [
         "測試命令與commit",
@@ -3394,6 +3394,40 @@
       "preconditions": "固定來源、完整 PHP 版本與平台語意、build profile、安全模式及隔離資料。歷史來源、應用與競品必須具有真實雜湊；缺失時為受阻而非通過。",
       "procedure": "沒有實作與基準證據時不得新增已通過、最快倍數、可安裝 API 或假 CI 成功徽章。",
       "expected": "README 使用英文與 The safest PHP in the world slogan；完整目標與現況分開，repo 為 HazelnutParadise/phego，授權與操作邊界明確。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-201",
+      "requirement": "REQ-101",
+      "category": "正常與相容",
+      "title": "清楚可定位的開發者診斷：正常與相容",
+      "preconditions": "固定 PHP 版本、平台與 build profile；使用受控來源與無敏感資料的 fixture。",
+      "procedure": "以固定語法錯誤驗證來源範圍、原因及可靠建議；比較無色終端與機器結果，並核對診斷開關前後 PHP 可見行為。",
+      "expected": "來源可用時提供正確範圍，終端與機器結果一致；無法判定時明示未知，保護敏感內容，且不改變 PHP 相容行為。",
+      "evidence": [
+        "測試命令與commit",
+        "輸入／來源／環境識別",
+        "實際輸出、錯誤及原始事件",
+        "資料／資源／安全不變條件",
+        "對應官方基準及差異處理"
+      ],
+      "status": "not_run"
+    },
+    {
+      "id": "T-202",
+      "requirement": "REQ-101",
+      "category": "例外與安全",
+      "title": "清楚可定位的開發者診斷：例外與安全",
+      "preconditions": "固定 PHP 版本、平台與 build profile；使用受控來源與無敏感資料的 fixture。",
+      "procedure": "檢查無來源、非法 UTF-8、多行與超長內容、敏感資訊遮蔽及不確定修法，並核對錯誤情境的 PHP 可見行為。",
+      "expected": "來源可用時提供正確範圍，終端與機器結果一致；無法判定時明示未知，保護敏感內容，且不改變 PHP 相容行為。",
       "evidence": [
         "測試命令與commit",
         "輸入／來源／環境識別",

@@ -1,0 +1,1799 @@
+{
+  "php_version": "8.5.12",
+  "platform": "linux/386",
+  "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+  "cases": [
+    {
+      "source": "<?php [&$a];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$a];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$a}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a+1}];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a+1}}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[1+2]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[1+2]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[foo(bar())]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[foo(bar())]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[\"{$b}\"]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[\"{$b}\"]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[1]++];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[1]++}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++[1]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++[1]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a::C];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a::C}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a::C[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::$b];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::$b}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::${$b}];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::${$b}}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{foo()}];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a::{foo()}}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a::{foo()}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{foo()}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a?->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a?->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)(1)];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)(1)}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[match($x){default=>0}]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[match($x){default=>0}]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[fn()=>1]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[fn()=>1]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b=2]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b=2]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b++]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b++]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b =& $c]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b =& $c]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b ? 1:2]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b ? 1:2]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b ?? 1]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b ?? 1]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[throw new E]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[throw new E]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[print 1]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[print 1]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[yield 1]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[yield 1]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[include \"x\"]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[include \"x\"]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a[$b->p]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[$b->p]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->{\"x\"}];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->{\"x\"}}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->{foo()}];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->{foo()}}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->{foo()}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->{foo()}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&foo()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&Foo::$a];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&Foo::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&Foo::C[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1][0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(1)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(foo())[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&new A()->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(fn()=>1)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&array(1)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&list($a)[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&\"a\"[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[\"x\"]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a[1]++}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[${\"x\"}]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a++[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++[0]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++?->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++::f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++::$p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++[0]->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a++()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a++()()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--[0]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--?->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--::f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--::$p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--[0]->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a--()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a--()()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++[0]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++?->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++::f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++::$p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++[0]->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a[0]++()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a[0]++()()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++[0]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++?->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++::f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++::$p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++[0]->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->p++()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a->p++()()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++[0]}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++?->p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++::f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++::$p}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++[0]->f()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a?->p++()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php \"{$a?->p++()()}\";",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a::C[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::C()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::C()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::class()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::class()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::{$x}()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::{$x}()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&($a)()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&(new A)()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1][0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1][0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&[1]()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&list($a)[0]];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)?->p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)::f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)::$p];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)[0]->f()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&list($a)()()];",
+      "accepted": false
+    },
+    {
+      "source": "<?php [&$a->f(...)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a->f(...)()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a->f(...)()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a::f(...)()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a::f(...)()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$a(...)()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$a(...)()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${fn()=>1}()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${fn()=>1}()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${yield 1}()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${yield 1}()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${throw new E}()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${throw new E}()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&$$$a()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{$$$a()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}[0]}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}?->p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}::f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}::$p}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}[0]->f()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&${$a = $b}()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php \"{${$a = $b}()()}\";",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&static::$a()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&self::$a()()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a[0]];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a?->p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a::f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a::$p];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a[0]->f()];",
+      "accepted": true
+    },
+    {
+      "source": "<?php [&parent::$a()()];",
+      "accepted": true
+    }
+  ]
+}
