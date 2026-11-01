@@ -241,7 +241,7 @@ func TestNetworkIPv6ZoneNamesRemainCaseSensitive(t *testing.T) {
 }
 
 func TestPublicRefusesDeprecatedIPv6LocalRanges(t *testing.T) {
-	for _, address := range []string{"fec0::1", "feff:ffff::1", "::2", "::127.0.0.1"} {
+	for _, address := range []string{"fec0::1", "feff:ffff::1", "::2", "::127.0.0.1", "fec0::1%En0", "2001:db8::1%En0"} {
 		if Public(netip.MustParseAddr(address)) {
 			t.Errorf("non-public address %s classified as public", address)
 		}

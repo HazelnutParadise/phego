@@ -92,7 +92,7 @@ func (p *Policy) DialContext(ctx context.Context, scheme, network, host string, 
 // private, link-local, multicast, unspecified, shared (100.64.0.0/10),
 // benchmarking, documentation and reserved ranges are not public.
 func Public(a netip.Addr) bool {
-	a = a.Unmap()
+	a = a.WithZone("").Unmap()
 	if !a.IsValid() || a.IsLoopback() || a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsLinkLocalMulticast() ||
 		a.IsInterfaceLocalMulticast() || a.IsMulticast() || a.IsUnspecified() {
 		return false
