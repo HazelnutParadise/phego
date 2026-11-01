@@ -54,6 +54,7 @@ type FileGrant struct {
 	// Where a nested mount shadows this source, directories must support
 	// fs.ReadDirFile and enumerate exact names consistent with Open. Unlisted
 	// aliases and paths that cannot be verified within bounded reads are denied.
+	// Symlinks under a source with nested mounts require fs.ReadLinkFS.
 	FS fs.FS
 	// Write permits creating and modifying files. It requires Root.
 	Write bool

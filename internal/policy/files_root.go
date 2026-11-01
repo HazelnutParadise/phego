@@ -9,12 +9,13 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 // File authorization follows the resolved directory handles, not the spelling
 // of the path. Host code owns the mount layout; PHP cannot rename directories
 // or create links through this API.
-func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
+func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
 	kind := FileRead
 	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
 		kind = FileWrite
@@ -40,22 +41,25 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 		}
 	}()
 	var names []string
-	pending := strings.Split(filepath.ToSlash(rel), "/")
 	links := 0
 	var leaf string
 	var before fs.FileInfo
 	for len(pending) > 0 {
-		component := pending[0]
+		part := pending[0]
+		component := part.name
 		pending = pending[1:]
 		switch component {
 		case "", ".":
 			continue
 		case "..":
+			if !linkParentAllowed(part.boundary, mountPath(grant.Path, names)) {
+				return nil, denied("outside-root")
+			}
 			if len(stack) == 1 {
 				if grant.Path == "/" {
 					continue
 				}
-				return p.openFile(mountPath(path.Dir(grant.Path), pending), flag, perm, redirects+1)
+				return p.redirectFile(path.Dir(grant.Path), pending, flag, perm, redirects)
 			}
 			if stack[len(stack)-1].root != nil {
 				stack[len(stack)-1].root.Close()
@@ -67,7 +71,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 		currentName := path.Join(grant.Path, path.Join(append(append([]string(nil), names...), component)...))
 		for _, mounted := range p.files {
 			if mounted.Path != grant.Path && mounted.Path == currentName {
-				return p.openFile(mountPath(mounted.Path, pending), flag, perm, redirects+1)
+				return p.redirectFile(mounted.Path, pending, flag, perm, redirects)
 			}
 		}
 		parent := stack[len(stack)-1].root
@@ -109,11 +113,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 			if filepath.IsAbs(target) || filepath.VolumeName(target) != "" {
 				return nil, denied("outside-root")
 			}
-			targetParts := strings.Split(filepath.ToSlash(target), "/")
-			resolvedTarget := path.Join(append(append([]string(nil), names...), targetParts...)...)
-			if resolvedTarget == ".." || strings.HasPrefix(resolvedTarget, "../") {
-				return nil, denied("outside-root")
-			}
+			targetParts := fileParts(target, grant.Path)
 			pending = append(targetParts, pending...)
 			continue
 		}
@@ -123,7 +123,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 				return nil, e
 			}
 			if mounted != "" {
-				return p.openFile(mountPath(mounted, pending), flag, perm, redirects+1)
+				return p.redirectFile(mounted, pending, flag, perm, redirects)
 			}
 		}
 		if len(pending) == 0 {
@@ -300,7 +300,7 @@ func (p *Policy) fileProtections(root *os.Root, grant FileGrant) (out []fileProt
 		prefix := strings.TrimSuffix(grant.Path, "/") + "/"
 		if strings.HasPrefix(g.Path, prefix) {
 			r, e := root.OpenRoot(strings.TrimPrefix(g.Path, prefix))
-			if e != nil && !errors.Is(e, fs.ErrNotExist) {
+			if e != nil && !unavailableShadow(e) {
 				for _, r := range roots {
 					r.Close()
 				}
@@ -497,7 +497,7 @@ func (p *Policy) directoryMount(root *os.Root, grant FileGrant, info fs.FileInfo
 			continue
 		}
 		shadow, err := root.Stat(strings.TrimPrefix(mounted.Path, prefix))
-		if errors.Is(err, fs.ErrNotExist) {
+		if unavailableShadow(err) {
 			continue
 		}
 		if err != nil {
@@ -519,7 +519,7 @@ func (p *Policy) hiddenReadAlias(root *os.Root, grant FileGrant, target fs.FileI
 			continue
 		}
 		shadow, err := root.OpenRoot(strings.TrimPrefix(mounted.Path, prefix))
-		if errors.Is(err, fs.ErrNotExist) {
+		if unavailableShadow(err) {
 			continue
 		}
 		if err != nil {
@@ -551,4 +551,10 @@ func (p *Policy) hiddenReadAlias(root *os.Root, grant FileGrant, target fs.FileI
 		}
 	}
 	return nil
+}
+
+// A shadow with no resolvable in-root directory cannot match an unrelated
+// directory identity. Permission and I/O failures still fail closed.
+func unavailableShadow(err error) bool {
+	return errors.Is(err, fs.ErrNotExist) || errors.Is(err, syscall.ENOTDIR) || rootEscapeError(err)
 }

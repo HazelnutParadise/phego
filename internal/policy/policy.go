@@ -110,6 +110,7 @@ type FileGrant struct {
 	// Directory-backed mounts must use Dir; os.DirFS is not confined.
 	// Nested mounts require bounded ReadDirFile enumeration with exact names
 	// consistent with Open; unverifiable paths and unlisted aliases are denied.
+	// Symlinks under a source with nested mounts require fs.ReadLinkFS.
 	FS    fs.FS
 	Write bool
 }

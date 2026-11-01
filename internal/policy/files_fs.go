@@ -12,29 +12,33 @@ import (
 
 // openFSFile interprets the virtual components before entering a trusted FS.
 // Crossing its mount root preserves the unprocessed suffix for the next backend.
-func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
+func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
 	kind := FileRead
 	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
 		kind = FileWrite
 	}
 	denied := func(rule string) error { return &PolicyError{Kind: kind, Op: "open", Target: name, Rule: rule} }
 	var names []string
-	pending := strings.Split(rel, "/")
 	links := 0
 	entryBudget := 100000
 	syntheticDepth := 0
+	_, symlinkAware := grant.FS.(fs.ReadLinkFS)
 	for len(pending) > 0 {
-		component := pending[0]
+		part := pending[0]
+		component := part.name
 		pending = pending[1:]
 		switch component {
 		case "", ".":
 			continue
 		case "..":
+			if !linkParentAllowed(part.boundary, mountPath(grant.Path, names)) {
+				return nil, denied("outside-root")
+			}
 			if len(names) == 0 {
 				if grant.Path == "/" {
 					continue
 				}
-				return p.openFile(mountPath(path.Dir(grant.Path), pending), flag, perm, redirects+1)
+				return p.redirectFile(path.Dir(grant.Path), pending, flag, perm, redirects)
 			}
 			names = names[:len(names)-1]
 			if len(names) < syntheticDepth {
@@ -47,7 +51,7 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 		current := path.Join(grant.Path, lookup)
 		for _, mounted := range p.files {
 			if mounted.Path != grant.Path && mounted.Path == current {
-				return p.openFile(mountPath(current, pending), flag, perm, redirects+1)
+				return p.redirectFile(current, pending, flag, perm, redirects)
 			}
 		}
 		// An FS may accept aliases such as a different case spelling. When
@@ -64,7 +68,7 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 			}
 			continue
 		}
-		if p.mountAncestor(parent) {
+		if p.mountAncestor(parent) || !symlinkAware && p.mountAncestor(grant.Path) {
 			directory := strings.Join(names, "/")
 			if directory == "" {
 				directory = "."
@@ -99,11 +103,7 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 				if path.IsAbs(target) || filepath.VolumeName(target) != "" {
 					return nil, denied("outside-root")
 				}
-				targetParts := strings.Split(target, "/")
-				resolved := path.Join(append(append([]string(nil), names...), targetParts...)...)
-				if resolved == ".." || strings.HasPrefix(resolved, "../") {
-					return nil, denied("outside-root")
-				}
+				targetParts := fileParts(target, grant.Path)
 				pending = append(targetParts, pending...)
 				continue
 			}
@@ -172,6 +172,11 @@ func exactFSEntry(source fs.FS, directory, name string, budget *int) error {
 		}
 		for _, entry := range entries {
 			if entry.Name() == name {
+				if entry.Type()&os.ModeSymlink != 0 {
+					if _, ok := source.(fs.ReadLinkFS); !ok {
+						return &fs.PathError{Op: "open", Path: path.Join(directory, name), Err: fs.ErrPermission}
+					}
+				}
 				return nil
 			}
 		}
