@@ -53,7 +53,9 @@ def main():
     platform, image = reference.IMAGES[64]
     # Acquisition output is separate from the reference's diagnostic stream.
     subprocess.run(["docker", "pull", "--platform", platform, image], capture_output=True, timeout=120, check=True)
-    command = ["docker", "run", "--pull", "never", "--rm", "-i", "--network", "none", "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--pids-limit", "32", "--memory", "128m", "--cpus", "1", "--platform", platform, image, "php", "-n"]
+    # REQ-017; T-033/T-034: stdin has no fixture directory. Mount the same
+    # read-only sources as reference.py so sorting.php remains resolvable.
+    command = ["docker", "run", "--pull", "never", "--rm", "-i", "--network", "none", "--read-only", "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--pids-limit", "32", "--memory", "128m", "--cpus", "1", "--mount", f"type=bind,src={source_dir},dst=/fixtures,readonly", "--workdir", "/fixtures", "--platform", platform, image, "php", "-n"]
     php = subprocess.run(command, input=source.encode(), capture_output=True, timeout=120)
     report = {"corpus": args.corpus, "cases": count, "platform": platform, "image": image, "command": command, "php_exit_code": php.returncode, "php_stderr": php.stderr.decode(errors="replace"), "input_sha256": hashlib.sha256(packed).hexdigest(), "fixture_sha256": hashlib.sha256((source_dir / "matrix.php").read_bytes()).hexdigest(), "output_sha256": hashlib.sha256(php.stdout).hexdigest()}
     output = args.output_dir / "reference.json"

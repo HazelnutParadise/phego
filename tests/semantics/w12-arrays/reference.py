@@ -44,6 +44,7 @@ def main():
         "image_preparation": preparation, "command": command, "exit_code": result.returncode, "stderr": result.stderr.decode(),
         "image": image, "platform": platform, "php": data["php"], "integer_width": args.width,
         "cases": len(data["cases"]), "fixture_sha256": hashlib.sha256((source / "matrix.php").read_bytes()).hexdigest(),
+        "fixture_sources_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(source.glob("*.php"))},
         "output": name, "output_sha256": hashlib.sha256(result.stdout).hexdigest(),
         "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
     }

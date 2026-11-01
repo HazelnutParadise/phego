@@ -24,6 +24,7 @@ function val($x, &$v) {
     }
     return $x;
 }
+require __DIR__.'/sorting.php';
 $cases = [];
 $keys = [null, true, false, 0, -7, '', '0', '-0', '00', '01', '+1', ' 1', '1 ', '1.0', '1e2', "1\0", "\xff", '2147483647', '2147483648', '-2147483648', '-2147483649', '9223372036854775807', '9223372036854775808'];
 foreach (['0', '-0', '1.5', '-1.5', '2147483648', '4294967295', '9223372036854775808', '1e20', 'inf', '-inf', 'nan'] as $f) $keys[] = ['float', $f];
@@ -129,6 +130,7 @@ foreach (['append', 'negative', 'string', 'nonfull'] as $trigger) {
     $ops[]=$trigger==='append' ? ['append','a',5] : ['set','a',match($trigger) {'negative'=>-1,'string'=>'x',default=>8},5];
     $cases['sparse-capacity-sort-cow-'.$trigger]=[...$ops,['sort','a','usort',false],['copy','b','a'],['pointer','b','next'],['pointer','b','prev'],['set','b',15,16],['pointer','b','prev'],['set','b',4,20],['pointer','b','key'],['emit','b']];
 }
+$cases += w12_sort_cases();
 function execute($ops, &$v, &$out, $iteration = -1) {
     foreach ($ops as $op) {
         $diags = [];
@@ -147,6 +149,8 @@ function execute($ops, &$v, &$out, $iteration = -1) {
                 case 'emit': $out[] = ['value', enc($v[$op[1]])]; break;
                 case 'isset_var': $out[] = ['value',enc(isset($v[$op[1]]))]; break;
                 case 'at': if ($iteration === $op[1]) execute($op[2],$v,$out,$iteration); break;
+                case 'sort_trace': w12_sort_trace($v,$op,$out); break;
+                case 'sort_recursive': w12_sort_recursive($v,$op,$out); break;
                 case 'sort':
                     $once = false;
                     ($op[2])($v[$op[1]],function($a,$b) use (&$v,$op,&$once) {
@@ -177,16 +181,19 @@ function execute($ops, &$v, &$out, $iteration = -1) {
         foreach ($diags as $d) $out[] = ['diagnostic',...$d];
     }
 }
-$out = ['php'=>PHP_VERSION,'int_size'=>PHP_INT_SIZE,'cases'=>[]];
+// REQ-017; T-033/T-034. Stream complete observations one case at a time,
+// rather than retaining every callback trace and encoded input simultaneously.
+function input_enc($x) { return is_array($x) ? array_map('input_enc',$x) : enc($x); }
+$out = ['php'=>PHP_VERSION,'int_size'=>PHP_INT_SIZE];
+echo substr(json_encode($out, JSON_THROW_ON_ERROR),0,-1), ',"cases":[';
+$first=true;
 foreach ($cases as $name=>$ops) {
     $v = []; $events = [];
     execute($ops,$v,$events);
-    $out['cases'][] = ['name'=>$name,'events'=>$events];
+    if (!$first) echo ',';
+    $first=false;
+    echo json_encode(['name'=>$name,'events'=>$events,'operations'=>input_enc($ops)],JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES);
 }
-// Operations travel separately as JSON with strings encoded by enc().
-function input_enc($x) { return is_array($x) ? array_map('input_enc',$x) : enc($x); }
-foreach ($out['cases'] as $i=>&$c) $c['operations'] = input_enc(array_values($cases)[$i]);
-unset($c);
 // Direct-CV foreach binding releases the previous item while it is still
 // observable to its destructor. This original fixture does not depend on a
 // variable-variable or property assignment path.
@@ -205,6 +212,7 @@ if (($argv[1]??'')==='--destructor-probe' || ($argv[1]??'')==='--unsafe-reentry'
     $w12_events=[];$w12_item=null;$w12_array=[new W12ForeachDestructor,42];
     foreach($w12_array as &$w12_item) { if($w12_item instanceof W12ForeachDestructor) unset($w12_array[0]); }
     $w12_events[]=['value',enc($w12_array)];$w12_events[]=['value',enc($w12_item)];
-    $out['cases'][]=['name'=>'foreach-destructor-item','operations'=>input_enc([['foreach_destructor']]),'events'=>$w12_events];
+    if (!$first) echo ',';
+    echo json_encode(['name'=>'foreach-destructor-item','operations'=>input_enc([['foreach_destructor']]),'events'=>$w12_events],JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES);
 }
-echo json_encode($out, JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES), "\n";
+echo "]}\n";

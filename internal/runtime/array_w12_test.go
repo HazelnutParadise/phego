@@ -189,6 +189,10 @@ func (m *w12Machine) run(ops []any, iteration int) error {
 					m.emit(v)
 				}
 			}
+		case "sort_trace":
+			err = m.sortTrace(o)
+		case "sort_recursive":
+			err = m.sortRecursive(o)
 		case "sort":
 			once := false
 			err = m.h.sortArray(m.slot(o[1]), o[2] == "uasort", func(a, b value) (int, error) {
@@ -276,7 +280,7 @@ func TestW12PHP8512Arrays(t *testing.T) {
 			if err := json.Unmarshal(data, &ref); err != nil {
 				t.Fatal(err)
 			}
-			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 102 {
+			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 646 {
 				t.Fatal("invalid reference profile or missing cases")
 			}
 			for _, c := range ref.Cases {

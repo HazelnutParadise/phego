@@ -1,5 +1,6 @@
 """REQ-017; T-034: Docker progress must not be mistaken for PHP diagnostics."""
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -28,6 +29,9 @@ class ReferenceRunnerTest(unittest.TestCase):
             self.assertEqual(run.call_args_list[1].args[0][1], "pull")
             self.assertEqual(run.call_args_list[2].args[0][1:4], ["run", "--pull", "never"])
             self.assertEqual(json.loads((Path(directory) / "w12-run-64.json").read_text())["stderr"], "")
+            sources = json.loads((Path(directory) / "w12-run-64.json").read_text())["fixture_sources_sha256"]
+            self.assertEqual(set(sources), {"matrix.php", "sorting.php"})
+            self.assertEqual(sources["sorting.php"], hashlib.sha256(Path(__file__).with_name("sorting.php").read_bytes()).hexdigest())
 
     def test_php_stderr_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
