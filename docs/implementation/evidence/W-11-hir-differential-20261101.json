@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "scope": "php8512_hir_lowering_differential_check",
+  "requirements": [
+    "REQ-011",
+    "REQ-012",
+    "REQ-015",
+    "REQ-024"
+  ],
+  "scenarios": [
+    "T-023",
+    "T-024",
+    "T-029",
+    "T-047",
+    "T-048"
+  ],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-11-01",
+  "php_version": "8.5.12",
+  "reference_images": {
+    "arm64": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+    "amd64": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f",
+    "note": "The Reflection and effects references produced by the amd64 image under emulation were byte-identical to the arm64 output; the semantics-hir workflow regenerates them natively on x86-64."
+  },
+  "corpus": {
+    "source": "php-8.5.12.tar.xz sha256 08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209, extracted by tools/frontend_corpus.py",
+    "files": 5449,
+    "corpus_sha256": "8b8fe3e0201fa62f92d62f4655d896f27dd29f2ee783c9556ba9ff2e6b4d7fdb",
+    "compile_reference_sha256": "29eac7274603fe82ce0d15cfdce8206b114bbc224f1d1d0dc10c3173a9cd7166",
+    "location": "outside the repository (PHP-licensed test material)"
+  },
+  "reference_scripts_sha256": {
+    "tests/semantics/w11-hir/compile_dump.php": "1a535e048e116d49e525d23360a2148d2db78109cd62da66ab1fe076009a2237",
+    "tests/semantics/w11-hir/reflect.php": "f7286a5e46f27d59b04f3a1d6b7876d7d19f7cf01c01d45becce93b05efd2713",
+    "tests/semantics/w11-hir/effects.php": "997fbdfae6468963bed5e27230eceb996de3288127bd785fbcd10b3afe66ad63"
+  },
+  "reference_commands": [
+    "python3 tools/frontend_corpus.py php-8.5.12.tar.xz OUT",
+    "docker run --rm --network none -v OUT/corpus:/corpus:ro -v tests/semantics/w11-hir:/w:ro IMAGE php -n /w/compile_dump.php /corpus > OUT/compile-reference.jsonl",
+    "docker run --rm --network none -v tests/semantics/w11-hir:/w:ro IMAGE php -n /w/reflect.php /w/reflect/NAME.php > tests/semantics/w11-hir/reflect/NAME.json",
+    "docker run --rm --network none -v tests/semantics/w11-hir:/w:ro IMAGE php -n /w/effects.php /w/effects/NAME.php > tests/semantics/w11-hir/effects/NAME.json"
+  ],
+  "test_commands": [
+    "PHEGO_LEXER_CORPUS=OUT PHEGO_IR_GAPS=1 go test -count=1 -v -run TestLowerMatchesCompileReference ./internal/ir",
+    "CGO_ENABLED=0 go test -count=1 ./internal/ir",
+    "go test -run '^$' -fuzz FuzzLower -fuzztime 60s ./internal/ir"
+  ],
+  "test_environment": "go1.26.5 darwin/arm64",
+  "result": {
+    "corpus_files_lowered": 5307,
+    "corpus_files_skipped": "142 files the front end or PHP rejects as syntax errors",
+    "false_rejections": 0,
+    "compile_errors_in_reference": 657,
+    "compile_errors_matched_message_and_line": 337,
+    "compile_errors_mismatched": 0,
+    "files_with_compile_warnings": 48,
+    "files_with_identical_warnings": 40,
+    "left_to_later_work_packages": {
+      "object model (W-13)": 316,
+      "attributes (W-13)": 5,
+      "built-in functions (W-29)": 4,
+      "compile-time function binding (W-29)": 1,
+      "constant folding (W-15)": 2
+    },
+    "reflection_fixtures": "3 of 3 identical (functions, methods, closures, parameters, types, statics, captures, compile-time values)",
+    "effects_fixture_lines_with_observed_effects": 50,
+    "effects_missing_from_hir": 0,
+    "fuzz": "about 11.7 million executions in 60 seconds, no failure"
+  },
+  "limitations": [
+    "Only PHP 8.5.12; the corpus comparison ran with the 64-bit profile.",
+    "Object-model, attribute and built-in function compile checks are not raised yet; their count is pinned by internal/ir/corpus_gaps_test.go.",
+    "Effects are compared for soundness against observed behaviour, not for precision; callback counts at run time need the VM (W-17, W-39)."
+  ]
+}

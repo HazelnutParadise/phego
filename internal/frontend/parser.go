@@ -656,11 +656,17 @@ func (p *parser) switchStatement() *Node {
 		default:
 			p.unexpected()
 		}
-		if !p.accept(':') && !p.acceptSemi() {
-			p.unexpected()
+		separator := ":"
+		if !p.accept(':') {
+			if !p.acceptSemi() {
+				p.unexpected()
+			}
+			separator = ";" // deprecated by PHP 8.5; the compiler warns
 		}
 		body := p.statements(false, func() bool { return p.atAny(TCase, TDefault) || end() })
-		n.Children = append(n.Children, node("case", c.Line, append([]*Node{label}, body...)...))
+		cs := node("case", c.Line, append([]*Node{label}, body...)...)
+		cs.Text = separator
+		n.Children = append(n.Children, cs)
 	}
 	if alt {
 		p.expect(TEndswitch)
@@ -767,7 +773,10 @@ func (p *parser) namespaceStatement() *Node {
 		p.fail(body[len(body)-1].Line, "Unclosed '{' on line %d", open.Line)
 	}
 	p.expect('}')
-	return node("namespace", t.Line, append([]*Node{name}, body...)...)
+	// Text marks the bracketed form, which an empty body cannot show.
+	n := node("namespace", t.Line, append([]*Node{name}, body...)...)
+	n.Text = "{"
+	return n
 }
 
 func (p *parser) useKind() string {

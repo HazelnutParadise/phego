@@ -1,0 +1,409 @@
+{
+    "functions": [
+        {
+            "name": "App\\Models\\typed",
+            "returnType": "?int",
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [
+                {
+                    "name": "a",
+                    "type": "string|int|null",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "b",
+                    "type": "?Lib\\Base",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "c",
+                    "type": "Lib\\Contracts\\Shape&Lib\\Contracts\\Named",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "d",
+                    "type": "iterable",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                },
+                {
+                    "name": "e",
+                    "type": "float",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                },
+                {
+                    "name": "f",
+                    "type": "mixed",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                }
+            ]
+        },
+        {
+            "name": "App\\Models\\nullable",
+            "returnType": "?App\\Models\\Local",
+            "byRef": false,
+            "generator": false,
+            "variadic": true,
+            "statics": [],
+            "params": [
+                {
+                    "name": "a",
+                    "type": "?Foo",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                },
+                {
+                    "name": "rest",
+                    "type": "int",
+                    "byRef": false,
+                    "variadic": true,
+                    "optional": true,
+                    "default": false,
+                    "promoted": false
+                }
+            ]
+        },
+        {
+            "name": "App\\Models\\ref",
+            "returnType": null,
+            "byRef": true,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "s1",
+                "s2"
+            ],
+            "params": [
+                {
+                    "name": "a",
+                    "type": "array",
+                    "byRef": true,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "b",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                },
+                {
+                    "name": "c",
+                    "type": "?callable",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                }
+            ]
+        },
+        {
+            "name": "App\\Models\\gen",
+            "returnType": "Generator",
+            "byRef": false,
+            "generator": true,
+            "variadic": false,
+            "statics": [],
+            "params": []
+        },
+        {
+            "name": "App\\Models\\optional",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [
+                {
+                    "name": "a",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "b",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "c",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                }
+            ]
+        },
+        {
+            "name": "App\\Models\\falsy",
+            "returnType": "void",
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [
+                {
+                    "name": "a",
+                    "type": "int|false",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "b",
+                    "type": "true",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "c",
+                    "type": "?stdClass",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "d",
+                    "type": "Lib\\Base|int|bool|null",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                },
+                {
+                    "name": "e",
+                    "type": "(Lib\\Contracts\\Shape&Lib\\Contracts\\Named)|string",
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Lib\\Base",
+            "methods": []
+        },
+        {
+            "name": "Lib\\Contracts\\Shape",
+            "methods": []
+        },
+        {
+            "name": "Lib\\Contracts\\Named",
+            "methods": []
+        },
+        {
+            "name": "App\\Models\\Local",
+            "methods": []
+        },
+        {
+            "name": "App\\Models\\Item",
+            "methods": [
+                {
+                    "name": "__construct",
+                    "returnType": null,
+                    "byRef": false,
+                    "generator": false,
+                    "variadic": false,
+                    "statics": [],
+                    "params": [
+                        {
+                            "name": "id",
+                            "type": "int",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": false,
+                            "promoted": true
+                        },
+                        {
+                            "name": "name",
+                            "type": "?string",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": true,
+                            "promoted": true
+                        },
+                        {
+                            "name": "plain",
+                            "type": null,
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": true,
+                            "promoted": false
+                        }
+                    ],
+                    "static": false
+                },
+                {
+                    "name": "make",
+                    "returnType": "static",
+                    "byRef": false,
+                    "generator": false,
+                    "variadic": false,
+                    "statics": [],
+                    "params": [
+                        {
+                            "name": "other",
+                            "type": "App\\Models\\Item",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": false,
+                            "promoted": false
+                        },
+                        {
+                            "name": "p",
+                            "type": "Lib\\Base",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": false,
+                            "promoted": false
+                        }
+                    ],
+                    "static": true
+                },
+                {
+                    "name": "pick",
+                    "returnType": "?App\\Models\\Item",
+                    "byRef": true,
+                    "generator": false,
+                    "variadic": false,
+                    "statics": [
+                        "memo"
+                    ],
+                    "params": [
+                        {
+                            "name": "x",
+                            "type": "App\\Models\\Item|Lib\\Contracts\\Shape",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": false,
+                            "default": false,
+                            "promoted": false
+                        },
+                        {
+                            "name": "flag",
+                            "type": "bool",
+                            "byRef": false,
+                            "variadic": false,
+                            "optional": true,
+                            "default": true,
+                            "promoted": false
+                        }
+                    ],
+                    "static": false
+                }
+            ]
+        }
+    ],
+    "closures": [],
+    "values": [
+        [
+            "string",
+            "4170705c4d6f64656c735c4974656d"
+        ],
+        [
+            "string",
+            "4c69625c42617365"
+        ],
+        [
+            "string",
+            "4c69625c436f6e7472616374735c4e616d6564"
+        ],
+        [
+            "string",
+            "4f746865725c5468696e67"
+        ],
+        [
+            "string",
+            "4170705c4d6f64656c735c5375625c58"
+        ],
+        [
+            "string",
+            "4c69625c426173655c44656570"
+        ],
+        [
+            "string",
+            "4170705c4d6f64656c73"
+        ],
+        [
+            "int",
+            "39"
+        ],
+        [
+            "string",
+            "2f772f7265666c6563742f6e616d65732e706870"
+        ],
+        [
+            "string",
+            "2f772f7265666c656374"
+        ],
+        [
+            "string",
+            ""
+        ],
+        [
+            "string",
+            ""
+        ]
+    ]
+}
