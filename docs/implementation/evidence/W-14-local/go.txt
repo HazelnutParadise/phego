@@ -1,0 +1,6 @@
+ok  	github.com/HazelnutParadise/phego	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/compat	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/frontend	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/ir	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/profile	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/runtime	3.650s
