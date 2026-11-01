@@ -33,6 +33,14 @@ NEWS = """PHP                                                                   
 
 
 class TestImpact(unittest.TestCase):
+    def test_news_and_source_paths_have_consistent_impact(self):
+        for section in upstream_diff.NEWS_IMPACT:
+            prefix = {"core": "Zend/", "fpm": "sapi/fpm/", "cli": "sapi/cli/"}.get(
+                section, f"ext/{section}/")
+            with self.subTest(section=section):
+                self.assertEqual(upstream_diff.impact(prefix + "x.c"),
+                                 upstream_diff.impact(section))
+
     def test_longest_prefix_wins(self):
         self.assertEqual(upstream_diff.impact("Zend/zend_language_parser.y"), ["W-09", "W-11"])
         self.assertEqual(upstream_diff.impact("Zend/zend_language_scanner.l"), ["W-09"])
@@ -73,6 +81,81 @@ class TestImpact(unittest.TestCase):
 
 
 class TestParseStubs(unittest.TestCase):
+    def test_doc_comments_keep_token_separation_inside_declarations(self):
+        source = """<?php
+function/** @readonly */f(): void {}
+class C { public const X = 1/** @virtual */+2; }
+"""
+        self.assertEqual(upstream_diff.parse_stubs(source), {
+            'function f': 'function f(): void',
+            'class C': 'class C', 'const C::X': 'public const X = 1 +2',
+        })
+
+    def test_ignored_doc_comments_do_not_consume_tokens(self):
+        source = '<?php\n/** plain */ /** @var ignored */ function f(): void {}\n'
+        with mock.patch.object(upstream_diff, 'MAX_STUB_TOKENS', 9):
+            self.assertEqual(upstream_diff.parse_stubs(source),
+                             {'function f': 'function f(): void'})
+
+    def test_unlisted_doc_comments_inside_declarations_are_ignored(self):
+        source = """<?php
+function /** normal */ f(/** @var ignored */ int $x): void {}
+class C { public const X = /** @cvalue ignored */ 1; }
+"""
+        expected = """<?php
+function f( int $x): void {}
+class C { public const X = 1; }
+"""
+        self.assertEqual(upstream_diff.parse_stubs(source), upstream_diff.parse_stubs(expected))
+        self.assertIn('function f', upstream_diff.parse_stubs(source))
+
+    def test_enum_case_attributes_and_whitelisted_doc_tags_are_retained(self):
+        source = """<?php
+enum E {
+    /** @readonly */
+    #[A(1)]
+    case X;
+}
+"""
+        self.assertEqual(upstream_diff.parse_stubs(source), {
+            'enum E': 'enum E', 'case E::X': '[@readonly] #[A(1)] case X',
+        })
+
+    def test_parameter_attribute_content_changes_without_spacing_artifact(self):
+        source = '<?php\nfunction f(#[A(1)] string $value): void {}\n'
+        expected = 'function f(#[A(1)] string $value): void'
+        self.assertEqual(upstream_diff.parse_stubs(source), {'function f': expected})
+        changed = source.replace('A(1)', 'A(2)')
+        report = upstream_diff.diff_releases({'ext/demo/x.stub.php': source},
+                                            {'ext/demo/x.stub.php': changed}, '8.5.12')
+        self.assertEqual(len(report['stubs']['changed']), 1)
+        self.assertEqual(report['stubs']['changed'][0]['new'], expected.replace('A(1)', 'A(2)'))
+
+    def test_doc_tag_names_are_exact_and_apply_to_class_property_and_constant(self):
+        source = """<?php
+/** @strict-properties */
+class C {
+    /** @readonly */ public string $name;
+    /** @virtual */ public const X = 1;
+    /** @readonly-extra */ public function f(): void {}
+}
+"""
+        self.assertEqual(upstream_diff.parse_stubs(source), {
+            'class C': '[@strict-properties] class C',
+            'property C::$name': '[@readonly] public string $name',
+            'const C::X': '[@virtual] public const X = 1',
+            'method C::f': 'public function f(): void',
+        })
+
+    def test_attribute_comment_brackets_are_preserved(self):
+        text = """<?php
+#[A(/* ] */ value: [1, 2])]
+function f(#[B("]")] string $x): void {}
+"""
+        self.assertEqual(upstream_diff.parse_stubs(text), {
+            "function f": '#[A(/* ] */ value: [1, 2])] function f(#[B("]")] string $x): void',
+        })
+
     def test_functions_and_semicolon_namespace(self):
         text = """namespace Foo\\Bar;
 
@@ -142,39 +225,41 @@ const IN_NS = 2;
             },
         )
 
-    def test_comments_docblocks_and_attributes_do_not_count(self):
-        with_metadata = """namespace Foo;
+    def test_comments_and_unlisted_doc_tags_do_not_count(self):
+        with_metadata = """<?php
+namespace Foo;
 
 /** Function doc. */
-#[Deprecated]
-function f(int $a): void;
+/** @cvalue X */
+function f(int $a): void {}
 
 // line comment
-#[Legacy]
+/** @var int */
 class K
 {
     /* block comment */
-    #[Marker]
+    /** @refcount 1 */
     const X = 1;
 
-    #[MethodAttr]
-    public function m(): void;
+    /** @compile-time-eval */
+    public function m(): void {}
 }
 
-#[Inline] function g(): void;
+/** @alias ignored */ function g(): void {}
 """
-        without_metadata = """namespace Foo;
+        without_metadata = """<?php
+namespace Foo;
 
-function f(int $a): void;
+function f(int $a): void {}
 
 class K
 {
     const X = 1;
 
-    public function m(): void;
+    public function m(): void {}
 }
 
-function g(): void;
+function g(): void {}
 """
         expected = {
             "function Foo\\f": "function f(int $a): void",
@@ -298,6 +383,68 @@ class TestParseStubsReview(unittest.TestCase):
 
 
 class TestGrammarSymbols(unittest.TestCase):
+    def test_existing_rule_bodies_and_full_source_changes(self):
+        parser = """%{
+int helper = 1;
+%}
+%token T_STRING T_NAME
+%left T_STRING
+%start program
+%% /* Rules */
+program:
+    name { /* action */ }
+;
+name: T_STRING ;
+name: T_NAME ;
+%%
+int main(void) { return helper; }
+"""
+        scanner = "%{\n#include \"parser.h\"\n%}\n%%\n[a-z]+ { return T_STRING; }\n%%\nint yywrap(void) { return 1; }\n"
+        old = {"Zend/zend_language_parser.y": parser,
+               "Zend/zend_language_scanner.l": scanner}
+        cases = (
+            (parser, [], False),
+            (parser.replace("name {", "name    {"), [], True),
+            (parser.replace("/* action */", "/* changed */"), ["program"], True),
+            (parser.replace("name: T_STRING ;\nname: T_NAME ;", "name: T_NAME ;\nname: T_STRING ;"), ["name"], True),
+            (parser.replace("%left", "%right"), [], True),
+            (parser.replace("%left", "%precedence"), [], True),
+            (parser.replace("helper = 1", "helper = 2"), [], True),
+            (parser.replace("return helper", "return 0"), [], True),
+        )
+        for changed, rules, parser_changed in cases:
+            with self.subTest(parser=changed):
+                report = upstream_diff.diff_releases(old, dict(old, **{
+                    "Zend/zend_language_parser.y": changed}), "8.5.12")
+                self.assertEqual(report["grammar"]["rules_changed"], rules)
+                self.assertIs(report["grammar"]["parser_changed"], parser_changed)
+                self.assertIs(report["grammar"]["scanner_changed"], False)
+                self.assertEqual(report["affected_work_packages"],
+                                 ["W-09", "W-11"] if parser_changed else [])
+        report = upstream_diff.diff_releases(old, dict(old, **{
+            "Zend/zend_language_scanner.l": scanner.replace("[a-z]", "[a-zA-Z]")}), "8.5.12")
+        self.assertEqual(report["grammar"]["rules_changed"], [])
+        self.assertIs(report["grammar"]["parser_changed"], False)
+        self.assertIs(report["grammar"]["scanner_changed"], True)
+        self.assertEqual(report["affected_work_packages"], ["W-09"])
+
+    def test_rules_separator_allows_trailing_comment(self):
+        parser_y = """%{
+int yylex(void);
+void yyerror(const char *message);
+%}
+%token T_STRING
+%start program
+%% /* Rules */
+program:
+    T_STRING { /* preserve rule actions */ }
+;
+%% /* C epilogue */
+void yyerror(const char *message) {}
+"""
+        self.assertEqual(upstream_diff.grammar_symbols(parser_y),
+                         {"tokens": ["T_STRING"], "rules": ["program"]})
+
     def test_tokens_and_rules(self):
         parser_y = """%token <ident> T_STRING "identifier"
 %token T_ECHO T_IF
@@ -617,7 +764,7 @@ function zeta(): void;
             {"schema_version", "new_version", "stubs", "grammar", "tests", "security",
              "affected_work_packages"},
         )
-        self.assertEqual(report["schema_version"], 1)
+        self.assertEqual(report["schema_version"], 2)
         self.assertEqual(report["new_version"], self.NEW_VERSION)
         self.assertEqual(
             report["stubs"],
@@ -680,6 +827,9 @@ function zeta(): void;
                 "tokens_removed": ["T_OLD", "T_ZOLD"],
                 "rules_added": ["rule_added", "rule_zadded"],
                 "rules_removed": ["rule_removed", "rule_zremoved"],
+                "rules_changed": [],
+                "parser_changed": True,
+                "scanner_changed": True,
             },
         )
 
@@ -823,7 +973,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(status, 0)
             self.assertEqual(stderr.getvalue(), "")
             report = json.loads(stdout.getvalue())
-            self.assertEqual(report["schema_version"], 1)
+            self.assertEqual(report["schema_version"], 2)
             self.assertEqual(report["new_version"], self.NEW_VERSION)
             self.assertEqual(
                 [entry["symbol"] for entry in report["stubs"]["changed"]],
