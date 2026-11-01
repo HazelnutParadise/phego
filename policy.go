@@ -122,7 +122,7 @@ const (
 	ResourceExecutions   Resource = "executions"
 )
 
-// Rule codes carried by PolicyError.
+// Common rule codes carried by PolicyError.
 const (
 	RuleNotGranted     = "not-granted"     // the capability is not granted
 	RuleOutsideRoot    = "outside-root"    // the path is outside every mounted tree

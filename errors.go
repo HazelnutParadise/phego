@@ -96,8 +96,8 @@ func (e *ReentrancyError) Error() string {
 	return "phego: host function " + e.Function + " does not allow re-entrant calls"
 }
 
-// PolicyError reports an operation the engine's Policy refused. Rule is one
-// of the Rule* codes or the name of a matched rule in ModeEnforce.
+// PolicyError reports an operation the engine's Policy refused. Rule identifies
+// the capability or safety refusal, or a heuristic rule matched in ModeEnforce.
 type PolicyError struct {
 	Capability Capability
 	Op         string
