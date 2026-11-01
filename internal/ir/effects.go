@@ -72,8 +72,9 @@ var opEffects = map[Op]Effect{
 	// Property access may run __get, __set, hooks or lazy initializers.
 	OpProp: MayWarn | MayThrow | MayCallUser, OpNullsafe: MayWarn | MayThrow | MayCallUser,
 	// Class lookups may run an autoloader.
-	OpStaticProp: MayWarn | MayThrow | MayCallUser, OpClassConst: MayThrow | MayCallUser,
-	OpClassName: MayThrow, OpConst: MayThrow, OpMagic: 0,
+	OpStaticProp: MayWarn | MayThrow | MayCallUser, OpClassConst: MayWarn | MayThrow | MayCallUser,
+	// A constant may be deprecated, which warns.
+	OpClassName: MayThrow, OpConst: MayWarn | MayThrow, OpMagic: 0,
 	// Overwriting a value may run its destructor.
 	OpAssign:      MayWrite | MayThrow | MayCallUser,
 	OpAssignRef:   MayWrite | MayAlias | MayThrow | MayCallUser | MayWarn,
@@ -118,7 +119,8 @@ var opEffects = map[Op]Effect{
 	OpGoto: 0, OpLabel: 0, OpDeclare: 0, OpBlock: 0,
 	OpFuncDecl: MayThrow,
 	// Declaring a class at run time may autoload its parents.
-	OpClass:    MayThrow | MayCallUser,
+	// Linking may also warn, for example about an incompatible return type.
+	OpClass:    MayWarn | MayThrow | MayCallUser,
 	OpConstDef: MayWarn | MayThrow,
 	OpHalt:     0,
 }
@@ -127,7 +129,17 @@ var opEffects = map[Op]Effect{
 // impossible.
 func ownEffects(n *Node) Effect {
 	e := opEffects[n.Op]
+	if n.Flags&FlagRef != 0 {
+		e |= MayAlias | MayWrite // the node is bound by reference
+	}
 	switch n.Op {
+	case OpReturn:
+		if n.Flags&FlagRef != 0 {
+			e |= MayWarn
+		}
+		if n.Flags&FlagCoerce != 0 {
+			e |= MayWarn | MayThrow | MayCallUser
+		}
 	case OpVar, OpSuperGlobal:
 		if n.Flags&(FlagWrite|FlagQuiet|FlagRef|FlagUnset) != 0 {
 			e &^= MayWarn
@@ -146,10 +158,14 @@ func ownEffects(n *Node) Effect {
 	case OpBinary:
 		e = binaryEffects(n)
 	case OpUnary:
-		if n.Text == "!" {
+		v := lit(n.Kids[0])
+		switch {
+		case n.Text == "!":
 			e = 0
-		} else if lit(n.Kids[0]) != nil && numeric(lit(n.Kids[0])) {
+		case v != nil && v.Kind == LitInt, v != nil && v.Kind == LitFloat && n.Text != "~":
 			e = 0
+		case v != nil && v.Kind == LitFloat:
+			e = MayWarn // ~ on a fractional float deprecates the implicit conversion
 		}
 	case OpCast:
 		e = castEffects(n)
@@ -214,7 +230,8 @@ func numeric(l *Literal) bool { return l.Kind == LitInt || l.Kind == LitFloat }
 
 func isArrayKeyLiteral(n *Node) bool {
 	l := lit(n)
-	return l != nil && (l.Kind == LitInt || l.Kind == LitString || l.Kind == LitBool || l.Kind == LitNull)
+	// A null key is deprecated in PHP 8.5, so it is not a quiet key.
+	return l != nil && (l.Kind == LitInt || l.Kind == LitString || l.Kind == LitBool)
 }
 
 // binaryEffects narrows operator effects for literal operands. Integer and
@@ -248,6 +265,9 @@ func binaryEffects(n *Node) Effect {
 	case "/", "%":
 		if (b.Kind == LitInt && b.Int != 0) && n.Text == "/" {
 			return 0
+		}
+		if n.Text == "%" && (a.Kind == LitFloat || b.Kind == LitFloat) {
+			return MayThrow | MayWarn // % converts floats to int, deprecating fractions
 		}
 		return MayThrow
 	case "<<", ">>":

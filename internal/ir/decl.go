@@ -23,6 +23,9 @@ type typeEntry struct {
 type typeSet struct {
 	mask    map[string]bool
 	entries []typeEntry
+	// unionNull is set when null is a union member, as in iterable|null,
+	// which Reflection prints expanded rather than as ?iterable.
+	unionNull bool
 }
 
 func (t *typeSet) has(b string) bool { return t.mask[b] }
@@ -96,6 +99,9 @@ func (l *lowerer) typeOf(n *frontend.Node, _ bool) *Type {
 				continue
 			}
 			single := l.singleType(c)
+			if single.mask["null"] {
+				t.unionNull = true
+			}
 			if single.mask["mixed"] {
 				l.fail(c.Line, "Type mixed can only be used as a standalone type")
 			}
@@ -160,7 +166,8 @@ func (l *lowerer) typeOf(n *frontend.Node, _ bool) *Type {
 // "iterable" for a type that is only iterable, as PHP does for
 // compatibility.
 func (t *typeSet) reflection() string {
-	if len(t.entries) == 1 && t.entries[0].iterable && len(t.mask) == 1 || len(t.entries) == 1 && t.entries[0].iterable && len(t.mask) == 2 && t.mask["null"] {
+	if len(t.entries) == 1 && t.entries[0].iterable && len(t.mask) == 1 ||
+		len(t.entries) == 1 && t.entries[0].iterable && len(t.mask) == 2 && t.mask["null"] && !t.unionNull {
 		if t.mask["null"] {
 			return "?iterable"
 		}

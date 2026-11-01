@@ -656,11 +656,17 @@ func (p *parser) switchStatement() *Node {
 		default:
 			p.unexpected()
 		}
-		if !p.accept(':') && !p.acceptSemi() {
-			p.unexpected()
+		separator := ":"
+		if !p.accept(':') {
+			if !p.acceptSemi() {
+				p.unexpected()
+			}
+			separator = ";" // deprecated by PHP 8.5; the compiler warns
 		}
 		body := p.statements(false, func() bool { return p.atAny(TCase, TDefault) || end() })
-		n.Children = append(n.Children, node("case", c.Line, append([]*Node{label}, body...)...))
+		cs := node("case", c.Line, append([]*Node{label}, body...)...)
+		cs.Text = separator
+		n.Children = append(n.Children, cs)
 	}
 	if alt {
 		p.expect(TEndswitch)

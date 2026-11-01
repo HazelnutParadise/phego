@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
 	"github.com/HazelnutParadise/phego/internal/profile"
@@ -227,6 +228,12 @@ func TestCompileErrorsCarryPHPLines(t *testing.T) {
 		{"<?php\nfunction f(): void { return 1; }", "A void function must not return a value", 2},
 		{"<?php\nyield 1;", "The \"yield\" expression can only be used inside a function", 2},
 		{"<?php\n$f = function () use ($this) {};", "Cannot use $this as lexical variable", 2},
+		// Lines below were checked with php -l in the pinned image.
+		{"<?php\n$f = function()\n use\n ($a,\n $a) {};", "Cannot use variable $a twice", 4},
+		{"<?php\nwhile (1) {\n break\n 2;\n}", "Cannot 'break' 2 levels", 4},
+		{"<?php\n$a = [\n 1,\n ...[]\n] = $b;", "Assignments can only happen to writable values", 3},
+		{"<?php\nisset(\n 1 + 1\n);", "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)", 3},
+		{"<?php\n$a?->b\n = 1;", "Can't use nullsafe operator in write context", 2},
 	}
 	for _, c := range cases {
 		_, err := lowerSource(c.src, 64)
@@ -266,5 +273,100 @@ func TestUnitIsIndependentOfLaterLowering(t *testing.T) {
 	lower(t, "<?php function f(&$x) { global $y; }")
 	if Dump(a) != before {
 		t.Error("lowering a second file changed the first unit")
+	}
+}
+
+// funcBodyEffects lowers src and returns the union of effects of the first
+// function's statements.
+func funcBodyEffects(t *testing.T, src string) Effect {
+	t.Helper()
+	u := lower(t, "<?php "+src)
+	var e Effect
+	for _, s := range u.Functions[0].Body {
+		e |= s.Effects
+	}
+	return e
+}
+
+func TestReviewedEffectsAreClaimed(t *testing.T) {
+	// Each case was confirmed against PHP 8.5.12 with an error handler.
+	cases := []struct {
+		src  string
+		want Effect
+		fn   bool
+	}{
+		{"function f($o): string { return $o; }", MayCallUser | MayThrow, true}, // __toString or TypeError
+		{"function h(): int { return 1.5; }", MayWarn, true},                    // implicit conversion deprecation
+		{"function &g() { return 1; }", MayWarn | MayAlias, true},               // only variable references notice
+		{"$a = [&$x];", MayAlias, false},
+		{"foreach ($arr as &$v) {}", MayAlias, false},
+		{"[&$p] = $arr;", MayAlias, false},
+		{"echo E_STRICT;", MayWarn, false}, // deprecated constant
+		{"$v = K::X;", MayWarn, false},     // deprecated class constant
+		{"$v = 5 % 1.5;", MayWarn, false},
+		{"$v = ~1.5;", MayWarn, false},
+		{"$v = [null => 1];", MayWarn, false},
+		{"if (true) { class AA {} }", MayWarn, false},
+		{"declare(ticks=1); $a = 1;", MayCallUser, false},
+	}
+	for _, c := range cases {
+		var e Effect
+		if c.fn {
+			e = funcBodyEffects(t, c.src)
+		} else {
+			u := lower(t, "<?php "+c.src)
+			for _, s := range u.Main.Body {
+				e |= s.Effects
+			}
+		}
+		if e&c.want != c.want {
+			t.Errorf("%s: effects {%s}, want {%s}", c.src, e, c.want)
+		}
+	}
+	// Without ticks, the same assignment of a literal to a fresh variable
+	// still may run a destructor, but nothing makes 1 + 2 call user code.
+	if e := firstExpr(t, lower(t, "<?php declare(ticks=0); 1 + 2;")).Effects; e&MayCallUser != 0 {
+		t.Errorf("ticks=0 must not add callbacks: {%s}", e)
+	}
+}
+
+func TestIterableUnionWithNullIsExpanded(t *testing.T) {
+	for src, want := range map[string]string{
+		"function f(iterable $a) {}":        "iterable",
+		"function f(?iterable $a) {}":       "?iterable",
+		"function f(iterable|null $a) {}":   "Traversable|array|null",
+		"function f(iterable|string $a) {}": "Traversable|array|string",
+	} {
+		u := lower(t, "<?php "+src)
+		if got := u.Functions[0].Params[0].Type.String; got != want {
+			t.Errorf("%s: type %q, want %q", src, got, want)
+		}
+	}
+}
+
+func TestLongOperatorChainsLowerInLinearTime(t *testing.T) {
+	src := "<?php $x = 1" + strings.Repeat(" + 1", 50000) + ";"
+	start := time.Now()
+	if _, err := lowerSource(src, 64); err != nil {
+		t.Fatal(err)
+	}
+	// The quadratic version took about 3.5 s here; linear takes a few ms.
+	if d := time.Since(start); d > 2*time.Second {
+		t.Errorf("lowering a 50000-term chain took %v", d)
+	}
+}
+
+func TestControlFlowBodiesCarryTheirEffects(t *testing.T) {
+	// Effects of statements nested in bodies must reach the enclosing
+	// statement, or an optimizer could drop a loop whose body calls f().
+	for _, src := range []string{
+		"if ($c) { f(); }", "if ($c) {} else { f(); }", "while ($c) { f(); }", "do { f(); } while ($c);",
+		"for (;;) { f(); }", "foreach ($a as $v) { f(); }", "switch ($c) { case 1: f(); }",
+		"try { f(); } catch (E $e) {}", "try {} finally { f(); }", "declare(ticks=0) { f(); }", "{ f(); }",
+	} {
+		u := lower(t, "<?php "+src)
+		if e := u.Main.Body[0].Effects; e&MayCallUser == 0 {
+			t.Errorf("%s: effects {%s} lost the call in the body", src, e)
+		}
 	}
 }

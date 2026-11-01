@@ -151,7 +151,7 @@ func (l *lowerer) node(op Op, line int, kids ...*Node) *Node {
 
 func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 	n = unparen(n)
-	l.cur = zline(n)
+	l.cur = l.zline(n)
 	c := n.Children
 	switch n.Kind {
 	case "literal":
@@ -256,7 +256,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		if isThis(left) {
 			l.fail(n.Line, "Cannot re-assign $this")
 		}
-		l.ensureWritable(left, n.Line)
+		l.ensureWritable(left, zline(n))
 		if unparen(right).Kind == "variable" && unparen(right).Text == "$GLOBALS" {
 			l.fail(n.Line, "Cannot acquire reference to $GLOBALS")
 		}
@@ -307,7 +307,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		for _, e := range c {
 			e = unparen(e)
 			if !isVariableLike(e) && e.Kind != "nullsafe_prop" && e.Kind != "class_const" {
-				l.fail(n.Line, "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)")
+				l.fail(zline(e), "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)")
 			}
 			nd.Kids = append(nd.Kids, l.exprCtx(e, ctxQuiet))
 		}
@@ -805,7 +805,7 @@ func (l *lowerer) destructurePattern(n *frontend.Node, line int) *Node {
 				}
 				it.Kids = []*Node{key, l.destructurePattern(v, line)}
 			case !canWrite(v):
-				l.fail(l.cur, "Assignments can only happen to writable values")
+				l.fail(zline(v), "Assignments can only happen to writable values")
 			default:
 				it.Kids = []*Node{key, l.target(v, line)}
 			}
@@ -839,7 +839,7 @@ func (l *lowerer) assign(n *frontend.Node) *Node {
 		pattern := l.destructurePattern(left, n.Line)
 		return l.node(OpDestructure, n.Line, pattern, value)
 	}
-	l.ensureWritable(left, n.Line)
+	l.ensureWritable(left, zline(n))
 	if n.Text == "=" {
 		dst := l.exprCtx(left, ctxWrite)
 		return l.node(OpAssign, n.Line, dst, l.expr(right))
@@ -1339,6 +1339,56 @@ func (l *lowerer) constArgs(args *frontend.Node, dynamic bool) {
 
 // zline is the line PHP's AST gives a node: a node with operands takes the
 // line of its first operand, a declaration or leaf its own line.
+// zline caches the result for every node on the operand spine it walks,
+// so lowering a long left-nested chain such as 1 + 1 + ... stays linear.
+func (l *lowerer) zline(n *frontend.Node) int {
+	if l.zlines == nil {
+		l.zlines = map[*frontend.Node]int{}
+	}
+	var spine []*frontend.Node
+	line := 0
+	for cur := n; ; {
+		if v, ok := l.zlines[cur]; ok {
+			line = v
+			break
+		}
+		spine = append(spine, cur)
+		next := zlineStep(unparen(cur))
+		if next == nil {
+			line = unparen(cur).Line
+			break
+		}
+		cur = next
+	}
+	for _, s := range spine {
+		l.zlines[s] = line
+	}
+	return line
+}
+
+// zlineStep returns the operand whose line a node takes, or nil when the
+// node's own line is used.
+func zlineStep(n *frontend.Node) *frontend.Node {
+	switch n.Kind {
+	case "closure", "arrow_function", "function", "class", "interface", "trait", "enum", "new_class",
+		"literal", "variable", "name", "magic_const", "interpolated", "heredoc", "match":
+		return nil
+	case "array", "list":
+		for _, c := range n.Children {
+			if c != nil {
+				return c
+			}
+		}
+		return nil
+	case "yield":
+		return n.Children[1]
+	}
+	if len(n.Children) == 0 {
+		return nil
+	}
+	return n.Children[0]
+}
+
 func zline(n *frontend.Node) int {
 	for {
 		n = unparen(n)

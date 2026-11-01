@@ -110,7 +110,11 @@ type lowerer struct {
 	inConstExpr bool
 	// seen records the symbols declared so far in the namespace, which a
 	// later import may not shadow, as PHP's seen_symbols.
-	seen map[string]bool
+	seen   map[string]bool
+	zlines map[*frontend.Node]int
+	// ticks is set inside declare(ticks=N), where a tick function may run
+	// user code after any statement.
+	ticks bool
 	// cur is the line of the expression compiled last, which PHP reports
 	// for errors raised while compiling a construct's later parts.
 	cur int
@@ -379,12 +383,12 @@ func (l *lowerer) block(n *frontend.Node) *Node {
 	}
 	if n.Kind != "block" {
 		b.Kids = appendNode(nil, l.statement(n, false))
-		return b
+		return l.seal(b)
 	}
 	for _, s := range n.Children {
 		b.Kids = appendNode(b.Kids, l.statement(s, false))
 	}
-	return b
+	return l.seal(b)
 }
 
 func lineOf(n *frontend.Node) int {
@@ -398,6 +402,9 @@ func (l *lowerer) statement(s *frontend.Node, top bool) *Node {
 	n := l.stmt(s, top)
 	if n != nil {
 		l.seal(n)
+		if l.ticks {
+			n.Effects |= MayCallUser
+		}
 	}
 	return n
 }
@@ -579,6 +586,9 @@ func (l *lowerer) switchStmt(s *frontend.Node) *Node {
 	l.push('s', s.Line)
 	seenDefault := false
 	for _, cs := range c[1:] {
+		if cs.Text == ";" {
+			l.diag(cs.Line, "Deprecated", "Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead")
+		}
 		var label *Node
 		if cs.Children[0] == nil {
 			if seenDefault {
@@ -600,13 +610,15 @@ func (l *lowerer) switchStmt(s *frontend.Node) *Node {
 
 func (l *lowerer) breakContinue(s *frontend.Node) *Node {
 	depth := int64(1)
+	line := s.Line
 	if d := s.Children[0]; d != nil {
+		line = zline(d) // PHP reports the line of the depth operand
 		if d.Kind != "literal" {
-			l.fail(s.Line, "'%s' operator with non-integer operand is no longer supported", s.Kind)
+			l.fail(line, "'%s' operator with non-integer operand is no longer supported", s.Kind)
 		}
 		v := l.literal(d)
 		if v.Kind != LitInt || v.Int < 1 {
-			l.fail(s.Line, "'%s' operator accepts only positive integers", s.Kind)
+			l.fail(line, "'%s' operator accepts only positive integers", s.Kind)
 		}
 		depth = v.Int
 	}
@@ -617,14 +629,14 @@ func (l *lowerer) breakContinue(s *frontend.Node) *Node {
 		}
 	}
 	if len(loops) == 0 {
-		l.fail(s.Line, "'%s' not in the 'loop' or 'switch' context", s.Kind)
+		l.fail(line, "'%s' not in the 'loop' or 'switch' context", s.Kind)
 	}
 	if depth > int64(len(loops)) {
 		plural := "s"
 		if depth == 1 {
 			plural = ""
 		}
-		l.fail(s.Line, "Cannot '%s' %d level%s", s.Kind, depth, plural)
+		l.fail(line, "Cannot '%s' %d level%s", s.Kind, depth, plural)
 	}
 	target := loops[depth-1]
 	if s.Kind == "continue" && l.regions[target].kind == 's' {
@@ -681,9 +693,16 @@ func (l *lowerer) returnStmt(s *frontend.Node) *Node {
 	if v != nil {
 		if f.ByRef && (isVariableLike(v) || shortCircuited(unparen(v))) {
 			n.Kids = []*Node{l.refTarget(v)}
-			n.Flags |= FlagRef
 		} else {
 			n.Kids = []*Node{l.expr(v)}
+		}
+		if f.ByRef {
+			// A by-reference return binds the result; returning a value
+			// that is not a variable raises a notice.
+			n.Flags |= FlagRef
+		}
+		if f.Return != nil && f.Return.String != "mixed" && !f.Generator {
+			n.Flags |= FlagCoerce
 		}
 	}
 	return n
@@ -769,8 +788,19 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		n.Text = strings.ToLower(name)
 		n.Value = l.constantValue(value)
 	}
+	ticks := false
+	for _, d := range directives {
+		if v := l.constantValue(d.Children[1]); strings.EqualFold(d.Children[0].Text, "ticks") && v != nil && v.Kind == LitInt && v.Int > 0 {
+			ticks = true
+		}
+	}
 	if body != nil {
+		saved := l.ticks
+		l.ticks = l.ticks || ticks
 		n.Kids = []*Node{l.block(body)}
+		l.ticks = saved
+	} else if ticks {
+		l.ticks = true // the rest of the file ticks
 	}
 	return n
 }
@@ -1059,21 +1089,26 @@ func nullableType(t string) string {
 }
 
 func (l *lowerer) closureUses(f *Func, uses *frontend.Node) {
+	// PHP checks each use before moving its current line to it, so errors
+	// carry the line of the previous use, or of the use list for the first.
+	line := uses.Line
 	for _, u := range uses.Children {
+		prev := line
+		line = u.Line
 		name := u.Children[0].Text[1:]
 		if name == "this" {
-			l.fail(u.Line, "Cannot use $this as lexical variable")
+			l.fail(prev, "Cannot use $this as lexical variable")
 		}
 		if isSuperGlobal(name) {
-			l.fail(u.Line, "Cannot use auto-global as lexical variable")
+			l.fail(prev, "Cannot use auto-global as lexical variable")
 		}
 		for _, c := range f.Captures {
 			if c.Name == name {
-				l.fail(u.Line, "Cannot use variable $%s twice", name)
+				l.fail(prev, "Cannot use variable $%s twice", name)
 			}
 		}
 		if v := f.vars[name]; v != nil && v.Flags&VarParam != 0 {
-			l.fail(u.Line, "Cannot use lexical variable $%s as a parameter name", name)
+			l.fail(prev, "Cannot use lexical variable $%s as a parameter name", name)
 		}
 		byRef := u.Text == "&"
 		if f.statics == nil {

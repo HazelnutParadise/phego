@@ -132,6 +132,9 @@ const (
 	FlagRef                        // the node is bound by reference
 	FlagQuiet                      // read in isset/empty/?? mode: no undefined warnings
 	FlagUnset                      // the node is unset
+	// FlagCoerce marks a return converted to the function's declared type,
+	// which may call __toString, warn or throw a TypeError.
+	FlagCoerce
 )
 
 // Arg is one call argument.
