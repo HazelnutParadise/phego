@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing/fstest"
 
 	"github.com/HazelnutParadise/phego"
 )
@@ -38,4 +39,31 @@ func ExampleEngine_Compile() {
 		fmt.Println(phpErr.Kind, "on line", phpErr.Line)
 	}
 	// Output: ParseError on line 3
+}
+
+// A policy grants file trees and network destinations; everything else is
+// refused, and the refusal names the capability and rule.
+func ExampleConfig_policy() {
+	engine, err := phego.NewEngine(phego.Config{
+		Policy: phego.Policy{
+			Mode:  phego.ModeEnforce,
+			Files: []phego.FileGrant{{Path: "/app", FS: fstest.MapFS{"index.php": {Data: []byte("<?php return 1;")}}}},
+			Network: []phego.NetworkGrant{
+				{Scheme: "https", Host: "api.example.com", Ports: []int{443}},
+			},
+		},
+		Limits:    phego.Limits{Steps: 50_000_000, Memory: 128 << 20},
+		MaxActive: 64,
+		MaxQueued: 128,
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer engine.Close(context.Background())
+	_, err = engine.RunFile(context.Background(), "/etc/passwd")
+	var denied *phego.PolicyError
+	if errors.As(err, &denied) {
+		fmt.Println(denied.Capability, denied.Rule)
+	}
+	// Output: file-read outside-root
 }
