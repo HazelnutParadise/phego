@@ -1,6 +1,4 @@
-# Phego
-
-**The safest PHP in the world**
+# Phego - The safest PHP in the world
 
 PHP, reimagined in Go. Phego is a project for a security-first PHP compiler and execution engine that fits inside a Go application, serves existing PHP websites, and carries PHP’s entire history forward.
 

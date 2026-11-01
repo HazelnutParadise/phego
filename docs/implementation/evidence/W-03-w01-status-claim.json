@@ -1,0 +1,14 @@
+{
+  "events": [
+    {
+      "id": "W-01",
+      "status": "claimed_complete",
+      "reason": "The W-01 contract review is recorded in this merge commit; product acceptance remains not_run.",
+      "evidence": {
+        "commit": "3f8fd2dec1e22043fd91da922a95de4532e83755",
+        "path": "docs/implementation/evidence/W-01-contract-review.md",
+        "sha256": "6bd6fe1bc0053ad15051d6e0dd29cff9b6821edf07e3f9a3c1a558c75ab896d1"
+      }
+    }
+  ]
+}
