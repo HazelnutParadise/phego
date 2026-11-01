@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing/fstest"
 
 	"github.com/HazelnutParadise/phego"
@@ -66,4 +68,35 @@ func ExampleConfig_policy() {
 		fmt.Println(denied.Capability, denied.Rule)
 	}
 	// Output: file-read outside-root
+}
+
+// Use Root for a directory on disk. FS is for trusted, self-contained sources
+// such as embedded files; os.DirFS is not a confined directory mount.
+func ExampleFileGrant_root() {
+	dir, err := os.MkdirTemp("", "phego-root-example-")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(dir)
+	if err := os.WriteFile(filepath.Join(dir, "index.php"), []byte("<?php return 1;"), 0600); err != nil {
+		panic(err)
+	}
+	engine, err := phego.NewEngine(phego.Config{Policy: phego.Policy{Files: []phego.FileGrant{{Path: "/app", Root: dir}}}})
+	if err != nil {
+		panic(err)
+	}
+	defer engine.Close(context.Background())
+	_, err = engine.RunFile(context.Background(), "/app/index.php")
+	var unsupported *phego.UnsupportedError
+	if errors.As(err, &unsupported) {
+		fmt.Println("read and compile succeeded; execution is not yet implemented")
+	}
+	_, err = engine.RunFile(context.Background(), "/outside.php")
+	var denied *phego.PolicyError
+	if errors.As(err, &denied) {
+		fmt.Println(denied.Capability, denied.Rule)
+	}
+	// Output:
+	// read and compile succeeded; execution is not yet implemented
+	// file-read outside-root
 }

@@ -438,3 +438,217 @@ func TestOverlappingMountsPreserveReadableHardLinks(t *testing.T) {
 		}
 	}
 }
+
+func TestRootPathsResolveSymlinksBeforeParentComponents(t *testing.T) {
+	for _, truncate := range []bool{false, true} {
+		root := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(root, "sub", "deep"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		for name, data := range map[string]string{"file": "root", "sub/file": "sub"} {
+			if err := os.WriteFile(filepath.Join(root, name), []byte(data), 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := os.Symlink("sub/deep", filepath.Join(root, "link")); err != nil {
+			t.Fatal(err)
+		}
+		p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}}})
+		flags := os.O_RDONLY
+		if truncate {
+			flags = os.O_WRONLY | os.O_TRUNC
+		}
+		f, err := p.OpenFile("/link/../file", flags, 0600)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !truncate {
+			b, e := io.ReadAll(f)
+			if e != nil || string(b) != "sub" {
+				f.Close()
+				t.Fatalf("read=%q %v, want sub/file", b, e)
+			}
+		}
+		f.Close()
+		b, err := os.ReadFile(filepath.Join(root, "file"))
+		if err != nil || string(b) != "root" {
+			t.Fatalf("wrong file modified=%q %v", b, err)
+		}
+		if truncate {
+			b, err := os.ReadFile(filepath.Join(root, "sub", "file"))
+			if err != nil || len(b) != 0 {
+				t.Fatalf("target not truncated=%q %v", b, err)
+			}
+		}
+	}
+}
+
+func TestRootPathsDoNotTreatFilesAsDirectories(t *testing.T) {
+	for _, name := range []string{"/file/.", "/file/", "/missing/../file"} {
+		t.Run(name, func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.WriteFile(filepath.Join(root, "file"), []byte("original"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}}})
+			f, err := p.OpenFile(name, os.O_WRONLY|os.O_TRUNC, 0600)
+			if f != nil {
+				f.Close()
+			}
+			if err == nil {
+				t.Errorf("opened non-directory path %q", name)
+			}
+			b, err := os.ReadFile(filepath.Join(root, "file"))
+			if err != nil || string(b) != "original" {
+				t.Fatalf("wrong file modified=%q %v", b, err)
+			}
+		})
+	}
+}
+
+func TestRootPathsTraverseVirtualMountParents(t *testing.T) {
+	app := t.TempDir()
+	other := t.TempDir()
+	if err := os.WriteFile(filepath.Join(other, "file"), []byte("other"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: app}, {Path: "/other", Dir: other, Write: true}}})
+	f, err := p.OpenFile("/app/../other/file", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := io.ReadAll(f)
+	f.Close()
+	if err != nil || string(b) != "other" {
+		t.Fatalf("virtual parent read=%q %v", b, err)
+	}
+	f, err = p.OpenFile("/app/../other/file", os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	b, err = os.ReadFile(filepath.Join(other, "file"))
+	if err != nil || len(b) != 0 {
+		t.Fatalf("virtual parent write=%q %v", b, err)
+	}
+}
+
+func TestRootPathsResolveIntoVirtualMountWithoutHostDirectory(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Symlink("virtual", filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/virtual", FS: fstest.MapFS{"file": {Data: []byte("mounted")}}}}})
+	f, err := p.OpenFile("/alias/file", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b, err := io.ReadAll(f)
+	if err != nil || string(b) != "mounted" {
+		t.Fatalf("virtual-only mount=%q %v", b, err)
+	}
+}
+
+func TestFSParentPreservesUnresolvedRootPath(t *testing.T) {
+	for _, truncate := range []bool{false, true} {
+		t.Run(map[bool]string{false: "read", true: "truncate"}[truncate], func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, "sub", "deep"), 0700); err != nil {
+				t.Fatal(err)
+			}
+			for name, data := range map[string]string{"file": "root", "sub/file": "sub"} {
+				if err := os.WriteFile(filepath.Join(root, name), []byte(data), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := os.Symlink("sub/deep", filepath.Join(root, "link")); err != nil {
+				t.Fatal(err)
+			}
+			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", FS: fstest.MapFS{}}, {Path: "/other", Dir: root, Write: true}}})
+			flag := os.O_RDONLY
+			if truncate {
+				flag = os.O_WRONLY | os.O_TRUNC
+			}
+			f, err := p.OpenFile("/app/../other/link/../file", flag, 0600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !truncate {
+				b, e := io.ReadAll(f)
+				if e != nil || string(b) != "sub" {
+					t.Errorf("wrong file read=%q %v", b, e)
+				}
+			}
+			f.Close()
+			b, err := os.ReadFile(filepath.Join(root, "file"))
+			if err != nil || string(b) != "root" {
+				t.Fatalf("wrong file modified=%q %v", b, err)
+			}
+		})
+	}
+}
+
+func TestFSParentRequiresExistingDirectory(t *testing.T) {
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", FS: fstest.MapFS{"file": {Data: []byte("file")}, "other": {Data: []byte("other")}, "dir/x": {Data: []byte("x")}}}}})
+	for _, name := range []string{"/app/file/../other", "/app/missing/../other"} {
+		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		if f != nil {
+			f.Close()
+		}
+		if err == nil {
+			t.Errorf("invalid directory path read through %q", name)
+		}
+	}
+	f, err := p.OpenFile("/app/dir/../other", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+}
+
+func TestRootPathsResolveNestedVirtualAncestors(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Symlink("virtual/deep", filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/virtual/deep", FS: fstest.MapFS{"file": {Data: []byte("mounted")}}}}})
+	for _, name := range []string{"/virtual/deep/file", "/alias/file"} {
+		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		if err != nil {
+			t.Errorf("read %q: %v", name, err)
+			continue
+		}
+		b, err := io.ReadAll(f)
+		f.Close()
+		if err != nil || string(b) != "mounted" {
+			t.Errorf("read %q=%q %v", name, b, err)
+		}
+	}
+}
+
+func TestVirtualMountAncestorsDoNotCreateHostFiles(t *testing.T) {
+	root := t.TempDir()
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/virtual/deep", FS: fstest.MapFS{}}}})
+	f, err := p.OpenFile("/virtual/ghost", os.O_WRONLY|os.O_CREATE, 0600)
+	if f != nil {
+		f.Close()
+	}
+	if err == nil {
+		t.Fatal("created a file under an unbacked virtual directory")
+	}
+}
+
+func TestFSPathsResolveSymlinksBeforeParentComponents(t *testing.T) {
+	source := fstest.MapFS{"file": {Data: []byte("root")}, "sub/file": {Data: []byte("sub")}, "sub/deep/empty": {}, "link": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", FS: source}}})
+	f, err := p.OpenFile("/app/link/../file", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b, err := io.ReadAll(f)
+	if err != nil || string(b) != "sub" {
+		t.Fatalf("FS symlink parent=%q %v", b, err)
+	}
+}
