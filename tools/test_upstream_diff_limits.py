@@ -150,6 +150,28 @@ class TestUpstreamDecoderLimits(unittest.TestCase):
 
 
 class TestUpstreamStubLimits(unittest.TestCase):
+    def test_token_budget_covers_every_kind_and_ignores_trailing_metadata(self):
+        pieces = (";", "name ", "'x' ", "<<<TXT\nx\nTXT\n", "#if A\n#endif\n")
+        with mock.patch.object(upstream_diff, "MAX_STUB_TOKENS", 16, create=True):
+            for piece in pieces:
+                count = 8 if piece.startswith("#if") else 16
+                source = piece * count
+                with self.subTest(piece=piece):
+                    self.assertEqual(upstream_diff.parse_stubs(source + " /* ignored */ \n"), {})
+                    with self.assertRaisesRegex(ValueError, "token"):
+                        upstream_diff.parse_stubs(source + piece)
+
+    def test_archive_with_no_declarations_still_enforces_token_budget(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode="w") as archive:
+            member = tarfile.TarInfo(f"php-{VERSION}/bomb.stub.php")
+            member.size = 256
+            archive.addfile(member, io.BytesIO(b";" * member.size))
+        files = upstream_diff.read_archive(_compress_xz(buffer.getvalue()), VERSION)
+        with mock.patch.object(upstream_diff, "MAX_STUB_TOKENS", 16, create=True):
+            with self.assertRaisesRegex(ValueError, "token"):
+                upstream_diff.diff_releases({}, files, VERSION)
+
     def test_condition_depth_accepts_128_and_rejects_129(self):
         with mock.patch.object(upstream_diff, "MAX_CONDITION_DEPTH", 128, create=True):
             accepted = "#if A\n" * 128 + "function bounded(): void;\n" + "#endif\n" * 128

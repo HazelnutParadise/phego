@@ -13,6 +13,7 @@ Usage:
   python3 tools/upstream_diff.py OLD.tar.xz NEW.tar.xz --old-version 8.5.11 --new-version 8.5.12
 """
 import argparse
+import io
 import json
 import lzma
 import re
@@ -34,6 +35,7 @@ MAX_CONDITION_DEPTH = 128
 MAX_CONDITION_BYTES = 64 * 1024
 MAX_SIGNATURE_BYTES = 8 * 1024 * 1024
 MAX_STUB_BYTES = 64 * 1024 * 1024
+MAX_STUB_TOKENS = 200_000
 
 # Source path prefixes and NEWS sections mapped to the work packages that
 # implement them. The longest matching prefix wins; unmatched paths map to
@@ -151,7 +153,7 @@ def _skip_attribute(text, index):
 
 
 def _strip_metadata(text):
-    out = []
+    out = io.StringIO()
     index = 0
     length = len(text)
     while index < length:
@@ -159,17 +161,17 @@ def _strip_metadata(text):
         if char in "'\"":
             start = index
             index = _skip_quoted(text, index)
-            out.append(text[start:index])
+            out.write(text[start:index])
             continue
         if text.startswith("<<<", index):
             end = _skip_heredoc(text, index)
             if end is not None:
-                out.append(text[index:end])
+                out.write(text[index:end])
                 index = end
                 continue
         if text.startswith("<?php", index) or text.startswith("?>", index):
             index += 5 if char == "<" else 2
-            out.append(" ; ")
+            out.write(" ; ")
             continue
         if char == "/" and index + 1 < length and text[index + 1] == "/":
             index += 2
@@ -181,26 +183,26 @@ def _strip_metadata(text):
             while index + 1 < length and not (text[index] == "*" and text[index + 1] == "/"):
                 index += 1
             index = min(index + 2, length)
-            out.append(" ")
+            out.write(" ")
             continue
         if char == "#":
             if index + 1 < length and text[index + 1] == "[":
                 index = _skip_attribute(text, index)
-                out.append(" ")
+                out.write(" ")
                 continue
             line_start = text.rfind("\n", 0, index) + 1
             directive = _DIRECTIVE.match(text, index)
             if directive and not text[line_start:index].strip():
-                out.append(f" {_PP}{directive.group(1)} {_collapse(directive.group(2))}{_PP} ")
+                out.write(f" {_PP}{directive.group(1)} {_collapse(directive.group(2))}{_PP} ")
                 index = directive.end()
                 continue
             index += 1
             while index < length and text[index] not in "\r\n":
                 index += 1
             continue
-        out.append(char)
+        out.write(char)
         index += 1
-    return "".join(out)
+    return out.getvalue()
 
 
 def _tokenize(text):
@@ -212,6 +214,8 @@ def _tokenize(text):
         if char.isspace():
             index += 1
             continue
+        if len(tokens) >= MAX_STUB_TOKENS:
+            raise ValueError("stub token limit exceeded")
         if char in "'\"":
             start = index
             index = _skip_quoted(text, index)
@@ -241,7 +245,7 @@ def _tokenize(text):
 
 def _collapse(text):
     """Collapse whitespace runs to one space outside string literals."""
-    out = []
+    out = io.StringIO()
     plain = 0
     index = 0
     while index < len(text):
@@ -254,11 +258,11 @@ def _collapse(text):
         if end is None:
             index += 1
             continue
-        out.append(re.sub(r"\s+", " ", text[plain:index]))
-        out.append(text[index:end])
+        out.write(re.sub(r"\s+", " ", text[plain:index]))
+        out.write(text[index:end])
         plain = index = end
-    out.append(re.sub(r"\s+", " ", text[plain:]))
-    return "".join(out).strip()
+    out.write(re.sub(r"\s+", " ", text[plain:]))
+    return out.getvalue().strip()
 
 
 def _qualify(namespace, name):
