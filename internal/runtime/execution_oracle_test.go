@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 30 {
-		t.Fatalf("want 30 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 37 {
+		t.Fatalf("want 37 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -255,20 +255,43 @@ func replayExecutionOracle(t *testing.T, width int) {
 					}
 					event("caught:" + c.err.Error())
 					event("previous:" + c.previous.Error())
-				case "array_throw_fatal":
+				case "array_throw_fatal", "array_throw_exit", "array_exit_throw", "array_exit_caught", "array_throw_exit_caught":
 					c := x.call(func(x *execution) completion {
 						a := x.heap.newArrayValue()
 						must(x.local(a))
-						for i, kind := range []endKind{endThrow, endFatal, endNormal} {
+						kinds := []endKind{endThrow, endFatal, endNormal}
+						if tc.Case == "array_throw_exit" || tc.Case == "array_throw_exit_caught" {
+							kinds = []endKind{endThrow, endExit, endNormal}
+						}
+						if tc.Case == "array_exit_throw" {
+							kinds = []endKind{endExit, endThrow, endNormal}
+						}
+						if tc.Case == "array_exit_caught" {
+							kinds = []endKind{endExit, endNormal}
+						}
+						for i, kind := range kinds {
 							o, err := x.object("Element", func(x *execution) completion {
 								switch kind {
 								case endThrow:
 									event("destroy:throw")
 									return completion{kind: endThrow, err: errors.New("earlier throw")}
+								case endExit:
+									event("destroy:exit")
+									return completion{kind: endExit, code: 7}
 								case endFatal:
 									event("destroy:fatal")
 									return completion{kind: endFatal, err: errors.New("fatal destructor")}
 								default:
+									if strings.HasSuffix(tc.Case, "_caught") {
+										return x.call(func(x *execution) completion {
+											c := x.call(func(*execution) completion { return completion{kind: endThrow, err: errors.New("caught tail")} }, nil)
+											if c.kind != endThrow {
+												return c
+											}
+											event("caught:tail")
+											return x.write([]byte("D"))
+										}, func(*execution) completion { event("finally"); return completion{} })
+									}
 									event("destroy:tail")
 									return x.write([]byte("D"))
 								}
@@ -285,6 +308,30 @@ func replayExecutionOracle(t *testing.T, width int) {
 						return x.write([]byte("unexpected"))
 					}
 					return c
+				case "frame_exit", "exit_cleanup_throw", "exit_cleanup_exit":
+					return x.call(func(x *execution) completion {
+						first, err := x.object("Local", func(x *execution) completion {
+							switch tc.Case {
+							case "exit_cleanup_throw":
+								event("destroy:throw")
+								return completion{kind: endThrow, err: errors.New("cleanup failure")}
+							case "exit_cleanup_exit":
+								event("destroy:exit")
+								return completion{kind: endExit, code: 9}
+							default:
+								event("destroy:local")
+								return x.write([]byte("D"))
+							}
+						})
+						must(err)
+						must(x.local(first))
+						if tc.Case != "frame_exit" {
+							tail, err := x.object("Tracked", func(x *execution) completion { event("destroy:tail"); return x.write([]byte("D")) })
+							must(err)
+							must(x.local(tail))
+						}
+						return completion{kind: endExit, code: 7}
+					}, func(*execution) completion { event("finally"); return completion{} })
 				case "array_fatal", "array_exit":
 					return x.call(func(x *execution) completion {
 						a := x.heap.newArrayValue()

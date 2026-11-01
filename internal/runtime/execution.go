@@ -25,6 +25,7 @@ const (
 )
 
 type completion struct {
+	serial   uint64 // Identifies a new throw/exit; forwarding preserves its order.
 	kind     endKind
 	code     int
 	value    value
@@ -93,6 +94,8 @@ type execution struct {
 	result                   executionResult
 	stop                     completion
 	phaseFatal               completion
+	phaseExit, lastExit      completion
+	serial                   uint64
 	calls                    int
 }
 
@@ -193,6 +196,8 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	x.closed = true
 	if c.kind == endThrow || c.kind == endFatal {
 		c.code = 255
+	} else if x.lastExit.kind == endExit && (c.kind == endNormal || c.kind == endReturn || c.kind == endExit) {
+		c.code = x.lastExit.code
 	}
 	// Never let the completion expose a PHP value after heap teardown.
 	c.value = value{}
@@ -207,8 +212,8 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	return x.result
 }
 
-// call owns local values until return/throw unwinds them. exit/fatal/cancel
-// bypass PHP finally; their live values are retained for request teardown.
+// call owns local values until return/throw/exit unwinds them. Exit bypasses
+// PHP finally; fatal and host stops retain live values for request teardown.
 func (x *execution) call(body, finally executionAction) completion {
 	if body == nil || x.closed {
 		return completion{kind: endInternal, err: errors.New("invalid execution action")}
@@ -239,8 +244,9 @@ func (x *execution) call(body, finally executionAction) completion {
 			c = x.replaceOwnedCompletion(c, stop)
 		}
 	}
-	if c.kind == endNormal || c.kind == endReturn || c.kind == endThrow {
+	if c.kind == endNormal || c.kind == endReturn || c.kind == endThrow || c.kind == endExit {
 		for i := 0; i < len(f.locals); i++ {
+			before := x.serial
 			if err := x.heap.release(f.locals[i]); err != nil {
 				var next completion
 				if errors.As(err, &next) {
@@ -248,9 +254,13 @@ func (x *execution) call(body, finally executionAction) completion {
 				} else {
 					c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
 				}
-				if c.kind != endThrow {
-					break
-				}
+			}
+			c = x.exitResult(c, before)
+			if stop := x.check(); stop.kind != endNormal {
+				c = x.replaceOwnedCompletion(c, stop)
+			}
+			if c.kind == endFatal || stopsUserCode(c) {
+				break
 			}
 		}
 	}
@@ -287,15 +297,16 @@ func (x *execution) releaseReturn(c *completion) completion {
 		return completion{}
 	}
 	v := c.value
+	before := x.serial
 	c.value, c.returnOwned = value{}, false
 	if err := x.heap.release(v); err != nil {
 		var next completion
 		if errors.As(err, &next) {
-			return next
+			return x.exitResult(next, before)
 		}
 		return x.fail(endInternal, err)
 	}
-	return completion{}
+	return x.exitResult(completion{}, before)
 }
 
 // Acquire the replacement before releasing the old return, even when both
@@ -412,11 +423,44 @@ func (x *execution) invoke(fn executionAction) (c completion) {
 			c = x.fail(endInternal, fmt.Errorf("execution callback panicked: %v", p))
 		}
 	}()
+	before := x.serial
+	pending := x.phaseExit
 	c = fn(x)
+	if (c.kind == endNormal || c.kind == endReturn) && x.phaseExit.kind == endThrow && x.phaseExit.serial > before {
+		// This action caught a newly raised exception. Restore the caller's
+		// pending event instead of resurrecting the handled exception later.
+		x.phaseExit = pending
+	}
+	if c.kind == endThrow || c.kind == endExit {
+		if c.serial == 0 {
+			x.serial++
+			c.serial = x.serial
+		}
+		if c.kind == endExit && c.serial > x.lastExit.serial {
+			x.lastExit = c
+		}
+		if c.serial > x.phaseExit.serial && (c.kind == endExit || x.phaseExit.kind != endNormal) {
+			x.phaseExit = c
+		}
+	}
 	// Mark at the action boundary, before a containing array or property
 	// release can continue into sibling destructors.
 	if c.kind == endFatal {
 		c = x.markFatal(c)
+	}
+	return x.exitResult(c, before)
+}
+
+// An aggregate release may return an older throw/exit. Preserve the newer
+// event without imposing an ambient exit on cleanup callbacks entered later.
+// A normal result after the latest throw means that callback caught it.
+func (x *execution) exitResult(c completion, since uint64) completion {
+	for x.phaseExit.serial > since && x.phaseExit.serial > c.serial {
+		if c.kind != endThrow && c.kind != endExit &&
+			((c.kind != endNormal && c.kind != endReturn) || x.phaseExit.kind != endExit) {
+			break
+		}
+		c = x.replaceOwnedCompletion(c, x.phaseExit)
 	}
 	return c
 }
@@ -437,6 +481,7 @@ func (x *execution) recordEnd(c completion) {
 	// The driver has consumed this phase's fatal. The next shutdown,
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
+	x.phaseExit = completion{}
 	if (c.kind == endThrow || c.kind == endFatal) && len(x.diagnostics) < x.limits.callbacks {
 		x.diagnostics = append(x.diagnostics, executionDiagnostic{"Fatal error", c.Error()})
 	}

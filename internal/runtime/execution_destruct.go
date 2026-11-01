@@ -10,17 +10,18 @@ func (x *execution) destruct() completion {
 	if x.destructorStop {
 		return completion{}
 	}
-	convert := func(err error) completion {
+	convert := func(err error, since uint64) completion {
 		if stop := x.check(); stop.kind != endNormal {
 			x.destructorStop = true
 			return stop
 		}
-		if err == nil {
-			return completion{}
-		}
 		var c completion
-		if !errors.As(err, &c) {
+		if err != nil && !errors.As(err, &c) {
 			c = x.fail(endInternal, err)
+		}
+		c = x.exitResult(c, since)
+		if c.kind == endNormal {
+			return c
 		}
 		x.destructorStop = true
 		return c
@@ -35,7 +36,8 @@ func (x *execution) destruct() completion {
 					continue
 				}
 				old, _ := a.remove(b.key)
-				if c := convert(x.heap.release(old)); c.kind != endNormal {
+				before := x.serial
+				if c := convert(x.heap.release(old), before); c.kind != endNormal {
 					return c
 				}
 			}
@@ -53,9 +55,10 @@ func (x *execution) destruct() completion {
 		o.destructorCalled = true
 		if o.class != nil && o.class.destructor != nil {
 			o.refcount++
+			before := x.serial
 			err := o.class.destructor(x.heap, value{kind: valueObject, object: o})
 			o.refcount--
-			if c := convert(err); c.kind != endNormal {
+			if c := convert(err, before); c.kind != endNormal {
 				return c
 			}
 		}

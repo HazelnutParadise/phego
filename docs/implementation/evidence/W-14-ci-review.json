@@ -190,5 +190,8 @@
     "go": "go version go1.26.5 darwin/arm64",
     "python": "3.9.6",
     "docker": "29.8.2 / 29.8.2"
-  }
+  },
+  "snapshot_commit": "093408d093bc4657146da4fe3bf0d4b9b3054d35",
+  "snapshot_note": "Input/reference hashes and results describe the 30-case snapshot at snapshot_commit; later exit fixes are recorded separately.",
+  "followup_exit_evidence": "docs/implementation/evidence/W-14-exit-review.json"
 }
