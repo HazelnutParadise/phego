@@ -21,7 +21,7 @@ Modifications: translated to Go; only the 128-entry tables and fused multiply-ad
 
 ## PHP 8.5.12 sorting compatibility
 
-The sorting routines identified in [the source inventory](third_party/php-sort/UPSTREAM.json) are Go translations/adaptations of `Zend/zend_sort.c` and the stable/user-comparison rules in `ext/standard/array.c` from PHP 8.5.12, commit `136e049ac10b032c83018e65b63b6df858943750`. Source URLs, retrieved SHA-256 digests, modification scope and license-file digests are recorded in that inventory (REQ-017; T-033, T-034).
+The sorting routines identified in [the source inventory](third_party/php-sort/UPSTREAM.json) are Go translations/adaptations of `Zend/zend_sort.c`, the stable/user-comparison rules in `ext/standard/array.c`, and empty-copy/native-sort behavior in `Zend/zend_hash.c` from PHP 8.5.12, commit `136e049ac10b032c83018e65b63b6df858943750`. Source URLs, retrieved SHA-256 digests, modification scope and license-file digests are recorded in that inventory (REQ-017; T-033, T-034).
 
 The derived portions retain the Zend Engine License 2.00 and PHP License 3.01 as applicable; `zend_sort.c` also carries the libc++ NCSA/MIT notices. These are not relicensed by Phego's original-work MIT grant. Full texts are distributed in [Zend-LICENSE](third_party/php-sort/Zend-LICENSE), [PHP-LICENSE](third_party/php-sort/PHP-LICENSE) and [LIBCXX-NOTICE](third_party/php-sort/LIBCXX-NOTICE). Upstream authors include Zend Technologies Ltd., Xinchen Hui, Sterling Hughes, the PHP Group and the libc++ contributors named in those notices. Preserve this inventory and all notices with source and binary distributions.
 

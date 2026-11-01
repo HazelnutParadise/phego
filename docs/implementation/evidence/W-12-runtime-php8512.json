@@ -13,7 +13,7 @@
     "T-033",
     "T-034"
   ],
-  "status": "local_checks_passed; independent runtime review passed; current-head remote CI/review pending",
+  "status": "historical runtime evidence; current sorting revision is recorded in W-12-sorting-php8512.json",
   "product_acceptance_status": "not_run",
   "source_state": "committed code; documentation/evidence recorded separately",
   "environment": {
@@ -239,7 +239,6 @@
     "Only PHP 8.5.12 guest widths 32/64; not full engine acceptance.",
     "Runtime heap is request-local and single-executor.",
     "VM, typed reference/call, resource and source-location integration remain downstream.",
-    "Comparator order/count and post-exception partial permutation are implementation-dependent; no Zend sorting algorithm copied.",
     "Local benchmark samples are noisy; no speedup claim.",
     "Pinned arm64 reference crashes with exit 133 / zend_mm_heap corrupted in two optional destructor probes; i386 completes. Neither is counted as conformance pass or converted to skip. Go safe direct-item tests are separate; full object lifecycle is W-13.",
     "Supplemental 1,200 frozen sequences were replayed only on arm64."
@@ -1366,5 +1365,7 @@
       "security_review": "completed"
     },
     "latest_head_ci_and_review": "pending after push; live PR is authoritative"
-  }
+  },
+  "superseded_by": "docs/implementation/evidence/W-12-sorting-php8512.json",
+  "historical_sorting_note": "The former implementation-dependent comparator schedule was not approved as a compatibility reduction. It is corrected and verified separately in W-12-sorting-php8512.json; historical command results below are retained, not current-head verification."
 }
