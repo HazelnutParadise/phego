@@ -1,0 +1,12 @@
+--- FAIL: TestExecutionCatchHonorsEntryStop (0.00s)
+    --- FAIL: TestExecutionCatchHonorsEntryStop/F (0.00s)
+        execution_catch_test.go:92: kind=5 body=true selector=false handler=false
+    --- FAIL: TestExecutionCatchHonorsEntryStop/G (0.00s)
+        execution_catch_test.go:92: kind=6 body=true selector=false handler=false
+    --- FAIL: TestExecutionCatchHonorsEntryStop/I (0.00s)
+        execution_catch_test.go:92: kind=8 body=true selector=false handler=false
+    --- FAIL: TestExecutionCatchHonorsEntryStop/D (0.00s)
+        execution_catch_test.go:92: kind=3 body=true selector=false handler=false
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.559s
+FAIL

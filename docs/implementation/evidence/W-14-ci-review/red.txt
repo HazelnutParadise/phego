@@ -1,0 +1,7 @@
+--- FAIL: TestExecutionReviewCaughtNestedShutdownThrow (0.00s)
+    execution_ci_review_test.go:47: end={end:{kind:0 code:0 value:{kind:0 boolean:false integer:0 floating:0 text: array:<nil> object:<nil> ref:<nil>} err:<nil> previous:<nil> returnOwned:false} returned:<nil> output:[] accepted:0 diagnostics:[] cleanupErr:<nil> cleanupComplete:true} events=[child caught]
+--- FAIL: TestExecutionReviewFatalOverridesAggregateThrow (0.00s)
+    execution_ci_review_test.go:93: end={end:{kind:0 code:0 value:{kind:0 boolean:false integer:0 floating:0 text: array:<nil> object:<nil> ref:<nil>} err:<nil> previous:<nil> returnOwned:false} returned:<nil> output:[117 110 101 120 112 101 99 116 101 100 83] accepted:11 diagnostics:[] cleanupErr:<nil> cleanupComplete:true} events=[throw fatal caught shutdown]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.887s
+FAIL

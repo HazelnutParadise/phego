@@ -1,0 +1,18 @@
+--- FAIL: TestExecutionOracleReplay (0.00s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/array_throw_caught_chain (0.00s)
+            execution_oracle_test.go:486: events=[destroy:first caught:middle destroy:third caught:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first caught:middle destroy:third caught:third previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/array_throw_chain (0.00s)
+            execution_oracle_test.go:486: events=[destroy:first destroy:second destroy:third caught:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first destroy:second destroy:third caught:third previous:second previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/local_cow (0.00s)
+            execution_oracle_test.go:264: shared array lost: []runtime.SnapshotEntry{}
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/array_throw_caught_chain (0.00s)
+            execution_oracle_test.go:486: events=[destroy:first caught:middle destroy:third caught:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first caught:middle destroy:third caught:third previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/array_throw_chain (0.00s)
+            execution_oracle_test.go:486: events=[destroy:first destroy:second destroy:third caught:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first destroy:second destroy:third caught:third previous:second previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/local_cow (0.00s)
+            execution_oracle_test.go:264: shared array lost: []runtime.SnapshotEntry{}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.532s
+FAIL

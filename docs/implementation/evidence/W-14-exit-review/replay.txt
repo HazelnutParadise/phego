@@ -1,0 +1,156 @@
+=== RUN   TestExecutionOracleReplay
+=== RUN   TestExecutionOracleReplay/64
+=== RUN   TestExecutionOracleReplay/64/array_exit
+=== RUN   TestExecutionOracleReplay/64/array_exit_caught
+=== RUN   TestExecutionOracleReplay/64/array_exit_throw
+=== RUN   TestExecutionOracleReplay/64/array_fatal
+=== RUN   TestExecutionOracleReplay/64/array_throw_exit
+=== RUN   TestExecutionOracleReplay/64/array_throw_exit_caught
+=== RUN   TestExecutionOracleReplay/64/array_throw_fatal
+=== RUN   TestExecutionOracleReplay/64/buffer_echo
+=== RUN   TestExecutionOracleReplay/64/buffer_object
+=== RUN   TestExecutionOracleReplay/64/buffer_retained
+=== RUN   TestExecutionOracleReplay/64/destructor_create
+=== RUN   TestExecutionOracleReplay/64/destructor_throw
+=== RUN   TestExecutionOracleReplay/64/die
+=== RUN   TestExecutionOracleReplay/64/exit
+=== RUN   TestExecutionOracleReplay/64/exit_cleanup_exit
+=== RUN   TestExecutionOracleReplay/64/exit_cleanup_throw
+=== RUN   TestExecutionOracleReplay/64/fatal
+=== RUN   TestExecutionOracleReplay/64/fatal_buffer_object
+=== RUN   TestExecutionOracleReplay/64/fatal_shutdown_create
+=== RUN   TestExecutionOracleReplay/64/fatal_shutdown_exit
+=== RUN   TestExecutionOracleReplay/64/flush_throw
+=== RUN   TestExecutionOracleReplay/64/frame_destructor_throw
+=== RUN   TestExecutionOracleReplay/64/frame_exit
+=== RUN   TestExecutionOracleReplay/64/frame_locals
+=== RUN   TestExecutionOracleReplay/64/frame_throw
+=== RUN   TestExecutionOracleReplay/64/normal
+=== RUN   TestExecutionOracleReplay/64/return_finally_array
+=== RUN   TestExecutionOracleReplay/64/return_finally_reference
+=== RUN   TestExecutionOracleReplay/64/return_finally_replace
+=== RUN   TestExecutionOracleReplay/64/return_replaced_destructor
+=== RUN   TestExecutionOracleReplay/64/shutdown_exit
+=== RUN   TestExecutionOracleReplay/64/shutdown_nested_catch
+=== RUN   TestExecutionOracleReplay/64/shutdown_register
+=== RUN   TestExecutionOracleReplay/64/shutdown_throw
+=== RUN   TestExecutionOracleReplay/64/uncaught
+=== RUN   TestExecutionOracleReplay/64/uncaught_shutdown_exit
+=== RUN   TestExecutionOracleReplay/64/warning
+=== RUN   TestExecutionOracleReplay/32
+=== RUN   TestExecutionOracleReplay/32/array_exit
+=== RUN   TestExecutionOracleReplay/32/array_exit_caught
+=== RUN   TestExecutionOracleReplay/32/array_exit_throw
+=== RUN   TestExecutionOracleReplay/32/array_fatal
+=== RUN   TestExecutionOracleReplay/32/array_throw_exit
+=== RUN   TestExecutionOracleReplay/32/array_throw_exit_caught
+=== RUN   TestExecutionOracleReplay/32/array_throw_fatal
+=== RUN   TestExecutionOracleReplay/32/buffer_echo
+=== RUN   TestExecutionOracleReplay/32/buffer_object
+=== RUN   TestExecutionOracleReplay/32/buffer_retained
+=== RUN   TestExecutionOracleReplay/32/destructor_create
+=== RUN   TestExecutionOracleReplay/32/destructor_throw
+=== RUN   TestExecutionOracleReplay/32/die
+=== RUN   TestExecutionOracleReplay/32/exit
+=== RUN   TestExecutionOracleReplay/32/exit_cleanup_exit
+=== RUN   TestExecutionOracleReplay/32/exit_cleanup_throw
+=== RUN   TestExecutionOracleReplay/32/fatal
+=== RUN   TestExecutionOracleReplay/32/fatal_buffer_object
+=== RUN   TestExecutionOracleReplay/32/fatal_shutdown_create
+=== RUN   TestExecutionOracleReplay/32/fatal_shutdown_exit
+=== RUN   TestExecutionOracleReplay/32/flush_throw
+=== RUN   TestExecutionOracleReplay/32/frame_destructor_throw
+=== RUN   TestExecutionOracleReplay/32/frame_exit
+=== RUN   TestExecutionOracleReplay/32/frame_locals
+=== RUN   TestExecutionOracleReplay/32/frame_throw
+=== RUN   TestExecutionOracleReplay/32/normal
+=== RUN   TestExecutionOracleReplay/32/return_finally_array
+=== RUN   TestExecutionOracleReplay/32/return_finally_reference
+=== RUN   TestExecutionOracleReplay/32/return_finally_replace
+=== RUN   TestExecutionOracleReplay/32/return_replaced_destructor
+=== RUN   TestExecutionOracleReplay/32/shutdown_exit
+=== RUN   TestExecutionOracleReplay/32/shutdown_nested_catch
+=== RUN   TestExecutionOracleReplay/32/shutdown_register
+=== RUN   TestExecutionOracleReplay/32/shutdown_throw
+=== RUN   TestExecutionOracleReplay/32/uncaught
+=== RUN   TestExecutionOracleReplay/32/uncaught_shutdown_exit
+=== RUN   TestExecutionOracleReplay/32/warning
+--- PASS: TestExecutionOracleReplay (0.01s)
+    --- PASS: TestExecutionOracleReplay/64 (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_exit_caught (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_exit_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_throw_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_throw_exit_caught (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/array_throw_fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/buffer_echo (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/buffer_object (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/buffer_retained (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/destructor_create (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/destructor_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/die (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/exit_cleanup_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/exit_cleanup_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/fatal_buffer_object (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/fatal_shutdown_create (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/fatal_shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/flush_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/frame_destructor_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/frame_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/frame_locals (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/frame_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/normal (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/return_finally_array (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/return_finally_reference (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/return_finally_replace (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/return_replaced_destructor (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/shutdown_nested_catch (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/shutdown_register (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/shutdown_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/uncaught (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/uncaught_shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/64/warning (0.00s)
+    --- PASS: TestExecutionOracleReplay/32 (0.01s)
+        --- PASS: TestExecutionOracleReplay/32/array_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_exit_caught (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_exit_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_throw_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_throw_exit_caught (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/array_throw_fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/buffer_echo (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/buffer_object (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/buffer_retained (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/destructor_create (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/destructor_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/die (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/exit_cleanup_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/exit_cleanup_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/fatal (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/fatal_buffer_object (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/fatal_shutdown_create (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/fatal_shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/flush_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/frame_destructor_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/frame_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/frame_locals (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/frame_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/normal (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/return_finally_array (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/return_finally_reference (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/return_finally_replace (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/return_replaced_destructor (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/shutdown_nested_catch (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/shutdown_register (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/shutdown_throw (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/uncaught (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/uncaught_shutdown_exit (0.00s)
+        --- PASS: TestExecutionOracleReplay/32/warning (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.910s
