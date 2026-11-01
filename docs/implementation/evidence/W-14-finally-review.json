@@ -1,0 +1,189 @@
+{
+  "scope": "W-14 finally-return suppression regression; local actions, not PHP VM acceptance",
+  "baseline_commit": "0078c47d1c826f835992262fa708709ffe2bc222",
+  "requirements": [
+    "REQ-020",
+    "REQ-040"
+  ],
+  "acceptance_scenarios": [
+    "T-039",
+    "T-040",
+    "T-079",
+    "T-080"
+  ],
+  "product_test_status": "not_run",
+  "local_status": "pass",
+  "findings": [
+    "PRRT_kwDOVadPy86ycsvi"
+  ],
+  "commands": [
+    {
+      "command": "gofmt -l internal (assert empty stdout)",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/go.txt",
+      "sha256": "53decd649ac12dd7ef909e01ad0f4b53daff07b95524651dae16302a2254d4e2"
+    },
+    {
+      "command": "go test -race ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/race.txt",
+      "sha256": "16f4cf78fee6848adcb03b9e01135a2a559674a45d249289ff0e715597788f01"
+    },
+    {
+      "command": "go vet ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/vet.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/oracle64.txt",
+      "sha256": "0cb91feecad17790eb03de6c76567e98ac99ccb5f2fa4d33e3288bee0e9431b5"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py --width 32",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/oracle32.txt",
+      "sha256": "676543e19e0a3e8c3047fa22fdac61e2910468395092e616ecd165ffbf1fd305"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/replay.txt",
+      "sha256": "5d7067b1a47fbd6a35ae69383e73a0eca4c4ad05246401154d5e9c0e8cfe35e7"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 ./internal/runtime",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/runtime-final.txt",
+      "sha256": "d36aeb45f8b8ea5505e8c8e12a1bb7d8525d0aa72c11a6b73886ae8d17e29127"
+    },
+    {
+      "command": "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime (temporary pinned W-12 archive plus W-14 execution*.go and fixtures)",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/w12.txt",
+      "sha256": "09b52e68bc786e609d863d67f5d94bbc5fc2b7cb57b5c031b1ae0427f2791568"
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/docs.txt",
+      "sha256": "f93f994c5372bc2d3388bcf5702875fa3b61dd9d6a85b6d74d5ce31a5ebb25f8"
+    },
+    {
+      "command": "python3 tools/validate_docs.py --no-write",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/docs-readonly.txt",
+      "sha256": "f93f994c5372bc2d3388bcf5702875fa3b61dd9d6a85b6d74d5ce31a5ebb25f8"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-finally-review/python.txt",
+      "sha256": "015cc069500affaa0b16e3150e6e752d138dbadd0f4cd6d58565bc5738a74ebd"
+    }
+  ],
+  "regressions": [
+    {
+      "baseline": "0078c47d1c826f835992262fa708709ffe2bc222",
+      "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay/(64|32)/(finally_return_suppresses_throw|array_finally_return_suppresses_throw|finally_return_object_suppresses_throw)$' ./internal/runtime",
+      "before_exit_code": 1,
+      "before_evidence": "docs/implementation/evidence/W-14-finally-review/red.txt",
+      "sha256": "a37f5a40b4de035e130fcfe3fc9e56b2c690d8cea4979e197eb6f646cce504bd",
+      "after_evidence": "docs/implementation/evidence/W-14-finally-review/replay.txt",
+      "reproduction": "python3 - <<'PYCODE'\nimport tempfile, subprocess, shutil, os\nfrom pathlib import Path\nroot = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='phego-w14-finally-red-') as tmp:\n    p = Path(tmp)\n    subprocess.run(['tar', '-x', '-C', str(p)], input=subprocess.check_output(['git', 'archive', '0078c47d1c826f835992262fa708709ffe2bc222']), check=True)\n    shutil.copy2(root / 'internal/runtime/execution_oracle_test.go', p / 'internal/runtime/execution_oracle_test.go')\n    shutil.copytree(root / 'tests/lifecycle/w14', p / 'tests/lifecycle/w14', dirs_exist_ok=True)\n    result = subprocess.run(['go', 'test', '-count=1', '-run', '^TestExecutionOracleReplay/(64|32)/(finally_return_suppresses_throw|array_finally_return_suppresses_throw|finally_return_object_suppresses_throw)$', './internal/runtime'], cwd=p, env={**os.environ, 'CGO_ENABLED': '0', 'GOWORK': 'off'})\n    raise SystemExit(result.returncode)\nPYCODE"
+    }
+  ],
+  "environment": {
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "go": "go version go1.26.5 darwin/arm64",
+    "python": "3.9.6",
+    "docker": "29.8.2 / 29.8.2"
+  },
+  "recorded_at_utc": "2026-11-01T17:30:55.228029+00:00",
+  "input_sha256": {
+    ".github/workflows/semantics-lifecycle.yml": "268d6659d26b45959100022e5b50442b1ea1f3a3faef1e8e36e2c173d24c778a",
+    "tools/lifecycle_reference.py": "1115aec71f1dac4378299db45b405d98676c3fb6bfdca819456ca2ceda5d944e",
+    "tools/test_lifecycle_reference.py": "a742909f87e3bdea915052613089341d35dc5270712e0757c649c6c455ddcd10",
+    "docs/implementation/W-14.md": "37698c4fb7330a05493b65f164210895730d7e7cbd79ba6d9c3df539700f4488",
+    "internal/runtime/execution_ci_review_test.go": "7e451a7e0ac37cf84981d9497f7b504c2df3f2cb8ce7990e0cd256beba429d97",
+    "internal/runtime/execution.go": "f181975daa46b62f7469d2127a52c14992a8e75def68ac2b93ea94e49313b227",
+    "internal/runtime/execution_review_test.go": "8996f23e22fe173f18279fa2d31828afb4542a4468235e2e31a457cbae26104c",
+    "internal/runtime/execution_slots_review_test.go": "0fda6de66c8eb02446cc7a36965272ac1a5b5652877fc1831439a504c3db0f1c",
+    "internal/runtime/execution_catch_test.go": "0c5ebd40864748ec491e3b203a6290dd939f87ca2ca058e796feff41d73421e3",
+    "internal/runtime/execution_output.go": "e12e3313985d5085430e1078a90529ff897256911dd8f3aef216dd1236fe2694",
+    "internal/runtime/execution_finally_review_test.go": "cbb5e793aacf5a9a92e5fe09e1387e0b51685816de6b4854bb8708ee0c14863e",
+    "internal/runtime/execution_destruct.go": "9229047299a8e8930ce92c44b21986ac935ba244ec8d835745f25998bb81ee42",
+    "internal/runtime/execution_test.go": "6b84a0a59450e25d157102241bbe26ccb41e330ccad4b709808b2c9e8685113c",
+    "internal/runtime/execution_oracle_test.go": "e63615eff969c7f782412c2769875529b481bb83753553b9a545db832c7292c5",
+    "internal/runtime/execution_snapshot_test.go": "62801091c1acb8f2065e2cd414ef1d5f8d6a72102cdb6f4b186ce31f3aad3259"
+  },
+  "profiles": [
+    {
+      "width": 64,
+      "cases": 46,
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "reference": "tests/lifecycle/w14/reference.json",
+      "sha256": "972158ffc1dd38bbe1fdc2140a149adb0c5e6bff664531b40d7ffd73bfc0c180"
+    },
+    {
+      "width": 32,
+      "cases": 46,
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "reference": "tests/lifecycle/w14/reference-32.json",
+      "sha256": "dba01df0dfcd520fa1dbff08e6ec99738fde96e01d47af691df4cb24aa7041ab"
+    }
+  ],
+  "width_comparison": {
+    "cases": 46,
+    "differences": [],
+    "fields": [
+      "case",
+      "exit_code",
+      "stdout",
+      "stderr",
+      "combined"
+    ]
+  },
+  "w12_compatibility": {
+    "head": "411f5da66960884b36a4b373bc4d692a5665498e",
+    "state": "PR #72 remains open; no W-12 files edited",
+    "result": "pass",
+    "reproduction": "python3 - <<'PYCODE'\nimport tempfile, subprocess, shutil, os\nfrom pathlib import Path\nroot = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='phego-w14-ci-final-integration-') as tmp:\n    p = Path(tmp)\n    subprocess.run(['tar', '-x', '-C', str(p)], input=subprocess.check_output(['git', 'archive', '411f5da66960884b36a4b373bc4d692a5665498e']), check=True)\n    for f in (root / 'internal/runtime').glob('execution*.go'):\n        shutil.copy2(f, p / 'internal/runtime' / f.name)\n    shutil.copytree(root / 'tests/lifecycle/w14', p / 'tests/lifecycle/w14', dirs_exist_ok=True)\n    result = subprocess.run(['go', 'test', './internal/runtime'], cwd=p, env={**os.environ, 'CGO_ENABLED': '0', 'GOWORK': 'off'})\n    raise SystemExit(result.returncode)\nPYCODE"
+  },
+  "behavior": [
+    "A finally return suppresses the current frame body throw before return replacement or local teardown.",
+    "The enclosing pending exception remains available to later destructors.",
+    "Normal finally preserves the body throw; a throwing finally chains it.",
+    "A used return object is released exactly once when a destructor replaces the return; the suppressed throw stays absent."
+  ],
+  "review": {
+    "independent_adversarial_review": "no confirmed findings after fix",
+    "remote_latest_head": "pending push and re-review"
+  },
+  "security_assessment": "needs_regression; no VM acceptance",
+  "remaining_gaps": [
+    "PHP source execution and VM integration remain not_run.",
+    "This is a pre-push snapshot. Latest remote CI and Codex review are linked from W-14.md and must be verified separately."
+  ]
+}

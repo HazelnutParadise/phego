@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 43 {
-		t.Fatalf("want 43 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 46 {
+		t.Fatalf("want 46 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -220,6 +220,59 @@ func replayExecutionOracle(t *testing.T, width int) {
 						return next
 					}
 					event("returned")
+				case "finally_return_suppresses_throw", "array_finally_return_suppresses_throw", "finally_return_object_suppresses_throw":
+					body := func(x *execution) completion {
+						v, err := x.object("FinallyLocal", func(*execution) completion {
+							event("destroy:local")
+							return completion{kind: endThrow, err: errors.New("destructor")}
+						})
+						must(err)
+						must(x.local(&v))
+						return completion{kind: endThrow, err: errors.New("suppressed")}
+					}
+					finally := func(x *execution) completion {
+						event("finally")
+						if tc.Case == "finally_return_object_suppresses_throw" {
+							v, err := x.object("Returned", func(*execution) completion {
+								event("destroy:returned")
+								return completion{kind: endThrow, err: errors.New("returned")}
+							})
+							must(err)
+							return completion{kind: endReturn, value: v}
+						}
+						return completion{kind: endReturn, value: nullValue()}
+					}
+					var c completion
+					if strings.HasPrefix(tc.Case, "array_") {
+						c = x.call(func(x *execution) completion {
+							a := x.heap.newArrayValue()
+							must(x.local(&a))
+							first, err := x.object("Earlier", func(*execution) completion {
+								event("destroy:first")
+								return completion{kind: endThrow, err: errors.New("first")}
+							})
+							must(err)
+							second, err := x.object("FinallyReturn", func(x *execution) completion { return x.call(body, finally) })
+							must(err)
+							must(x.heap.setElement(&a, bytesValue([]byte("first")), first))
+							must(x.heap.setElement(&a, bytesValue([]byte("second")), second))
+							return completion{}
+						}, nil)
+					} else {
+						c = x.call(body, finally)
+					}
+					if c.kind != endThrow {
+						t.Fatalf("expected destructor exception: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					for previous := c.previous; previous != nil; {
+						var prior completion
+						if !errors.As(previous, &prior) {
+							t.Fatalf("non-completion previous: %v", previous)
+						}
+						event("previous:" + prior.err.Error())
+						previous = prior.previous
+					}
 				case "return_replaced_destructor":
 					c := x.call(func(x *execution) completion {
 						v, err := x.object("ReturnTracked", func(x *execution) completion { event("destroy:returned"); return x.write([]byte("R")) })

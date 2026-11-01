@@ -206,5 +206,8 @@
   "remaining_gaps": [
     "PHP source execution and VM integration remain not_run.",
     "This is a pre-push snapshot. Latest remote CI and Codex review are linked from W-14.md and must be verified separately."
-  ]
+  ],
+  "snapshot_commit": "0078c47d1c826f835992262fa708709ffe2bc222",
+  "snapshot_note": "Historical 43-case snapshot; later finally suppression regressions are in the followup record.",
+  "followup_evidence": "docs/implementation/evidence/W-14-finally-review.json"
 }

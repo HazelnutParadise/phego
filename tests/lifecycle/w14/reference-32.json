@@ -32,6 +32,13 @@
       "combined": "destroy:array-a\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BAS)]"
     },
     {
+      "case": "array_finally_return_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\nfinally\ndestroy:local\ncaught:destructor\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\nfinally\ndestroy:local\ncaught:destructor\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
       "case": "array_throw_caught_chain",
       "exit_code": 0,
       "stdout": "[(BSD)]",
@@ -177,6 +184,20 @@
       "stdout": "[(BS)]",
       "stderr": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\nFatal error: body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:exit\nflush:inner\nflush:outer\n",
       "combined": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\nFatal error: body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:exit\nflush:inner\nflush:outer\n[(BS)]"
+    },
+    {
+      "case": "finally_return_object_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "finally\ndestroy:local\ndestroy:returned\ncaught:returned\nprevious:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\ndestroy:local\ndestroy:returned\ncaught:returned\nprevious:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
+      "case": "finally_return_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "finally\ndestroy:local\ncaught:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\ndestroy:local\ncaught:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
     },
     {
       "case": "flush_throw",
@@ -336,6 +357,7 @@
     "array_exit_caught.php": "5bf22790cd750cbc2fa3971ee8c80bd16486e87f54c474bb367590a053b2c276",
     "array_exit_throw.php": "48fe6ddf61ad79f03e1c5a6a32ca52577c88517590897e555c4512e387e26756",
     "array_fatal.php": "883f5a9223149f9d57a974284c84f22486d2e94fd146d19ffebebd7b222ebe6d",
+    "array_finally_return_suppresses_throw.php": "1d3fd12560c578a6f56540d61d5a7c59ab7160ecc6acb24e56e66b295a462be6",
     "array_throw_caught_chain.php": "a774878b9e7f1f0c97607df4d7fde36e2486e4f4e7b982504ae8fb62de431bc2",
     "array_throw_chain.php": "82ef3a1e25d3f18869fbe049dc37ae314e6cf7468b5aaaa2c1a1c35dcd17900f",
     "array_throw_exit.php": "060b7c8de261a3f44cc5a467a8e81bc6d5b6fcbade4964657dce5cd880e5ae76",
@@ -358,6 +380,8 @@
     "fatal_buffer_object.php": "7b1db14d184073377637faaab9c80a6581c72c4c02ce37e82dab07242a057487",
     "fatal_shutdown_create.php": "de129cf010aa13e1ad3840cc727b5342884299dfff8afacf2bd54d07185b615d",
     "fatal_shutdown_exit.php": "8d49ab5d15c9d730223fd95acf55c41884323c54e185684a84d12f1c36d11ef3",
+    "finally_return_object_suppresses_throw.php": "4752f711e46747f2a125cf5f241a5b4c5ee08463db9d0ca80525a50cfde9a511",
+    "finally_return_suppresses_throw.php": "ee9ca7bcf9bcc117b6d37d8c1f2c2c165b8bac4a654ac4ee0de7e564c3087875",
     "flush_throw.php": "6c0ca200757ecfc2838b2bebf51283a7ae2b969e41ed53eb3d0952d489a56597",
     "frame_destructor_throw.php": "ca7f8702945f9e291ace5f784bdd153ae9092b9b81b485fe2c696160a242a424",
     "frame_exit.php": "55820aaffecfa239111fd183c56e397672f91142824cde13af9be71735f04c51",

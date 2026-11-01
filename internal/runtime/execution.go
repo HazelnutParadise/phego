@@ -227,6 +227,7 @@ func (x *execution) call(body, finally executionAction) completion {
 	x.calls++
 	f := &executionFrame{}
 	x.frames = append(x.frames, f)
+	enclosingPending := x.phaseCompletion
 	c := ownReturn(x.invoke(body))
 	if stop := x.check(); stop.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, stop)
@@ -237,6 +238,11 @@ func (x *execution) call(body, finally executionAction) completion {
 		} else {
 			x.calls++
 			if next := x.invoke(finally); next.kind != endNormal {
+				if c.kind == endThrow && next.kind == endReturn {
+					// Finally suppressed this frame's throw. Restore only the
+					// enclosing event before return replacement or local cleanup.
+					x.phaseCompletion = enclosingPending
+				}
 				c = x.replaceOwnedCompletion(c, next)
 			}
 		}
