@@ -44,6 +44,10 @@ REQ-017、T-033、T-034 要求比較呼叫本身也相容，包含不一致與�
 
 `array_sort_user_php8512.go` 對 bool false 反向呼叫一次，保留巢狀排序的 deprecation 狀態。診斷掛點可傳遞 deprecation 或轉型警告處理函式拋出的例外。W-17（issue #21、PR #77）負責正式呼叫與錯誤處理函式接線。回傳參照包住 bool 時不做 bool 補救。W-13（issue #18、PR #73）負責尚未建立的物件／enum 內建比較處理。
 
+排序內部比較接收元素位置。每次使用者函式呼叫都重新解開參照並持有當次值，反向重試不沿用前次快照。回傳值在釋放參數前先持有，直到轉型與診斷結束才釋放。若重試關閉 heap，回傳值仍清理，但禁止再呼叫宿主診斷，並優先保留原始 callback 錯誤。
+
+callback 拋錯與參數清理拋錯分開傳遞。後者保留已產生的比較結果，並在待處理例外下抑制診斷與 false 重試。重試不額外改寫 deprecation 旗標，以保留巢狀排序的重設。對照命令與兩種位元寬度的結果存於證據 `codex_review_revision.additional_regressions`。
+
 空副本保留下一索引，但不複製初始化狀態與迭代位置。`limit == 0` 是 Go 表示未初始化的記號，不是 Zend 欄位布局。內建排序的混合陣列移除空洞時保留原始迭代位置；packed 轉換則使用原有位置映射。這些行為與排序中暫時清空查找索引均有 PHP 對照。
 
 上游版本鎖定 PHP 8.5.12 commit `136e049ac10b032c83018e65b63b6df858943750`。衍生程式保留 Zend 2.00、PHP 3.01 及 libc++ 的完整授權與聲明，見 [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) 與 [UPSTREAM.json](../../third_party/php-sort/UPSTREAM.json)。原創專案程式維持 MIT。
@@ -56,7 +60,7 @@ REQ-017、T-033、T-034 要求比較呼叫本身也相容，包含不一致與�
 | 128 | 1119 | 810 | 138 次，約 29.5 KB |
 | 1024 | 12938 | 9942 | 1038 次，約 243 KB |
 
-比較次數沒有增加，穩定位置表增加配置。各批耗時受背景負載影響而大幅變動，不能據此主張加速。原始樣本、失敗再現及 646 組案例在兩種位元寬度的對照見[排序修正證據](../implementation/evidence/W-12-sorting-php8512.json)。這是 runtime 整數比較量測，不包含 PHP VM 或應用效能。
+比較次數沒有增加，穩定位置表增加配置。各批耗時受背景負載影響而大幅變動，不能據此主張加速。原始樣本、失敗再現及 650 組案例在兩種位元寬度的對照見[排序修正證據](../implementation/evidence/W-12-sorting-php8512.json)。這是 runtime 整數比較量測，不包含 PHP VM 或應用效能。
 
 PHP 次數使用同一個 seed 73 數列，每次追加前以 `(seed*73+19)%9973` 更新，完整受限容器命令、內嵌 PHP 腳本及排序輸出的 JSON 雜湊編碼存於證據的 `native_comparison_probe`。從專案根目錄可重跑：
 
@@ -71,4 +75,5 @@ subprocess.run(probe["command"], check=True)
 
 - 差異案例只涵蓋 PHP 8.5.12 的兩種整數寬度；其他歷史版本、作業系統差異與正式 VM／AOT 尚未驗證。
 - 參照參數／回傳、型別限制及 resource 由後續物件／呼叫／資源工作整合，沒有回報完整 T-013～T-034 已通過。
+- 多個物件解構例外的主例外替換與 previous 鏈尚未建立，由 W-13／W-17 整合，目前 heap 保留首次錯誤。
 - 核心 heap 由單一請求擁有；未加入全域可變狀態、cgo、LLVM、Zend 正式回退、公開 Go 契約變更或新的付費依賴。
