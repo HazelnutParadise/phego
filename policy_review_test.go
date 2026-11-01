@@ -131,3 +131,71 @@ func TestReviewLegacyFilesMixedMountsRequireVerifiableDirectories(t *testing.T) 
 		t.Fatalf("shadowed legacy source leaked: %v", err)
 	}
 }
+
+func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "protected"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "protected", "hidden.php"), []byte("<?php function HIDDEN_SENTINEL( {"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(filepath.Join(root, "protected", "hidden.php"), filepath.Join(root, "alias.php")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "public.php"), []byte("<?php return 1;"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	disk, err := os.OpenRoot(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer disk.Close()
+	for _, useRoot := range []bool{false, true} {
+		name := "FS"
+		grant := FileGrant{Path: "/", FS: disk.FS()}
+		if useRoot {
+			name = "Root"
+			grant.FS = nil
+			grant.Root = root
+		}
+		t.Run(name, func(t *testing.T) {
+			e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{grant, {Path: "/protected", FS: fstest.MapFS{}}}}})
+			result, err := e.RunFile(context.Background(), "/alias.php")
+			var denied *PolicyError
+			if !errors.As(err, &denied) || denied.Rule != RuleNotGranted || result.Status != StatusPolicyDenied {
+				t.Fatalf("hidden hardlink not denied: %+v %v", result, err)
+			}
+			_, err = e.RunFile(context.Background(), "/public.php")
+			if useRoot {
+				var unsupported *UnsupportedError
+				if !errors.As(err, &unsupported) {
+					t.Fatalf("ordinary Root file refused: %v", err)
+				}
+			} else if !errors.As(err, &denied) {
+				t.Fatalf("overlapping disk FS should require Root: %v", err)
+			}
+		})
+	}
+	for _, legacy := range []bool{false, true} {
+		cfg := Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: disk.FS()}}}}
+		name := "/public.php"
+		if legacy {
+			cfg = Config{Files: disk.FS()}
+			name = "public.php"
+		}
+		e := newPolicyEngine(t, cfg)
+		_, err := e.RunFile(context.Background(), name)
+		var unsupported *UnsupportedError
+		if !errors.As(err, &unsupported) {
+			t.Fatalf("standalone source changed: %v", err)
+		}
+	}
+	virtual := fstest.MapFS{"public.php": {Data: []byte("<?php return 1;"), Sys: struct{}{}}}
+	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: virtual}, {Path: "/protected", FS: fstest.MapFS{}}}}})
+	_, err = e.RunFile(context.Background(), "/public.php")
+	var unsupported *UnsupportedError
+	if !errors.As(err, &unsupported) {
+		t.Fatalf("virtual metadata mistaken for disk: %v", err)
+	}
+}
