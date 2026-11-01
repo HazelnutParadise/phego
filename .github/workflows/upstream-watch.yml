@@ -11,6 +11,11 @@ on:
       - 'compat.lock.json'
       - 'tools/upstream_watch.py'
       - 'tools/test_upstream_watch*.py'
+      - 'tools/upstream_update.py'
+      - 'tools/upstream_diff.py'
+      - 'tools/upstream_snapshot.py'
+      - 'tools/test_upstream_update*.py'
+      - 'docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json'
   pull_request:
     paths:
       - '.github/workflows/upstream-watch.yml'
@@ -18,6 +23,11 @@ on:
       - 'compat.lock.json'
       - 'tools/upstream_watch.py'
       - 'tools/test_upstream_watch*.py'
+      - 'tools/upstream_update.py'
+      - 'tools/upstream_diff.py'
+      - 'tools/upstream_snapshot.py'
+      - 'tools/test_upstream_update*.py'
+      - 'docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json'
 
 permissions:
   contents: read
@@ -25,7 +35,7 @@ permissions:
 jobs:
   observe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Observe official release metadata
@@ -36,6 +46,9 @@ jobs:
       - name: Compare with reviewed baseline
         run: |
           python3 tools/upstream_watch.py compare docs/data/php-upstream-baseline.json /tmp/php-upstream-observed.json > /tmp/php-upstream-changes.json 2> /tmp/php-upstream-compare-error.txt || { code=$?; cat /tmp/php-upstream-compare-error.txt >&2; exit "$code"; }
+      - name: Verify sources and classify changed releases
+        run: |
+          python3 tools/upstream_update.py watch docs/data/php-upstream-baseline.json /tmp/php-upstream-observed.json > /tmp/php-upstream-classified.json 2> /tmp/php-upstream-classify-error.txt || { code=$?; cat /tmp/php-upstream-classify-error.txt >&2; exit "$code"; }
       - name: Retain observation and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,10 +57,49 @@ jobs:
           path: |
             /tmp/php-upstream-observed.json
             /tmp/php-upstream-changes.json
+            /tmp/php-upstream-classified.json
             /tmp/php-upstream-observe-error.txt
             /tmp/php-upstream-compare-error.txt
+            /tmp/php-upstream-classify-error.txt
           if-no-files-found: warn
           retention-days: 30
       - name: Require review for changes
         run: |
           python3 -c 'import json,sys; d=json.load(open("/tmp/php-upstream-changes.json")); print(json.dumps(d,indent=2)); sys.exit(0 if d["status"] == "unchanged" else 1)'
+  locked-pair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check adversarial classification and locked official pair
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools -p 'test_upstream_update*.py' -v
+          for version in 8.5.11 8.5.12; do
+            curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 --max-filesize 104857600 \
+              "https://www.php.net/distributions/php-${version}.tar.xz" -o "/tmp/php-${version}.tar.xz"
+          done
+          for run in 1 2; do
+            python3 tools/upstream_update.py pair --lock docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json \
+              /tmp/php-8.5.11.tar.xz /tmp/php-8.5.12.tar.xz > "/tmp/php-upstream-locked-${run}.json"
+          done
+          cmp /tmp/php-upstream-locked-1.json /tmp/php-upstream-locked-2.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/php-upstream-locked-1.json').read_text())
+          expected = json.loads(Path('docs/compatibility/upstream-diff-8.5.11-8.5.12.json').read_text())
+          assert result['classification'] == expected
+          assert result['source_verification'] == 'sha256_verified'
+          assert result['compatibility'] == 'not_assessed'
+          assert any(f['category'] == 'implementation' and f['review'] == 'needs_behavior_regression' for f in result['files'])
+          assert result['regression_candidates']
+          PY
+      - name: Retain reproducible source report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-upstream-locked-pair
+          path: /tmp/php-upstream-locked-*.json
+          if-no-files-found: warn
+          retention-days: 30

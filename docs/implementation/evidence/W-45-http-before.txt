@@ -1,0 +1,85 @@
+FF
+======================================================================
+ERROR: test_protocol_errors_block_one_series_and_preserve_the_next (tools.test_upstream_update_io.UpdateBoundaryTests) (error='IncompleteRead')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 214, in test_protocol_errors_block_one_series_and_preserve_the_next
+    result = upstream_update.observe_changes(baseline, observed, load)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 308, in observe_changes
+    old_archive = load_archive(old_release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 210, in load
+    return upstream_update._fetch_archive(release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 353, in _fetch_archive
+    with opener.open(request, timeout=30) as response:
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1093, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1097, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1152, in _execute_mock_call
+    raise effect
+http.client.IncompleteRead: IncompleteRead(7 bytes read)
+
+======================================================================
+ERROR: test_protocol_errors_block_one_series_and_preserve_the_next (tools.test_upstream_update_io.UpdateBoundaryTests) (error='BadStatusLine')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 214, in test_protocol_errors_block_one_series_and_preserve_the_next
+    result = upstream_update.observe_changes(baseline, observed, load)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 308, in observe_changes
+    old_archive = load_archive(old_release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 210, in load
+    return upstream_update._fetch_archive(release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 353, in _fetch_archive
+    with opener.open(request, timeout=30) as response:
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1093, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1097, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1152, in _execute_mock_call
+    raise effect
+http.client.BadStatusLine: invalid
+
+======================================================================
+ERROR: test_protocol_errors_block_one_series_and_preserve_the_next (tools.test_upstream_update_io.UpdateBoundaryTests) (error='LineTooLong')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 214, in test_protocol_errors_block_one_series_and_preserve_the_next
+    result = upstream_update.observe_changes(baseline, observed, load)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 308, in observe_changes
+    old_archive = load_archive(old_release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 210, in load
+    return upstream_update._fetch_archive(release)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_update.py", line 353, in _fetch_archive
+    with opener.open(request, timeout=30) as response:
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1093, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1097, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1152, in _execute_mock_call
+    raise effect
+http.client.LineTooLong: got more than 65536 bytes when reading header
+
+======================================================================
+FAIL: test_chunk_size_slow_drip_obeys_total_deadline (tools.test_upstream_update_io.UpdateBoundaryTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 188, in test_chunk_size_slow_drip_obeys_total_deadline
+    self.slow_response(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n",
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 180, in slow_response
+    self.assertLess(time.monotonic() - start, 0.5)
+AssertionError: 1.175457583 not less than 0.5
+
+======================================================================
+FAIL: test_open_response_header_slow_drip_obeys_total_deadline (tools.test_upstream_update_io.UpdateBoundaryTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 192, in test_open_response_header_slow_drip_obeys_total_deadline
+    self.slow_response(b"HTTP/1.1 200 OK\r\nX-Slow: ",
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_update_io.py", line 180, in slow_response
+    self.assertLess(time.monotonic() - start, 0.5)
+AssertionError: 1.1693709169999997 not less than 0.5
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.410s
+
+FAILED (failures=2, errors=3)
