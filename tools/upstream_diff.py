@@ -13,7 +13,6 @@ Usage:
   python3 tools/upstream_diff.py OLD.tar.xz NEW.tar.xz --old-version 8.5.11 --new-version 8.5.12
 """
 import argparse
-import io
 import json
 import lzma
 import re
@@ -21,9 +20,9 @@ import sys
 import tarfile
 
 try:
-    from tools.upstream_snapshot import _BoundedTarInfo
+    from tools.upstream_snapshot import _open_archive
 except ImportError:  # run as tools/upstream_diff.py
-    from upstream_snapshot import _BoundedTarInfo
+    from upstream_snapshot import _open_archive
 
 MAX_ARCHIVE = 100 * 1024 * 1024
 MAX_FILE = 32 * 1024 * 1024
@@ -31,6 +30,10 @@ MAX_FILE = 32 * 1024 * 1024
 MAX_MEMBERS = 100_000
 MAX_UNPACKED = 512 * 1024 * 1024
 MAX_KEPT = 64 * 1024 * 1024
+MAX_CONDITION_DEPTH = 128
+MAX_CONDITION_BYTES = 64 * 1024
+MAX_SIGNATURE_BYTES = 8 * 1024 * 1024
+MAX_STUB_BYTES = 64 * 1024 * 1024
 
 # Source path prefixes and NEWS sections mapped to the work packages that
 # implement them. The longest matching prefix wins; unmatched paths map to
@@ -301,14 +304,17 @@ def parse_stubs(text):
     semicolon, for example "function strlen(string $string): int". Doc
     comments and attributes do not count, so editing them is no change.
     Class signatures include extends and implements lists.
+    Oversized condition trees or generated signatures raise ValueError.
     """
     cleaned = _strip_metadata(text)
     tokens = _tokenize(cleaned)
-    symbols = {}
+    signature_fragments = {}
+    signature_bytes_used = 0
     scopes = []
     base_namespace = ""
     depth = 0
     conditions = []
+    condition_bytes = 0
 
     def namespace_now():
         return scopes[-1]["namespace"] if scopes else base_namespace
@@ -320,12 +326,29 @@ def parse_stubs(text):
         return scopes[-1].get("kind") if scopes else None
 
     def record(symbol, signature):
+        nonlocal signature_bytes_used
         signature = signature.replace(_PP, "")
+        symbol_size = len(symbol.encode("utf-8"))
+        signature_size = len(signature.encode("utf-8"))
         if conditions:
-            signature = f"[{' && '.join(conditions)}] {signature}"
-        if symbol in symbols:
-            signature = symbols[symbol] + "\n" + signature
-        symbols[symbol] = signature
+            prefix_size = condition_bytes + 3
+        else:
+            prefix_size = 0
+        fragments = signature_fragments.get(symbol)
+        additional = symbol_size if fragments is None else 1
+        additional += prefix_size + signature_size
+        if signature_bytes_used + additional > MAX_SIGNATURE_BYTES:
+            raise ValueError("stub signature limit exceeded")
+        signature_bytes_used += additional
+        if conditions:
+            condition = " && ".join("".join(parts) for parts in conditions)
+            prefix = f"[{condition}] "
+        else:
+            prefix = ""
+        if fragments is None:
+            signature_fragments[symbol] = [prefix + signature]
+        else:
+            fragments.append(prefix + signature)
 
     index = 0
     while index < len(tokens):
@@ -333,13 +356,29 @@ def parse_stubs(text):
         if kind == "pp":
             directive, _, condition = value.partition(" ")
             if directive in ("if", "ifdef", "ifndef"):
-                conditions.append(value)
+                added = len(value.encode("utf-8")) + (4 if conditions else 0)
+                if (len(conditions) >= MAX_CONDITION_DEPTH
+                        or condition_bytes + added > MAX_CONDITION_BYTES):
+                    raise ValueError("stub condition limit exceeded")
+                conditions.append([value])
+                condition_bytes += added
             elif directive == "elif" and conditions:
-                conditions[-1] = f"{conditions[-1]} / {value}"
+                added = len(value.encode("utf-8")) + 3
+                if condition_bytes + added > MAX_CONDITION_BYTES:
+                    raise ValueError("stub condition limit exceeded")
+                conditions[-1].extend((" / ", value))
+                condition_bytes += added
             elif directive == "else" and conditions:
-                conditions[-1] = f"{conditions[-1]} / else"
+                added = len(" / else".encode("utf-8"))
+                if condition_bytes + added > MAX_CONDITION_BYTES:
+                    raise ValueError("stub condition limit exceeded")
+                conditions[-1].append(" / else")
+                condition_bytes += added
             elif directive == "endif" and conditions:
-                conditions.pop()
+                condition_bytes -= sum(len(part.encode("utf-8"))
+                                       for part in conditions.pop())
+                if conditions:
+                    condition_bytes -= 4
             index += 1
             continue
         if kind == "symbol":
@@ -492,7 +531,8 @@ def parse_stubs(text):
 
         index += 1
 
-    return symbols
+    return {symbol: "\n".join(fragments)
+            for symbol, fragments in signature_fragments.items()}
 
 
 def grammar_symbols(parser_y):
@@ -610,6 +650,7 @@ def read_archive(data, version):
     *.phpt and NEWS are read. .phpt files are kept as bytes so tests are
     compared byte for byte; the others are decoded as UTF-8 with
     replacement. PAX and GNU metadata is bounded as in upstream_snapshot.
+    XZ and legacy LZMA decoder memory and decoded output are bounded there too.
     Archives larger than MAX_ARCHIVE, members larger than MAX_FILE, more than
     MAX_MEMBERS members, more than MAX_UNPACKED bytes unpacked in all, more
     than MAX_KEPT bytes of kept files, paths outside the root, absolute paths
@@ -624,7 +665,7 @@ def read_archive(data, version):
     seen = set()
     unpacked = kept = 0
     try:
-        with tarfile.open(fileobj=io.BytesIO(data), mode="r|*", tarinfo=_BoundedTarInfo) as stream:
+        with _open_archive(data, MAX_UNPACKED, MAX_MEMBERS) as stream:
             for member in stream:
                 if len(seen) >= MAX_MEMBERS:
                     raise ValueError("too many archive members")
@@ -666,9 +707,16 @@ def _stub_map(files):
     # several stubs (apache_request_headers, PASSWORD_ARGON2_PROVIDER), and a
     # change to any one of them must be reported.
     stubs = {}
+    stub_bytes = 0
     for path in sorted(files):
         if path.endswith(".stub.php"):
             for symbol, signature in parse_stubs(files[path]).items():
+                entry_bytes = (len(symbol.encode("utf-8"))
+                               + len(path.encode("utf-8"))
+                               + len(signature.encode("utf-8")))
+                if stub_bytes + entry_bytes > MAX_STUB_BYTES:
+                    raise ValueError("aggregate stub size limit exceeded")
+                stub_bytes += entry_bytes
                 stubs[(symbol, path)] = signature
     return stubs
 
