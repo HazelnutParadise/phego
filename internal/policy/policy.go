@@ -187,7 +187,7 @@ func New(spec Spec) (*Policy, error) {
 				return nil, &SpecError{Field: field, Reason: fmt.Sprintf("port %d is out of range", port)}
 			}
 		}
-		g.Scheme, g.Host = strings.ToLower(g.Scheme), strings.ToLower(g.Host)
+		g.Scheme, g.Host = strings.ToLower(g.Scheme), strings.ToLower(strings.TrimSuffix(g.Host, "."))
 		g.Ports = append([]int(nil), g.Ports...)
 		sort.Ints(g.Ports)
 		p.network = append(p.network, g)

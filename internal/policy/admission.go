@@ -15,6 +15,7 @@ type Admission struct {
 	queued   int
 	maxQueue int
 	closed   bool
+	done     chan struct{}
 }
 
 // NewAdmission returns an admission gate for maxActive running and
@@ -27,7 +28,7 @@ func NewAdmission(maxActive, maxQueued int) (*Admission, error) {
 	if maxQueued < 0 {
 		return nil, &SpecError{Field: "MaxQueued", Reason: fmt.Sprintf("%d is negative", maxQueued)}
 	}
-	return &Admission{slots: make(chan struct{}, maxActive), maxQueue: maxQueued}, nil
+	return &Admission{slots: make(chan struct{}, maxActive), maxQueue: maxQueued, done: make(chan struct{})}, nil
 }
 
 // ErrAdmissionClosed reports admission after Close.
@@ -41,6 +42,10 @@ func (a *Admission) Acquire(ctx context.Context) (release func(), err error) {
 		a.mu.Unlock()
 		return nil, ErrAdmissionClosed
 	}
+	if err := ctx.Err(); err != nil {
+		a.mu.Unlock()
+		return nil, err
+	}
 	select {
 	case a.slots <- struct{}{}:
 		a.mu.Unlock()
@@ -48,9 +53,9 @@ func (a *Admission) Acquire(ctx context.Context) (release func(), err error) {
 	default:
 	}
 	if a.queued >= a.maxQueue {
-		used := int64(len(a.slots) + a.queued)
+		used := int64(len(a.slots)) + int64(a.queued)
 		a.mu.Unlock()
-		return nil, &ResourceError{Resource: Executions, Limit: int64(cap(a.slots) + a.maxQueue), Used: used, Requested: 1}
+		return nil, &ResourceError{Resource: Executions, Limit: int64(cap(a.slots)) + int64(a.maxQueue), Used: used, Requested: 1}
 	}
 	a.queued++
 	a.mu.Unlock()
@@ -68,7 +73,13 @@ func (a *Admission) Acquire(ctx context.Context) (release func(), err error) {
 			<-a.slots
 			return nil, ErrAdmissionClosed
 		}
+		if err := ctx.Err(); err != nil {
+			<-a.slots
+			return nil, err
+		}
 		return a.releaser(), nil
+	case <-a.done:
+		return nil, ErrAdmissionClosed
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
@@ -83,7 +94,10 @@ func (a *Admission) releaser() func() {
 // release them.
 func (a *Admission) Close() {
 	a.mu.Lock()
-	a.closed = true
+	if !a.closed {
+		a.closed = true
+		close(a.done)
+	}
 	a.mu.Unlock()
 }
 

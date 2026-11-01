@@ -45,8 +45,8 @@ func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, err
 	return f, nil
 }
 
-// fileGrant finds the most specific mount whose path contains name and
-// allows kind, and returns name relative to it in fs.ValidPath form.
+// fileGrant finds the most specific mount whose path contains name, then checks
+// whether it allows kind, and returns name relative to it in fs.ValidPath form.
 func (p *Policy) fileGrant(kind Kind, op, name string) (FileGrant, string, error) {
 	if !path.IsAbs(name) || strings.ContainsRune(name, 0) {
 		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: "not-absolute"}
@@ -55,9 +55,6 @@ func (p *Policy) fileGrant(kind Kind, op, name string) (FileGrant, string, error
 	var best FileGrant
 	found := false
 	for _, g := range p.files {
-		if kind == FileWrite && !g.Write {
-			continue
-		}
 		if clean != g.Path && !strings.HasPrefix(clean, strings.TrimSuffix(g.Path, "/")+"/") {
 			continue
 		}
@@ -66,14 +63,12 @@ func (p *Policy) fileGrant(kind Kind, op, name string) (FileGrant, string, error
 		}
 	}
 	if !found {
-		rule := "outside-root"
-		if kind == FileWrite {
-			if _, _, err := p.fileGrant(FileRead, op, name); err == nil {
-				rule = "not-granted" // mounted, but read-only
-			}
-		}
-		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: rule}
+		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: "outside-root"}
 	}
+	if kind == FileWrite && !best.Write {
+		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: "not-granted"}
+	}
+
 	rel := strings.TrimPrefix(strings.TrimPrefix(clean, best.Path), "/")
 	if rel == "" {
 		rel = "."

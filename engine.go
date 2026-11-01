@@ -337,6 +337,11 @@ func WithGlobal(name string, v Value) RunOption {
 
 // Run executes program in a new isolated execution.
 func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (*Result, error) {
+	return e.run(ctx, program, false, opts...)
+}
+
+// run reuses a slot already held by RunFile when admitted is true.
+func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
@@ -360,18 +365,20 @@ func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
-	release, err := e.admit(ctx)
-	if err != nil {
-		var re *ResourceError
-		switch {
-		case errors.As(err, &re):
-			return &Result{Status: StatusPolicyDenied}, err
-		case ctx.Err() != nil:
-			return &Result{Status: StatusCancelled}, err
+	if !admitted {
+		release, err := e.admit(ctx)
+		if err != nil {
+			var re *ResourceError
+			switch {
+			case errors.As(err, &re):
+				return &Result{Status: StatusPolicyDenied}, err
+			case ctx.Err() != nil:
+				return &Result{Status: StatusCancelled}, err
+			}
+			return &Result{Status: StatusFailed}, err
 		}
-		return &Result{Status: StatusFailed}, err
+		defer release()
 	}
-	defer release()
 	// Execution arrives with the VM; until then a run never claims success.
 	return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "PHP execution"}
 }
@@ -385,13 +392,30 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
-	// A relative path is relative to "/", where the deprecated Files field
-	// mounts its file system.
-	phpPath := path
-	if !strings.HasPrefix(phpPath, "/") {
-		phpPath = "/" + phpPath
+	release, err := e.admit(ctx)
+	if err != nil {
+		status := StatusFailed
+		var re *ResourceError
+		switch {
+		case errors.As(err, &re):
+			status = StatusPolicyDenied
+		case ctx.Err() != nil:
+			status = StatusCancelled
+		}
+		return &Result{Status: status}, err
 	}
-	f, err := e.openFile(phpPath)
+	defer release()
+	var f fs.File
+	if e.cfg.Files != nil && len(e.cfg.Policy.Files) == 0 {
+		// Keep the legacy FS's path interpretation and errors unchanged.
+		f, err = e.cfg.Files.Open(path)
+	} else {
+		phpPath := path
+		if !strings.HasPrefix(phpPath, "/") {
+			phpPath = "/" + phpPath
+		}
+		f, err = e.openFile(phpPath)
+	}
 	var pe *PolicyError
 	if errors.As(err, &pe) {
 		if len(e.cfg.Policy.Files) == 0 && e.cfg.Files == nil {
@@ -414,7 +438,7 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
-	return e.Run(ctx, program, opts...)
+	return e.run(ctx, program, true, opts...)
 }
 
 // Close stops new work and waits for running work until ctx ends. It does

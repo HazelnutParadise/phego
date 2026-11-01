@@ -64,14 +64,14 @@ func TestRunFileLegacyFilesCompatibility(t *testing.T) {
 		"a.php":   {Data: []byte("<?php return 1;")},
 		"bad.php": {Data: []byte("<?php 1 <")},
 	}})
-	for _, path := range []string{"a.php", "/a.php"} {
+	for _, path := range []string{"a.php"} {
 		_, err := e.RunFile(ctx, path)
 		var ue *UnsupportedError
 		if !errors.As(err, &ue) {
 			t.Fatalf("RunFile(%q) error = %v, want *UnsupportedError after a successful read and compile", path, err)
 		}
 	}
-	for _, path := range []string{"bad.php", "/bad.php"} {
+	for _, path := range []string{"bad.php"} {
 		_, err := e.RunFile(ctx, path)
 		var pe *PHPError
 		if !errors.As(err, &pe) {
