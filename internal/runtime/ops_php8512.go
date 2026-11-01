@@ -502,7 +502,6 @@ func (h *heap) concat(a, b value) (value, error) {
 // arrayUnion is array + array: a copy of a with b's absent keys appended.
 func (h *heap) arrayUnion(a, b *phpArray) value {
 	out := h.duplicate(a)
-	out.copiedFrom = nil
 	pos := 0
 	for e, ok := b.next(&pos); ok; e, ok = b.next(&pos) {
 		if _, found := out.find(e.key); found {

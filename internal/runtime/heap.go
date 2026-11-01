@@ -159,7 +159,10 @@ func (h *heap) freeArray(a *phpArray) error {
 			first = err
 		}
 	}
-	a.buckets, a.index, a.live, a.copiedFrom = nil, nil, 0, nil
+	for it := range a.cursors {
+		delete(it.arrays, a)
+	}
+	a.buckets, a.index, a.live, a.cursors = nil, nil, 0, nil
 	return first
 }
 
@@ -281,12 +284,15 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
-	dup := &phpArray{nextFree: src.nextFree, copiedFrom: src}
+	dup := &phpArray{nextFree: src.nextFree}
 	if !src.packed() {
 		dup.index = make(map[arrayKey]int, src.live)
 	}
 	pos := 0
 	for b, ok := src.next(&pos); ok; b, ok = src.next(&pos) {
+		if pos-1 < src.pointer {
+			dup.pointer++
+		}
 		v := b.val
 		if v.kind == valueReference && v.ref.refcount == 1 &&
 			(v.ref.target.kind != valueArray || v.ref.target.array != src) {
@@ -299,6 +305,23 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		dup.buckets = append(dup.buckets, &bucket{key: b.key, val: v})
 		dup.live++
 	}
+	// REQ-017; T-033/034: PHP resets an invalid internal pointer on COW.
+	if dup.pointer >= dup.live {
+		dup.pointer = 0
+	}
+	for it, cursor := range src.cursors {
+		rank := 0
+		for _, b := range src.buckets[:min(cursor, len(src.buckets))] {
+			if b != nil {
+				rank++
+			}
+		}
+		if dup.cursors == nil {
+			dup.cursors = make(map[*arrayIterator]int)
+		}
+		dup.cursors[it] = rank
+		it.arrays[dup] = struct{}{}
+	}
 	return dup
 }
 
@@ -308,7 +331,7 @@ func (h *heap) element(slot *value, key value) (*value, error) {
 	if err != nil {
 		return nil, err
 	}
-	k, err := normalizeKey(key, h.width)
+	k, err := h.arrayKey(key, false)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +382,7 @@ func (h *heap) getElement(container value, key value) (value, bool, error) {
 	if container.kind != valueArray {
 		return value{}, false, nil
 	}
-	k, err := normalizeKey(key, h.width)
+	k, err := h.arrayKey(key, false)
 	if err != nil {
 		return value{}, false, err
 	}
@@ -377,7 +400,7 @@ func (h *heap) unsetElement(slot *value, key value) error {
 	if err != nil {
 		return err
 	}
-	k, err := normalizeKey(key, h.width)
+	k, err := h.arrayKey(key, true)
 	if err != nil {
 		return err
 	}
@@ -391,8 +414,9 @@ func (h *heap) unsetElement(slot *value, key value) error {
 // becomes a shared location that the loop owns, so writes and appends in the
 // body modify the iterated array. Each element is bound to item, and appended
 // elements are visited. When the array is separated by copy-on-write, in the
-// body or by the loop, the cursor moves to the same place in the copy; when the body assigns an unrelated array, iteration restarts at its
-// first element. A tail deletion clamps the cursor, as PHP does, so an
+// body or by the loop, positions are tracked independently in each copy; when
+// the body assigns an unrelated array, iteration starts at its internal pointer.
+// A tail deletion clamps the cursor, as PHP does, so an
 // element appended into the freed slot is still visited.
 func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err error) {
 	var loop value
@@ -410,13 +434,13 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 		h.warnForeach(t)
 		return nil
 	}
-	var cur *phpArray
-	pos := 0
+	it := &arrayIterator{arrays: make(map[*phpArray]struct{})}
 	defer func() {
-		if cur != nil {
-			delete(cur.cursors, &pos)
+		for a := range it.arrays {
+			delete(a.cursors, it)
 		}
 	}()
+	first := true
 	for {
 		t := loop.ref.target
 		if t.kind != valueArray {
@@ -424,36 +448,23 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 			h.warnForeach(t)
 			return nil
 		}
-		replaced := cur != nil && t.array != cur && t.array.copiedFrom != cur
 		a, err := h.separate(&loop)
 		if err != nil {
 			return err
 		}
-		switch {
-		case replaced:
-			pos = 0
-		case cur != nil && a != cur:
-			// A copy keeps the live elements in order without holes, so the
-			// cursor becomes the number of live elements already passed.
-			rank := 0
-			for _, b := range cur.buckets[:min(pos, len(cur.buckets))] {
-				if b != nil {
-					rank++
-				}
-			}
-			pos = rank
-		}
-		if a != cur {
-			if cur != nil {
-				delete(cur.cursors, &pos)
+		pos, known := a.cursors[it]
+		if !known {
+			if !first {
+				pos = a.pointer
 			}
 			if a.cursors == nil {
-				a.cursors = make(map[*int]struct{})
+				a.cursors = make(map[*arrayIterator]int)
 			}
-			a.cursors[&pos] = struct{}{}
+			it.arrays[a] = struct{}{}
 		}
-		cur = a
+		first = false
 		b, ok := a.next(&pos)
+		a.cursors[it] = pos
 		if !ok {
 			return nil
 		}
@@ -741,7 +752,10 @@ func (h *heap) freeGarbage(a *phpArray, dead map[gcNode]bool) error {
 			first = err
 		}
 	}
-	a.buckets, a.index, a.live = nil, nil, 0
+	for it := range a.cursors {
+		delete(it.arrays, a)
+	}
+	a.buckets, a.index, a.live, a.cursors = nil, nil, 0, nil
 	return first
 }
 

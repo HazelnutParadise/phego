@@ -35,21 +35,23 @@ type phpArray struct {
 	index    map[arrayKey]int
 	live     int
 	nextFree int64 // math.MinInt64 until an integer key is inserted
-	// copiedFrom is the array this one was separated from, so an active
-	// foreach can tell copy-on-write separation from replacement.
-	copiedFrom *phpArray
 	// cursors are active foreach positions; a tail deletion clamps them so an
 	// element appended into the freed slot is still visited, as in PHP.
-	cursors map[*int]struct{}
+	// REQ-016/017; T-031/032/034. Each iterator tracks a position in every
+	// separated copy, since the loop may later select any of those arrays.
+	cursors map[*arrayIterator]int
+	pointer int // internal pointer; independent of foreach positions
 }
+
+type arrayIterator struct{ arrays map[*phpArray]struct{} }
 
 func newArray() *phpArray { return &phpArray{nextFree: math.MinInt64} }
 
 func (a *phpArray) packed() bool { return a.index == nil }
 func (a *phpArray) count() int   { return a.live }
 
-// normalizeKey applies PHP 8.5.12 key conversion for the platform width.
-// Floats and composite keys are outside this prototype and return an error.
+// normalizeKey handles keys without operation-specific diagnostics. Runtime
+// element operations use heap.arrayKey for floats, null diagnostics and errors.
 func normalizeKey(k value, width int) (arrayKey, error) {
 	k = k.deref()
 	switch k.kind {
@@ -155,12 +157,23 @@ func (a *phpArray) remove(k arrayKey) (value, bool) {
 	old := a.buckets[i].val
 	if a.packed() {
 		a.buckets = a.buckets[:i]
-		for c := range a.cursors {
-			*c = min(*c, i)
-		}
 	} else {
 		a.buckets[i] = nil
 		delete(a.index, k)
+		for len(a.buckets) > 0 && a.buckets[len(a.buckets)-1] == nil {
+			a.buckets = a.buckets[:len(a.buckets)-1]
+		}
+	}
+	for c, pos := range a.cursors {
+		a.cursors[c] = min(pos, len(a.buckets))
+	}
+	// REQ-017; T-034: keep an invalid pointer at the new end after trimming.
+	// The next append can make that position valid again.
+	a.pointer = min(a.pointer, len(a.buckets))
+	if a.pointer == i {
+		for a.pointer < len(a.buckets) && a.buckets[a.pointer] == nil {
+			a.pointer++
+		}
 	}
 	a.live--
 	return old, true
