@@ -381,13 +381,29 @@ def _serialize_report(report):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog="Limits: archive 100 MiB, JSON input 2 MiB, report 32 MiB. "
+               "Inputs must be regular files, without symlinks. Invalid inputs "
+               "and blocked watch reports exit 2. Pending review exits 0.")
     sub = parser.add_subparsers(dest="command")
-    pair = sub.add_parser("pair", help="Verify two archives against a reviewed release lock")
+    pair = sub.add_parser(
+        "pair", help="Verify two archives against a reviewed release lock",
+        description="The lock contains old/new objects with version, tag, commit, "
+                    "archive_sha256 and announcement. SHA-256 is checked before decoding.",
+        epilog="Example: python3 tools/upstream_update.py pair --lock "
+               "docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json "
+               "php-8.5.11.tar.xz php-8.5.12.tar.xz")
     pair.add_argument("--lock", required=True, help="JSON containing old/new release identities")
     pair.add_argument("old_archive")
     pair.add_argument("new_archive")
-    watch = sub.add_parser("watch", help="Classify version/digest changes in W-02 snapshots")
+    watch = sub.add_parser(
+        "watch", help="Classify version/digest changes in W-02 snapshots",
+        description="Read W-02 schema-2 observation snapshots. Download changed pairs "
+                    "from php.net by default. Metadata-only changes do not download sources. "
+                    "Blocked pairs remain in the JSON output and exit 2.",
+        epilog="Example: python3 tools/upstream_update.py watch "
+               "docs/data/php-upstream-baseline.json observed.json --archive-dir /tmp/php-cache")
     watch.add_argument("baseline")
     watch.add_argument("observed")
     watch.add_argument("--archive-dir", help="Offline cache: <sha256>.tar.xz; missing files block")
