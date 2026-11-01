@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/policy"
 )
@@ -168,7 +169,11 @@ func compilePolicy(cfg *Config, callbacks []string) (*compiledPolicy, error) {
 	pol, err := policy.New(spec)
 	var se *policy.SpecError
 	if errors.As(err, &se) {
-		return nil, &ConfigError{Field: "Policy." + se.Field, Reason: se.Reason}
+		field := se.Field
+		if strings.HasPrefix(field, "Files[") && strings.HasSuffix(field, ".Dir") {
+			field = strings.TrimSuffix(field, ".Dir") + ".Root"
+		}
+		return nil, &ConfigError{Field: "Policy." + field, Reason: se.Reason}
 	}
 	if err != nil {
 		return nil, err

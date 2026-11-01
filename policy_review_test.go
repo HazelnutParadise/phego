@@ -67,3 +67,8 @@ func TestReviewLegacyRunFilePreservesFSPaths(t *testing.T) {
 		}
 	}
 }
+
+func TestReviewRootErrorUsesPublicField(t *testing.T) {
+	_, err := NewEngine(Config{Policy: Policy{Files: []FileGrant{{Path: "/app", Root: "relative"}}}})
+	wantConfigField(t, err, "Policy.Files[0].Root")
+}
