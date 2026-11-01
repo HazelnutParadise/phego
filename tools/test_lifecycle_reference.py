@@ -54,12 +54,88 @@ class LifecycleReferenceTests(unittest.TestCase):
         with patch.object(oracle.subprocess, 'run', side_effect=run):
             with self.assertRaises(subprocess.TimeoutExpired):
                 oracle.collect()
-        name = calls[0][calls[0].index('--name') + 1]
+        command = next(c for c in calls if c[1] == 'run')
+        name = command[command.index('--name') + 1]
         self.assertTrue(name.startswith('phego-w14-'))
-        self.assertEqual(calls[1], ['docker', 'rm', '-f', name])
-        self.assertIn('--network=none', calls[0])
-        self.assertIn('--read-only', calls[0])
-        self.assertIn('--user=65534:65534', calls[0])
+        self.assertEqual(calls[-1], ['docker', 'rm', '-f', name])
+        self.assertIn('--network=none', command)
+        self.assertIn('--read-only', command)
+        self.assertIn('--user=65534:65534', command)
+
+    def test_cold_image_pull_noise_is_separate_from_reference_streams(self):
+        for width in (32, 64):
+            calls = []
+            payload = {'php_version': '8.5.12', 'int_size': width // 8,
+                       'os': 'Linux', 'cases': [{'stderr': 'PHP warning\n'}]}
+
+            def run(argv, **kwargs):
+                calls.append(argv)
+                if argv[1] == 'image':
+                    return subprocess.CompletedProcess(argv, 1, b'', b'missing')
+                if argv[1] == 'run':
+                    return subprocess.CompletedProcess(argv, 0, json.dumps(payload).encode(), b'')
+                return subprocess.CompletedProcess(argv, 0, b'', b'Download complete\n')
+
+            with self.subTest(width=width), patch.object(oracle.subprocess, 'run', side_effect=run):
+                data = oracle.collect(width)
+                self.assertEqual(data['cases'], payload['cases'])
+                self.assertEqual([c[1] for c in calls], ['image', 'pull', 'run', 'rm'])
+                self.assertEqual(calls[1][2:4], ['--platform', 'linux/386' if width == 32 else 'linux/arm64'])
+                self.assertIn('--pull=never', calls[2])
+
+    def test_runner_stderr_and_wrong_profile_are_rejected(self):
+        for stderr, size in [(b'runner warning', 8), (b'', 4)]:
+            def run(argv, **kwargs):
+                payload = {'php_version': '8.5.12', 'int_size': size, 'os': 'Linux', 'cases': []}
+                return subprocess.CompletedProcess(argv, 0, json.dumps(payload).encode(), stderr if argv[1] == 'run' else b'')
+            with self.subTest(stderr=stderr, size=size), patch.object(oracle.subprocess, 'run', side_effect=run):
+                with self.assertRaises(ValueError):
+                    oracle.collect()
+
+    def test_pull_failure_does_not_start_container(self):
+        calls = []
+        def run(argv, **kwargs):
+            calls.append(argv)
+            if argv[1] == 'image':
+                return subprocess.CompletedProcess(argv, 1, b'', b'missing')
+            raise subprocess.CalledProcessError(1, argv, stderr=b'pull failed')
+        with patch.object(oracle.subprocess, 'run', side_effect=run):
+            with self.assertRaises(subprocess.CalledProcessError):
+                oracle.collect()
+        self.assertEqual([c[1] for c in calls], ['image', 'pull'])
+
+    def test_both_profiles_cover_identical_fixtures_and_observed_behavior(self):
+        wide = json.loads(oracle.EXPECTED.read_text())
+        narrow = json.loads((oracle.FIXTURES / 'reference-32.json').read_text())
+        self.assertEqual(narrow['int_size'], 4)
+        self.assertEqual(narrow['image'], oracle.IMAGES[32][1])
+        self.assertEqual(narrow['inputs_sha256'], wide['inputs_sha256'])
+        self.assertEqual(narrow['cases'], wide['cases'])
+
+    def test_cli_width_selects_own_record_and_guards_concurrent_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixtures = Path(directory)
+            wide = fixtures / 'reference.json'
+            narrow = fixtures / 'reference-32.json'
+            payload = {'cases': []}
+            original = json.dumps(payload).encode()
+            wide.write_bytes(original)
+            narrow.write_bytes(original)
+            with patch.object(oracle, 'EXPECTED', wide), patch.object(oracle, 'FIXTURES', fixtures), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                for width, path in [(64, wide), (32, narrow)]:
+                    with patch.object(oracle, 'collect', return_value=payload) as collect:
+                        self.assertEqual(oracle.main(['--width', str(width)]), 0)
+                        collect.assert_called_once_with(width)
+                    def changed(_):
+                        path.write_bytes(b'concurrent edit')
+                        return payload
+                    with patch.object(oracle, 'collect', side_effect=changed):
+                        self.assertEqual(oracle.main(['--width', str(width), '--write']), 1)
+                        self.assertEqual(path.read_bytes(), b'concurrent edit')
+                with self.assertRaises(SystemExit) as invalid:
+                    oracle.main(['--width', '16'])
+                self.assertEqual(invalid.exception.code, 2)
 
 
 if __name__ == '__main__':

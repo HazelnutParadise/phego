@@ -204,6 +204,9 @@
   "command": [
     "docker",
     "run",
+    "--pull=never",
+    "--platform",
+    "linux/arm64",
     "--rm",
     "--name",
     "<unique-container-name>",

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -13,12 +14,27 @@ import (
 // REQ-020, REQ-040; T-039, T-040, T-079, T-080.
 // These are local action replays, not execution of PHP source by Phego.
 func TestExecutionOracleReplay(t *testing.T) {
-	data, err := os.ReadFile("../../tests/lifecycle/w14/reference.json")
+	for _, width := range []int{64, 32} {
+		t.Run(fmt.Sprint(width), func(t *testing.T) {
+			replayExecutionOracle(t, width)
+		})
+	}
+}
+
+func replayExecutionOracle(t *testing.T, width int) {
+	name := "reference.json"
+	if width == 32 {
+		name = "reference-32.json"
+	}
+	data, err := os.ReadFile("../../tests/lifecycle/w14/" + name)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var oracle struct {
-		Cases []struct {
+		IntSize    int    `json:"int_size"`
+		PHPVersion string `json:"php_version"`
+		OS         string `json:"os"`
+		Cases      []struct {
 			Case           string
 			ExitCode       int `json:"exit_code"`
 			Stdout, Stderr string
@@ -26,6 +42,12 @@ func TestExecutionOracleReplay(t *testing.T) {
 	}
 	if err := json.Unmarshal(data, &oracle); err != nil {
 		t.Fatal(err)
+	}
+	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
+		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
+	}
+	if len(oracle.Cases) != 28 {
+		t.Fatalf("want 28 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -39,7 +61,7 @@ func TestExecutionOracleReplay(t *testing.T) {
 			must(r.Admit(func(context.Context) error { return nil }))
 			must(r.BeginInit())
 			must(r.Ready())
-			x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 4096})
+			x, err := newExecution(context.Background(), r, width, nil, executionLimits{32, 64, 4096})
 			must(err)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
@@ -231,9 +253,9 @@ func TestExecutionOracleReplay(t *testing.T) {
 						must(err)
 						second, err := x.object("Tracked", func(x *execution) completion { event("destroy:array-b"); return x.write([]byte("D")) })
 						must(err)
-						zero, err := intValue(0, 64)
+						zero, err := intValue(0, width)
 						must(err)
-						one, err := intValue(1, 64)
+						one, err := intValue(1, width)
 						must(err)
 						must(x.heap.setElement(&a, zero, first))
 						must(x.heap.setElement(&a, one, second))

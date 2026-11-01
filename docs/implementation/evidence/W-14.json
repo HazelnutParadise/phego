@@ -563,5 +563,6 @@
         "test": "TestExecutionReviewHostStopOverridesEarlierDestructorThrow"
       }
     ]
-  }
+  },
+  "ci_followup_evidence": "docs/implementation/evidence/W-14-ci.json"
 }
