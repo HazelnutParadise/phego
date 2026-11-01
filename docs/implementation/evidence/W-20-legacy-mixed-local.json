@@ -1,0 +1,58 @@
+{
+  "scope": "approved_legacy_mixed_mount_regression",
+  "source_commit": "3be6b0e7a00a41215486457ddf43182e95a81913",
+  "recorded_at_utc": "2026-11-01T10:19:48.146956+00:00",
+  "go_version": "go version go1.26.5 darwin/arm64",
+  "product_test_status": "not_run",
+  "approved_contract": "Standalone Config.Files preserves direct Open paths and errors. When mixed with Policy.Files, legacy parent FS must satisfy bounded exact directory enumeration and symlink verification, or refuse the read.",
+  "pre_fix_reproductions": [
+    {
+      "source_commit": "005b5623bb5f48175da13b94d0516246fe148744",
+      "test_file": "policy_review_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace test_file with the final test_source_commit version",
+      "command": "CGO_ENABLED=0 go test . -run TestReviewLegacyFilesMixedMountsRequireVerifiableDirectories -count=1",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestReviewLegacyFilesMixedMountsRequireVerifiableDirectories (0.00s)\n    policy_review_test.go:122: unverifiable mixed parent=phego: unsupported: PHP execution, want permission denial\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego\t0.853s\nFAIL\n",
+      "stderr": "",
+      "test_source_commit": "3be6b0e7a00a41215486457ddf43182e95a81913"
+    }
+  ],
+  "commands": [
+    {
+      "command": "CGO_ENABLED=0 go test -race ./...",
+      "exit_code": 0,
+      "stdout": "ok  \tgithub.com/HazelnutParadise/phego\t1.936s\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t2.060s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "stderr": ""
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go test -c ./internal/policy -o /tmp/phego-policy-windows.test.exe",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 314,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "prior_tool_suite_evidence": "W-20-final-local.json: 466 passing Python tool tests; Python tools unchanged",
+  "limitations": [
+    "VM remains unimplemented; full PHP/application acceptance not_run",
+    "Windows policy tests cross-compiled only",
+    "Trusted FS must confine effects and provide accurate directory metadata"
+  ]
+}
