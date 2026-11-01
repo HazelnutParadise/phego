@@ -11,8 +11,13 @@ func (h *heap) sortArrayUser(slot *value, preserveKeys bool, call func(value, va
 // may preserve a valid true comparison but suppress a false reverse retry.
 func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call func(value, value) (value, error), diagnose func(int, string) error) error {
 	h.sortCompareDeprecated = false
-	return h.sortArray(slot, preserveKeys, func(a, b value) (int, error) {
-		result, err := call(a, b)
+	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (n int, err error) {
+		result, err := h.sortUserCall(a, b, call)
+		defer func(held value) {
+			if e := h.release(held); err == nil {
+				err = e
+			}
+		}(result)
 		if err != nil {
 			return h.sortComparisonResult(result, err, diagnose)
 		}
@@ -42,13 +47,42 @@ func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call 
 			}
 			if !v.boolean {
 				// The retry result is converted once, never recursively retried.
-				result, err = call(b, a)
-				n, err := h.sortComparisonResult(result, err, diagnose)
+				retry, callErr := h.sortUserCall(b, a, call)
+				defer func(held value) {
+					if e := h.release(held); err == nil {
+						err = e
+					}
+				}(retry)
+				n, err = h.sortComparisonResult(retry, callErr, diagnose)
 				return -n, err
 			}
 		}
 		return h.sortComparisonResult(result, nil, diagnose)
-	})
+	}, true)
+}
+
+// REQ-017; T-033/T-034. Return an owned raw result, preserving by-reference
+// return kind. Protect it before releasing this invocation's argument holds,
+// which can run destructors. The caller must release it even after shutdown.
+func (h *heap) sortUserCall(a, b *value, call func(value, value) (value, error)) (result value, err error) {
+	if h.closed {
+		return value{}, ErrHeapClosed
+	}
+	x, y := a.deref(), b.deref()
+	retain(x)
+	retain(y)
+	result, err = call(x, y)
+	retain(result)
+	if e := h.release(y); err == nil {
+		err = e
+	}
+	if e := h.release(x); err == nil {
+		err = e
+	}
+	if err == nil && h.closed {
+		err = ErrHeapClosed
+	}
+	return result, err
 }
 
 // Results follow the constructor/borrowed-value ownership convention. Hold a
@@ -64,8 +98,15 @@ func (h *heap) sortComparisonResult(v value, callErr error, diagnose func(int, s
 	if callErr != nil {
 		return 0, callErr
 	}
+	if h.closed {
+		return 0, ErrHeapClosed
+	}
 	if v.kind == valueObject {
-		return 1, diagnose(levelWarning, "Object of class "+typeName(v)+" could not be converted to int")
+		err = diagnose(levelWarning, "Object of class "+typeName(v)+" could not be converted to int")
+		if err == nil && h.closed {
+			err = ErrHeapClosed
+		}
+		return 1, err
 	}
 	// Existing scalar conversion records diagnostics. Route only the newly
 	// emitted suffix through this call's PHP handler, once, before releasing
@@ -75,8 +116,12 @@ func (h *heap) sortComparisonResult(v value, callErr error, diagnose func(int, s
 	emitted := append([]diagnostic(nil), h.diagnostics[start:]...)
 	h.diagnostics = h.diagnostics[:start]
 	for _, d := range emitted {
-		if e := diagnose(d.level, d.message); err == nil {
-			err = e
+		err = diagnose(d.level, d.message)
+		if err == nil && h.closed {
+			err = ErrHeapClosed
+		}
+		if err != nil {
+			break
 		}
 	}
 	return compareInts(converted, 0), err

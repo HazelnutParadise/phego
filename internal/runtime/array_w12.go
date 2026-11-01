@@ -128,16 +128,36 @@ func (h *heap) foreachValue(arr value, item *value, fn func(arrayKey) error) (er
 // REQ-016/017; T-031/032/033/034. Comparator is trusted runtime code and must
 // propagate cancellation/errors; no comparator is called after an error.
 func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, value) (int, error)) (err error) {
-	return h.sortArrayWithPolicy(slot, preserveKeys, compare, true)
+	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (int, error) {
+		return h.sortCompareValues(a, b, compare)
+	}, true)
 }
 
 // SORT_REGULAR shares the PHP schedule, but native comparisons are not user
 // calls suppressed by a pending callback exception. W-13 owns object handlers.
 func (h *heap) sortArrayRegular(slot *value, preserveKeys bool) error {
-	return h.sortArrayWithPolicy(slot, preserveKeys, h.compare, false)
+	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (int, error) {
+		return h.sortCompareValues(a, b, h.compare)
+	}, false)
 }
 
-func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(value, value) (int, error), stopUserCalls bool) (err error) {
+// REQ-017; T-033/T-034. Retain snapshots only for this invocation. The user
+// adapter receives live locations separately so a bool retry can reload them.
+func (h *heap) sortCompareValues(a, b *value, compare func(value, value) (int, error)) (n int, err error) {
+	x, y := a.deref(), b.deref()
+	retain(x)
+	retain(y)
+	n, err = compare(x, y)
+	if e := h.release(y); err == nil {
+		err = e
+	}
+	if e := h.release(x); err == nil {
+		err = e
+	}
+	return n, err
+}
+
+func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(*value, *value) (int, error), stopUserCalls bool) (err error) {
 	if h.closed {
 		return ErrHeapClosed
 	}
@@ -214,17 +234,8 @@ func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(
 			failure = ErrHeapClosed
 		}
 		if !h.closed && (failure == nil || !stopUserCalls) {
-			xv, yv := x.val.deref(), y.val.deref()
-			retain(xv)
-			retain(yv)
 			var e error
-			n, e = compare(xv, yv)
-			if rerr := h.release(yv); e == nil {
-				e = rerr
-			}
-			if rerr := h.release(xv); e == nil {
-				e = rerr
-			}
+			n, e = compare(&x.val, &y.val)
 			if failure == nil {
 				failure = e
 			}

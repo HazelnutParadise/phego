@@ -79,7 +79,7 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 		return fmt.Errorf("sort_trace throwAt must be a nonnegative integer")
 	}
 	switch mode {
-	case "one", "minus", "zero", "normal", "cycle", "bool", "boolfalse", "booltrue", "boolnested", "boolref", "boolwarntrue", "boolwarnfalse", "object", "objectwarn", "float", "floatwarn":
+	case "one", "minus", "zero", "normal", "cycle", "bool", "boolfalse", "booltrue", "boolnested", "boolref", "boolwarntrue", "boolwarnfalse", "object", "objectwarn", "float", "floatwarn", "boolmutate", "booldiagmutate":
 	default:
 		return fmt.Errorf("unsupported sort_trace mode %q", mode)
 	}
@@ -151,6 +151,16 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 			return m.h.newObject(&class{name: "stdClass"})
 		case "float", "floatwarn":
 			return floatValue(math.Inf(1)), nil
+		case "boolmutate", "booldiagmutate":
+			if calls == 1 {
+				if mode == "boolmutate" {
+					if e := m.h.assign(m.slot("r"), w12Int(10)); e != nil {
+						return value{}, e
+					}
+				}
+				return boolValue(false), nil
+			}
+			return w12Int(a.integer - b.integer), nil
 		case "boolref":
 			n, e := m.h.compare(a, b)
 			if e != nil {
@@ -174,6 +184,12 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 		default:
 			return value{}, fmt.Errorf("unsupported sort_trace mode %q", mode)
 		}
+	}
+	if mode == "booldiagmutate" {
+		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function == "uasort", callback, func(level int, message string) error {
+			m.events = append(m.events, []any{"diagnostic", level, message})
+			return m.h.assign(m.slot("r"), w12Int(10))
+		})
 	}
 	if mode == "boolwarntrue" || mode == "boolwarnfalse" || mode == "objectwarn" || mode == "floatwarn" {
 		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function == "uasort", callback, func(level int, message string) error {

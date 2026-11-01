@@ -154,6 +154,10 @@ function w12_sort_cases() {
             foreach([3,17] as $n) $cases["$function-$mode-$n"]=w12_sort_case($function,$mode,w12_sort_ints($n,'permuted'));
         }
     }
+    // REQ-017; T-033/T-034: bool retry reloads externally referenced values.
+    foreach (['usort','uasort'] as $function) foreach (['boolmutate','booldiagmutate'] as $mode) {
+        $cases["$function-$mode-live-retry"]=[['append','a',1],['append','a',2],['bind_element','r','a',0],['sort_trace','a',$function,$mode,0],['emit','a'],['emit','r']];
+    }
     return $cases;
 }
 
@@ -178,7 +182,7 @@ function w12_sort_trace(&$v, $op, &$out) {
     $calls = 0;
     $mode = $op[3];
     $throwAt = $op[4];
-    $compare = function($a, $b) use (&$out, &$calls, $mode, $throwAt) {
+    $compare = function($a, $b) use (&$v, &$out, &$calls, $mode, $throwAt) {
         $out[] = ['compare', enc($a), enc($b)];
         $calls++;
         if ($throwAt !== 0 && $calls === $throwAt) {
@@ -196,6 +200,9 @@ function w12_sort_trace(&$v, $op, &$out) {
             case 'boolwarnfalse': return false;
             case 'object': case 'objectwarn': return new stdClass;
             case 'float': case 'floatwarn': return INF;
+            case 'boolmutate': case 'booldiagmutate':
+                if ($calls===1) { if($mode==='boolmutate')$v['r']=10;return false; }
+                return $a-$b;
             case 'boolnested':
                 if ($calls===2) { $inner=[2,1]; usort($inner,fn($x,$y)=>$x<=>$y); }
                 return $a > $b;
@@ -217,8 +224,9 @@ function w12_sort_trace(&$v, $op, &$out) {
     }
     $warningThrows=in_array($mode,['boolwarntrue','boolwarnfalse','objectwarn','floatwarn'],true);
     if($warningThrows)set_error_handler(function($level,$message)use(&$out){$out[]=['diagnostic',$level,$message];throw new Exception('comparison warning failed');});
+    if($mode==='booldiagmutate')set_error_handler(function($level,$message)use(&$v,&$out){$out[]=['diagnostic',$level,$message];$v['r']=10;});
     try {
         if ($function === 'usort') usort($v[$op[1]], $compare);
         else uasort($v[$op[1]], $compare);
-    } finally {if($warningThrows)restore_error_handler();}
+    } finally {if($warningThrows||$mode==='booldiagmutate')restore_error_handler();}
 }

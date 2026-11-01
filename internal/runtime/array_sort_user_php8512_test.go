@@ -3,9 +3,125 @@ package runtime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 )
+
+// REQ-017; T-033/T-034: every PHP callback invocation reloads live bucket
+// references, including a retry after a callback or diagnostic handler write.
+func TestW12SortUserRetryLiveReference(t *testing.T) {
+	for _, preserve := range []bool{false, true} {
+		for _, inDiagnostic := range []bool{false, true} {
+			t.Run(fmt.Sprint(preserve, "/", inDiagnostic), func(t *testing.T) {
+				h := testHeap(t)
+				var a, alias value
+				must(t, h.appendValue(&a, h.number(1)))
+				must(t, h.appendValue(&a, h.number(2)))
+				element, err := h.element(&a, h.number(0))
+				must(t, err)
+				must(t, h.bind(&alias, element))
+				calls := [][2]int64{}
+				must(t, h.sortArrayUserWithDiagnostic(&a, preserve, func(x, y value) (value, error) {
+					calls = append(calls, [2]int64{x.integer, y.integer})
+					if len(calls) == 1 {
+						if !inDiagnostic {
+							must(t, h.assign(&alias, h.number(10)))
+						}
+						return boolValue(false), nil
+					}
+					return h.number(x.integer - y.integer), nil
+				}, func(int, string) error {
+					if inDiagnostic {
+						return h.assign(&alias, h.number(10))
+					}
+					return nil
+				}))
+				if want := [][2]int64{{1, 2}, {2, 10}}; !reflect.DeepEqual(calls, want) {
+					t.Fatalf("calls=%v, PHP=%v", calls, want)
+				}
+				for i, want := range []int64{2, 10} {
+					if got := a.deref().array.buckets[i].val.deref().integer; got != want {
+						t.Fatalf("item%d=%d, PHP=%d", i, got, want)
+					}
+				}
+				must(t, h.unset(&alias))
+				must(t, h.unset(&a))
+			})
+		}
+	}
+}
+
+// REQ-017; T-034: retry shutdown must prevent further host diagnostics,
+// preserve the callback error, and release its temporary return object.
+func TestW12SortUserRetryClosedHeap(t *testing.T) {
+	for _, callbackError := range []error{nil, context.Canceled} {
+		t.Run(fmt.Sprint(callbackError), func(t *testing.T) {
+			h := testHeap(t)
+			var a value
+			must(t, h.appendValue(&a, h.number(1)))
+			must(t, h.appendValue(&a, h.number(2)))
+			calls, afterClose := 0, 0
+			var returned *object
+			err := h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+				calls++
+				if calls == 1 {
+					return boolValue(false), nil
+				}
+				v, e := h.newObject(&class{name: "stdClass"})
+				must(t, e)
+				returned = v.object
+				must(t, h.shutdown(&a))
+				return v, callbackError
+			}, func(int, string) error {
+				if h.closed {
+					afterClose++
+				}
+				return nil
+			})
+			want := callbackError
+			if want == nil {
+				want = ErrHeapClosed
+			}
+			if !errors.Is(err, want) || calls != 2 || afterClose != 0 {
+				t.Fatalf("error=%v calls=%d diagnostics-after-close=%d", err, calls, afterClose)
+			}
+			if returned == nil || !returned.freed || returned.refcount != 0 {
+				t.Fatalf("return object not cleaned: %+v", returned)
+			}
+		})
+	}
+}
+
+// REQ-017; T-034: callback return ownership outlives its argument holds.
+func TestW12SortUserBorrowedArgumentResult(t *testing.T) {
+	h := testHeap(t)
+	var a, alias value
+	destroyed := 0
+	v, err := h.newObject(&class{name: "SortResult", destructor: func(*heap, value) error { destroyed++; return nil }})
+	must(t, err)
+	must(t, h.appendValue(&a, v))
+	must(t, h.appendValue(&a, h.number(2)))
+	element, err := h.element(&a, h.number(0))
+	must(t, err)
+	must(t, h.bind(&alias, element))
+	warnings := 0
+	must(t, h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+		must(t, h.assign(&alias, h.number(10)))
+		return x, nil
+	}, func(int, string) error {
+		warnings++
+		if v.object.freed || destroyed != 0 {
+			t.Fatal("borrowed result freed before coercion completed")
+		}
+		return nil
+	}))
+	if warnings != 1 || !v.object.freed || v.object.refcount != 0 || destroyed != 1 {
+		t.Fatalf("warnings=%d destroyed=%d object=%+v", warnings, destroyed, v.object)
+	}
+	must(t, h.unset(&alias))
+	must(t, h.unset(&a))
+}
 
 // REQ-017; T-034: a reference-valued callback result is coerced directly;
 // PHP's bool-return deprecation/retry tests the actual return kind first.
