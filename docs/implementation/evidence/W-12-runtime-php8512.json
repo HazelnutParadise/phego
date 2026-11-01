@@ -13,7 +13,7 @@
     "T-033",
     "T-034"
   ],
-  "status": "local_checks_passed; independent runtime review passed; CI pending",
+  "status": "local_checks_passed; independent runtime review passed; current-head CI and remote review pending",
   "product_acceptance_status": "not_run",
   "source_state": "committed code; documentation/evidence recorded separately",
   "environment": {
@@ -76,12 +76,11 @@
       "platform": "linux/386",
       "php": "8.5.12",
       "integer_width": 32,
-      "cases": 72,
-      "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+      "cases": 98,
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
       "output": "w12-ref-32.json",
-      "output_sha256": "d8b8b4f4b494cf832023998057409ad859a3cb3532fafbc30c8bd316ada307cf",
-      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
-      "metadata_recorded_at_utc": "2026-11-01T05:47:19.578099+00:00"
+      "output_sha256": "be78ec46460cddabfc7c1e4a523eb1e2f41e7529ae99fddf990d7bf54fc2b856",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
     },
     {
       "requirements": [
@@ -137,121 +136,121 @@
       "platform": "linux/arm64",
       "php": "8.5.12",
       "integer_width": 64,
-      "cases": 72,
-      "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+      "cases": 98,
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
       "output": "w12-ref-64.json",
-      "output_sha256": "89adcba8175f4ca68bb8730b72d67316be7de50f3c57763baf3be8b36573b479",
-      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
-      "metadata_recorded_at_utc": "2026-11-01T05:46:59.609299+00:00"
+      "output_sha256": "db7c0869103ee0bec87f7a7d7198b77041bda4827d4a1281c1da9fb68389ad16",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
     }
   ],
   "checks": [
     {
-      "command": "gofmt -l internal",
-      "exit_code": 0,
-      "output": "",
-      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:42:23.024711+00:00"
-    },
-    {
       "command": "CGO_ENABLED=0 go test ./...",
       "exit_code": 0,
-      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t3.764s\n",
-      "output_sha256": "05c01b04d5bc011ef6e30f60c26ffc3cfeb2a10d3f3bbfc8c3d9da53cb67ec3a",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:43:00.451809+00:00"
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t2.424s\n",
+      "output_sha256": "3bc007fa4d54550dd1f99256e9ffcb9e80db27416177a9b176a7f68687dc1e35",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:47:28.128981+00:00"
     },
     {
       "command": "go test -race ./...",
       "exit_code": 0,
-      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t1.674s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
-      "output_sha256": "49cb56ef81569f4321e95270492fbc427c03a6fed80bb4a3a51fb77cc1d79876",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:45:42.932524+00:00"
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t13.341s\n",
+      "output_sha256": "dacd7fc60aa78acb628bac961433d8db90d1d450ec5dc78d1c3f6594c2548440",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:47:44.507554+00:00"
     },
     {
       "command": "go vet ./...",
       "exit_code": 0,
       "output": "",
       "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:41:45.870619+00:00"
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:47:44.527550+00:00"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
+      "exit_code": 0,
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/78 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 78/78 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 5122 (1707/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 6s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 9s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 12s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 15s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 18s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 21s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 24s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 27s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 30s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nfuzz: elapsed: 31s, execs: 5122 (0/sec), new interesting: 7 (total: 85)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.577s\n",
+      "output_sha256": "4a618723338bcc22bfc6c1ef4d51cd7b8f44bcb97a59c0c3922ec6abc24a5806",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:48:17.433267+00:00"
+    },
+    {
+      "command": "go test -run '^$' -bench 'Benchmark(PackedAppend1K|CopyOnWriteSeparation1K|ReferenceBindAndWrite|W12OrderedLookup1K)$' -benchtime 2000x -count 3 ./internal/runtime",
+      "exit_code": 0,
+      "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        56.54 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        55.54 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        52.71 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     49596 ns/op\t  128382 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     46840 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     50306 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27837 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     25556 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     26653 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        48.27 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        46.79 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.71 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.829s\n",
+      "output_sha256": "7306cb7b86cd1cc2dbee51bc24b57f4b77fb508fcc064e050062a991bf4b395d",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:48:18.565845+00:00"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^TestW12Layout$' -v",
+      "exit_code": 0,
+      "output": "=== RUN   TestW12Layout\n    array_w12_safety_test.go:83: value: 64 bytes\n    array_w12_safety_test.go:83: reference: 72 bytes\n    array_w12_safety_test.go:83: arrayKey: 32 bytes\n    array_w12_safety_test.go:83: bucket: 96 bytes\n    array_w12_safety_test.go:83: phpArray: 80 bytes\n    array_w12_safety_test.go:83: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.359s\n",
+      "output_sha256": "9d231a74d2fa4fe883c0faa1793f357dbacc17d85886c86d856acd15de6a5067",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:48:19.058722+00:00"
+    },
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "output": "",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:52:24.581425+00:00"
     },
     {
       "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
       "exit_code": 0,
-      "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 415 tests in 183.778s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
-      "output_sha256": "4d0d4e92c6bc079ccf826faa1e003003de018e89c1c4c09c1bee6d4b447ec5bf",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:46:50.428932+00:00"
+      "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 415 tests in 141.130s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+      "output_sha256": "91f16bb13c6b22d3c085579404dbad0e08b4265591b9125d0cb0e500fee082b6",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Actual executed output; Python tools unchanged since this run; documentation-only edits recorded separately.",
+      "output_last_written_at_utc": "2026-11-01T06:25:55.087836+00:00"
     },
     {
       "command": "python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'",
       "exit_code": 0,
-      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.004s\n\nOK\n",
-      "output_sha256": "cbe4b84d897ac017db0552ccb3a31855ff0fb172bc344c967c4c4c92eb19e624",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:46:58.724538+00:00"
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.003s\n\nOK\n",
+      "output_sha256": "24adda79e21044fef19cdc7f0606a9cd7770fc9a99c705a8622ee923c13bce5d",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:52:25.402259+00:00"
     },
     {
       "command": "PHEGO_W12_REFERENCE=/tmp/w12-reference go test ./internal/runtime -run W12",
       "exit_code": 0,
-      "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.560s\n",
-      "output_sha256": "906f3ff26bc2730a0fb97a3ed685dff149daa3bc3ef13b245affc2821dcda0d8",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:47:20.398043+00:00"
+      "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.550s\n",
+      "output_sha256": "953f34976988fd504909cde936d556003bbce9ea8003195c8f2d1dcf8148d505",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:52:25.323393+00:00"
     },
     {
-      "command": "go test ./internal/runtime -run 'TestW12IterationErrorCleanup|TestW12SnapshotOwnershipAfterCleanup|TestW12Layout' -v",
+      "command": "python3 tools/validate_docs.py",
       "exit_code": 0,
-      "output": "=== RUN   TestW12IterationErrorCleanup\n=== RUN   TestW12IterationErrorCleanup/value\n=== RUN   TestW12IterationErrorCleanup/reference\n--- PASS: TestW12IterationErrorCleanup (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/value (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/reference (0.00s)\n=== RUN   TestW12SnapshotOwnershipAfterCleanup\n--- PASS: TestW12SnapshotOwnershipAfterCleanup (0.00s)\n=== RUN   TestW12Layout\n    array_w12_safety_test.go:82: value: 64 bytes\n    array_w12_safety_test.go:82: reference: 72 bytes\n    array_w12_safety_test.go:82: arrayKey: 32 bytes\n    array_w12_safety_test.go:82: bucket: 96 bytes\n    array_w12_safety_test.go:82: phpArray: 72 bytes\n    array_w12_safety_test.go:82: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.585s\n",
-      "output_sha256": "da0ba9070bba6fd24ab40d85e91addef6cc7a76021c1b9b6d3856db82139da4f",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
-      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
-      "output_last_written_at_utc": "2026-11-01T05:36:39.579461+00:00"
+      "output": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 321,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "output_sha256": "41b406957a237abdee05ecb8892136f8e57f30d3fb51ffe2f550b67e35049e30",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:52:31.269595+00:00"
     },
     {
-      "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
-      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "command": "python3 tools/validate_docs.py --no-write",
       "exit_code": 0,
-      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/13 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 13/13 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 40298 (13428/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 6s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 9s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 12s, execs: 121708 (27122/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 15s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 18s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 21s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 24s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 27s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 30s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 31s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.622s\n",
-      "output_sha256": "7a2e34eafaa89e3a668e6e2def18de017f017177ade89d38892d804a58b9bcb8",
-      "output_last_written_at_utc": "2026-11-01T05:49:17.201687+00:00"
-    },
-    {
-      "command": "python3 tools/validate_docs.py; python3 tools/validate_docs.py --no-write",
-      "exit_code": 0,
-      "result": {
-        "scope": "documentation_only",
-        "status": "pass",
-        "counts": {
-          "chapters": 40,
-          "requirements": 101,
-          "acceptance_scenarios": 202,
-          "work_packages": 60,
-          "decisions": 28,
-          "sources": 57,
-          "local_markdown_links": 319,
-          "checks": 34,
-          "catalogs": {
-            "php-history-policy.json": 7,
-            "competitor-catalog.json": 8,
-            "application-catalog.json": 9
-          }
-        },
-        "product_test_status": "not_run",
-        "errors": []
-      },
-      "note": "Documentation validation is not product acceptance.",
-      "output_last_written_at_utc": "2026-11-01T05:50:55.510265+00:00"
+      "output": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 321,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "output_sha256": "41b406957a237abdee05ecb8892136f8e57f30d3fb51ffe2f550b67e35049e30",
+      "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
+      "version_scope": "Current runtime source; logs predate only added replay tooling and documentation.",
+      "output_last_written_at_utc": "2026-11-01T06:52:31.384401+00:00"
     }
   ],
   "limitations": [
@@ -259,46 +258,51 @@
     "Runtime heap is request-local and single-executor.",
     "VM, typed reference/call, resource and source-location integration remain downstream.",
     "Comparator order/count and post-exception partial permutation are implementation-dependent; no Zend sorting algorithm copied.",
-    "Local benchmark samples are noisy; no speedup claim."
+    "Local benchmark samples are noisy; no speedup claim.",
+    "Pinned arm64 reference crashes with exit 133 / zend_mm_heap corrupted in two optional destructor probes; i386 completes. Neither is counted as conformance pass or converted to skip. Go safe direct-item tests are separate; full object lifecycle is W-13.",
+    "Supplemental 1,200 frozen sequences were replayed only on arm64."
   ],
   "source_sha256": {
-    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
-    "internal/runtime/heap.go": "f15cf85ab75ce8b4c8eee020155e7b9974785c385290d0701349d3b1b471b955",
-    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
-    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
-    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
-    "internal/runtime/array_w12_test.go": "c2612aa928ca58d63075d02e8b1fac8f4317e5aaa1166acf98affa893d238161",
-    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
-    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
-    "internal/runtime/array_w12_safety_test.go": "c26ba0f21e2137a71260dfd74502abd6d613c78b464b539d5d2cdab91fd19b4b",
-    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
-    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
-    "internal/runtime/array_w12_fuzz_test.go": "2f33accef14a95507b175666c33a789be294bcc964dac51b0bf6d01089f5fef1",
-    "internal/runtime/value_test.go": "77c1c65544e0d5a54967104f4acff8943282e6c3a7e5c921fb9738354ed78c6a",
-    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
-    "internal/runtime/array_w12.go": "a45bd06d07cb59274da30d8c679f76e17bf54e3bf656c0625986d6528cdf3f27",
-    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
-    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
-    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
-    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
-    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    ".github/workflows/semantics-arrays.yml": "d4490ead378f3b1176df542515072e662c45dd3ba9feaa766a84d394f51e7aa3",
+    "internal/runtime/array.go": "ddfaf0c6f7e918c75921ea4bcfb25d5296377fbaf5c07c33730ce162559b5fe9",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/array_w12.go": "259a5328e673977462e27bc6aa7eade8109593cbd9ff8b1ddcb3a49755318e2b",
+    "internal/runtime/array_w12_fuzz_test.go": "dd5d0ef510143dcd3243aa34141672802a4a260a99af6eb37d4f9ed9549e6823",
+    "internal/runtime/array_w12_safety_test.go": "e050d8904e93d09838f7dd814f0d837fb2da7fbef8e6e04d4292ff7f5c086e24",
+    "internal/runtime/array_w12_test.go": "8d7d143c6ba193e61ae73ab5221f5261671db1c4e966edbce1a6276d3604ac83",
+    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
+    "internal/runtime/heap.go": "b06c4e8b4ea21bf6b990082d537ce8b143a2d0fc6521578adae3eeacca9a2843",
+    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
+    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
+    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
+    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
+    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
     "internal/runtime/numeric_php8512_fuzz_test.go": "44e5366621e66b2526a751da33b82dac01766c412ebf9d480cca8bce263eb74d",
-    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
     "internal/runtime/ops_php8512.go": "f18b1e88aeb65506b4bf58c6823e76324dfd6db037a0441ce3688ea0780add0a",
     "internal/runtime/ops_php8512_test.go": "db4932ace89fe1ef6b48a25895e4622e8990812d8793ba70d0cb5abb5068e7d3",
-    "internal/runtime/array.go": "8e8c799d047c42a78a8dd2abec2d6e21b51769659766550fa4621dfafc5aaaaf",
-    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
+    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
+    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
+    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
+    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
     "internal/runtime/value.go": "70ff5c9b5e8cc4b001584bada266f3036058bf7a29aee284e4fd79c7e1f6daa4",
-    "tests/semantics/w12-arrays/test_reference.py": "65867665f9f092adc0770267cc4cd676f473d2695918523ab25e4abccbf298d1",
-    "tests/semantics/w12-arrays/matrix.php": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
+    "internal/runtime/value_test.go": "423bd4c06db7f27d78283c3488657eb09a691aa904dfb51ff0606e4e3bef195b",
+    "tests/semantics/w12-arrays/matrix.php": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
     "tests/semantics/w12-arrays/reference.py": "e0cd9ea32c18aaa6118c2074e75585d3f8ce22b757d27475259790e1516a1f2c",
-    ".github/workflows/semantics-arrays.yml": "d4490ead378f3b1176df542515072e662c45dd3ba9feaa766a84d394f51e7aa3"
+    "tests/semantics/w12-arrays/review-foreach.json.gz": "3e88c035c94344270dc6028bd184bd538ec13e8b73463ce5956bbbe94a12789a",
+    "tests/semantics/w12-arrays/review-general.json.gz": "62e2755563ddbbcec7ffee64d551b01b85000980c59d99f2040bccc104d98eae",
+    "tests/semantics/w12-arrays/review_corpus.py": "bc704c303524d78b089e163465073e15a3ca8ab4b1455ffd781731ace55a41d1",
+    "tests/semantics/w12-arrays/test_reference.py": "65867665f9f092adc0770267cc4cd676f473d2695918523ab25e4abccbf298d1"
   },
-  "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+  "code_commit": "66b432fd5e6db4077001577ef4c673f7556fe58f",
   "benchmarks": {
     "baseline_commit": "ddccbe8cbd62c8a03f7647a9be77db48ec56d31c",
-    "candidate_runtime_commit": "8c2728b04f7939f40fc038903329e2f59f24ec3a",
+    "candidate_runtime_commit": "af7560d6c08402694abe86875a66e1334831df06",
     "command": "go test -run '^$' -bench 'Benchmark(PackedAppend1K|CopyOnWriteSeparation1K|ReferenceBindAndWrite|W12OrderedLookup1K)$' -benchtime 2000x -count 3 ./internal/runtime",
     "baseline_scope": "same command without W12OrderedLookup1K, which does not exist on baseline",
     "samples": {
@@ -315,19 +319,29 @@
         "sha256": "d9a7b5b3d40a9e6a9e61584a179d764279fd7b04e22df7b85961f7f4d88ed3f8"
       },
       "candidate_final": {
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        56.54 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        55.54 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t        52.71 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     49596 ns/op\t  128382 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     46840 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     50306 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27837 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     25556 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     26653 ns/op\t  107856 B/op\t    1026 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        48.27 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        46.79 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.71 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.829s\n",
+        "sha256": "7306cb7b86cd1cc2dbee51bc24b57f4b77fb508fcc064e050062a991bf4b395d",
+        "runtime_commit": "af7560d6c08402694abe86875a66e1334831df06"
+      },
+      "candidate_previous": {
         "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       128.5 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       115.6 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       156.6 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     55125 ns/op\t  128379 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     48246 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     51158 ns/op\t  128379 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     28251 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27490 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27561 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.65 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        45.65 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.48 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.835s\n",
         "sha256": "7be41e97e32b3ffe9144d6c70e0256fce1c1f8a8c6656fdd67e354e7f5bc7b0a"
       }
     }
   },
   "review": {
-    "runtime_review": "independent adversarial read-only review and re-review",
+    "method": "Independent read-only adversarial review and main-agent verified replay",
     "model": "gpt-6.1-sol",
     "unresolved_confirmed_findings": 0,
     "resolved": [
-      "Clamp internal pointer after tail deletion, including mixed-key holes; two red/green differential fixtures."
+      "Sort retains original argument reference across caller unset/rebind (GitHub P2).",
+      "Empty sort preserves next append index (GitHub P2).",
+      "Sparse packed/ordered transition preserves exhausted pointer (GitHub P2).",
+      "Do not eagerly separate shared current array on each foreach fetch (independent P1).",
+      "Prune alternative copy cursors when an iterator selects a known copy (independent P1).",
+      "Retain valid old-item ownership during destructor observation/reentry; direct tests cover errors, aliasing, unset, next-bucket deletion and resurrection."
     ],
-    "additional_regression": "Comparator arguments remain logically owned while callbacks replace shared references."
+    "remote_review_scope": "Old-head GitHub findings fixed locally; current-head remote review still pending at recording time."
   },
   "superseded_attempts": [
     {
@@ -344,6 +358,11 @@
       "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
       "exit_code": 1,
       "reason": "First attempt overlapped documentation editing before the new evidence target existed, so local Markdown link validation caused 4 failures and 14 errors. Created the evidence artifact; final full 415-test run passed."
+    },
+    {
+      "command": "go test ./internal/runtime",
+      "reason": "Original private dense-packed assumption failed after hole-preserving layout. Replaced with stronger observable packed/ordered equivalence; PHP oracle expectations unchanged. See decision record.",
+      "exit_code": 1
     }
   ],
   "red_test_evidence": {
@@ -358,26 +377,606 @@
     "callback_argument_ownership": {
       "output": "--- FAIL: TestW12SortOwnsCallbackArguments (0.00s)\n    array_w12_safety_test.go:107: comparison argument was destroyed during callback\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.636s\nFAIL\n",
       "sha256": "3bbe0804d305e1503c47c7acf08f620bff7985631517458db7e9958cf1d55b50"
+    },
+    "github_review_regressions": {
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.01s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.01s)\n        --- FAIL: TestW12PHP8512Arrays/64/sort-unset-argument (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"b\",true]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"3\"]],[[\"i\",\"1\"],[\"i\",\"1\"]],[[\"i\",\"2\"],[\"i\",\"2\"]]]]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sort-rebind-argument (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"3\"]],[[\"i\",\"1\"],[\"i\",\"1\"]],[[\"i\",\"2\"],[\"i\",\"2\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\n                PHP: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"8\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"8\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sparse-pointer-1 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sparse-pointer-2 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"i\",\"4\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sparse-pointer-3 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"i\",\"6\"]],[\"value\",[\"i\",\"6\"]],[\"value\",[\"i\",\"6\"]],[\"value\",[\"i\",\"6\"]],[\"value\",[\"i\",\"6\"]],[\"value\",[\"i\",\"6\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sparse-pointer-7 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"s\",\"78\"]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"i\",\"14\"]],[\"value\",[\"i\",\"14\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/usort-deleted-empty (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"4\"]]]]]]\n                PHP: [[\"value\",[\"a\",[[[\"i\",\"1\"],[\"i\",\"4\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/usort-negative-empty (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"4\"]]]]]]\n                PHP: [[\"value\",[\"a\",[[[\"i\",\"-4\"],[\"i\",\"4\"]]]]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.571s\nFAIL\n",
+      "sha256": "e808496803ca5cb8cd924c3673908e697d91784a22a954e0e069bd89550fafaa",
+      "scope": "Actual pre-fix failing tests; final checks above pass."
+    },
+    "position_policy": {
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.00s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.00s)\n        --- FAIL: TestW12PHP8512Arrays/64/indexed-end-copy (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"7a\"],[\"i\",\"3\"]],[[\"i\",\"0\"],[\"i\",\"9\"]]]]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"7a\"],[\"i\",\"3\"]]]]]]\n                PHP: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"7a\"],[\"i\",\"3\"]],[[\"i\",\"0\"],[\"i\",\"9\"]]]]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"7a\"],[\"i\",\"3\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/indexed-hole-pointer-copy (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"s\",\"64\"]],[\"value\",[\"s\",\"64\"]]]\n                PHP: [[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"s\",\"64\"]],[\"value\",[\"s\",\"78\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/indexed-rehash-1 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]],[\"value\",[\"s\",\"6e31\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/indexed-rehash-4 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"s\",\"6e34\"]],[\"value\",[\"s\",\"6e34\"]],[\"value\",[\"s\",\"6e34\"]],[\"value\",[\"s\",\"6e34\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/indexed-rehash-6 (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]],[\"value\",[\"s\",\"6e30\"]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"n\"]],[\"value\",[\"s\",\"6e36\"]],[\"value\",[\"s\",\"6e36\"]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.342s\nFAIL\n",
+      "sha256": "ba99413832bfff1af4a0b6a72c87707af7cd7c2195673d47de7c3bd8f3cbb316",
+      "scope": "Actual pre-fix failing tests; final checks above pass."
+    },
+    "foreach_fetch_timing": {
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.00s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.00s)\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-copy-later-write (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"99\"]],[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"i\",\"2\"],[\"i\",\"30\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"99\"]],[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"i\",\"2\"],[\"i\",\"30\"]]]]]]\n                PHP: [[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"99\"]],[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"i\",\"2\"],[\"i\",\"30\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"10\"]],[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"i\",\"2\"],[\"i\",\"30\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-switch-copy (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"79\"],[\"i\",\"2\"]],[[\"i\",\"0\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"79\"],[\"i\",\"2\"]],[[\"i\",\"0\"],[\"i\",\"3\"]]]]]]\n                PHP: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"79\"],[\"i\",\"2\"]],[[\"i\",\"0\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"s\",\"78\"],[\"i\",\"1\"]],[[\"s\",\"79\"],[\"i\",\"2\"]],[[\"i\",\"0\"],[\"i\",\"3\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-switch-sorted-copy (0.00s)\n            array_w12_test.go:302: Go: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\n                PHP: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.273s\nFAIL\n",
+      "sha256": "60fd34500ae5c2bc66ca240c7fb6522c93b6215ff1e9cf87735b13f45782b37a",
+      "scope": "Actual pre-fix failing tests; final checks above pass."
+    },
+    "old_item_release_order": {
+      "output": "--- FAIL: TestW12ForeachObjectItemReleaseOrder (0.00s)\n    --- FAIL: TestW12ForeachObjectItemReleaseOrder/observe (0.00s)\n        array_w12_safety_test.go:156: seen \"int\" item {kind:3 boolean:false integer:42 floating:0 text: array:<nil> object:<nil> ref:<nil>} object count=0 freed=true\n    --- FAIL: TestW12ForeachObjectItemReleaseOrder/rewrite (0.00s)\n        array_w12_safety_test.go:156: seen \"int\" item {kind:3 boolean:false integer:99 floating:0 text: array:<nil> object:<nil> ref:<nil>} object count=0 freed=true\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.530s\nFAIL\n",
+      "sha256": "adb7b7f6a20dc0cfd175684aa03ee3e669420389f6f34f671e652009ee63206f",
+      "scope": "Actual pre-fix failing tests; final checks above pass."
     }
   },
   "integration_base_commit": "b71da8f9bd7df0c7c7cbd0e119270bc8e1419941",
   "commit_roles": {
     "integration_base_commit": "Merge of origin/main before implementation; not a W-12 implementation checkout.",
-    "code_commit": "Latest committed code and runner; checkout this commit to reproduce code checks.",
-    "runtime_verification_commit": "8c2728b04f7939f40fc038903329e2f59f24ec3a: all Go runtime source matches this implementation commit. The subsequent code commit only changes the reference runner, its tests and workflow.",
-    "benchmark_candidate": "8c2728b04f7939f40fc038903329e2f59f24ec3a: candidate_final sample uses this runtime; initial samples were earlier W-12 working-tree observations and are retained as exploratory, not final-version measurements."
+    "code_commit": "Runtime, reference runner and frozen review corpus committed; documentation/evidence recorded separately.",
+    "runtime_verification_commit": "af7560d6c08402694abe86875a66e1334831df06: all current Go runtime implementation/test source matches this commit.",
+    "benchmark_candidate": "af7560d6c08402694abe86875a66e1334831df06: candidate_final sample; earlier samples retained with original commit in prior_verification."
   },
-  "recorded_at_utc": "2026-11-01 05:53:42 UTC",
+  "recorded_at_utc": "2026-11-01T06:52:57.433046+00:00",
   "timestamp_scope": "Output timestamps are actual log/file last-write times, not inferred command start times.",
   "documentation_review": {
     "method": "Fresh-context read-only review after scope/version clarifications",
     "model": "gpt-6.1-sol",
     "blocking_readability_findings": 0,
-    "scope": "W-12 plan, array decision and linked evidence readable without chat context",
+    "scope": "Final 98-case plan, array decision and linked evidence passed fresh-context read-only review; no necessary corrections. Source and oracle hashes checked by reviewer.",
     "nonblocking_followup": {
       "path": "docs/implementation/README.md:45",
       "existing_text": "These product tests have not been run (Traditional Chinese overview).",
       "recommendation": "In a separate overview update, distinguish full product acceptance from executed work-package-local Go tests. W-12 package/evidence already make this distinction."
     }
-  }
+  },
+  "prior_verification": {
+    "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+    "references": [
+      {
+        "requirements": [
+          "REQ-007",
+          "REQ-016",
+          "REQ-017"
+        ],
+        "tests": [
+          "T-013",
+          "T-014",
+          "T-031",
+          "T-032",
+          "T-033",
+          "T-034"
+        ],
+        "image_preparation": [
+          "docker",
+          "image",
+          "inspect",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049"
+        ],
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--platform",
+          "linux/386",
+          "-v",
+          "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+          "php",
+          "-n",
+          "/w/matrix.php"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "platform": "linux/386",
+        "php": "8.5.12",
+        "integer_width": 32,
+        "cases": 72,
+        "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+        "output": "w12-ref-32.json",
+        "output_sha256": "d8b8b4f4b494cf832023998057409ad859a3cb3532fafbc30c8bd316ada307cf",
+        "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
+        "metadata_recorded_at_utc": "2026-11-01T05:47:19.578099+00:00"
+      },
+      {
+        "requirements": [
+          "REQ-007",
+          "REQ-016",
+          "REQ-017"
+        ],
+        "tests": [
+          "T-013",
+          "T-014",
+          "T-031",
+          "T-032",
+          "T-033",
+          "T-034"
+        ],
+        "image_preparation": [
+          "docker",
+          "image",
+          "inspect",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9"
+        ],
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--platform",
+          "linux/arm64",
+          "-v",
+          "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+          "php",
+          "-n",
+          "/w/matrix.php"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "platform": "linux/arm64",
+        "php": "8.5.12",
+        "integer_width": 64,
+        "cases": 72,
+        "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+        "output": "w12-ref-64.json",
+        "output_sha256": "89adcba8175f4ca68bb8730b72d67316be7de50f3c57763baf3be8b36573b479",
+        "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
+        "metadata_recorded_at_utc": "2026-11-01T05:46:59.609299+00:00"
+      }
+    ],
+    "checks": [
+      {
+        "command": "gofmt -l internal",
+        "exit_code": 0,
+        "output": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:42:23.024711+00:00"
+      },
+      {
+        "command": "CGO_ENABLED=0 go test ./...",
+        "exit_code": 0,
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t3.764s\n",
+        "output_sha256": "05c01b04d5bc011ef6e30f60c26ffc3cfeb2a10d3f3bbfc8c3d9da53cb67ec3a",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:43:00.451809+00:00"
+      },
+      {
+        "command": "go test -race ./...",
+        "exit_code": 0,
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t1.674s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+        "output_sha256": "49cb56ef81569f4321e95270492fbc427c03a6fed80bb4a3a51fb77cc1d79876",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:45:42.932524+00:00"
+      },
+      {
+        "command": "go vet ./...",
+        "exit_code": 0,
+        "output": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:41:45.870619+00:00"
+      },
+      {
+        "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+        "exit_code": 0,
+        "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 415 tests in 183.778s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+        "output_sha256": "4d0d4e92c6bc079ccf826faa1e003003de018e89c1c4c09c1bee6d4b447ec5bf",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:46:50.428932+00:00"
+      },
+      {
+        "command": "python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'",
+        "exit_code": 0,
+        "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.004s\n\nOK\n",
+        "output_sha256": "cbe4b84d897ac017db0552ccb3a31855ff0fb172bc344c967c4c4c92eb19e624",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:46:58.724538+00:00"
+      },
+      {
+        "command": "PHEGO_W12_REFERENCE=/tmp/w12-reference go test ./internal/runtime -run W12",
+        "exit_code": 0,
+        "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.560s\n",
+        "output_sha256": "906f3ff26bc2730a0fb97a3ed685dff149daa3bc3ef13b245affc2821dcda0d8",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:47:20.398043+00:00"
+      },
+      {
+        "command": "go test ./internal/runtime -run 'TestW12IterationErrorCleanup|TestW12SnapshotOwnershipAfterCleanup|TestW12Layout' -v",
+        "exit_code": 0,
+        "output": "=== RUN   TestW12IterationErrorCleanup\n=== RUN   TestW12IterationErrorCleanup/value\n=== RUN   TestW12IterationErrorCleanup/reference\n--- PASS: TestW12IterationErrorCleanup (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/value (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/reference (0.00s)\n=== RUN   TestW12SnapshotOwnershipAfterCleanup\n--- PASS: TestW12SnapshotOwnershipAfterCleanup (0.00s)\n=== RUN   TestW12Layout\n    array_w12_safety_test.go:82: value: 64 bytes\n    array_w12_safety_test.go:82: reference: 72 bytes\n    array_w12_safety_test.go:82: arrayKey: 32 bytes\n    array_w12_safety_test.go:82: bucket: 96 bytes\n    array_w12_safety_test.go:82: phpArray: 72 bytes\n    array_w12_safety_test.go:82: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.585s\n",
+        "output_sha256": "da0ba9070bba6fd24ab40d85e91addef6cc7a76021c1b9b6d3856db82139da4f",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+        "output_last_written_at_utc": "2026-11-01T05:36:39.579461+00:00"
+      },
+      {
+        "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
+        "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+        "exit_code": 0,
+        "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/13 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 13/13 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 40298 (13428/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 6s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 9s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 12s, execs: 121708 (27122/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 15s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 18s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 21s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 24s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 27s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 30s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 31s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.622s\n",
+        "output_sha256": "7a2e34eafaa89e3a668e6e2def18de017f017177ade89d38892d804a58b9bcb8",
+        "output_last_written_at_utc": "2026-11-01T05:49:17.201687+00:00"
+      },
+      {
+        "command": "python3 tools/validate_docs.py; python3 tools/validate_docs.py --no-write",
+        "exit_code": 0,
+        "result": {
+          "scope": "documentation_only",
+          "status": "pass",
+          "counts": {
+            "chapters": 40,
+            "requirements": 101,
+            "acceptance_scenarios": 202,
+            "work_packages": 60,
+            "decisions": 28,
+            "sources": 57,
+            "local_markdown_links": 319,
+            "checks": 34,
+            "catalogs": {
+              "php-history-policy.json": 7,
+              "competitor-catalog.json": 8,
+              "application-catalog.json": 9
+            }
+          },
+          "product_test_status": "not_run",
+          "errors": []
+        },
+        "note": "Documentation validation is not product acceptance.",
+        "output_last_written_at_utc": "2026-11-01T05:50:55.510265+00:00"
+      }
+    ],
+    "review": {
+      "runtime_review": "independent adversarial read-only review and re-review",
+      "model": "gpt-6.1-sol",
+      "unresolved_confirmed_findings": 0,
+      "resolved": [
+        "Clamp internal pointer after tail deletion, including mixed-key holes; two red/green differential fixtures."
+      ],
+      "additional_regression": "Comparator arguments remain logically owned while callbacks replace shared references."
+    },
+    "scope": "Superseded 72-case implementation; retained historical observations, not verification of current runtime."
+  },
+  "supplemental_review": {
+    "general": {
+      "corpus": "general",
+      "cases": 500,
+      "platform": "linux/arm64",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "-i",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n"
+      ],
+      "php_exit_code": 0,
+      "php_stderr": "",
+      "input_sha256": "62e2755563ddbbcec7ffee64d551b01b85000980c59d99f2040bccc104d98eae",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "output_sha256": "ceae81856e37d3262ca7bcc66f09f5ca42736926c1e7310143411479a9056f96",
+      "go_exit_code": 0,
+      "go_stdout": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.567s\n",
+      "go_stderr": "",
+      "reproduce": "python3 tests/semantics/w12-arrays/review_corpus.py --corpus general --output-dir /tmp/w12-general-review",
+      "scope": "arm64 PHP 8.5.12 only; frozen original inputs, separate from 196 fixed-profile cases"
+    },
+    "foreach": {
+      "corpus": "foreach",
+      "cases": 700,
+      "platform": "linux/arm64",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "-i",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n"
+      ],
+      "php_exit_code": 0,
+      "php_stderr": "",
+      "input_sha256": "3e88c035c94344270dc6028bd184bd538ec13e8b73463ce5956bbbe94a12789a",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "output_sha256": "0840450b4e4db750a84b9f699c0d0290eb63962a8b0895734ec8cfaea119a2b1",
+      "go_exit_code": 0,
+      "go_stdout": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.464s\n",
+      "go_stderr": "",
+      "reproduce": "python3 tests/semantics/w12-arrays/review_corpus.py --corpus foreach --output-dir /tmp/w12-foreach-review",
+      "scope": "arm64 PHP 8.5.12 only; frozen original inputs, separate from 196 fixed-profile cases"
+    }
+  },
+  "reference_engine_diagnostics": [
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "/w/matrix.php",
+        "--destructor-probe"
+      ],
+      "exit_code": 133,
+      "stderr": "zend_mm_heap corrupted\n",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "classification": "diagnostic_only; not conformance pass",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "/w/matrix.php",
+        "--unsafe-reentry"
+      ],
+      "exit_code": 133,
+      "stderr": "zend_mm_heap corrupted\n",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "classification": "diagnostic_only; not conformance pass",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/386",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "php",
+        "-n",
+        "/w/matrix.php",
+        "--destructor-probe"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "classification": "diagnostic_only; not conformance pass",
+      "stdout_sha256": "21b748c81a62217c82a6c49c961d59cd5a991c25633ec229fa20faf92553f017",
+      "last_case": {
+        "name": "foreach-destructor-item",
+        "operations": [
+          [
+            [
+              "s",
+              "666f72656163685f64657374727563746f72"
+            ]
+          ]
+        ],
+        "events": [
+          [
+            "value",
+            [
+              "s",
+              "573132466f726561636844657374727563746f72"
+            ]
+          ],
+          [
+            "value",
+            [
+              "a",
+              [
+                [
+                  [
+                    "i",
+                    "1"
+                  ],
+                  [
+                    "i",
+                    "42"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "value",
+            [
+              "i",
+              "42"
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/386",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "php",
+        "-n",
+        "/w/matrix.php",
+        "--unsafe-reentry"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "fixture_sha256": "6375487c07933d2543b761d2f514872ba944b66ee34fd5122ecabd06fd24518a",
+      "classification": "diagnostic_only; not conformance pass",
+      "stdout_sha256": "21b748c81a62217c82a6c49c961d59cd5a991c25633ec229fa20faf92553f017",
+      "last_case": {
+        "name": "foreach-destructor-item",
+        "operations": [
+          [
+            [
+              "s",
+              "666f72656163685f64657374727563746f72"
+            ]
+          ]
+        ],
+        "events": [
+          [
+            "value",
+            [
+              "s",
+              "573132466f726561636844657374727563746f72"
+            ]
+          ],
+          [
+            "value",
+            [
+              "a",
+              [
+                [
+                  [
+                    "i",
+                    "1"
+                  ],
+                  [
+                    "i",
+                    "42"
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "value",
+            [
+              "i",
+              "42"
+            ]
+          ]
+        ]
+      }
+    }
+  ]
 }

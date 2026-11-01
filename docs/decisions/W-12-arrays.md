@@ -6,28 +6,35 @@
 
 | 項目 | 選定做法 | 未採用的選項與理由 |
 |---|---|---|
-| packed／ordered | 延用穩定 bucket 指標，連續整數鍵免索引，混合鍵使用有序 bucket 與 Go map 索引 | 單獨 Go map 無順序；值 slice 會讓元素參照在成長後失效 |
+| packed／ordered | 延用穩定 bucket 指標，packed 允許有界空洞，混合鍵使用有序 bucket 與 Go map 索引 | 單獨 Go map 無順序；值 slice 會讓元素參照在成長後失效 |
 | 複製與參照 | 寫入才分離，保留外部共享參照，單獨擁有的參照在分離時解開 | 一律深拷貝破壞別名；一律共享破壞一般賦值隔離 |
 | by-value foreach | 持有原陣列，依序將值賦給迴圈位置 | 先深拷貝會看不到既有參照元素的更新 |
-| by-ref foreach | 每個迭代器為各存活副本保存獨立位置，釋放陣列與結束迭代時解除登錄 | 單一 `copiedFrom` 只能辨認一次分離，也會保留整條舊陣列鏈 |
+| by-ref foreach | 為候選副本保存獨立位置，取值時不提早分離目前陣列，選定副本後清除其他候選 | 單一 `copiedFrom` 無法處理多次分離；每圈分離會誤共享上一輪元素或保留過時位置 |
 | 內部指標 | 與 foreach 位置分開；讀取不分離，移動指標先分離 | 共用一個位置會讓 foreach 改動 current／key 的結果 |
+| 位置範圍 | 獨立記錄 PHP 8.5.12 的位置範圍與壓縮觸發，保留必要的空洞及失效指標位置 | 直接使用 Go slice 容量或只記「已失效」無法重現後續插入重新啟用指標的時機 |
 | 鍵與診斷 | 沿用已測的數字字串與浮點轉換，依讀寫／unset 區分 null 診斷 | 依 Go `int` 寬度轉換不能模擬 32 位元 PHP |
-| 排序 | 在獨立副本穩定排序；callback 參數在呼叫期間持有所有權，結束後提交副本 | 原地排序會讓 callback 重入破壞結構；拋例外就保留原陣列不符本版參考結果 |
+| 排序 | 在獨立副本穩定排序，持有原參數參照與比較參數所有權，最後提交至原參數位置；空陣列維持原狀 | 透過可能被解除綁定的 caller slot 提交，會重新建立已 unset 的變數並漏改原別名 |
+
+壓縮空洞與分離副本使用不同的位置映射。packed 副本保留空洞，ordered 副本壓縮空洞，但保留 PHP 對洞內指標與舊末端迭代器的位置結果。位置可以超出當前元素範圍，後續插入仍可能重新啟用，不能一律夾到目前尾端。穩定 bucket 指標、Go map 與明確的範圍計數只實作可觀察結果，沒有移植 Zend 配置器或原生記憶體結構。
+
+W-06 的單元測試原先要求「刪除一格必須退出 packed」，這是已更換的私有布局假設。W-12 移除該假設，改成更完整的刪除、查找、追加、重新插入與 ordered 表示結果等價檢查，PHP 對照預期沒有放寬。
+
+直接物件的 foreach 換綁先持有下一個參照，在舊位置仍有有效擁有者時執行本次換綁必然觸發的解構，再完成換綁與釋放。一般 assign／bind 的順序不變。另保留 arm64 PHP 8.5.12 解構重入造成參考程序記憶體損毀的獨立診斷結果，這些失敗不算相容通過；完整物件圖生命週期仍由 W-13 整合。
 
 ## 布局與量測結果
 
-Apple M3、darwin/arm64 的型別布局：value 64 B、reference 72 B、arrayKey 32 B、bucket 96 B、phpArray 72 B、arrayIterator 8 B。布局由 `go test ./internal/runtime -run '^TestW12Layout$' -v` 取得，沒有使用 unsafe。
+Apple M3、darwin/arm64 的型別布局：value 64 B、reference 72 B、arrayKey 32 B、bucket 96 B、phpArray 80 B、arrayIterator 8 B。布局由 `go test ./internal/runtime -run '^TestW12Layout$' -v` 取得，沒有使用 unsafe。
 
 候選版本重跑命令為 `go test -run '^$' -bench 'Benchmark(PackedAppend1K|CopyOnWriteSeparation1K|ReferenceBindAndWrite|W12OrderedLookup1K)$' -benchtime 2000x -count 3 ./internal/runtime`。基準固定為量測時的 `origin/main`，即 `ddccbe8cbd62c8a03f7647a9be77db48ec56d31c`，使用相同命令移除 `|W12OrderedLookup1K`，因該版本沒有這項新增基準。
 
 | 操作 | 基準每次耗時 | W-12 每次耗時 | 配置 |
 |---|---|---|---|
-| 連續追加 1024 個整數 | 52～78 µs | 48～55 µs | 1040 次、約 128 KB，兩者相同 |
-| 複製 1024 元素並寫入一格 | 44～49 µs | 27～28 µs | 1037 次、約 128 KB，兩者相同 |
-| 綁定參照並寫入 | 56～125 ns | 46～48 ns | 1 次、80 B，兩者相同 |
-| ordered 陣列讀取一格 | 本批未量測 | 116～157 ns | 0 次、0 B |
+| 連續追加 1024 個整數 | 52～78 µs | 47～51 µs | 1040 次、約 128 KB，兩者相同 |
+| 複製 1024 元素並寫入一格 | 44～49 µs | 25～28 µs | 基準 1037 次／約 128 KB；W-12 1026 次／約 108 KB |
+| 綁定參照並寫入 | 56～125 ns | 46～49 ns | 1 次、80 B，兩者相同 |
+| ordered 陣列讀取一格 | 本批未量測 | 52～57 ns | 0 次、0 B |
 
-表格使用最後一批樣本。前一批與最後一批的耗時差異很大，背景負載沒有固定，不能據此宣稱更快或排除耗時退步。W-12 以補足語意為目的，沒有以這次量測主張效能最佳化成立。兩批原始樣本、基準 commit、工具版本與雜湊保存在[執行證據](../implementation/evidence/W-12-runtime-php8512.json)。每元素一次配置的成本仍存在，沒有在本票重寫布局。
+表格使用最後一批樣本。前一批與最後一批的耗時差異很大，背景負載沒有固定，不能據此宣稱更快或排除耗時退步。W-12 以補足語意為目的，沒有以這次量測主張效能最佳化成立。各批原始樣本、基準 commit、工具版本與雜湊保存在[執行證據](../implementation/evidence/W-12-runtime-php8512.json)。每元素一次配置的成本仍存在，沒有在本票重寫布局。
 
 ## 已知限制
 
