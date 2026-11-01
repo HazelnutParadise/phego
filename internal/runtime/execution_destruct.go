@@ -19,7 +19,7 @@ func (x *execution) destruct() completion {
 		if err != nil && !errors.As(err, &c) {
 			c = x.fail(endInternal, err)
 		}
-		c = x.exitResult(c, since)
+		c = x.orderedResult(c, since)
 		if c.kind == endNormal {
 			return c
 		}

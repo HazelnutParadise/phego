@@ -86,7 +86,7 @@ func TestExecutionReviewUnwindReleasesReplacedReturn(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := x.local(returned); err != nil {
+			if err := x.local(&returned); err != nil {
 				t.Fatal(err)
 			}
 			local, err := x.object("Broken", func(*execution) completion {
@@ -96,7 +96,7 @@ func TestExecutionReviewUnwindReleasesReplacedReturn(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := x.local(local); err != nil {
+			if err := x.local(&local); err != nil {
 				t.Fatal(err)
 			}
 			return completion{kind: endReturn, value: returned}
@@ -146,7 +146,7 @@ func TestExecutionReviewHostStopOverridesEarlierDestructorThrow(t *testing.T) {
 			defer cancel()
 			got := x.run(cleanup, func(x *execution) completion {
 				a := x.heap.newArrayValue()
-				if err := x.local(a); err != nil {
+				if err := x.local(&a); err != nil {
 					t.Fatal(err)
 				}
 				first, err := x.object("First", func(*execution) completion { return completion{kind: endThrow, err: errors.New("first PHP failure")} })

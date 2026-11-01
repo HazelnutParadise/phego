@@ -61,7 +61,7 @@ func TestExecutionReviewFatalOverridesAggregateThrow(t *testing.T) {
 		}
 		c := x.call(func(x *execution) completion {
 			a := x.heap.newArrayValue()
-			if err := x.local(a); err != nil {
+			if err := x.local(&a); err != nil {
 				t.Fatal(err)
 			}
 			for i, kind := range []endKind{endThrow, endFatal} {
@@ -122,7 +122,7 @@ func TestExecutionReviewFatalPhaseBoundaries(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if err := x.local(v); err != nil {
+					if err := x.local(&v); err != nil {
 						t.Fatal(err)
 					}
 					return b, completion{}
@@ -183,7 +183,7 @@ func TestExecutionReviewFatalOverridesPropertyThrow(t *testing.T) {
 					if err := x.heap.setElement(&x.globals, bytesValue([]byte("parent")), parent); err != nil {
 						t.Fatal(err)
 					}
-				} else if err := x.local(parent); err != nil {
+				} else if err := x.local(&parent); err != nil {
 					t.Fatal(err)
 				}
 				for _, name := range []string{"throw", "fatal", "tail"} {

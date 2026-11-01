@@ -32,6 +32,20 @@
       "combined": "destroy:array-a\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BAS)]"
     },
     {
+      "case": "array_throw_caught_chain",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\ncaught:middle\ndestroy:third\ncaught:third\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\ncaught:middle\ndestroy:third\ncaught:third\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
+      "case": "array_throw_chain",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\ndestroy:second\ndestroy:third\ncaught:third\nprevious:second\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\ndestroy:second\ndestroy:third\ncaught:third\nprevious:second\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
       "case": "array_throw_exit",
       "exit_code": 7,
       "stdout": "[(BDSD)]",
@@ -72,6 +86,27 @@
       "stdout": "[(BSD)]",
       "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:retained\nflush:inner\nflush:outer\n",
       "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:retained\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
+      "case": "caught_then_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
+      "case": "caught_then_throw_destructor",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
+    },
+    {
+      "case": "caught_then_throw_helper",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
     },
     {
       "case": "destructor_create",
@@ -177,6 +212,13 @@
       "stdout": "[(BDSD)]",
       "stderr": "finally\ndestroy:local\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
       "combined": "finally\ndestroy:local\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]"
+    },
+    {
+      "case": "local_cow",
+      "exit_code": 0,
+      "stdout": "[(BchangedoriginalSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BchangedoriginalSD)]"
     },
     {
       "case": "normal",
@@ -294,12 +336,17 @@
     "array_exit_caught.php": "5bf22790cd750cbc2fa3971ee8c80bd16486e87f54c474bb367590a053b2c276",
     "array_exit_throw.php": "48fe6ddf61ad79f03e1c5a6a32ca52577c88517590897e555c4512e387e26756",
     "array_fatal.php": "883f5a9223149f9d57a974284c84f22486d2e94fd146d19ffebebd7b222ebe6d",
+    "array_throw_caught_chain.php": "a774878b9e7f1f0c97607df4d7fde36e2486e4f4e7b982504ae8fb62de431bc2",
+    "array_throw_chain.php": "82ef3a1e25d3f18869fbe049dc37ae314e6cf7468b5aaaa2c1a1c35dcd17900f",
     "array_throw_exit.php": "060b7c8de261a3f44cc5a467a8e81bc6d5b6fcbade4964657dce5cd880e5ae76",
     "array_throw_exit_caught.php": "22775eb2098175cc33dd91769e4e802c2cba0722c8ce63f7a4f581d06ca3b623",
     "array_throw_fatal.php": "a41e3e121141556ef61386252c73e3396f7e759532cab0cf3eba20fefcd23e03",
     "buffer_echo.php": "4488a62345db335b415a1bb00c3e6218bf36c099418bd1ea3801e52c25dc8c16",
     "buffer_object.php": "b38844512581c9e2f47e35858e4f8f78f069818d8b0321800219e61fd5a2bf3e",
     "buffer_retained.php": "47dd495bc1be6bf42a05c4c9e46646de715f6a10b82e68a29eb5820c50abf247",
+    "caught_then_throw.php": "ff6d55f22074c9791e350c9693a50bb8dda4679b04467ce9c46605ce3497884e",
+    "caught_then_throw_destructor.php": "4cbc74ce8686cfa8b4c6ce4f690f6d1f13d2eaa1a01843e1b1ab01d94f92eff4",
+    "caught_then_throw_helper.php": "c58b17a935712ae7971001d0e17ecb03d61e3001cbecd91bcdaf15d1703fe743",
     "common.php": "1b3c6eccdc2c20c95ce3c86228eb5ea2b8f8e4474cdba01ada3258affec5d712",
     "destructor_create.php": "8fd9ac029f15ee93e155f0f0ace814e86d4c6f8851204944c58f5988b041f9c5",
     "destructor_throw.php": "5ce9f8a00b48429e0b6b7f2e622e41c56da69e0e79056774f6e0ee2ee77568ab",
@@ -316,6 +363,7 @@
     "frame_exit.php": "55820aaffecfa239111fd183c56e397672f91142824cde13af9be71735f04c51",
     "frame_locals.php": "f5f00e5c2d6dc7659886be695716ce6bbc9fb1cbfd3572012f98be7435fea1bb",
     "frame_throw.php": "c821c8975574ecb4687f094044a354c2bbc7be2b3f71b2e5a11e3c02e4b36404",
+    "local_cow.php": "2ba5428768d8fb755c8662fba5f5c98bee6300c9583f7b65dfabc05b5926494a",
     "normal.php": "4fb9daf3ed2b25d8cc812210b843bdbf16a9b16dbbc53fe14ec92b16c69d03f4",
     "reference.php": "f41ebfe1d67418c6efbf4824ec60daac607a3aeb2ba58a79cc5c415881865cb5",
     "return_finally_array.php": "0f9c50344db2e76797766f38b0b67e6d0efd2d91bceb854771f33e2d4e843f21",

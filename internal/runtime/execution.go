@@ -52,7 +52,7 @@ type executionAction func(*execution) completion
 // the completion channel carries outward termination, not the output string.
 type outputFilter func(*execution, []byte) ([]byte, completion)
 type executionLimits struct{ depth, callbacks, output int }
-type executionFrame struct{ locals []value }
+type executionFrame struct{ locals []*value }
 type executionBuffer struct {
 	data   []byte
 	filter outputFilter
@@ -76,27 +76,27 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // input; actions and output writers must cooperate with cancellation. Cleanup
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
-	ctx                      context.Context
-	request                  *Request
-	heap                     *heap
-	globals                  value
-	limits                   executionLimits
-	writer                   io.Writer
-	frames                   []*executionFrame
-	shutdown                 []executionAction
-	buffers                  []executionBuffer
-	output                   []byte
-	accepted                 int64
-	diagnostics              []executionDiagnostic
-	started, closed          bool
-	filtering, handlerOutput bool
-	destructorStop           bool
-	result                   executionResult
-	stop                     completion
-	phaseFatal               completion
-	phaseExit, lastExit      completion
-	serial                   uint64
-	calls                    int
+	ctx                       context.Context
+	request                   *Request
+	heap                      *heap
+	globals                   value
+	limits                    executionLimits
+	writer                    io.Writer
+	frames                    []*executionFrame
+	shutdown                  []executionAction
+	buffers                   []executionBuffer
+	output                    []byte
+	accepted                  int64
+	diagnostics               []executionDiagnostic
+	started, closed           bool
+	filtering, handlerOutput  bool
+	destructorStop            bool
+	result                    executionResult
+	stop                      completion
+	phaseFatal                completion
+	phaseCompletion, lastExit completion
+	serial                    uint64
+	calls                     int
 }
 
 func newExecution(ctx context.Context, request *Request, width int, writer io.Writer, limits executionLimits) (*execution, error) {
@@ -247,7 +247,7 @@ func (x *execution) call(body, finally executionAction) completion {
 	if c.kind == endNormal || c.kind == endReturn || c.kind == endThrow || c.kind == endExit {
 		for i := 0; i < len(f.locals); i++ {
 			before := x.serial
-			if err := x.heap.release(f.locals[i]); err != nil {
+			if err := x.heap.unset(f.locals[i]); err != nil {
 				var next completion
 				if errors.As(err, &next) {
 					c = x.replaceOwnedCompletion(c, next)
@@ -255,7 +255,7 @@ func (x *execution) call(body, finally executionAction) completion {
 					c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
 				}
 			}
-			c = x.exitResult(c, before)
+			c = x.orderedResult(c, before)
 			if stop := x.check(); stop.kind != endNormal {
 				c = x.replaceOwnedCompletion(c, stop)
 			}
@@ -273,11 +273,56 @@ func (x *execution) call(body, finally executionAction) completion {
 	return c
 }
 
+// tryCatch is a control-flow boundary within the current PHP frame. The adapter
+// selects matching Throwable classes before returning a handler; nil rethrows.
+// Handling restores the pending completion from before try, before user code runs.
+func (x *execution) tryCatch(body executionAction, handler func(completion) executionAction) completion {
+	if stop := x.check(); stop.kind != endNormal {
+		return stop
+	}
+	pending := x.phaseCompletion
+	c := x.invoke(body)
+	if stop := x.check(); stop.kind != endNormal {
+		return x.replaceOwnedCompletion(c, stop)
+	}
+	if c.kind != endThrow || handler == nil {
+		return c
+	}
+	fn := handler(c)
+	if fn == nil {
+		return c
+	}
+	x.phaseCompletion = pending
+	return x.invoke(fn)
+}
+
 func replaceCompletion(old, next completion) completion {
-	if old.kind == endThrow && next.kind == endThrow {
-		next.previous = errors.Join(next.previous, old.err, old.previous)
+	if old.kind == endThrow && next.kind == endThrow &&
+		(old.serial == 0 || old.serial != next.serial) && !containsCompletion(next.previous, old.serial) {
+		next.previous = errors.Join(next.previous, old)
 	}
 	return next
+}
+
+// Identity is the completion serial, not error text or a user-defined Is method.
+func containsCompletion(err error, serial uint64) bool {
+	if err == nil || serial == 0 {
+		return false
+	}
+	if c, ok := err.(completion); ok && c.serial == serial {
+		return true
+	}
+	switch e := err.(type) {
+	case interface{ Unwrap() []error }:
+		for _, child := range e.Unwrap() {
+			if containsCompletion(child, serial) {
+				return true
+			}
+		}
+	case interface{ Unwrap() error }:
+		return containsCompletion(e.Unwrap(), serial)
+	}
+	return false
 }
 
 // REQ-020, REQ-022; T-039, T-040, T-043, T-044. A by-value return acquires
@@ -302,11 +347,11 @@ func (x *execution) releaseReturn(c *completion) completion {
 	if err := x.heap.release(v); err != nil {
 		var next completion
 		if errors.As(err, &next) {
-			return x.exitResult(next, before)
+			return x.orderedResult(next, before)
 		}
 		return x.fail(endInternal, err)
 	}
-	return x.exitResult(completion{}, before)
+	return x.orderedResult(completion{}, before)
 }
 
 // Acquire the replacement before releasing the old return, even when both
@@ -324,13 +369,22 @@ func (x *execution) replaceOwnedCompletion(old, next completion) completion {
 	}
 }
 
-func (x *execution) local(v value) error {
-	if len(x.frames) == 0 || x.closed {
-		return errors.New("local requires an active frame")
+// local establishes ownership for a previously unowned variable slot. Register
+// before assign/bind/COW operations; afterwards mutate only through heap methods.
+func (x *execution) local(slot *value) error {
+	if slot == nil || len(x.frames) == 0 || x.closed {
+		return errors.New("local requires a slot and an active frame")
 	}
-	retain(v)
+	for _, frame := range x.frames {
+		for _, existing := range frame.locals {
+			if existing == slot {
+				return errors.New("local slot is already registered")
+			}
+		}
+	}
+	retain(*slot)
 	f := x.frames[len(x.frames)-1]
-	f.locals = append(f.locals, v)
+	f.locals = append(f.locals, slot)
 	return nil
 }
 func (x *execution) registerShutdown(fn executionAction) error {
@@ -424,12 +478,12 @@ func (x *execution) invoke(fn executionAction) (c completion) {
 		}
 	}()
 	before := x.serial
-	pending := x.phaseExit
+	pending := x.phaseCompletion
 	c = fn(x)
-	if (c.kind == endNormal || c.kind == endReturn) && x.phaseExit.kind == endThrow && x.phaseExit.serial > before {
+	if (c.kind == endNormal || c.kind == endReturn) && x.phaseCompletion.kind == endThrow && x.phaseCompletion.serial > before {
 		// This action caught a newly raised exception. Restore the caller's
 		// pending event instead of resurrecting the handled exception later.
-		x.phaseExit = pending
+		x.phaseCompletion = pending
 	}
 	if c.kind == endThrow || c.kind == endExit {
 		if c.serial == 0 {
@@ -439,8 +493,9 @@ func (x *execution) invoke(fn executionAction) (c completion) {
 		if c.kind == endExit && c.serial > x.lastExit.serial {
 			x.lastExit = c
 		}
-		if c.serial > x.phaseExit.serial && (c.kind == endExit || x.phaseExit.kind != endNormal) {
-			x.phaseExit = c
+		if c.serial > x.phaseCompletion.serial {
+			c = replaceCompletion(x.phaseCompletion, c)
+			x.phaseCompletion = c
 		}
 	}
 	// Mark at the action boundary, before a containing array or property
@@ -448,19 +503,19 @@ func (x *execution) invoke(fn executionAction) (c completion) {
 	if c.kind == endFatal {
 		c = x.markFatal(c)
 	}
-	return x.exitResult(c, before)
+	return x.orderedResult(c, before)
 }
 
 // An aggregate release may return an older throw/exit. Preserve the newer
-// event without imposing an ambient exit on cleanup callbacks entered later.
+// event and its chain without imposing it on cleanup callbacks entered later.
 // A normal result after the latest throw means that callback caught it.
-func (x *execution) exitResult(c completion, since uint64) completion {
-	for x.phaseExit.serial > since && x.phaseExit.serial > c.serial {
+func (x *execution) orderedResult(c completion, since uint64) completion {
+	for x.phaseCompletion.serial > since && x.phaseCompletion.serial > c.serial {
 		if c.kind != endThrow && c.kind != endExit &&
-			((c.kind != endNormal && c.kind != endReturn) || x.phaseExit.kind != endExit) {
+			((c.kind != endNormal && c.kind != endReturn) || x.phaseCompletion.kind != endExit) {
 			break
 		}
-		c = x.replaceOwnedCompletion(c, x.phaseExit)
+		c = x.replaceOwnedCompletion(c, x.phaseCompletion)
 	}
 	return c
 }
@@ -481,7 +536,7 @@ func (x *execution) recordEnd(c completion) {
 	// The driver has consumed this phase's fatal. The next shutdown,
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
-	x.phaseExit = completion{}
+	x.phaseCompletion = completion{}
 	if (c.kind == endThrow || c.kind == endFatal) && len(x.diagnostics) < x.limits.callbacks {
 		x.diagnostics = append(x.diagnostics, executionDiagnostic{"Fatal error", c.Error()})
 	}

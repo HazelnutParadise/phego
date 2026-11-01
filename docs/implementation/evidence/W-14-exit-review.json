@@ -119,7 +119,8 @@
       "cases": [
         "array_exit_caught",
         "array_throw_exit_caught"
-      ]
+      ],
+      "reproducibility": "Diagnostic log only; the intermediate candidate patch was not retained, so this is not an independently reproducible baseline."
     }
   ],
   "environment": {
@@ -192,5 +193,8 @@
   "remaining_gaps": [
     "PHP source execution and VM integration remain not_run.",
     "This is a pre-push snapshot. Latest remote CI and Codex review are linked from W-14.md and must be verified separately."
-  ]
+  ],
+  "snapshot_commit": "2eb6883c49a2ff37df3a5c0caaa6e11adef3202e",
+  "snapshot_note": "Historical 37-case input snapshot; current 43-case evidence is in the followup record.",
+  "followup_evidence": "docs/implementation/evidence/W-14-slots-review.json"
 }

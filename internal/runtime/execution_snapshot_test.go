@@ -14,7 +14,7 @@ func TestExecutionReturnSnapshotSurvivesShutdown(t *testing.T) {
 	defer cancel()
 	got := x.run(ctx, func(x *execution) completion {
 		v := x.heap.newArrayValue()
-		if err := x.local(v); err != nil {
+		if err := x.local(&v); err != nil {
 			t.Fatal(err)
 		}
 		if err := x.heap.setElement(&v, bytesValue([]byte("key")), bytesValue([]byte("value"))); err != nil {

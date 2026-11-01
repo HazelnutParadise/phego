@@ -181,6 +181,6 @@
   ],
   "local_status": "pass",
   "snapshot_commit": "cacf865508ff0880db8a226491db86591ffc4a3d",
-  "snapshot_note": "Input and reference hashes describe the initial 28-case CI snapshot at snapshot_commit; current 30-case regression evidence is linked separately.",
+  "snapshot_note": "Input and reference hashes describe the initial 28-case CI snapshot at snapshot_commit; subsequent 30-case regression evidence is linked separately.",
   "followup_review_evidence": "docs/implementation/evidence/W-14-ci-review.json"
 }

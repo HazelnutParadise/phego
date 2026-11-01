@@ -1,0 +1,1 @@
+PASS: 43 locked PHP lifecycle reference cases (32-bit)
