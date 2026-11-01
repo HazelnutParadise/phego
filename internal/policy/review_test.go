@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -191,4 +192,37 @@ func TestReviewRootAndRootFSConfineSymlinks(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestReviewWildcardNeedsDomainAfterNormalization(t *testing.T) {
+	for _, host := range []string{"*.", "*.."} {
+		_, err := New(Spec{Network: []NetworkGrant{{Scheme: "https", Host: host, Ports: []int{443}}}})
+		var se *SpecError
+		if !errors.As(err, &se) {
+			t.Errorf("grant %q accepted without domain", host)
+		}
+	}
+}
+
+func TestReviewConcurrentDualStackRefusals(t *testing.T) {
+	p := mustPolicy(t, Spec{Network: []NetworkGrant{{Scheme: "tcp", Host: "localhost", Ports: []int{12345}}}})
+	var wg sync.WaitGroup
+	for i := 0; i < 500; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			go func() { time.Sleep(time.Millisecond); cancel() }()
+			c, err := p.DialContext(ctx, "tcp", "tcp", "localhost", 12345)
+			if c != nil {
+				c.Close()
+				t.Error("loopback connected")
+			}
+			if err == nil {
+				t.Error("loopback accepted")
+			}
+		}()
+	}
+	wg.Wait()
 }

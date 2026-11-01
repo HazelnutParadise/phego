@@ -171,12 +171,14 @@ func New(spec Spec) (*Policy, error) {
 		p.files = append(p.files, g)
 	}
 	for i, g := range spec.Network {
+		g.Scheme, g.Host = strings.ToLower(g.Scheme), strings.ToLower(strings.TrimSuffix(g.Host, "."))
 		field := fmt.Sprintf("Network[%d]", i)
 		if g.Scheme == "" || strings.ContainsAny(g.Scheme, ":/") {
 			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}
 		}
 		if g.Host == "" || strings.ContainsAny(g.Host, "/:@") && !isIPv6Literal(g.Host) || strings.Count(g.Host, "*") > 1 ||
-			strings.Contains(g.Host, "*") && !strings.HasPrefix(g.Host, "*.") {
+			strings.Contains(g.Host, "*") && !strings.HasPrefix(g.Host, "*.") ||
+			strings.HasPrefix(g.Host, "*.") && strings.Trim(g.Host[2:], ".") == "" {
 			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("host %q is not a host name, address or *.domain pattern", g.Host)}
 		}
 		if len(g.Ports) == 0 {
@@ -187,7 +189,6 @@ func New(spec Spec) (*Policy, error) {
 				return nil, &SpecError{Field: field, Reason: fmt.Sprintf("port %d is out of range", port)}
 			}
 		}
-		g.Scheme, g.Host = strings.ToLower(g.Scheme), strings.ToLower(strings.TrimSuffix(g.Host, "."))
 		g.Ports = append([]int(nil), g.Ports...)
 		sort.Ints(g.Ports)
 		p.network = append(p.network, g)

@@ -6,6 +6,7 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -53,20 +54,26 @@ func (p *Policy) DialContext(ctx context.Context, scheme, network, host string, 
 		return nil, err
 	}
 	target := net.JoinHostPort(host, strconv.Itoa(port))
+	var mu sync.Mutex
 	var refused error
 	d := net.Dialer{Control: func(_, address string, _ syscall.RawConn) error {
 		ap, err := netip.ParseAddrPort(address)
+		var denial error
 		if err != nil {
-			refused = &PolicyError{Kind: Network, Op: scheme, Target: target, Rule: "unparsable-address"}
-			return refused
+			denial = &PolicyError{Kind: Network, Op: scheme, Target: target, Rule: "unparsable-address"}
+		} else if !grant.AllowPrivate && !Public(ap.Addr()) {
+			denial = &PolicyError{Kind: Network, Op: scheme, Target: target + " -> " + ap.Addr().String(), Rule: "private-address"}
 		}
-		if !grant.AllowPrivate && !Public(ap.Addr()) {
-			refused = &PolicyError{Kind: Network, Op: scheme, Target: target + " -> " + ap.Addr().String(), Rule: "private-address"}
-			return refused
+		if denial != nil {
+			mu.Lock()
+			refused = denial
+			mu.Unlock()
 		}
-		return nil
+		return denial
 	}}
 	conn, err := d.DialContext(ctx, network, target)
+	mu.Lock()
+	defer mu.Unlock()
 	if err != nil && refused != nil {
 		return nil, refused
 	}
