@@ -55,6 +55,8 @@ type FileGrant struct {
 	// fs.ReadDirFile and enumerate exact names consistent with Open. Unlisted
 	// aliases and paths that cannot be verified within bounded reads are denied.
 	// Symlinks under a source with nested mounts require fs.ReadLinkFS.
+	// Recognizable OS files under such a source are refused; use Root so
+	// physical hard-link aliases are checked.
 	FS fs.FS
 	// Write permits creating and modifying files. It requires Root.
 	Write bool

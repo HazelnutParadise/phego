@@ -111,6 +111,7 @@ type FileGrant struct {
 	// Nested mounts require bounded ReadDirFile enumeration with exact names
 	// consistent with Open; unverifiable paths and unlisted aliases are denied.
 	// Symlinks under a source with nested mounts require fs.ReadLinkFS.
+	// Recognizable OS files are refused when the source has nested mounts.
 	FS    fs.FS
 	Write bool
 }

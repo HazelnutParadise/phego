@@ -135,7 +135,24 @@ func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, fl
 	if result == "" {
 		result = "."
 	}
-	return grant.FS.Open(result)
+	f, err := grant.FS.Open(result)
+	if err != nil {
+		return nil, err
+	}
+	if p.mountAncestor(grant.Path) {
+		info, err := f.Stat()
+		if err != nil {
+			f.Close()
+			return nil, err
+		}
+		// Enforce the host-directory Root contract before exposing OS files.
+		// This recognizes OS metadata, not arbitrary trusted FS internals.
+		if os.SameFile(info, info) {
+			f.Close()
+			return nil, denied("not-granted")
+		}
+	}
+	return f, nil
 }
 
 func (p *Policy) mountAncestor(name string) bool {
