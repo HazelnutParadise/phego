@@ -51,5 +51,53 @@
     "VM unimplemented; full PHP and application acceptance not_run",
     "Windows cross-compiled only",
     "Trusted host FS must confine operations and provide consistent exact names"
+  ],
+  "pre_fix_reproductions": [
+    {
+      "source_commit": "04cfb82de952906107a0e2c2e3ae2a28f1a66031",
+      "test_source_commit": "1d905f0c2ad5c322db44a8f8828156c300b1fdc5",
+      "test_file": "internal/policy/review_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace only test_file with git show test_source_commit:test_file",
+      "command": "CGO_ENABLED=0 go test ./internal/policy -run 'TestNetworkIPv6ZoneNamesRemainCaseSensitive|TestPublicRefusesDeprecatedIPv6LocalRanges' -count=1",
+      "expected_exit": "nonzero: regression reproduced",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestNetworkIPv6ZoneNamesRemainCaseSensitive (0.00s)\n    review_test.go:234: grant for En0 authorized the different en0 zone\n--- FAIL: TestPublicRefusesDeprecatedIPv6LocalRanges (0.00s)\n    review_test.go:246: non-public address fec0::1 classified as public\n    review_test.go:246: non-public address feff:ffff::1 classified as public\n    review_test.go:246: non-public address ::2 classified as public\n    review_test.go:246: non-public address ::127.0.0.1 classified as public\n    review_test.go:246: non-public address fec0::1%En0 classified as public\n    review_test.go:246: non-public address 2001:db8::1%En0 classified as public\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.533s\nFAIL\n",
+      "stderr": "",
+      "argv": [
+        "go",
+        "test",
+        "./internal/policy",
+        "-run",
+        "TestNetworkIPv6ZoneNamesRemainCaseSensitive|TestPublicRefusesDeprecatedIPv6LocalRanges",
+        "-count=1"
+      ],
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "recorded_at_utc": "2026-11-01T09:33:25.534092+00:00"
+    },
+    {
+      "source_commit": "005b5623bb5f48175da13b94d0516246fe148744",
+      "test_source_commit": "d500e155322cfcb8f88dd8a95cc9078e4fe3cedb",
+      "test_file": "internal/policy/overlap_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace only test_file with git show test_source_commit:test_file",
+      "command": "CGO_ENABLED=0 go test ./internal/policy -run 'TestReadOnlyParentsResolveWritableChildAliases|TestFSMountsRejectUnlistedCaseAliases|TestFSMountsRequireBoundedDirectoryEnumeration|TestFSVirtualAncestorsDoNotEnableCaseAliases' -count=1",
+      "expected_exit": "nonzero: regression reproduced",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestReadOnlyParentsResolveWritableChildAliases (0.01s)\n    --- FAIL: TestReadOnlyParentsResolveWritableChildAliases/same (0.00s)\n        overlap_test.go:679: policy: file-write open \"/alias/file\" refused (not-granted)\n    --- FAIL: TestReadOnlyParentsResolveWritableChildAliases/separate (0.00s)\n        overlap_test.go:679: policy: file-write open \"/alias/file\" refused (not-granted)\n    overlap_test.go:706: policy: file-write open \"/alias/new\" refused (not-granted)\n--- FAIL: TestFSMountsRejectUnlistedCaseAliases (0.00s)\n    overlap_test.go:742: read hidden data via /Protected/hidden\n--- FAIL: TestFSMountsRequireBoundedDirectoryEnumeration (0.00s)\n    overlap_test.go:760: unverifiable FS accepted beside shadow mount\n--- FAIL: TestFSVirtualAncestorsDoNotEnableCaseAliases (0.00s)\n    overlap_test.go:778: virtual ancestor enabled hidden case alias\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.535s\nFAIL\n",
+      "stderr": "",
+      "argv": [
+        "go",
+        "test",
+        "./internal/policy",
+        "-run",
+        "TestReadOnlyParentsResolveWritableChildAliases|TestFSMountsRejectUnlistedCaseAliases|TestFSMountsRequireBoundedDirectoryEnumeration|TestFSVirtualAncestorsDoNotEnableCaseAliases",
+        "-count=1"
+      ],
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "recorded_at_utc": "2026-11-01T09:33:25.534250+00:00"
+    }
   ]
 }

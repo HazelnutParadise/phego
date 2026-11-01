@@ -53,5 +53,30 @@
     "Windows cross-compiled only",
     "Root escape error identification matches exact current Go error text; unknown future errors remain failures",
     "FS is trusted host code and must provide confined operations plus accurate directory metadata"
+  ],
+  "pre_fix_reproductions": [
+    {
+      "source_commit": "b727652fb04382073f69082a60a561f5910904cf",
+      "test_source_commit": "5748274cb55cfd554510626ab9b2a6eaef14b618",
+      "test_file": "internal/policy/overlap_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace only test_file with git show test_source_commit:test_file",
+      "command": "CGO_ENABLED=0 go test ./internal/policy -run 'TestSymlinkTargetsResolveNestedLinksBeforeParents|TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories|TestOverlappingFSRejectsUnresolvableSymlinks|TestSymlinkBoundariesSurviveMountRemapping' -count=1",
+      "expected_exit": "nonzero: regression reproduced",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestSymlinkTargetsResolveNestedLinksBeforeParents (0.01s)\n    --- FAIL: TestSymlinkTargetsResolveNestedLinksBeforeParents/same (0.00s)\n        overlap_test.go:811: policy: file-read open \"/app/link\" refused (outside-root)\n    --- FAIL: TestSymlinkTargetsResolveNestedLinksBeforeParents/separate (0.00s)\n        overlap_test.go:811: policy: file-read open \"/app/link\" refused (outside-root)\n--- FAIL: TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories (0.00s)\n    overlap_test.go:849: /data/file flag0: policy: file-read open \"/data/file\" refused (outside-root)\n--- FAIL: TestOverlappingFSRejectsUnresolvableSymlinks (0.00s)\n    overlap_test.go:890: unresolvable symlink read via /alias\n--- FAIL: TestSymlinkBoundariesSurviveMountRemapping (0.00s)\n    --- FAIL: TestSymlinkBoundariesSurviveMountRemapping/same (0.00s)\n        overlap_test.go:919: policy: file-read open \"/app/good\" refused (outside-root)\n    --- FAIL: TestSymlinkBoundariesSurviveMountRemapping/separate (0.00s)\n        overlap_test.go:919: policy: file-read open \"/app/good\" refused (outside-root)\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.555s\nFAIL\n",
+      "stderr": "",
+      "argv": [
+        "go",
+        "test",
+        "./internal/policy",
+        "-run",
+        "TestSymlinkTargetsResolveNestedLinksBeforeParents|TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories|TestOverlappingFSRejectsUnresolvableSymlinks|TestSymlinkBoundariesSurviveMountRemapping",
+        "-count=1"
+      ],
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "recorded_at_utc": "2026-11-01T09:33:25.534789+00:00"
+    }
   ]
 }
