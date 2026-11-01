@@ -387,7 +387,8 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 	return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "PHP execution"}
 }
 
-// RunFile reads path through Config.Files, then compiles and runs it.
+// RunFile reads path through Policy.Files, or directly through legacy
+// Config.Files when used alone, then compiles and runs it.
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
