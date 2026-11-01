@@ -1,0 +1,88 @@
+name: Native Linux reference Go
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/native-go-reference.yml'
+      - 'compat.lock.json'
+      - 'tools/reference_go.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-amd64-go:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check runner and locked inputs
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/phego-go-evidence"
+          test "$(uname -m)" = x86_64
+          uname -a | tee "$RUNNER_TEMP/phego-go-evidence/kernel.txt"
+          lscpu | tee "$RUNNER_TEMP/phego-go-evidence/cpu.txt"
+          docker version | tee "$RUNNER_TEMP/phego-go-evidence/docker.txt"
+          python3 - <<'PY'
+          import json
+          with open('compat.lock.json', encoding='utf-8') as f:
+              lock = json.load(f)
+          assert lock['go']['version'] == '1.27.3'
+          assert lock['go']['source_build']['archive_url'] == 'https://go.dev/dl/go1.27.3.src.tar.gz'
+          assert lock['go']['source_build']['archive_sha256'] == '6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb'
+          entries = [p for p in lock['go']['additional_archives'] if p['platform'] == 'linux/amd64']
+          assert len(entries) == 1
+          assert entries[0]['archive_url'] == 'https://go.dev/dl/go1.27.3.linux-amd64.tar.gz'
+          assert entries[0]['archive_sha256'] == '65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40'
+          assert entries[0]['probe_image'] == 'debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31'
+          PY
+          sha256sum compat.lock.json tools/reference_go.py | tee "$RUNNER_TEMP/phego-go-evidence/input-sha256.txt"
+      - name: Acquire pinned inputs
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 \
+            https://go.dev/dl/go1.27.3.linux-amd64.tar.gz -o "$RUNNER_TEMP/go.tar.gz"
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 \
+            https://go.dev/dl/go1.27.3.src.tar.gz -o "$RUNNER_TEMP/go.src.tar.gz"
+          printf '%s  %s\n' 65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40 "$RUNNER_TEMP/go.tar.gz" | sha256sum -c -
+          printf '%s  %s\n' 6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb "$RUNNER_TEMP/go.src.tar.gz" | sha256sum -c -
+          docker pull --platform linux/amd64 debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31
+      - name: Probe binary and rebuild source twice
+        run: |
+          set -euo pipefail
+          python3 tools/reference_go.py "$RUNNER_TEMP/go.tar.gz" --platform linux/amd64 --timeout 900 2>&1 | tee "$RUNNER_TEMP/phego-go-evidence/binary.log"
+          for run in 1 2; do
+            python3 tools/reference_go.py "$RUNNER_TEMP/go.tar.gz" --source-build "$RUNNER_TEMP/go.src.tar.gz" --platform linux/amd64 --timeout 900 2>&1 | tee "$RUNNER_TEMP/phego-go-evidence/source-${run}.log"
+          done
+          python3 - <<'PY'
+          import os,pathlib,re
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'phego-go-evidence'
+          binary=(root/'binary.log').read_text()
+          if binary.count('probe ok') != 1 or binary.count('go version go1.27.3 linux/amd64') != 1:
+              raise SystemExit('binary probe did not report the expected success and version')
+          results=[]
+          for n in (1,2):
+              text=(root/f'source-{n}.log').read_text()
+              if text.count('source_build_probe_ok') != 1 or text.count('go version go1.27.3 linux/amd64') != 1:
+                  raise SystemExit(f'source run {n}: missing expected success or version')
+              hashes=[]
+              for name in ('/tmp/source/go/bin/go','/tmp/probe'):
+                  matches=re.findall(r'(?m)^([0-9a-f]{64})\s+'+re.escape(name)+r'$',text)
+                  if len(matches)!=1: raise SystemExit(f'source run {n}: missing or ambiguous digest for {name}')
+                  hashes.append(matches[0])
+              results.append(hashes)
+          if results[0]!=results[1]: raise SystemExit('source builds differ')
+          print('Both source builds produced matching Go and probe digests:',*results[0])
+          PY
+      - name: Retain raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-amd64-go-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/phego-go-evidence/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "scope": "W-54 competitor and workload coverage gaps; open items block the complete performance goal",
+  "gaps": [
+    {"id": "GAP-01", "area": "competitors", "status": "open", "description": "No inventory item has a locked release, build recipe, or verified executable; every cell stays pending until a lock and a correctness run exist."},
+    {"id": "GAP-02", "area": "competitors", "status": "open", "description": "Discovery has covered planning seeds and upstream repositories found so far. Package registries, academic literature, archived project lists, and commercial runtimes have not been searched systematically."},
+    {"id": "GAP-03", "area": "competitors", "status": "open", "description": "Deployment stacks (FrankenPHP, RoadRunner, Swoole family) need web workloads; they must not be compared with execution cores on CLI cells as if equivalent."},
+    {"id": "GAP-04", "area": "workloads", "status": "open", "description": "Only six engine-level CLI workloads are frozen. Real-application workloads (WordPress/WooCommerce, Laravel, BookStack and others owned by W-56 to W-58), HTTP concurrency sweeps, overload, and recovery workloads are not yet defined as matrix cells."},
+    {"id": "GAP-05", "area": "workloads", "status": "open", "description": "Holdout workloads that are withheld until measurement have not been prepared."},
+    {"id": "GAP-06", "area": "oracles", "status": "open", "description": "Expected outputs come from PHP 8.5.12 on emulated linux/386 only. A native 64-bit reference run is still required to confirm platform-independent output."},
+    {"id": "GAP-07", "area": "protocol", "status": "open", "description": "Resource budgets, security mode, build flags, repetition count, sample-size and stop rules from chapter 37 are not yet recorded per cell."}
+  ]
+}

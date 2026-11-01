@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "scope": "frontend_parser_differential_check",
+  "requirement": "REQ-010",
+  "scenarios": ["T-019", "T-020"],
+  "product_acceptance": "not_run",
+  "executed_at": "2026-10-31",
+  "implementation_commit": "934df7f265eeddb5c50e103dda18b088ea67d341",
+  "test_harness_sha256": "a0b3f58c2eb9228ef879341e23d7abdb14befdc28e7de86611d8a8c7e8dfb7b4",
+  "php_version": "8.5.12",
+  "php_int_size": 8,
+  "reference_platform": "linux/arm64",
+  "reference_image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+  "source_archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "corpus_sha256": "8b8fe3e0201fa62f92d62f4655d896f27dd29f2ee783c9556ba9ff2e6b4d7fdb",
+  "reference_command": "docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --memory 1024m --pids-limit 64 --platform linux/arm64 -v CORPUS:/corpus:ro -v tests/frontend/parse_dump.php:/dump.php:ro IMAGE php -n -d memory_limit=1G /dump.php > parse-reference-arm64-official.jsonl",
+  "reference_sha256": "e93e6bc6de11405df53763e064ad2db4e3490b2ac0de9d678df57a89c4a41e9a",
+  "test_command": "PHEGO_LEXER_CORPUS=DIR PHEGO_PARSER_REFERENCE=parse-reference-arm64-official.jsonl PHEGO_LEXER_INT_WIDTH=64 CGO_ENABLED=0 go test -run '^TestParseMatchesReferenceCorpus$' -count=1 -v ./internal/frontend",
+  "result": {"matching_files": 5449, "files": 5449, "accepted": 5307, "parse_errors": 112, "other_errors": 30},
+  "limitations": ["Acceptance and error line only; error text and tree meaning were not compared.", "PHP 8.5.12 only; other releases and real applications remain unverified.", "The implementation commit precedes the test-harness update identified by its SHA-256."]
+}
