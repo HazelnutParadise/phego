@@ -18,6 +18,10 @@ import (
 // needs a mount granted for writing. The result is an *os.File for a host
 // directory and the file system's own file for an fs.FS mount.
 func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, error) {
+	return p.openFile(name, flag, perm, 0)
+}
+
+func (p *Policy) openFile(name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
 	kind, op := FileRead, "open"
 	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
 		kind = FileWrite
@@ -34,6 +38,9 @@ func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, err
 		return nil, err
 	}
 	defer root.Close()
+	if kind == FileWrite {
+		return p.openWrite(root, grant, rel, name, flag, perm, redirects)
+	}
 	f, err := root.OpenFile(rel, flag, perm)
 	if err != nil {
 		var pe *fs.PathError
