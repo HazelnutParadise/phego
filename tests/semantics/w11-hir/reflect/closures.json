@@ -1,0 +1,228 @@
+{
+    "functions": [
+        {
+            "name": "Fx\\outer",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [
+                {
+                    "name": "p",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                }
+            ]
+        }
+    ],
+    "classes": [
+        {
+            "name": "Fx\\Box",
+            "methods": [
+                {
+                    "name": "make",
+                    "returnType": null,
+                    "byRef": false,
+                    "generator": false,
+                    "variadic": false,
+                    "statics": [],
+                    "params": [],
+                    "static": false
+                }
+            ]
+        }
+    ],
+    "closures": [
+        {
+            "name": "{closure:Fx\\outer():6}",
+            "returnType": "int",
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "a",
+                "b",
+                "n"
+            ],
+            "params": [
+                {
+                    "name": "x",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                },
+                {
+                    "name": "y",
+                    "type": null,
+                    "byRef": true,
+                    "variadic": false,
+                    "optional": true,
+                    "default": true,
+                    "promoted": false
+                }
+            ],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\outer():7}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "a",
+                "b",
+                "c"
+            ],
+            "params": [
+                {
+                    "name": "x",
+                    "type": null,
+                    "byRef": false,
+                    "variadic": false,
+                    "optional": false,
+                    "default": false,
+                    "promoted": false
+                }
+            ],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\outer():8}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "d",
+                "a",
+                "c"
+            ],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\outer():9}",
+            "returnType": "array",
+            "byRef": false,
+            "generator": false,
+            "variadic": true,
+            "statics": [],
+            "params": [
+                {
+                    "name": "xs",
+                    "type": "int",
+                    "byRef": false,
+                    "variadic": true,
+                    "optional": true,
+                    "default": false,
+                    "promoted": false
+                }
+            ],
+            "static": true
+        },
+        {
+            "name": "{closure:Fx\\outer():10}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\outer():11}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\Box::make():18}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "q"
+            ],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:Fx\\Box::make():19}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "q"
+            ],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:/w/reflect/closures.php:28}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "m"
+            ],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:/w/reflect/closures.php:29}",
+            "returnType": null,
+            "byRef": false,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "m"
+            ],
+            "params": [],
+            "static": false
+        },
+        {
+            "name": "{closure:/w/reflect/closures.php:30}",
+            "returnType": null,
+            "byRef": true,
+            "generator": false,
+            "variadic": false,
+            "statics": [
+                "m",
+                "k"
+            ],
+            "params": [],
+            "static": true
+        }
+    ],
+    "values": [
+        [
+            "string",
+            "46785c426f783a3a6d616b65"
+        ],
+        [
+            "string",
+            "6d616b65"
+        ],
+        [
+            "string",
+            "46785c426f78"
+        ]
+    ]
+}
