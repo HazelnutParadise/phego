@@ -236,5 +236,34 @@
     "policy_test.go": "871b7cff2e709a2a09195ffce7e6ab85ec06f5ce3675386eadd0e58228249545",
     "value.go": "c05c59e02c712fc53abf97b113bc6ab75597957a87d56fea7e41b5fdb8fabb24",
     "value_test.go": "e350ed3fbb02419b395d9a0acb16fddb8b8118654fde87ff5bde39f508556216"
+  },
+  "php_fifo_reference": {
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--cap-drop",
+      "ALL",
+      "--security-opt",
+      "no-new-privileges",
+      "--pids-limit",
+      "32",
+      "--memory",
+      "128m",
+      "--cpus",
+      "1",
+      "--tmpfs",
+      "/tmp:rw,noexec,nosuid,size=1m",
+      "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "sh",
+      "-c",
+      "mkfifo /tmp/probe\n timeout 2 php -r 'echo PHP_VERSION,\" before\\n\"; $f=fopen(\"/tmp/probe\",\"r\"); echo \"opened\\n\";'\n echo no_peer_exit=$?\n (sleep 1; printf payload > /tmp/probe) &\n timeout 4 php -r '$f=fopen(\"/tmp/probe\",\"r\"); echo \"opened:\",stream_get_contents($f),\"\\n\";'\n echo with_peer_exit=$?\n wait\n"
+    ],
+    "exit_code": 0,
+    "stdout": "8.5.12 before\nno_peer_exit=124\nopened:payload\nwith_peer_exit=0\n",
+    "stderr": ""
   }
 }
