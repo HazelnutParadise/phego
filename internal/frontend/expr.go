@@ -804,7 +804,8 @@ func (p *parser) encapsList(end Kind) []*Node {
 					e = node("dim", name.Line, e, idx)
 				}
 			} else {
-				e = node("variable_variable", t.Line, p.expr())
+				// Text marks ${expr}, which PHP deprecates, apart from {$$a}.
+				e = &Node{Kind: "variable_variable", Text: "${", Line: t.Line, Children: []*Node{p.expr()}}
 			}
 			p.expect('}')
 			out = append(out, e)

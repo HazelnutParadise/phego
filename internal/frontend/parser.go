@@ -767,7 +767,10 @@ func (p *parser) namespaceStatement() *Node {
 		p.fail(body[len(body)-1].Line, "Unclosed '{' on line %d", open.Line)
 	}
 	p.expect('}')
-	return node("namespace", t.Line, append([]*Node{name}, body...)...)
+	// Text marks the bracketed form, which an empty body cannot show.
+	n := node("namespace", t.Line, append([]*Node{name}, body...)...)
+	n.Text = "{"
+	return n
 }
 
 func (p *parser) useKind() string {
