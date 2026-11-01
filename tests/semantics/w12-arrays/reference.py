@@ -19,7 +19,14 @@ def main():
     args = parser.parse_args()
     source = Path(__file__).resolve().parent
     platform, image = IMAGES[args.width]
-    command = ["docker", "run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
+    # Image acquisition has Docker's own stderr (pull progress). Keep it
+    # separate from the PHP stderr channel that must remain empty.
+    preparation = ["docker", "image", "inspect", image]
+    inspected = subprocess.run(preparation, capture_output=True, timeout=30)
+    if inspected.returncode:
+        preparation = ["docker", "pull", "--platform", platform, image]
+        subprocess.run(preparation, capture_output=True, timeout=120, check=True)
+    command = ["docker", "run", "--pull", "never", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
                "--security-opt", "no-new-privileges", "--pids-limit", "32", "--memory", "128m", "--cpus", "1",
                "--platform", platform, "-v", str(source) + ":/w:ro", image, "php", "-n", "/w/matrix.php"]
     result = subprocess.run(command, capture_output=True, timeout=120, check=True)
@@ -34,7 +41,7 @@ def main():
     metadata = {
         "requirements": ["REQ-007", "REQ-016", "REQ-017"],
         "tests": ["T-013", "T-014", "T-031", "T-032", "T-033", "T-034"],
-        "command": command, "exit_code": result.returncode, "stderr": result.stderr.decode(),
+        "image_preparation": preparation, "command": command, "exit_code": result.returncode, "stderr": result.stderr.decode(),
         "image": image, "platform": platform, "php": data["php"], "integer_width": args.width,
         "cases": len(data["cases"]), "fixture_sha256": hashlib.sha256((source / "matrix.php").read_bytes()).hexdigest(),
         "output": name, "output_sha256": hashlib.sha256(result.stdout).hexdigest(),

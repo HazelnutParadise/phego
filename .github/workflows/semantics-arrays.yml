@@ -24,6 +24,8 @@ jobs:
           go-version-file: go.mod
           cache: false
       # REQ-007/016/017; T-013/014/031/032/033/034. Generate the oracle afresh.
+      - name: Test reference runner
+        run: python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'
       - name: Run the pinned reference
         run: python3 tests/semantics/w12-arrays/reference.py --width ${{ matrix.width }} --output-dir "$RUNNER_TEMP/w12-reference"
       - name: Compare with Go runtime
