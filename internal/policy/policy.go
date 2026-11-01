@@ -108,6 +108,8 @@ type FileGrant struct {
 	Dir string
 	// FS is a trusted, confinement-safe read-only host implementation.
 	// Directory-backed mounts must use Dir; os.DirFS is not confined.
+	// Nested mounts require bounded ReadDirFile enumeration with exact names
+	// consistent with Open; unverifiable paths and unlisted aliases are denied.
 	FS    fs.FS
 	Write bool
 }

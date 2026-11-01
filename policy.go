@@ -51,6 +51,9 @@ type FileGrant struct {
 	// perform unauthorized side effects. Phego cannot inspect its internals.
 	// Use Root for host directories: os.DirFS follows escaping symlinks and
 	// does not provide the required confinement.
+	// Where a nested mount shadows this source, directories must support
+	// fs.ReadDirFile and enumerate exact names consistent with Open. Unlisted
+	// aliases and paths that cannot be verified within bounded reads are denied.
 	FS fs.FS
 	// Write permits creating and modifying files. It requires Root.
 	Write bool

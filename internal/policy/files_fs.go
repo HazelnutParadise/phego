@@ -2,6 +2,7 @@ package policy
 
 import (
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -20,6 +21,8 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 	var names []string
 	pending := strings.Split(rel, "/")
 	links := 0
+	entryBudget := 100000
+	syntheticDepth := 0
 	for len(pending) > 0 {
 		component := pending[0]
 		pending = pending[1:]
@@ -34,6 +37,9 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 				return p.openFile(mountPath(path.Dir(grant.Path), pending), flag, perm, redirects+1)
 			}
 			names = names[:len(names)-1]
+			if len(names) < syntheticDepth {
+				syntheticDepth = 0
+			}
 			continue
 		}
 		parts := append(append([]string(nil), names...), component)
@@ -42,6 +48,39 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 		for _, mounted := range p.files {
 			if mounted.Path != grant.Path && mounted.Path == current {
 				return p.openFile(mountPath(current, pending), flag, perm, redirects+1)
+			}
+		}
+		// An FS may accept aliases such as a different case spelling. When
+		// a nested mount exists here, only exact enumerated names may reach
+		// the parent backend. Virtual mount ancestors need no host entry.
+		parent := path.Join(grant.Path, strings.Join(names, "/"))
+		if syntheticDepth > 0 {
+			if !p.mountAncestor(current) {
+				return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrNotExist}
+			}
+			names = parts
+			if len(names) > 256 {
+				return nil, denied("protection-check-limit")
+			}
+			continue
+		}
+		if p.mountAncestor(parent) {
+			directory := strings.Join(names, "/")
+			if directory == "" {
+				directory = "."
+			}
+			if err := exactFSEntry(grant.FS, directory, component, &entryBudget); err != nil {
+				if p.mountAncestor(current) {
+					// Traverse only virtual descendants. An unverified backing
+					// name must never become a source for sibling reads.
+					syntheticDepth = len(parts)
+					names = parts
+					if len(names) > 256 {
+						return nil, denied("protection-check-limit")
+					}
+					continue
+				}
+				return nil, err
 			}
 		}
 		var info fs.FileInfo
@@ -73,6 +112,9 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 		}
 		if err != nil {
 			if !errors.Is(err, fs.ErrNotExist) || !p.mountAncestor(current) {
+				if kind == FileWrite {
+					return nil, denied("not-granted")
+				}
 				return nil, err
 			}
 		} else if len(pending) > 0 && info != nil && !info.IsDir() {
@@ -85,6 +127,9 @@ func (p *Policy) openFSFile(grant FileGrant, rel, name string, flag int, perm fs
 	}
 	if kind == FileWrite {
 		return nil, denied("not-granted")
+	}
+	if syntheticDepth > 0 {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrNotExist}
 	}
 	result := strings.Join(names, "/")
 	if result == "" {
@@ -101,4 +146,44 @@ func (p *Policy) mountAncestor(name string) bool {
 		}
 	}
 	return false
+}
+
+// exactFSEntry uses bounded batches rather than an unbounded ReadDirFS call.
+// FS providers must make directory names and exact Open names consistent.
+func exactFSEntry(source fs.FS, directory, name string, budget *int) error {
+	f, err := source.Open(directory)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	dir, ok := f.(fs.ReadDirFile)
+	if !ok {
+		return &fs.PathError{Op: "open", Path: directory, Err: fs.ErrPermission}
+	}
+	for *budget > 0 {
+		count := 128
+		if count > *budget {
+			count = *budget
+		}
+		entries, err := dir.ReadDir(count)
+		*budget -= len(entries)
+		if len(entries) > count {
+			return &fs.PathError{Op: "open", Path: directory, Err: fs.ErrPermission}
+		}
+		for _, entry := range entries {
+			if entry.Name() == name {
+				return nil
+			}
+		}
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return &fs.PathError{Op: "open", Path: path.Join(directory, name), Err: fs.ErrNotExist}
+			}
+			return err
+		}
+		if len(entries) == 0 {
+			break
+		}
+	}
+	return &fs.PathError{Op: "open", Path: directory, Err: fs.ErrPermission}
 }

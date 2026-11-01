@@ -35,17 +35,6 @@ func (p *Policy) openFile(name string, flag int, perm fs.FileMode, redirects int
 		return nil, err
 	}
 
-	if kind == FileWrite && !grant.Write {
-		parent := false
-		for _, component := range strings.Split(rel, "/") {
-			if component == ".." {
-				parent = true
-			}
-		}
-		if !parent {
-			return nil, &PolicyError{Kind: kind, Op: op, Target: name, Rule: "not-granted"}
-		}
-	}
 	if grant.FS != nil {
 		return p.openFSFile(grant, rel, name, flag, perm, redirects)
 	}
