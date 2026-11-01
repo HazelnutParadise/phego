@@ -83,12 +83,18 @@ func (x *execution) filter(fn outputFilter, data []byte) (out []byte, c completi
 	x.handlerOutput = false
 	defer func() { x.filtering = false; x.handlerOutput = false }()
 	c = x.call(func(x *execution) completion { var next completion; out, next = fn(x, data); return next }, nil)
+	if released := x.releaseReturn(&c); released.kind != endNormal {
+		c = x.replaceOwnedCompletion(c, released)
+	}
 	if x.handlerOutput {
 		if len(x.diagnostics) >= x.limits.callbacks {
-			c = x.fail(endLimit, errExecutionLimit)
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 		} else {
 			x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", "Producing output from user output handler is deprecated"})
 		}
+	}
+	if stop := x.check(); stop.kind != endNormal {
+		c = x.replaceOwnedCompletion(c, stop)
 	}
 	return out, c
 }

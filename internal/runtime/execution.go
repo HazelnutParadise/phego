@@ -30,6 +30,9 @@ type completion struct {
 	value    value
 	err      error
 	previous error
+	// An owned return moves with its completion. Copying the Go struct does
+	// not create another owner; the receiver must consume or forward it once.
+	returnOwned bool
 }
 
 func (c completion) Error() string {
@@ -42,6 +45,10 @@ func (c completion) Error() string {
 func (c completion) Unwrap() []error { return []error{c.err, c.previous} }
 
 type executionAction func(*execution) completion
+
+// outputFilter returns already-adapted output bytes. A successful PHP callback
+// return must be converted to out by the VM adapter and report endNormal here;
+// the completion channel carries outward termination, not the output string.
 type outputFilter func(*execution, []byte) ([]byte, completion)
 type executionLimits struct{ depth, callbacks, output int }
 type executionFrame struct{ locals []value }
@@ -125,15 +132,26 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		var err error
 		returned, err = exportSnapshot(c.value)
 		if err != nil {
-			c = completion{kind: endInternal, err: err}
+			c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
+		} else if released := x.releaseReturn(&c); released.kind != endNormal {
+			c = x.replaceOwnedCompletion(c, released)
 		}
+	}
+	if stop := x.check(); stop.kind != endNormal {
+		c = x.replaceOwnedCompletion(c, stop)
 	}
 	x.recordEnd(c)
 	if !stopsUserCode(c) {
 		for i := 0; i < len(x.shutdown); i++ {
 			next := x.call(x.shutdown[i], nil)
+			if released := x.releaseReturn(&next); released.kind != endNormal {
+				next = x.replaceOwnedCompletion(next, released)
+			}
+			if stop := x.check(); stop.kind != endNormal {
+				next = x.replaceOwnedCompletion(next, stop)
+			}
 			if next.kind != endNormal && next.kind != endReturn {
-				c = next
+				c = x.replaceOwnedCompletion(c, next)
 				x.recordEnd(c)
 				break
 			}
@@ -145,7 +163,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		x.destructorStop = true
 	}
 	if next := x.destruct(); next.kind != endNormal {
-		c = replaceCompletion(c, next)
+		c = x.replaceOwnedCompletion(c, next)
 		x.recordEnd(c)
 	}
 	if !stopsUserCode(c) {
@@ -156,7 +174,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		}
 		x.destructorStop = false
 		if next := x.flush(); next.kind != endNormal {
-			c = next
+			c = x.replaceOwnedCompletion(c, next)
 			x.recordEnd(c)
 		}
 	}
@@ -167,7 +185,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		o.destructorCalled = true
 	}
 	if err := x.heap.shutdown(&x.globals); err != nil {
-		c = x.fail(endInternal, err)
+		c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
 	}
 	x.buffers = nil
 	x.shutdown = nil
@@ -204,40 +222,42 @@ func (x *execution) call(body, finally executionAction) completion {
 	x.calls++
 	f := &executionFrame{}
 	x.frames = append(x.frames, f)
-	c := x.invoke(body)
+	c := ownReturn(x.invoke(body))
 	if stop := x.check(); stop.kind != endNormal {
-		c = stop
+		c = x.replaceOwnedCompletion(c, stop)
 	}
 	if (c.kind == endNormal || c.kind == endReturn || c.kind == endThrow) && finally != nil {
 		if x.calls >= x.limits.callbacks {
-			c = x.fail(endLimit, errExecutionLimit)
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 		} else {
 			x.calls++
 			if next := x.invoke(finally); next.kind != endNormal {
-				c = replaceCompletion(c, next)
+				c = x.replaceOwnedCompletion(c, next)
 			}
 		}
 		if stop := x.check(); stop.kind != endNormal {
-			c = stop
+			c = x.replaceOwnedCompletion(c, stop)
 		}
-	}
-	if c.kind == endReturn {
-		retain(c.value)
 	}
 	if c.kind == endNormal || c.kind == endReturn || c.kind == endThrow {
 		for i := 0; i < len(f.locals); i++ {
 			if err := x.heap.release(f.locals[i]); err != nil {
 				var next completion
 				if errors.As(err, &next) {
-					c = replaceCompletion(c, next)
+					c = x.replaceOwnedCompletion(c, next)
 				} else {
-					c = x.fail(endInternal, err)
+					c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
 				}
 				if c.kind != endThrow {
 					break
 				}
 			}
 		}
+	}
+	// freeArray preserves its first PHP error; a later destructor may still
+	// have set a sticky cancellation, writer error, or resource stop.
+	if stop := x.check(); stop.kind != endNormal {
+		c = x.replaceOwnedCompletion(c, stop)
 	}
 	x.frames = x.frames[:len(x.frames)-1]
 	return c
@@ -248,6 +268,49 @@ func replaceCompletion(old, next completion) completion {
 		next.previous = errors.Join(next.previous, old.err, old.previous)
 	}
 	return next
+}
+
+// REQ-020, REQ-022; T-039, T-040, T-043, T-044. A by-value return acquires
+// its own logical owner before finally can unset or replace the source slot.
+// Nested calls transfer an existing return owner without retaining it again.
+func ownReturn(c completion) completion {
+	if c.kind == endReturn && !c.returnOwned {
+		c.value = c.value.deref()
+		retain(c.value)
+		c.returnOwned = true
+	}
+	return c
+}
+
+func (x *execution) releaseReturn(c *completion) completion {
+	if !c.returnOwned {
+		return completion{}
+	}
+	v := c.value
+	c.value, c.returnOwned = value{}, false
+	if err := x.heap.release(v); err != nil {
+		var next completion
+		if errors.As(err, &next) {
+			return next
+		}
+		return x.fail(endInternal, err)
+	}
+	return completion{}
+}
+
+// Acquire the replacement before releasing the old return, even when both
+// point to the same value. A destructor raised by either release can replace
+// the completion again; its discarded replacement must be consumed as well.
+func (x *execution) replaceOwnedCompletion(old, next completion) completion {
+	next = ownReturn(next)
+	for {
+		next = replaceCompletion(old, next)
+		released := x.releaseReturn(&old)
+		if released.kind == endNormal {
+			return next
+		}
+		old, next = next, released
+	}
 }
 
 func (x *execution) local(v value) error {
@@ -304,6 +367,12 @@ func (x *execution) object(name string, destructor executionAction) (value, erro
 			return nil
 		}
 		c := x.call(destructor, nil)
+		if released := x.releaseReturn(&c); released.kind != endNormal {
+			c = x.replaceOwnedCompletion(c, released)
+		}
+		if stop := x.check(); stop.kind != endNormal {
+			c = x.replaceOwnedCompletion(c, stop)
+		}
 		if c.kind == endNormal || c.kind == endReturn {
 			return nil
 		}
