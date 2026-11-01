@@ -43,8 +43,10 @@ const (
 // Exactly one of Root and FS is set.
 type FileGrant struct {
 	Path string
-	// Root is a host directory, opened through os.Root so ".." and symbolic
-	// links cannot leave it.
+	// Root is a host directory opened through os.Root. Absolute symbolic links
+	// may target another granted Root; parent components in link targets may
+	// not leave their selected mount. Only regular files and directories are
+	// supported. The host must control the layout, including existing hard links.
 	Root string
 	// FS is a trusted host implementation of a read-only source, for example
 	// an embed.FS. It must confine reads to the authorized data and must not
@@ -66,8 +68,9 @@ type FileGrant struct {
 type NetworkGrant struct {
 	// Scheme is the protocol, for example "https" or "tcp".
 	Scheme string
-	// Host is a host name, an IP address, or "*.example.com" for every
-	// subdomain of example.com but not example.com itself.
+	// Host is an ASCII name, an IP address without brackets or a port, or
+	// "*.example.com" for every subdomain (not example.com itself).
+	// Internationalized names must use punycode.
 	Host string
 	// Ports lists the allowed ports; at least one is required.
 	Ports []int

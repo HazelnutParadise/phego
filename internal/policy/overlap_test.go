@@ -836,8 +836,10 @@ func TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories(t *testing.T) {
 	if err := os.Link(filepath.Join(root, "data/file"), filepath.Join(root, "data/hard")); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"shadow", "escape"} {
-		if err := os.Symlink(outside, filepath.Join(root, name)); err != nil {
+	// Keep the escape target ungranted: absolute links into the authorized
+	// /shadow directory are now intentionally supported.
+	for name, target := range map[string]string{"shadow": outside, "escape": t.TempDir()} {
+		if err := os.Symlink(target, filepath.Join(root, name)); err != nil {
 			t.Fatal(err)
 		}
 	}

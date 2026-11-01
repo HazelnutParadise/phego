@@ -10,10 +10,11 @@ import (
 )
 
 // OpenFile opens name, an absolute PHP path, through the mount that
-// contains it. A host directory is opened through os.Root, so ".."
-// components and symbolic links cannot leave it even if the file system
-// changes between the check and the open; a plain string prefix check
-// would not resist that.
+// contains it. Host directories are opened through os.Root and verified by
+// identity. Absolute symlink targets inside granted directories are remapped
+// to PHP paths; target parent components cannot escape their selected mount.
+// Host directories permit only regular files and directories, not FIFOs or
+// other special files. Host-created hard links still require a trusted layout.
 //
 // flag uses the os.O_* values. Any write, create, append or truncate flag
 // needs a mount granted for writing. The result is an *os.File for a host

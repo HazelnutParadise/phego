@@ -32,7 +32,7 @@ func normalizeHost(host string) string {
 	if a, err := netip.ParseAddr(host); err == nil {
 		return a.String()
 	}
-	return strings.ToLower(strings.TrimSuffix(host, "."))
+	return asciiLower(strings.TrimSuffix(host, "."))
 }
 
 func hostMatches(pattern, host string) bool {
@@ -90,12 +90,23 @@ func (p *Policy) DialContext(ctx context.Context, scheme, network, host string, 
 
 // Public reports whether a is a globally routable unicast address. Loopback,
 // private, link-local, multicast, unspecified, shared (100.64.0.0/10),
-// benchmarking, documentation and reserved ranges are not public.
+// benchmarking, documentation and reserved ranges are not public. The well-known
+// NAT64 prefix (64:ff9b::/96) and 6to4 (2002::/16) are classified by their
+// embedded IPv4 address, so public IPv4 destinations remain reachable.
 func Public(a netip.Addr) bool {
 	a = a.WithZone("").Unmap()
 	if !a.IsValid() || a.IsLoopback() || a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsLinkLocalMulticast() ||
 		a.IsInterfaceLocalMulticast() || a.IsMulticast() || a.IsUnspecified() {
 		return false
+	}
+	if a.Is6() {
+		b := a.As16()
+		switch {
+		case nat64Prefix.Contains(a):
+			return Public(netip.AddrFrom4([4]byte(b[12:16])))
+		case sixToFourPrefix.Contains(a):
+			return Public(netip.AddrFrom4([4]byte(b[2:6])))
+		}
 	}
 	for _, p := range nonPublic {
 		if p.Contains(a) {
@@ -105,12 +116,17 @@ func Public(a netip.Addr) bool {
 	return true
 }
 
+var (
+	nat64Prefix     = netip.MustParsePrefix("64:ff9b::/96")
+	sixToFourPrefix = netip.MustParsePrefix("2002::/16")
+)
+
 var nonPublic = func() []netip.Prefix {
 	var out []netip.Prefix
 	for _, s := range []string{
-		"0.0.0.0/8", "100.64.0.0/10", "192.0.0.0/24", "192.0.2.0/24", "198.18.0.0/15",
+		"0.0.0.0/8", "100.64.0.0/10", "192.88.99.0/24", "192.0.0.0/24", "192.0.2.0/24", "198.18.0.0/15",
 		"198.51.100.0/24", "203.0.113.0/24", "240.0.0.0/4", "255.255.255.255/32",
-		"::/96", "fec0::/10", "64:ff9b:1::/48", "100::/64", "2001::/23", "2001:db8::/32", "fc00::/7",
+		"::/96", "::ffff:0:0:0/96", "3fff::/20", "5f00::/16", "fec0::/10", "64:ff9b:1::/48", "100::/64", "2001::/23", "2001:db8::/32", "fc00::/7",
 	} {
 		out = append(out, netip.MustParsePrefix(s))
 	}
