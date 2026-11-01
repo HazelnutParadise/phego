@@ -34,7 +34,9 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 	stack := []frame{{root, info}}
 	defer func() {
 		for _, frame := range stack[1:] {
-			frame.root.Close()
+			if frame.root != nil {
+				frame.root.Close()
+			}
 		}
 	}()
 	var names []string
@@ -50,24 +52,50 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 			continue
 		case "..":
 			if len(stack) == 1 {
-				return nil, denied("outside-root")
+				if grant.Path == "/" {
+					continue
+				}
+				return p.openFile(mountPath(path.Dir(grant.Path), pending), flag, perm, redirects+1)
 			}
-			stack[len(stack)-1].root.Close()
+			if stack[len(stack)-1].root != nil {
+				stack[len(stack)-1].root.Close()
+			}
 			stack = stack[:len(stack)-1]
 			names = names[:len(names)-1]
 			continue
 		}
+		currentName := path.Join(grant.Path, path.Join(append(append([]string(nil), names...), component)...))
+		for _, mounted := range p.files {
+			if mounted.Path != grant.Path && mounted.Path == currentName {
+				return p.openFile(mountPath(mounted.Path, pending), flag, perm, redirects+1)
+			}
+		}
 		parent := stack[len(stack)-1].root
-		st, e := parent.Lstat(component)
+		var st fs.FileInfo
+		var e error
+		if parent == nil {
+			e = &fs.PathError{Op: "open", Path: currentName, Err: fs.ErrNotExist}
+		} else {
+			st, e = parent.Lstat(component)
+		}
+		if errors.Is(e, fs.ErrNotExist) && p.mountAncestor(currentName) {
+			if len(stack) >= 256 {
+				return nil, denied("protection-check-limit")
+			}
+			stack = append(stack, frame{})
+			names = append(names, component)
+			continue
+		}
 		if e != nil {
-			if len(pending) == 0 && errors.Is(e, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
+			if parent != nil && len(pending) == 0 && errors.Is(e, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
 				leaf = component
 				break
 			}
 			return nil, e
 		}
 		if len(pending) == 0 && flag&(os.O_CREATE|os.O_EXCL) == os.O_CREATE|os.O_EXCL {
-			return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
+			leaf, before = component, st
+			break
 		}
 		if st.Mode()&os.ModeSymlink != 0 {
 			links++
@@ -81,19 +109,12 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 			if filepath.IsAbs(target) || filepath.VolumeName(target) != "" {
 				return nil, denied("outside-root")
 			}
-			pending = append(strings.Split(filepath.ToSlash(target), "/"), pending...)
-			resolvedRel := path.Join(append(append([]string(nil), names...), pending...)...)
-			if resolvedRel == ".." || strings.HasPrefix(resolvedRel, "../") {
+			targetParts := strings.Split(filepath.ToSlash(target), "/")
+			resolvedTarget := path.Join(append(append([]string(nil), names...), targetParts...)...)
+			if resolvedTarget == ".." || strings.HasPrefix(resolvedTarget, "../") {
 				return nil, denied("outside-root")
 			}
-			resolvedName := path.Join(grant.Path, resolvedRel)
-			selected, _, e := p.fileGrant(kind, "open", resolvedName)
-			if e != nil {
-				return nil, e
-			}
-			if selected.Path != grant.Path {
-				return p.openFile(resolvedName, flag, perm, redirects+1)
-			}
+			pending = append(targetParts, pending...)
 			continue
 		}
 		if st.IsDir() {
@@ -102,7 +123,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 				return nil, e
 			}
 			if mounted != "" {
-				return p.openFile(path.Join(mounted, path.Join(pending...)), flag, perm, redirects+1)
+				return p.openFile(mountPath(mounted, pending), flag, perm, redirects+1)
 			}
 		}
 		if len(pending) == 0 {
@@ -130,7 +151,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 		names = append(names, component)
 	}
 	if leaf == "" {
-		if kind == FileRead {
+		if kind == FileRead && stack[len(stack)-1].root != nil {
 			return stack[len(stack)-1].root.Open(".")
 		}
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrInvalid}
@@ -142,6 +163,12 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, 
 	}
 	if selected.Path != grant.Path {
 		return p.openFile(resolved, flag, perm, redirects+1)
+	}
+	if kind == FileWrite && !grant.Write {
+		return nil, denied("not-granted")
+	}
+	if before != nil && flag&(os.O_CREATE|os.O_EXCL) == os.O_CREATE|os.O_EXCL {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
 		f, err := stack[len(stack)-1].root.OpenFile(leaf, flag, perm)

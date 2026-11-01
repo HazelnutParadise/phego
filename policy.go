@@ -46,7 +46,11 @@ type FileGrant struct {
 	// Root is a host directory, opened through os.Root so ".." and symbolic
 	// links cannot leave it.
 	Root string
-	// FS is a read-only file system, for example an embed.FS.
+	// FS is a trusted host implementation of a read-only source, for example
+	// an embed.FS. It must confine reads to the authorized data and must not
+	// perform unauthorized side effects. Phego cannot inspect its internals.
+	// Use Root for host directories: os.DirFS follows escaping symlinks and
+	// does not provide the required confinement.
 	FS fs.FS
 	// Write permits creating and modifying files. It requires Root.
 	Write bool

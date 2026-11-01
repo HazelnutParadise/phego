@@ -106,7 +106,8 @@ type FileGrant struct {
 	Path string
 	// Dir is an absolute host directory, opened through os.Root.
 	Dir string
-	// FS is a read-only file system.
+	// FS is a trusted, confinement-safe read-only host implementation.
+	// Directory-backed mounts must use Dir; os.DirFS is not confined.
 	FS    fs.FS
 	Write bool
 }

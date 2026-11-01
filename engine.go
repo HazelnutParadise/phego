@@ -40,7 +40,8 @@ type Config struct {
 	// Deprecated: use Limits.Output. Setting both to different values is a
 	// ConfigError.
 	OutputLimit int
-	// Files mounts a read-only file system at "/" for RunFile, which then
+	// Files is a trusted host implementation, as described by FileGrant.FS.
+	// It mounts a read-only file system at "/" for RunFile, which then
 	// accepts paths relative to it. Nil grants no file access.
 	//
 	// Deprecated: use Policy.Files. Mounting both at "/" is a ConfigError.
