@@ -1,0 +1,194 @@
+{
+  "scope": "W-14 latest Codex review regression; local actions, not VM acceptance",
+  "baseline_commit": "cacf865508ff0880db8a226491db86591ffc4a3d",
+  "requirements": [
+    "REQ-020",
+    "REQ-040"
+  ],
+  "acceptance_scenarios": [
+    "T-039",
+    "T-040",
+    "T-079",
+    "T-080"
+  ],
+  "product_test_status": "not_run",
+  "findings": [
+    {
+      "thread": "PRRT_kwDOVadPy86ycIrN",
+      "reproduced": true,
+      "test": "TestExecutionReviewCaughtNestedShutdownThrow"
+    },
+    {
+      "thread": "PRRT_kwDOVadPy86ycIrR",
+      "reproduced": true,
+      "test": "TestExecutionReviewFatalOverridesAggregateThrow"
+    }
+  ],
+  "local_status": "pass",
+  "regression": {
+    "command": "CGO_ENABLED=0 go test -count=1 -run 'TestExecutionReview(CaughtNestedShutdownThrow|FatalOverridesAggregateThrow)$' ./internal/runtime",
+    "before_exit_code": 1,
+    "before_evidence": "docs/implementation/evidence/W-14-ci-review/red.txt",
+    "after_evidence": "docs/implementation/evidence/W-14-ci-review/green.txt",
+    "test_source": "internal/runtime/execution_ci_review_test.go",
+    "method": "new tests executed against cacf865 before implementation changes"
+  },
+  "commands": [
+    {
+      "command": "gofmt -l internal (assert empty stdout)",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/go.txt",
+      "sha256": "6f62d4f48d7d5b91a34b311a76b95fbdd026e17d020453f81b4fdc3dde5dc8b8"
+    },
+    {
+      "command": "go test -race ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/race.txt",
+      "sha256": "3b9c2eda9ad63dac10b66fbd9dd06d54b19cc9c128acbe16d3d6da16a854fc79"
+    },
+    {
+      "command": "go vet ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/vet.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/python.txt",
+      "sha256": "a91e01136d988f6cb316fab9630f884bbb5d5144584975a5bfe07e0110db0ddc"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/oracle64.txt",
+      "sha256": "782b21ab5c3744832e02f6ceec8ee2d8698d91e53ece88ac8f4aa3d2f64e608e"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py --width 32",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/oracle32.txt",
+      "sha256": "58800a6f7c0109b7979b306beae3f4a319c2becd03cf94665e40539e991680ee"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p test_lifecycle_reference.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/runner.txt",
+      "sha256": "d2c6a9bc981a90f83741abca5675fff24e991855bfffa05d538f02e5aa9ee5cc"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/replay.txt",
+      "sha256": "ad8071676e9f3eb741023887c3bfc4315968aaeaaa9223ee8bd62a9cebe0fbdc"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 -run 'TestExecutionReview' ./internal/runtime",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/green.txt",
+      "sha256": "1b2dd1ea47127d22b64efb1620aedfddbaa86826c302516d182ba8ea435f6782"
+    },
+    {
+      "command": "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime (temporary W-12 archive plus W-14 execution*.go and fixtures)",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/w12.txt",
+      "sha256": "e066eb4ff771e71b910142c6bd244531c8036441fa4f4d47b80f4fddc230d9f9"
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/docs.txt",
+      "sha256": "622d8157bdfbcee203890c478d1b514cb0e47ddcb4636f96b92c3eeae4cc3b1d"
+    },
+    {
+      "command": "python3 tools/validate_docs.py --no-write",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "docs/implementation/evidence/W-14-ci-review/docs-readonly.txt",
+      "sha256": "622d8157bdfbcee203890c478d1b514cb0e47ddcb4636f96b92c3eeae4cc3b1d"
+    }
+  ],
+  "recorded_at_utc": "2026-11-01T16:24:35.908414+00:00",
+  "input_sha256": {
+    ".github/workflows/semantics-lifecycle.yml": "268d6659d26b45959100022e5b50442b1ea1f3a3faef1e8e36e2c173d24c778a",
+    "tools/lifecycle_reference.py": "1115aec71f1dac4378299db45b405d98676c3fb6bfdca819456ca2ceda5d944e",
+    "tools/test_lifecycle_reference.py": "a742909f87e3bdea915052613089341d35dc5270712e0757c649c6c455ddcd10",
+    "docs/implementation/W-14.md": "8e89fc5a1aa8f6f04fb3bb7bdf9409097025f4949d4191aa193a533464ec41dd",
+    "internal/runtime/execution.go": "2d3abde37a5244dc65efaa65bf466ee1e15d89a281769318abd4a9c628c715cb",
+    "internal/runtime/execution_ci_review_test.go": "d338fcbbfcda9efb866b07dfaf65375b910dd0ee55192d2745588b46434b4ee0",
+    "internal/runtime/execution_destruct.go": "64565296437c0a87ff95279a47c7f7fa9015f941e3f68bbc591cfe84fb110280",
+    "internal/runtime/execution_oracle_test.go": "45a6253182e6bb0fa1d09769f33f2066c9d9d73ccad9b8b95048e38170c9a0e9",
+    "internal/runtime/execution_output.go": "e12e3313985d5085430e1078a90529ff897256911dd8f3aef216dd1236fe2694",
+    "internal/runtime/execution_review_test.go": "a6bc6694c0c7782292c7e7f77e00490b2e7c7f8765ff5835b7e97e579a69ef8c",
+    "internal/runtime/execution_snapshot_test.go": "da6aa7009295370b8861e35eb9ba44e78f18a4404569eb9763e9a06dc63045f2",
+    "internal/runtime/execution_test.go": "6b84a0a59450e25d157102241bbe26ccb41e330ccad4b709808b2c9e8685113c"
+  },
+  "profiles": [
+    {
+      "width": 64,
+      "cases": 30,
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "reference": "tests/lifecycle/w14/reference.json",
+      "sha256": "b287bd39d3fa3f58f37da499838c589a3b2f8a00205b4c6bd6f14d4d9f479f2f"
+    },
+    {
+      "width": 32,
+      "cases": 30,
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "reference": "tests/lifecycle/w14/reference-32.json",
+      "sha256": "2be68aa2e656a47e0b2a7864b16d98bcbd29877aff2a8df661f80e0b04142fb5"
+    }
+  ],
+  "width_comparison": {
+    "cases": 30,
+    "differences": [],
+    "fields": [
+      "case",
+      "exit_code",
+      "stdout",
+      "stderr",
+      "combined"
+    ]
+  },
+  "w12_compatibility": {
+    "head": "65adcab07c85de2317e11a8e78da6c6d232043cb",
+    "state": "PR #72 remains open; no W-12 files edited",
+    "result": "pass",
+    "reproduction": "python3 - <<'PYCODE'\nimport tempfile, subprocess, shutil, os\nfrom pathlib import Path\nroot = Path.cwd()\nwith tempfile.TemporaryDirectory(prefix='phego-w14-ci-final-integration-') as tmp:\n    p = Path(tmp)\n    subprocess.run(['tar', '-x', '-C', str(p)], input=subprocess.check_output(['git', 'archive', '65adcab07c85de2317e11a8e78da6c6d232043cb']), check=True)\n    for f in (root / 'internal/runtime').glob('execution*.go'):\n        shutil.copy2(f, p / 'internal/runtime' / f.name)\n    shutil.copytree(root / 'tests/lifecycle/w14', p / 'tests/lifecycle/w14', dirs_exist_ok=True)\n    result = subprocess.run(['go', 'test', './internal/runtime'], cwd=p, env={**os.environ, 'CGO_ENABLED': '0', 'GOWORK': 'off'})\n    raise SystemExit(result.returncode)\nPYCODE"
+  },
+  "review": {
+    "independent_adversarial_review": "no confirmed findings after fix",
+    "remote_latest_head": "pending push and re-review",
+    "baseline_remote_checks": "cacf865: 26/26 passed before the review fixes"
+  },
+  "security_assessment": "needs_regression; no VM acceptance",
+  "remaining_gaps": [
+    "PHP source execution and VM integration remain not_run.",
+    "Latest fix commit remote CI and Codex review require verification after push."
+  ],
+  "environment": {
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "go": "go version go1.26.5 darwin/arm64",
+    "python": "3.9.6",
+    "docker": "29.8.2 / 29.8.2"
+  }
+}

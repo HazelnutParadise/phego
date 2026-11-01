@@ -88,11 +88,11 @@ type execution struct {
 	accepted                 int64
 	diagnostics              []executionDiagnostic
 	started, closed          bool
-	destructing              bool
 	filtering, handlerOutput bool
 	destructorStop           bool
 	result                   executionResult
 	stop                     completion
+	phaseFatal               completion
 	calls                    int
 }
 
@@ -255,7 +255,7 @@ func (x *execution) call(body, finally executionAction) completion {
 		}
 	}
 	// freeArray preserves its first PHP error; a later destructor may still
-	// have set a sticky cancellation, writer error, or resource stop.
+	// have set a phase fatal, cancellation, writer error, or resource stop.
 	if stop := x.check(); stop.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, stop)
 	}
@@ -376,11 +376,8 @@ func (x *execution) object(name string, destructor executionAction) (value, erro
 		if c.kind == endNormal || c.kind == endReturn {
 			return nil
 		}
-		// During request teardown any terminating destructor stops the rest.
-		// During normal frame unwinding a PHP exception may still be caught.
-		if x.destructing {
-			x.destructorStop = true
-		}
+		// A nested exception may be caught by the outer destructor. Only
+		// destruct() decides whether an escaping error stops the whole pass.
 		return c
 	}})
 }
@@ -390,6 +387,9 @@ func stopsUserCode(c completion) bool {
 }
 
 func (x *execution) fail(kind endKind, err error) completion {
+	if kind == endFatal {
+		return x.markFatal(completion{kind: kind, err: err})
+	}
 	if x.stop.kind == endNormal {
 		x.stop = completion{kind: kind, err: err}
 	}
@@ -403,7 +403,7 @@ func (x *execution) check() completion {
 	if err := x.ctx.Err(); err != nil {
 		return x.fail(endCancel, err)
 	}
-	return completion{}
+	return x.phaseFatal
 }
 
 func (x *execution) invoke(fn executionAction) (c completion) {
@@ -416,19 +416,27 @@ func (x *execution) invoke(fn executionAction) (c completion) {
 	// Mark at the action boundary, before a containing array or property
 	// release can continue into sibling destructors.
 	if c.kind == endFatal {
-		for _, o := range x.heap.live {
-			o.destructorCalled = true
-		}
+		c = x.markFatal(c)
 	}
 	return c
 }
 
-func (x *execution) recordEnd(c completion) {
-	if c.kind == endFatal {
-		for _, o := range x.heap.live {
-			o.destructorCalled = true
-		}
+// Preserve a fatal across aggregate releases that return an earlier exception.
+// Host stops remain independent and take precedence in check().
+func (x *execution) markFatal(c completion) completion {
+	if x.phaseFatal.kind == endNormal {
+		x.phaseFatal = c
 	}
+	for _, o := range x.heap.live {
+		o.destructorCalled = true
+	}
+	return x.phaseFatal
+}
+
+func (x *execution) recordEnd(c completion) {
+	// The driver has consumed this phase's fatal. The next shutdown,
+	// destructor, or output phase may execute new PHP callbacks.
+	x.phaseFatal = completion{}
 	if (c.kind == endThrow || c.kind == endFatal) && len(x.diagnostics) < x.limits.callbacks {
 		x.diagnostics = append(x.diagnostics, executionDiagnostic{"Fatal error", c.Error()})
 	}

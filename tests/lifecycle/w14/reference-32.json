@@ -18,6 +18,13 @@
       "combined": "destroy:array-a\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BAS)]"
     },
     {
+      "case": "array_throw_fatal",
+      "exit_code": 255,
+      "stdout": "[(BS)]",
+      "stderr": "destroy:throw\ndestroy:fatal\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\nFatal error: fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n",
+      "combined": "destroy:throw\ndestroy:fatal\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\nFatal error: fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BS)]"
+    },
+    {
       "case": "buffer_echo",
       "exit_code": 0,
       "stdout": "[(BSD)]",
@@ -165,6 +172,13 @@
       "combined": "shutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
     },
     {
+      "case": "shutdown_nested_catch",
+      "exit_code": 0,
+      "stdout": "[(BSDD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:child\ncaught:child\ndestroy:tail\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:child\ncaught:child\ndestroy:tail\nflush:inner\nflush:outer\n[(BSDD)]"
+    },
+    {
       "case": "shutdown_register",
       "exit_code": 0,
       "stdout": "[(BSD)]",
@@ -229,6 +243,7 @@
   "inputs_sha256": {
     "array_exit.php": "8292a1e03a37836e8fc464b4f343ea7e032beecee5d025b90cd024b9706e9eb2",
     "array_fatal.php": "883f5a9223149f9d57a974284c84f22486d2e94fd146d19ffebebd7b222ebe6d",
+    "array_throw_fatal.php": "a41e3e121141556ef61386252c73e3396f7e759532cab0cf3eba20fefcd23e03",
     "buffer_echo.php": "4488a62345db335b415a1bb00c3e6218bf36c099418bd1ea3801e52c25dc8c16",
     "buffer_object.php": "b38844512581c9e2f47e35858e4f8f78f069818d8b0321800219e61fd5a2bf3e",
     "buffer_retained.php": "47dd495bc1be6bf42a05c4c9e46646de715f6a10b82e68a29eb5820c50abf247",
@@ -252,6 +267,7 @@
     "return_finally_replace.php": "8fc5bdbdaf1cb6db6e7e06516dda051ea1aba7ae84e2f7abe3aeb6a620b4f648",
     "return_replaced_destructor.php": "508b9829a97971e3aad19f3e9acc18ea323e3e60e31ee68b28766496888f045b",
     "shutdown_exit.php": "97f16da5fe1b87f4c97e95ce25219e251d6136f97c513b89aaf8b0439019447e",
+    "shutdown_nested_catch.php": "74e560fe19d3f58e2e21159483463a932da4ba6595af8294b4b53c7b56df5062",
     "shutdown_register.php": "028d0aeb25f7bfe22f04e4a45a612f07a6045c1d5747a72729d30d5db4ef817d",
     "shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
     "uncaught.php": "ac1040cfe0c54d7603c2f2c0eea6104cbef05d3a1048756d4e0e3dbb72e528f5",

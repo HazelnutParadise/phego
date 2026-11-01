@@ -7,12 +7,14 @@ import "errors"
 // destructor phase is separate from storage invalidation so output handlers
 // can still use values. The existing W-06 prototype shutdown stays unchanged.
 func (x *execution) destruct() completion {
-	x.destructing = true
-	defer func() { x.destructing = false }()
 	if x.destructorStop {
 		return completion{}
 	}
 	convert := func(err error) completion {
+		if stop := x.check(); stop.kind != endNormal {
+			x.destructorStop = true
+			return stop
+		}
 		if err == nil {
 			return completion{}
 		}

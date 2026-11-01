@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 28 {
-		t.Fatalf("want 28 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 30 {
+		t.Fatalf("want 30 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -81,6 +81,25 @@ func replayExecutionOracle(t *testing.T, width int) {
 					return []byte("(" + string(b) + ")"), completion{}
 				}))
 				switch tc.Case {
+				case "shutdown_nested_catch":
+					_, err := x.object("Outer", func(x *execution) completion {
+						child, err := x.object("NestedChild", func(*execution) completion {
+							event("destroy:child")
+							return completion{kind: endThrow, err: errors.New("child failure")}
+						})
+						must(err)
+						var slot value
+						must(x.heap.assign(&slot, child))
+						var caught completion
+						if err := x.heap.unset(&slot); !errors.As(err, &caught) || caught.kind != endThrow {
+							t.Fatalf("expected child exception: %v", err)
+						}
+						event("caught:child")
+						return completion{}
+					})
+					must(err)
+					_, err = x.object("Tracked", func(x *execution) completion { event("destroy:tail"); return x.write([]byte("D")) })
+					must(err)
 				case "fatal_shutdown_create":
 					// Store the pre-fatal object so the callback can explicitly unset it.
 					old := value{kind: valueObject, object: x.heap.live[1]}
@@ -236,6 +255,36 @@ func replayExecutionOracle(t *testing.T, width int) {
 					}
 					event("caught:" + c.err.Error())
 					event("previous:" + c.previous.Error())
+				case "array_throw_fatal":
+					c := x.call(func(x *execution) completion {
+						a := x.heap.newArrayValue()
+						must(x.local(a))
+						for i, kind := range []endKind{endThrow, endFatal, endNormal} {
+							o, err := x.object("Element", func(x *execution) completion {
+								switch kind {
+								case endThrow:
+									event("destroy:throw")
+									return completion{kind: endThrow, err: errors.New("earlier throw")}
+								case endFatal:
+									event("destroy:fatal")
+									return completion{kind: endFatal, err: errors.New("fatal destructor")}
+								default:
+									event("destroy:tail")
+									return x.write([]byte("D"))
+								}
+							})
+							must(err)
+							key, err := intValue(int64(i), width)
+							must(err)
+							must(x.heap.setElement(&a, key, o))
+						}
+						return completion{}
+					}, nil)
+					if c.kind == endThrow {
+						event("caught")
+						return x.write([]byte("unexpected"))
+					}
+					return c
 				case "array_fatal", "array_exit":
 					return x.call(func(x *execution) completion {
 						a := x.heap.newArrayValue()
