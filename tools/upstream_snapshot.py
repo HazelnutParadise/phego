@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Inventory verified PHP release archives and compare candidate changes."""
 import argparse
+from contextlib import contextmanager
 import hashlib
 import io
 import json
+import lzma
 import re
 import sys
 import tarfile
@@ -17,6 +19,8 @@ MAX_ENTRIES = 100000
 MAX_SNAPSHOT = 32 * 1024 * 1024
 MAX_METADATA = 1024 * 1024
 MAX_METADATA_HEADERS = 256
+MAX_LZMA_MEMORY = 128 * 1024 * 1024
+_LZMA_CHUNK = 64 * 1024
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 VERSION = re.compile(r"[0-9]+(?:\.[0-9]+){1,2}\Z")
@@ -109,6 +113,125 @@ class _BoundedTarInfo(tarfile.TarInfo):
         return super()._proc_gnulong(archive)
 
 
+class _BoundedLZMAReader:
+    _XZ_PREFIX = b"\xfd7zXZ"
+    _ALONE_PREFIX = b"\x5d\x00\x00\x80"
+
+    def __init__(self, data, max_decoded):
+        self._data = data
+        self._max_decoded = max_decoded
+        self._offset = 0
+        self._decoded = 0
+        self._buffer = bytearray()
+        self._decoder = None
+        self._decoder_format = None
+        self._previous_format = None
+        self._finished = False
+
+    @classmethod
+    def _format_at(cls, data, offset):
+        prefix = data[offset:offset + len(cls._XZ_PREFIX)]
+        if prefix.startswith(cls._XZ_PREFIX):
+            return "xz"
+        prefix = data[offset:offset + len(cls._ALONE_PREFIX)]
+        if prefix == cls._ALONE_PREFIX:
+            return "alone"
+        return None
+
+    def _start_stream(self):
+        if self._offset >= len(self._data):
+            self._finished = True
+            return
+
+        padding_start = self._offset
+        while self._offset < len(self._data) and self._data[self._offset] == 0:
+            self._offset += 1
+        padding_size = self._offset - padding_start
+        if padding_size and (
+                self._previous_format != "xz" or padding_size % 4):
+            raise lzma.LZMAError("invalid XZ stream padding")
+        if self._offset >= len(self._data):
+            self._finished = True
+            return
+
+        self._decoder_format = self._format_at(self._data, self._offset)
+        if self._decoder_format is None:
+            raise lzma.LZMAError("invalid data after LZMA stream")
+        self._decoder = lzma.LZMADecompressor(
+            format=lzma.FORMAT_AUTO, memlimit=MAX_LZMA_MEMORY)
+
+    def _pump(self):
+        if self._decoder is None:
+            self._start_stream()
+            if self._finished:
+                return
+
+        decoder = self._decoder
+        if decoder.needs_input:
+            if self._offset >= len(self._data):
+                raise lzma.LZMAError("truncated LZMA stream")
+            end = min(self._offset + _LZMA_CHUNK, len(self._data))
+            chunk = self._data[self._offset:end]
+            self._offset = end
+        else:
+            chunk = b""
+
+        output_limit = min(_LZMA_CHUNK, self._max_decoded - self._decoded + 1)
+        output = decoder.decompress(chunk, max_length=output_limit)
+        self._decoded += len(output)
+        if self._decoded > self._max_decoded:
+            raise ValueError("archive decoded size limit exceeded")
+        self._buffer.extend(output)
+
+        if decoder.eof:
+            self._offset -= len(decoder.unused_data)
+            self._previous_format = self._decoder_format
+            self._decoder = None
+            self._decoder_format = None
+
+    def _fill(self, size):
+        while len(self._buffer) < size and not self._finished:
+            self._pump()
+
+    def read(self, size=-1):
+        if size == 0:
+            return b""
+        if size is None or size < 0:
+            size = self._max_decoded + 1
+        self._fill(size)
+        result = bytes(self._buffer[:size])
+        del self._buffer[:size]
+        return result
+
+    def drain(self):
+        while self.read(_LZMA_CHUNK):
+            pass
+
+
+@contextmanager
+def _open_archive(data, max_expanded, max_entries):
+    """Open tar data, bounding LZMA decoding before tarfile sees its output."""
+    lzma_format = _BoundedLZMAReader._format_at(data, 0)
+    if lzma_format is None:
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r|*",
+                          tarinfo=_BoundedTarInfo) as archive:
+            yield archive
+        return
+
+    # Each header needs 512 bytes; each payload can add 511 bytes of padding.
+    max_decoded = (max_expanded
+                   + (max_entries + MAX_METADATA_HEADERS) * 1024
+                   + MAX_METADATA + tarfile.RECORDSIZE)
+    source = _BoundedLZMAReader(data, max_decoded)
+    try:
+        with tarfile.open(fileobj=source, mode="r|",
+                          tarinfo=_BoundedTarInfo) as archive:
+            yield archive
+        source.drain()
+    except lzma.LZMAError as exc:
+        raise ValueError("invalid archive") from exc
+
+
 def capture(archive, expected_sha256, version, tag, commit, announcement):
     """Return a deterministic snapshot of a digest-verified source archive."""
     release = _release({"version": version, "tag": tag, "commit": commit,
@@ -120,7 +243,7 @@ def capture(archive, expected_sha256, version, tag, commit, announcement):
     root = "php-" + version
     seen, files, expanded = set(), {}, 0
     try:
-        with tarfile.open(fileobj=io.BytesIO(archive), mode="r|*", tarinfo=_BoundedTarInfo) as stream:
+        with _open_archive(archive, MAX_EXPANDED, MAX_ENTRIES) as stream:
             for index, member in enumerate(stream, 1):
                 if index > MAX_ENTRIES:
                     raise ValueError("too many archive entries")

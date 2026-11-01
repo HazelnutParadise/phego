@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "scope": "existing PHP 8.5.12 int64 regression; not two-release compatibility acceptance",
+  "source_commit": "a1a70e5560a666e82b0d93e28a6d044a4ae54416",
+  "release": "8.5.12",
+  "int_width": 64,
+  "host_architecture": "arm64",
+  "reference_platform": "linux/amd64 (Docker emulation on arm64 host)",
+  "reference_image": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f",
+  "reference_network": "none",
+  "source_archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "corpus_files": 5449,
+  "corpus_sha256": "8b8fe3e0201fa62f92d62f4655d896f27dd29f2ee783c9556ba9ff2e6b4d7fdb",
+  "reference_sha256": {
+    "reference.jsonl": "2b7d98caf2d0a111cf1043d1589be8299b3b926205d4e45ece302a36154a6c9b",
+    "parse-reference.jsonl": "e93e6bc6de11405df53763e064ad2db4e3490b2ac0de9d678df57a89c4a41e9a",
+    "compile-reference.jsonl": "29eac7274603fe82ce0d15cfdce8206b114bbc224f1d1d0dc10c3173a9cd7166"
+  },
+  "reference_commands": [
+    "python3 tools/frontend_corpus.py /tmp/phego-w09-corpus.emTrzb/php-8.5.12.tar.xz /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus",
+    "docker run --rm --network none --platform linux/amd64 -v /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/corpus:/corpus:ro -v /Users/timlai/.codex/worktrees/w49-history/phego/tests/frontend:/tests:ro php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f php -n -d short_open_tag=1 /tests/token_dump.php > /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/reference.jsonl",
+    "docker run --rm --network none --platform linux/amd64 -v /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/corpus:/corpus:ro -v /Users/timlai/.codex/worktrees/w49-history/phego/tests/frontend:/tests:ro php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f php -n -d short_open_tag=1 /tests/parse_dump.php > /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/parse-reference.jsonl",
+    "docker run --rm --network none --platform linux/amd64 -v /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/corpus:/corpus:ro -v /Users/timlai/.codex/worktrees/w49-history/phego/tests/semantics/w11-hir:/tests:ro php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f php -n /tests/compile_dump.php /corpus > /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w45-profile-g5ei6pq0/corpus/compile-reference.jsonl"
+  ],
+  "go_command": [
+    "go",
+    "test",
+    "-json",
+    "-count=1",
+    "-run",
+    "^(TestLexMatchesReferenceCorpus|TestParseMatchesReferenceCorpus|TestPHP8512OperatorsMatchReference|TestPHP8512NumericStringsMatchReference|TestLowerMatchesCompileReference|TestLowerMatchesReflection|TestEffectsCoverObservedBehaviour)$",
+    "./internal/frontend",
+    "./internal/ir",
+    "./internal/runtime"
+  ],
+  "environment": {
+    "CGO_ENABLED": "0",
+    "PHEGO_LEXER_CORPUS": "CORPUS_ROOT",
+    "PHEGO_LEXER_INT_WIDTH": "64"
+  },
+  "tests": {
+    "TestLexMatchesReferenceCorpus": [
+      "pass"
+    ],
+    "TestParseMatchesReferenceCorpus": [
+      "pass"
+    ],
+    "TestPHP8512OperatorsMatchReference": [
+      "pass"
+    ],
+    "TestPHP8512NumericStringsMatchReference": [
+      "pass"
+    ],
+    "TestLowerMatchesCompileReference": [
+      "pass"
+    ],
+    "TestLowerMatchesReflection": [
+      "pass"
+    ],
+    "TestEffectsCoverObservedBehaviour": [
+      "pass"
+    ]
+  },
+  "status": "pass",
+  "raw_result": {
+    "path": "docs/implementation/evidence/W-45-profile64-go.jsonl",
+    "sha256": "c02e18cba377ca00f4726bdd692fffed75fb24ea68849e1fb58be7941917cee4"
+  },
+  "limitations": [
+    "Only one exact release is implemented; int32 and int64 are not two releases.",
+    "This run does not certify int32 or native amd64 behavior. The existing native CI handles operator references.",
+    "HIR compile-error comparison preserves its counted W-13/W-15/W-29 gaps; successful suite execution does not mean complete PHP engine semantics."
+  ],
+  "reproduction_note": "These are resolved execution commands. For replay, choose a fresh absolute corpus output directory and replace the recorded temporary root consistently. The extraction tool refuses an existing output directory."
+}

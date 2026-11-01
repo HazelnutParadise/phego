@@ -1,0 +1,269 @@
+{
+  "scope": "w20_review_fixes_local_regression",
+  "requirements": [
+    "REQ-033",
+    "REQ-037",
+    "REQ-059"
+  ],
+  "tests": [
+    "T-065",
+    "T-066",
+    "T-073",
+    "T-074",
+    "T-117",
+    "T-118"
+  ],
+  "product_test_status": "not_run",
+  "before_fix": [
+    {
+      "commands": "go test ./internal/policy -run TestReviewFixFIFO -count=1 -timeout 10s\ngo test . -run TestReviewFix -count=1 -timeout 10s",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixFIFOOpenDoesNotBlock (1.00s)\n    fifo_review_fixes_test.go:47: FIFO open blocked without a writer\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t1.637s\nFAIL\n--- FAIL: TestReviewFixRunFileRejectsNonregularBeforeRead (0.00s)\n    runfile_review_fixes_test.go:44: mode=p--------- legacy=false reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=p--------- legacy=true reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=D--------- legacy=false reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=D--------- legacy=true reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=S--------- legacy=false reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=S--------- legacy=true reads=2 closes=1 error=phego: unsupported: PHP execution\n    runfile_review_fixes_test.go:44: mode=d--------- legacy=false reads=1 closes=1 error=read file: invalid argument\n    runfile_review_fixes_test.go:44: mode=d--------- legacy=true reads=1 closes=1 error=read file: invalid argument\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego\t0.650s\nFAIL\n"
+    },
+    {
+      "commands": "go test ./internal/policy -run TestReviewFixAbsolute -count=1 -timeout 20s",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixAbsoluteSymlinkMounts (0.01s)\n    --- FAIL: TestReviewFixAbsoluteSymlinkMounts/same (0.00s)\n        absolute_review_fixes_test.go:58: policy: file-read open \"/app/same\" refused (outside-root)\n    --- FAIL: TestReviewFixAbsoluteSymlinkMounts/cross (0.00s)\n        absolute_review_fixes_test.go:58: policy: file-read open \"/app/cross\" refused (outside-root)\n    --- FAIL: TestReviewFixAbsoluteSymlinkMounts/parent (0.00s)\n        absolute_review_fixes_test.go:58: policy: file-read open \"/app/parent\" refused (outside-root)\n    --- FAIL: TestReviewFixAbsoluteSymlinkMounts/symlink-parent (0.00s)\n        absolute_review_fixes_test.go:58: policy: file-read open \"/app/symlink-parent\" refused (outside-root)\n    absolute_review_fixes_test.go:71: got policy: file-write open \"/app/cross\" refused (outside-root), want PolicyError with rule \"not-granted\"\n--- FAIL: TestReviewFixAbsoluteSymlinkSwapDoesNotLeak (0.00s)\n    absolute_review_fixes_test.go:101: policy: file-read open \"/app/link\" refused (outside-root)\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.650s\nFAIL\n"
+    },
+    {
+      "commands": "go test ./internal/policy -run 'TestReviewFixFIFO|TestReviewFixRootRejects' -count=1 -timeout 10s\ngo test . -run TestReviewFixRunFileFIFO -count=1 -timeout 10s",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixFIFOOpenDoesNotBlock (1.00s)\n    fifo_review_fixes_test.go:47: FIFO open blocked without a writer\n--- FAIL: TestReviewFixRootRejectsDeviceFiles (0.00s)\n    fifo_review_fixes_test.go:57: got <nil>, want PolicyError with rule \"not-granted\"\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t1.821s\nFAIL\n--- FAIL: TestReviewFixRunFileFIFOReleasesAdmission (1.00s)\n    runfile_fifo_review_fixes_test.go:42: RunFile remained blocked after cancellation\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego\t1.281s\nFAIL\n"
+    },
+    {
+      "commands": "go test ./internal/policy -run TestReviewFixAbsoluteLinkPreservesTrailing -count=1",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixAbsoluteLinkPreservesTrailingSeparator (0.00s)\n    absolute_review_fixes_test.go:172: trailing slash incorrectly treated a regular file as a directory\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.276s\nFAIL\n"
+    },
+    {
+      "commands": "go test ./internal/policy -run TestReviewFixAbsoluteLinkUsesConfigured -count=1",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixAbsoluteLinkUsesConfiguredRootAlias (0.00s)\n    absolute_review_fixes_test.go:234: policy: file-read open \"/app/same\" refused (outside-root)\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.653s\nFAIL\n"
+    },
+    {
+      "commands": "go test ./internal/policy . -run 'TestReviewFix(Public|Network|InvalidNetwork|NormalizeHost|NewEngine)' -count=1 -timeout 20s",
+      "exit_code": 1,
+      "output": "--- FAIL: TestReviewFixPublicAddressClassification (0.00s)\n    --- FAIL: TestReviewFixPublicAddressClassification/64:ff9b::a00:1 (0.00s)\n        network_review_fixes_test.go:42: Public(64:ff9b::a00:1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/64:ff9b::7f00:1 (0.00s)\n        network_review_fixes_test.go:42: Public(64:ff9b::7f00:1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/64:ff9b::a9fe:a9fe (0.00s)\n        network_review_fixes_test.go:42: Public(64:ff9b::a9fe:a9fe) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/2002:a00:1::1 (0.00s)\n        network_review_fixes_test.go:42: Public(2002:a00:1::1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/2002:7f00:1::1 (0.00s)\n        network_review_fixes_test.go:42: Public(2002:7f00:1::1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/2002::1 (0.00s)\n        network_review_fixes_test.go:42: Public(2002::1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/::ffff:0:a00:1 (0.00s)\n        network_review_fixes_test.go:42: Public(::ffff:0:a00:1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/::ffff:0:808:808 (0.00s)\n        network_review_fixes_test.go:42: Public(::ffff:0:808:808) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/3fff::1 (0.00s)\n        network_review_fixes_test.go:42: Public(3fff::1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/5f00::1 (0.00s)\n        network_review_fixes_test.go:42: Public(5f00::1) = true, want false\n    --- FAIL: TestReviewFixPublicAddressClassification/192.88.99.1 (0.00s)\n        network_review_fixes_test.go:42: Public(192.88.99.1) = true, want false\n--- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError (0.00s)\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/example.com:443 (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/1.2.3.4:443 (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/[::1] (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/exa_mple.com (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/héllo.example (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/Kelvin.example (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/a..com (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/.a.com (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/-a.com (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/a-.com (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/999.1.1.1 (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n    --- FAIL: TestReviewFixInvalidNetworkHostsReturnSpecError/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd (0.00s)\n        network_review_fixes_test.go:137: New error = <nil>, want *SpecError\n--- FAIL: TestReviewFixNormalizeHostDoesNotFoldUnicode (0.00s)\n    network_review_fixes_test.go:152: Unicode normalized to \"kelvin.example\"\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.665s\n--- FAIL: TestReviewFixNewEngineRejectsMalformedNetworkHost (0.00s)\n    network_review_fixes_test.go:8: error = <nil>, want *ConfigError with field \"Policy.Network[0]\"\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego\t1.087s\nFAIL\n"
+    }
+  ],
+  "limitations": [
+    "Darwin arm64 runtime tests; Windows amd64 cross-compilation only.",
+    "PHP 8.5.12 FIFO reference ran in restricted Linux arm64 container.",
+    "Host-created hard links can reference data outside roots; host layout remains trusted."
+  ],
+  "base_commit": "e1a29d6cef211af8d3f89cfa1e27e7cb1d25dbf0",
+  "environment": "go version go1.26.5 darwin/arm64",
+  "before_fix_note": "Test-first outputs from staged implementation during this change; commands operated on the then-current working tree based on base_commit, not a claimed immutable pre-fix commit.",
+  "after_fix": [
+    {
+      "argv": [
+        "gofmt",
+        "-l",
+        "."
+      ],
+      "env": {},
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "./..."
+      ],
+      "env": {
+        "CGO_ENABLED": "0"
+      },
+      "exit_code": 0,
+      "stdout": "ok  \tgithub.com/HazelnutParadise/phego\t1.720s\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t2.102s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t2.162s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "go",
+        "vet",
+        "./..."
+      ],
+      "env": {},
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/validate_docs.py"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 322,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "-c",
+        "./internal/policy",
+        "-o",
+        "/tmp/phego-w20-policy-windows.test.exe"
+      ],
+      "env": {
+        "GOOS": "windows",
+        "GOARCH": "amd64",
+        "CGO_ENABLED": "0"
+      },
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "go_source_sha256": {
+    "internal/policy/absolute_review_fixes_test.go": "8697d690586f20a675f98ce82e684a6d6fce1938888731f657ed1e23c0f92e4f",
+    "internal/policy/fifo_review_fixes_test.go": "faf6c30f860fc1eedc3b80f6e52110e6fca8ae81bbb2e4673d3019cae289271f",
+    "internal/policy/files_absolute.go": "a919bce492be18aaca3d73d9fcdc0b0794b0f03ffd1c41a8726f8b05ad0989e6",
+    "internal/policy/files_open_other.go": "077602dd00ff192848c40f0eccdce3c4710be5415dcf73b1080bc3aaaead7335",
+    "internal/policy/files_open_unix.go": "365fa642d4e2d3cde270a71f6089cc49d790938dbe9fb47857761043a640fa83",
+    "internal/policy/network_review_fixes_test.go": "5afbe1a39b8659dc1d9dff27276ba3d1f4d87f7b252e60ea69624bd1917789e5",
+    "network_review_fixes_test.go": "1fe8d6bc21b427a3733757554c5ced998157f5baec783f02d619cf7887495098",
+    "runfile_fifo_review_fixes_test.go": "0a3e62701274ea7f0d75bbf44b67d5bb5124f5be9159d1625081661055f0fbb6",
+    "runfile_review_fixes_test.go": "760ea3fc0dac155014f41e45dfe12bddbff7119b7d1cc4cbf862cd6c6d5e403c",
+    "engine.go": "757678971aa612e18276cc2a899af7b5b6d82a86408efe8d3fb83743cd7abcc5",
+    "engine_test.go": "7c31d3789587882b2d482ef781e77298a3508334414ea6f6223baa4519f92b9f",
+    "errors.go": "dceac2f58870b05f93c6cbe5cf8fb25b4dc26b4f6c780c49f9099a52d6f07ecd",
+    "example_test.go": "190621e0d05bbedee3fa2425695abf94059f0a83f64a98d194e0218ed9b7cc32",
+    "experiments/nativeabi/main.go": "bf44cfe21aab6a229ec6f0413fad57b07255bfe02da5b5b31984820ab6f7275f",
+    "experiments/nativecallback/callback_test.go": "c7d0ea1a6e3483b00b5ed70a02d056166315c142d2f6d04b86c0ef110a5d2cd3",
+    "experiments/nativecallback/main.go": "5a69c26ad82db1cc11a591897d1314ea97b2a4e56ca902b3ea3fc3f6b6280574",
+    "experiments/nativecancel/cancel_panic_test.go": "675a82956c2d01ed2059d3bdcad066760ab43bcf4605c03f82e7bab6ee2425a1",
+    "experiments/nativecancel/cancel_race_test.go": "a703b71a33fd8f09236444e89f73b7544b56f5d82b14fb88e8eebf421a1ed3e7",
+    "experiments/nativecancel/cancel_test.go": "08e2d13b26025f9948f15ffe722c1218dee7ab708885419948a77a3c5901569c",
+    "experiments/nativecancel/main.go": "fff26564c70fd05e01f6972a9d86568cbd6423b2ff797a1fd639c219dc25f2d2",
+    "experiments/nativehandle/handle_test.go": "2395ff3322e5fd162cf17b6a6d8a824dd0bd15b8cfc18769d37f801c6ed10079",
+    "experiments/nativehandle/main.go": "10ec455307c696d1651a38b6cf9f5ef51514b0ade6c60fcfc3ebc21db6be0861",
+    "internal/compat/scan.go": "78f2e438b5f78b463c10b4b21408c88699551a3a1fcc71356189fc6e95625810",
+    "internal/compat/scan_fuzz_test.go": "7bd01aac35fcb2290dd3a2d4263930c5a3eb318b9fcc450c966a68800e15a8c5",
+    "internal/compat/scan_test.go": "9cf861c6a57215ad3d9134c5aa4f6412f9bd1ea6f0dcb2a47e27085c37d523cc",
+    "internal/frontend/array_interpolation_validation_test.go": "4f7367f75186e676307c0a452b5f2d4f08748e5cb87d6ad2cc93a333598f1155",
+    "internal/frontend/ast.go": "b3192aa4531af43320ea5c73dc8f49a75ead548746bef4e7864200d81d868c91",
+    "internal/frontend/attributed_for_test.go": "a456517d1b26cf355f1941a166b3ebac1625f1db013c4e5b59704d33f14b68f3",
+    "internal/frontend/closure_class_reference_test.go": "f6699770ffbc059d25d497fe7b71758be7693f6596ef86b867e7a88e22714564",
+    "internal/frontend/corpus_integrity_test.go": "85c44b62b8af5e311ccd31a1a489285f06737eee314a8954b22b98080f8678e4",
+    "internal/frontend/destructuring_assignment_test.go": "f54881c5ba1c6fb62f3b98e64bb3b9e19701b8c2ccd4c415b1d5805ea040d8be",
+    "internal/frontend/expr.go": "b10ec42c148c0035828528a3f42827077a6de13ed09c86dd29b403fe10a4f070",
+    "internal/frontend/foreach_validation_test.go": "686e4a3112d4f339174ffdfa01c8d4b17842728fb96a663815cc3e5a4c13290f",
+    "internal/frontend/grammar_validation_test.go": "0ddbad24ac67798c4fed3cc3a25512b2b9fecbdb73cb1d0899590c1cbc3aed64",
+    "internal/frontend/group_import_test.go": "6348abc728d6473473457e4449ac7af74c503d64a89357e9cdb764595f00aeb5",
+    "internal/frontend/heredoc_ast_test.go": "a335b534dd3962466514a81dc06175eaffbe847e4b35e11808ccbb08c1ba6a7f",
+    "internal/frontend/heredoc_html_test.go": "1984a967440831c86c0f4d394a8c422e0a1c77d21ace1ce0ddc8e489d3bed0d4",
+    "internal/frontend/heredoc_nested_test.go": "915faebd27bf479e07e8b0206274f8de1899b26f5f6dfaa334b2b1cdc02c10d3",
+    "internal/frontend/heredoc_strings_test.go": "fe74508bfa268717f4c131328bb3b17c716a3756cbc81a25486212d136b59e4b",
+    "internal/frontend/hooks_validation_test.go": "987f53ecdb3f9aba7c7525875f510c369f144baa7fbc8a8dd61bac3671af6b53",
+    "internal/frontend/lexer.go": "cb48aa9be3506e1a44d750a1d459d65c9949b0ac64d7b45c5577fc463d47faa6",
+    "internal/frontend/lexer_corpus_test.go": "d3efdc0f9418e809fad594207c4f0ae6f802fdfb54dc675a0cff1e2fbc56927e",
+    "internal/frontend/lexer_test.go": "f12296932ec54d8d819e6551041d6e734b33d4b223d665acf6c16aaee1c62c86",
+    "internal/frontend/modifiers.go": "96c81ce05b8dbec422f5c1301d4e0e33ae603094d9fe09777da90d9678666597",
+    "internal/frontend/numeric_validation_test.go": "75b80508457f954ce478964461cec72c08d16035e68c32b444d00744b4158fb3",
+    "internal/frontend/parser.go": "452a38662468a47e6d98e705f8a80166ee93611eabc17e095d2950a576ac518c",
+    "internal/frontend/parser_corpus_test.go": "2e3e031470c4411ee20a5a3de6005eea78a15a31488b2888a34cfec5d4968541",
+    "internal/frontend/parser_test.go": "014111507651ebc503c583de3376387970d137dd0a5d4ebef6a31c592946375b",
+    "internal/frontend/postfix_complex_test.go": "b068633b5d5ffa17abebe5f1b3c0087830981301127fd45fa0077b15c91458a7",
+    "internal/frontend/postfix_validation_test.go": "72c61ac1523f7a80a0d36ade9f936a8f479ee88d2bc14b177ad2c8839ab68b2f",
+    "internal/frontend/reference_target_corpus_test.go": "8da73874cba9f8f2c24cce1ba2fd63e319570c01ede74429909064a6eae15f01",
+    "internal/frontend/reference_validation_test.go": "f3ff412d1d8cf47572260c766706d3b5e3a37d295e4c0ef80d5c4c61af35e791",
+    "internal/frontend/review_regression_test.go": "58c5954d53e138cbe2bbd96744641d26964ccf8a8bd1a17388292639bdfc1e2a",
+    "internal/frontend/single_statement_test.go": "8fd9bed0b66e42434e75d1484450d8124ffacf36b6ca20422f4f632aede368d5",
+    "internal/frontend/token.go": "46de39f3997e70008d091e1d2a0d9f840d995f84dd51057ed0d56c7f48b5a7b1",
+    "internal/frontend/unterminated_string_test.go": "cb37a460c6d7c9a310b2e863fceeece69fc248d8da68f691b3ec20ea309891bc",
+    "internal/ir/corpus_gaps_test.go": "8bb1cd967a5ad531b5303980c860106ee80baea11072cef214ff73e8bcfb57e9",
+    "internal/ir/corpus_test.go": "984c11ddb03e15d2c47494c7e2ed1dfa624f674784e4d96b06c986c768c635dc",
+    "internal/ir/decl.go": "2a5b4e21db318f137f5bf9fb4e3ddddf93450b8bb80411f24d5bf100c5409305",
+    "internal/ir/dump.go": "4e644ad7b072967502fa045f2dea7e2021e6879b8fb44fceca18231971b2f3b4",
+    "internal/ir/effects.go": "ff1b335ea245298f3e52952bff6db417b8dce84a1800d77c56dd6cc9a8fa6879",
+    "internal/ir/effects_test.go": "917edcf8066619c66e84e87b365ff888d6ae8f489e4f8199e31c12ba04eda7f2",
+    "internal/ir/expr.go": "fa3f248443119d48577850cee8111b95366abcb6b1efc039d9410c5049bf9eb8",
+    "internal/ir/fuzz_test.go": "6e6baba307cda29cc9b444401693ce4f06a6e6bbd30669a4525bc6081eb85a49",
+    "internal/ir/hir.go": "bbde3eb1008972ec2d8dca0066bc143391b781f0ac89d45ad26e1b25e73a311b",
+    "internal/ir/literal.go": "30b3848fa8b95c34ebb89e3c6e0224970ef6aa3e98f06c4cb30590bcaf5ac686",
+    "internal/ir/lower.go": "f70519aeabfffe26f01d823b156270ad3a3f813c757edbbf27c92915863e0979",
+    "internal/ir/lower_test.go": "299d4a7f35073c10b16c549f03726e34a644faeb31773eafdfa43a22be20a9ed",
+    "internal/ir/names.go": "2c16caef8da89c1c7de5dede777fc00e7dcf9aa9bac9c3c4d3abc226dcf381d4",
+    "internal/ir/reflect_test.go": "81e329d7ba73d4933bd158ffcde0910b42fcc50883012512406365658476c6dd",
+    "internal/policy/admission.go": "b28c11735c632ccf13f5990c739c66daf8e92e278c9e26c22209569b8db081cc",
+    "internal/policy/audit.go": "203ff30e5669293116a90bc5c0102ad99403523d29fff73e320e032a25b4e9f1",
+    "internal/policy/errors.go": "a801da5288d4c3c8f35aa64269af6e2f7ae56ffe4236bf30d7701ee3196596ff",
+    "internal/policy/files.go": "6cbb151c18ca4db015a8e5ffcfe1981013c3e6f5ada0975e13e437f9e98d9cee",
+    "internal/policy/files_fs.go": "74730e1c2810bff6cb530700988987a614581a5909dd322ddaa1cf3912ee54c8",
+    "internal/policy/files_root.go": "003b6cf3d6b8eae97e74927270693fc32d8b0bb50b1191ff60c541b93e076dec",
+    "internal/policy/meter.go": "930e4a014ac5a8a266d3da8069f1a80ade17635e5200a14b41e699e23e2abc80",
+    "internal/policy/network.go": "72ce8d43b4fdad99b7d64cd78832d6aeaa27f691456e7b0cb60555614dd65591",
+    "internal/policy/overlap_test.go": "ba5baf415efe33f62c6cf700ab4dfe0adc6b81f3fc16d8938beccf9646a5fe88",
+    "internal/policy/policy.go": "d41635b5dd9cca0dcf67c53d44696c225602fc6302be042856ea4244d7eb0da0",
+    "internal/policy/policy_test.go": "cb533ed212ad8c67a67eac8aaffa1e7d3068add7eeb085ab6d863015cc4c2917",
+    "internal/policy/review_test.go": "63fc44f382c19b16f70533d04aa2cfb93f37d2ff0f124d3f004c6f87cc113bdf",
+    "internal/profile/matrix_test.go": "64752ab8e631fd5f91d9c5a38f29cf4b9416b24a27332a3f8cf42d2e8cf405bb",
+    "internal/profile/profile.go": "7f6fbba47bae907e70f213d6a1a4dda41c8dbbf3d0d60e4489a15f241c8b076d",
+    "internal/profile/profile_test.go": "259263c6be5e11de9346ad8df5e4e01718b85770e711a1790e2b3c4e67b3959e",
+    "internal/profile/releases_gen.go": "d93d96e3f9621c2cdf46e4efcfc954bc4ed0911e51a671fc544eb80a235c6ccd",
+    "internal/runtime/array.go": "68db55a88b3e70447562ea381480b83e9446e3476c048532d4ec877d7ef37881",
+    "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
+    "internal/runtime/heap.go": "e633b4e949cdf8916581b099b846be12170afc7149405901befbdffd35dd0813",
+    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
+    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
+    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
+    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
+    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
+    "internal/runtime/numeric_php8512_fuzz_test.go": "44e5366621e66b2526a751da33b82dac01766c412ebf9d480cca8bce263eb74d",
+    "internal/runtime/ops_php8512.go": "04bcccd4816183587a04fe3c8285ef5dc22f0a7ee480ec6eb3e91025af87dce2",
+    "internal/runtime/ops_php8512_test.go": "db4932ace89fe1ef6b48a25895e4622e8990812d8793ba70d0cb5abb5068e7d3",
+    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
+    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
+    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
+    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
+    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
+    "internal/runtime/value.go": "70ff5c9b5e8cc4b001584bada266f3036058bf7a29aee284e4fd79c7e1f6daa4",
+    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
+    "internal/runtime/value_test.go": "77c1c65544e0d5a54967104f4acff8943282e6c3a7e5c921fb9738354ed78c6a",
+    "policy.go": "862e29ed472a673db31414b4df2a2289173adaefd76f0dc84e1f2f4d177e8650",
+    "policy_review_test.go": "20c02e215287102c10530e2d9a6d6c8c5c963ca8a24accb57069ac70e1059979",
+    "policy_test.go": "871b7cff2e709a2a09195ffce7e6ab85ec06f5ce3675386eadd0e58228249545",
+    "value.go": "c05c59e02c712fc53abf97b113bc6ab75597957a87d56fea7e41b5fdb8fabb24",
+    "value_test.go": "e350ed3fbb02419b395d9a0acb16fddb8b8118654fde87ff5bde39f508556216"
+  },
+  "php_fifo_reference": {
+    "argv": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--cap-drop",
+      "ALL",
+      "--security-opt",
+      "no-new-privileges",
+      "--pids-limit",
+      "32",
+      "--memory",
+      "128m",
+      "--cpus",
+      "1",
+      "--tmpfs",
+      "/tmp:rw,noexec,nosuid,size=1m",
+      "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "sh",
+      "-c",
+      "mkfifo /tmp/probe\n timeout 2 php -r 'echo PHP_VERSION,\" before\\n\"; $f=fopen(\"/tmp/probe\",\"r\"); echo \"opened\\n\";'\n echo no_peer_exit=$?\n (sleep 1; printf payload > /tmp/probe) &\n timeout 4 php -r '$f=fopen(\"/tmp/probe\",\"r\"); echo \"opened:\",stream_get_contents($f),\"\\n\";'\n echo with_peer_exit=$?\n wait\n"
+    ],
+    "exit_code": 0,
+    "stdout": "8.5.12 before\nno_peer_exit=124\nopened:payload\nwith_peer_exit=0\n",
+    "stderr": ""
+  }
+}
