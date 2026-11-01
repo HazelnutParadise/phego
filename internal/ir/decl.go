@@ -405,6 +405,28 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 		for _, n := range c[0].Children {
 			cl.Traits = append(cl.Traits, l.ns.resolveClass(n.Text))
 		}
+		if len(c) > 1 && c[1] != nil {
+			for _, a := range c[1].Children {
+				ref := a.Children[0]
+				rule := &TraitRule{Line: a.Line, Method: ref.Children[1].Text}
+				if ref.Children[0] != nil {
+					rule.Trait = l.ns.resolveClass(ref.Children[0].Text)
+				}
+				if a.Kind == "insteadof" {
+					for _, n := range a.Children[1].Children {
+						rule.Insteadof = append(rule.Insteadof, l.ns.resolveClass(n.Text))
+					}
+				} else {
+					if a.Children[1] != nil {
+						rule.Modifier = strings.ToLower(a.Children[1].Text)
+					}
+					if a.Children[2] != nil {
+						rule.Alias = a.Children[2].Text
+					}
+				}
+				cl.TraitRules = append(cl.TraitRules, rule)
+			}
+		}
 	case "class_const":
 		mods := modifierList(c[1])
 		var typ *Type

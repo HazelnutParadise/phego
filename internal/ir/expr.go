@@ -222,7 +222,8 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			if name.Special == "" {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: name.Resolved}})
 			}
-			if name.Special == "self" && l.class != nil && l.scopeKnown() {
+			// An anonymous class's real name is only known at run time.
+			if name.Special == "self" && l.class != nil && !l.class.Anonymous && l.scopeKnown() {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
 			}
 			nd.Name = name
@@ -964,7 +965,9 @@ var scopeFunctions = map[string]string{
 }
 
 func (l *lowerer) call(n *frontend.Node) *Node {
-	callee, argList := unparen(n.Children[0]), n.Children[1]
+	// (foo)() calls the value of the constant foo, so only a bare name is a
+	// direct function call.
+	callee, argList := n.Children[0], n.Children[1]
 	nd := &Node{Line: n.Line}
 	if callee.Kind == "name" {
 		nd.Op = OpCall

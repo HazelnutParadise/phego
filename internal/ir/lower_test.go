@@ -370,3 +370,65 @@ func TestControlFlowBodiesCarryTheirEffects(t *testing.T) {
 		}
 	}
 }
+
+// TestCodexReviewFollowUps covers the Codex review of PR #71; each PHP
+// behaviour was checked in the pinned PHP 8.5.12 image.
+func TestCodexReviewFollowUps(t *testing.T) {
+	// (foo)() calls the value of the constant foo, not the function foo.
+	u := lower(t, "<?php (foo)();")
+	if call := firstExpr(t, u); call.Op != OpCallValue || call.Kids[0].Op != OpConst {
+		t.Errorf("(foo)(): got %s with callee %s, want call_value of a constant", call.Op, call.Kids[0].Op)
+	}
+	if call := firstExpr(t, lower(t, "<?php foo();")); call.Op != OpCall {
+		t.Errorf("foo(): got %s, want call", call.Op)
+	}
+
+	// self::class in an anonymous class names the run-time class.
+	u = lower(t, "<?php $o = new class { function f() { return self::class; } };")
+	newNode := firstExpr(t, u).Kids[1]
+	ret := newNode.Class.Methods[0].Body[0].Kids[0]
+	if ret.Op != OpClassName || ret.Name.Special != "self" {
+		t.Errorf("anonymous self::class folded to %s %v", ret.Op, ret.Value)
+	}
+
+	// Generator return types need the built-in names, not substrings.
+	for src, ok := range map[string]bool{
+		"<?php function f(): Acme\\Traversable { yield 1; }":           false,
+		"<?php namespace Acme; function f(): Traversable { yield 1; }": false,
+		"<?php function f(): IteratorAggregate { yield 1; }":           false,
+		"<?php function f(): (Iterator&Countable)|array { yield 1; }":  false,
+		"<?php function f(): Iterator&Countable { yield 1; }":          true,
+		"<?php function f(): \\Traversable { yield 1; }":               true,
+		"<?php function f(): iterable { yield 1; }":                    true,
+		"<?php function f(): ?Generator { yield 1; }":                  true,
+		"<?php function f(): mixed { yield 1; }":                       true,
+	} {
+		_, err := lowerSource(src, 64)
+		var ce *CompileError
+		rejected := errors.As(err, &ce) && strings.HasPrefix(ce.Message, "Generator return type must be a supertype of Generator")
+		if rejected == ok {
+			t.Errorf("%s: err %v, want accepted=%v", src, err, ok)
+		}
+	}
+
+	// Every directive of a declare statement is kept.
+	u = lower(t, "<?php declare(ticks=1, strict_types=1);")
+	var dirs []string
+	for _, k := range u.Main.Body[0].Kids {
+		if k.Op == OpDirective {
+			dirs = append(dirs, k.Text+"="+literalText(k.Value))
+		}
+	}
+	if strings.Join(dirs, " ") != "ticks=1 strict_types=1" {
+		t.Errorf("directives %v", dirs)
+	}
+
+	// Trait adaptations are kept for the object model.
+	u = lower(t, "<?php class C { use A, B { A::f insteadof B; g as protected h; B::f as private; } }")
+	rules := u.Classes[0].TraitRules
+	if len(rules) != 3 || rules[0].Trait.Resolved != "A" || len(rules[0].Insteadof) != 1 || rules[0].Insteadof[0].Resolved != "B" ||
+		rules[1].Trait != nil || rules[1].Method != "g" || rules[1].Modifier != "protected" || rules[1].Alias != "h" ||
+		rules[2].Trait.Resolved != "B" || rules[2].Modifier != "private" || rules[2].Alias != "" {
+		t.Errorf("trait rules %+v", rules)
+	}
+}
