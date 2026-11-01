@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "scope": "synthetic PHPT classification fixtures; reference observations are not product acceptance",
+  "requirement": "REQ-072",
+  "scenarios": [
+    "T-143",
+    "T-144"
+  ],
+  "reference": {
+    "php_version": "8.5.12",
+    "source_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+    "platform": "linux/arm64",
+    "sapi": "cli",
+    "configure": [
+      "--disable-all",
+      "--enable-cli",
+      "--without-pear"
+    ],
+    "runs": [
+      {
+        "path": "docs/implementation/evidence/W-04-reference-20261029/run-01.log.gz",
+        "sha256": "fad229946eaf43c2c7013f6009554c7a09283222efed22977480589bb3eab3ec",
+        "uncompressed_sha256": "e27f8b209f82c1af00dc3c83585ef07358bafc4386be3b20c33b384afe5e71a3"
+      },
+      {
+        "path": "docs/implementation/evidence/W-04-reference-20261029/run-02.log.gz",
+        "sha256": "7fb5150fd679285d48a4fa0cc003f3d7c1cd168f984b41c2d7613680e036656e",
+        "uncompressed_sha256": "3c6bee561b5758c29d2fbd17eb633cc33b24723158e533eef8d72c5c185e27ca"
+      }
+    ]
+  },
+  "items": [
+    {
+      "file": "bork.phpt",
+      "sha256": "67cd88e91371820a3939e735e88fa90469695e202fbc2653a495965ac5df0698",
+      "reference_status": "BORK",
+      "phego_status": "not_run",
+      "note": "Missing expectation is malformed; not a product pass or environment skip."
+    },
+    {
+      "file": "environment-skip.phpt",
+      "sha256": "4b539ecbda8bf222aa21fbc49edbd945e0044af2271f93c28247dd43bb0a2def",
+      "reference_status": "SKIP",
+      "phego_status": "not_run",
+      "note": "Synthetic explicit environment skip."
+    },
+    {
+      "file": "expectf.phpt",
+      "sha256": "1ca48964441a977c5ccccf89952138248c543040bd0a2c16d202e67784bf2999",
+      "reference_status": "PASS",
+      "phego_status": "not_run"
+    },
+    {
+      "file": "fail.phpt",
+      "sha256": "2a1485c3c98a5472f424f591b9aa73629b6803f97dd44badd7138e668653c0a6",
+      "reference_status": "FAIL",
+      "phego_status": "not_run",
+      "note": "Deliberate output mismatch must remain a failure."
+    },
+    {
+      "file": "feature-skipif.phpt",
+      "sha256": "043b0d4f8ca09c4e49b6479dee5b7a1dbd292330415a987bcea6b215c7fc1d8d",
+      "reference_status": "PASS",
+      "phego_status": "not_run",
+      "note": "Reference provides strlen. If the tested engine lacks it, classify as unsupported, not environment skip; that condition has not been run."
+    },
+    {
+      "file": "pass.phpt",
+      "sha256": "963853a797b680c264ba69be3d95cfc2e90f0633fc3736791267f7dddd9272a5",
+      "reference_status": "PASS",
+      "phego_status": "not_run"
+    },
+    {
+      "file": "xfail.phpt",
+      "sha256": "b2a0d406899f93db555d5d710133f653d98dac539d4e616500f48081d677d155",
+      "reference_status": "XFAIL",
+      "phego_status": "not_run",
+      "note": "Reference runner labels expected mismatch XFAIL; do not silently erase the underlying mismatch."
+    },
+    {
+      "file": "xpass.phpt",
+      "sha256": "cd6c17896ac8dbe971708e5245dd450f00fbf6a2bade6b5d60ec04c1398b5b91",
+      "reference_status": "WARN",
+      "phego_status": "not_run",
+      "note": "Reference runner reports WARN for an XFAIL that unexpectedly passes; do not treat WARN as a normal pass."
+    }
+  ],
+  "product_acceptance": "not_claimed"
+}

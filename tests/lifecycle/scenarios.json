@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "scope": "Lifecycle fixtures for local model replay; product acceptance remains not run.",
+  "requirements": [
+    "REQ-022",
+    "REQ-073"
+  ],
+  "acceptance_scenarios": [
+    "T-043",
+    "T-044",
+    "T-145",
+    "T-146"
+  ],
+  "execution_status": "not_run",
+  "cases": [
+    {
+      "id": "LIFE-001",
+      "description": "Normal completion with a committed resource and one admitted request",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "admit",
+          "request": "A"
+        },
+        {
+          "op": "begin_init",
+          "request": "A"
+        },
+        {
+          "op": "commit_resource",
+          "request": "A",
+          "resource": "r1"
+        },
+        {
+          "op": "ready",
+          "request": "A"
+        },
+        {
+          "op": "run",
+          "request": "A"
+        },
+        {
+          "op": "finish",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        }
+      ],
+      "expected": {
+        "final_state": "Closed",
+        "closed_once": [
+          "r1"
+        ],
+        "admission_returns": 1,
+        "callback_before_ready": false
+      }
+    },
+    {
+      "id": "LIFE-002",
+      "description": "Initialization fails after one committed resource and one unfinished resource",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "admit",
+          "request": "A"
+        },
+        {
+          "op": "begin_init",
+          "request": "A"
+        },
+        {
+          "op": "commit_resource",
+          "request": "A",
+          "resource": "r1"
+        },
+        {
+          "op": "begin_resource",
+          "request": "A",
+          "resource": "r2"
+        },
+        {
+          "op": "fail_init",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        }
+      ],
+      "expected": {
+        "final_state": "Closed",
+        "closed_once": [
+          "r1"
+        ],
+        "not_in_cleanup_ledger": [
+          "r2"
+        ],
+        "admission_returns": 1,
+        "callback_before_ready": false,
+        "php_shutdown_called": false
+      }
+    },
+    {
+      "id": "LIFE-003",
+      "description": "Cancellation before admission never returns an unacquired permit",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "cancel",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        }
+      ],
+      "expected": {
+        "final_state": "Closed",
+        "admission_returns": 0,
+        "callback_before_ready": false,
+        "php_shutdown_called": false
+      }
+    },
+    {
+      "id": "LIFE-004",
+      "description": "Repeated cleanup cannot close a committed resource or return a permit twice",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "admit",
+          "request": "A"
+        },
+        {
+          "op": "begin_init",
+          "request": "A"
+        },
+        {
+          "op": "commit_resource",
+          "request": "A",
+          "resource": "r1"
+        },
+        {
+          "op": "fail_init",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        }
+      ],
+      "expected": {
+        "final_state": "Closed",
+        "closed_once": [
+          "r1"
+        ],
+        "admission_returns": 1,
+        "php_shutdown_called": false
+      }
+    },
+    {
+      "id": "LIFE-005",
+      "description": "A closed handle remains invalid after a later request obtains a resource",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "admit",
+          "request": "A"
+        },
+        {
+          "op": "begin_init",
+          "request": "A"
+        },
+        {
+          "op": "commit_resource",
+          "request": "A",
+          "resource": "r1",
+          "handle": "old"
+        },
+        {
+          "op": "fail_init",
+          "request": "A"
+        },
+        {
+          "op": "cleanup",
+          "request": "A"
+        },
+        {
+          "op": "receive",
+          "request": "B"
+        },
+        {
+          "op": "admit",
+          "request": "B"
+        },
+        {
+          "op": "begin_init",
+          "request": "B"
+        },
+        {
+          "op": "commit_resource",
+          "request": "B",
+          "resource": "r2",
+          "handle": "new"
+        },
+        {
+          "op": "use_handle",
+          "request": "B",
+          "handle": "old"
+        }
+      ],
+      "expected": {
+        "old_handle_usable": false,
+        "other_request_resource_affected": false,
+        "admission_returns_for_A": 1
+      }
+    },
+    {
+      "id": "LIFE-006",
+      "description": "A cleanup failure must not be reported as a successful release",
+      "events": [
+        {
+          "op": "receive",
+          "request": "A"
+        },
+        {
+          "op": "admit",
+          "request": "A"
+        },
+        {
+          "op": "begin_init",
+          "request": "A"
+        },
+        {
+          "op": "commit_resource",
+          "request": "A",
+          "resource": "r1"
+        },
+        {
+          "op": "fail_init",
+          "request": "A"
+        },
+        {
+          "op": "cleanup_with_failure",
+          "request": "A",
+          "resource": "r1"
+        }
+      ],
+      "expected": {
+        "cleanup_failure_recorded": true,
+        "resource_reported_clean": false,
+        "callback_before_ready": false,
+        "php_shutdown_called": false
+      }
+    }
+  ]
+}

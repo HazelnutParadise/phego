@@ -1,0 +1,17 @@
+/tmp/source.tar.gz: OK
+/tmp/bootstrap.tar.gz: OK
+go version go1.27.3 linux/arm64
+Building Go cmd/dist using /tmp/bootstrap/go. (go1.27.3 linux/arm64)
+Building Go toolchain1 using /tmp/bootstrap/go.
+Building Go bootstrap cmd/go (go_bootstrap) using Go toolchain1.
+Building Go toolchain2 using go_bootstrap and Go toolchain1.
+Building Go toolchain3 using go_bootstrap and Go toolchain2.
+Building packages and commands for linux/arm64.
+---
+Installed Go for linux/arm64 in /tmp/source/go
+Installed commands in /tmp/source/go/bin
+*** You need to add /tmp/source/go/bin to your PATH.
+go version go1.27.3 linux/arm64
+dac5084fdb1df984738a1c95ee1109c330389183aa1c51199c3b7bf1bf24c3ab  /tmp/source/go/bin/go
+c08e2094e281475333e7bba80be3c97ec23bee166e2a0d60d5c49117bc23f22f  /tmp/probe
+GO_SOURCE_BUILD_OK

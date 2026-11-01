@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "scope": "local_callback_probe_only",
+  "requirement_ids": [
+    "REQ-052",
+    "REQ-053"
+  ],
+  "test_ids": [
+    "T-103",
+    "T-104",
+    "T-105",
+    "T-106"
+  ],
+  "product_acceptance": "not_run",
+  "checked_date": "2026-10-30",
+  "source_sha256": {
+    "experiments/nativecallback/main.go": "5a69c26ad82db1cc11a591897d1314ea97b2a4e56ca902b3ea3fc3f6b6280574",
+    "experiments/nativecallback/invoke.ll": "ef43ebfcf096c6cd661d071bc93acc41bf0c48ab5d3f64e46c94ab907c79307a",
+    "experiments/nativecallback/callback_test.go": "c7d0ea1a6e3483b00b5ed70a02d056166315c142d2f6d04b86c0ef110a5d2cd3"
+  },
+  "platform": "darwin/arm64",
+  "toolchain": {
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "go": "go version go1.26.5 darwin/arm64"
+  },
+  "build_commands": [
+    "clang -c experiments/nativecallback/invoke.ll -o /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-callback-test.LxTt2JSast/invoke.o",
+    "ar rcs /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-callback-test.LxTt2JSast/libphegocallback.a /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-callback-test.LxTt2JSast/invoke.o"
+  ],
+  "runs": [
+    {
+      "command": "CGO_ENABLED=1 CC=clang CGO_LDFLAGS=\"-L/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-callback-test.LxTt2JSast -lphegocallback\" go test -race -count=1 -tags=phego_native_probe -v ./experiments/nativecallback",
+      "exit_code": 0,
+      "passed_tests": [
+        "TestRegisterReturnsUniqueNonzeroToken",
+        "TestRegisterRejectsZeroOwner",
+        "TestRegisterRejectsTokenExhaustionInSubprocess",
+        "TestNativeInvokeCountsValidCalls",
+        "TestNativeInvokeConcurrentCallsAreCounted",
+        "TestConcurrentReleaseAndNativeInvoke",
+        "TestNativeInvokeRejectsInvalidOwnerAndTokensWithoutCounting",
+        "TestReleaseRequiresMatchingOwnerAndRejectsRepeat",
+        "TestNativeInvokeRecoversCallbackPanicAndRemainsUsable",
+        "TestNativeInvokeKeepsCallbackAliveAcrossGC"
+      ],
+      "captured_output_excerpt": [
+        "PASS",
+        "ok  \tgithub.com/HazelnutParadise/phego/experiments/nativecallback\t2.394s"
+      ]
+    },
+    {
+      "command": "GOEXPERIMENT=cgocheck2 CGO_ENABLED=1 CC=clang CGO_LDFLAGS=\"-L/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-callback-test.LxTt2JSast -lphegocallback\" go test -count=1 -tags=phego_native_probe ./experiments/nativecallback",
+      "exit_code": 0,
+      "captured_output_excerpt": [
+        "ok  \tgithub.com/HazelnutParadise/phego/experiments/nativecallback\t0.593s"
+      ]
+    }
+  ],
+  "limits": [
+    "The recorded temporary directory may no longer exist; use the mktemp instructions in W-07.md to build a fresh library.",
+    "The registry is test-only; owner/token values are guessable and do not isolate untrusted native code.",
+    "One forced GC is not a GC stress test or proof of complex Go value lifetime.",
+    "Concurrent release is a smoke test and does not force overlap with an in-progress callback.",
+    "Native-created threads, reentrancy, cancellation, PHP exceptions and complete ABI compatibility were not verified."
+  ]
+}
