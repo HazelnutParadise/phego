@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 import tools.upstream_diff as upstream_diff
+import tools.upstream_snapshot as upstream_snapshot
 
 
 NEWS = """PHP                                                                        NEWS
@@ -275,6 +276,16 @@ class TestParseStubsReview(unittest.TestCase):
         self.assertEqual(symbols["const N\\G"], "const G = [1, 2]")
         self.assertEqual(symbols["const N\\H"], "const H = 3")
 
+    def test_same_symbol_in_several_stub_files_is_compared_per_file(self):
+        apache = "<?php function apache_request_headers(): array {}"
+        fpm = "<?php function apache_request_headers(): array {}"
+        old = {"sapi/apache2handler/php_functions.stub.php": apache, "sapi/fpm/fpm/fpm_main.stub.php": fpm}
+        new = dict(old)
+        new["sapi/apache2handler/php_functions.stub.php"] = apache.replace("array", "array|false")
+        changed = upstream_diff.diff_releases(old, new, "8.5.12")["stubs"]["changed"]
+        self.assertEqual([(entry["symbol"], entry["file"]) for entry in changed],
+                         [("function apache_request_headers", "sapi/apache2handler/php_functions.stub.php")])
+
     def test_conditional_declarations_keep_every_branch(self):
         text = ("<?php\n#if FOO\nfunction f(int $x): void {}\n#else\n"
                 "function f(string $x): void {}\n#endif\nfunction g(): void {}\n")
@@ -428,7 +439,24 @@ class TestReadArchive(unittest.TestCase):
         result = upstream_diff.read_archive(self.tar_xz(files, directories), self.VERSION)
         self.assertEqual(set(result), set(contents))
         for path, data in contents.items():
-            self.assertEqual(result[path], data.decode("utf-8"))
+            expected = data if path.endswith(".phpt") else data.decode("utf-8")
+            self.assertEqual(result[path], expected)
+
+    def test_phpt_bytes_are_compared_exactly(self):
+        old = upstream_diff.read_archive(self.tar_xz([(f"{self.ROOT}/t.phpt", b"--EXPECT--\n\xff\n")]), self.VERSION)
+        new = upstream_diff.read_archive(self.tar_xz([(f"{self.ROOT}/t.phpt", b"--EXPECT--\n\xfe\n")]), self.VERSION)
+        report = upstream_diff.diff_releases(old, new, self.VERSION)
+        self.assertEqual([entry["path"] for entry in report["tests"]["modified"]], ["t.phpt"])
+
+    def test_oversized_pax_metadata_is_rejected(self):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode="w:xz", format=tarfile.PAX_FORMAT) as archive:
+            info = tarfile.TarInfo(name=f"{self.ROOT}/t.phpt")
+            info.pax_headers = {"comment": "x" * (upstream_snapshot.MAX_METADATA + 1)}
+            info.size = 1
+            archive.addfile(info, io.BytesIO(b"x"))
+        with self.assertRaises(ValueError):
+            upstream_diff.read_archive(buffer.getvalue(), self.VERSION)
 
     def test_invalid_utf8_is_replaced(self):
         path = "ext/foo/foo.stub.php"

@@ -20,6 +20,11 @@ import re
 import sys
 import tarfile
 
+try:
+    from tools.upstream_snapshot import _BoundedTarInfo
+except ImportError:  # run as tools/upstream_diff.py
+    from upstream_snapshot import _BoundedTarInfo
+
 MAX_ARCHIVE = 100 * 1024 * 1024
 MAX_FILE = 32 * 1024 * 1024
 # PHP 8.5.12 has 27,730 members, 149 MB unpacked and 30.5 MB of kept text.
@@ -598,11 +603,13 @@ def _wanted_path(path):
 
 
 def read_archive(data, version):
-    """Return {path: text} for the parser, stub, test and NEWS files.
+    """Return {path: content} for the parser, stub, test and NEWS files.
 
     Paths are relative to the archive's "php-<version>/" root. Only
     Zend/zend_language_parser.y, Zend/zend_language_scanner.l, *.stub.php,
-    *.phpt and NEWS are read; text is decoded as UTF-8 with replacement.
+    *.phpt and NEWS are read. .phpt files are kept as bytes so tests are
+    compared byte for byte; the others are decoded as UTF-8 with
+    replacement. PAX and GNU metadata is bounded as in upstream_snapshot.
     Archives larger than MAX_ARCHIVE, members larger than MAX_FILE, more than
     MAX_MEMBERS members, more than MAX_UNPACKED bytes unpacked in all, more
     than MAX_KEPT bytes of kept files, paths outside the root, absolute paths
@@ -617,7 +624,7 @@ def read_archive(data, version):
     seen = set()
     unpacked = kept = 0
     try:
-        with tarfile.open(fileobj=io.BytesIO(data), mode="r|*") as stream:
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r|*", tarinfo=_BoundedTarInfo) as stream:
             for member in stream:
                 if len(seen) >= MAX_MEMBERS:
                     raise ValueError("too many archive members")
@@ -648,18 +655,21 @@ def read_archive(data, version):
                 raw = handle.read(MAX_FILE + 1)
                 if len(raw) != member.size:
                     raise ValueError("truncated archive entry")
-                files[path] = raw.decode("utf-8", errors="replace")
+                files[path] = raw if path.endswith(".phpt") else raw.decode("utf-8", errors="replace")
     except (tarfile.TarError, EOFError, OSError, TypeError, lzma.LZMAError) as exc:
         raise ValueError("invalid archive") from exc
     return files
 
 
 def _stub_map(files):
+    # Keyed by (symbol, file): SAPIs and extensions declare the same symbol in
+    # several stubs (apache_request_headers, PASSWORD_ARGON2_PROVIDER), and a
+    # change to any one of them must be reported.
     stubs = {}
     for path in sorted(files):
         if path.endswith(".stub.php"):
             for symbol, signature in parse_stubs(files[path]).items():
-                stubs[symbol] = (path, signature)
+                stubs[(symbol, path)] = signature
     return stubs
 
 
@@ -673,8 +683,9 @@ def diff_releases(old_files, new_files, new_version):
     [...], "affected_work_packages": [...]}.
 
     Stub entries are {"symbol", "file", "old", "new", "work_packages"} (old
-    or new is None for additions and removals), sorted by symbol. Test
-    entries are {"path", "work_packages"} sorted by path. Security entries
+    or new is None for additions and removals), sorted by symbol and then
+    file. A symbol declared in several stub files is compared file by file.
+    Test entries are {"path", "work_packages"} sorted by path. Security entries
     are the new release's security NEWS entries with "work_packages" and
     "assessment": "needs_assessment". affected_work_packages is the sorted
     union of every work package above, including "unmapped" when present.
@@ -682,20 +693,17 @@ def diff_releases(old_files, new_files, new_version):
     old_stubs = _stub_map(old_files)
     new_stubs = _stub_map(new_files)
     added, removed, changed = [], [], []
-    for symbol in sorted(set(old_stubs) | set(new_stubs)):
-        before = old_stubs.get(symbol)
-        after = new_stubs.get(symbol)
+    for symbol, path in sorted(set(old_stubs) | set(new_stubs)):
+        before = old_stubs.get((symbol, path))
+        after = new_stubs.get((symbol, path))
+        entry = {"symbol": symbol, "file": path, "old": before, "new": after,
+                 "work_packages": impact(path)}
         if before is None:
-            path, signature = after
-            added.append({"symbol": symbol, "file": path, "old": None, "new": signature,
-                          "work_packages": impact(path)})
+            added.append(entry)
         elif after is None:
-            path, signature = before
-            removed.append({"symbol": symbol, "file": path, "old": signature, "new": None,
-                            "work_packages": impact(path)})
-        elif before[1] != after[1]:
-            changed.append({"symbol": symbol, "file": after[0], "old": before[1],
-                            "new": after[1], "work_packages": impact(after[0])})
+            removed.append(entry)
+        elif before != after:
+            changed.append(entry)
 
     old_grammar = grammar_symbols(old_files.get("Zend/zend_language_parser.y", ""))
     new_grammar = grammar_symbols(new_files.get("Zend/zend_language_parser.y", ""))
