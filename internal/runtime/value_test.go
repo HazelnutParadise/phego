@@ -256,13 +256,26 @@ func TestPackedAndIndexedArraysAgree(t *testing.T) {
 		t.Fatal("packed and indexed arrays differ")
 	}
 	must(t, h.unsetElement(&packed, num(t, 1)))
-	if packed.array.packed() {
-		t.Fatal("hole kept packed form")
+	// REQ-017; T-033/034: packed holes are legal. Verify the observable
+	// deletion, append and reinsertion results against the ordered form.
+	must(t, h.unsetElement(&indexed, num(t, 1)))
+	if !same(t, packed, indexed) {
+		t.Fatal("representations differ after deleting a key")
+	}
+	if _, present, err := h.getElement(packed, num(t, 1)); err != nil || present {
+		t.Fatalf("deleted packed key remains visible: %v, %v", present, err)
 	}
 	for _, k := range []int64{0, 2, 3} {
 		if v, ok, _ := h.getElement(packed, num(t, k)); !ok || v.integer != k*10 {
 			t.Fatalf("key %d = %+v %v", k, v, ok)
 		}
+	}
+	for _, a := range []*value{&packed, &indexed} {
+		must(t, h.appendValue(a, num(t, 40)))
+		must(t, h.setElement(a, num(t, 1), num(t, 10)))
+	}
+	if !same(t, packed, indexed) || !slices.Equal(keys(packed), []arrayKey{intKey(0), intKey(2), intKey(3), intKey(4), intKey(1)}) {
+		t.Fatal("representations differ after append and reinsertion")
 	}
 }
 
