@@ -95,3 +95,30 @@ type ReentrancyError struct {
 func (e *ReentrancyError) Error() string {
 	return "phego: host function " + e.Function + " does not allow re-entrant calls"
 }
+
+// PolicyError reports an operation the engine's Policy refused. Rule is one
+// of the Rule* codes or the name of a matched rule in ModeEnforce.
+type PolicyError struct {
+	Capability Capability
+	Op         string
+	Target     string
+	Rule       string
+}
+
+func (e *PolicyError) Error() string {
+	return fmt.Sprintf("phego: %s %s %q refused (%s)", e.Capability, e.Op, e.Target, e.Rule)
+}
+
+// ResourceError reports a budget that would be exceeded during a run, or
+// an Engine with no free execution slot. LimitError is used instead for
+// input rejected before any processing.
+type ResourceError struct {
+	Resource  Resource
+	Limit     int64
+	Used      int64
+	Requested int64
+}
+
+func (e *ResourceError) Error() string {
+	return fmt.Sprintf("phego: %s limit %d exceeded (used %d, requested %d)", e.Resource, e.Limit, e.Used, e.Requested)
+}

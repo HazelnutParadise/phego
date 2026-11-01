@@ -1,7 +1,11 @@
 package phego
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"io/fs"
+	"os"
 
 	"github.com/HazelnutParadise/phego/internal/policy"
 )
@@ -129,4 +133,138 @@ type compiledPolicy struct {
 	policy    *policy.Policy
 	limits    policy.Limits
 	admission *policy.Admission // nil when MaxActive is zero
+}
+
+// compilePolicy validates cfg.Policy, cfg.Limits, cfg.MaxActive and
+// cfg.MaxQueued, folds the deprecated Files and OutputLimit fields into
+// them, and returns the immutable form. Errors are *ConfigError with the
+// public field path, for example "Policy.Files[0].Path". callbacks are the
+// registered host function names, which registration alone authorizes.
+func compilePolicy(cfg *Config, callbacks []string) (*compiledPolicy, error) {
+	spec := policy.Spec{Callbacks: callbacks, DynamicCode: cfg.Policy.DynamicCode}
+	switch cfg.Policy.Mode {
+	case ModeCompat:
+		spec.Mode = policy.Compat
+	case ModeObserve:
+		spec.Mode = policy.Observe
+	case ModeEnforce:
+		spec.Mode = policy.Enforce
+	default:
+		return nil, &ConfigError{Field: "Policy.Mode", Reason: fmt.Sprintf("unknown mode %d", cfg.Policy.Mode)}
+	}
+	for _, g := range cfg.Policy.Files {
+		if cfg.Files != nil && g.Path == "/" {
+			return nil, &ConfigError{Field: "Files", Reason: `Files and Policy.Files both mount "/"`}
+		}
+		spec.Files = append(spec.Files, policy.FileGrant{Path: g.Path, Dir: g.Root, FS: g.FS, Write: g.Write})
+	}
+	if cfg.Files != nil {
+		spec.Files = append(spec.Files, policy.FileGrant{Path: "/", FS: cfg.Files})
+	}
+	for _, g := range cfg.Policy.Network {
+		spec.Network = append(spec.Network, policy.NetworkGrant{Scheme: g.Scheme, Host: g.Host,
+			Ports: append([]int(nil), g.Ports...), AllowPrivate: g.AllowPrivate})
+	}
+	pol, err := policy.New(spec)
+	var se *policy.SpecError
+	if errors.As(err, &se) {
+		return nil, &ConfigError{Field: "Policy." + se.Field, Reason: se.Reason}
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	l := cfg.Limits
+	for _, f := range []struct {
+		name string
+		v    int64
+	}{
+		{"Steps", l.Steps}, {"Memory", l.Memory}, {"Output", l.Output}, {"Diagnostics", int64(l.Diagnostics)},
+		{"Frames", int64(l.Frames)}, {"OpenFiles", int64(l.OpenFiles)}, {"Connections", int64(l.Connections)},
+		{"CompileBytes", l.CompileBytes},
+	} {
+		if f.v < 0 {
+			return nil, &ConfigError{Field: "Limits." + f.name, Reason: "must not be negative"}
+		}
+	}
+	output := l.Output
+	switch {
+	case cfg.OutputLimit != 0 && output != 0 && int64(cfg.OutputLimit) != output:
+		return nil, &ConfigError{Field: "OutputLimit", Reason: fmt.Sprintf("is %d but Limits.Output is %d", cfg.OutputLimit, output)}
+	case output == 0 && cfg.OutputLimit != 0:
+		output = int64(cfg.OutputLimit)
+	case output == 0:
+		output = defaultOutputLimit
+	}
+	cfg.OutputLimit = int(min(output, int64(maxInt)))
+	diagnostics := int64(l.Diagnostics)
+	if diagnostics == 0 {
+		diagnostics = defaultDiagnostics
+	}
+	limits := policy.Limits{policy.Output: output, policy.Diagnostics: diagnostics}
+	for r, n := range map[policy.Resource]int64{
+		policy.Steps: l.Steps, policy.Memory: l.Memory, policy.Frames: int64(l.Frames),
+		policy.OpenFiles: int64(l.OpenFiles), policy.Connections: int64(l.Connections), policy.CompileBytes: l.CompileBytes,
+	} {
+		if n > 0 {
+			limits[r] = n
+		}
+	}
+
+	c := &compiledPolicy{policy: pol, limits: limits}
+	switch {
+	case cfg.MaxActive < 0:
+		return nil, &ConfigError{Field: "MaxActive", Reason: "must not be negative"}
+	case cfg.MaxQueued < 0:
+		return nil, &ConfigError{Field: "MaxQueued", Reason: "must not be negative"}
+	case cfg.MaxActive == 0 && cfg.MaxQueued != 0:
+		return nil, &ConfigError{Field: "MaxQueued", Reason: "needs MaxActive to bound running work"}
+	case cfg.MaxActive > 0:
+		c.admission, err = policy.NewAdmission(cfg.MaxActive, cfg.MaxQueued)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c, nil
+}
+
+const maxInt = int(^uint(0) >> 1)
+
+// admit takes an execution slot, or returns a *ResourceError when the
+// Engine is full, ErrEngineClosed after Close, or ctx.Err() when ctx ends
+// while waiting. The release function may be called more than once.
+func (e *Engine) admit(ctx context.Context) (func(), error) {
+	if e.policy.admission == nil {
+		return func() {}, nil
+	}
+	release, err := e.policy.admission.Acquire(ctx)
+	if err != nil {
+		return nil, publicError(err)
+	}
+	return release, nil
+}
+
+// openFile opens a PHP path through the policy for reading.
+func (e *Engine) openFile(path string) (fs.File, error) {
+	f, err := e.policy.policy.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return nil, publicError(err)
+	}
+	return f, nil
+}
+
+// publicError converts internal policy errors to the public types and
+// passes other errors through unchanged.
+func publicError(err error) error {
+	var pe *policy.PolicyError
+	var re *policy.ResourceError
+	switch {
+	case errors.Is(err, policy.ErrAdmissionClosed):
+		return ErrEngineClosed
+	case errors.As(err, &pe):
+		return &PolicyError{Capability: Capability(pe.Kind.String()), Op: pe.Op, Target: pe.Target, Rule: pe.Rule}
+	case errors.As(err, &re):
+		return &ResourceError{Resource: Resource(re.Resource.String()), Limit: re.Limit, Used: re.Used, Requested: re.Requested}
+	}
+	return err
 }

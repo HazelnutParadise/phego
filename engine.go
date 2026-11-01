@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"strings"
 	"sync"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
@@ -35,9 +36,25 @@ type Config struct {
 	// MaxSourceBytes limits each compiled source. Zero selects 8 MiB.
 	MaxSourceBytes int
 	// OutputLimit limits captured output per run. Zero selects 8 MiB.
+	//
+	// Deprecated: use Limits.Output. Setting both to different values is a
+	// ConfigError.
 	OutputLimit int
-	// Files grants RunFile read access. Nil grants no file access.
+	// Files mounts a read-only file system at "/" for RunFile, which then
+	// accepts paths relative to it. Nil grants no file access.
+	//
+	// Deprecated: use Policy.Files. Mounting both at "/" is a ConfigError.
 	Files fs.FS
+	// Policy grants the capabilities PHP code may use. The zero value
+	// grants nothing.
+	Policy Policy
+	// Limits bounds what each run may use.
+	Limits Limits
+	// MaxActive bounds runs executing at once and MaxQueued the runs
+	// waiting for a slot. Work beyond both is refused before it starts with
+	// a ResourceError. Zero MaxActive sets no bound; MaxQueued then must be
+	// zero.
+	MaxActive, MaxQueued int
 	// HostFunctions are the Go functions PHP code may call. They are
 	// validated and snapshotted by NewEngine.
 	HostFunctions []HostFunction
@@ -108,6 +125,7 @@ type Engine struct {
 	cfg     Config
 	profile profile.Profile
 	host    map[string]HostFunction // lower-cased name -> snapshot
+	policy  *compiledPolicy
 	mu      sync.Mutex
 	runs    sync.WaitGroup
 	shut    bool
@@ -148,9 +166,6 @@ func NewEngine(cfg Config) (*Engine, error) {
 	if cfg.MaxSourceBytes == 0 {
 		cfg.MaxSourceBytes = defaultMaxSourceBytes
 	}
-	if cfg.OutputLimit == 0 {
-		cfg.OutputLimit = defaultOutputLimit
-	}
 	host := make(map[string]HostFunction, len(cfg.HostFunctions))
 	for i, f := range cfg.HostFunctions {
 		field := fmt.Sprintf("HostFunctions[%d]", i)
@@ -176,8 +191,16 @@ func NewEngine(cfg Config) (*Engine, error) {
 		f.Capabilities = append([]string(nil), f.Capabilities...)
 		host[key] = f
 	}
+	names := make([]string, 0, len(host))
+	for _, f := range host {
+		names = append(names, f.Name)
+	}
+	pol, err := compilePolicy(&cfg, names)
+	if err != nil {
+		return nil, err
+	}
 	cfg.HostFunctions = nil
-	return &Engine{cfg: cfg, profile: prof, host: host, drain: make(chan struct{}), ready: true}, nil
+	return &Engine{cfg: cfg, profile: prof, host: host, policy: pol, drain: make(chan struct{}), ready: true}, nil
 }
 
 // Program is an immutable compiled program bound to the engine that made it.
@@ -337,6 +360,18 @@ func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
+	release, err := e.admit(ctx)
+	if err != nil {
+		var re *ResourceError
+		switch {
+		case errors.As(err, &re):
+			return &Result{Status: StatusPolicyDenied}, err
+		case ctx.Err() != nil:
+			return &Result{Status: StatusCancelled}, err
+		}
+		return &Result{Status: StatusFailed}, err
+	}
+	defer release()
 	// Execution arrives with the VM; until then a run never claims success.
 	return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "PHP execution"}
 }
@@ -350,10 +385,20 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
-	if e.cfg.Files == nil {
-		return &Result{Status: StatusPolicyDenied}, &ConfigError{Field: "Files", Reason: "file access is not granted"}
+	// A relative path is relative to "/", where the deprecated Files field
+	// mounts its file system.
+	phpPath := path
+	if !strings.HasPrefix(phpPath, "/") {
+		phpPath = "/" + phpPath
 	}
-	f, err := e.cfg.Files.Open(path)
+	f, err := e.openFile(phpPath)
+	var pe *PolicyError
+	if errors.As(err, &pe) {
+		if len(e.cfg.Policy.Files) == 0 && e.cfg.Files == nil {
+			pe.Rule = RuleNotGranted // nothing is mounted at all
+		}
+		return &Result{Status: StatusPolicyDenied}, pe
+	}
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
@@ -383,6 +428,9 @@ func (e *Engine) Close(ctx context.Context) error {
 	}
 	if !e.shut {
 		e.shut = true
+		if e.policy.admission != nil {
+			e.policy.admission.Close()
+		}
 		go func() {
 			e.runs.Wait()
 			close(e.drain)
