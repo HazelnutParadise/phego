@@ -1,6 +1,7 @@
 {
   "affected_work_packages": [
     "W-11",
+    "W-15",
     "W-17",
     "W-25",
     "W-28",
@@ -14,13 +15,16 @@
     "unmapped"
   ],
   "grammar": {
+    "parser_changed": false,
     "rules_added": [],
+    "rules_changed": [],
     "rules_removed": [],
+    "scanner_changed": false,
     "tokens_added": [],
     "tokens_removed": []
   },
   "new_version": "8.5.12",
-  "schema_version": 1,
+  "schema_version": 2,
   "security": [
     {
       "assessment": "needs_assessment",
@@ -1557,115 +1561,115 @@
       {
         "path": "ext/opcache/tests/file_cache_frameless_handler.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/frameless_interrupt_001.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/frameless_interrupt_002.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/frameless_interrupt_003.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh20890.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23628_001.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23628_002.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23628_003.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23679.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23693.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/jit/gh23991.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/call_graph_stack_overflow.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/dce_015.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/dce_016.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/dce_017.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/gh23644.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/gh24063.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/oss_fuzz_546798343.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {
         "path": "ext/opcache/tests/opt/sccp_isset_dim_partial_object.phpt",
         "work_packages": [
-          "W-52"
+          "W-15"
         ]
       },
       {

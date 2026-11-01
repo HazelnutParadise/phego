@@ -50,6 +50,8 @@ PATH_IMPACT = {
     "ext/mbstring/": ["W-30"],
     "ext/pdo": ["W-31"],
     "ext/mysqli/": ["W-31"],
+    "ext/mysqlnd/": ["W-31"],
+    "ext/opcache/": ["W-15"],
     "ext/openssl/": ["W-32"],
     "ext/curl/": ["W-32"],
     "ext/dom/": ["W-33"],
@@ -72,11 +74,16 @@ NEWS_IMPACT = {
 _STUB_MODIFIERS = frozenset({
     "public", "protected", "private", "static", "final", "abstract", "readonly", "var",
 })
+_STUB_DOC_TAGS = frozenset({
+    "tentative-return-type", "readonly", "virtual", "strict-properties",
+    "not-serializable", "prefer-ref",
+})
 _CLASS_KEYWORDS = frozenset({"class", "interface", "trait", "enum"})
 _HEREDOC = re.compile(r"<<<[ \t]*([\"']?)([A-Za-z_\x80-\uffff][A-Za-z0-9_\x80-\uffff]*)\1\r?\n")
 _DIRECTIVE = re.compile(r"#[ \t]*(if|ifdef|ifndef|elif|else|endif)\b([^\r\n]*)")
 # Preprocessor lines survive metadata stripping as "\x01directive\x01".
 _PP = "\x01"
+_DOC = "\x02"
 _NEWS_HEADER = re.compile(
     r"^\s*[0-9]{1,2}\s+[A-Za-z]{3,9}\s+[0-9]{4},\s+PHP\s+(\S+)\s*$"
 )
@@ -121,6 +128,17 @@ def _skip_quoted(text, index):
     return index
 
 
+def _skip_block_comment(text, index):
+    end = text.find("*/", index + 2)
+    return len(text) if end < 0 else end + 2
+
+
+def _skip_line_comment(text, index):
+    while index < len(text) and text[index] not in "\r\n":
+        index += 1
+    return index
+
+
 def _skip_heredoc(text, index):
     """Return the end of the heredoc or nowdoc at index, or None if none starts there."""
     match = _HEREDOC.match(text, index)
@@ -141,6 +159,20 @@ def _skip_attribute(text, index):
         char = text[index]
         if char in "'\"":
             index = _skip_quoted(text, index)
+            continue
+        if text.startswith("<<<", index):
+            end = _skip_heredoc(text, index)
+            if end is not None:
+                index = end
+                continue
+        if text.startswith("//", index):
+            index = _skip_line_comment(text, index + 2)
+            continue
+        if text.startswith("/*", index):
+            index = _skip_block_comment(text, index)
+            continue
+        if char == "#" and not text.startswith("#[", index):
+            index = _skip_line_comment(text, index + 1)
             continue
         if char == "[":
             depth += 1
@@ -173,32 +205,39 @@ def _strip_metadata(text):
             index += 5 if char == "<" else 2
             out.write(" ; ")
             continue
+        if char == "#" and index + 1 < length and text[index + 1] == "[":
+            end = _skip_attribute(text, index)
+            out.write(text[index:end])
+            index = end
+            continue
         if char == "/" and index + 1 < length and text[index + 1] == "/":
-            index += 2
-            while index < length and text[index] not in "\r\n":
-                index += 1
+            index = _skip_line_comment(text, index + 2)
             continue
         if char == "/" and index + 1 < length and text[index + 1] == "*":
-            index += 2
-            while index + 1 < length and not (text[index] == "*" and text[index + 1] == "/"):
-                index += 1
-            index = min(index + 2, length)
+            if text.startswith("/**", index):
+                start = index
+                index = _skip_block_comment(text, index)
+                tags = _doc_tags(text, start, index)
+                if tags:
+                    out.write(_DOC + json.dumps(tags, ensure_ascii=True, separators=(",", ":")) + _DOC)
+                else:
+                    out.write(" ")
+                continue
+            index = _skip_block_comment(text, index)
             out.write(" ")
             continue
         if char == "#":
-            if index + 1 < length and text[index + 1] == "[":
-                index = _skip_attribute(text, index)
-                out.write(" ")
-                continue
             line_start = text.rfind("\n", 0, index) + 1
             directive = _DIRECTIVE.match(text, index)
             if directive and not text[line_start:index].strip():
                 out.write(f" {_PP}{directive.group(1)} {_collapse(directive.group(2))}{_PP} ")
                 index = directive.end()
                 continue
+            index = _skip_line_comment(text, index + 1)
+            continue
+        if char == _DOC:
+            out.write(_DOC * 3)
             index += 1
-            while index < length and text[index] not in "\r\n":
-                index += 1
             continue
         out.write(char)
         index += 1
@@ -216,6 +255,21 @@ def _tokenize(text):
             continue
         if len(tokens) >= MAX_STUB_TOKENS:
             raise ValueError("stub token limit exceeded")
+        if char == "#" and text.startswith("#[", index):
+            end = _skip_attribute(text, index)
+            tokens.append(("attribute", text[index:end], index, end))
+            index = end
+            continue
+        if text.startswith(_DOC * 3, index):
+            tokens.append(("symbol", _DOC, index, index + 3))
+            index += 3
+            continue
+        if char == _DOC:
+            end = text.index(_DOC, index + 1) + 1
+            tags = json.loads(text[index + 1:end - 1])
+            tokens.append(("doc", tags, index, end))
+            index = end
+            continue
         if char in "'\"":
             start = index
             index = _skip_quoted(text, index)
@@ -271,9 +325,79 @@ def _qualify(namespace, name):
     return namespace + "\\" + name if namespace else name
 
 
+def _doc_tags(text, start, end):
+    tags = []
+    cursor = start + 3
+    limit = end - 2 if text.startswith("*/", end - 2) else end
+    while cursor < limit:
+        line_end = cursor
+        while line_end < limit and text[line_end] not in "\r\n":
+            line_end += 1
+        line = text[cursor:line_end].strip()
+        if line.startswith("*"):
+            line = line[1:].lstrip()
+        match = re.fullmatch(r"@([A-Za-z][A-Za-z0-9_-]*)(?:[ \t]+(.*))?", line)
+        if match is not None and match.group(1) in _STUB_DOC_TAGS:
+            value = _collapse(match.group(2)) if match.group(2) else ""
+            tags.append(f"[@{match.group(1)} {value}]" if value else f"[@{match.group(1)}]")
+        if text.startswith("\r\n", line_end):
+            cursor = line_end + 2
+        else:
+            cursor = line_end + 1
+    return tags
+
+
+def _prefix_before(tokens, cleaned, start, end):
+    tags = []
+    attributes = []
+    modifiers = []
+    core_start = None
+    for cursor in range(start, end):
+        kind, value, _, _ = tokens[cursor]
+        if kind == "doc":
+            tags.extend(value)
+        elif kind == "attribute":
+            attributes.append(value)
+        elif kind == "ident" and value in _STUB_MODIFIERS:
+            modifiers.append(value)
+        elif core_start is None:
+            core_start = cursor
+    parts = tags + attributes
+    if modifiers:
+        parts.append(" ".join(modifiers))
+    if core_start is not None:
+        parts.append(_source_without_docs(
+            tokens, cleaned, core_start, end, tokens[core_start][2], tokens[end][2]
+        ))
+    return _collapse(" ".join(parts))
+
+
+def _source_without_docs(tokens, cleaned, start, end, start_pos, end_pos):
+    parts = []
+    cursor = start_pos
+    for token_index in range(start, end):
+        token = tokens[token_index]
+        if token[0] == "doc":
+            parts.append(cleaned[cursor:token[2]])
+            parts.append(" ")
+            cursor = token[3]
+    parts.append(cleaned[cursor:end_pos])
+    return "".join(parts)
+
+
+def _signature(tokens, cleaned, declaration, keyword, terminator):
+    prefix = _prefix_before(tokens, cleaned, declaration, keyword)
+    body = _source_without_docs(
+        tokens, cleaned, keyword, terminator, tokens[keyword][2], tokens[terminator][2]
+    )
+    return _collapse(prefix + " " + body)
+
+
 def _statement_start(tokens, index):
     cursor = index - 1
-    while cursor >= 0 and tokens[cursor][0] == "ident" and tokens[cursor][1] in _STUB_MODIFIERS:
+    while cursor >= 0 and (
+            tokens[cursor][0] in ("attribute", "doc")
+            or (tokens[cursor][0] == "ident" and tokens[cursor][1] in _STUB_MODIFIERS)):
         cursor -= 1
     if cursor < 0:
         return 0
@@ -296,17 +420,33 @@ def _matching_brace(tokens, index):
     return len(tokens) - 1
 
 
+def _property_start(tokens, index):
+    cursor = index - 1
+    while cursor >= 0:
+        kind, value, _, _ = tokens[cursor]
+        if kind == "pp" or (kind == "symbol" and value in (";", "{", "}")):
+            return cursor + 1
+        cursor -= 1
+    return 0
+
+
+def _skip_doc_tokens(tokens, index):
+    while index < len(tokens) and tokens[index][0] == "doc":
+        index += 1
+    return index
+
+
 def parse_stubs(text):
     """Return {symbol: signature} for one .stub.php file.
 
     Symbols are "function NAME", "class NAME", "interface NAME", "trait NAME",
     "enum NAME", "method CLASS::NAME" and "const NAME" (global) or
-    "const CLASS::NAME", with names fully qualified by the file's namespace
-    declarations ("namespace X;" or "namespace X { ... }") and no leading
-    backslash. The signature is the declaration with comments removed and
-    runs of whitespace collapsed to one space, ending before the body or the
-    semicolon, for example "function strlen(string $string): int". Doc
-    comments and attributes do not count, so editing them is no change.
+    "const CLASS::NAME", and "property CLASS::$name", with names fully
+    qualified by the file's namespace declarations ("namespace X;" or
+    "namespace X { ... }") and no leading backslash. Signatures end before
+    the body or semicolon, with whitespace collapsed outside string literals.
+    Declaration attributes and selected doc tags are retained in a canonical
+    prefix; parameter attributes remain in place. Property hooks are omitted.
     Class signatures include extends and implements lists.
     Oversized condition trees or generated signatures raise ValueError.
     """
@@ -385,6 +525,62 @@ def parse_stubs(text):
                     condition_bytes -= 4
             index += 1
             continue
+        if kind == "symbol" and value == "$" and class_now() is not None:
+            declaration = _property_start(tokens, index)
+            cursor = index
+            nesting = []
+            items = [[]]
+            hook = None
+            while cursor < len(tokens):
+                token_kind, token_value = tokens[cursor][:2]
+                if (not nesting and token_kind == "symbol" and token_value == "{"):
+                    hook = cursor
+                    break
+                if token_kind == "symbol" and token_value in "([{":
+                    nesting.append(token_value)
+                elif token_kind == "symbol" and token_value in ")]}":
+                    if nesting:
+                        nesting.pop()
+                if not nesting and token_kind == "symbol" and token_value == ";":
+                    break
+                if not nesting and token_kind == "symbol" and token_value == ",":
+                    items.append([])
+                else:
+                    items[-1].append(cursor)
+                cursor += 1
+            end = cursor if cursor < len(tokens) else len(tokens)
+            first_name = next(
+                (at for at in items[0]
+                 if tokens[at][0] == "symbol" and tokens[at][1] == "$"
+                 and at + 1 < len(tokens) and tokens[at + 1][0] == "ident"),
+                None,
+            )
+            if first_name is not None:
+                header = _prefix_before(tokens, cleaned, declaration, first_name)
+                for item in items:
+                    if not item:
+                        continue
+                    name_at = next(
+                        (at for at in item
+                         if tokens[at][0] == "symbol" and tokens[at][1] == "$"
+                         and at + 1 < len(tokens) and tokens[at + 1][0] == "ident"),
+                        None,
+                    )
+                    if name_at is None:
+                        continue
+                    body = _source_without_docs(
+                        tokens, cleaned, item[0], item[-1] + 1,
+                        tokens[item[0]][2], tokens[item[-1]][3]
+                    )
+                    signature = _collapse(
+                        header + " " + body
+                    )
+                    record(f"property {class_now()}::${tokens[name_at + 1][1]}", signature)
+            if hook is not None:
+                index = _matching_brace(tokens, hook) + 1
+            else:
+                index = min(end + 1, len(tokens))
+            continue
         if kind == "symbol":
             if value == "{":
                 depth += 1
@@ -401,7 +597,12 @@ def parse_stubs(text):
         if value == "namespace":
             cursor = index + 1
             names = []
-            while cursor < len(tokens) and tokens[cursor][0] == "ident":
+            while cursor < len(tokens):
+                if tokens[cursor][0] == "doc":
+                    cursor += 1
+                    continue
+                if tokens[cursor][0] != "ident":
+                    break
                 names.append(tokens[cursor][1])
                 cursor += 1
             if cursor >= len(tokens):
@@ -437,7 +638,7 @@ def parse_stubs(text):
             if cursor >= len(tokens) or name is None:
                 break
             terminator = tokens[cursor]
-            signature = _collapse(cleaned[tokens[declaration][2]:terminator[2]])
+            signature = _signature(tokens, cleaned, declaration, index, cursor)
             qualified = _qualify(namespace_now(), name)
             record(f"{value} {qualified}", signature)
             if terminator[1] == "{":
@@ -455,8 +656,10 @@ def parse_stubs(text):
                 index += 1
                 continue
             cursor = index + 1
+            cursor = _skip_doc_tokens(tokens, cursor)
             if cursor < len(tokens) and tokens[cursor][1] == "&":
                 cursor += 1
+                cursor = _skip_doc_tokens(tokens, cursor)
             if cursor >= len(tokens) or tokens[cursor][0] != "ident":
                 index += 1
                 continue
@@ -467,7 +670,7 @@ def parse_stubs(text):
             if cursor >= len(tokens):
                 break
             terminator = tokens[cursor]
-            signature = _collapse(cleaned[tokens[declaration][2]:terminator[2]])
+            signature = _signature(tokens, cleaned, declaration, index, cursor)
             current_class = class_now()
             if current_class is not None:
                 record(f"method {current_class}::{name}", signature)
@@ -481,13 +684,21 @@ def parse_stubs(text):
 
         if value == "case" and class_kind_now() == "enum":
             cursor = index + 1
+            cursor = _skip_doc_tokens(tokens, cursor)
             while cursor < len(tokens) and tokens[cursor][1] != ";":
                 cursor += 1
             if cursor >= len(tokens):
                 break
-            if index + 1 < cursor and tokens[index + 1][0] == "ident":
-                signature = _collapse(cleaned[start:tokens[cursor][2]])
-                record(f"case {class_now()}::{tokens[index + 1][1]}", signature)
+            name_at = next(
+                (at for at in range(index + 1, cursor) if tokens[at][0] == "ident"),
+                None,
+            )
+            if name_at is not None:
+                declaration = _statement_start(tokens, index)
+                if declaration is None:
+                    declaration = index
+                signature = _signature(tokens, cleaned, declaration, index, cursor)
+                record(f"case {class_now()}::{tokens[name_at][1]}", signature)
             index = cursor + 1
             continue
 
@@ -522,9 +733,12 @@ def parse_stubs(text):
                     continue
                 name_at = idents[-1] if equals is not None else idents[0]
                 if header is None:
-                    header = cleaned[tokens[declaration][2]:tokens[name_at][2]]
-                body = cleaned[tokens[name_at][2]:tokens[item[-1]][3]]
-                signature = _collapse(header + body)
+                    header = _prefix_before(tokens, cleaned, declaration, name_at)
+                body = _source_without_docs(
+                    tokens, cleaned, name_at, item[-1] + 1,
+                    tokens[name_at][2], tokens[item[-1]][3]
+                )
+                signature = _collapse(header + " " + body)
                 current_class = class_now()
                 if current_class is not None:
                     record(f"const {current_class}::{tokens[name_at][1]}", signature)
@@ -544,7 +758,8 @@ def grammar_symbols(parser_y):
 
     Tokens are the names declared by %token lines (T_STRING, T_ECHO, ...);
     rules are the nonterminals defined in the grammar section between the
-    first and second "%%" lines, each "name:" at the start of a line. Both
+    first and second "%%" lines (including trailing comments), each "name:"
+    at the start of a line. Both
     lists are sorted and contain no duplicates.
     """
     lines = parser_y.splitlines()
@@ -557,19 +772,28 @@ def grammar_symbols(parser_y):
         rest = re.sub(r"<[^>]*>", " ", rest)
         rest = re.sub(r'"[^"]*"', " ", rest)
         tokens.update(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", rest))
-    rules = set()
-    in_grammar = False
+    return {"tokens": sorted(tokens), "rules": sorted(_grammar_rules(parser_y))}
+
+
+def _grammar_rules(parser_y):
+    """Keep normalized rule bodies, including comments, in declaration order."""
+    grammar = []
     separators = 0
-    for line in lines:
-        if line.strip() == "%%":
+    for line in parser_y.splitlines(keepends=True):
+        if re.match(r"^\s*%%(?:\s|/\*|//|$)", line):
             separators += 1
-            in_grammar = separators == 1
+            if separators == 2:
+                break
             continue
-        if in_grammar:
-            match = re.match(r"([A-Za-z_][A-Za-z0-9_]*)\s*:", line)
-            if match:
-                rules.add(match.group(1))
-    return {"tokens": sorted(tokens), "rules": sorted(rules)}
+        if separators == 1:
+            grammar.append(line)
+    body = "".join(grammar)
+    definitions = list(re.finditer(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:", body, re.M))
+    fragments = {}
+    for index, match in enumerate(definitions):
+        end = definitions[index + 1].start() if index + 1 < len(definitions) else len(body)
+        fragments.setdefault(match.group(1), []).append(_collapse(body[match.end():end]))
+    return {name: "\n".join(parts) for name, parts in fragments.items()}
 
 
 def news_entries(news, version):
@@ -729,9 +953,9 @@ def diff_releases(old_files, new_files, new_version):
     """Return the classified change report between two read archives.
 
     old_files and new_files are read_archive results. The report is
-    {"schema_version": 1, "new_version", "stubs": {"added", "removed",
+    {"schema_version": 2, "new_version", "stubs": {"added", "removed",
     "changed"}, "grammar": {"tokens_added", "tokens_removed", "rules_added",
-    "rules_removed"}, "tests": {"added", "removed", "modified"}, "security":
+    "rules_removed", "rules_changed", "parser_changed", "scanner_changed"}, "tests": {"added", "removed", "modified"}, "security":
     [...], "affected_work_packages": [...]}.
 
     Stub entries are {"symbol", "file", "old", "new", "work_packages"} (old
@@ -741,6 +965,10 @@ def diff_releases(old_files, new_files, new_version):
     are the new release's security NEWS entries with "work_packages" and
     "assessment": "needs_assessment". affected_work_packages is the sorted
     union of every work package above, including "unmapped" when present.
+    Rule bodies normalize whitespace, preserve comments and join repeated
+    definitions in source order; comment edits count as changes. Parser and
+    scanner flags compare complete source text, including missing files,
+    using the same comparison as affected_work_packages.
     """
     old_stubs = _stub_map(old_files)
     new_stubs = _stub_map(new_files)
@@ -761,11 +989,21 @@ def diff_releases(old_files, new_files, new_version):
     new_grammar = grammar_symbols(new_files.get("Zend/zend_language_parser.y", ""))
     old_tokens, new_tokens = set(old_grammar["tokens"]), set(new_grammar["tokens"])
     old_rules, new_rules = set(old_grammar["rules"]), set(new_grammar["rules"])
+    old_bodies = _grammar_rules(old_files.get("Zend/zend_language_parser.y", ""))
+    new_bodies = _grammar_rules(new_files.get("Zend/zend_language_parser.y", ""))
+    source_changed = {
+        path: old_files.get(path) != new_files.get(path)
+        for path in ("Zend/zend_language_parser.y", "Zend/zend_language_scanner.l")
+    }
     grammar = {
         "tokens_added": sorted(new_tokens - old_tokens),
         "tokens_removed": sorted(old_tokens - new_tokens),
         "rules_added": sorted(new_rules - old_rules),
         "rules_removed": sorted(old_rules - new_rules),
+        "rules_changed": sorted(name for name in old_rules & new_rules
+                                if old_bodies[name] != new_bodies[name]),
+        "parser_changed": source_changed["Zend/zend_language_parser.y"],
+        "scanner_changed": source_changed["Zend/zend_language_scanner.l"],
     }
 
     old_tests = {path: text for path, text in old_files.items() if path.endswith(".phpt")}
@@ -797,12 +1035,12 @@ def diff_releases(old_files, new_files, new_version):
             affected.update(entry["work_packages"])
     for entry in security:
         affected.update(entry["work_packages"])
-    for path in ("Zend/zend_language_parser.y", "Zend/zend_language_scanner.l"):
-        if old_files.get(path) != new_files.get(path):
+    for path, changed_source in source_changed.items():
+        if changed_source:
             affected.update(impact(path))
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "new_version": new_version,
         "stubs": {"added": added, "removed": removed, "changed": changed},
         "grammar": grammar,

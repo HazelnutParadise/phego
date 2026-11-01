@@ -13,6 +13,7 @@ on:
       - 'tools/test_upstream_watch*.py'
       - 'tools/upstream_update.py'
       - 'tools/upstream_diff.py'
+      - 'tools/test_upstream_diff*.py'
       - 'tools/upstream_snapshot.py'
       - 'tools/test_upstream_update*.py'
       - 'docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json'
@@ -25,6 +26,7 @@ on:
       - 'tools/test_upstream_watch*.py'
       - 'tools/upstream_update.py'
       - 'tools/upstream_diff.py'
+      - 'tools/test_upstream_diff*.py'
       - 'tools/upstream_snapshot.py'
       - 'tools/test_upstream_update*.py'
       - 'docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json'
@@ -87,9 +89,16 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
+          from tools import upstream_diff
           result = json.loads(Path('/tmp/php-upstream-locked-1.json').read_text())
           expected = json.loads(Path('docs/compatibility/upstream-diff-8.5.11-8.5.12.json').read_text())
           assert result['classification'] == expected
+          for version in ('8.5.11', '8.5.12'):
+              files = upstream_diff.read_archive(Path(f'/tmp/php-{version}.tar.xz').read_bytes(), version)
+              assert len(upstream_diff.grammar_symbols(files['Zend/zend_language_parser.y'])['rules']) == 177
+          assert expected['grammar']['rules_changed'] == []
+          assert expected['grammar']['parser_changed'] is False
+          assert expected['grammar']['scanner_changed'] is False
           assert result['source_verification'] == 'sha256_verified'
           assert result['compatibility'] == 'not_assessed'
           assert any(f['category'] == 'implementation' and f['review'] == 'needs_behavior_regression' for f in result['files'])
