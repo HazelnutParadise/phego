@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"os"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 	"testing/fstest"
@@ -71,4 +73,24 @@ func TestReviewLegacyRunFilePreservesFSPaths(t *testing.T) {
 func TestReviewRootErrorUsesPublicField(t *testing.T) {
 	_, err := NewEngine(Config{Policy: Policy{Files: []FileGrant{{Path: "/app", Root: "relative"}}}})
 	wantConfigField(t, err, "Policy.Files[0].Root")
+}
+
+func TestReviewRunFileDoesNotReadShadowedAlias(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "protected"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "protected", "hidden.php"), []byte("<?php function HIDDEN_SENTINEL( {"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("protected/hidden.php", filepath.Join(root, "alias.php")); err != nil {
+		t.Fatal(err)
+	}
+	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/", Root: root}, {Path: "/protected", FS: fstest.MapFS{}}}}})
+	for _, name := range []string{"/protected/hidden.php", "/alias.php"} {
+		_, err := e.RunFile(context.Background(), name)
+		if !errors.Is(err, fs.ErrNotExist) {
+			t.Fatalf("RunFile(%q)=%v, want hidden backend absent", name, err)
+		}
+	}
 }

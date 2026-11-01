@@ -313,3 +313,128 @@ func TestOverlappingPhysicalRootsCaseInsensitiveAncestor(t *testing.T) {
 		t.Fatalf("case alias=%q %v", b, err)
 	}
 }
+
+func TestOverlappingMountsRematchReadAliases(t *testing.T) {
+	root := t.TempDir()
+	protected := filepath.Join(root, "protected")
+	if err := os.Mkdir(protected, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(protected, "hidden.php"), []byte("hidden"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("protected/hidden.php", filepath.Join(root, "alias.php")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("protected", filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{"visible.php": {Data: []byte("visible")}}}}})
+	for _, name := range []string{"/protected/hidden.php", "/alias.php", "/alias/hidden.php"} {
+		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		if f != nil {
+			f.Close()
+		}
+		if err == nil {
+			t.Fatalf("read hidden file through %q", name)
+		}
+	}
+	f, err := p.OpenFile("/alias/visible.php", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b, err := io.ReadAll(f)
+	if err != nil || string(b) != "visible" {
+		t.Fatalf("resolved mounted read=%q %v", b, err)
+	}
+}
+
+func TestOverlappingMountsRematchCaseInsensitiveReadAlias(t *testing.T) {
+	root := t.TempDir()
+	protected := filepath.Join(root, "Protected")
+	if err := os.Mkdir(protected, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "protected")); os.IsNotExist(err) {
+		t.Skip("requires a case-insensitive filesystem")
+	} else if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(protected, "hidden.php"), []byte("hidden"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{"visible.php": {Data: []byte("visible")}}}}})
+	f, err := p.OpenFile("/Protected/hidden.php", os.O_RDONLY, 0)
+	if f != nil {
+		f.Close()
+	}
+	if err == nil {
+		t.Fatal("case alias read hidden parent file")
+	}
+	f, err = p.OpenFile("/Protected/visible.php", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	b, err := io.ReadAll(f)
+	if err != nil || string(b) != "visible" {
+		t.Fatalf("case rematch=%q %v", b, err)
+	}
+}
+
+func TestOverlappingMountsDoNotReadHiddenHardLink(t *testing.T) {
+	root := t.TempDir()
+	protected := filepath.Join(root, "protected")
+	if err := os.Mkdir(protected, 0700); err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(protected, "hidden")
+	if err := os.WriteFile(file, []byte("hidden"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(file, filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{}}}})
+	f, err := p.OpenFile("/alias", os.O_RDONLY, 0)
+	if f != nil {
+		f.Close()
+	}
+	wantPolicyError(t, err, "not-granted")
+}
+
+func TestOverlappingMountsPreserveReadableHardLinks(t *testing.T) {
+	for _, sameBackend := range []bool{false, true} {
+		root := t.TempDir()
+		protected := filepath.Join(root, "protected")
+		if err := os.Mkdir(protected, 0700); err != nil {
+			t.Fatal(err)
+		}
+		source := filepath.Join(root, "visible")
+		if sameBackend {
+			source = filepath.Join(protected, "visible")
+		}
+		if err := os.WriteFile(source, []byte("visible"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Link(source, filepath.Join(root, "alias")); err != nil {
+			t.Fatal(err)
+		}
+		mount := FileGrant{Path: "/protected", FS: fstest.MapFS{}}
+		if sameBackend {
+			mount.FS = nil
+			mount.Dir = protected
+		}
+		p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, mount}})
+		f, err := p.OpenFile("/alias", os.O_RDONLY, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := io.ReadAll(f)
+		f.Close()
+		if err != nil || string(b) != "visible" {
+			t.Fatalf("readable hard link=%q %v", b, err)
+		}
+	}
+}
