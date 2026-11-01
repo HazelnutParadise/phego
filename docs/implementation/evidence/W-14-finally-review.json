@@ -185,5 +185,8 @@
   "remaining_gaps": [
     "PHP source execution and VM integration remain not_run.",
     "This is a pre-push snapshot. Latest remote CI and Codex review are linked from W-14.md and must be verified separately."
-  ]
+  ],
+  "snapshot_commit": "a170cc8e5e99884230c3e3fb65ea33b544cf9d0a",
+  "snapshot_note": "Historical pre-W-12-merge snapshot; full merged-main validation is in the followup record.",
+  "followup_evidence": "docs/implementation/evidence/W-14-main-integration.json"
 }

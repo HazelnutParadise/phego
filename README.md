@@ -54,3 +54,12 @@ This command validates the documentation package. It does not run PHP, certify a
 ## License
 
 Phego’s original code and project documentation are licensed under the [MIT License](LICENSE). Third-party software, tests, and application fixtures retain their own licenses; see [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+
+The Go sorting compatibility routines retain upstream notices documented in [Third-party notices](THIRD_PARTY_NOTICES.md):
+
+> This product includes the Zend Engine, freely available at http://www.zend.com
+>
+> The Zend Engine is freely available at http://www.zend.com
+>
+> This product includes PHP software, freely available from <http://www.php.net/software/>

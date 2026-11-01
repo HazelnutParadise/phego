@@ -25,31 +25,36 @@ type bucket struct {
 	val value
 }
 
-// phpArray is an insertion-ordered PHP array. While packed, bucket i has key i
-// and there are no holes, so no index is needed; any other shape converts to
-// the indexed form. Buckets are pointers so a bound element keeps a stable
-// address across growth.
+// phpArray is an insertion-ordered PHP array. Packed bucket i has integer key
+// i (or is a hole); mixed keys use an ordered slice and lookup index. Stable
+// bucket pointers keep element locations valid across growth and compaction.
 type phpArray struct {
 	refcount int
 	buckets  []*bucket // nil entries are deleted slots
 	index    map[arrayKey]int
 	live     int
 	nextFree int64 // math.MinInt64 until an integer key is inserted
-	// copiedFrom is the array this one was separated from, so an active
-	// foreach can tell copy-on-write separation from replacement.
-	copiedFrom *phpArray
 	// cursors are active foreach positions; a tail deletion clamps them so an
 	// element appended into the freed slot is still visited, as in PHP.
-	cursors map[*int]struct{}
+	// REQ-016/017; T-031/032/034. Each iterator tracks a position in every
+	// separated copy, since the loop may later select any of those arrays.
+	cursors map[*arrayIterator]int
+	pointer int // internal pointer; independent of foreach positions
+	// PHP 8.5.12's logical position space, independent of Go slice capacity.
+	// Growth and compaction can affect observable exhausted internal pointers.
+	// Zero is Go's uninitialized-state marker, not PHP's raw table size.
+	limit int
 }
+
+type arrayIterator struct{ arrays map[*phpArray]struct{} }
 
 func newArray() *phpArray { return &phpArray{nextFree: math.MinInt64} }
 
 func (a *phpArray) packed() bool { return a.index == nil }
 func (a *phpArray) count() int   { return a.live }
 
-// normalizeKey applies PHP 8.5.12 key conversion for the platform width.
-// Floats and composite keys are outside this prototype and return an error.
+// normalizeKey handles keys without operation-specific diagnostics. Runtime
+// element operations use heap.arrayKey for floats, null diagnostics and errors.
 func normalizeKey(k value, width int) (arrayKey, error) {
 	k = k.deref()
 	switch k.kind {
@@ -76,7 +81,7 @@ func normalizeKey(k value, width int) (arrayKey, error) {
 func (a *phpArray) find(k arrayKey) (int, bool) {
 	if a.packed() {
 		if !k.isString && k.integer >= 0 && k.integer < int64(len(a.buckets)) {
-			return int(k.integer), true
+			return int(k.integer), a.buckets[int(k.integer)] != nil
 		}
 		return 0, false
 	}
@@ -92,25 +97,120 @@ func (a *phpArray) lookup(k arrayKey) (*bucket, bool) {
 }
 
 func (a *phpArray) toIndexed() {
-	a.index = make(map[arrayKey]int, len(a.buckets))
-	for i, b := range a.buckets {
-		if b != nil {
-			a.index[b.key] = i
+	a.index = make(map[arrayKey]int, a.live)
+	a.compact()
+}
+
+// compact remaps positions during representation conversion/rehash. Unlike
+// COW copying, it maps an iterator at the old end to the new end. An exhausted
+// internal pointer keeps its raw position until insertion reaches it again.
+// REQ-016/017; T-031/032/033/034.
+func (a *phpArray) compact() {
+	used := len(a.buckets)
+	if a.live == 0 {
+		a.buckets = nil
+		a.pointer = 0
+		for it := range a.cursors {
+			a.cursors[it] = 0
+		}
+		clear(a.index)
+		return
+	}
+	positions := make(map[int]int, len(a.cursors)+1)
+	if a.pointer < used {
+		positions[a.pointer] = 0
+	}
+	for _, p := range a.cursors {
+		if p <= used {
+			positions[p] = 0
 		}
 	}
+	rank := 0
+	for i, b := range a.buckets {
+		if _, ok := positions[i]; ok {
+			positions[i] = rank
+		}
+		if b != nil {
+			rank++
+		}
+	}
+	positions[used] = rank
+	if a.pointer < used {
+		a.pointer = positions[a.pointer]
+	}
+	for it, p := range a.cursors {
+		if p <= used {
+			a.cursors[it] = positions[p]
+		}
+	}
+	write := 0
+	clear(a.index)
+	for _, b := range a.buckets {
+		if b == nil {
+			continue
+		}
+		a.buckets[write] = b
+		a.index[b.key] = write
+		write++
+	}
+	clear(a.buckets[write:])
+	a.buckets = a.buckets[:write]
+}
+
+func (a *phpArray) growLimit() bool {
+	if a.limit < 8 {
+		a.limit = 8
+	}
+	if a.limit > int(^uint(0)>>1)/2 {
+		return false
+	}
+	a.limit *= 2
+	return true
 }
 
 // insert adds a new key; callers have checked it is absent. The value is
 // stored as given, so ownership transfers to the array.
 func (a *phpArray) insert(k arrayKey, v value, width int) *bucket {
-	if a.packed() && (k.isString || k.integer != int64(len(a.buckets))) {
-		a.toIndexed()
+	if a.limit < 8 {
+		a.limit = 8
+	}
+	if a.packed() {
+		if k.isString || (k.integer >= 0 && k.integer < int64(len(a.buckets))) {
+			a.toIndexed()
+		} else if k.integer < 0 || k.integer >= int64(a.limit) {
+			if k.integer >= 0 && k.integer/2 < int64(a.limit) && a.live > a.limit/2 && a.growLimit() {
+				// Dense growth keeps the packed position space.
+			} else {
+				// REQ-017; T-033/034: full numeric conversion grows the
+				// position range before compacting, including negative keys.
+				// Sort and string-key conversion keep the existing range.
+				if len(a.buckets) >= a.limit {
+					a.growLimit()
+				}
+				a.toIndexed()
+			}
+		}
 	}
 	b := &bucket{key: k, val: v}
-	if !a.packed() {
+	if a.packed() {
+		oldUsed := len(a.buckets)
+		for len(a.buckets) <= int(k.integer) {
+			a.buckets = append(a.buckets, nil)
+		}
+		a.buckets[int(k.integer)] = b
+		if a.pointer == oldUsed {
+			a.pointer = int(k.integer)
+		}
+	} else {
+		if len(a.buckets) >= a.limit {
+			if len(a.buckets)-a.live <= a.live>>5 {
+				a.growLimit()
+			}
+			a.compact()
+		}
 		a.index[k] = len(a.buckets)
+		a.buckets = append(a.buckets, b)
 	}
-	a.buckets = append(a.buckets, b)
 	a.live++
 	if !k.isString && k.integer >= a.nextFree {
 		if k.integer < maxInt(width) {
@@ -149,25 +249,29 @@ func (a *phpArray) remove(k arrayKey) (value, bool) {
 	if !ok {
 		return value{}, false
 	}
-	if a.packed() && i != len(a.buckets)-1 {
-		a.toIndexed()
-	}
 	old := a.buckets[i].val
-	if a.packed() {
-		a.buckets = a.buckets[:i]
-		for c := range a.cursors {
-			*c = min(*c, i)
-		}
-	} else {
-		a.buckets[i] = nil
+	oldUsed := len(a.buckets)
+	a.buckets[i] = nil
+	if !a.packed() {
 		delete(a.index, k)
+	}
+	for len(a.buckets) > 0 && a.buckets[len(a.buckets)-1] == nil {
+		a.buckets = a.buckets[:len(a.buckets)-1]
+	}
+	for c, pos := range a.cursors {
+		a.cursors[c] = min(pos, len(a.buckets))
+	}
+	// REQ-017; T-034: keep an invalid pointer at the new end after trimming.
+	// The next append can make that position valid again.
+	if len(a.buckets) < oldUsed {
+		a.pointer = min(a.pointer, len(a.buckets))
 	}
 	a.live--
 	return old, true
 }
 
 // next advances an iteration position over live buckets in insertion order.
-// Elements appended during iteration are visited, as PHP foreach by reference does.
+// It visits live entries at or after the stored position, including later appends.
 func (a *phpArray) next(pos *int) (*bucket, bool) {
 	for *pos < len(a.buckets) {
 		b := a.buckets[*pos]
