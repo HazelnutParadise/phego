@@ -143,6 +143,77 @@ func TestExecutionOracleReplay(t *testing.T) {
 				switch tc.Case {
 				case "normal":
 					event("body")
+				case "return_finally_array", "return_finally_reference":
+					var alias value
+					c := x.call(func(x *execution) completion {
+						must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
+						must(x.heap.setElement(&x.globals, bytesValue([]byte("key")), bytesValue([]byte("kept"))))
+						if tc.Case == "return_finally_reference" {
+							must(x.heap.bind(&alias, &x.globals))
+						}
+						return completion{kind: endReturn, value: x.globals}
+					}, func(x *execution) completion {
+						if tc.Case == "return_finally_reference" {
+							v := x.heap.newArrayValue()
+							must(x.heap.setElement(&v, bytesValue([]byte("key")), bytesValue([]byte("changed"))))
+							must(x.heap.assign(&alias, v))
+							must(x.heap.unset(&alias))
+						}
+						must(x.heap.unset(&x.globals))
+						event("finally")
+						return completion{}
+					})
+					if c.kind != endReturn {
+						t.Fatalf("return failed: %+v", c)
+					}
+					snapshot, err := exportSnapshot(c.value)
+					must(err)
+					entries := snapshot.([]SnapshotEntry)
+					if len(entries) != 1 {
+						t.Fatalf("pending return lost: %#v", snapshot)
+					}
+					if next := x.write(entries[0].Value.([]byte)); next.kind != endNormal {
+						return next
+					}
+					if next := x.releaseReturn(&c); next.kind != endNormal {
+						return next
+					}
+					event("returned")
+				case "return_replaced_destructor":
+					c := x.call(func(x *execution) completion {
+						v, err := x.object("ReturnTracked", func(x *execution) completion { event("destroy:returned"); return x.write([]byte("R")) })
+						must(err)
+						must(x.local(v))
+						local, err := x.object("UnwindFailure", func(*execution) completion {
+							event("destroy:local")
+							return completion{kind: endThrow, err: errors.New("local failure")}
+						})
+						must(err)
+						must(x.local(local))
+						return completion{kind: endReturn, value: v}
+					}, nil)
+					if c.kind != endThrow {
+						t.Fatalf("destructor failure lost: %+v", c)
+					}
+					event("caught")
+				case "return_finally_replace":
+					newReturn := func(name, output string) completion {
+						v, err := x.object("Replacement", func(x *execution) completion {
+							event("destroy:" + name)
+							if next := x.write([]byte(output)); next.kind != endNormal {
+								return next
+							}
+							return completion{kind: endThrow, err: errors.New(name)}
+						})
+						must(err)
+						return completion{kind: endReturn, value: v}
+					}
+					c := x.call(func(*execution) completion { return newReturn("old", "O") }, func(*execution) completion { return newReturn("new", "N") })
+					if c.kind != endThrow || c.previous == nil {
+						t.Fatalf("replacement exception chain lost: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					event("previous:" + c.previous.Error())
 				case "array_fatal", "array_exit":
 					return x.call(func(x *execution) completion {
 						a := x.heap.newArrayValue()
@@ -229,7 +300,7 @@ func TestExecutionOracleReplay(t *testing.T) {
 			}
 			var want []string
 			for _, line := range strings.Split(tc.Stderr, "\n") {
-				if strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || line == "returned" || strings.HasPrefix(line, "body") {
+				if strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || strings.HasPrefix(line, "caught:") || strings.HasPrefix(line, "previous:") || line == "returned" || strings.HasPrefix(line, "body") {
 					want = append(want, line)
 				}
 			}

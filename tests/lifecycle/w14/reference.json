@@ -130,6 +130,34 @@
       "combined": "body\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]"
     },
     {
+      "case": "return_finally_array",
+      "exit_code": 0,
+      "stdout": "[(BkeptSD)]",
+      "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BkeptSD)]"
+    },
+    {
+      "case": "return_finally_reference",
+      "exit_code": 0,
+      "stdout": "[(BkeptSD)]",
+      "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BkeptSD)]"
+    },
+    {
+      "case": "return_finally_replace",
+      "exit_code": 0,
+      "stdout": "[(BONSD)]",
+      "stderr": "destroy:old\ndestroy:new\ncaught:new\nprevious:old\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:old\ndestroy:new\ncaught:new\nprevious:old\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BONSD)]"
+    },
+    {
+      "case": "return_replaced_destructor",
+      "exit_code": 0,
+      "stdout": "[(BRSD)]",
+      "stderr": "destroy:local\ndestroy:returned\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:local\ndestroy:returned\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BRSD)]"
+    },
+    {
       "case": "shutdown_exit",
       "exit_code": 9,
       "stdout": "[(BSD)]",
@@ -216,6 +244,10 @@
     "frame_throw.php": "c821c8975574ecb4687f094044a354c2bbc7be2b3f71b2e5a11e3c02e4b36404",
     "normal.php": "4fb9daf3ed2b25d8cc812210b843bdbf16a9b16dbbc53fe14ec92b16c69d03f4",
     "reference.php": "f41ebfe1d67418c6efbf4824ec60daac607a3aeb2ba58a79cc5c415881865cb5",
+    "return_finally_array.php": "0f9c50344db2e76797766f38b0b67e6d0efd2d91bceb854771f33e2d4e843f21",
+    "return_finally_reference.php": "ae9a1a07944f0a30a91389a757f975b6ae86e14e0990bb2d1448c4e510082161",
+    "return_finally_replace.php": "8fc5bdbdaf1cb6db6e7e06516dda051ea1aba7ae84e2f7abe3aeb6a620b4f648",
+    "return_replaced_destructor.php": "508b9829a97971e3aad19f3e9acc18ea323e3e60e31ee68b28766496888f045b",
     "shutdown_exit.php": "97f16da5fe1b87f4c97e95ce25219e251d6136f97c513b89aaf8b0439019447e",
     "shutdown_register.php": "028d0aeb25f7bfe22f04e4a45a612f07a6045c1d5747a72729d30d5db4ef817d",
     "shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
