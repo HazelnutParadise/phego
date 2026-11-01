@@ -32,6 +32,10 @@ Historical reference engines, application fixtures, and potentially unsafe tests
 
 Run `python3 tools/validate_docs.py` after changing planning records. Product test commands must be added when a runnable engine exists; do not invent passing CI for absent implementation.
 
+## Review
+
+Every review must look for approaches that cost the same or less and give a better result, and report each one it finds. Take every such benefit where PHP compatibility does not constrain the internals; it is not a trade-off to weigh. Judge approaches with added cost by the benefit they actually bring. Conventional code is not acceptable just because it works. This never overrides PHP-visible semantics or safety checks.
+
 ## Decision boundaries
 
 You may choose private types, internal layout, algorithms, test tooling, and evidence-backed optimizations within the specification. Document meaningful design changes.
