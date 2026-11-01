@@ -49,6 +49,10 @@ type heap struct {
 	// diagnostics are the PHP warnings and deprecations raised by modeled
 	// operations, in order.
 	diagnostics []diagnostic
+	// PHP 8.5.12 array user-sort deprecation state is request-local. A nested
+	// user sort resets it; returning from that sort does not restore it.
+	// REQ-017; T-033/T-034.
+	sortCompareDeprecated bool
 }
 
 func newHeap(width int) (*heap, error) {
@@ -321,6 +325,13 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
+	// REQ-017; T-033/T-034. An empty COW copy is uninitialized even if the
+	// source was allocated. It keeps nextFree, but not capacity or iterators.
+	if src.live == 0 {
+		dup := newArray()
+		dup.nextFree = src.nextFree
+		return dup
+	}
 	dup := &phpArray{nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
 	if !src.packed() {
 		dup.index = make(map[arrayKey]int, src.live)

@@ -1,9 +1,6 @@
 package runtime
 
-import (
-	"fmt"
-	"slices"
-)
+import "fmt"
 
 // arrayKey applies operation-specific PHP 8.5.12 diagnostics. Snapshot import
 // retains its narrower int/string contract. REQ-017; T-033/034.
@@ -131,6 +128,16 @@ func (h *heap) foreachValue(arr value, item *value, fn func(arrayKey) error) (er
 // REQ-016/017; T-031/032/033/034. Comparator is trusted runtime code and must
 // propagate cancellation/errors; no comparator is called after an error.
 func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, value) (int, error)) (err error) {
+	return h.sortArrayWithPolicy(slot, preserveKeys, compare, true)
+}
+
+// SORT_REGULAR shares the PHP schedule, but native comparisons are not user
+// calls suppressed by a pending callback exception. W-13 owns object handlers.
+func (h *heap) sortArrayRegular(slot *value, preserveKeys bool) error {
+	return h.sortArrayWithPolicy(slot, preserveKeys, h.compare, false)
+}
+
+func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(value, value) (int, error), stopUserCalls bool) (err error) {
 	if h.closed {
 		return ErrHeapClosed
 	}
@@ -141,7 +148,7 @@ func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, val
 	// Sorting an empty array preserves its next append index. Retain the
 	// argument location for nonempty input, as a by-reference call does: the
 	// callback can unset or rebind the caller's variable without changing it.
-	if v.array.count() == 0 {
+	if stopUserCalls && v.array.count() == 0 {
 		return nil
 	}
 	var argument value
@@ -153,40 +160,85 @@ func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, val
 			err = e
 		}
 	}()
-	a := h.duplicate(v.array)
-	// Sorting operates on live entries; ordinary packed COW preserves holes.
-	a.toIndexed()
-	a.refcount = 1
+	var a *phpArray
+	if stopUserCalls {
+		a = h.duplicate(v.array)
+		a.toIndexed()
+		a.refcount = 1
+	} else {
+		// Native SORT_REGULAR separates the argument, unpacks before its
+		// temporary hold, then mutates that array without a final reassignment.
+		a, err = h.separate(&argument)
+		if err != nil {
+			return err
+		}
+		if a.packed() && a.limit != 0 {
+			a.toIndexed()
+		}
+		retain(value{kind: valueArray, array: a})
+	}
 	defer func() {
 		if e := h.release(value{kind: valueArray, array: a}); err == nil {
 			err = e
 		}
 	}()
+	if a.count() == 0 || (preserveKeys && a.count() == 1) {
+		if stopUserCalls {
+			return h.assign(&argument, value{kind: valueArray, array: a})
+		}
+		return nil
+	}
+	// Already ordered native arrays remove holes without remapping foreach
+	// positions. Clear lookup chains during comparisons, as PHP does for
+	// recursive-array comparisons; rebuild them only after sorting.
+	write := 0
+	for _, b := range a.buckets {
+		if b != nil {
+			a.buckets[write] = b
+			write++
+		}
+	}
+	clear(a.buckets[write:])
+	a.buckets = a.buckets[:write]
+	clear(a.index)
 	var failure error
-	slices.SortStableFunc(a.buckets, func(x, y *bucket) int {
-		if failure != nil {
-			return 0
-		}
-		if h.closed {
+	// REQ-017; T-033/T-034. PHP's stable fallback follows original live
+	// positions, even while an exception suppresses further user calls.
+	original := make(map[*bucket]int, len(a.buckets))
+	for i, b := range a.buckets {
+		original[b] = i
+	}
+	php8512Sort(a.buckets, func(x, y *bucket) int {
+		n := 0
+		if failure == nil && h.closed {
 			failure = ErrHeapClosed
-			return 0
 		}
-		xv, yv := x.val.deref(), y.val.deref()
-		retain(xv)
-		retain(yv)
-		n, e := compare(xv, yv)
-		if rerr := h.release(yv); e == nil {
-			e = rerr
+		if !h.closed && (failure == nil || !stopUserCalls) {
+			xv, yv := x.val.deref(), y.val.deref()
+			retain(xv)
+			retain(yv)
+			var e error
+			n, e = compare(xv, yv)
+			if rerr := h.release(yv); e == nil {
+				e = rerr
+			}
+			if rerr := h.release(xv); e == nil {
+				e = rerr
+			}
+			if failure == nil {
+				failure = e
+			}
 		}
-		if rerr := h.release(xv); e == nil {
-			e = rerr
+		if n != 0 {
+			return n
 		}
-		failure = e
-		return n
+		return compareInts(int64(original[x]), int64(original[y]))
 	})
 	a.pointer = 0
 	if preserveKeys {
-		a.toIndexed()
+		for i, b := range a.buckets {
+			a.index[b.key] = i
+		}
 	} else {
 		a.index = nil
 		for i, b := range a.buckets {
@@ -194,8 +246,10 @@ func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, val
 		}
 		a.nextFree = int64(len(a.buckets))
 	}
-	if e := h.assign(&argument, value{kind: valueArray, array: a}); failure == nil {
-		failure = e
+	if stopUserCalls {
+		if e := h.assign(&argument, value{kind: valueArray, array: a}); failure == nil {
+			failure = e
+		}
 	}
 	return failure
 }

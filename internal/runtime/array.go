@@ -42,12 +42,13 @@ type phpArray struct {
 	pointer int // internal pointer; independent of foreach positions
 	// PHP 8.5.12's logical position space, independent of Go slice capacity.
 	// Growth and compaction can affect observable exhausted internal pointers.
+	// Zero is Go's uninitialized-state marker, not PHP's raw table size.
 	limit int
 }
 
 type arrayIterator struct{ arrays map[*phpArray]struct{} }
 
-func newArray() *phpArray { return &phpArray{nextFree: math.MinInt64, limit: 8} }
+func newArray() *phpArray { return &phpArray{nextFree: math.MinInt64} }
 
 func (a *phpArray) packed() bool { return a.index == nil }
 func (a *phpArray) count() int   { return a.live }
