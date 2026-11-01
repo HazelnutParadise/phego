@@ -3,6 +3,7 @@ package policy
 import (
 	"context"
 	"errors"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"sync"
@@ -225,4 +226,29 @@ func TestReviewConcurrentDualStackRefusals(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+func TestNetworkIPv6ZoneNamesRemainCaseSensitive(t *testing.T) {
+	p := mustPolicy(t, Spec{Network: []NetworkGrant{{Scheme: "tcp", Host: "fe80::1%En0", Ports: []int{443}, AllowPrivate: true}}})
+	if _, err := p.networkGrant("tcp", "fe80::1%en0", 443); err == nil {
+		t.Fatal("grant for En0 authorized the different en0 zone")
+	}
+	for _, host := range []string{"FE80::1%En0", "fe80:0:0:0:0:0:0:1%En0"} {
+		if _, err := p.networkGrant("tcp", host, 443); err != nil {
+			t.Fatalf("same address and zone refused: %v", err)
+		}
+	}
+}
+
+func TestPublicRefusesDeprecatedIPv6LocalRanges(t *testing.T) {
+	for _, address := range []string{"fec0::1", "feff:ffff::1", "::2", "::127.0.0.1"} {
+		if Public(netip.MustParseAddr(address)) {
+			t.Errorf("non-public address %s classified as public", address)
+		}
+	}
+	for _, address := range []string{"8.8.8.8", "::ffff:8.8.8.8", "2606:4700::1111"} {
+		if !Public(netip.MustParseAddr(address)) {
+			t.Errorf("public control %s refused", address)
+		}
+	}
 }
