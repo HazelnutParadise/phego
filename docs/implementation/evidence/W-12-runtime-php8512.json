@@ -1306,5 +1306,65 @@
       "revision_independent_review": "pending"
     }
   },
-  "pending_checks": []
+  "pending_checks": [],
+  "final_integration": {
+    "upstream_main_commit": "5be9226b426e7d6ac7defd5892a257e3fc90b7c7",
+    "merge_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+    "conflict_paths": [
+      "docs/data/document-validation.json"
+    ],
+    "resolution_commands": [
+      "git checkout --theirs docs/data/document-validation.json",
+      "python3 tools/validate_docs.py"
+    ],
+    "runtime_and_fixture_diff_from_57ee97f": "empty; merged W-45 source from main without changing W-12 runtime/fixture content",
+    "checks": [
+      {
+        "command": "CGO_ENABLED=0 go test ./...",
+        "exit_code": 0,
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t0.582s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+        "output_sha256": "c0333d69693add1e3342ce50b6ad46b895ae59ed9ea188b6ea07118cbb75bcd6",
+        "code_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+        "output_last_written_at_utc": "2026-11-01T07:14:36.825068+00:00"
+      },
+      {
+        "command": "go test -race ./...",
+        "exit_code": 0,
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.446s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+        "output_sha256": "54380b387412ff6a62633e26bb4d0629136b10bed7dd71cc26176d645c2184c9",
+        "code_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+        "output_last_written_at_utc": "2026-11-01T07:14:38.866232+00:00"
+      },
+      {
+        "command": "go vet ./...",
+        "exit_code": 0,
+        "output": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+        "output_last_written_at_utc": "2026-11-01T07:14:38.877017+00:00"
+      },
+      {
+        "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+        "exit_code": 0,
+        "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n...................................................................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 466 tests in 129.624s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+        "output_sha256": "a0f31f97b74fbaa877ea47158cb4a51df2235855da5be65c7d9de3ed76613564",
+        "code_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+        "output_last_written_at_utc": "2026-11-01T07:16:48.747402+00:00"
+      },
+      {
+        "command": "python3 tools/validate_docs.py --no-write",
+        "exit_code": 0,
+        "output": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 321,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+        "output_sha256": "41b406957a237abdee05ecb8892136f8e57f30d3fb51ffe2f550b67e35049e30",
+        "code_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
+        "output_last_written_at_utc": "2026-11-01T07:16:48.908742+00:00"
+      }
+    ],
+    "remote_review_before_integration": {
+      "head": "57ee97f9584e53a37bf989bdc3e76705f28c33f1",
+      "code_review": "completed; no findings",
+      "security_review": "completed"
+    },
+    "latest_head_ci_and_review": "pending after push; live PR is authoritative"
+  }
 }
