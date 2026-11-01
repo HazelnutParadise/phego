@@ -94,3 +94,40 @@ func TestReviewRunFileDoesNotReadShadowedAlias(t *testing.T) {
 		}
 	}
 }
+
+// Embedding only fs.File deliberately hides optional directory enumeration.
+type reviewOpaqueFile struct{ fs.File }
+type reviewOpaqueFS struct{ fs.FS }
+
+func (f reviewOpaqueFS) Open(name string) (fs.File, error) {
+	v, err := f.FS.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	return reviewOpaqueFile{v}, nil
+}
+
+func TestReviewLegacyFilesMixedMountsRequireVerifiableDirectories(t *testing.T) {
+	files := fstest.MapFS{"a.php": {Data: []byte("<?php return 1;")}, "protected/hidden.php": {Data: []byte("<?php function HIDDEN_SENTINEL( {")}}
+	opaque := reviewOpaqueFS{files}
+	only := newPolicyEngine(t, Config{Files: opaque})
+	_, err := only.RunFile(context.Background(), "a.php")
+	var unsupported *UnsupportedError
+	if !errors.As(err, &unsupported) {
+		t.Fatalf("standalone legacy Files changed: %v", err)
+	}
+	mixed := newPolicyEngine(t, Config{Files: opaque, Policy: Policy{Files: []FileGrant{{Path: "/protected", FS: fstest.MapFS{}}}}})
+	_, err = mixed.RunFile(context.Background(), "/a.php")
+	if !errors.Is(err, fs.ErrPermission) {
+		t.Fatalf("unverifiable mixed parent=%v, want permission denial", err)
+	}
+	verified := newPolicyEngine(t, Config{Files: files, Policy: Policy{Files: []FileGrant{{Path: "/protected", FS: fstest.MapFS{}}}}})
+	_, err = verified.RunFile(context.Background(), "/a.php")
+	if !errors.As(err, &unsupported) {
+		t.Fatalf("verified mixed parent refused: %v", err)
+	}
+	_, err = verified.RunFile(context.Background(), "/protected/hidden.php")
+	if !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("shadowed legacy source leaked: %v", err)
+	}
+}
