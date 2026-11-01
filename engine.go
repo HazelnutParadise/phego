@@ -43,6 +43,9 @@ type Config struct {
 	// Files is a trusted host implementation, as described by FileGrant.FS.
 	// It mounts a read-only file system at "/" for RunFile, which then
 	// accepts paths relative to it. Nil grants no file access.
+	// Used alone, it preserves direct Open path and error behavior. With
+	// Policy.Files, it is a parent mount and must meet FileGrant.FS directory
+	// enumeration and symlink-verification requirements.
 	//
 	// Deprecated: use Policy.Files. Mounting both at "/" is a ConfigError.
 	Files fs.FS
