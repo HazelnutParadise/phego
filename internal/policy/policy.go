@@ -172,7 +172,7 @@ func New(spec Spec) (*Policy, error) {
 		p.files = append(p.files, g)
 	}
 	for i, g := range spec.Network {
-		g.Scheme, g.Host = strings.ToLower(g.Scheme), strings.ToLower(strings.TrimSuffix(g.Host, "."))
+		g.Scheme, g.Host = strings.ToLower(g.Scheme), normalizeHost(g.Host)
 		field := fmt.Sprintf("Network[%d]", i)
 		if g.Scheme == "" || strings.ContainsAny(g.Scheme, ":/") {
 			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}

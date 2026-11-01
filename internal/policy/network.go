@@ -12,7 +12,7 @@ import (
 
 // networkGrant finds the grant covering scheme, host and port.
 func (p *Policy) networkGrant(scheme, host string, port int) (NetworkGrant, error) {
-	scheme, host = strings.ToLower(scheme), strings.ToLower(strings.TrimSuffix(host, "."))
+	scheme, host = strings.ToLower(scheme), normalizeHost(host)
 	target := net.JoinHostPort(host, strconv.Itoa(port))
 	for _, g := range p.network {
 		if g.Scheme != scheme || !hostMatches(g.Host, host) {
@@ -25,6 +25,14 @@ func (p *Policy) networkGrant(scheme, host string, port int) (NetworkGrant, erro
 		}
 	}
 	return NetworkGrant{}, &PolicyError{Kind: Network, Op: scheme, Target: target, Rule: "not-granted"}
+}
+
+// normalizeHost folds DNS names but preserves case-sensitive IPv6 zone names.
+func normalizeHost(host string) string {
+	if a, err := netip.ParseAddr(host); err == nil {
+		return a.String()
+	}
+	return strings.ToLower(strings.TrimSuffix(host, "."))
 }
 
 func hostMatches(pattern, host string) bool {
@@ -102,7 +110,7 @@ var nonPublic = func() []netip.Prefix {
 	for _, s := range []string{
 		"0.0.0.0/8", "100.64.0.0/10", "192.0.0.0/24", "192.0.2.0/24", "198.18.0.0/15",
 		"198.51.100.0/24", "203.0.113.0/24", "240.0.0.0/4", "255.255.255.255/32",
-		"64:ff9b:1::/48", "100::/64", "2001::/23", "2001:db8::/32", "fc00::/7",
+		"::/96", "fec0::/10", "64:ff9b:1::/48", "100::/64", "2001::/23", "2001:db8::/32", "fc00::/7",
 	} {
 		out = append(out, netip.MustParsePrefix(s))
 	}
