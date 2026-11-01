@@ -148,7 +148,14 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": "docs/implementation/evidence/W-14-main-integration/python.txt",
-      "sha256": "0364b64685da456731ac8912f3079f076e083d2a8175cb3aa263012eb1208ad9"
+      "sha256": "0364b64685da456731ac8912f3079f076e083d2a8175cb3aa263012eb1208ad9",
+      "output_note": "The checksum rejection, malformed CLI argument and container cleanup errors are expected negative-test output. The PHP/FI exit code 23 is explicitly injected by test_execute_cleans_started_container_by_cidfile_id_and_preserves_nonzero_result. Suite outcome is Ran 530 tests / OK and process exit_code 0; the original log is preserved.",
+      "output_sources": [
+        "tools/test_frontend_corpus.py::CorpusTests.test_extracts_only_file_sections_from_selected_tests",
+        "tools/test_history_inventory.py::BuildTests.test_oversized_or_invalid_inputs_are_rejected",
+        "tools/test_reference_php_cleanup_signal.py::test_cleanup_failure_restores_signal_handlers",
+        "tools/test_history_fi2.py::ExecuteAndMainTests.test_execute_cleans_started_container_by_cidfile_id_and_preserves_nonzero_result"
+      ]
     },
     {
       "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
@@ -189,5 +196,7 @@
   "recorded_at_utc": "2026-11-01T17:53:01.880628+00:00",
   "review": {
     "remote_latest_head": "pending merge commit, push, CI and re-review"
-  }
+  },
+  "snapshot_commit": "c4447b3881c0c9415ec1eec9c942cedfce5dfae7",
+  "snapshot_note": "Full local validation snapshot for the W-12 integration commit c4447b3881c0c9415ec1eec9c942cedfce5dfae7. Input hashes and raw logs refer to that commit. Later documentation edits do not replace these historical inputs; remote CI and review fields preserve their pre-push state. Check the latest PR #74 head separately."
 }
