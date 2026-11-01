@@ -12,14 +12,19 @@ func (h *heap) sortArrayUser(slot *value, preserveKeys bool, call func(value, va
 func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call func(value, value) (value, error), diagnose func(int, string) error) error {
 	h.sortCompareDeprecated = false
 	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (n int, err error) {
-		result, err := h.sortUserCall(a, b, call)
+		result, callErr, cleanupErr := h.sortUserCall(a, b, call)
 		defer func(held value) {
 			if e := h.release(held); err == nil {
 				err = e
 			}
 		}(result)
-		if err != nil {
-			return h.sortComparisonResult(result, err, diagnose)
+		if callErr != nil || cleanupErr != nil {
+			// Only the first result enters PHP's bool-deprecation branch.
+			// A reverse retry must preserve any nested reset of this flag.
+			if callErr == nil && cleanupErr != nil && result.kind == valueBool {
+				h.sortCompareDeprecated = true
+			}
+			return h.sortUserResult(result, callErr, cleanupErr, diagnose)
 		}
 		if h.closed {
 			return 0, ErrHeapClosed
@@ -47,13 +52,13 @@ func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call 
 			}
 			if !v.boolean {
 				// The retry result is converted once, never recursively retried.
-				retry, callErr := h.sortUserCall(b, a, call)
+				retry, callErr, cleanupErr := h.sortUserCall(b, a, call)
 				defer func(held value) {
 					if e := h.release(held); err == nil {
 						err = e
 					}
 				}(retry)
-				n, err = h.sortComparisonResult(retry, callErr, diagnose)
+				n, err = h.sortUserResult(retry, callErr, cleanupErr, diagnose)
 				return -n, err
 			}
 		}
@@ -64,25 +69,43 @@ func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call 
 // REQ-017; T-033/T-034. Return an owned raw result, preserving by-reference
 // return kind. Protect it before releasing this invocation's argument holds,
 // which can run destructors. The caller must release it even after shutdown.
-func (h *heap) sortUserCall(a, b *value, call func(value, value) (value, error)) (result value, err error) {
+func (h *heap) sortUserCall(a, b *value, call func(value, value) (value, error)) (result value, callErr, cleanupErr error) {
 	if h.closed {
-		return value{}, ErrHeapClosed
+		return value{}, ErrHeapClosed, nil
 	}
 	x, y := a.deref(), b.deref()
 	retain(x)
 	retain(y)
-	result, err = call(x, y)
+	result, callErr = call(x, y)
 	retain(result)
-	if e := h.release(y); err == nil {
-		err = e
+	if e := h.release(y); cleanupErr == nil {
+		cleanupErr = e
 	}
-	if e := h.release(x); err == nil {
-		err = e
+	if e := h.release(x); cleanupErr == nil {
+		cleanupErr = e
 	}
-	if err == nil && h.closed {
-		err = ErrHeapClosed
+	if callErr == nil && h.closed {
+		callErr = cleanupErr
+		if callErr == nil {
+			callErr = ErrHeapClosed
+		}
 	}
-	return result, err
+	return result, callErr, cleanupErr
+}
+
+// REQ-017; T-034. Argument destruction may throw after the callback already
+// produced a valid result. PHP still normalizes it, suppressing diagnostics
+// and false retries under the pending exception; callback failures have no
+// valid result. Keep those two failure phases distinct.
+func (h *heap) sortUserResult(result value, callErr, cleanupErr error, diagnose func(int, string) error) (int, error) {
+	if callErr != nil {
+		return h.sortComparisonResult(result, callErr, diagnose)
+	}
+	if cleanupErr != nil {
+		n, _ := h.sortComparisonResult(result, nil, func(int, string) error { return nil })
+		return n, cleanupErr
+	}
+	return h.sortComparisonResult(result, nil, diagnose)
 }
 
 // Results follow the constructor/borrowed-value ownership convention. Hold a

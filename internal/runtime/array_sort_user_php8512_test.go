@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -89,6 +90,106 @@ func TestW12SortUserRetryClosedHeap(t *testing.T) {
 			if returned == nil || !returned.freed || returned.refcount != 0 {
 				t.Fatalf("return object not cleaned: %+v", returned)
 			}
+		})
+	}
+}
+
+// REQ-017; T-034: callback return ownership outlives its argument holds.
+func TestW12SortUserRetryCleanupDeprecationState(t *testing.T) {
+	h := testHeap(t)
+	var a value
+	must(t, h.appendValue(&a, h.number(1)))
+	must(t, h.appendValue(&a, h.number(2)))
+	outer := 0
+	must(t, h.sortArrayUser(&a, false, func(x, y value) (value, error) {
+		outer++
+		if outer > 1 {
+			return h.number(x.integer - y.integer), nil
+		}
+		var inner, alias, nested value
+		v, e := h.newObject(&class{name: "Argument", destructor: func(*heap, value) error { return errors.New("dtor") }})
+		must(t, e)
+		must(t, h.appendValue(&inner, v))
+		must(t, h.appendValue(&inner, h.number(2)))
+		element, e := h.element(&inner, h.number(0))
+		must(t, e)
+		must(t, h.bind(&alias, element))
+		calls := 0
+		err := h.sortArrayUser(&inner, false, func(x, y value) (value, error) {
+			calls++
+			if calls == 1 {
+				return boolValue(false), nil
+			}
+			must(t, h.appendValue(&nested, h.number(2)))
+			must(t, h.appendValue(&nested, h.number(1)))
+			must(t, h.sortArrayUser(&nested, false, func(x, y value) (value, error) { return h.number(x.integer - y.integer), nil }))
+			must(t, h.assign(&alias, h.number(10)))
+			return boolValue(false), nil
+		})
+		if err == nil || err.Error() != "dtor" || calls != 2 {
+			t.Fatalf("inner error=%v calls=%d", err, calls)
+		}
+		must(t, h.unset(&nested))
+		must(t, h.unset(&alias))
+		must(t, h.unset(&inner))
+		return boolValue(false), nil
+	}))
+	if len(h.diagnostics) != 2 || outer != 2 {
+		t.Fatalf("warnings=%d outer calls=%d, PHP wants2/2", len(h.diagnostics), outer)
+	}
+	must(t, h.unset(&a))
+}
+
+// REQ-017; T-034: valid return normalization survives argument cleanup failure.
+func TestW12SortUserArgumentCleanupFailure(t *testing.T) {
+	for _, mode := range []string{"positive", "true", "object", "negative", "false", "float"} {
+		t.Run(mode, func(t *testing.T) {
+			h := testHeap(t)
+			var a, alias value
+			stop := errors.New("argument destructor failed")
+			x, err := h.newObject(&class{name: "Argument", destructor: func(*heap, value) error { return stop }})
+			must(t, err)
+			must(t, h.appendValue(&a, x))
+			must(t, h.appendValue(&a, h.number(2)))
+			e, err := h.element(&a, h.number(0))
+			must(t, err)
+			must(t, h.bind(&alias, e))
+			calls, warnings := 0, 0
+			err = h.sortArrayUserWithDiagnostic(&a, false, func(value, value) (value, error) {
+				calls++
+				must(t, h.assign(&alias, h.number(10)))
+				switch mode {
+				case "positive":
+					return h.number(1), nil
+				case "true":
+					return boolValue(true), nil
+				case "object":
+					return h.newObject(&class{name: "stdClass"})
+				case "negative":
+					return h.number(-1), nil
+				case "float":
+					return floatValue(math.Inf(1)), nil
+				default:
+					return boolValue(false), nil
+				}
+			}, func(int, string) error { warnings++; return nil })
+			if !errors.Is(err, stop) || calls != 1 || warnings != 0 {
+				t.Fatalf("error=%v calls=%d warnings=%d", err, calls, warnings)
+			}
+			want := []int64{10, 2}
+			if mode == "positive" || mode == "true" || mode == "object" {
+				want = []int64{2, 10}
+			}
+			for i, n := range want {
+				if got := a.deref().array.buckets[i].val.deref().integer; got != n {
+					t.Fatalf("item%d=%d PHP=%d", i, got, n)
+				}
+			}
+			if !x.object.freed || x.object.refcount != 0 {
+				t.Fatalf("argument not released: %+v", x.object)
+			}
+			must(t, h.unset(&alias))
+			must(t, h.unset(&a))
 		})
 	}
 }
