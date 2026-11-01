@@ -6,12 +6,16 @@ uses validated W-02 observation snapshots. Neither command executes source or
 certifies PHP compatibility. JSON goes to stdout; invalid inputs exit 2.
 """
 import argparse
+from contextlib import contextmanager
 import hashlib
+import http.client
 import io
 import json
 import os
+import signal
 import stat
 import sys
+import threading
 import time
 import urllib.request
 
@@ -39,7 +43,12 @@ def _unique_pairs(pairs):
 
 
 def _read_bounded(path, limit):
-    flags = os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW
+    flags = os.O_RDONLY
+    for name in ("O_NONBLOCK", "O_NOFOLLOW"):
+        flag = getattr(os, name, None)
+        if flag is None:
+            raise ValueError("safe regular-file inputs are unsupported on this platform")
+        flags |= flag
     descriptor = os.open(os.fspath(path), flags)
     try:
         if not stat.S_ISREG(os.fstat(descriptor).st_mode):
@@ -338,7 +347,41 @@ def _set_response_timeout(response, timeout):
         sock.settimeout(timeout)
 
 
+@contextmanager
+def _fetch_deadline():
+    """Bound connection, HTTP framing and data reads in the Unix CLI thread."""
+    if (threading.current_thread() is not threading.main_thread()
+            or not callable(getattr(signal, "setitimer", None))
+            or not callable(getattr(signal, "getitimer", None))
+            or not hasattr(signal, "ITIMER_REAL")):
+        raise ValueError("online archive fetch requires a POSIX main thread; use --archive-dir")
+    if any(signal.getitimer(signal.ITIMER_REAL)):
+        raise ValueError("online archive fetch cannot replace an active timer; use --archive-dir")
+    previous = signal.getsignal(signal.SIGALRM)
+
+    def expired(signum, frame):
+        raise TimeoutError("archive fetch deadline exceeded")
+
+    signal.signal(signal.SIGALRM, expired)
+    try:
+        signal.setitimer(signal.ITIMER_REAL, MAX_FETCH_SECONDS)
+        yield
+    finally:
+        try:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+        finally:
+            signal.signal(signal.SIGALRM, previous)
+
+
 def _fetch_archive(release):
+    with _fetch_deadline():
+        try:
+            return _download_archive(release)
+        except http.client.HTTPException as exc:
+            raise OSError("invalid HTTP archive response: " + str(exc)) from exc
+
+
+def _download_archive(release):
     url = ("https://www.php.net/distributions/php-"
            + release["version"] + ".tar.xz")
     request = urllib.request.Request(
@@ -384,8 +427,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__,
         epilog="Limits: archive 100 MiB, JSON input 2 MiB, report 32 MiB. "
-               "Inputs must be regular files, without symlinks. Invalid inputs "
-               "and blocked watch reports exit 2. Pending review exits 0.")
+               "Inputs require Unix safe regular-file flags, without symlinks. Invalid inputs "
+               "and blocked watch reports exit 2. Pending review exits 0. "
+               "Online fetching requires a POSIX main thread with no active timer.")
     sub = parser.add_subparsers(dest="command")
     pair = sub.add_parser(
         "pair", help="Verify two archives against a reviewed release lock",
@@ -401,7 +445,9 @@ def main(argv=None):
         "watch", help="Classify version/digest changes in W-02 snapshots",
         description="Read W-02 schema-2 observation snapshots. Download changed pairs "
                     "from php.net by default. Metadata-only changes do not download sources. "
-                    "Blocked pairs remain in the JSON output and exit 2.",
+                    "Blocked pairs remain in the JSON output and exit 2. Online downloads "
+                    "have a 180-second total deadline and require a POSIX main thread "
+                    "with no active timer; otherwise use --archive-dir.",
         epilog="Example: python3 tools/upstream_update.py watch "
                "docs/data/php-upstream-baseline.json observed.json --archive-dir /tmp/php-cache")
     watch.add_argument("baseline")

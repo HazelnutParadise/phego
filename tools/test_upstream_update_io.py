@@ -93,6 +93,15 @@ class UpdateBoundaryTests(unittest.TestCase):
             self.assertEqual(output.getvalue(), "")
             self.assertTrue(error.getvalue())
 
+    def test_unsupported_safe_open_platform_returns_a_diagnostic(self):
+        output, error = io.StringIO(), io.StringIO()
+        with mock.patch.object(upstream_update.os, "O_NOFOLLOW", None, create=True):
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(error):
+                status = upstream_update.main(["pair", "--lock", "unused", "old", "new"])
+        self.assertEqual(status, 2)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("regular-file", error.getvalue())
+
     def test_watch_report_budget_keeps_array_delimiters_and_blocked_diagnostic(self):
         _, _, before, after = _pair_archives()
         baseline = _snapshot({"8.5": _watch_record(before["version"], before["archive_sha256"])})
@@ -141,6 +150,167 @@ class UpdateBoundaryTests(unittest.TestCase):
             receiver.close()
             sender.close()
             worker.join(timeout=0.5)
+
+    def slow_response(self, headers, fragments, begin_in_open=False):
+        import http.client
+        import socket
+        import threading
+        receiver, sender = socket.socketpair()
+        receiver.settimeout(30)
+        sender.sendall(headers)
+        response = http.client.HTTPResponse(receiver)
+        if not begin_in_open:
+            response.begin()
+
+        def drip():
+            try:
+                for fragment in fragments:
+                    sender.sendall(fragment)
+                    time.sleep(0.02)
+            except OSError:
+                pass
+
+        worker = threading.Thread(target=drip, daemon=True)
+        worker.start()
+        opener = mock.Mock()
+
+        def open_response(*args, **kwargs):
+            if begin_in_open:
+                response.begin()
+            return response
+
+        opener.open.side_effect = open_response
+        try:
+            with mock.patch("urllib.request.build_opener", return_value=opener):
+                with mock.patch.object(upstream_update, "MAX_FETCH_SECONDS", 0.08):
+                    start = time.monotonic()
+                    with self.assertRaises(TimeoutError):
+                        upstream_update._fetch_archive({"version": "8.5.12"})
+                    self.assertLess(time.monotonic() - start, 0.5)
+        finally:
+            response.close()
+            receiver.close()
+            sender.close()
+            worker.join(timeout=0.5)
+
+    def test_chunk_size_slow_drip_obeys_total_deadline(self):
+        self.slow_response(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n",
+                           [b"0"] * 50 + [b"1\r\nx\r\n0\r\n\r\n"])
+
+    def test_valid_chunked_download_remains_supported(self):
+        import http.client
+        import socket
+        receiver, sender = socket.socketpair()
+        sender.sendall(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\n\r\n")
+        response = http.client.HTTPResponse(receiver)
+        response.begin()
+        opener = mock.Mock()
+        opener.open.return_value = response
+        try:
+            with mock.patch("urllib.request.build_opener", return_value=opener):
+                self.assertEqual(upstream_update._fetch_archive({"version": "8.5.12"}), b"x")
+        finally:
+            response.close()
+            receiver.close()
+            sender.close()
+
+    def test_open_response_header_slow_drip_obeys_total_deadline(self):
+        self.slow_response(b"HTTP/1.1 200 OK\r\nX-Slow: ",
+                           [b"x"] * 50 + [b"\r\nContent-Length: 1\r\n\r\nx"], True)
+
+    def test_protocol_errors_block_one_series_and_preserve_the_next(self):
+        import http.client
+        old, new, before, after = _pair_archives()
+        baseline = _snapshot({"8.4": _watch_record("8.4.33", "a" * 64),
+                              "8.5": _watch_record(before["version"], before["archive_sha256"])})
+        observed = _snapshot({"8.4": _watch_record("8.4.34", "b" * 64),
+                              "8.5": _watch_record(after["version"], after["archive_sha256"])})
+        for error in (http.client.IncompleteRead(b"partial"), http.client.BadStatusLine("invalid"),
+                      http.client.LineTooLong("header")):
+            with self.subTest(error=type(error).__name__):
+                opener = mock.Mock()
+                opener.open.side_effect = error
+
+                def load(release):
+                    if release["version"].startswith("8.4"):
+                        return upstream_update._fetch_archive(release)
+                    return old if release["version"] == before["version"] else new
+
+                with mock.patch("urllib.request.build_opener", return_value=opener):
+                    result = upstream_update.observe_changes(baseline, observed, load)
+                self.assertEqual(result["status"], "blocked")
+                self.assertEqual([r["status"] for r in result["comparisons"]], ["blocked", "classified"])
+
+    def test_online_fetch_restores_signal_state_after_success_and_error(self):
+        import signal
+        previous = signal.getsignal(signal.SIGALRM)
+        sentinel = lambda signum, frame: None
+        self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+        signal.signal(signal.SIGALRM, sentinel)
+        try:
+            for error in (None, OSError("unavailable")):
+                opener, response = mock.Mock(), mock.MagicMock()
+                response.read1.side_effect = [b"x", b""]
+                response.__enter__.return_value = response
+                opener.open.return_value = response
+                opener.open.side_effect = error
+                with mock.patch("urllib.request.build_opener", return_value=opener):
+                    if error:
+                        with self.assertRaises(OSError):
+                            upstream_update._fetch_archive({"version": "8.5.12"})
+                    else:
+                        self.assertEqual(upstream_update._fetch_archive({"version": "8.5.12"}), b"x")
+                self.assertIs(signal.getsignal(signal.SIGALRM), sentinel)
+                self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+        finally:
+            signal.signal(signal.SIGALRM, previous)
+
+    def test_online_fetch_preserves_active_timer_and_blocks_nonmain_thread(self):
+        import signal
+        import threading
+        previous = signal.getsignal(signal.SIGALRM)
+        sentinel = lambda signum, frame: None
+        self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+        signal.signal(signal.SIGALRM, sentinel)
+        signal.setitimer(signal.ITIMER_REAL, 60)
+        try:
+            with mock.patch("urllib.request.build_opener") as build:
+                response = mock.MagicMock()
+                response.__enter__.return_value = response
+                response.read1.side_effect = [b"x", b""]
+                build.return_value.open.return_value = response
+                with self.assertRaises(ValueError):
+                    upstream_update._fetch_archive({"version": "8.5.12"})
+                build.assert_not_called()
+            self.assertIs(signal.getsignal(signal.SIGALRM), sentinel)
+            self.assertGreater(signal.getitimer(signal.ITIMER_REAL)[0], 50)
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous)
+        errors = []
+
+        def fetch():
+            try:
+                upstream_update._fetch_archive({"version": "8.5.12"})
+            except ValueError as exc:
+                errors.append(exc)
+
+        with mock.patch("urllib.request.build_opener") as build:
+            response = mock.MagicMock()
+            response.__enter__.return_value = response
+            response.read1.side_effect = [b"x", b""]
+            build.return_value.open.return_value = response
+            worker = threading.Thread(target=fetch)
+            worker.start()
+            worker.join(timeout=1)
+            self.assertFalse(worker.is_alive())
+            self.assertEqual(len(errors), 1)
+            build.assert_not_called()
+        with mock.patch.object(upstream_update.signal, "setitimer", None):
+            with mock.patch("urllib.request.build_opener") as build:
+                with self.assertRaisesRegex(ValueError, "POSIX"):
+                    upstream_update._fetch_archive({"version": "8.5.12"})
+                build.assert_not_called()
 
 
 if __name__ == "__main__":
