@@ -116,7 +116,7 @@ var opEffects = map[Op]Effect{
 	// Unsetting may run a destructor, offsetUnset or __unset.
 	OpUnset: MayWrite | MayThrow | MayCallUser,
 	OpTry:   0, OpCatch: MayWrite | MayCallUser | MayThrow, OpFinally: 0,
-	OpGoto: 0, OpLabel: 0, OpDeclare: 0, OpBlock: 0,
+	OpGoto: 0, OpLabel: 0, OpDeclare: 0, OpDirective: 0, OpBlock: 0,
 	OpFuncDecl: MayThrow,
 	// Declaring a class at run time may autoload its parents.
 	// Linking may also warn, for example about an incompatible return type.

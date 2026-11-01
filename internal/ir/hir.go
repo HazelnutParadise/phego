@@ -78,34 +78,35 @@ const (
 
 // Statement operations.
 const (
-	OpEcho     Op = "echo"
-	OpExpr     Op = "expr"
-	OpVoid     Op = "void" // (void) expr
-	OpHTML     Op = "html" // inline HTML; Value is its bytes
-	OpIf       Op = "if"   // Kids: cond, OpBlock, then repeated cond/OpBlock pairs, optional trailing else OpBlock
-	OpWhile    Op = "while"
-	OpDo       Op = "do"
-	OpFor      Op = "for"     // Kids: init, cond, step (OpBlock lists of expressions), body
-	OpForeach  Op = "foreach" // Kids: subject, key (may be nil), value target, body; FlagRef when by reference
-	OpSwitch   Op = "switch"  // Kids: subject, OpCase...
-	OpCase     Op = "case"    // Kids: label (nil for default), body OpBlock
-	OpBreak    Op = "break"   // Value is the level
-	OpContinue Op = "continue"
-	OpReturn   Op = "return"
-	OpGlobal   Op = "global" // Var bound to the global of the same name
-	OpStatic   Op = "static" // Var bound to the function's static slot; Kids[0] initializer
-	OpUnset    Op = "unset"
-	OpTry      Op = "try" // Kids: body, OpCatch..., optional OpFinally
-	OpCatch    Op = "catch"
-	OpFinally  Op = "finally"
-	OpGoto     Op = "goto" // Text label
-	OpLabel    Op = "label"
-	OpDeclare  Op = "declare" // Text directive; Value its literal; Kids optional body
-	OpBlock    Op = "block"
-	OpFuncDecl Op = "func_decl"  // Func, declared when reached (conditional declaration)
-	OpClass    Op = "class_decl" // Class, declared when reached
-	OpConstDef Op = "const_decl" // Name, Kids[0] value
-	OpHalt     Op = "halt_compiler"
+	OpEcho      Op = "echo"
+	OpExpr      Op = "expr"
+	OpVoid      Op = "void" // (void) expr
+	OpHTML      Op = "html" // inline HTML; Value is its bytes
+	OpIf        Op = "if"   // Kids: cond, OpBlock, then repeated cond/OpBlock pairs, optional trailing else OpBlock
+	OpWhile     Op = "while"
+	OpDo        Op = "do"
+	OpFor       Op = "for"     // Kids: init, cond, step (OpBlock lists of expressions), body
+	OpForeach   Op = "foreach" // Kids: subject, key (may be nil), value target, body; FlagRef when by reference
+	OpSwitch    Op = "switch"  // Kids: subject, OpCase...
+	OpCase      Op = "case"    // Kids: label (nil for default), body OpBlock
+	OpBreak     Op = "break"   // Value is the level
+	OpContinue  Op = "continue"
+	OpReturn    Op = "return"
+	OpGlobal    Op = "global" // Var bound to the global of the same name
+	OpStatic    Op = "static" // Var bound to the function's static slot; Kids[0] initializer
+	OpUnset     Op = "unset"
+	OpTry       Op = "try" // Kids: body, OpCatch..., optional OpFinally
+	OpCatch     Op = "catch"
+	OpFinally   Op = "finally"
+	OpGoto      Op = "goto" // Text label
+	OpLabel     Op = "label"
+	OpDeclare   Op = "declare"   // Kids: one OpDirective per directive, then an optional body OpBlock
+	OpDirective Op = "directive" // Text directive name in lower case; Value its literal
+	OpBlock     Op = "block"
+	OpFuncDecl  Op = "func_decl"  // Func, declared when reached (conditional declaration)
+	OpClass     Op = "class_decl" // Class, declared when reached
+	OpConstDef  Op = "const_decl" // Name, Kids[0] value
+	OpHalt      Op = "halt_compiler"
 )
 
 // Node is one HIR operation. Which fields are set depends on Op.
@@ -324,12 +325,28 @@ type Class struct {
 	Parent     *Name
 	Interfaces []*Name
 	Traits     []*Name
+	// TraitRules are the adaptations of the trait uses, in source order.
+	TraitRules []*TraitRule
 	Backing    *Type
 	Consts     []*ClassConst
 	Props      []*Prop
 	Cases      []*ClassConst
 	Methods    []*Func
 	Anonymous  bool
+}
+
+// TraitRule is one trait adaptation: "T::m insteadof U, V" or
+// "[T::]m as [modifier] [alias]". The object model applies and checks them.
+type TraitRule struct {
+	Line int
+	// Trait is the trait named before ::, or nil for a bare method.
+	Trait  *Name
+	Method string
+	// Insteadof lists the excluded traits of an insteadof rule; it is empty
+	// for an alias rule.
+	Insteadof []*Name
+	Modifier  string // visibility of an alias rule, lower case, or ""
+	Alias     string // new name of an alias rule, or ""
 }
 
 // ClassConst is a class constant or enum case.

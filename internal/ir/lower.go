@@ -785,8 +785,7 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		default:
 			l.diag(s.Line, "Warning", fmt.Sprintf("Unsupported declare '%s'", name))
 		}
-		n.Text = strings.ToLower(name)
-		n.Value = l.constantValue(value)
+		n.Kids = append(n.Kids, l.seal(&Node{Op: OpDirective, Line: d.Line, Text: strings.ToLower(name), Value: l.constantValue(value)}))
 	}
 	ticks := false
 	for _, d := range directives {
@@ -797,7 +796,7 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 	if body != nil {
 		saved := l.ticks
 		l.ticks = l.ticks || ticks
-		n.Kids = []*Node{l.block(body)}
+		n.Kids = append(n.Kids, l.block(body))
 		l.ticks = saved
 	} else if ticks {
 		l.ticks = true // the rest of the file ticks
@@ -962,13 +961,22 @@ func containsYield(n *frontend.Node) bool {
 	return false
 }
 
+// generatorCompatible reports whether a return type, in compile-error
+// spelling, admits a Generator: it contains object or mixed, or names the
+// built-in Traversable, Iterator or Generator. A parenthesized intersection
+// inside a union does not count; a top-level intersection counts through
+// its members.
 func generatorCompatible(t string) bool {
-	for _, part := range strings.Split(strings.TrimPrefix(t, "?"), "|") {
-		switch strings.ToLower(strings.Trim(part, "()")) {
-		case "mixed", "object", "iterable", "traversable", "iterator", "generator":
-			return true
+	members := strings.Split(strings.TrimPrefix(t, "?"), "|")
+	if len(members) == 1 && !strings.HasPrefix(t, "(") {
+		members = strings.Split(members[0], "&")
+	}
+	for _, m := range members {
+		if strings.HasPrefix(m, "(") {
+			continue
 		}
-		if strings.Contains(part, "Traversable") {
+		switch strings.ToLower(m) {
+		case "mixed", "object", "traversable", "iterator", "generator":
 			return true
 		}
 	}
