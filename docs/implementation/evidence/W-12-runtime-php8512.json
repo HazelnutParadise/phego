@@ -1,0 +1,383 @@
+{
+  "work_package": "W-12",
+  "requirements": [
+    "REQ-007",
+    "REQ-016",
+    "REQ-017"
+  ],
+  "tests": [
+    "T-013",
+    "T-014",
+    "T-031",
+    "T-032",
+    "T-033",
+    "T-034"
+  ],
+  "status": "local_checks_passed; independent runtime review passed; CI pending",
+  "product_acceptance_status": "not_run",
+  "source_state": "committed code; documentation/evidence recorded separately",
+  "environment": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "python": "3.9.6",
+    "host": "macOS-27.0.1-arm64-arm-64bit"
+  },
+  "references": [
+    {
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ],
+      "image_preparation": [
+        "docker",
+        "image",
+        "inspect",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049"
+      ],
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/386",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "php",
+        "-n",
+        "/w/matrix.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "platform": "linux/386",
+      "php": "8.5.12",
+      "integer_width": 32,
+      "cases": 72,
+      "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+      "output": "w12-ref-32.json",
+      "output_sha256": "d8b8b4f4b494cf832023998057409ad859a3cb3532fafbc30c8bd316ada307cf",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
+      "metadata_recorded_at_utc": "2026-11-01T05:47:19.578099+00:00"
+    },
+    {
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ],
+      "image_preparation": [
+        "docker",
+        "image",
+        "inspect",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9"
+      ],
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "/w/matrix.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "platform": "linux/arm64",
+      "php": "8.5.12",
+      "integer_width": 64,
+      "cases": 72,
+      "fixture_sha256": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+      "output": "w12-ref-64.json",
+      "output_sha256": "89adcba8175f4ca68bb8730b72d67316be7de50f3c57763baf3be8b36573b479",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration",
+      "metadata_recorded_at_utc": "2026-11-01T05:46:59.609299+00:00"
+    }
+  ],
+  "checks": [
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "output": "",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:42:23.024711+00:00"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "exit_code": 0,
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t3.764s\n",
+      "output_sha256": "05c01b04d5bc011ef6e30f60c26ffc3cfeb2a10d3f3bbfc8c3d9da53cb67ec3a",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:43:00.451809+00:00"
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 0,
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t1.674s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "output_sha256": "49cb56ef81569f4321e95270492fbc427c03a6fed80bb4a3a51fb77cc1d79876",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:45:42.932524+00:00"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "output": "",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:41:45.870619+00:00"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 415 tests in 183.778s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+      "output_sha256": "4d0d4e92c6bc079ccf826faa1e003003de018e89c1c4c09c1bee6d4b447ec5bf",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:46:50.428932+00:00"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'",
+      "exit_code": 0,
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.004s\n\nOK\n",
+      "output_sha256": "cbe4b84d897ac017db0552ccb3a31855ff0fb172bc344c967c4c4c92eb19e624",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:46:58.724538+00:00"
+    },
+    {
+      "command": "PHEGO_W12_REFERENCE=/tmp/w12-reference go test ./internal/runtime -run W12",
+      "exit_code": 0,
+      "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.560s\n",
+      "output_sha256": "906f3ff26bc2730a0fb97a3ed685dff149daa3bc3ef13b245affc2821dcda0d8",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:47:20.398043+00:00"
+    },
+    {
+      "command": "go test ./internal/runtime -run 'TestW12IterationErrorCleanup|TestW12SnapshotOwnershipAfterCleanup|TestW12Layout' -v",
+      "exit_code": 0,
+      "output": "=== RUN   TestW12IterationErrorCleanup\n=== RUN   TestW12IterationErrorCleanup/value\n=== RUN   TestW12IterationErrorCleanup/reference\n--- PASS: TestW12IterationErrorCleanup (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/value (0.00s)\n    --- PASS: TestW12IterationErrorCleanup/reference (0.00s)\n=== RUN   TestW12SnapshotOwnershipAfterCleanup\n--- PASS: TestW12SnapshotOwnershipAfterCleanup (0.00s)\n=== RUN   TestW12Layout\n    array_w12_safety_test.go:82: value: 64 bytes\n    array_w12_safety_test.go:82: reference: 72 bytes\n    array_w12_safety_test.go:82: arrayKey: 32 bytes\n    array_w12_safety_test.go:82: bucket: 96 bytes\n    array_w12_safety_test.go:82: phpArray: 72 bytes\n    array_w12_safety_test.go:82: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.585s\n",
+      "output_sha256": "da0ba9070bba6fd24ab40d85e91addef6cc7a76021c1b9b6d3856db82139da4f",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "version_scope": "Relevant source matches code_commit; documentation/evidence updates do not alter these code paths.",
+      "output_last_written_at_utc": "2026-11-01T05:36:39.579461+00:00"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
+      "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+      "exit_code": 0,
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/13 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 13/13 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 40298 (13428/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 6s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 9s, execs: 40298 (0/sec), new interesting: 4 (total: 17)\nfuzz: elapsed: 12s, execs: 121708 (27122/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 15s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 18s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 21s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 24s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 27s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 30s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nfuzz: elapsed: 31s, execs: 121708 (0/sec), new interesting: 10 (total: 23)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.622s\n",
+      "output_sha256": "7a2e34eafaa89e3a668e6e2def18de017f017177ade89d38892d804a58b9bcb8",
+      "output_last_written_at_utc": "2026-11-01T05:49:17.201687+00:00"
+    },
+    {
+      "command": "python3 tools/validate_docs.py; python3 tools/validate_docs.py --no-write",
+      "exit_code": 0,
+      "result": {
+        "scope": "documentation_only",
+        "status": "pass",
+        "counts": {
+          "chapters": 40,
+          "requirements": 101,
+          "acceptance_scenarios": 202,
+          "work_packages": 60,
+          "decisions": 28,
+          "sources": 57,
+          "local_markdown_links": 319,
+          "checks": 34,
+          "catalogs": {
+            "php-history-policy.json": 7,
+            "competitor-catalog.json": 8,
+            "application-catalog.json": 9
+          }
+        },
+        "product_test_status": "not_run",
+        "errors": []
+      },
+      "note": "Documentation validation is not product acceptance.",
+      "output_last_written_at_utc": "2026-11-01T05:50:55.510265+00:00"
+    }
+  ],
+  "limitations": [
+    "Only PHP 8.5.12 guest widths 32/64; not full engine acceptance.",
+    "Runtime heap is request-local and single-executor.",
+    "VM, typed reference/call, resource and source-location integration remain downstream.",
+    "Comparator order/count and post-exception partial permutation are implementation-dependent; no Zend sorting algorithm copied.",
+    "Local benchmark samples are noisy; no speedup claim."
+  ],
+  "source_sha256": {
+    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
+    "internal/runtime/heap.go": "f15cf85ab75ce8b4c8eee020155e7b9974785c385290d0701349d3b1b471b955",
+    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
+    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
+    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
+    "internal/runtime/array_w12_test.go": "c2612aa928ca58d63075d02e8b1fac8f4317e5aaa1166acf98affa893d238161",
+    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
+    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
+    "internal/runtime/array_w12_safety_test.go": "c26ba0f21e2137a71260dfd74502abd6d613c78b464b539d5d2cdab91fd19b4b",
+    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_w12_fuzz_test.go": "2f33accef14a95507b175666c33a789be294bcc964dac51b0bf6d01089f5fef1",
+    "internal/runtime/value_test.go": "77c1c65544e0d5a54967104f4acff8943282e6c3a7e5c921fb9738354ed78c6a",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/array_w12.go": "a45bd06d07cb59274da30d8c679f76e17bf54e3bf656c0625986d6528cdf3f27",
+    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
+    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
+    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
+    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
+    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/numeric_php8512_fuzz_test.go": "44e5366621e66b2526a751da33b82dac01766c412ebf9d480cca8bce263eb74d",
+    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
+    "internal/runtime/ops_php8512.go": "f18b1e88aeb65506b4bf58c6823e76324dfd6db037a0441ce3688ea0780add0a",
+    "internal/runtime/ops_php8512_test.go": "db4932ace89fe1ef6b48a25895e4622e8990812d8793ba70d0cb5abb5068e7d3",
+    "internal/runtime/array.go": "8e8c799d047c42a78a8dd2abec2d6e21b51769659766550fa4621dfafc5aaaaf",
+    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/value.go": "70ff5c9b5e8cc4b001584bada266f3036058bf7a29aee284e4fd79c7e1f6daa4",
+    "tests/semantics/w12-arrays/test_reference.py": "65867665f9f092adc0770267cc4cd676f473d2695918523ab25e4abccbf298d1",
+    "tests/semantics/w12-arrays/matrix.php": "2996a2baa54d5a91901a1ecae6c19df492a193016692d78d6b149c1566396126",
+    "tests/semantics/w12-arrays/reference.py": "e0cd9ea32c18aaa6118c2074e75585d3f8ce22b757d27475259790e1516a1f2c",
+    ".github/workflows/semantics-arrays.yml": "d4490ead378f3b1176df542515072e662c45dd3ba9feaa766a84d394f51e7aa3"
+  },
+  "code_commit": "f936957231373252b3ebca4cc63dde179f71773b",
+  "benchmarks": {
+    "baseline_commit": "ddccbe8cbd62c8a03f7647a9be77db48ec56d31c",
+    "candidate_runtime_commit": "8c2728b04f7939f40fc038903329e2f59f24ec3a",
+    "command": "go test -run '^$' -bench 'Benchmark(PackedAppend1K|CopyOnWriteSeparation1K|ReferenceBindAndWrite|W12OrderedLookup1K)$' -benchtime 2000x -count 3 ./internal/runtime",
+    "baseline_scope": "same command without W12OrderedLookup1K, which does not exist on baseline",
+    "samples": {
+      "baseline_initial": {
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkPackedAppend1K-8            \t    2000\t    112366 ns/op\t  128382 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t    111835 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t    389151 ns/op\t  128377 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     97592 ns/op\t  128201 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t    117967 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     82905 ns/op\t  128203 B/op\t    1037 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       108.3 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       109.3 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       108.8 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t2.377s\n",
+        "sha256": "0e61289d833b9d7eef5334838080612ca6e8dc9487fe0dd5c1f37397904efcda"
+      },
+      "candidate_initial": {
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkPackedAppend1K-8            \t    2000\t    137632 ns/op\t  128382 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t    197652 ns/op\t  128377 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t    240160 ns/op\t  128377 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t    117062 ns/op\t  128201 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t    144327 ns/op\t  128201 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t    164386 ns/op\t  128201 B/op\t    1037 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       198.7 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       115.8 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       135.5 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t2.397s\n",
+        "sha256": "57f0a7a897eda4b77dd9aaf2361dbc948e75b3e8eb974565ba272fcd145c17e6"
+      },
+      "baseline_final": {
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkPackedAppend1K-8            \t    2000\t     77650 ns/op\t  128382 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     55418 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     52218 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     49071 ns/op\t  128201 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     47153 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     44133 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        69.42 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t       124.9 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        55.65 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t1.185s\n",
+        "sha256": "d9a7b5b3d40a9e6a9e61584a179d764279fd7b04e22df7b85961f7f4d88ed3f8"
+      },
+      "candidate_final": {
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       128.5 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       115.6 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkW12OrderedLookup1K-8        \t    2000\t       156.6 ns/op\t       0 B/op\t       0 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     55125 ns/op\t  128379 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     48246 ns/op\t  128376 B/op\t    1040 allocs/op\nBenchmarkPackedAppend1K-8            \t    2000\t     51158 ns/op\t  128379 B/op\t    1040 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     28251 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27490 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     27561 ns/op\t  128200 B/op\t    1037 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.65 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        45.65 ns/op\t      80 B/op\t       1 allocs/op\nBenchmarkReferenceBindAndWrite-8     \t    2000\t        47.48 ns/op\t      80 B/op\t       1 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.835s\n",
+        "sha256": "7be41e97e32b3ffe9144d6c70e0256fce1c1f8a8c6656fdd67e354e7f5bc7b0a"
+      }
+    }
+  },
+  "review": {
+    "runtime_review": "independent adversarial read-only review and re-review",
+    "model": "gpt-6.1-sol",
+    "unresolved_confirmed_findings": 0,
+    "resolved": [
+      "Clamp internal pointer after tail deletion, including mixed-key holes; two red/green differential fixtures."
+    ],
+    "additional_regression": "Comparator arguments remain logically owned while callbacks replace shared references."
+  },
+  "superseded_attempts": [
+    {
+      "command": "go test -race ./...",
+      "exit_code": 1,
+      "reason": "Initial run during fixture refresh rejected stale 70-case committed fixtures after test count became 72; refreshed from pinned references, final full suite passed."
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 1,
+      "reason": "Unchanged internal/ir TestLongOperatorChainsLowerInLinearTime exceeded its 2-second wall-clock threshold (2.346 seconds); isolated origin/main baseline passed, unchanged current test then passed three repetitions and final full race suite passed. Exact external scheduling cause was not established."
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 1,
+      "reason": "First attempt overlapped documentation editing before the new evidence target existed, so local Markdown link validation caused 4 failures and 14 errors. Created the evidence artifact; final full 415-test run passed."
+    }
+  ],
+  "red_test_evidence": {
+    "missing_operations_and_keys": {
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.00s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.00s)\n        --- FAIL: TestW12PHP8512Arrays/64/key-0 (0.00s)\n            array_w12_test.go:148: Go: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"a\",[[[\"s\",\"\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",8192,\"Using null as an array offset is deprecated, use an empty string instead\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",8192,\"Using null as an array offset is deprecated, use an empty string instead\"],[\"value\",[\"a\",[[[\"s\",\"\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-23 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-24 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-25 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",8192,\"Implicit conversion from float 1.5 to int loses precision\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",8192,\"Implicit conversion from float 1.5 to int loses precision\"],[\"value\",[\"a\",[[[\"i\",\"1\"],[\"i\",\"7\"]]]]],[\"diagnostic\",8192,\"Implicit conversion from float 1.5 to int loses precision\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-26 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",8192,\"Implicit conversion from float -1.5 to int loses precision\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",8192,\"Implicit conversion from float -1.5 to int loses precision\"],[\"value\",[\"a\",[[[\"i\",\"-1\"],[\"i\",\"7\"]]]]],[\"diagnostic\",8192,\"Implicit conversion from float -1.5 to int loses precision\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-27 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"a\",[[[\"i\",\"2147483648\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-28 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"value\",[\"i\",\"7\"]],[\"value\",[\"a\",[[[\"i\",\"4294967295\"],[\"i\",\"7\"]]]]],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-29 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",2,\"The float 9.223372036854776E+18 is not representable as an int, cast occurred\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",2,\"The float 9.223372036854776E+18 is not representable as an int, cast occurred\"],[\"value\",[\"a\",[[[\"i\",\"-9223372036854775808\"],[\"i\",\"7\"]]]]],[\"diagnostic\",2,\"The float 9.223372036854776E+18 is not representable as an int, cast occurred\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-30 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",2,\"The float 1.0E+20 is not representable as an int, cast occurred\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",2,\"The float 1.0E+20 is not representable as an int, cast occurred\"],[\"value\",[\"a\",[[[\"i\",\"7766279631452241920\"],[\"i\",\"7\"]]]]],[\"diagnostic\",2,\"The float 1.0E+20 is not representable as an int, cast occurred\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-31 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",2,\"The float INF is not representable as an int, cast occurred\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",2,\"The float INF is not representable as an int, cast occurred\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"7\"]]]]],[\"diagnostic\",2,\"The float INF is not representable as an int, cast occurred\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-32 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",2,\"The float -INF is not representable as an int, cast occurred\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",2,\"The float -INF is not representable as an int, cast occurred\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"7\"]]]]],[\"diagnostic\",2,\"The float -INF is not representable as an int, cast occurred\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/key-33 (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]],[\"error\",\"Error\",\"array key kind 4 is not modeled by this prototype\"],[\"value\",[\"a\",[]]]]\n                PHP: [[\"diagnostic\",2,\"The float NAN is not representable as an int, cast occurred\"],[\"diagnostic\",8192,\"Implicit conversion from float NAN to int loses precision\"],[\"value\",[\"i\",\"7\"]],[\"diagnostic\",2,\"The float NAN is not representable as an int, cast occurred\"],[\"diagnostic\",8192,\"Implicit conversion from float NAN to int loses precision\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"7\"]]]]],[\"diagnostic\",2,\"The float NAN is not representable as an int, cast occurred\"],[\"diagnostic\",8192,\"Implicit conversion from float NAN to int loses precision\"],[\"value\",[\"a\",[]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-value (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"by-value iteration not implemented\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]],[\"value\",[\"n\"]]]\n                PHP: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"i\",\"3\"],[\"i\",\"4\"]]]]],[\"value\",[\"i\",\"3\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-ref-copy (0.00s)\n            array_w12_test.go:148: Go: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]],[[\"s\",\"78\"],[\"i\",\"4\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\n                PHP: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]],[[\"s\",\"78\"],[\"i\",\"4\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]]]]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]],[[\"i\",\"2\"],[\"i\",\"3\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-value-alias (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"by-value iteration not implemented\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"2\"]]]]]]\n                PHP: [[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"8\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"1\"]],[[\"i\",\"1\"],[\"i\",\"8\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/foreach-nonarray (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"by-value iteration not implemented\"],[\"diagnostic\",2,\"foreach() argument must be of type array|object, int given\"]]\n                PHP: [[\"diagnostic\",2,\"foreach() argument must be of type array|object, null given\"],[\"diagnostic\",2,\"foreach() argument must be of type array|object, int given\"]]\n        --- FAIL: TestW12PHP8512Arrays/64/pointers (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array pointer operation current not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"],[\"error\",\"Error\",\"array pointer operation next not implemented\"],[\"error\",\"Error\",\"array pointer operation next not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"],[\"error\",\"Error\",\"array pointer operation current not implemented\"],[\"error\",\"Error\",\"array pointer operation prev not implemented\"],[\"error\",\"Error\",\"array pointer operation reset not implemented\"],[\"error\",\"Error\",\"array pointer operation current not implemented\"],[\"error\",\"Error\",\"array pointer operation end not implemented\"],[\"error\",\"Error\",\"array pointer operation next not implemented\"],[\"error\",\"Error\",\"array pointer operation current not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"],[\"value\",[\"a\",[[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"s\",\"78\"],[\"i\",\"30\"]]]]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"i\",\"0\"]],[\"value\",[\"i\",\"20\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"i\",\"20\"]],[\"value\",[\"b\",false]],[\"value\",[\"i\",\"10\"]],[\"value\",[\"i\",\"20\"]],[\"value\",[\"i\",\"20\"]],[\"value\",[\"b\",false]],[\"value\",[\"i\",\"20\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"a\",[[[\"i\",\"1\"],[\"i\",\"20\"]],[[\"s\",\"78\"],[\"i\",\"30\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/pointer-foreach (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array pointer operation end not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"],[\"error\",\"Error\",\"array pointer operation key not implemented\"]]\n                PHP: [[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"1\"]],[\"value\",[\"i\",\"1\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/invalid-key (0.00s)\n            array_w12_test.go:148: Go: [[\"error\",\"Error\",\"array key kind 6 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 6 is not modeled by this prototype\"],[\"error\",\"Error\",\"array key kind 6 is not modeled by this prototype\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"2\"]]]]]]\n                PHP: [[\"error\",\"TypeError\",\"Cannot access offset of type array on array\"],[\"error\",\"TypeError\",\"Cannot access offset of type array on array\"],[\"error\",\"TypeError\",\"Cannot unset offset of type array on array\"],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"2\"]]]]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.972s\nFAIL\n",
+      "sha256": "292f65d638784321f66403ed8050117fe1d84e8dfe9dd6025ddf0bb7256b9fe0"
+    },
+    "tail_pointer": {
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.00s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.00s)\n        --- FAIL: TestW12PHP8512Arrays/64/invalid-pointer-tail-delete (0.00s)\n            array_w12_test.go:287: Go: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]]]\n                PHP: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"b\",false]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"4\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/pointer-tail-holes (0.00s)\n            array_w12_test.go:287: Go: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"n\"]],[\"value\",[\"b\",false]]]\n                PHP: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"0\"]],[\"value\",[\"i\",\"4\"]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.564s\nFAIL\n",
+      "sha256": "72eff66765cd215ec8ac1edda2b49c61ae416a0b0d38513f3c3cc6b402c29720"
+    },
+    "callback_argument_ownership": {
+      "output": "--- FAIL: TestW12SortOwnsCallbackArguments (0.00s)\n    array_w12_safety_test.go:107: comparison argument was destroyed during callback\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.636s\nFAIL\n",
+      "sha256": "3bbe0804d305e1503c47c7acf08f620bff7985631517458db7e9958cf1d55b50"
+    }
+  },
+  "integration_base_commit": "b71da8f9bd7df0c7c7cbd0e119270bc8e1419941",
+  "commit_roles": {
+    "integration_base_commit": "Merge of origin/main before implementation; not a W-12 implementation checkout.",
+    "code_commit": "Latest committed code and runner; checkout this commit to reproduce code checks.",
+    "runtime_verification_commit": "8c2728b04f7939f40fc038903329e2f59f24ec3a: all Go runtime source matches this implementation commit. The subsequent code commit only changes the reference runner, its tests and workflow.",
+    "benchmark_candidate": "8c2728b04f7939f40fc038903329e2f59f24ec3a: candidate_final sample uses this runtime; initial samples were earlier W-12 working-tree observations and are retained as exploratory, not final-version measurements."
+  },
+  "recorded_at_utc": "2026-11-01 05:53:42 UTC",
+  "timestamp_scope": "Output timestamps are actual log/file last-write times, not inferred command start times.",
+  "documentation_review": {
+    "method": "Fresh-context read-only review after scope/version clarifications",
+    "model": "gpt-6.1-sol",
+    "blocking_readability_findings": 0,
+    "scope": "W-12 plan, array decision and linked evidence readable without chat context",
+    "nonblocking_followup": {
+      "path": "docs/implementation/README.md:45",
+      "existing_text": "These product tests have not been run (Traditional Chinese overview).",
+      "recommendation": "In a separate overview update, distinguish full product acceptance from executed work-package-local Go tests. W-12 package/evidence already make this distinction."
+    }
+  }
+}
