@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "archive_url": "https://go.dev/dl/go1.27.3.src.tar.gz",
+  "archive_sha256": "6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb",
+  "selection": "Regular files with LICENSE, LICENCE, COPYING or NOTICE as a case-insensitive substring of the basename.",
+  "regular_files": 15636,
+  "directories": 1711,
+  "other_members": 0,
+  "files": [
+    {
+      "path": "go/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/compile/internal/ssa/_gen/vendor/golang.org/x/tools/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/github.com/google/pprof/LICENSE",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/github.com/google/pprof/third_party/svgpan/LICENSE",
+      "size": 1754,
+      "sha256": "154c946c17de61ca71d28e13673d76a5798e6e25995a7397fbae157afc8f62b4",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/github.com/ianlancetaylor/demangle/LICENSE",
+      "size": 1479,
+      "sha256": "b73277f7730993ef8e7f80aed83e5309762fed4d77eced982abb2c00657c074d",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/arch/LICENSE",
+      "size": 1453,
+      "sha256": "8cda009bd927676a95ee7ce2dae921442ac4d9584d041b56ecfcba6839032f0b",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/build/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/mod/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/sync/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/sys/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/telemetry/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/term/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/text/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/golang.org/x/tools/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/cmd/vendor/rsc.io/markdown/LICENSE",
+      "size": 1479,
+      "sha256": "2d36597f7117c38b006835ae7f537487207d8ec407aa9d9980794b2030cbc067",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/crypto/internal/boring/LICENSE",
+      "size": 9714,
+      "sha256": "56210f826b8f0fbac3160dfe55c97f4019eb6cdda3963b5a0eab8a8bdb62360e",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/crypto/x509/testdata/nist-pkits/certs/UserNoticeQualifierTest15EE.crt",
+      "size": 1026,
+      "sha256": "4c407adf86944a79fe64d535b1b25ec612674ddc58c567c065468002d977370c",
+      "encoding": "non_utf8"
+    },
+    {
+      "path": "go/src/crypto/x509/testdata/nist-pkits/certs/UserNoticeQualifierTest16EE.crt",
+      "size": 1145,
+      "sha256": "02a97f60d57dd426719083d5cba805e0e26cfed394b483d78ee9bc1501714488",
+      "encoding": "non_utf8"
+    },
+    {
+      "path": "go/src/crypto/x509/testdata/nist-pkits/certs/UserNoticeQualifierTest17EE.crt",
+      "size": 1014,
+      "sha256": "f2d4b2afa6363bea0127dca6d1450d8bfeb40625ad34dfbea9cfc3a1c8272a1b",
+      "encoding": "non_utf8"
+    },
+    {
+      "path": "go/src/crypto/x509/testdata/nist-pkits/certs/UserNoticeQualifierTest18EE.crt",
+      "size": 1240,
+      "sha256": "304e5dcde7d7b79b4e73064276fcd64b598e8beff8f609c936f62aaa956db021",
+      "encoding": "non_utf8"
+    },
+    {
+      "path": "go/src/crypto/x509/testdata/nist-pkits/certs/UserNoticeQualifierTest19EE.crt",
+      "size": 1263,
+      "sha256": "e936f236551b2c63253e4efd91a6b753f6e7780b122d3418940b9cdee1734696",
+      "encoding": "non_utf8"
+    },
+    {
+      "path": "go/src/runtime/testdata/testgoroutineleakprofile/goker/LICENSE",
+      "size": 1138,
+      "sha256": "f99df8ae6da6de047ed002d9dbe8682d9a19c88e9a7473abdadf3ac206621a85",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/vendor/golang.org/x/crypto/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/vendor/golang.org/x/net/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/vendor/golang.org/x/sys/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    },
+    {
+      "path": "go/src/vendor/golang.org/x/text/LICENSE",
+      "size": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "encoding": "utf8_text"
+    }
+  ]
+}

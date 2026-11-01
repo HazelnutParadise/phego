@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "scope": "cooperative_cancel_probe_only",
+  "requirement_ids": [
+    "REQ-052",
+    "REQ-053"
+  ],
+  "test_ids": [
+    "T-103",
+    "T-104",
+    "T-105",
+    "T-106"
+  ],
+  "product_acceptance": "not_run",
+  "checked_date": "2026-10-30",
+  "source_sha256": {
+    "experiments/nativecancel/cancel_panic_test.go": "675a82956c2d01ed2059d3bdcad066760ab43bcf4605c03f82e7bab6ee2425a1",
+    "experiments/nativecancel/cancel_race_test.go": "a703b71a33fd8f09236444e89f73b7544b56f5d82b14fb88e8eebf421a1ed3e7",
+    "experiments/nativecancel/cancel_test.go": "08e2d13b26025f9948f15ffe722c1218dee7ab708885419948a77a3c5901569c",
+    "experiments/nativecancel/loop.ll": "c2fb46934611af927efd82c97853defeb66675ce6f29b06edf2b914d1790bc25",
+    "experiments/nativecancel/main.go": "fff26564c70fd05e01f6972a9d86568cbd6423b2ff797a1fd639c219dc25f2d2"
+  },
+  "runs": [
+    {
+      "platform": "linux/arm64",
+      "emulated": false,
+      "image": "buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3",
+      "command": "set -o pipefail\nzstd --long=30 -dc /tmp/phego-llvm-probe/LLVM-23.1.4-Linux-ARM64.tar.zst | docker run --rm -i --platform linux/arm64 --network none --read-only --user 65534:65534 --pids-limit 128 --memory 3g --cpus 2 --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,exec,nosuid,size=2g --mount type=bind,src=/tmp/phego-source.z6hT5t/go1.27.3.linux-arm64.tar.gz,dst=/input/go.tar.gz,readonly --mount type=bind,src=/Users/timlai/.codex/worktrees/w07-native-abi/phego/experiments/nativecancel,dst=/src,readonly buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3 timeout 600 sh -ec 'tar -xf - -C /tmp LLVM-23.1.4-Linux-ARM64/bin/clang LLVM-23.1.4-Linux-ARM64/bin/clang-23 LLVM-23.1.4-Linux-ARM64/lib/clang/23/include; tar -xzf /input/go.tar.gz -C /tmp; /tmp/LLVM-23.1.4-Linux-ARM64/bin/clang --version | head -1; /tmp/go/bin/go version; /tmp/LLVM-23.1.4-Linux-ARM64/bin/clang -c -O2 /src/loop.ll -o /tmp/probe.o; ar rcs /tmp/libphegocancel.a /tmp/probe.o; cd /src; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache GO111MODULE=off CGO_ENABLED=1 CC=/tmp/LLVM-23.1.4-Linux-ARM64/bin/clang CGO_LDFLAGS=\"-L/tmp -lphegocancel\" /tmp/go/bin/go test -race -count=1 -tags=phego_native_probe -v .'",
+      "exit_code": 0,
+      "output_excerpt": [
+        "clang version 23.1.4",
+        "go version go1.27.3 linux/arm64",
+        "--- PASS: TestNilPanicCannotBeReportedAsSuccess (0.00s)",
+        "--- PASS: TestReleaseDuringContextCheckDoesNotDeadlockOrSucceed (0.00s)",
+        "PASS"
+      ],
+      "passed_tests": [
+        "TestNilPanicCannotBeReportedAsSuccess",
+        "TestReleaseDuringContextCheckDoesNotDeadlockOrSucceed",
+        "TestRegisterNilContextReturnsZero",
+        "TestNormalCompletionCountsEveryCheckpoint",
+        "TestZeroIterationsDoNotCheckpoint",
+        "TestInvalidTokenIsRejectedBeforeLimit",
+        "TestReleasedTokenIsRejectedBeforeLimitAndReleaseIsNotRepeated",
+        "TestAlreadyCanceledContextStopsWithoutCheckpoint",
+        "TestCancellationAfterFirstCheckpoint",
+        "TestErrPanicIsReturnedAsStatusThree",
+        "TestRuntimeGCKeepsRegisteredContextAlive"
+      ],
+      "archive_hashes_checked_in_earlier_probe": {
+        "llvm_sha256": "0975f753e0f9b5f83146a7a2f4678bc143e713496b56520716a4de047a63f99f",
+        "go_sha256": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49"
+      }
+    },
+    {
+      "platform": "linux/amd64",
+      "emulated": true,
+      "image": "buildpack-deps@sha256:0766bfc10a5b87c895c6f675bb8dd09067821b4de144b047a6d029e0c366ecac",
+      "command": "set -o pipefail\nzstd --long=30 -dc /tmp/phego-llvm-x64.JelvL2/LLVM-23.1.4-Linux-X64.tar.zst | docker run --rm -i --platform linux/amd64 --network none --read-only --user 65534:65534 --pids-limit 128 --memory 3g --cpus 2 --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,exec,nosuid,size=2g --mount type=bind,src=/tmp/phego-go-amd64.bzF76r/go.tar.gz,dst=/input/go.tar.gz,readonly --mount type=bind,src=/Users/timlai/.codex/worktrees/w07-native-abi/phego/experiments/nativecancel,dst=/src,readonly buildpack-deps@sha256:0766bfc10a5b87c895c6f675bb8dd09067821b4de144b047a6d029e0c366ecac timeout 600 sh -ec 'tar -xf - -C /tmp LLVM-23.1.4-Linux-X64/bin/clang LLVM-23.1.4-Linux-X64/bin/clang-23 LLVM-23.1.4-Linux-X64/lib/clang/23/include; tar -xzf /input/go.tar.gz -C /tmp; /tmp/LLVM-23.1.4-Linux-X64/bin/clang --version | head -1; /tmp/go/bin/go version; /tmp/LLVM-23.1.4-Linux-X64/bin/clang -c -O2 /src/loop.ll -o /tmp/probe.o; ar rcs /tmp/libphegocancel.a /tmp/probe.o; cd /src; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache GO111MODULE=off CGO_ENABLED=1 CC=/tmp/LLVM-23.1.4-Linux-X64/bin/clang CGO_LDFLAGS=\"-L/tmp -lphegocancel\" /tmp/go/bin/go test -race -count=1 -tags=phego_native_probe -v .'",
+      "exit_code": 0,
+      "output_excerpt": [
+        "clang version 23.1.4",
+        "go version go1.27.3 linux/amd64",
+        "--- PASS: TestNilPanicCannotBeReportedAsSuccess (0.00s)",
+        "--- PASS: TestReleaseDuringContextCheckDoesNotDeadlockOrSucceed (0.00s)",
+        "PASS"
+      ],
+      "passed_tests": [
+        "TestNilPanicCannotBeReportedAsSuccess",
+        "TestReleaseDuringContextCheckDoesNotDeadlockOrSucceed",
+        "TestRegisterNilContextReturnsZero",
+        "TestNormalCompletionCountsEveryCheckpoint",
+        "TestZeroIterationsDoNotCheckpoint",
+        "TestInvalidTokenIsRejectedBeforeLimit",
+        "TestReleasedTokenIsRejectedBeforeLimitAndReleaseIsNotRepeated",
+        "TestAlreadyCanceledContextStopsWithoutCheckpoint",
+        "TestCancellationAfterFirstCheckpoint",
+        "TestErrPanicIsReturnedAsStatusThree",
+        "TestRuntimeGCKeepsRegisteredContextAlive"
+      ],
+      "archive_hashes_checked_in_earlier_probe": {
+        "llvm_sha256": "efdd1dbd089b99bfcfcde7b8eb1236163f2e88df5a981cca4f783ec9cb5e0378",
+        "go_sha256": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40"
+      }
+    }
+  ],
+  "limits": [
+    "The temporary archive paths and container commands are not a hardened replay entrypoint; archived source paths were not immutable.",
+    "The container timeout does not verify cleanup after interruption.",
+    "The token registry is an independent experiment, not the product request lifecycle. Tokens are guessable and do not sandbox native code.",
+    "One GC test does not demonstrate preservation of complex values or GC stress.",
+    "Blocking host Context.Err cannot be forcibly interrupted; a zero-iteration loop does not check cancellation."
+  ]
+}
