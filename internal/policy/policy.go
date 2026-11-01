@@ -11,6 +11,8 @@ package policy
 
 import (
 	"fmt"
+	"io/fs"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -76,7 +78,8 @@ func (k Kind) String() string {
 // nothing.
 type Spec struct {
 	Mode Mode
-	// Files are directory trees PHP may read, and write when Write is set.
+	// Files mounts directory trees at PHP-visible paths. PHP may read them,
+	// and write when Write is set.
 	Files []FileGrant
 	// Network lists the destinations PHP may connect to.
 	Network []NetworkGrant
@@ -97,10 +100,14 @@ type Spec struct {
 	Services []string
 }
 
-// FileGrant grants a directory tree.
+// FileGrant mounts a tree at Path, the absolute path PHP sees. Exactly one
+// of Dir and FS is set; Write requires Dir.
 type FileGrant struct {
-	// Root is an absolute directory path.
-	Root  string
+	Path string
+	// Dir is an absolute host directory, opened through os.Root.
+	Dir string
+	// FS is a read-only file system.
+	FS    fs.FS
 	Write bool
 }
 
@@ -142,12 +149,25 @@ func New(spec Spec) (*Policy, error) {
 		mode: spec.Mode, shell: spec.Shell, dynamicCode: spec.DynamicCode,
 		databases: map[string]bool{}, processes: map[string]bool{}, callbacks: map[string]bool{}, services: map[string]bool{},
 	}
+	mounted := map[string]bool{}
 	for i, g := range spec.Files {
 		field := fmt.Sprintf("Files[%d]", i)
-		if g.Root == "" || !filepath.IsAbs(g.Root) {
-			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("root %q is not an absolute path", g.Root)}
+		switch {
+		case !path.IsAbs(g.Path) || path.Clean(g.Path) != g.Path:
+			return nil, &SpecError{Field: field + ".Path", Reason: fmt.Sprintf("%q is not a clean absolute path", g.Path)}
+		case (g.Dir == "") == (g.FS == nil):
+			return nil, &SpecError{Field: field, Reason: "exactly one of Dir and FS must be set"}
+		case g.Dir != "" && !filepath.IsAbs(g.Dir):
+			return nil, &SpecError{Field: field + ".Dir", Reason: fmt.Sprintf("%q is not an absolute path", g.Dir)}
+		case g.Write && g.FS != nil:
+			return nil, &SpecError{Field: field + ".Write", Reason: "an fs.FS mount is read-only"}
+		case mounted[g.Path]:
+			return nil, &SpecError{Field: field + ".Path", Reason: fmt.Sprintf("%q is mounted twice", g.Path)}
 		}
-		g.Root = filepath.Clean(g.Root)
+		mounted[g.Path] = true
+		if g.Dir != "" {
+			g.Dir = filepath.Clean(g.Dir)
+		}
 		p.files = append(p.files, g)
 	}
 	for i, g := range spec.Network {

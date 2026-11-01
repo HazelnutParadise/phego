@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"testing"
+	"testing/fstest"
 	"time"
 )
 
@@ -45,8 +46,13 @@ func TestZeroSpecGrantsNothing(t *testing.T) {
 func TestSpecValidation(t *testing.T) {
 	bad := []Spec{
 		{Mode: 9},
-		{Files: []FileGrant{{Root: "relative/dir"}}},
-		{Files: []FileGrant{{Root: ""}}},
+		{Files: []FileGrant{{Path: "/app", Dir: "relative/dir"}}},
+		{Files: []FileGrant{{Path: "/app"}}},
+		{Files: []FileGrant{{Path: "app", Dir: "/srv"}}},
+		{Files: []FileGrant{{Path: "/app/", Dir: "/srv"}}},
+		{Files: []FileGrant{{Path: "/app", Dir: "/srv", FS: fstest.MapFS{}}}},
+		{Files: []FileGrant{{Path: "/app", FS: fstest.MapFS{}, Write: true}}},
+		{Files: []FileGrant{{Path: "/app", Dir: "/srv"}, {Path: "/app", Dir: "/opt"}}},
 		{Network: []NetworkGrant{{Scheme: "https://", Host: "a.com", Ports: []int{443}}}},
 		{Network: []NetworkGrant{{Scheme: "https", Host: "a.com/x", Ports: []int{443}}}},
 		{Network: []NetworkGrant{{Scheme: "https", Host: "a.*.com", Ports: []int{443}}}},
@@ -115,7 +121,7 @@ func TestFilesStayInsideGrantedTrees(t *testing.T) {
 	if err := os.Symlink("../../secret", filepath.Join(data, "up")); err != nil {
 		t.Fatal(err)
 	}
-	p := mustPolicy(t, Spec{Files: []FileGrant{{Root: app}, {Root: data, Write: true}}})
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: app, Dir: app}, {Path: data, Dir: data, Write: true}}})
 
 	f, err := p.OpenFile(filepath.Join(app, "index.php"), os.O_RDONLY, 0)
 	if err != nil {
@@ -139,7 +145,10 @@ func TestFilesStayInsideGrantedTrees(t *testing.T) {
 	}
 	// Writing needs a write grant: app is read-only, data is writable.
 	_, err = p.OpenFile(filepath.Join(app, "new.txt"), os.O_CREATE|os.O_WRONLY, 0o644)
-	wantPolicyError(t, err, "outside-root")
+	wantPolicyError(t, err, "not-granted")
+	if filepath.Separator != '/' {
+		t.Skip("host paths are used as PHP paths in this test")
+	}
 	w, err := p.OpenFile(filepath.Join(data, "cache.txt"), os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		t.Fatalf("write in the writable tree: %v", err)
@@ -147,6 +156,38 @@ func TestFilesStayInsideGrantedTrees(t *testing.T) {
 	w.Close()
 	if _, err := p.OpenFile(filepath.Join(app, "index.php"), os.O_RDWR, 0); err == nil {
 		t.Error("read-write open of a read-only tree succeeded")
+	}
+}
+
+func TestMountsMapPHPPathsToTheirBackends(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "conf.ini"), []byte("x=1"), 0o644)
+	p := mustPolicy(t, Spec{Files: []FileGrant{
+		{Path: "/", FS: fstest.MapFS{"index.php": {Data: []byte("<?php")}, "etc/a": {Data: []byte("a")}}},
+		{Path: "/etc", Dir: dir},
+	}})
+	f, err := p.OpenFile("/index.php", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatalf("fs.FS mount: %v", err)
+	}
+	f.Close()
+	// The longer mount wins: /etc/conf.ini comes from the host directory,
+	// and /etc/a from the fs.FS is hidden by it.
+	if f, err := p.OpenFile("/etc/conf.ini", os.O_RDONLY, 0); err != nil {
+		t.Fatalf("directory mount: %v", err)
+	} else {
+		f.Close()
+	}
+	if _, err := p.OpenFile("/etc/a", os.O_RDONLY, 0); err == nil {
+		t.Error("the shorter mount answered for a path under the longer one")
+	}
+	if _, err := p.OpenFile("/index.php", os.O_WRONLY, 0); err == nil {
+		t.Error("write through a read-only mount succeeded")
+	}
+	_, err = p.OpenFile("index.php", os.O_RDONLY, 0)
+	wantPolicyError(t, err, "not-absolute")
+	if _, err := p.OpenFile("/../index.php", os.O_RDONLY, 0); err != nil {
+		t.Errorf("PHP paths are cleaned before matching: %v", err)
 	}
 }
 

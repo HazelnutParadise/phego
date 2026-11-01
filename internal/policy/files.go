@@ -4,19 +4,20 @@ import (
 	"errors"
 	"io/fs"
 	"os"
-	"path/filepath"
+	"path"
 	"strings"
 )
 
-// OpenFile opens name for the requested access through the granted tree
-// that contains it. name must be absolute. The open goes through os.Root, so
-// ".." components and symbolic links cannot leave the tree even if the file
-// system changes between the check and the open; a plain string prefix
-// check would not resist that.
+// OpenFile opens name, an absolute PHP path, through the mount that
+// contains it. A host directory is opened through os.Root, so ".."
+// components and symbolic links cannot leave it even if the file system
+// changes between the check and the open; a plain string prefix check
+// would not resist that.
 //
 // flag uses the os.O_* values. Any write, create, append or truncate flag
-// needs a tree granted for writing.
-func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
+// needs a mount granted for writing. The result is an *os.File for a host
+// directory and the file system's own file for an fs.FS mount.
+func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, error) {
 	kind, op := FileRead, "open"
 	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
 		kind = FileWrite
@@ -25,7 +26,10 @@ func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, er
 	if err != nil {
 		return nil, err
 	}
-	root, err := os.OpenRoot(grant.Root)
+	if grant.FS != nil {
+		return grant.FS.Open(rel)
+	}
+	root, err := os.OpenRoot(grant.Dir)
 	if err != nil {
 		return nil, err
 	}
@@ -41,30 +45,38 @@ func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, er
 	return f, nil
 }
 
-// fileGrant finds the most specific grant whose tree contains name and
-// allows kind.
+// fileGrant finds the most specific mount whose path contains name and
+// allows kind, and returns name relative to it in fs.ValidPath form.
 func (p *Policy) fileGrant(kind Kind, op, name string) (FileGrant, string, error) {
-	if !filepath.IsAbs(name) || strings.ContainsRune(name, 0) {
+	if !path.IsAbs(name) || strings.ContainsRune(name, 0) {
 		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: "not-absolute"}
 	}
-	clean := filepath.Clean(name)
+	clean := path.Clean(name)
 	var best FileGrant
 	found := false
 	for _, g := range p.files {
 		if kind == FileWrite && !g.Write {
 			continue
 		}
-		rel, err := filepath.Rel(g.Root, clean)
-		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		if clean != g.Path && !strings.HasPrefix(clean, strings.TrimSuffix(g.Path, "/")+"/") {
 			continue
 		}
-		if !found || len(g.Root) > len(best.Root) {
+		if !found || len(g.Path) > len(best.Path) {
 			best, found = g, true
 		}
 	}
 	if !found {
-		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: "outside-root"}
+		rule := "outside-root"
+		if kind == FileWrite {
+			if _, _, err := p.fileGrant(FileRead, op, name); err == nil {
+				rule = "not-granted" // mounted, but read-only
+			}
+		}
+		return FileGrant{}, "", &PolicyError{Kind: kind, Op: op, Target: name, Rule: rule}
 	}
-	rel, _ := filepath.Rel(best.Root, clean)
+	rel := strings.TrimPrefix(strings.TrimPrefix(clean, best.Path), "/")
+	if rel == "" {
+		rel = "."
+	}
 	return best, rel, nil
 }
