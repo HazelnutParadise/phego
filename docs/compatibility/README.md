@@ -13,3 +13,11 @@ The [history policy](../data/php-history-policy.json) is a planning catalog, not
 Required evidence includes source identity, license, build environment, matching oracle, semantic tests, applicable real applications, and documented security differences. Unknowns and unavailable evidence remain completion blockers.
 
 The authoritative behavior contract is in [specification chapters 36 and 40](../spec/specification.zh-TW.md#chapter-36). Background sources are the [official history](https://www.php.net/manual/en/history.php.php), [PHP 1 archive](https://museum.php.net/php1/), and [PHP/FI 2 manual](https://www.php.net/manual/phpfi2.php).
+
+## Upstream update review
+
+Use `python3 tools/upstream_update.py --help` for the source-verified update entry point. `pair --lock LOCK OLD_ARCHIVE NEW_ARCHIVE` accepts the reviewed old/new identities in a W-02 comparison report. Both archives must match their locked SHA-256 values before decoding. The output preserves the detailed stub, grammar, PHPT and security classification and lists every changed regular file with its hashes and responsible work packages. Implementation and unclassified changes require behavior regression even when the signatures match. Raw stub changes also remain visible when the declaration parser cannot interpret them.
+
+`watch BASELINE OBSERVED` consumes W-02 observation snapshots and downloads only changed release/digest pairs from php.net. `--archive-dir DIR` uses an offline cache named `<sha256>.tar.xz` and never downloads a missing entry. Added or removed series, missing archives and verification failures remain blocked in the output. Metadata-only changes still require review. The existing daily upstream-watch workflow retains both the observation and the classified report, including partial failures.
+
+Added and modified PHPT files become `pending` regression candidates bound to the exact release, source archive, path and raw PHPT hash. Maintainers must run them through W-04 against the corresponding Phego profile before accepting compatibility. The classifier never executes downloaded source or tests. Its `compatibility: not_assessed` field applies even to empty differences. The current tool acceptance and downstream blockers are recorded in [W-45 evidence](../implementation/evidence/W-45.json).
