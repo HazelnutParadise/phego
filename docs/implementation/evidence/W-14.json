@@ -1,8 +1,8 @@
 {
   "scope": "W-14 local runtime core and locked PHP oracle; not product acceptance",
   "work_package": "W-14",
-  "source_commit": "a59186e3c2e4762e3f091f57d0c9cbc658c9905d",
-  "plan_sha256": "37440deb0bbe8023dd04a1b0cb446eaf11d057e6105975030f6b3c4c97a46a8a",
+  "source_commit": "05efa1a0087b56107b23b5d511b3e6e3994eb4c3",
+  "plan_sha256": "7f9e8ace5980540676e4f24c71a0b3e48e029606f51d2c6ccf3e7dc8c7943158",
   "product_test_status": "not_run",
   "requirements": [
     "REQ-009",
@@ -39,13 +39,13 @@
     "ini": "php -n",
     "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9"
   },
-  "reference_cases": 24,
+  "reference_cases": 28,
   "reference_path": "tests/lifecycle/w14/reference.json",
-  "reference_sha256": "0a8ed8db24d7dc6e04813881015469748f8f6ebf23f11f01bb0400656fdf78b4",
+  "reference_sha256": "b22287f8d83d492473ab775b1dc80de298a999e25c14f11f0a046a4251e93892",
   "implementation_locations": [
     {
       "path": "internal/runtime/execution.go",
-      "line": 108
+      "line": 115
     },
     {
       "path": "internal/runtime/execution_destruct.go",
@@ -57,12 +57,13 @@
     }
   ],
   "input_sha256": {
-    "docs/data/document-validation.json": "21deb29d05c8f7535965ca726001b7c84fa050fb084e58fd19f5d87ea361ccb2",
-    "docs/implementation/W-14.md": "37440deb0bbe8023dd04a1b0cb446eaf11d057e6105975030f6b3c4c97a46a8a",
-    "internal/runtime/execution.go": "f0d77bd27d657654985e60facf9e6ea16b618db47cb7c8b5bc7356b5cd5445a1",
+    "docs/data/document-validation.json": "d3623afb49e080f7eaf636ddfefc6603ace76f5ad9bcf5e000f1c2f6ec4f4a7f",
+    "docs/implementation/W-14.md": "7f9e8ace5980540676e4f24c71a0b3e48e029606f51d2c6ccf3e7dc8c7943158",
+    "internal/runtime/execution.go": "fcd5aaed4ed8a1bd17bfeb105326bbc8e165e068b145c5db1b781f8b9358cd0b",
     "internal/runtime/execution_destruct.go": "8510ce31abae7d8192e9526de09a84b234486897768b9fba30495216ebd6d7d5",
-    "internal/runtime/execution_oracle_test.go": "b8553e26fd3a637858b6a92aabfb7d2baa8f193eddf34629d59e02ac318ed423",
-    "internal/runtime/execution_output.go": "b5f27943594835135d6a7478238182410f282066fc4f3d883db29d0404777166",
+    "internal/runtime/execution_oracle_test.go": "6c6afff366fc484f2038c4f8f33411aba313973efa824a3c74042e97a3e6ac8a",
+    "internal/runtime/execution_output.go": "e12e3313985d5085430e1078a90529ff897256911dd8f3aef216dd1236fe2694",
+    "internal/runtime/execution_review_test.go": "a6bc6694c0c7782292c7e7f77e00490b2e7c7f8765ff5835b7e97e579a69ef8c",
     "internal/runtime/execution_snapshot_test.go": "da6aa7009295370b8861e35eb9ba44e78f18a4404569eb9763e9a06dc63045f2",
     "internal/runtime/execution_test.go": "6b84a0a59450e25d157102241bbe26ccb41e330ccad4b709808b2c9e8685113c",
     "tests/lifecycle/w14/array_exit.php": "8292a1e03a37836e8fc464b4f343ea7e032beecee5d025b90cd024b9706e9eb2",
@@ -84,8 +85,12 @@
     "tests/lifecycle/w14/frame_locals.php": "f5f00e5c2d6dc7659886be695716ce6bbc9fb1cbfd3572012f98be7435fea1bb",
     "tests/lifecycle/w14/frame_throw.php": "c821c8975574ecb4687f094044a354c2bbc7be2b3f71b2e5a11e3c02e4b36404",
     "tests/lifecycle/w14/normal.php": "4fb9daf3ed2b25d8cc812210b843bdbf16a9b16dbbc53fe14ec92b16c69d03f4",
-    "tests/lifecycle/w14/reference.json": "0a8ed8db24d7dc6e04813881015469748f8f6ebf23f11f01bb0400656fdf78b4",
+    "tests/lifecycle/w14/reference.json": "b22287f8d83d492473ab775b1dc80de298a999e25c14f11f0a046a4251e93892",
     "tests/lifecycle/w14/reference.php": "f41ebfe1d67418c6efbf4824ec60daac607a3aeb2ba58a79cc5c415881865cb5",
+    "tests/lifecycle/w14/return_finally_array.php": "0f9c50344db2e76797766f38b0b67e6d0efd2d91bceb854771f33e2d4e843f21",
+    "tests/lifecycle/w14/return_finally_reference.php": "ae9a1a07944f0a30a91389a757f975b6ae86e14e0990bb2d1448c4e510082161",
+    "tests/lifecycle/w14/return_finally_replace.php": "8fc5bdbdaf1cb6db6e7e06516dda051ea1aba7ae84e2f7abe3aeb6a620b4f648",
+    "tests/lifecycle/w14/return_replaced_destructor.php": "508b9829a97971e3aad19f3e9acc18ea323e3e60e31ee68b28766496888f045b",
     "tests/lifecycle/w14/shutdown_exit.php": "97f16da5fe1b87f4c97e95ce25219e251d6136f97c513b89aaf8b0439019447e",
     "tests/lifecycle/w14/shutdown_register.php": "028d0aeb25f7bfe22f04e4a45a612f07a6045c1d5747a72729d30d5db4ef817d",
     "tests/lifecycle/w14/shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
@@ -111,8 +116,13 @@
       "fatal_buffer_object",
       "buffer_echo",
       "array_fatal",
-      "array_exit"
-    ]
+      "array_exit",
+      "return_finally_array",
+      "return_finally_reference",
+      "return_finally_replace",
+      "return_replaced_destructor"
+    ],
+    "scope": "independent local review; GitHub rereview must be checked on the pushed head"
   },
   "remaining_gaps": [
     "Engine.Run still returns UnsupportedError; no PHP source/bytecode VM integration in this package.",
@@ -123,7 +133,8 @@
     "No Session serializer or upload progress support is claimed; REQ-044/T-087/T-088 remain not_run.",
     "Historical PHP profiles and other platforms are not certified by the modern Linux arm64 oracle.",
     "Go callbacks/writers cannot be forcibly stopped in the same process. Cleanup timeout may leave the Request in ResourceCleanup.",
-    "Returning live PHP objects or recursive arrays through the local W-06 snapshot helper remains rejected; public opaque descriptors require the SDK/VM bridge."
+    "Returning live PHP objects or recursive arrays through the local W-06 snapshot helper remains rejected; public opaque descriptors require the SDK/VM bridge.",
+    "True PHP by-reference returns and unused-expression destruction order require an explicit VM result-disposition contract. outputFilter expects already-adapted bytes and endNormal for successful callback output."
   ],
   "planning_baseline": {
     "scope": "documentation_only",
@@ -431,8 +442,8 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/go.txt",
-        "sha256": "7e09f2da64296eb13d5ea06bec9b07c463c50147aca39753d70013626e0468c1"
+        "path": "docs/implementation/evidence/W-14-review/go.txt",
+        "sha256": "5487cdf81bb437b49ab2d2ccec856056a5267c42d39a8f3159d7b010890b4878"
       }
     },
     {
@@ -440,8 +451,8 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/race.txt",
-        "sha256": "4f0948d99dd0f0b7929edc801e39b29189e4d18cca76ff89daf4eef71666a867"
+        "path": "docs/implementation/evidence/W-14-review/race.txt",
+        "sha256": "c8ef8015a92fb7d27ab2f18de32d451e5202efdc0fd6c865b9d39df13634488c"
       }
     },
     {
@@ -449,7 +460,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/vet.txt",
+        "path": "docs/implementation/evidence/W-14-review/vet.txt",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     },
@@ -458,8 +469,8 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/python.txt",
-        "sha256": "38849bdf786120708054bbbef9c5107be430463f0213d95cea7e5d29892d0ba3"
+        "path": "docs/implementation/evidence/W-14-review/python.txt",
+        "sha256": "5a619c5696c45e519bdd00e59719e43b9e5efc35780f6e3cb9f86aedb8deef5a"
       }
     },
     {
@@ -467,8 +478,8 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/oracle.txt",
-        "sha256": "38376dd2ccf00140b1339153fa391823b86b0a4c937f4e2016c446d90175436d"
+        "path": "docs/implementation/evidence/W-14-review/oracle.txt",
+        "sha256": "99044abd1024a8c33f3a2c054aae315e63ef0fc44403dd85ab0500831b5d1b38"
       }
     },
     {
@@ -476,8 +487,17 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-local/docs.json",
-        "sha256": "ad750e808aba42bc553c44b8a6d00d0eb29aeeae0c8b1a4c03d5ce6864f2b37a"
+        "path": "docs/implementation/evidence/W-14-review/docs.json",
+        "sha256": "482065b6b29ffc75efc8383bb1847be8e1a00cafdd88206088dbb1aeedffaed7"
+      }
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestExecutionReview' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": {
+        "path": "docs/implementation/evidence/W-14-review/green.txt",
+        "sha256": "1e067f5eecb4bbbcca6307a6877627fd17de9b7fdb740740fbbe4bf15173f763"
       }
     },
     {
@@ -487,5 +507,61 @@
     }
   ],
   "local_status": "pass",
-  "recorded_at_utc": "2026-11-01T05:58:49.494525+00:00"
+  "recorded_at_utc": "2026-11-01T06:40:33.552007+00:00",
+  "previous_local_evidence": {
+    "commit": "9d9097ce9d38f982990ab5c2d027297d34ceec98",
+    "path": "docs/implementation/evidence/W-14.json"
+  },
+  "github_review_followup": {
+    "reviewed_commit": "9d9097ce9d38f982990ab5c2d027297d34ceec98",
+    "fix_commit": "2a1db3a23953e36c6d0189a27c45500b7f0065b7",
+    "test_commit": "4cb64501d23ed0f3a506c26fa9874e6e76a53dc5",
+    "status": "fixed_locally_pending_remote_rereview",
+    "red": {
+      "baseline_commit": "9d9097ce9d38f982990ab5c2d027297d34ceec98",
+      "exit_code": 1,
+      "command": "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime -run ^TestExecutionReview -count=1",
+      "scope": "isolated git archive plus recorded red-test snapshot",
+      "status": "fail",
+      "evidence": {
+        "path": "docs/implementation/evidence/W-14-review/red.txt",
+        "sha256": "1eda37512c8d7937322c5a3b49af55fea3f2ba1117d67255e303f35ac9c2bcf2"
+      },
+      "test_snapshot": {
+        "path": "docs/implementation/evidence/W-14-review/red-tests.go.txt",
+        "sha256": "7a64c92f2bcdd7094c50911ff3ada2aa509e00a1a21e1e28f846eddb6121b51e"
+      },
+      "reproduction": [
+        "git archive 9d9097ce9d38f982990ab5c2d027297d34ceec98 go.mod internal into a disposable directory",
+        "copy the recorded red-tests.go.txt to internal/runtime/execution_review_test.go",
+        "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime -run ^TestExecutionReview -count=1"
+      ]
+    },
+    "green": {
+      "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestExecutionReview' -count=1",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": {
+        "path": "docs/implementation/evidence/W-14-review/green.txt",
+        "sha256": "1e067f5eecb4bbbcca6307a6877627fd17de9b7fdb740740fbbe4bf15173f763"
+      }
+    },
+    "mappings": [
+      {
+        "comment_id": 4434629235,
+        "url": "https://github.com/HazelnutParadise/phego/pull/74#discussion_r4434629235",
+        "test": "TestExecutionReviewReturnSurvivesFinally"
+      },
+      {
+        "comment_id": 4434629238,
+        "url": "https://github.com/HazelnutParadise/phego/pull/74#discussion_r4434629238",
+        "test": "TestExecutionReviewUnwindReleasesReplacedReturn"
+      },
+      {
+        "comment_id": 4434629239,
+        "url": "https://github.com/HazelnutParadise/phego/pull/74#discussion_r4434629239",
+        "test": "TestExecutionReviewHostStopOverridesEarlierDestructorThrow"
+      }
+    ]
+  }
 }
