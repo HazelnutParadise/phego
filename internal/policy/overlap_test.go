@@ -783,3 +783,160 @@ func TestFSVirtualAncestorsDoNotEnableCaseAliases(t *testing.T) {
 	}
 	f.Close()
 }
+
+func TestSymlinkTargetsResolveNestedLinksBeforeParents(t *testing.T) {
+	for _, memory := range []bool{false, true} {
+		t.Run(fmtBool(memory), func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, "sub/deep"), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, "file"), []byte("root"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			for name, target := range map[string]string{"deep": "sub/deep", "link": "deep/../../file", "escape": "../file"} {
+				if err := os.Symlink(target, filepath.Join(root, name)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			grant := FileGrant{Path: "/app", Dir: root, Write: true}
+			if memory {
+				grant.Dir = ""
+				grant.Write = false
+				grant.FS = fstest.MapFS{"sub/deep": {Mode: fs.ModeDir}, "file": {Data: []byte("root")}, "deep": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}, "link": {Mode: os.ModeSymlink, Data: []byte("deep/../../file")}, "escape": {Mode: os.ModeSymlink, Data: []byte("../file")}}
+			}
+			p := mustPolicy(t, Spec{Files: []FileGrant{grant, {Path: "/", FS: fstest.MapFS{"file": {Data: []byte("outside")}}}}})
+			f, err := p.OpenFile("/app/link", os.O_RDONLY, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := io.ReadAll(f)
+			f.Close()
+			if err != nil || string(b) != "root" {
+				t.Fatalf("nested target=%q %v", b, err)
+			}
+			f, err = p.OpenFile("/app/escape", os.O_RDONLY, 0)
+			if f != nil {
+				f.Close()
+			}
+			wantPolicyError(t, err, "outside-root")
+		})
+	}
+}
+
+func TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "data"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "data/file"), []byte("safe"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(filepath.Join(root, "data/file"), filepath.Join(root, "data/hard")); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"shadow", "escape"} {
+		if err := os.Symlink(outside, filepath.Join(root, name)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/shadow", Dir: outside}}})
+	for _, name := range []string{"/data/file", "/data/hard"} {
+		for _, flag := range []int{os.O_RDONLY, os.O_WRONLY} {
+			f, err := p.OpenFile(name, flag, 0600)
+			if err != nil {
+				t.Fatalf("%s flag%d: %v", name, flag, err)
+			}
+			f.Close()
+		}
+	}
+	f, err := p.OpenFile("/escape/file", os.O_RDONLY, 0)
+	if f != nil {
+		f.Close()
+	}
+	wantPolicyError(t, err, "outside-root")
+}
+
+func TestOverlappingFSRejectsUnresolvableSymlinks(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "public"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(root, "protected"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "protected/hidden"), []byte("secret"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("protected/hidden", filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("../protected/hidden", filepath.Join(root, "public/alias")); err != nil {
+		t.Fatal(err)
+	}
+	r, err := os.OpenRoot(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: struct{ fs.FS }{r.FS()}}, {Path: "/protected", FS: fstest.MapFS{}}}})
+	for _, name := range []string{"/alias", "/public/alias"} {
+		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		if f != nil {
+			f.Close()
+		}
+		if err == nil {
+			t.Fatalf("unresolvable symlink read via %s", name)
+		}
+	}
+}
+
+func TestSymlinkBoundariesSurviveMountRemapping(t *testing.T) {
+	for _, memory := range []bool{false, true} {
+		t.Run(fmtBool(memory), func(t *testing.T) {
+			root := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(root, "sub/deep"), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(root, "file"), []byte("inside"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			for name, target := range map[string]string{"deep": "sub/deep", "good": "deep/../../file", "bad": "sub/../../file"} {
+				if err := os.Symlink(target, filepath.Join(root, name)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			source := FileGrant{Path: "/app", Dir: root}
+			child := FileGrant{Path: "/app/sub", Dir: filepath.Join(root, "sub")}
+			if memory {
+				source.Dir = ""
+				source.FS = fstest.MapFS{"deep": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}, "good": {Mode: os.ModeSymlink, Data: []byte("deep/../../file")}, "bad": {Mode: os.ModeSymlink, Data: []byte("sub/../../file")}, "file": {Data: []byte("inside")}}
+			}
+			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: fstest.MapFS{"file": {Data: []byte("outside")}}}, source, child}})
+			f, err := p.OpenFile("/app/good", os.O_RDONLY, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := io.ReadAll(f)
+			f.Close()
+			if err != nil || string(b) != "inside" {
+				t.Fatalf("remapped target=%q %v", b, err)
+			}
+			f, err = p.OpenFile("/app/bad", os.O_RDONLY, 0)
+			if f != nil {
+				f.Close()
+			}
+			wantPolicyError(t, err, "outside-root")
+			f, err = p.OpenFile("/app/sub/../../file", os.O_RDONLY, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err = io.ReadAll(f)
+			f.Close()
+			if err != nil || string(b) != "outside" {
+				t.Fatalf("requested parent=%q %v", b, err)
+			}
+		})
+	}
+}
