@@ -174,12 +174,18 @@ func (a *phpArray) insert(k arrayKey, v value, width int) *bucket {
 		a.limit = 8
 	}
 	if a.packed() {
-		if k.isString || k.integer < int64(len(a.buckets)) {
+		if k.isString || (k.integer >= 0 && k.integer < int64(len(a.buckets))) {
 			a.toIndexed()
-		} else if k.integer >= int64(a.limit) {
-			if k.integer/2 < int64(a.limit) && a.live > a.limit/2 && a.growLimit() {
+		} else if k.integer < 0 || k.integer >= int64(a.limit) {
+			if k.integer >= 0 && k.integer/2 < int64(a.limit) && a.live > a.limit/2 && a.growLimit() {
 				// Dense growth keeps the packed position space.
 			} else {
+				// REQ-017; T-033/034: full numeric conversion grows the
+				// position range before compacting, including negative keys.
+				// Sort and string-key conversion keep the existing range.
+				if len(a.buckets) >= a.limit {
+					a.growLimit()
+				}
 				a.toIndexed()
 			}
 		}

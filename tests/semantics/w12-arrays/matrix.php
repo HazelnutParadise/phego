@@ -120,6 +120,15 @@ foreach (['usort','uasort'] as $sort) {
     $cases[$sort.'-deleted-empty'] = [['append','a',1],['delete','a',0],['sort','a',$sort,false],['append','a',4],['emit','a']];
     $cases[$sort.'-negative-empty'] = [['set','a',-5,1],['delete','a',-5],['sort','a',$sort,false],['append','a',4],['emit','a']];
 }
+// REQ-017; T-033/034: numeric overflow of a full packed position range
+// retains its enlarged range across sorting/COW. String and nonfull conversion
+// are controls: they must not inherit the numeric-full growth rule.
+foreach (['append', 'negative', 'string', 'nonfull'] as $trigger) {
+    $ops=[['set','a',6,1]];
+    if ($trigger !== 'nonfull') $ops[]=['append','a',4];
+    $ops[]=$trigger==='append' ? ['append','a',5] : ['set','a',match($trigger) {'negative'=>-1,'string'=>'x',default=>8},5];
+    $cases['sparse-capacity-sort-cow-'.$trigger]=[...$ops,['sort','a','usort',false],['copy','b','a'],['pointer','b','next'],['pointer','b','prev'],['set','b',15,16],['pointer','b','prev'],['set','b',4,20],['pointer','b','key'],['emit','b']];
+}
 function execute($ops, &$v, &$out, $iteration = -1) {
     foreach ($ops as $op) {
         $diags = [];

@@ -276,7 +276,7 @@ func TestW12PHP8512Arrays(t *testing.T) {
 			if err := json.Unmarshal(data, &ref); err != nil {
 				t.Fatal(err)
 			}
-			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 98 {
+			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 102 {
 				t.Fatal("invalid reference profile or missing cases")
 			}
 			for _, c := range ref.Cases {
