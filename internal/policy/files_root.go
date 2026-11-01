@@ -110,7 +110,14 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			if e != nil {
 				return nil, e
 			}
-			if filepath.IsAbs(target) || filepath.VolumeName(target) != "" {
+			if filepath.IsAbs(target) {
+				mounted, targetParts, ok := p.absoluteLinkMount(target, grant.Path)
+				if !ok {
+					return nil, denied("outside-root")
+				}
+				return p.redirectFile(mounted, append(targetParts, pending...), flag, perm, redirects)
+			}
+			if filepath.VolumeName(target) != "" {
 				return nil, denied("outside-root")
 			}
 			targetParts := fileParts(target, grant.Path)
@@ -171,7 +178,12 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		f, err := stack[len(stack)-1].root.OpenFile(leaf, flag, perm)
+		if !before.Mode().IsRegular() && !before.IsDir() {
+			return nil, denied("not-granted")
+		}
+		// A regular file may be replaced by a FIFO after Lstat. Open without
+		// waiting for a peer, then verify the actual object before returning it.
+		f, err := stack[len(stack)-1].root.OpenFile(leaf, flag|nonblockOpenFlag, perm)
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +192,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) {
+		if !os.SameFile(before, actual) || !actual.Mode().IsRegular() && !actual.IsDir() {
 			f.Close()
 			return nil, denied("path-changed")
 		}
@@ -220,7 +232,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	if !before.Mode().IsRegular() {
 		return nil, denied("not-granted")
 	}
-	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL), perm)
+	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +259,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		if flag&(os.O_WRONLY|os.O_RDWR) == 0 {
 			// Preserve O_RDONLY|O_TRUNC: truncate through a separately verified writer,
 			// while returning the original read-only descriptor.
-			writer, e := parent.OpenFile(leaf, os.O_WRONLY, 0)
+			writer, e := parent.OpenFile(leaf, os.O_WRONLY|nonblockOpenFlag, 0)
 			if e != nil {
 				return fail(e)
 			}

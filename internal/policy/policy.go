@@ -12,6 +12,7 @@ package policy
 import (
 	"fmt"
 	"io/fs"
+	"net/netip"
 	"path"
 	"path/filepath"
 	"sort"
@@ -120,8 +121,9 @@ type FileGrant struct {
 type NetworkGrant struct {
 	// Scheme is the protocol, for example "https" or "tcp".
 	Scheme string
-	// Host is a host name, an IP address, or "*.example.com" for every
-	// subdomain of example.com (not example.com itself).
+	// Host is an ASCII name, an IP address without brackets or a port, or
+	// "*.example.com" for every subdomain (not example.com itself).
+	// Internationalized names must use punycode.
 	Host string
 	// Ports are the allowed ports; empty allows none.
 	Ports []int
@@ -176,15 +178,22 @@ func New(spec Spec) (*Policy, error) {
 		p.files = append(p.files, g)
 	}
 	for i, g := range spec.Network {
-		g.Scheme, g.Host = strings.ToLower(g.Scheme), normalizeHost(g.Host)
+		g.Scheme = strings.ToLower(g.Scheme)
 		field := fmt.Sprintf("Network[%d]", i)
 		if g.Scheme == "" || strings.ContainsAny(g.Scheme, ":/") {
 			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}
 		}
-		if g.Host == "" || strings.ContainsAny(g.Host, "/:@") && !isIPv6Literal(g.Host) || strings.Count(g.Host, "*") > 1 ||
-			strings.Contains(g.Host, "*") && !strings.HasPrefix(g.Host, "*.") ||
-			strings.HasPrefix(g.Host, "*.") && strings.Trim(g.Host[2:], ".") == "" {
-			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("host %q is not a host name, address or *.domain pattern", g.Host)}
+		if a, err := netip.ParseAddr(g.Host); err == nil {
+			g.Host = a.String()
+		} else {
+			// Only DNS names have a trailing root dot. IP zone names are opaque.
+			g.Host = strings.TrimSuffix(g.Host, ".")
+			// Validate the original bytes before folding: Unicode lowercasing
+			// would turn the Kelvin sign into an accepted ASCII k.
+			if !validDNSHost(strings.TrimPrefix(g.Host, "*.")) {
+				return nil, &SpecError{Field: field, Reason: fmt.Sprintf("host %q is not a host name, address or *.domain pattern", g.Host)}
+			}
+			g.Host = asciiLower(g.Host)
 		}
 		if len(g.Ports) == 0 {
 			return nil, &SpecError{Field: field, Reason: "no ports are granted"}
@@ -281,4 +290,27 @@ func asciiLower(s string) string {
 	return string(b)
 }
 
-func isIPv6Literal(h string) bool { return strings.Contains(h, ":") && !strings.ContainsAny(h, "/@") }
+// validDNSHost accepts ASCII names, including underscores, but rejects
+// numeric dotted spellings that were not accepted as an IP address.
+func validDNSHost(host string) bool {
+	if host == "" || len(host) > 253 {
+		return false
+	}
+	nonNumeric := false
+	for _, label := range strings.Split(host, ".") {
+		if len(label) == 0 || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
+			return false
+		}
+		for i := 0; i < len(label); i++ {
+			c := label[i]
+			switch {
+			case c >= '0' && c <= '9':
+			case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z', c == '-', c == '_':
+				nonNumeric = true
+			default:
+				return false
+			}
+		}
+	}
+	return nonNumeric
+}

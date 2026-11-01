@@ -388,7 +388,8 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 }
 
 // RunFile reads path through Policy.Files, or directly through legacy
-// Config.Files when used alone, then compiles and runs it.
+// Config.Files when used alone, then compiles and runs it. The source must be
+// a regular file; other file types are closed without reading their contents.
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -432,6 +433,13 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		return &Result{Status: StatusFailed}, err
 	}
 	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		return &Result{Status: StatusFailed}, err
+	}
+	if !info.Mode().IsRegular() {
+		return &Result{Status: StatusFailed}, &fs.PathError{Op: "read", Path: path, Err: fs.ErrInvalid}
+	}
 	data, err := io.ReadAll(io.LimitReader(f, int64(e.cfg.MaxSourceBytes)+1))
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
