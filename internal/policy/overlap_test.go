@@ -2,8 +2,10 @@ package policy
 
 import (
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 )
@@ -651,4 +653,133 @@ func TestFSPathsResolveSymlinksBeforeParentComponents(t *testing.T) {
 	if err != nil || string(b) != "sub" {
 		t.Fatalf("FS symlink parent=%q %v", b, err)
 	}
+}
+
+func TestReadOnlyParentsResolveWritableChildAliases(t *testing.T) {
+	for _, separate := range []bool{false, true} {
+		t.Run(fmtBool(separate), func(t *testing.T) {
+			root := t.TempDir()
+			data := filepath.Join(root, "data")
+			if err := os.Mkdir(data, 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(data, "file"), []byte("hidden"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink("data", filepath.Join(root, "alias")); err != nil {
+				t.Fatal(err)
+			}
+			writable := data
+			if separate {
+				writable = t.TempDir()
+			}
+			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/data", Dir: writable, Write: true}}})
+			f, err := p.OpenFile("/alias/file", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := f.(io.Writer).Write([]byte("new")); err != nil {
+				f.Close()
+				t.Fatal(err)
+			}
+			f.Close()
+			b, err := os.ReadFile(filepath.Join(writable, "file"))
+			if err != nil || string(b) != "new" {
+				t.Fatalf("writable child=%q %v", b, err)
+			}
+			if separate {
+				b, err := os.ReadFile(filepath.Join(data, "file"))
+				if err != nil || string(b) != "hidden" {
+					t.Fatalf("hidden backing changed: %q %v", b, err)
+				}
+			}
+			f, err = p.OpenFile("/ungranted", os.O_CREATE|os.O_WRONLY, 0600)
+			if f != nil {
+				f.Close()
+			}
+			wantPolicyError(t, err, "not-granted")
+		})
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: fstest.MapFS{"alias": {Mode: os.ModeSymlink, Data: []byte("data")}}}, {Path: "/data", Dir: t.TempDir(), Write: true}}})
+	f, err := p.OpenFile("/alias/new", os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+}
+
+func fmtBool(b bool) string {
+	if b {
+		return "separate"
+	}
+	return "same"
+}
+
+type foldingFS struct{ fs.FS }
+
+func (f foldingFS) Open(name string) (fs.File, error) { return f.FS.Open(strings.ToLower(name)) }
+
+type opaqueFS struct{ fs.FS }
+type opaqueFile struct{ fs.File }
+
+func (f opaqueFS) Open(name string) (fs.File, error) {
+	v, e := f.FS.Open(name)
+	if e != nil {
+		return nil, e
+	}
+	return opaqueFile{v}, nil
+}
+
+func TestFSMountsRejectUnlistedCaseAliases(t *testing.T) {
+	backing := foldingFS{fstest.MapFS{"protected/hidden": {Data: []byte("secret")}, "public/file": {Data: []byte("public")}}}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}}})
+	for _, name := range []string{"/Protected/hidden", "/PROTECTED/hidden"} {
+		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		if f != nil {
+			f.Close()
+		}
+		if err == nil {
+			t.Fatalf("read hidden data via %s", name)
+		}
+	}
+	f, err := p.OpenFile("/public/file", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+}
+
+func TestFSMountsRequireBoundedDirectoryEnumeration(t *testing.T) {
+	backing := opaqueFS{fstest.MapFS{"public": {Data: []byte("ok")}}}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}}})
+	f, err := p.OpenFile("/public", os.O_RDONLY, 0)
+	if f != nil {
+		f.Close()
+	}
+	if err == nil {
+		t.Fatal("unverifiable FS accepted beside shadow mount")
+	}
+	p = mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}}})
+	f, err = p.OpenFile("/public", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+}
+
+func TestFSVirtualAncestorsDoNotEnableCaseAliases(t *testing.T) {
+	backing := foldingFS{fstest.MapFS{"protected/hidden": {Data: []byte("secret")}}}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}, {Path: "/Protected/deep", FS: fstest.MapFS{"file": {Data: []byte("ok")}}}}})
+	f, err := p.OpenFile("/Protected/hidden", os.O_RDONLY, 0)
+	if f != nil {
+		f.Close()
+	}
+	if err == nil {
+		t.Fatal("virtual ancestor enabled hidden case alias")
+	}
+	f, err = p.OpenFile("/Protected/deep/file", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
 }
