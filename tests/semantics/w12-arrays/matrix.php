@@ -76,12 +76,49 @@ $cases['pointer-tail-holes'] = [['set','a','a',1],['set','a','b',2],['set','a','
 $cases['foreach-sort'] = [['append','a',3],['append','a',1],['append','a',2],['foreach_ref','a','v',[
     ['emit','v'],['at',0,[['sort','a','usort',false]]]
 ]],['emit','a']];
+$cases['sort-unset-argument'] = [['append','a',3],['append','a',1],['append','a',2],['bind','alias','a'],['sort','a','usort','unset'],['isset_var','a'],['emit','alias']];
+$cases['sort-rebind-argument'] = [['append','a',3],['append','a',1],['append','a',2],['append','replacement',8],['bind','alias','a'],['sort','a','usort','rebind'],['emit','alias'],['emit','a'],['emit','replacement']];
+foreach ([0,1,2,3,7,8,100,-1] as $k) {
+    $ops = [['set','a',$k,0],['pointer','a','next'],['set','a','x',1],['pointer','a','key'],['pointer','a','current']];
+    for ($i=0;$i<8;$i++) { $ops[]=['append','a',2]; $ops[]=['pointer','a','key']; }
+    $cases['sparse-pointer-'.$k]=$ops;
+}
+$cases['sparse-valid-pointer'] = [['set','a',3,1],['set','a','x',2],['pointer','a','key'],['pointer','a','current']];
+$cases['sparse-pointer-copy'] = [['set','a',3,1],['pointer','a','next'],['copy','b','a'],['append','b',2],['pointer','b','key'],['pointer','b','current']];
+$cases['sparse-foreach-copy'] = [['set','a',0,1],['set','a',3,2],['foreach_ref','a','v',[
+    ['emit','v'],['at',0,[['copy','b','a'],['set','a','x',3]]]
+]],['emit','a'],['emit','b']];
+$cases['indexed-end-copy'] = [['set','a','x',1],['set','a','y',2],['set','a','z',3],['delete','a','y'],['foreach_ref','a','v',[
+    ['emit','v'],['at',1,[['copy','b','a'],['append','a',9]]]
+]],['emit','a'],['emit','b']];
+$cases['foreach-copy-later-write'] = [['append','a',10],['append','a',20],['append','a',30],['foreach_ref','a','v',[
+    ['at',0,[['copy','b','a']]],['at',1,[['set','a',0,99]]]
+]],['emit','a'],['emit','b']];
+$cases['foreach-switch-copy'] = [['set','a','x',1],['set','a','y',2],['foreach_ref','a','v',[
+    ['emit','v'],['at',0,[['copy','b','a']]],['at',1,[['append','b',3],['copy','a','b']]]
+]],['emit','a'],['emit','b']];
+$cases['foreach-switch-sorted-copy'] = [['append','a',3],['append','a',1],['append','a',2],['foreach_ref','a','v',[
+    ['emit','v'],['at',0,[['copy','b','a']]],['at',1,[['sort','b','usort',false],['copy','a','b']]]
+]],['emit','a'],['emit','b']];
+$cases['indexed-hole-pointer-copy'] = [['set','a','a',1],['set','a','b',2],['set','a','c',3],['set','a','d',4],['pointer','a','next'],['pointer','a','next'],['delete','a','b'],['delete','a','c'],['copy','b','a'],['set','b','x',5],['pointer','a','key'],['pointer','b','key']];
+foreach ([1,4,6] as $deleted) {
+    $ops=[]; for($i=0;$i<8;$i++) $ops[]=['set','a','s'.$i,$i];
+    $ops[]=['pointer','a','end']; $ops[]=['pointer','a','next'];
+    for($i=0;$i<$deleted;$i++) $ops[]=['delete','a','s'.$i];
+    for($i=0;$i<8;$i++) { $ops[]=['set','a','n'.$i,$i]; $ops[]=['pointer','a','key']; }
+    $cases['indexed-rehash-'.$deleted]=$ops;
+}
+$ops=[]; for($i=0;$i<8;$i++) $ops[]=['set','a','s'.$i,$i];
+$body=[['emit','v']]; $first=[];for($i=1;$i<7;$i++)$first[]=['delete','a','s'.$i];$first[]=['set','a','new',9];$body[]=['at',0,$first];
+$ops[]=['foreach_ref','a','v',$body];$ops[]=['emit','a'];$cases['foreach-indexed-rehash']=$ops;
 foreach (['usort','uasort'] as $sort) {
     $cases[$sort] = [['set','a','x',3],['set','a',5,1],['set','a','y',1],['pointer','a','end'],['copy','b','a'],['sort','a',$sort,false],['emit','a'],['emit','b'],['pointer','a','key'],['append','a',9],['emit','a']];
     $cases[$sort.'-reentry'] = [['append','a',3],['append','a',1],['append','a',2],['sort','a',$sort,true],['emit','a']];
     $cases[$sort.'-throw'] = [['append','a',3],['append','a',1],['append','a',2],['sort','a',$sort,'throw'],['emit','a']];
     $cases[$sort.'-throw-keys'] = [['set','a','x',3],['set','a',5,1],['pointer','a','end'],['sort','a',$sort,'throw'],['emit','a'],['pointer','a','key'],['append','a',9],['emit','a']];
     $cases[$sort.'-empty'] = [['assign','a',['array']],['sort','a',$sort,false],['emit','a'],['append','a',7],['emit','a']];
+    $cases[$sort.'-deleted-empty'] = [['append','a',1],['delete','a',0],['sort','a',$sort,false],['append','a',4],['emit','a']];
+    $cases[$sort.'-negative-empty'] = [['set','a',-5,1],['delete','a',-5],['sort','a',$sort,false],['append','a',4],['emit','a']];
 }
 function execute($ops, &$v, &$out, $iteration = -1) {
     foreach ($ops as $op) {
@@ -99,12 +136,15 @@ function execute($ops, &$v, &$out, $iteration = -1) {
                 case 'delete': unset($v[$op[1]][val($op[2],$v)]); break;
                 case 'get': $out[] = ['value', enc($v[$op[1]][val($op[2],$v)])]; break;
                 case 'emit': $out[] = ['value', enc($v[$op[1]])]; break;
+                case 'isset_var': $out[] = ['value',enc(isset($v[$op[1]]))]; break;
                 case 'at': if ($iteration === $op[1]) execute($op[2],$v,$out,$iteration); break;
                 case 'sort':
                     $once = false;
                     ($op[2])($v[$op[1]],function($a,$b) use (&$v,$op,&$once) {
+                        if ($op[3] === 'unset' && !$once) { $once=true; unset($v[$op[1]]); }
+                        elseif ($op[3] === 'rebind' && !$once) { $once=true; $v[$op[1]] =& $v['replacement']; }
                         if ($op[3] === 'throw') { $v[$op[1]][] = 99; throw new Exception('comparison failed'); }
-                        if ($op[3] && !$once) { $once=true; $v[$op[1]][] = 99; }
+                        if ($op[3] === true && !$once) { $once=true; $v[$op[1]][] = 99; }
                         return $a <=> $b;
                     }); break;
                 case 'pointer':
@@ -138,4 +178,24 @@ foreach ($cases as $name=>$ops) {
 function input_enc($x) { return is_array($x) ? array_map('input_enc',$x) : enc($x); }
 foreach ($out['cases'] as $i=>&$c) $c['operations'] = input_enc(array_values($cases)[$i]);
 unset($c);
+// Direct-CV foreach binding releases the previous item while it is still
+// observable to its destructor. This original fixture does not depend on a
+// variable-variable or property assignment path.
+class W12ForeachDestructor {
+    function __destruct() {
+        global $w12_item,$w12_events,$w12_unsafe_reentry;
+        $w12_events[]=['value',enc(get_debug_type($w12_item))];
+        if ($w12_unsafe_reentry) $w12_item=99;
+    }
+}
+// The pinned reference can corrupt its heap during this diagnostic. Keep the
+// crash reproducer isolated from functional oracles and record its process
+// result separately; a reference crash is not PHP conformance evidence.
+if (($argv[1]??'')==='--destructor-probe' || ($argv[1]??'')==='--unsafe-reentry') {
+    $w12_unsafe_reentry=($argv[1]??'')==='--unsafe-reentry';
+    $w12_events=[];$w12_item=null;$w12_array=[new W12ForeachDestructor,42];
+    foreach($w12_array as &$w12_item) { if($w12_item instanceof W12ForeachDestructor) unset($w12_array[0]); }
+    $w12_events[]=['value',enc($w12_array)];$w12_events[]=['value',enc($w12_item)];
+    $out['cases'][]=['name'=>'foreach-destructor-item','operations'=>input_enc([['foreach_destructor']]),'events'=>$w12_events];
+}
 echo json_encode($out, JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES), "\n";

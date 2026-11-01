@@ -171,6 +171,9 @@ func (m *w12Machine) run(ops []any, iteration int) error {
 			}
 		case "emit":
 			m.emit(*m.slot(o[1]))
+		case "isset_var":
+			k := m.slot(o[1]).deref().kind
+			m.emit(boolValue(k != valueUndefined && k != valueNull))
 		case "at":
 			if int(o[1].(int64)) == iteration {
 				err = m.run(o[2].([]any), iteration)
@@ -189,6 +192,18 @@ func (m *w12Machine) run(ops []any, iteration int) error {
 		case "sort":
 			once := false
 			err = m.h.sortArray(m.slot(o[1]), o[2] == "uasort", func(a, b value) (int, error) {
+				if o[3] == "unset" && !once {
+					once = true
+					if err := m.h.unset(m.slot(o[1])); err != nil {
+						return 0, err
+					}
+				}
+				if o[3] == "rebind" && !once {
+					once = true
+					if err := m.h.bind(m.slot(o[1]), m.slot("replacement")); err != nil {
+						return 0, err
+					}
+				}
 				if o[3] == "throw" {
 					if err := m.h.appendValue(m.slot(o[1]), w12Int(99)); err != nil {
 						return 0, err
@@ -261,7 +276,7 @@ func TestW12PHP8512Arrays(t *testing.T) {
 			if err := json.Unmarshal(data, &ref); err != nil {
 				t.Fatal(err)
 			}
-			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 72 {
+			if ref.PHP != "8.5.12" || ref.IntSize*8 != width || len(ref.Cases) != 98 {
 				t.Fatal("invalid reference profile or missing cases")
 			}
 			for _, c := range ref.Cases {

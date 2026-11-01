@@ -247,6 +247,43 @@ func (h *heap) bind(dst, src *value) error {
 	return h.release(old)
 }
 
+// bindForeachItem preserves the direct-object destruction boundary of a
+// foreach CV. Keep the old slot owned while its imminent destructor runs, so
+// a reentrant write cannot release an already-consumed reference target.
+// Capture the next reference first: that destructor may remove its bucket.
+// General assignment/bind order and object-graph release remain unchanged.
+// REQ-016; T-031/032/034.
+func (h *heap) bindForeachItem(dst, src *value) error {
+	if h.closed {
+		return ErrHeapClosed
+	}
+	if src.kind != valueReference {
+		*src = value{kind: valueReference, ref: &reference{refcount: 1, target: *src}}
+	}
+	if dst == src {
+		return nil
+	}
+	next := *src
+	retain(next)
+	old := *dst
+	var first error
+	if old.kind != valueReference || old.ref.refcount == 1 {
+		v := old.deref()
+		if v.kind == valueObject && v.object.refcount == 1 && !v.object.destructorCalled && v.object.class != nil && v.object.class.destructor != nil {
+			first = h.deleteObject(v.object)
+		}
+	}
+	old = *dst
+	*dst = next
+	if err := h.release(old); first == nil {
+		first = err
+	}
+	if first == nil && h.closed {
+		first = ErrHeapClosed
+	}
+	return first
+}
+
 func (h *heap) unset(slot *value) error {
 	old := *slot
 	*slot = value{}
@@ -284,15 +321,14 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
-	dup := &phpArray{nextFree: src.nextFree}
+	dup := &phpArray{nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
 	if !src.packed() {
 		dup.index = make(map[arrayKey]int, src.live)
+	} else {
+		dup.buckets = make([]*bucket, len(src.buckets))
 	}
 	pos := 0
 	for b, ok := src.next(&pos); ok; b, ok = src.next(&pos) {
-		if pos-1 < src.pointer {
-			dup.pointer++
-		}
 		v := b.val
 		if v.kind == valueReference && v.ref.refcount == 1 &&
 			(v.ref.target.kind != valueArray || v.ref.target.array != src) {
@@ -300,26 +336,34 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		}
 		retain(v)
 		if !src.packed() {
+			if pos-1 == src.pointer {
+				dup.pointer = len(dup.buckets)
+			}
 			dup.index[b.key] = len(dup.buckets)
+			dup.buckets = append(dup.buckets, &bucket{key: b.key, val: v})
+		} else {
+			dup.buckets[pos-1] = &bucket{key: b.key, val: v}
 		}
-		dup.buckets = append(dup.buckets, &bucket{key: b.key, val: v})
 		dup.live++
 	}
 	// REQ-017; T-033/034: PHP resets an invalid internal pointer on COW.
-	if dup.pointer >= dup.live {
+	if src.pointer >= len(src.buckets) {
 		dup.pointer = 0
 	}
 	for it, cursor := range src.cursors {
-		rank := 0
-		for _, b := range src.buckets[:min(cursor, len(src.buckets))] {
-			if b != nil {
-				rank++
+		copiedPos := cursor
+		if !src.packed() && cursor < len(src.buckets) {
+			copiedPos = 0
+			for _, b := range src.buckets[:cursor] {
+				if b != nil {
+					copiedPos++
+				}
 			}
 		}
 		if dup.cursors == nil {
 			dup.cursors = make(map[*arrayIterator]int)
 		}
-		dup.cursors[it] = rank
+		dup.cursors[it] = copiedPos
 		it.arrays[dup] = struct{}{}
 	}
 	return dup
@@ -410,14 +454,15 @@ func (h *heap) unsetElement(slot *value, key value) error {
 	return nil
 }
 
-// foreachRef iterates an array by reference. As in PHP, the iterated variable
-// becomes a shared location that the loop owns, so writes and appends in the
-// body modify the iterated array. Each element is bound to item, and appended
-// elements are visited. When the array is separated by copy-on-write, in the
-// body or by the loop, positions are tracked independently in each copy; when
+// foreachRef iterates an array by reference. The loop owns the iterated
+// location. It separates at initialization or an unrelated replacement, not
+// on every fetch of a shared array. Each element is bound to item. When the
+// body separates an array, positions are tracked in candidate copies; when
 // the body assigns an unrelated array, iteration starts at its internal pointer.
 // A tail deletion clamps the cursor, as PHP does, so an
-// element appended into the freed slot is still visited.
+// element appended into the freed slot is still visited. Copying a mixed
+// array with holes can retain an exhausted cursor instead of visiting an
+// append before that raw position, as in the fixed PHP 8.5.12 fixtures.
 func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err error) {
 	var loop value
 	if err := h.bind(&loop, arr); err != nil {
@@ -441,6 +486,7 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 		}
 	}()
 	first := true
+	var current *phpArray
 	for {
 		t := loop.ref.target
 		if t.kind != valueArray {
@@ -448,27 +494,49 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 			h.warnForeach(t)
 			return nil
 		}
-		a, err := h.separate(&loop)
-		if err != nil {
-			return err
-		}
+		a := t.array
 		pos, known := a.cursors[it]
-		if !known {
+		if first || !known {
+			// FE_RESET separates once. A later fetch separates only for an
+			// unrelated replacement, not just because the current array is
+			// shared: binding the next item must release the previous item
+			// before a subsequent body write decides which references to copy.
+			for old := range it.arrays {
+				delete(old.cursors, it)
+				delete(it.arrays, old)
+			}
+			var err error
+			a, err = h.separate(&loop)
+			if err != nil {
+				return err
+			}
 			if !first {
 				pos = a.pointer
+			} else {
+				pos = 0
 			}
-			if a.cursors == nil {
-				a.cursors = make(map[*arrayIterator]int)
+		} else if a != current {
+			// Selecting a tracked copy consumes the other candidates. A
+			// later switch back is a replacement, not a stale saved cursor.
+			for old := range it.arrays {
+				if old != a {
+					delete(old.cursors, it)
+					delete(it.arrays, old)
+				}
 			}
-			it.arrays[a] = struct{}{}
 		}
+		if a.cursors == nil {
+			a.cursors = make(map[*arrayIterator]int)
+		}
+		it.arrays[a] = struct{}{}
+		current = a
 		first = false
 		b, ok := a.next(&pos)
 		a.cursors[it] = pos
 		if !ok {
 			return nil
 		}
-		if err := h.bind(item, &b.val); err != nil {
+		if err := h.bindForeachItem(item, &b.val); err != nil {
 			return err
 		}
 		if err := fn(b.key); err != nil {

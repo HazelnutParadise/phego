@@ -49,38 +49,46 @@ func (h *heap) arrayPointer(slot *value, op string) (value, error) {
 			return value{}, err
 		}
 	}
+	pos := a.pointer
+	for pos < len(a.buckets) && a.buckets[pos] == nil {
+		pos++
+	}
 	switch op {
 	case "reset":
-		a.pointer = 0
+		pos = 0
 	case "end":
-		a.pointer = len(a.buckets) - 1
+		pos = len(a.buckets) - 1
 	case "next":
-		if a.pointer < len(a.buckets) {
-			a.pointer++
-		}
-	case "prev":
-		// PHP cannot retreat from an already invalid internal pointer.
-		if a.pointer >= len(a.buckets) || a.pointer < 0 {
+		if pos >= len(a.buckets) {
 			return boolValue(false), nil
 		}
-		a.pointer--
-		for a.pointer >= 0 && a.buckets[a.pointer] == nil {
-			a.pointer--
+		pos++
+	case "prev":
+		// PHP cannot retreat from an already invalid internal pointer.
+		if pos >= len(a.buckets) || pos < 0 {
+			return boolValue(false), nil
+		}
+		pos--
+		for pos >= 0 && a.buckets[pos] == nil {
+			pos--
 		}
 	}
-	if a.pointer < 0 {
-		a.pointer = len(a.buckets)
+	if pos < 0 {
+		pos = len(a.buckets)
 	}
-	for a.pointer < len(a.buckets) && a.buckets[a.pointer] == nil {
-		a.pointer++
+	for pos < len(a.buckets) && a.buckets[pos] == nil {
+		pos++
 	}
-	if a.pointer >= len(a.buckets) {
+	if op != "current" && op != "key" {
+		a.pointer = pos
+	}
+	if pos >= len(a.buckets) {
 		if op == "key" {
 			return nullValue(), nil
 		}
 		return boolValue(false), nil
 	}
-	b := a.buckets[a.pointer]
+	b := a.buckets[pos]
 	if op == "key" {
 		if b.key.isString {
 			return bytesValue([]byte(b.key.text)), nil
@@ -130,7 +138,24 @@ func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, val
 	if v.kind != valueArray {
 		return &Throwable{"TypeError", "array sort requires an array"}
 	}
+	// Sorting an empty array preserves its next append index. Retain the
+	// argument location for nonempty input, as a by-reference call does: the
+	// callback can unset or rebind the caller's variable without changing it.
+	if v.array.count() == 0 {
+		return nil
+	}
+	var argument value
+	if err := h.bind(&argument, slot); err != nil {
+		return err
+	}
+	defer func() {
+		if e := h.unset(&argument); err == nil {
+			err = e
+		}
+	}()
 	a := h.duplicate(v.array)
+	// Sorting operates on live entries; ordinary packed COW preserves holes.
+	a.toIndexed()
 	a.refcount = 1
 	defer func() {
 		if e := h.release(value{kind: valueArray, array: a}); err == nil {
@@ -169,7 +194,7 @@ func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, val
 		}
 		a.nextFree = int64(len(a.buckets))
 	}
-	if e := h.assign(slot, value{kind: valueArray, array: a}); failure == nil {
+	if e := h.assign(&argument, value{kind: valueArray, array: a}); failure == nil {
 		failure = e
 	}
 	return failure

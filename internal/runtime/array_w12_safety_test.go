@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -107,6 +108,122 @@ func TestW12SortOwnsCallbackArguments(t *testing.T) {
 	must(t, err)
 	if !o.object.freed {
 		t.Fatal("temporary comparator ownership leaked")
+	}
+}
+
+// REQ-017; T-034: a logical position limit cannot wrap into a negative
+// allocation length. Extreme integer keys use ordered storage, without gaps.
+func TestW12PositionLimitBounds(t *testing.T) {
+	a := newArray()
+	a.limit = int(^uint(0) >> 1)
+	before := a.limit
+	if a.growLimit() || a.limit != before {
+		t.Fatal("logical limit overflowed")
+	}
+	h := testHeap(t)
+	var v value
+	must(t, h.setElement(&v, num(t, 9223372036854775807), num(t, 1)))
+	if v.array.packed() || len(v.array.buckets) != 1 {
+		t.Fatal("extreme key allocated its gaps")
+	}
+}
+
+// REQ-016; T-031/032/034. A direct previous object remains visible during
+// the destructor caused by advancing foreach. Reentrant writes must not
+// release an already-consumed owner or modify the newly selected element.
+func TestW12ForeachObjectItemReleaseOrder(t *testing.T) {
+	for _, rewrite := range []bool{false, true} {
+		t.Run(map[bool]string{false: "observe", true: "rewrite"}[rewrite], func(t *testing.T) {
+			h := testHeap(t)
+			var arr, item value
+			seen := ""
+			o, err := h.newObject(&class{name: "C", destructor: func(h *heap, _ value) error {
+				seen = typeName(item)
+				if rewrite {
+					return h.assign(&item, num(t, 99))
+				}
+				return nil
+			}})
+			must(t, err)
+			must(t, h.appendValue(&arr, o))
+			must(t, h.appendValue(&arr, num(t, 42)))
+			must(t, h.foreachRef(&arr, &item, func(arrayKey) error {
+				if item.deref().kind == valueObject {
+					return h.unsetElement(&arr, num(t, 0))
+				}
+				return nil
+			}))
+			if seen != "C" || item.deref().integer != 42 || o.object.refcount != 0 || !o.object.freed {
+				t.Fatalf("seen %q item %+v object count=%d freed=%v", seen, item.deref(), o.object.refcount, o.object.freed)
+			}
+			must(t, h.unset(&arr))
+			must(t, h.unset(&item))
+		})
+	}
+}
+
+// REQ-016; T-031/032/034. These are Go ownership/safety checks. Reentrant
+// access to a reference being destroyed can corrupt the pinned PHP heap;
+// those reference-process failures are recorded separately, never as passes.
+func TestW12ForeachDirectObjectSafety(t *testing.T) {
+	for _, referenceItem := range []bool{false, true} {
+		for _, action := range []string{"throw", "unset", "alias", "delete-next", "resurrect"} {
+			t.Run(fmt.Sprintf("reference=%t/%s", referenceItem, action), func(t *testing.T) {
+				h := testHeap(t)
+				var arr, item, alias, saved value
+				calls, bodies := 0, 0
+				stop := errors.New("stop")
+				old, err := h.newObject(&class{name: "C", destructor: func(h *heap, this value) error {
+					calls++
+					switch action {
+					case "throw":
+						return stop
+					case "unset":
+						return h.unset(&item)
+					case "alias":
+						return h.bind(&alias, &item)
+					case "delete-next":
+						return h.unsetElement(&arr, num(t, 0))
+					case "resurrect":
+						return h.assign(&saved, this)
+					}
+					return nil
+				}})
+				must(t, err)
+				must(t, h.assign(&item, old))
+				if referenceItem {
+					var temporary value
+					must(t, h.bind(&temporary, &item))
+					must(t, h.unset(&temporary))
+				}
+				must(t, h.appendValue(&arr, num(t, 42)))
+				err = h.foreachRef(&arr, &item, func(arrayKey) error { bodies++; return nil })
+				if action == "throw" {
+					if !errors.Is(err, stop) || bodies != 0 {
+						t.Fatalf("error=%v bodies=%d", err, bodies)
+					}
+				} else if err != nil || bodies != 1 {
+					t.Fatalf("error=%v bodies=%d", err, bodies)
+				}
+				if item.deref().kind != valueInt || item.deref().integer != 42 || calls != 1 || len(arr.deref().array.cursors) != 0 {
+					t.Fatalf("item=%+v calls=%d", item.deref(), calls)
+				}
+				retained := action == "alias" || action == "resurrect"
+				if retained {
+					if old.object.refcount != 1 || old.object.freed {
+						t.Fatal("resurrected object lost its owner")
+					}
+				} else if old.object.refcount != 0 || !old.object.freed {
+					t.Fatal("previous object ownership leaked")
+				}
+				for _, slot := range []*value{&arr, &item, &alias, &saved} {
+					must(t, h.unset(slot))
+				}
+				if old.object.refcount != 0 || !old.object.freed || calls != 1 {
+					t.Fatal("cleanup leaked or repeated destruction")
+				}
+			})
+		}
 	}
 }
 

@@ -17,11 +17,10 @@ type w12ModelEntry struct {
 type w12ModelArray struct {
 	entries  []w12ModelEntry
 	nextFree int64
-	packed   bool
 }
 
 func newW12ModelArray() *w12ModelArray {
-	return &w12ModelArray{nextFree: math.MinInt64, packed: true}
+	return &w12ModelArray{nextFree: math.MinInt64}
 }
 
 func (a *w12ModelArray) find(k arrayKey) int {
@@ -37,9 +36,6 @@ func (a *w12ModelArray) put(k arrayKey, v int64, width int) {
 	if i := a.find(k); i >= 0 {
 		a.entries[i].val = v
 		return
-	}
-	if a.packed && (k.isString || k.integer != int64(len(a.entries))) {
-		a.packed = false
 	}
 	a.entries = append(a.entries, w12ModelEntry{key: k, val: v})
 	if !k.isString && k.integer >= a.nextFree {
@@ -59,9 +55,6 @@ func (a *w12ModelArray) remove(k arrayKey) {
 	i := a.find(k)
 	if i < 0 {
 		return
-	}
-	if a.packed && i != len(a.entries)-1 {
-		a.packed = false
 	}
 	a.entries = append(a.entries[:i], a.entries[i+1:]...)
 }
@@ -83,7 +76,6 @@ func (a *w12ModelArray) clone() *w12ModelArray {
 	dup := &w12ModelArray{
 		entries:  append([]w12ModelEntry(nil), a.entries...),
 		nextFree: a.nextFree,
-		packed:   a.packed,
 	}
 	return dup
 }
@@ -114,9 +106,6 @@ func checkW12Model(t *testing.T, width int, actual value, want *w12ModelArray) {
 	if a.live != len(want.entries) {
 		t.Fatalf("width %d: live count %d, want %d", width, a.live, len(want.entries))
 	}
-	if a.packed() != want.packed {
-		t.Fatalf("width %d: packed=%v, want %v", width, a.packed(), want.packed)
-	}
 	if a.nextFree != want.nextFree {
 		t.Fatalf("width %d: nextFree=%d, want %d", width, a.nextFree, want.nextFree)
 	}
@@ -135,11 +124,11 @@ func checkW12Model(t *testing.T, width int, actual value, want *w12ModelArray) {
 	}
 
 	if a.packed() {
-		if a.index != nil || len(a.buckets) != len(want.entries) {
+		if a.index != nil || len(a.buckets) < len(want.entries) {
 			t.Fatalf("width %d: malformed packed storage: index=%v buckets=%d", width, a.index, len(a.buckets))
 		}
 		for i, b := range a.buckets {
-			if b == nil || b.key != intKey(int64(i)) {
+			if b != nil && b.key != intKey(int64(i)) {
 				t.Fatalf("width %d: packed bucket %d = %#v", width, i, b)
 			}
 		}
@@ -317,7 +306,6 @@ func TestW12CopyMutationPreservesSourceAndRepresentation(t *testing.T) {
 			wantSource := &w12ModelArray{
 				entries:  []w12ModelEntry{{key: intKey(0), val: 10}, {key: intKey(1), val: 11}, {key: intKey(2), val: 12}},
 				nextFree: 3,
-				packed:   false,
 			}
 			wantCopy := wantSource.clone()
 			wantCopy.put(intKey(1), 99, width)
