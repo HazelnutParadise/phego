@@ -11,11 +11,15 @@ import (
 	"strings"
 )
 
-// Write authorization follows the resolved directory handles, not the spelling
+// File authorization follows the resolved directory handles, not the spelling
 // of the path. Host code owns the mount layout; PHP cannot rename directories
 // or create links through this API.
-func (p *Policy) openWrite(root *os.Root, grant FileGrant, rel, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
-	denied := func(rule string) error { return &PolicyError{Kind: FileWrite, Op: "open", Target: name, Rule: rule} }
+func (p *Policy) openRootFile(root *os.Root, grant FileGrant, rel, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
+	kind := FileRead
+	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
+		kind = FileWrite
+	}
+	denied := func(rule string) error { return &PolicyError{Kind: kind, Op: "open", Target: name, Rule: rule} }
 	if redirects >= 40 {
 		return nil, denied("path-changed")
 	}
@@ -78,7 +82,28 @@ func (p *Policy) openWrite(root *os.Root, grant FileGrant, rel, name string, fla
 				return nil, denied("outside-root")
 			}
 			pending = append(strings.Split(filepath.ToSlash(target), "/"), pending...)
+			resolvedRel := path.Join(append(append([]string(nil), names...), pending...)...)
+			if resolvedRel == ".." || strings.HasPrefix(resolvedRel, "../") {
+				return nil, denied("outside-root")
+			}
+			resolvedName := path.Join(grant.Path, resolvedRel)
+			selected, _, e := p.fileGrant(kind, "open", resolvedName)
+			if e != nil {
+				return nil, e
+			}
+			if selected.Path != grant.Path {
+				return p.openFile(resolvedName, flag, perm, redirects+1)
+			}
 			continue
+		}
+		if st.IsDir() {
+			mounted, e := p.directoryMount(root, grant, st)
+			if e != nil {
+				return nil, e
+			}
+			if mounted != "" {
+				return p.openFile(path.Join(mounted, path.Join(pending...)), flag, perm, redirects+1)
+			}
 		}
 		if len(pending) == 0 {
 			leaf = component
@@ -105,17 +130,42 @@ func (p *Policy) openWrite(root *os.Root, grant FileGrant, rel, name string, fla
 		names = append(names, component)
 	}
 	if leaf == "" {
+		if kind == FileRead {
+			return stack[len(stack)-1].root.Open(".")
+		}
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrInvalid}
 	}
 	resolved := path.Join(grant.Path, path.Join(append(append([]string(nil), names...), leaf)...))
-	selected, _, err := p.fileGrant(FileWrite, "open", resolved)
+	selected, _, err := p.fileGrant(kind, "open", resolved)
 	if err != nil {
 		return nil, err
 	}
 	if selected.Path != grant.Path {
 		return p.openFile(resolved, flag, perm, redirects+1)
 	}
-	protections, err := p.writeProtections(root, grant)
+	if kind == FileRead {
+		f, err := stack[len(stack)-1].root.OpenFile(leaf, flag, perm)
+		if err != nil {
+			return nil, err
+		}
+		actual, err := f.Stat()
+		if err != nil {
+			f.Close()
+			return nil, err
+		}
+		if !os.SameFile(before, actual) {
+			f.Close()
+			return nil, denied("path-changed")
+		}
+		if actual.Mode().IsRegular() && !singleLink(actual) {
+			if err := p.hiddenReadAlias(root, grant, actual, name); err != nil {
+				f.Close()
+				return nil, err
+			}
+		}
+		return f, nil
+	}
+	protections, err := p.fileProtections(root, grant)
 	if err != nil {
 		var pe *PolicyError
 		if errors.As(err, &pe) && pe.Target == "" {
@@ -192,7 +242,7 @@ func (p *Policy) openWrite(root *os.Root, grant FileGrant, rel, name string, fla
 	return f, nil
 }
 
-type writeProtection struct {
+type fileProtection struct {
 	root    *os.Root
 	info    fs.FileInfo
 	exclude []fs.FileInfo
@@ -200,7 +250,7 @@ type writeProtection struct {
 
 // Both the mounted backend and the parent tree hidden underneath a read-only
 // mount are protected. A writable descendant only excludes its own actual tree.
-func (p *Policy) writeProtections(root *os.Root, grant FileGrant) (out []writeProtection, err error) {
+func (p *Policy) fileProtections(root *os.Root, grant FileGrant) (out []fileProtection, err error) {
 	defer func() {
 		if err != nil {
 			for _, r := range out {
@@ -241,7 +291,7 @@ func (p *Policy) writeProtections(root *os.Root, grant FileGrant) (out []writePr
 				}
 				return out, e
 			}
-			protection := writeProtection{root: r, info: info}
+			protection := fileProtection{root: r, info: info}
 			out = append(out, protection)
 			// A mount can begin inside a protected tree without traversing its
 			// root. Only an explicit, deeper virtual writable mount overrides it.
@@ -299,7 +349,7 @@ func singleLink(info fs.FileInfo) bool {
 
 // contains checks pre-existing hard-link aliases without following symlinks.
 // Metadata work, directory depth and directory buffers are explicitly bounded.
-func (p writeProtection) contains(target fs.FileInfo, name string) (bool, error) {
+func (p fileProtection) contains(target fs.FileInfo, name string) (bool, error) {
 	const maxEntries = 100000
 	visited := 0
 	var walk func(*os.Root, int) (bool, error)
@@ -408,4 +458,70 @@ func rootContains(parent, child *os.Root, childName string) (bool, error) {
 		current = next
 	}
 	return false, &PolicyError{Kind: FileWrite, Op: "open", Rule: "protection-check-limit"}
+}
+
+// directoryMount recognizes nested mounts by physical directory identity, also
+// when the host filesystem accepts a different spelling of the directory name.
+func (p *Policy) directoryMount(root *os.Root, grant FileGrant, info fs.FileInfo) (string, error) {
+	prefix := strings.TrimSuffix(grant.Path, "/") + "/"
+	best := ""
+	for _, mounted := range p.files {
+		if mounted.Path == grant.Path || !strings.HasPrefix(mounted.Path, prefix) || len(mounted.Path) <= len(best) {
+			continue
+		}
+		shadow, err := root.Stat(strings.TrimPrefix(mounted.Path, prefix))
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		if os.SameFile(info, shadow) {
+			best = mounted.Path
+		}
+	}
+	return best, nil
+}
+
+// A hard link has no symlink target to rematch. Refuse an alias of data hidden
+// by a nested mount, while leaving ordinary readable hard links usable.
+func (p *Policy) hiddenReadAlias(root *os.Root, grant FileGrant, target fs.FileInfo, name string) error {
+	prefix := strings.TrimSuffix(grant.Path, "/") + "/"
+	for _, mounted := range p.files {
+		if mounted.Path == grant.Path || !strings.HasPrefix(mounted.Path, prefix) {
+			continue
+		}
+		shadow, err := root.OpenRoot(strings.TrimPrefix(mounted.Path, prefix))
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if mounted.Dir != "" {
+			backend, e := os.OpenRoot(mounted.Dir)
+			if e == nil {
+				a, ae := backend.Stat(".")
+				b, be := shadow.Stat(".")
+				backend.Close()
+				if ae == nil && be == nil && os.SameFile(a, b) {
+					shadow.Close()
+					continue
+				}
+			}
+		}
+		found, err := (fileProtection{root: shadow}).contains(target, name)
+		shadow.Close()
+		if err != nil {
+			var pe *PolicyError
+			if errors.As(err, &pe) {
+				pe.Kind = FileRead
+			}
+			return err
+		}
+		if found {
+			return &PolicyError{Kind: FileRead, Op: "open", Target: name, Rule: "not-granted"}
+		}
+	}
+	return nil
 }

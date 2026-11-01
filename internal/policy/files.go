@@ -38,10 +38,7 @@ func (p *Policy) openFile(name string, flag int, perm fs.FileMode, redirects int
 		return nil, err
 	}
 	defer root.Close()
-	if kind == FileWrite {
-		return p.openWrite(root, grant, rel, name, flag, perm, redirects)
-	}
-	f, err := root.OpenFile(rel, flag, perm)
+	f, err := p.openRootFile(root, grant, rel, name, flag, perm, redirects)
 	if err != nil {
 		var pe *fs.PathError
 		if errors.As(err, &pe) && strings.Contains(pe.Err.Error(), "escapes") {
