@@ -227,6 +227,65 @@ class C
         )
 
 
+class TestParseStubsReview(unittest.TestCase):
+    """Cases found by the PR #105 review, each checked against php-8.5.12 sources."""
+
+    def test_open_tag_does_not_hide_the_first_declaration(self):
+        symbols = upstream_diff.parse_stubs(
+            "<?php\n\n/** @generate-class-entries */\n\n"
+            "final class Closure\n{\n    private function __construct() {}\n"
+            "    public static function bind(Closure $closure): ?Closure {}\n}\n"
+        )
+        self.assertEqual(symbols["class Closure"], "final class Closure")
+        self.assertIn("method Closure::bind", symbols)
+        self.assertNotIn("function bind", symbols)
+
+    def test_heredoc_is_a_string(self):
+        symbols = upstream_diff.parse_stubs(
+            "<?php\nnamespace N;\nconst X = <<<TXT\n} ; function fake(): void {}\nTXT;\n"
+            "function real(): void {}\n"
+        )
+        self.assertEqual(sorted(symbols), ["const N\\X", "function N\\real"])
+        self.assertEqual(symbols["const N\\X"],
+                         "const X = <<<TXT\n} ; function fake(): void {}\nTXT")
+
+    def test_whitespace_inside_strings_is_kept(self):
+        two = upstream_diff.parse_stubs('<?php function f(string $x = "a  b"):  void {}')
+        one = upstream_diff.parse_stubs('<?php function f(string $x = "a b"): void {}')
+        self.assertEqual(two["function f"], 'function f(string $x = "a  b"): void')
+        self.assertNotEqual(two, one)
+
+    def test_enum_cases(self):
+        symbols = upstream_diff.parse_stubs(
+            "<?php\nenum RoundingMode {\n    case HalfAwayFromZero;\n    case HalfTowardsZero;\n}\n"
+            "enum Suit: string { case Hearts = 'H'; public function color(): string { switch (1) { case 1: return ''; } } }\n"
+        )
+        self.assertEqual(symbols["case RoundingMode::HalfAwayFromZero"], "case HalfAwayFromZero")
+        self.assertEqual(symbols["case Suit::Hearts"], "case Hearts = 'H'")
+        self.assertEqual(sorted(k for k in symbols if k.startswith("case ")),
+                         ["case RoundingMode::HalfAwayFromZero",
+                          "case RoundingMode::HalfTowardsZero", "case Suit::Hearts"])
+
+    def test_every_constant_of_a_list(self):
+        symbols = upstream_diff.parse_stubs(
+            "<?php namespace N; interface I { public const int A = 1, B = f(2, 3); }\nconst G = [1, 2], H = 3;"
+        )
+        self.assertEqual(symbols["const N\\I::A"], "public const int A = 1")
+        self.assertEqual(symbols["const N\\I::B"], "public const int B = f(2, 3)")
+        self.assertEqual(symbols["const N\\G"], "const G = [1, 2]")
+        self.assertEqual(symbols["const N\\H"], "const H = 3")
+
+    def test_conditional_declarations_keep_every_branch(self):
+        text = ("<?php\n#if FOO\nfunction f(int $x): void {}\n#else\n"
+                "function f(string $x): void {}\n#endif\nfunction g(): void {}\n")
+        symbols = upstream_diff.parse_stubs(text)
+        self.assertEqual(symbols["function f"],
+                         "[if FOO] function f(int $x): void\n[if FOO / else] function f(string $x): void")
+        self.assertEqual(symbols["function g"], "function g(): void")
+        changed = upstream_diff.parse_stubs(text.replace("int $x", "float $x"))
+        self.assertNotEqual(changed["function f"], symbols["function f"])
+
+
 class TestGrammarSymbols(unittest.TestCase):
     def test_tokens_and_rules(self):
         parser_y = """%token <ident> T_STRING "identifier"
@@ -408,6 +467,18 @@ class TestReadArchive(unittest.TestCase):
             "wrong root": (
                 mock.patch.object(upstream_diff, "MAX_ARCHIVE", upstream_diff.MAX_ARCHIVE),
                 self.tar_xz([("php-8.2.1/Zend/zend_language_parser.y", b"%token T_A\n")]),
+            ),
+            "too many members": (
+                mock.patch.object(upstream_diff, "MAX_MEMBERS", 2),
+                self.tar_xz([(f"{self.ROOT}/t{i}.phpt", b"x") for i in range(3)]),
+            ),
+            "unpacks too large": (
+                mock.patch.object(upstream_diff, "MAX_UNPACKED", 5),
+                self.tar_xz([(f"{self.ROOT}/README", b"abc"), (f"{self.ROOT}/LICENSE", b"abc")]),
+            ),
+            "keeps too much": (
+                mock.patch.object(upstream_diff, "MAX_KEPT", 5),
+                self.tar_xz([(f"{self.ROOT}/a.phpt", b"abc"), (f"{self.ROOT}/b.phpt", b"abc")]),
             ),
         }
         for label, (patched, data) in cases.items():

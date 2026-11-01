@@ -22,6 +22,10 @@ import tarfile
 
 MAX_ARCHIVE = 100 * 1024 * 1024
 MAX_FILE = 32 * 1024 * 1024
+# PHP 8.5.12 has 27,730 members, 149 MB unpacked and 30.5 MB of kept text.
+MAX_MEMBERS = 100_000
+MAX_UNPACKED = 512 * 1024 * 1024
+MAX_KEPT = 64 * 1024 * 1024
 
 # Source path prefixes and NEWS sections mapped to the work packages that
 # implement them. The longest matching prefix wins; unmatched paths map to
@@ -59,6 +63,10 @@ _STUB_MODIFIERS = frozenset({
     "public", "protected", "private", "static", "final", "abstract", "readonly", "var",
 })
 _CLASS_KEYWORDS = frozenset({"class", "interface", "trait", "enum"})
+_HEREDOC = re.compile(r"<<<[ \t]*([\"']?)([A-Za-z_\x80-\uffff][A-Za-z0-9_\x80-\uffff]*)\1\r?\n")
+_DIRECTIVE = re.compile(r"#[ \t]*(if|ifdef|ifndef|elif|else|endif)\b([^\r\n]*)")
+# Preprocessor lines survive metadata stripping as "\x01directive\x01".
+_PP = "\x01"
 _NEWS_HEADER = re.compile(
     r"^\s*[0-9]{1,2}\s+[A-Za-z]{3,9}\s+[0-9]{4},\s+PHP\s+(\S+)\s*$"
 )
@@ -103,6 +111,19 @@ def _skip_quoted(text, index):
     return index
 
 
+def _skip_heredoc(text, index):
+    """Return the end of the heredoc or nowdoc at index, or None if none starts there."""
+    match = _HEREDOC.match(text, index)
+    if match is None:
+        return None
+    label = re.escape(match.group(2))
+    closing = re.compile(r"^[ \t]*" + label + r"(?![A-Za-z0-9_\x80-\uffff])", re.M)
+    end = closing.search(text, match.end())
+    if end is None:
+        return len(text)
+    return end.end()
+
+
 def _skip_attribute(text, index):
     index += 1
     depth = 0
@@ -132,6 +153,16 @@ def _strip_metadata(text):
             index = _skip_quoted(text, index)
             out.append(text[start:index])
             continue
+        if text.startswith("<<<", index):
+            end = _skip_heredoc(text, index)
+            if end is not None:
+                out.append(text[index:end])
+                index = end
+                continue
+        if text.startswith("<?php", index) or text.startswith("?>", index):
+            index += 5 if char == "<" else 2
+            out.append(" ; ")
+            continue
         if char == "/" and index + 1 < length and text[index + 1] == "/":
             index += 2
             while index < length and text[index] not in "\r\n":
@@ -148,6 +179,12 @@ def _strip_metadata(text):
             if index + 1 < length and text[index + 1] == "[":
                 index = _skip_attribute(text, index)
                 out.append(" ")
+                continue
+            line_start = text.rfind("\n", 0, index) + 1
+            directive = _DIRECTIVE.match(text, index)
+            if directive and not text[line_start:index].strip():
+                out.append(f" {_PP}{directive.group(1)} {_collapse(directive.group(2))}{_PP} ")
+                index = directive.end()
                 continue
             index += 1
             while index < length and text[index] not in "\r\n":
@@ -172,6 +209,17 @@ def _tokenize(text):
             index = _skip_quoted(text, index)
             tokens.append(("string", text[start:index], start, index))
             continue
+        if text.startswith("<<<", index):
+            end = _skip_heredoc(text, index)
+            if end is not None:
+                tokens.append(("string", text[index:end], index, end))
+                index = end
+                continue
+        if char == _PP:
+            end = text.index(_PP, index + 1) + 1
+            tokens.append(("pp", text[index + 1:end - 1].strip(), index, end))
+            index = end
+            continue
         if char.isalpha() or char in "_\\":
             start = index
             while index < length and (text[index].isalnum() or text[index] in "_\\"):
@@ -184,7 +232,25 @@ def _tokenize(text):
 
 
 def _collapse(text):
-    return re.sub(r"\s+", " ", text).strip()
+    """Collapse whitespace runs to one space outside string literals."""
+    out = []
+    plain = 0
+    index = 0
+    while index < len(text):
+        char = text[index]
+        end = None
+        if char in "'\"":
+            end = _skip_quoted(text, index)
+        elif text.startswith("<<<", index):
+            end = _skip_heredoc(text, index)
+        if end is None:
+            index += 1
+            continue
+        out.append(re.sub(r"\s+", " ", text[plain:index]))
+        out.append(text[index:end])
+        plain = index = end
+    out.append(re.sub(r"\s+", " ", text[plain:]))
+    return "".join(out).strip()
 
 
 def _qualify(namespace, name):
@@ -199,7 +265,7 @@ def _statement_start(tokens, index):
         cursor -= 1
     if cursor < 0:
         return 0
-    if tokens[cursor][0] == "symbol" and tokens[cursor][1] in (";", "{", "}"):
+    if tokens[cursor][0] == "pp" or (tokens[cursor][0] == "symbol" and tokens[cursor][1] in (";", "{", "}")):
         return cursor + 1
     return None
 
@@ -237,6 +303,7 @@ def parse_stubs(text):
     scopes = []
     base_namespace = ""
     depth = 0
+    conditions = []
 
     def namespace_now():
         return scopes[-1]["namespace"] if scopes else base_namespace
@@ -244,9 +311,32 @@ def parse_stubs(text):
     def class_now():
         return scopes[-1]["class"] if scopes else None
 
+    def class_kind_now():
+        return scopes[-1].get("kind") if scopes else None
+
+    def record(symbol, signature):
+        signature = signature.replace(_PP, "")
+        if conditions:
+            signature = f"[{' && '.join(conditions)}] {signature}"
+        if symbol in symbols:
+            signature = symbols[symbol] + "\n" + signature
+        symbols[symbol] = signature
+
     index = 0
     while index < len(tokens):
         kind, value, start, _ = tokens[index]
+        if kind == "pp":
+            directive, _, condition = value.partition(" ")
+            if directive in ("if", "ifdef", "ifndef"):
+                conditions.append(value)
+            elif directive == "elif" and conditions:
+                conditions[-1] = f"{conditions[-1]} / {value}"
+            elif directive == "else" and conditions:
+                conditions[-1] = f"{conditions[-1]} / else"
+            elif directive == "endif" and conditions:
+                conditions.pop()
+            index += 1
+            continue
         if kind == "symbol":
             if value == "{":
                 depth += 1
@@ -301,10 +391,11 @@ def parse_stubs(text):
             terminator = tokens[cursor]
             signature = _collapse(cleaned[tokens[declaration][2]:terminator[2]])
             qualified = _qualify(namespace_now(), name)
-            symbols[f"{value} {qualified}"] = signature
+            record(f"{value} {qualified}", signature)
             if terminator[1] == "{":
                 depth += 1
-                scopes.append({"depth": depth, "namespace": namespace_now(), "class": qualified})
+                scopes.append({"depth": depth, "namespace": namespace_now(), "class": qualified,
+                               "kind": value})
                 index = cursor + 1
             else:
                 index = cursor + 1
@@ -331,13 +422,25 @@ def parse_stubs(text):
             signature = _collapse(cleaned[tokens[declaration][2]:terminator[2]])
             current_class = class_now()
             if current_class is not None:
-                symbols[f"method {current_class}::{name}"] = signature
+                record(f"method {current_class}::{name}", signature)
             else:
-                symbols[f"function {_qualify(namespace_now(), name)}"] = signature
+                record(f"function {_qualify(namespace_now(), name)}", signature)
             if terminator[1] == "{":
                 index = _matching_brace(tokens, cursor) + 1
             else:
                 index = cursor + 1
+            continue
+
+        if value == "case" and class_kind_now() == "enum":
+            cursor = index + 1
+            while cursor < len(tokens) and tokens[cursor][1] != ";":
+                cursor += 1
+            if cursor >= len(tokens):
+                break
+            if index + 1 < cursor and tokens[index + 1][0] == "ident":
+                signature = _collapse(cleaned[start:tokens[cursor][2]])
+                record(f"case {class_now()}::{tokens[index + 1][1]}", signature)
+            index = cursor + 1
             continue
 
         if value == "const":
@@ -346,33 +449,39 @@ def parse_stubs(text):
                 index += 1
                 continue
             cursor = index + 1
-            equals = None
-            while cursor < len(tokens) and tokens[cursor][1] != ";":
-                if equals is None and tokens[cursor][0] == "symbol" and tokens[cursor][1] == "=":
-                    equals = cursor
+            nesting = 0
+            items = [[]]
+            while cursor < len(tokens) and not (nesting == 0 and tokens[cursor][1] == ";"):
+                token = tokens[cursor]
+                if token[0] == "symbol" and token[1] in "([{":
+                    nesting += 1
+                elif token[0] == "symbol" and token[1] in ")]}":
+                    nesting -= 1
+                if nesting == 0 and token[0] == "symbol" and token[1] == ",":
+                    items.append([])
+                else:
+                    items[-1].append(cursor)
                 cursor += 1
             if cursor >= len(tokens):
                 break
-            name = None
-            if equals is not None:
-                for back in range(equals - 1, index, -1):
-                    if tokens[back][0] == "ident":
-                        name = tokens[back][1]
-                        break
-            else:
-                for ahead in range(index + 1, cursor):
-                    if tokens[ahead][0] == "ident":
-                        name = tokens[ahead][1]
-                        break
-            if name is None:
-                index = cursor + 1
-                continue
-            signature = _collapse(cleaned[tokens[declaration][2]:tokens[cursor][2]])
-            current_class = class_now()
-            if current_class is not None:
-                symbols[f"const {current_class}::{name}"] = signature
-            else:
-                symbols[f"const {_qualify(namespace_now(), name)}"] = signature
+            # Each "NAME = value" item becomes its own symbol; the modifiers,
+            # "const" and the type before the first name are shared.
+            header = None
+            for item in items:
+                equals = next((at for at in item if tokens[at][0] == "symbol" and tokens[at][1] == "="), None)
+                idents = [at for at in item if tokens[at][0] == "ident" and (equals is None or at < equals)]
+                if not idents:
+                    continue
+                name_at = idents[-1] if equals is not None else idents[0]
+                if header is None:
+                    header = cleaned[tokens[declaration][2]:tokens[name_at][2]]
+                body = cleaned[tokens[name_at][2]:tokens[item[-1]][3]]
+                signature = _collapse(header + body)
+                current_class = class_now()
+                if current_class is not None:
+                    record(f"const {current_class}::{tokens[name_at][1]}", signature)
+                else:
+                    record(f"const {_qualify(namespace_now(), tokens[name_at][1])}", signature)
             index = cursor + 1
             continue
 
@@ -494,8 +603,10 @@ def read_archive(data, version):
     Paths are relative to the archive's "php-<version>/" root. Only
     Zend/zend_language_parser.y, Zend/zend_language_scanner.l, *.stub.php,
     *.phpt and NEWS are read; text is decoded as UTF-8 with replacement.
-    Archives larger than MAX_ARCHIVE, members larger than MAX_FILE, paths
-    outside the root, absolute paths and ".." components raise ValueError.
+    Archives larger than MAX_ARCHIVE, members larger than MAX_FILE, more than
+    MAX_MEMBERS members, more than MAX_UNPACKED bytes unpacked in all, more
+    than MAX_KEPT bytes of kept files, paths outside the root, absolute paths
+    and ".." components raise ValueError.
     """
     if not isinstance(data, (bytes, bytearray)):
         raise ValueError("archive must be bytes")
@@ -504,9 +615,12 @@ def read_archive(data, version):
     root = "php-" + version
     files = {}
     seen = set()
+    unpacked = kept = 0
     try:
         with tarfile.open(fileobj=io.BytesIO(data), mode="r|*") as stream:
             for member in stream:
+                if len(seen) >= MAX_MEMBERS:
+                    raise ValueError("too many archive members")
                 name = member.name.rstrip("/") if member.isdir() else member.name
                 if not _safe_path(name) or not (name == root or name.startswith(root + "/")):
                     raise ValueError("invalid archive path")
@@ -519,9 +633,15 @@ def read_archive(data, version):
                     raise ValueError("non-regular archive entry")
                 if member.size < 0 or member.size > MAX_FILE:
                     raise ValueError("archive member too large")
+                unpacked += member.size
+                if unpacked > MAX_UNPACKED:
+                    raise ValueError("archive unpacks too large")
                 path = name[len(root) + 1:]
                 if not _wanted_path(path):
                     continue
+                kept += member.size
+                if kept > MAX_KEPT:
+                    raise ValueError("archive keeps too much text")
                 handle = stream.extractfile(member)
                 if handle is None:
                     raise ValueError("cannot read archive entry")

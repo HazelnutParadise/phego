@@ -8,7 +8,9 @@
       "suites": [
         {"id": "lexer-corpus", "tests": ["TestLexMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
         {"id": "parser-corpus", "tests": ["TestParseMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
-        {"id": "operators", "tests": ["TestPHP8512OperatorsMatchReference", "TestPHP8512NumericStringsMatchReference"]}
+        {"id": "operators", "tests": ["TestPHP8512OperatorsMatchReference", "TestPHP8512NumericStringsMatchReference"]},
+        {"id": "hir-compile-errors", "tests": ["TestLowerMatchesCompileReference"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "hir-reflection-effects", "tests": ["TestLowerMatchesReflection", "TestEffectsCoverObservedBehaviour"]}
       ],
       "security_exceptions": []
     },
