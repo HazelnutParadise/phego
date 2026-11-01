@@ -1,0 +1,86 @@
+{
+  "commit": "6b3c6f3360deb27de17e733c9786750fdeb624d2",
+  "raw_files": {
+    "build-1-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "build-1.log": {
+      "bytes": 688,
+      "sha256": "ce0bd887cb16ef1cfb5f08864eff42c59a99ff0f6f3471784ae46bb452cf7177"
+    },
+    "build-2-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "build-2.log": {
+      "bytes": 688,
+      "sha256": "fc77fa5aa609771ed2ab4561202a3a4dc6d63a14344d392822d66981a4b3346f"
+    },
+    "commit.txt": {
+      "bytes": 42,
+      "sha256": "cbd737b09d1e4332c530ac83209829163e35b006f273f691d3099621b8deb016"
+    },
+    "comparison.txt": {
+      "bytes": 41,
+      "sha256": "9b0d570ea9323767d5b6d6e6710e31a6e98b748535bff2df92fcc705c092d3cc"
+    },
+    "cpu.txt": {
+      "bytes": 86,
+      "sha256": "9ab44772be5efa082ac28340efbf6179cf6a06fc8e40ad60485348beab3321b0"
+    },
+    "lock-sha256.txt": {
+      "bytes": 149,
+      "sha256": "46eb66eaa84e9f896555f53426e0f233c98ddeaf8dc3c7c9623c725a1a6641ed"
+    },
+    "os.txt": {
+      "bytes": 117,
+      "sha256": "5ad411c6f644b9af8a70751f32ae5513483d74eb1340c2badc5686ca36daac1b"
+    },
+    "probe-build-1-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "probe-build-1.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe-build-2-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "probe-build-2.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe-run-1-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "probe-run-1.log": {
+      "bytes": 30,
+      "sha256": "4cf8959a43931ca40b4ed4168fc634a1b32bc3e42948e8e3518f32d297559537"
+    },
+    "probe-run-2-exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "probe-run-2.log": {
+      "bytes": 30,
+      "sha256": "4cf8959a43931ca40b4ed4168fc634a1b32bc3e42948e8e3518f32d297559537"
+    },
+    "result-1.txt": {
+      "bytes": 220,
+      "sha256": "4062941b192fdad2c781c91cba9ff1ed9bc8ceded8159fc75ce0283294e7ad4e"
+    },
+    "result-2.txt": {
+      "bytes": 220,
+      "sha256": "4062941b192fdad2c781c91cba9ff1ed9bc8ceded8159fc75ce0283294e7ad4e"
+    },
+    "runner.txt": {
+      "bytes": 82,
+      "sha256": "38883262c6dc87d5a58bcadda75eeaddd17ecc5feb9638d94faf6d61beea081e"
+    }
+  },
+  "run_id": 40868256713
+}

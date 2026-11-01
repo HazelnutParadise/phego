@@ -1,0 +1,54 @@
+name: Native PHP build diagnostics
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/native-php-build-diagnostics.yml'
+      - 'compat.lock.json'
+      - 'tools/reference_php.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-php-build-diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Acquire fixed inputs
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 \
+            https://www.php.net/distributions/php-8.5.12.tar.xz -o "$RUNNER_TEMP/php.tar.xz"
+          printf '%s  %s\n' 08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209 "$RUNNER_TEMP/php.tar.xz" | sha256sum -c -
+          docker pull --platform linux/amd64 buildpack-deps@sha256:702b53c861e19913b8720993a4032b13441ed63916e123b403301423977f818f
+      - name: Build and retain configuration evidence
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/php-diagnostics"
+          sha256sum compat.lock.json tools/reference_php.py > "$RUNNER_TEMP/php-diagnostics/inputs.txt"
+          python3 - <<'PYCODE' 2>&1 | tee "$RUNNER_TEMP/php-diagnostics/build.log"
+          import os, pathlib, subprocess, sys
+          sys.path.insert(0, str(pathlib.Path('tools').resolve()))
+          import reference_php
+          archive = pathlib.Path(os.environ['RUNNER_TEMP']) / 'php.tar.xz'
+          lock = reference_php._load_compat()
+          reference_php.verify_archive(archive, lock['php']['archive_sha256'])
+          command = reference_php._build_command(archive, 1800, lock, platform='linux/amd64')
+          command[2:2] = ['--rm']
+          command[-1] += "; echo '=== BUILD SYSTEM DEFINES ==='; grep -E '^#define PHP_(BUILD_SYSTEM|UNAME)' ./main/php_config.h; ./sapi/cli/php -n -i > /tmp/phpinfo.txt; echo '=== PHPINFO BUILD SYSTEM ==='; grep '^Build System' /tmp/phpinfo.txt"
+          result = subprocess.run(command, check=False)
+          raise SystemExit(result.returncode)
+          PYCODE
+      - name: Retain raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-php-build-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/php-diagnostics/
+          if-no-files-found: warn
+          retention-days: 30

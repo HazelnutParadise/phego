@@ -1,0 +1,300 @@
+{
+  "scope": "documentation_only",
+  "source_commit": "57f19a93a872cee5ccaaaacff470284f9114666e",
+  "plan_sha256": "7bdb58f59adc8c6e92f05e64a654537d211cf2f7bb93e6bea6d67d2904de7402",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "python3 tools/validate_docs.py",
+      "status": "pass",
+      "checks": 33
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "status": "pass",
+      "tests": 11
+    }
+  ],
+  "document_report": {
+    "schema_version": 1,
+    "document_version": "1.1.2",
+    "scope": "documentation_only",
+    "status": "pass",
+    "counts": {
+      "chapters": 40,
+      "requirements": 100,
+      "acceptance_scenarios": 200,
+      "work_packages": 60,
+      "decisions": 28,
+      "sources": 57,
+      "local_markdown_links": 78,
+      "checks": 33,
+      "catalogs": {
+        "php-history-policy.json": 7,
+        "competitor-catalog.json": 8,
+        "application-catalog.json": 9
+      }
+    },
+    "product_test_status": "not_run",
+    "engine_implemented": false,
+    "remote_publication_checked": false,
+    "external_urls_checked_by_this_tool": false,
+    "checks": [
+      {
+        "check": "phego-requirements.json version",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-requirements.json complete IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-requirements.json unique IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-requirements.json unexecuted planning state",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-acceptance-tests.json version",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-acceptance-tests.json complete IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-acceptance-tests.json unique IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-acceptance-tests.json unexecuted planning state",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-work-packages.json version",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-work-packages.json complete IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-work-packages.json unique IDs",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "phego-work-packages.json unexecuted planning state",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "bidirectional requirement/test/work traceability",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "acyclic work-package dependencies",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "40 unique chapter anchors",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "complete table of contents",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "40 chapter headings",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "specification requirements register",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "specification tests register",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "specification work packages register",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "28 decision records",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "decision register matches specification",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "source references resolve",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "source register IDs unique",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "planning catalogs and references",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "English README",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "requested slogan",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "README honest implementation status",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "MIT license identity",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "MIT license grant and disclaimer",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "complete updated scope",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "superseded scope removed",
+        "status": "pass",
+        "detail": ""
+      },
+      {
+        "check": "local Markdown links",
+        "status": "pass",
+        "detail": ""
+      }
+    ],
+    "errors": [],
+    "work_package_topological_order": [
+      "W-01",
+      "W-02",
+      "W-03",
+      "W-04",
+      "W-05",
+      "W-06",
+      "W-07",
+      "W-08",
+      "W-09",
+      "W-10",
+      "W-11",
+      "W-12",
+      "W-13",
+      "W-14",
+      "W-15",
+      "W-16",
+      "W-17",
+      "W-20",
+      "W-18",
+      "W-19",
+      "W-21",
+      "W-22",
+      "W-23",
+      "W-24",
+      "W-25",
+      "W-26",
+      "W-27",
+      "W-28",
+      "W-29",
+      "W-30",
+      "W-31",
+      "W-32",
+      "W-33",
+      "W-34",
+      "W-35",
+      "W-36",
+      "W-37",
+      "W-38",
+      "W-39",
+      "W-40",
+      "W-41",
+      "W-49",
+      "W-50",
+      "W-51",
+      "W-52",
+      "W-53",
+      "W-56",
+      "W-57",
+      "W-58",
+      "W-42",
+      "W-54",
+      "W-43",
+      "W-44",
+      "W-45",
+      "W-46",
+      "W-47",
+      "W-48",
+      "W-55",
+      "W-59",
+      "W-60"
+    ],
+    "input_sha256": {
+      ".gitattributes": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+      ".gitignore": "fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0",
+      "AGENTS.md": "d6561509027f152b98931559746aa842c2895ab012158f928b51791546ea80e3",
+      "CHANGELOG.md": "c6320531f024a8616007b30f23b6103d72b778e2fc6754b2028125532625daf8",
+      "LICENSE": "1d89138d5b983bf02dd2f6c6da3a63014631251033e9adc039c153ffe54b32cc",
+      "README.md": "55fa09d8c4efe007ea5181192a9e91cc9a375a57df90dfe867af2a5abd0a5b95",
+      "THIRD_PARTY_NOTICES.md": "fce643a639b306627eea3c21ecb57a81269b27b726b11b62ab5bfc1b2cc5b7ac",
+      "docs/README.md": "a32b9bfb6e78fe92585e1d5a4c5c403046f72f8da622d2b46fdf6f83231bb5e5",
+      "docs/acceptance/README.md": "6f454d12918ff24b738e15aa95e42819353af13e2850c81c2f3ced9adb331edc",
+      "docs/benchmarks/README.md": "11a1356436fd1536199fb4cdcc79ed65da04e1c2077695897d611069630f2cb5",
+      "docs/compatibility/README.md": "d7ccaecc26dc24b4aa11268f72cb595f1d46889a21acc62756fcf2c40e620277",
+      "docs/data/application-catalog.json": "8f64ee2b6722b3d494f25692c4713ab7f77ef66660c7938b5e7930850c33425c",
+      "docs/data/competitor-catalog.json": "c4c3d61cd9056ccb9a1220f213a1db82a5cd4b08ca03d572d0b571e92853bd43",
+      "docs/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
+      "docs/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
+      "docs/data/phego-sources.json": "c4e4217c59185e7f97ee49f32eb92d335b79df1528c93b6102bf8e3395609079",
+      "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
+      "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
+      "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
+      "docs/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
+      "docs/implementation/W-04.md": "7bdb58f59adc8c6e92f05e64a654537d211cf2f7bb93e6bea6d67d2904de7402",
+      "docs/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
+      "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+      "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
+      "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
+    }
+  }
+}

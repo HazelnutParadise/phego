@@ -1,0 +1,42 @@
+name: Native ABI numeric probe
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  numeric-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Build and run isolated numeric probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          clang --version | head -1
+          go version
+          uname -sm
+          probe_dir=$(mktemp -d)
+          clang -c experiments/nativeabi/xor.ll -o "$probe_dir/probe.o"
+          ar rcs "$probe_dir/libphegoprobe.a" "$probe_dir/probe.o"
+          CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir -lphegoprobe" go run -tags=phego_native_probe ./experiments/nativeabi
+          sed 's/%result = xor /%result = or /' experiments/nativeabi/xor.ll > "$probe_dir/invalid.ll"
+          clang -c "$probe_dir/invalid.ll" -o "$probe_dir/invalid.o"
+          mkdir "$probe_dir/invalid"
+          ar rcs "$probe_dir/invalid/libphegoprobe.a" "$probe_dir/invalid.o"
+          if CGO_ENABLED=1 CC=clang CGO_LDFLAGS="-L$probe_dir/invalid -lphegoprobe" go run -tags=phego_native_probe ./experiments/nativeabi > "$probe_dir/negative.log" 2>&1; then
+            echo 'error: incorrect native result was accepted' >&2
+            exit 1
+          fi
+          cat "$probe_dir/negative.log"
+          grep -F 'error: native XOR for 0xf0 and 0x3c returned 0xfc; expected 0xcc' "$probe_dir/negative.log"

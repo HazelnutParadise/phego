@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "scope": "prebuilt_image_embedded_source_check",
+  "php_release": "8.5.12",
+  "platform": "linux/386",
+  "emulated": true,
+  "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+  "image_architecture": "386",
+  "embedded_source_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "locked_source_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "container_exit_code": 0,
+  "container_stderr_bytes": 0,
+  "stdout_gzip": "W-06-php85-i386-image-source.log.gz",
+  "method": "A separate read-only, network-disabled, non-root Docker container computed sha256sum /usr/src/php.tar.xz, printed PHP_SHA256, PHP_VERSION and PHP_INT_SIZE. Docker image inspect reported the image ID, architecture and OS; docker inspect after completion reported no such container.",
+  "limitations": [
+    "The image contains the locked source archive, but this does not prove its binary was built from that archive.",
+    "This is supplementary reference evidence, not Phego execution or work-package acceptance.",
+    "Container runtime isolation, exit code and empty stderr are recorded observations; this log alone cannot independently reconstruct all launch conditions or interruption cleanup."
+  ],
+  "log_uncompressed_sha256": "589630014bbee3308abbb0f80ae49efabe566488ff54579504df2122a94613e1",
+  "image_id": "sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049"
+}
