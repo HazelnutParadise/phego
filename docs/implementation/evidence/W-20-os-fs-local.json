@@ -1,0 +1,64 @@
+{
+  "scope": "overlapping_os_fs_contract_regression",
+  "source_commit": "1a9c83e52668d61676208e561f58113efe1b8eec",
+  "recorded_at_utc": "2026-11-01T10:59:01.272752+00:00",
+  "go_version": "go version go1.26.5 darwin/arm64",
+  "product_test_status": "not_run",
+  "contract": "Disk directories use Root. FS sources with nested mounts refuse recognizable OS-backed file metadata before handing a handle to the caller. Arbitrary FS adapters remain trusted host code; metadata opacity is not proof of non-disk backing.",
+  "pre_fix_reproductions": [
+    {
+      "source_commit": "b68d0fdd514f09640a95cc8fcc823c3bc17a3878",
+      "test_file": "policy_review_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace test_file with final test_source_commit version",
+      "command": "CGO_ENABLED=0 go test . -run TestReviewOverlappingDiskFSRequiresRoot -count=1",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestReviewOverlappingDiskFSRequiresRoot (0.00s)\n    --- FAIL: TestReviewOverlappingDiskFSRequiresRoot/FS (0.00s)\n        policy_review_test.go:167: hidden hardlink not denied: &{Status:0 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]} phego: PHP ParseError: syntax error, unexpected token \"{\" in /alias.php on line 1\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego\t0.532s\nFAIL\n",
+      "stderr": "",
+      "test_source_commit": "1a9c83e52668d61676208e561f58113efe1b8eec"
+    }
+  ],
+  "commands": [
+    {
+      "command": "CGO_ENABLED=0 go test -race ./...",
+      "exit_code": 0,
+      "stdout": "ok  \tgithub.com/HazelnutParadise/phego\t1.931s\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t2.041s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.960s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "stderr": ""
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go test -c ./internal/policy -o /tmp/phego-policy-windows.test.exe",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 315,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "positive_controls": [
+    "Same fixture via Root rejects hidden hard link and allows ordinary file",
+    "Standalone Root.FS and legacy Files retain ordinary reads",
+    "Virtual FS with nonnil custom metadata remains readable"
+  ],
+  "prior_tool_suite_evidence": "W-20-final-local.json: 466 passing Python tool tests; Python tools unchanged",
+  "supersedes_legacy_contract_scope_of": "W-20-latest-review-local.json: unchanged legacy behavior applies only when Config.Files is used alone",
+  "limitations": [
+    "VM remains unimplemented; full PHP/application acceptance not_run",
+    "Windows policy tests cross-compiled only",
+    "os.SameFile recognizes OS file metadata, not arbitrary trusted Go FS internals"
+  ]
+}

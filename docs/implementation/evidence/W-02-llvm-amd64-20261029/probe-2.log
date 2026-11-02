@@ -1,0 +1,9 @@
+x86_64
+ldd (Debian GLIBC 2.41-12+deb13u4) 2.41
+clang version 23.1.4 (https://github.com/llvm/llvm-project 7a941dfb2877a0b8cf30323fefa85ad019e0b0f5)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /tmp/LLVM-23.1.4-Linux-X64/bin
+LLD 23.1.4 (https://github.com/llvm/llvm-project 7a941dfb2877a0b8cf30323fefa85ad019e0b0f5) (compatible with GNU linkers)
+e051785175b27ca3646f7f0e2049bd13f329d3cfc33deba49fdc13d633dce308  /tmp/probe
+LLVM_AMD64_PROBE_OK

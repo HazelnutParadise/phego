@@ -1,0 +1,10 @@
+.............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source
+......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases
+...............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 418 tests in 178.816s
+
+OK
+
+[PHP/FI build and engine exit code: 23]

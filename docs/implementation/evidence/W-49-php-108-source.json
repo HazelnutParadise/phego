@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "work_package": "W-49",
+  "requirements": [
+    "REQ-080"
+  ],
+  "archive": {
+    "url": "https://museum.php.net/php1/php-108.tar.gz",
+    "index": "https://museum.php.net/php1/",
+    "retrieved_on": "2026-10-28",
+    "size": 26717,
+    "observed_sha256": "e7404c9c60021eeec20c77ee75d46db01328f00b549dbf5f6c6f490cca5a211a",
+    "digest_origin": "Locally measured after retrieval; no independent upstream checksum was verified.",
+    "contents_observed": [
+      {
+        "path": "php/README",
+        "size": 2760,
+        "sha256": "c75d34b9341478e08813b487a9de333ecc3b9e0ddf07a547312bfff4ab42ddfc",
+        "observation": "Names PHP Tools and identifies GPL as the accompanying license."
+      },
+      {
+        "path": "php/version.h",
+        "size": 1169,
+        "sha256": "a2e67dea427dc34dd9197048f7f648a28d49316ba1dc32c0c8d936e3aed941f4",
+        "observation": "Defines version 1.0.8; header states GPL version 2 or later."
+      },
+      {
+        "path": "php/License",
+        "size": 17982,
+        "sha256": "91df39d1816bfb17a4dda2d3d2c83b1f6f2d38d53e53e41e8f97ad5ac46a0cad",
+        "observation": "Contains the GNU General Public License text."
+      }
+    ]
+  },
+  "inspection": {
+    "environment": "Network-disabled, read-only linux/arm64 container in OrbStack; non-root, capabilities dropped, limited CPU, memory and process count.",
+    "action": "Listed archive members and read selected files without extracting or executing them.",
+    "reference_engine_status": "not_built_or_run",
+    "image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+    "limits": {
+      "platform": "linux/arm64",
+      "cpus": 1,
+      "memory": "256m",
+      "pids": 32,
+      "network": "none",
+      "root_filesystem": "read-only",
+      "uid_gid": "65534:65534",
+      "capabilities": "all dropped",
+      "no_new_privileges": true
+    },
+    "verification": "In a container with the stated limits and read-only mounts of the downloaded archive and this record, Python tarfile listed members and hashlib.sha256 checked the archive and selected files against this record. No source was extracted or executed.",
+    "reproduce": "Set ARCHIVE to the downloaded php-108.tar.gz absolute path, then run: docker run --rm --pull never --platform linux/arm64 --network none --read-only --user 65534:65534 --pids-limit 32 --memory 256m --cpus 1 --cap-drop ALL --security-opt no-new-privileges --mount \"type=bind,src=$ARCHIVE,dst=/input/archive.tar.gz,readonly\" buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b python3 -c 'import hashlib,tarfile,pathlib,sys; p=pathlib.Path(\"/input/archive.tar.gz\"); expected={'\"'\"'php/README'\"'\"': '\"'\"'c75d34b9341478e08813b487a9de333ecc3b9e0ddf07a547312bfff4ab42ddfc'\"'\"', '\"'\"'php/version.h'\"'\"': '\"'\"'a2e67dea427dc34dd9197048f7f648a28d49316ba1dc32c0c8d936e3aed941f4'\"'\"', '\"'\"'php/License'\"'\"': '\"'\"'91df39d1816bfb17a4dda2d3d2c83b1f6f2d38d53e53e41e8f97ad5ac46a0cad'\"'\"'}; a=tarfile.open(p,\"r:gz\"); ok=hashlib.sha256(p.read_bytes()).hexdigest()=='\"'\"'e7404c9c60021eeec20c77ee75d46db01328f00b549dbf5f6c6f490cca5a211a'\"'\"' and all(hashlib.sha256(a.extractfile(n).read()).hexdigest()==h for n,h in expected.items()); print(\"archive and selected files match\" if ok else \"digest mismatch\"); sys.exit(0 if ok else 1)'"
+  },
+  "limitations": [
+    "Observed archive identity is not independently authenticated by a publisher checksum.",
+    "This archive does not establish the first public PHP Tools release or a complete release inventory.",
+    "License scope and obligations, including any distribution of derived material, require separate review.",
+    "No compatibility, historical behavior, safety or product acceptance is established."
+  ],
+  "acceptance_scenarios": {
+    "ids": [
+      "T-159",
+      "T-160"
+    ],
+    "status": "not_run",
+    "note": "This is one source observation, not a complete inventory or acceptance run."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "description": "Maintainer judgements of whether each upstream PHP security fix affects Phego, with evidence. tools/upstream_diff.py reports every fix as needs_assessment; tools/test_security_assessments.py requires a record here for every security identifier in a committed docs/compatibility/upstream-diff-*.json report.",
+  "assessments": [
+    {
+      "release": "8.5.12",
+      "ids": ["GHSA-w8hw-w9fx-j79w", "GHSA-6wmf-4rv5-p3rp", "CVE-2026-109618", "CVE-2026-109619"],
+      "status": "needs_regression",
+      "work_packages": ["W-14", "W-17"],
+      "evidence": "NEWS (Core) describes state corruption via bailout, the longjmp Zend uses to abort on fatal errors. Phego shares no C code with Zend and does not use bailout, so the memory-safety defect cannot occur as written. The PHP-observable part, execution state after a fatal error during a request, belongs to W-14 (errors and shutdown) and the VM (W-17). The 8.5.12 archive adds no test named for these identifiers (no Zend/tests file matches GHSA-w8hw or GHSA-6wmf), so a regression test must be written from the advisory when it is published and run once W-14 and W-17 exist.",
+      "assessed_at": "2026-11-01"
+    }
+  ]
+}

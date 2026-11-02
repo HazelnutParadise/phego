@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "description": "Regression suites every implemented PHP profile must pass. Adding a release to internal/profile requires an entry here for both integer widths; internal/profile TestEveryImplementedProfileHasRegressionSuites enforces it. Suites name Go test functions that must exist in the repository.",
+  "profiles": [
+    {
+      "release": "8.5.12",
+      "int_width": 64,
+      "suites": [
+        {"id": "lexer-corpus", "tests": ["TestLexMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "parser-corpus", "tests": ["TestParseMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "operators", "tests": ["TestPHP8512OperatorsMatchReference", "TestPHP8512NumericStringsMatchReference"]},
+        {"id": "hir-compile-errors", "tests": ["TestLowerMatchesCompileReference"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "hir-reflection-effects", "tests": ["TestLowerMatchesReflection", "TestEffectsCoverObservedBehaviour"]}
+      ],
+      "security_exceptions": []
+    },
+    {
+      "release": "8.5.12",
+      "int_width": 32,
+      "suites": [
+        {"id": "lexer-corpus", "tests": ["TestLexMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "parser-corpus", "tests": ["TestParseMatchesReferenceCorpus"], "requires": "PHEGO_LEXER_CORPUS"},
+        {"id": "operators", "tests": ["TestPHP8512OperatorsMatchReference", "TestPHP8512NumericStringsMatchReference"]}
+      ],
+      "security_exceptions": [],
+      "known_gaps": ["The ** operator does not reproduce i386 glibc x87 pow results (docs/implementation/W-10.md)."]
+    }
+  ]
+}
