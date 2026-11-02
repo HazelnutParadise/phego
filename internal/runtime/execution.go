@@ -33,7 +33,8 @@ type completion struct {
 	previous error
 	// An owned return moves with its completion. Copying the Go struct does
 	// not create another owner; the receiver must consume or forward it once.
-	returnOwned bool
+	returnOwned       bool
+	returnByReference bool
 }
 
 func (c completion) Error() string {
@@ -77,6 +78,7 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
 	ctx                       context.Context
+	cleanupContext            context.Context
 	request                   *Request
 	heap                      *heap
 	globals                   value
@@ -110,7 +112,9 @@ func newExecution(ctx context.Context, request *Request, width int, writer io.Wr
 	if err != nil {
 		return nil, err
 	}
-	return &execution{ctx: ctx, request: request, heap: h, globals: nullValue(), writer: writer, limits: limits}, nil
+	x := &execution{ctx: ctx, request: request, heap: h, globals: nullValue(), writer: writer, limits: limits}
+	h.execution = x
+	return x, nil
 }
 
 // run starts a Ready request exactly once and always performs Runtime cleanup.
@@ -129,6 +133,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		return executionResult{end: completion{kind: endInternal, err: err}}
 	}
 	x.started = true
+	x.cleanupContext = cleanup
 	c := x.call(body, nil)
 	var returned any
 	if c.kind == endReturn {
@@ -207,7 +212,8 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	} else {
 		transitionErr = x.request.Abort()
 	}
-	cleanupErr := errors.Join(transitionErr, x.request.Close(cleanup))
+	resourceErr := x.heap.closeResources(cleanup)
+	cleanupErr := errors.Join(resourceErr, transitionErr, x.request.Close(cleanup))
 	x.result = executionResult{end: c, returned: returned, output: append([]byte(nil), x.output...), accepted: x.accepted, diagnostics: append([]executionDiagnostic(nil), x.diagnostics...), cleanupErr: cleanupErr, cleanupComplete: x.request.State() == Closed}
 	return x.result
 }
@@ -225,6 +231,9 @@ func (x *execution) call(body, finally executionAction) completion {
 		return x.fail(endLimit, errExecutionLimit)
 	}
 	x.calls++
+	previousHook := x.heap.currentHook
+	x.heap.currentHook = activePropertyHook{}
+	defer func() { x.heap.currentHook = previousHook }()
 	f := &executionFrame{}
 	x.frames = append(x.frames, f)
 	enclosingPending := x.phaseCompletion
@@ -336,7 +345,9 @@ func containsCompletion(err error, serial uint64) bool {
 // Nested calls transfer an existing return owner without retaining it again.
 func ownReturn(c completion) completion {
 	if c.kind == endReturn && !c.returnOwned {
-		c.value = c.value.deref()
+		if !c.returnByReference {
+			c.value = c.value.deref()
+		}
 		retain(c.value)
 		c.returnOwned = true
 	}

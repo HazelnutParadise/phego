@@ -20,6 +20,7 @@ const (
 	valueArray
 	valueObject
 	valueReference
+	valueResource
 )
 
 // value is the candidate PHP value cell. Composite kinds point at shared
@@ -39,6 +40,7 @@ type value struct {
 // reference is a shared PHP location. Every variable, element, or property
 // bound by & holds one count.
 type reference struct {
+	owner    *heap
 	refcount int
 	target   value
 }
@@ -104,6 +106,8 @@ func identicalIn(a, b value, active map[*phpArray]bool) (bool, error) {
 	case valueString:
 		return a.text == b.text, nil
 	case valueObject:
+		return a.object == b.object, nil
+	case valueResource:
 		return a.object == b.object, nil
 	case valueArray:
 		if a.array == b.array {

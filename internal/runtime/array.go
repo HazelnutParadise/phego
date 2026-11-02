@@ -29,6 +29,7 @@ type bucket struct {
 // i (or is a hole); mixed keys use an ordered slice and lookup index. Stable
 // bucket pointers keep element locations valid across growth and compaction.
 type phpArray struct {
+	owner    *heap
 	refcount int
 	buckets  []*bucket // nil entries are deleted slots
 	index    map[arrayKey]int
