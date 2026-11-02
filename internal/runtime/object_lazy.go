@@ -34,6 +34,9 @@ func (h *heap) newLazyObject(c *class, proxy bool, initialize func(*heap, value)
 			return value{}, &Throwable{"Error", "Cannot instantiate " + kind + " " + c.name}
 		}
 	}
+	if c.schema != nil && (c.schema.layout == nil || len(c.schema.layout.names) == 0) {
+		return h.newObject(c)
+	}
 	obj, err := h.newObjectShell(c)
 	if err != nil {
 		return value{}, err
@@ -45,9 +48,15 @@ func (h *heap) newLazyObject(c *class, proxy bool, initialize func(*heap, value)
 // Host code and PHP callable ownership are explicit, separate inputs. Go closure
 // reachability cannot stand in for the callable's logical PHP owners or edges.
 func (h *heap) newLazyObjectWithInitializer(c *class, proxy bool, initializer value, initialize func(*heap, value) (value, error)) (value, error) {
+	if err := h.claimValues(initializer); err != nil {
+		return value{}, err
+	}
 	o, err := h.newLazyObject(c, proxy, initialize)
 	if err != nil {
 		return value{}, err
+	}
+	if o.object.lazy == nil {
+		return o, nil
 	}
 	if err := h.assign(&o.object.lazy.initializer, initializer); err != nil {
 		return value{}, h.mergeObjectErrors(err, h.discard(o))
@@ -105,6 +114,15 @@ func copyPropertyTable(src *propertyTable) *propertyTable {
 }
 
 func copyPropertyValues(dst, src *propertyTable) {
+	dst.materialized = src.materialized || src.index != nil
+	if len(src.index) != 0 && dst.index == nil {
+		dst.index = make(map[string]*value, len(src.index))
+	}
+	for i, v := range src.declared {
+		if v.kind == valueUndefined {
+			dst.declared[i] = v
+		}
+	}
 	src.each(func(name string, v *value) { retain(*v); *dst.slot(name) = *v })
 }
 
@@ -262,12 +280,14 @@ func (h *heap) restoreLazyProperties(o *object, before *propertyTable) error {
 	o.props.index = nil
 	o.props.head = nil
 	o.props.tail = nil
+	o.props.materialized = false
 	if err := h.freePropertyTable(dynamic, nil, false); err != nil {
 		first = h.mergeObjectErrors(first, err)
 	}
 	o.props.index = before.index
 	o.props.head = before.head
 	o.props.tail = before.tail
+	o.props.materialized = before.materialized
 	before.index = nil
 	before.head = nil
 	before.tail = nil
@@ -345,6 +365,10 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 	if o.class.schema != nil && len(o.class.schema.enumCases) > 0 {
 		return value{}, &Throwable{"Error", "Trying to clone an uncloneable object of class " + o.class.name}
 	}
+	m, hasClone := h.resolveMethod(o.class, "__clone", nil)
+	if hasClone && !canAccess(scope, m.owner, m.visibility) {
+		return value{}, &Throwable{"Error", "Call to " + accessName(m.visibility) + " method " + m.owner.name + "::__clone() from " + methodScopeLabel(scope)}
+	}
 	if o.lazy != nil && o.lazy.proxy {
 		wrapper := o
 		if _, err := h.initializeLazy(wrapper); err != nil {
@@ -376,21 +400,22 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 		return value{}, err
 	}
 	cloneObjectProperties(h, clone.object, o)
-	if m, ok := h.resolveMethod(o.class, "__clone", scope); ok {
-		if !canAccess(scope, m.owner, m.visibility) {
-			retain(clone)
-			_ = h.release(clone)
-			return value{}, &Throwable{"Error", "Call to " + accessName(m.visibility) + " " + m.owner.name + "::__clone() from " + methodScopeLabel(scope)}
-		}
+	if hasClone {
 		if clone.object.hooks == nil {
 			clone.object.hooks = make(map[string]bool)
 		}
 		clone.object.hooks["\x00clone"] = true
-		_, err = h.invokeMethod(clone, m, nil, scope, false, methodCallSite{})
+		// The handler may return the clone itself, directly or in a composite.
+		// Keep the construction temporary alive while consuming that result.
+		hold, _ := h.holdMethodResult(clone)
+		out, callErr := h.invokeMethod(clone, m, nil, scope, false, methodCallSite{})
+		err = h.mergeObjectErrors(callErr, h.discardMethodReturn(out))
 		clear(clone.object.hooks)
 		if err != nil {
-			retain(clone)
-			_ = h.release(clone)
+			hold.temporary = false
+			return value{}, h.mergeObjectErrors(err, h.releaseMethodHold(hold))
+		}
+		if err := h.releaseMethodHold(hold); err != nil {
 			return value{}, err
 		}
 	}

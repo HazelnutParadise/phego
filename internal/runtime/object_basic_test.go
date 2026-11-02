@@ -143,7 +143,9 @@ func TestW13ObjectComparison(t *testing.T) {
 func TestW13UninitializedLazyDoesNotDestruct(t *testing.T) {
 	h := testHeap(t)
 	calls := 0
-	c, err := buildClass(classSpec{name: "LazyDtor", destructor: func(*heap, value) error { calls++; return nil }})
+	// Pinned PHP immediately makes zero-property classes ordinary objects.
+	// Keep this fixture genuinely lazy; zero-property behavior has its own oracle.
+	c, err := buildClass(classSpec{name: "LazyDtor", properties: []propertySpec{{name: "p", typeName: "int"}}, destructor: func(*heap, value) error { calls++; return nil }})
 	must(t, err)
 	o, err := h.newLazyObject(c, false, func(*heap, value) (value, error) { t.Fatal("unexpected initialization"); return value{}, nil })
 	must(t, err)

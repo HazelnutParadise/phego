@@ -51,11 +51,20 @@ func (h *heap) invokeObject(fn func() (value, error), byReference bool) (value, 
 		if err := h.claimValues(v); err != nil {
 			return value{}, err
 		}
+		if !byReference && v.kind == valueReference {
+			return h.dereferenceMethodReturn(v)
+		}
 		return v, nil
 	}
 	x := h.execution
 	c := x.call(func(*execution) completion {
 		v, err := fn()
+		if err == nil {
+			err = h.claimValues(v)
+			if err == nil && !byReference && v.kind == valueReference {
+				v, err = h.dereferenceMethodReturn(v)
+			}
+		}
 		if err != nil {
 			var stop completion
 			if errors.As(err, &stop) {
@@ -65,9 +74,6 @@ func (h *heap) invokeObject(fn func() (value, error), byReference bool) (value, 
 			if errors.As(err, &php) {
 				return completion{kind: endThrow, err: err}
 			}
-			return x.fail(endInternal, err)
-		}
-		if err := h.claimValues(v); err != nil {
 			return x.fail(endInternal, err)
 		}
 		return completion{kind: endReturn, value: v, returnByReference: byReference}

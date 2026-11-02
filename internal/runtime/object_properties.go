@@ -59,6 +59,21 @@ func (h *heap) detachPropertySource(slot *value) {
 	}
 }
 
+func readonlyObjectPropertyWriteError(o *object, p *propertyInfo, slot *value) error {
+	if p.readonly && slot != nil && slot.kind != valueUndefined &&
+		(!o.hooks["\x00clone"] || o.hooks["\x00clone:"+p.key]) {
+		return &Throwable{"Error", "Cannot modify readonly property " + p.label()}
+	}
+	return nil
+}
+
+func (h *heap) revalidatePropertyReceiver(o *object, p *propertyInfo) error {
+	if o == nil || o.owner != h || o.freed || h.live[o.handle] != o {
+		return &Throwable{"Error", "Object was released while assigning to property " + p.label()}
+	}
+	return nil
+}
+
 func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	o, err := h.checkedObject(obj)
 	if err != nil {
@@ -67,7 +82,10 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	p, err := h.resolveInstanceProperty(o, name, scope, false)
 	if err != nil {
 		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
-			return out.deref(), callErr
+			if callErr != nil {
+				return value{}, callErr
+			}
+			return h.dereferenceMethodReturn(out)
 		}
 		return value{}, err
 	}
@@ -92,7 +110,10 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 			return slot.deref(), nil
 		}
 		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
-			return out.deref(), callErr
+			if callErr != nil {
+				return value{}, callErr
+			}
+			return h.dereferenceMethodReturn(out)
 		}
 		h.warn(levelWarning, "Undefined property: "+o.class.name+"::$"+name)
 		return nullValue(), nil
@@ -101,6 +122,14 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 		return value{}, &Throwable{"Error", "Property " + p.label() + " is write-only"}
 	}
 	slot, _ := o.props.lookup(p.key)
+	if slot != nil && slot.isExplicitlyUnset() {
+		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
+			if callErr != nil {
+				return value{}, callErr
+			}
+			return h.dereferenceMethodReturn(out)
+		}
+	}
 	if slot.kind == valueUndefined {
 		if p.typeName != "" {
 			return value{}, &Throwable{"Error", "Typed property " + p.label() + " must not be accessed before initialization"}
@@ -159,10 +188,8 @@ func (h *heap) getPropertyHook(o *object, p *propertyInfo, byReference bool) (va
 			return value{}, err
 		}
 		out, err := h.checkMethodReturn(raw, &methodSpec{owner: p.owner, name: "$" + p.name + "::get", returnType: p.typeName, returnsReference: p.getReference}, this, p.hookStrict)
-		if err != nil {
-			if cleanup := h.discard(raw); cleanup != nil {
-				err = h.mergeObjectErrors(err, cleanup)
-			}
+		if err != nil || raw.kind != out.kind {
+			err = h.mergeObjectErrors(err, h.discardMethodReturn(raw))
 		}
 		return out, err
 	}, nullValue(), byReference)
@@ -209,6 +236,9 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 			if err != nil {
 				return err
 			}
+			if err := h.revalidatePropertyReceiver(o, p); err != nil {
+				return err
+			}
 			_, err = h.propertyHook(o, p, p.set, v)
 			return err
 		}
@@ -216,8 +246,8 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 	}
 	if p != nil && !p.static && p.set != nil && !bypassHook {
 		slot, _ := o.props.lookup(p.key)
-		if p.readonly && slot != nil && slot.kind != valueUndefined && (!o.hooks["\x00clone"] || o.hooks["\x00clone:"+p.key]) {
-			return &Throwable{"Error", "Cannot modify readonly property " + p.label()}
+		if err := readonlyObjectPropertyWriteError(o, p, slot); err != nil {
+			return err
 		}
 		if !canAccess(scope, p.owner, p.setVisibility) {
 			from := "global scope"
@@ -232,6 +262,9 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		}
 		v, err = h.coerceProperty(p, v, strict, false)
 		if err != nil {
+			return err
+		}
+		if err := h.revalidatePropertyReceiver(o, p); err != nil {
 			return err
 		}
 		_, err = h.propertyHook(o, p, p.set, v)
@@ -257,8 +290,13 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		return &Throwable{"Error", "Property " + p.label() + " is read-only"}
 	}
 	slot, _ := o.props.lookup(p.key)
-	if p.readonly && slot != nil && slot.kind != valueUndefined && (!o.hooks["\x00clone"] || o.hooks["\x00clone:"+p.key]) {
-		return &Throwable{"Error", "Cannot modify readonly property " + p.label()}
+	if slot.isExplicitlyUnset() {
+		if _, called, callErr := h.magicProperty(o, "set", name, []value{v}); called {
+			return callErr
+		}
+	}
+	if err := readonlyObjectPropertyWriteError(o, p, slot); err != nil {
+		return err
 	}
 	if !canAccess(scope, p.owner, p.setVisibility) {
 		from := "global scope"
@@ -275,6 +313,10 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 	if err != nil {
 		return err
 	}
+	if err := h.revalidatePropertyReceiver(o, p); err != nil {
+		return err
+	}
+	slot, _ = o.props.lookup(p.key)
 	if slot == nil {
 		return &Throwable{"Error", "Cannot write to virtual property " + p.label()}
 	}
@@ -310,14 +352,31 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 	}
 	if p != nil {
 		key = p.key
-		if p.readonly {
+		slot, _ := o.props.lookup(key)
+		if p.readonly && slot != nil && slot.kind != valueUndefined {
 			return &Throwable{"Error", "Cannot unset readonly property " + p.label()}
 		}
 		if !canAccess(scope, p.owner, p.setVisibility) {
-			return &Throwable{"Error", "Cannot unset " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + methodScopeLabel(scope)}
+			readonly := ""
+			if p.readonly {
+				readonly = "readonly "
+			}
+			return &Throwable{"Error", "Cannot unset " + accessName(p.setVisibility) + "(set) " + readonly + "property " + p.label() + " from " + methodScopeLabel(scope)}
 		}
 		if p.get != nil || p.set != nil {
 			return &Throwable{"Error", "Cannot unset hooked property " + p.label()}
+		}
+		if slot != nil && slot.isExplicitlyUnset() {
+			if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
+				return callErr
+			}
+			return nil
+		}
+		if slot != nil && !p.virtual {
+			h.detachPropertySource(slot)
+			old := *slot
+			*slot = explicitlyUnsetValue()
+			return h.release(old)
 		}
 	}
 	if slot, ok := o.props.lookup(key); ok {
@@ -340,6 +399,9 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 	}
 	p, err := h.resolveInstanceProperty(o, name, scope, false)
 	if err != nil {
+		if called, callErr := h.referenceMagicProperty(dst, o, name); called {
+			return callErr
+		}
 		return err
 	}
 	key := name
@@ -360,7 +422,7 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 			if err != nil {
 				return err
 			}
-			return h.bind(dst, &r)
+			return h.bindMethodReference(dst, r)
 		}
 		if (p.get != nil && !bypassHook) || p.virtual {
 			return &Throwable{"Error", "Indirect modification of " + p.label() + " is not allowed"}
@@ -372,14 +434,36 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 	}
 	var slot *value
 	if p == nil {
-		slot, err = h.dynamicPropertySlot(o, name)
+		slot, _ = o.props.lookup(name)
+		if slot == nil || slot.kind == valueUndefined {
+			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
+				return callErr
+			}
+			slot, err = h.dynamicPropertySlot(o, name)
+		}
 	} else {
 		slot = o.props.slot(key)
+		if slot.isExplicitlyUnset() {
+			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
+				return callErr
+			}
+		}
 	}
 	if err != nil {
 		return err
 	}
 	return h.bindPropertyReference(dst, slot, p)
+}
+
+func (h *heap) referenceMagicProperty(dst *value, o *object, name string) (bool, error) {
+	raw, called, err := h.magicProperty(o, "get", name, nil)
+	if !called || err != nil {
+		return called, err
+	}
+	if raw.kind != valueReference && raw.deref().kind != valueObject {
+		h.warn(levelNotice, "Indirect modification of overloaded property "+o.class.name+"::$"+name+" has no effect")
+	}
+	return true, h.bindMethodReference(dst, raw)
 }
 
 // __get/__set/__isset/__unset recurse independently for each property.
@@ -402,7 +486,15 @@ func (h *heap) magicProperty(o *object, operation, name string, extra []value) (
 		args = append(args, methodArgument{value: v})
 	}
 	out, err := h.invokeMethod(value{kind: valueObject, object: o}, m, args, nil, false, methodCallSite{})
-	return out, true, err
+	switch operation {
+	case "isset":
+		result := boolValue(h.toBool(out))
+		return result, true, h.mergeObjectErrors(err, h.discardMethodReturn(out))
+	case "set", "unset":
+		return value{}, true, h.mergeObjectErrors(err, h.discardMethodReturn(out))
+	default:
+		return out, true, err
+	}
 }
 
 func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
@@ -430,12 +522,20 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 	}
 	if p.get != nil {
 		v, err := h.readObject(obj, name, scope)
-		return err == nil && v.deref().kind != valueNull, err
+		set := err == nil && v.deref().kind != valueNull
+		return set, h.mergeObjectErrors(err, h.discardMethodReturn(v))
 	}
 	o, err = h.initializeLazy(o)
 	if err != nil {
 		return false, err
 	}
 	slot, ok := o.props.lookup(key)
+	if ok && slot.isExplicitlyUnset() {
+		v, called, err := h.magicProperty(o, "isset", name, nil)
+		if called {
+			return v.boolean, err
+		}
+		return false, nil
+	}
 	return ok && slot.kind != valueUndefined && slot.deref().kind != valueNull, nil
 }

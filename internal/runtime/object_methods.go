@@ -137,7 +137,13 @@ func (h *heap) invokeMagicCall(obj value, magic *methodSpec, methodName string, 
 		if a.name == "" {
 			setErr = h.appendValue(&packed, v)
 		} else {
-			setErr = h.setElement(&packed, bytesValue([]byte(a.name)), v)
+			key := bytesValue([]byte(a.name))
+			if _, found, err := h.getElement(packed, key); err != nil {
+				return value{}, err
+			} else if found {
+				return value{}, &Throwable{"Error", "Named parameter $" + a.name + " overwrites previous argument"}
+			}
+			setErr = h.setElement(&packed, key, v)
 		}
 		if setErr != nil {
 			return value{}, setErr
@@ -837,14 +843,13 @@ func (h *heap) coerceMethodValue(m *methodSpec, called *class, typ string, v val
 				if n.kind == numericInt {
 					return h.number(n.integer), true
 				}
-				if math.IsNaN(n.floating) || !floatFitsInt(n.floating, h.width) {
-					return value{}, false
+				if !math.IsNaN(n.floating) && floatFitsInt(n.floating, h.width) {
+					i := h.floatToIntCap(n.floating)
+					if float64(i) != n.floating {
+						h.warn(levelDeprecated, "Implicit conversion from float-string \""+cString(v.text)+"\" to int loses precision")
+					}
+					return h.number(i), true
 				}
-				i := h.floatToIntCap(n.floating)
-				if float64(i) != n.floating {
-					h.warn(levelDeprecated, "Implicit conversion from float-string \""+cString(v.text)+"\" to int loses precision")
-				}
-				return h.number(i), true
 			}
 		}
 	}
@@ -856,10 +861,9 @@ func (h *heap) coerceMethodValue(m *methodSpec, called *class, typ string, v val
 			}
 			return h.number(0), true
 		case valueFloat:
-			if math.IsNaN(v.floating) || !floatFitsInt(v.floating, h.width) {
-				return value{}, false
+			if !math.IsNaN(v.floating) && floatFitsInt(v.floating, h.width) {
+				return h.number(h.floatToIntSafe(v.floating)), true
 			}
-			return h.number(h.floatToIntSafe(v.floating)), true
 		}
 	}
 	if hasFloat {
@@ -881,6 +885,9 @@ func (h *heap) coerceMethodValue(m *methodSpec, called *class, typ string, v val
 		case valueInt:
 			return bytesValue([]byte(strconv.FormatInt(v.integer, 10))), true
 		case valueFloat:
+			if math.IsNaN(v.floating) {
+				h.warn(levelWarning, "unexpected NAN value was coerced to string")
+			}
 			return bytesValue([]byte(php8512FormatFloat(v.floating, -1))), true
 		}
 	}

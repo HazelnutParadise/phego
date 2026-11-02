@@ -171,3 +171,46 @@ func BenchmarkW13MethodDispatch(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkW13MaterializedLifecycle(b *testing.B) {
+	c, err := buildClass(classSpec{name: "MaterializedBench", properties: []propertySpec{{name: "p", hasDefault: true, initial: int64(1)}}})
+	if err != nil {
+		b.Fatal(err)
+	}
+	for _, mode := range []string{"once", "repeated", "clone"} {
+		b.Run(mode, func(b *testing.B) {
+			h, err := newHeap(64)
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for range b.N {
+				o, err := h.instantiate(c)
+				if err != nil {
+					b.Fatal(err)
+				}
+				if _, err := h.materializeObjectProperties(o); err != nil {
+					b.Fatal(err)
+				}
+				if mode == "repeated" {
+					if _, err := h.materializeObjectProperties(o); err != nil {
+						b.Fatal(err)
+					}
+				}
+				if mode == "clone" {
+					copy, err := h.cloneObject(o, nil)
+					if err != nil {
+						b.Fatal(err)
+					}
+					if err := h.discard(copy); err != nil {
+						b.Fatal(err)
+					}
+				}
+				if err := h.discard(o); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}

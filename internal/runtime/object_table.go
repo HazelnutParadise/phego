@@ -19,11 +19,12 @@ func newPropertyLayout(names []string) *propertyLayout {
 }
 
 type propertyTable struct {
-	layout   *propertyLayout
-	declared []value
-	index    map[string]*value
-	head     *propertyBlock
-	tail     *propertyBlock
+	layout       *propertyLayout
+	declared     []value
+	index        map[string]*value
+	head         *propertyBlock
+	tail         *propertyBlock
+	materialized bool
 }
 
 // Each dynamic block and its fixed-capacity entries will share one safe Go

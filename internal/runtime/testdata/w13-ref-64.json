@@ -3138,6 +3138,721 @@
       ],
       "diagnostics": []
     },
+    "r2-return-magic": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-hook": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-magic-frame": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-hook-frame": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-coerced-hook": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-coerced-hook-frame": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-magic-reference": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-hook-reference": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-magic-reference-frame": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-hook-reference-frame": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-magic-value-object-reference": {
+      "result": [
+        "child",
+        "after"
+      ],
+      "diagnostics": []
+    },
+    "r2-return-magic-value-scalar-reference": {
+      "result": [
+        2,
+        [
+          "after"
+        ]
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R2ReturnMagicScalar::$p has no effect"
+        ]
+      ]
+    },
+    "r2-return-magic-readonly-reference": {
+      "result": [
+        "Error",
+        "Cannot indirectly modify readonly property W13R2ReturnReadonly::$p"
+      ],
+      "diagnostics": []
+    },
+    "r2-values-string-reference-concat": {
+      "result": [
+        "prefix:value",
+        [],
+        [
+          "wrapper"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-typed-compare-primary": {
+      "result": 1,
+      "diagnostics": []
+    },
+    "r2-values-typed-compare-reverse": {
+      "result": -1,
+      "diagnostics": []
+    },
+    "r2-values-typed-compare-prefix": {
+      "result": -1,
+      "diagnostics": []
+    },
+    "r2-values-typed-compare-uninitialized": {
+      "result": [
+        1,
+        1,
+        {
+          "a": 3
+        },
+        {
+          "a": 3
+        },
+        {
+          "a": 3,
+          "b": 2
+        },
+        {
+          "a": 3,
+          "b": 2
+        }
+      ],
+      "diagnostics": []
+    },
+    "r2-values-typed-materialized-table": {
+      "result": [
+        1,
+        {
+          "a": 1
+        },
+        {
+          "a": 1
+        },
+        1,
+        1,
+        1,
+        {
+          "a": 1
+        },
+        {
+          "a": 1
+        }
+      ],
+      "diagnostics": []
+    },
+    "r2-values-typed-materialized-prefix": {
+      "result": [
+        1,
+        -1,
+        -1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r2-values-materialized-clone": {
+      "result": [
+        -1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r2-values-union-property-intstring-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intstring-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r2-values-union-return-intstring-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r2-values-union-property-intstring-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r2-values-union-argument-intstring-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r2-values-union-return-intstring-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r2-values-union-property-intstring-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intstring-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r2-values-union-return-intstring-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r2-values-union-property-intstring-numeric-string": {
+      "result": "1e30",
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intstring-numeric-string": {
+      "result": "1e30",
+      "diagnostics": []
+    },
+    "r2-values-union-return-intstring-numeric-string": {
+      "result": "1e30",
+      "diagnostics": []
+    },
+    "r2-values-union-property-intbool-huge": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intbool-huge": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-return-intbool-huge": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-property-intbool-nan": {
+      "result": true,
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to bool"
+        ]
+      ]
+    },
+    "r2-values-union-argument-intbool-nan": {
+      "result": true,
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to bool"
+        ]
+      ]
+    },
+    "r2-values-union-return-intbool-nan": {
+      "result": true,
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to bool"
+        ]
+      ]
+    },
+    "r2-values-union-property-intbool-inf": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intbool-inf": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-return-intbool-inf": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-property-intbool-numeric-string": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-argument-intbool-numeric-string": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-union-return-intbool-numeric-string": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r2-values-magic-duplicate-missing": {
+      "result": [
+        [
+          "Error",
+          "Named parameter $duplicate overwrites previous argument"
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r2-values-magic-duplicate-inaccessible": {
+      "result": [
+        [
+          "Error",
+          "Named parameter $duplicate overwrites previous argument"
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-ordinary-private": {
+      "result": [
+        [
+          "Error",
+          "Call to private method W13R2VClonePrivate::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-ghost-private": {
+      "result": [
+        [
+          "Error",
+          "Call to private method W13R2VClonePrivate::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-proxy-private": {
+      "result": [
+        [
+          "Error",
+          "Call to private method W13R2VClonePrivate::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-ordinary-protected": {
+      "result": [
+        [
+          "Error",
+          "Call to protected method W13R2VCloneProtected::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-ghost-protected": {
+      "result": [
+        [
+          "Error",
+          "Call to protected method W13R2VCloneProtected::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-proxy-protected": {
+      "result": [
+        [
+          "Error",
+          "Call to protected method W13R2VCloneProtected::__clone() from global scope"
+        ],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-values-clone-in-scope": {
+      "result": [
+        [
+          "clone"
+        ],
+        [
+          "clone",
+          "destructor",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-property-readonly-coercion-reentry": {
+      "result": [
+        null,
+        "outer"
+      ],
+      "diagnostics": []
+    },
+    "r2-property-unset-magic": {
+      "result": [
+        2,
+        null,
+        true,
+        [
+          "Error",
+          "Typed property W13R2PUnset::$q must not be accessed before initialization"
+        ],
+        [
+          "get",
+          "set",
+          "isset",
+          "unset"
+        ],
+        2,
+        2,
+        [
+          "get",
+          "set",
+          "isset",
+          "unset",
+          "get",
+          "clone",
+          "get"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-property-stringable-receiver-release": {
+      "result": [
+        [
+          "Error",
+          "Object was released while assigning to property W13R2PReceiver::$text"
+        ],
+        [
+          "string",
+          "destruct",
+          "destruct"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-property-readonly-unset": {
+      "result": [
+        [
+          "Error",
+          "Cannot unset protected(set) readonly property W13R2PReadonlyBase::$p from global scope"
+        ],
+        null,
+        null,
+        null,
+        [
+          "Error",
+          "Cannot unset readonly property W13R2PReadonlyBase::$p"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-property-magic-result-destruction": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "Exception",
+          "dtor"
+        ],
+        true,
+        [
+          "set",
+          "result-dtor",
+          "unset",
+          "result-dtor",
+          "unset",
+          "result-dtor",
+          "isset",
+          "result-dtor",
+          "isset",
+          "plain-dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-zero-ghost": {
+      "result": [
+        [
+          false,
+          true
+        ],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-zero-proxy": {
+      "result": [
+        [
+          false,
+          true
+        ],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-capture-ghost": {
+      "result": [
+        [
+          false,
+          true
+        ],
+        [
+          "capture",
+          "after-constructor",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-capture-throw-ghost": {
+      "result": [
+        [
+          "Exception",
+          "capture"
+        ],
+        [
+          "capture",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-capture-proxy": {
+      "result": [
+        [
+          false,
+          true
+        ],
+        [
+          "capture",
+          "after-constructor",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-capture-throw-proxy": {
+      "result": [
+        [
+          "Exception",
+          "capture"
+        ],
+        [
+          "capture",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-lazy-comparison-state": {
+      "result": [
+        -1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-isset": {
+      "result": [
+        true,
+        [
+          "child",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-isset-throw": {
+      "result": [
+        [
+          "Exception",
+          "child",
+          null
+        ],
+        [
+          "child",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-clone": {
+      "result": [
+        null,
+        [
+          "child",
+          "after-clone",
+          "clone",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-clone-throw": {
+      "result": [
+        [
+          "Exception",
+          "child",
+          null
+        ],
+        [
+          "child",
+          "clone",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-clone-self": {
+      "result": [
+        null,
+        [
+          "after-clone",
+          "clone",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-clone-array": {
+      "result": [
+        null,
+        [
+          "after-clone",
+          "clone",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-clone-double": {
+      "result": [
+        [
+          "Exception",
+          "destructor",
+          "clone"
+        ],
+        [
+          "clone",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-dynamic": {
+      "result": [
+        [
+          2,
+          7
+        ],
+        [
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-handler": {
+      "result": [
+        null,
+        [
+          "subclass",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r2-cleanup-reentry": {
+      "result": [
+        "after",
+        [
+          "child",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
     "shutdown-handle-reuse": {
       "result": "hole\nbody-end\nmaker\nold\nnew\n",
       "diagnostics": []

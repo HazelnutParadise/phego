@@ -262,12 +262,17 @@ func (h *heap) toString(v value) (string, error) {
 			return "", err
 		}
 		if _, ok := h.resolveMethod(v.object.class, "__toString", nil); ok {
-			out, err := h.callMethod(v, "__toString", nil, nil, false)
+			raw, err := h.callMethod(v, "__toString", nil, nil, false)
+			if err != nil {
+				return "", err
+			}
+			out, err := h.dereferenceMethodReturn(raw)
 			if err != nil {
 				return "", err
 			}
 			if out.kind != valueString {
-				return "", &Throwable{"TypeError", v.object.class.name + "::__toString(): Return value must be of type string, " + valueName(out) + " returned"}
+				typeErr := &Throwable{"TypeError", v.object.class.name + "::__toString(): Return value must be of type string, " + valueName(out) + " returned"}
+				return "", h.mergeObjectErrors(typeErr, h.discardMethodReturn(out))
 			}
 			return out.text, nil
 		}

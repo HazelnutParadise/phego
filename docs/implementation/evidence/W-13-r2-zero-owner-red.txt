@@ -1,0 +1,5 @@
+--- FAIL: TestW13ZeroLazyInitializerOwnership (0.00s)
+    object_review_r2_lazy_test.go:86: zero-property optimization accepted a foreign initializer
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.998s
+FAIL

@@ -40,7 +40,8 @@
             "TestW13UnclaimedGraphOwnershipAtomic",
             "TestW13TemporaryArrayMutationOwnership",
             "TestW13TemporaryReferenceLocationOwnership",
-            "TestW13LazyRollbackConsecutiveSafety"
+            "TestW13LazyRollbackConsecutiveSafety",
+            "TestW13ZeroLazyInitializerOwnership"
           ]
         },
         {
@@ -102,7 +103,8 @@
             "TestW13UnclaimedGraphOwnershipAtomic",
             "TestW13TemporaryArrayMutationOwnership",
             "TestW13TemporaryReferenceLocationOwnership",
-            "TestW13LazyRollbackConsecutiveSafety"
+            "TestW13LazyRollbackConsecutiveSafety",
+            "TestW13ZeroLazyInitializerOwnership"
           ]
         }
       ],

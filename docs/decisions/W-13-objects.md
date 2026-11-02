@@ -18,7 +18,7 @@
 
 物件 identity 與屬性表 header 合在同一個 Go struct 配置，物件保留指向其中 header 的 interior pointer。宣告值陣列另一次配置，位置維持固定。clone 複製值到新物件既有的表，避免先建立再丟棄一份 header／defaults。resource 只配置 identity，不負擔屬性表。
 
-Go 1.26.5、darwin/arm64、Apple M3 的最後三次微型量測，value 為 64 B、bucket 96 B、object 96 B、propertyTable 56 B。32 屬性表的 W-12 陣列布局為 8880 B／47 次配置，宣告表為 2304 B／1 次，動態表為 7704 B／15 次。含物件建立、寫入與釋放的結果如下，原始 main 為 `4578556dcba800b34a9f0ad8a0cc8359e4e6e0d1`。
+Go 1.26.5、darwin/arm64、Apple M3 的量測中，value 為 64 B、bucket 96 B、object 96 B、propertyTable 64 B。32 屬性表的 W-12 陣列布局為 8880 B／47 次配置，宣告表為 2304 B／1 次，動態表為 7704 B／15 次。含物件建立、寫入與釋放的結果如下，原始 main 為 `4578556dcba800b34a9f0ad8a0cc8359e4e6e0d1`。
 
 | 屬性數 | 原始 main 動態物件 B／配置 | W-13 動態物件 B／配置 | W-13 宣告物件 B／配置 |
 |---|---:|---:|---:|
@@ -30,17 +30,25 @@ Go 1.26.5、darwin/arm64、Apple M3 的最後三次微型量測，value 為 64 B
 
 4 個動態屬性比原始 main 多 136 B，但少 5 次配置。這個固定位置與成長容量的成本明列保留，不能宣稱所有情境記憶體都下降。32 與 256 屬性的成本支持採用專用布局，沒有 PHP VM、真實應用或競品效能通過的含義。原始樣本、基準原始碼與重跑命令列在 W-13 evidence。
 
+PHP 比較物件時，僅有宣告值的直接路徑與已建立屬性檢視的 hash 路徑，對未初始化值的結果不同。runtime 以 `materialized` 保存後者狀態，dynamic index／blocks 也會選擇 hash 路徑。建立屬性檢視只設一個 bool，動態寫入才建立 map。clone 與 lazy 快照保存此狀態，rollback 同步還原。這個 bool 讓表從 56 B 增至 64 B，但本機 Go allocator 的獨立表與合併物件配置級距均不變，省掉宣告物件屬性檢視的空 map。配置前後量測位於 evidence；此級距結論只適用實測 Go host，不由 PHP guest 的整數寬度推論。
+
 ## 參照限制與請求狀態
 
 型別限制按實際屬性位置附加，別名寫入同一 reference 時一起驗證。unset、物件釋放、clone 與循環釋放必須維護來源的加入與解除。限制放在 heap 的按需側表，避免每個 reference 都增加一個 slice header。value 維持 64 B；為拒絕跨請求的活陣列與 reference，各自增加一個 heap owner 指標，phpArray 為 88 B、reference 為 80 B。
 
-對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個 constructor-style temporary 時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
+[建構函式回傳的暫存值](../../internal/runtime/heap.go#L85)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
 
 類別描述不保存物件欄位、static 值、enum 活實例、lazy 初始化錯誤或 hook 重入狀態。這些狀態由該請求的 heap／object 擁有。Go callback 是受信任的宿主程式；程式描述中的 callback 不應捕捉 PHP 請求的可變值。
 
 resource 使用既有 identity 指標欄位與獨立的請求登錄，不在每個 PHP value 加一個 resource 指標。使用時核對 owner、種類、identity 與代次。關閉先提交 closed 狀態，再呼叫宿主清理器，防止重入重複關閉。PHP scope 釋放與 W-14 最終清理共用該登錄，實際 I/O 與能力授權仍由對應模組處理。
 
 ## 呼叫與生命週期
+
+明確 unset 的宣告屬性以 undefined 值內原本未使用的 boolean 位元區別，維持 value 64 B，不另配置 bitmap 或側表。這個標記讓 magic get／set／isset／unset／reference 與真正從未初始化的 typed 屬性分流，clone 與 rollback 會保留標記。弱型別轉換可能執行 PHP callback，寫入前必須重新核對 receiver 仍存活並重新取得 slot。readonly 初始化資格依 PHP 在轉換前判斷；原生重入案例證明內層賦值後外層仍可完成首次賦值，因此不追加轉換後的 readonly 拒絕。
+
+callback 回傳 reference 時，按值讀取先保護 target，再消耗暫存 wrapper，於 W-14 取得回傳 owner 前完成。按參照綁定則直接為目的地取得 owner，避免把 Go 區域複本誤算成第二個來源 owner。magic setter／unset、magic 與 hooked isset、clone 的未使用結果都在操作結束前消耗，清理例外保留 previous chain。clone 以單一 `methodHold` 保護新物件，涵蓋回傳自己、含自己的陣列與回傳值解構重入 readonly 初始化，不增加持有權帳本。
+
+clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。檢查先於 lazy 初始化與 clone 配置，省掉拒絕操作的不必要配置與副作用。具名 magic 參數重複檢查重用已打包的陣列索引，不另建集合。union 的 int 轉換溢位時繼續嘗試允許的 string／bool，包含固定映像的 NaN 診斷。已知零個實體屬性的 lazy 類別直接建立普通物件；未知舊描述不套用這個快速路徑，initializer 的請求 owner 仍先檢查。
 
 方法表保存建置後不可變的 descriptor 指標。新定義與 trait 套用各有自己的 descriptor，純繼承共享原 descriptor；trait 綁定只複製描述本身，已凍結的參數與 defaults 可以共享。這讓方法實作身分可直接比較，也省掉原先每次 lookup 複製 descriptor 的配置。固定本機微型測試中，單次方法呼叫從 208 B／4 次配置降至 112 B／3 次配置。再把只保存單一 receiver 的 slice 改成一個 `methodHold` 值，降到 32 B／2 次配置。這批前後樣本執行時有其他工作，不能用其時間宣稱速度提升。
 

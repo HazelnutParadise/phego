@@ -75,6 +75,11 @@ require __DIR__.'/captures.php';
 require __DIR__.'/hook_frames.php';
 require __DIR__.'/statics.php';
 require __DIR__.'/review.php';
+require __DIR__.'/review_r2_returns.php';
+require __DIR__.'/review_r2_values.php';
+require __DIR__.'/review_r2_properties.php';
+require __DIR__.'/review_r2_lazy.php';
+require __DIR__.'/review_r2_cleanup.php';
 foreach($tests as $name=>$test) {
     // These cases have exact independent observations. Their consecutive
     // execution corrupts pinned PHP; preserve that separate diagnostic.

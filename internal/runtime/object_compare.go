@@ -57,10 +57,13 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 			failure = h.mergeObjectErrors(failure, h.releaseMethodHold(owner))
 		}
 	}()
-	var err error
-	x, y, err = h.comparisonPropertiesPHP8512(x, y)
-	if err != nil {
-		return 0, err
+	direct := directObjectComparisonEligible(x, y)
+	if !direct {
+		var err error
+		x, y, err = h.comparisonPropertiesPHP8512(x, y)
+		if err != nil {
+			return 0, err
+		}
 	}
 	if x.class != y.class {
 		return 1, nil
@@ -79,29 +82,104 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 	}
 	h.comparingObjects[x] = true
 	defer delete(h.comparingObjects, x)
-	xn, yn := 0, 0
-	x.props.each(func(_ string, _ *value) { xn++ })
-	y.props.each(func(_ string, _ *value) { yn++ })
+	if direct {
+		return h.compareDeclaredObjectProperties(x, y, arrays, true)
+	}
+	xn, yn := objectHashPropertyCount(x), objectHashPropertyCount(y)
 	if xn > yn {
 		return 1, nil
 	}
 	if xn < yn {
 		return -1, nil
 	}
+	return h.compareHashObjectProperties(x, y, arrays)
+}
+
+func directObjectComparisonEligible(x, y *object) bool {
+	for _, o := range []*object{x, y} {
+		if o == nil || o.class == nil || o.class.schema == nil ||
+			o.props == nil || o.props.layout != o.class.schema.layout ||
+			o.props.materialized || o.props.index != nil || o.props.head != nil || o.props.tail != nil {
+			return false
+		}
+		if o.lazy != nil && (o.lazy.initialize != nil || o.lazy.proxy || o.lazy.target.kind == valueObject) {
+			return false
+		}
+	}
+	return true
+}
+
+func objectHashPropertyCount(o *object) int {
+	declared := 0
+	if o.props != nil {
+		declared = len(o.props.declared)
+		if o.props.index != nil {
+			declared += len(o.props.index)
+		}
+	}
+	return declared
+}
+
+func (h *heap) compareDeclaredObjectProperties(x, y *object, arrays map[*phpArray]bool, direct bool) (int, error) {
+	if x.props.layout == nil {
+		return 0, nil
+	}
+	for i := range x.props.layout.names {
+		comparison, err := h.compareObjectPropertyValues(&x.props.declared[i], &y.props.declared[i], arrays, direct)
+		if err != nil || comparison != 0 {
+			return comparison, err
+		}
+	}
+	return 0, nil
+}
+
+func (h *heap) compareHashObjectProperties(x, y *object, arrays map[*phpArray]bool) (int, error) {
+	if comparison, err := h.compareDeclaredObjectProperties(x, y, arrays, false); err != nil || comparison != 0 {
+		return comparison, err
+	}
+
 	result := 0
 	var first error
-	x.props.each(func(name string, v *value) {
+	for block := x.props.head; block != nil; block = block.next {
+		for i := 0; i < block.used; i++ {
+			entry := &block.entries[i]
+			if current, ok := x.props.index[entry.name]; !ok || current != &entry.value {
+				continue
+			}
+			other, ok := y.props.lookup(entry.name)
+			if !ok {
+				result = 1
+				break
+			}
+			result, first = h.compareObjectPropertyValues(&entry.value, other, arrays, false)
+			if result != 0 || first != nil {
+				break
+			}
+		}
 		if result != 0 || first != nil {
-			return
+			break
 		}
-		other, ok := y.props.lookup(name)
-		if !ok || other.kind == valueUndefined {
-			result = 1
-			return
-		}
-		result, first = h.compareIn(*v, *other, arrays)
-	})
+	}
 	return result, first
+}
+
+func (h *heap) compareObjectPropertyValues(left, right *value, arrays map[*phpArray]bool, direct bool) (int, error) {
+	leftUndefined := left.deref().kind == valueUndefined
+	rightUndefined := right.deref().kind == valueUndefined
+	switch {
+	case leftUndefined && rightUndefined:
+		return 0, nil
+	case leftUndefined || rightUndefined:
+		if direct {
+			return 1, nil
+		}
+		if leftUndefined {
+			return -1, nil
+		}
+		return 1, nil
+	default:
+		return h.compareIn(*left, *right, arrays)
+	}
 }
 
 // These two pinned PHP 8.5.12 profiles evaluate the property-table operands
@@ -117,6 +195,10 @@ func (h *heap) comparisonPropertiesPHP8512(left, right *object) (*object, *objec
 	if err != nil {
 		return nil, nil, err
 	}
+	(*first).props.materialize()
 	*second, err = h.initializeLazy(*second)
+	if err == nil {
+		(*second).props.materialize()
+	}
 	return left, right, err
 }
