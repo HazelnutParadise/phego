@@ -115,6 +115,8 @@ Push 將帶有 Value／Location 類別及可選名稱的引數加入請求內 st
 
 Handler 的保護區間為 `[Start,End)`，處理區塊為 `[Target,BodyEnd)`，兩者不可重疊。保護區間依 Start 遞增、同起點 End 遞減排列，只能巢狀或分離。每一對 Handler 必須符合其中一種關係：四個區間完全分離，或內層的保護區間及處理區塊一起包含於外層的單一保護區間或單一處理區塊。這允許 finally 裡的 try/catch，並拒絕跨區拼接。函式入口不得位於處理區塊。正常跳躍或順序執行不得跨入處理區塊，離開處理區塊須使用 Leave 或 completion 指令。
 
+從區間外進入保護區間時，目標必須是 Start，Leave 也受此限制。離開 Finally 保護區間須使用 Leave 或 completion 指令，不能以一般跳躍或順序執行跨出。
+
 Catch 入口只保證 exception register 已定義。Finally 入口不保證任何暫存器已定義。處理區塊需自行取得 local 或建立暫存值。例外不能沿用一條失敗指令本來要寫入的目的值。
 
 Leave 明示需要展開 finally 的控制轉移。其 continuation 必須重新定義暫存器或載入 local，驗證器不假設暫存值跨越 finally 後仍可讀取。Return、ReturnRef 與 Throw 交由 Runtime 的 completion 與 unwind 機制處理。EndFinally 所在位置最內層的處理區塊必須是 Finally，繼續當次 Execution 保存的 completion。

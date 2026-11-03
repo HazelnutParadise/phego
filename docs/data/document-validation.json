@@ -329,7 +329,7 @@
     "docs/decisions/W-12-arrays.md": "573297e7895403043f1443685030f3f4c0e77b221c27d724ee76d78f8447dd58",
     "docs/decisions/W-13-objects.md": "40564029353f793afdcd96c33a1f49341d64a46d6fdc6c59d84d86be1c3e9ebf",
     "docs/decisions/W-15-ssa.md": "08bf804d9d7a294dc1aa3429dfefc81bf184515d52243e2210fcb1c74d0529ba",
-    "docs/decisions/W-16-bytecode.md": "d38be126c26169996fcc9d681ae86620f49d9aabeebd0dbffd5df81641212693",
+    "docs/decisions/W-16-bytecode.md": "f348b57935612b45d5fb697750cbc78b8a4c60fcc49bc1832fdeb17570b7bfa7",
     "docs/implementation/README.md": "70f04b3f1d3f01de37042b559bf6204dace3530baf862006fd442d4e5640ac14",
     "docs/implementation/W-01.md": "512c8992cd4976fac1f509603d257f21dfca911171bf2891b5fb84207f5c7ca8",
     "docs/implementation/W-02.md": "27a2644f8d64984bc9bcbf2528649ac472e05099bc8933af1572019e0daae9e6",
