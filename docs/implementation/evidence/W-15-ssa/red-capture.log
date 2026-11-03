@@ -1,0 +1,23 @@
+--- FAIL: TestOperationEffectsMalformedClosure (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x10 pc=0x104d2fd3c]
+
+goroutine 22 [running]:
+testing.tRunner.func1.2({0x104f24cc0, 0x104f85210})
+	/usr/local/go/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1977 +0x318
+panic({0x104f24cc0?, 0x104f85210?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/HazelnutParadise/phego/internal/ir.ownEffects(0x7f0b6a324eb8)
+	/Users/timlai/.codex/worktrees/w09-frontend/phego/internal/ir/effects.go:256 +0x4fc
+github.com/HazelnutParadise/phego/internal/ir.OperationEffects(0x104c87980?)
+	/Users/timlai/.codex/worktrees/w09-frontend/phego/internal/ir/effects.go:85 +0x1b8
+github.com/HazelnutParadise/phego/internal/ir.TestOperationEffectsMalformedClosure(0x7f0b6a372908)
+	/Users/timlai/.codex/worktrees/w09-frontend/phego/internal/ir/effects_w15_test.go:37 +0xa4
+testing.tRunner(0x7f0b6a372908, 0x104f60060)
+	/usr/local/go/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/HazelnutParadise/phego/internal/ir	0.549s
+FAIL

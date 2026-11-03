@@ -1,0 +1,33 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/ir/ssa
+cpu: Apple M3
+BenchmarkW15Build/constants/off-8         	    4998	     47253 ns/op	   97410 B/op	      27 allocs/op
+BenchmarkW15Build/constants/off-8         	    5618	     44452 ns/op	   97408 B/op	      27 allocs/op
+BenchmarkW15Build/constants/off-8         	    5407	     46524 ns/op	   97408 B/op	      27 allocs/op
+BenchmarkW15Build/constants/on-8          	    4932	     49349 ns/op	   97408 B/op	      27 allocs/op
+BenchmarkW15Build/constants/on-8          	    4906	     49742 ns/op	   97408 B/op	      27 allocs/op
+BenchmarkW15Build/constants/on-8          	    4831	     50686 ns/op	   97408 B/op	      27 allocs/op
+BenchmarkW15Build/typed/off-8             	    6447	     36122 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/typed/off-8             	    6586	     36999 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/typed/off-8             	    7058	     34962 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/typed/on-8              	    6433	     41283 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/typed/on-8              	    6145	     39640 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/typed/on-8              	    6391	     40006 ns/op	   93448 B/op	      23 allocs/op
+BenchmarkW15Build/opaque/off-8            	    5491	     43618 ns/op	   95480 B/op	      30 allocs/op
+BenchmarkW15Build/opaque/off-8            	    5876	     43248 ns/op	   95480 B/op	      30 allocs/op
+BenchmarkW15Build/opaque/off-8            	    5658	     43709 ns/op	   95480 B/op	      30 allocs/op
+BenchmarkW15Build/opaque/on-8             	    5226	     48284 ns/op	   95480 B/op	      30 allocs/op
+BenchmarkW15Build/opaque/on-8             	    5326	     47036 ns/op	   95480 B/op	      30 allocs/op
+BenchmarkW15Build/opaque/on-8             	    4976	     47153 ns/op	   95481 B/op	      30 allocs/op
+BenchmarkW15Storage/slab-8                	   54270	      4752 ns/op	   53392 B/op	       3 allocs/op
+BenchmarkW15Storage/slab-8                	   43392	      5175 ns/op	   53392 B/op	       3 allocs/op
+BenchmarkW15Storage/slab-8                	   52680	      4495 ns/op	   53392 B/op	       3 allocs/op
+BenchmarkW15Storage/dense-8               	   87771	      2663 ns/op	   41120 B/op	       2 allocs/op
+BenchmarkW15Storage/dense-8               	   90681	      2652 ns/op	   41120 B/op	       2 allocs/op
+BenchmarkW15Storage/dense-8               	   92254	      2636 ns/op	   41120 B/op	       2 allocs/op
+BenchmarkW15Storage/pointers-8            	   28998	      8275 ns/op	   40960 B/op	     512 allocs/op
+BenchmarkW15Storage/pointers-8            	   28873	      8294 ns/op	   40960 B/op	     512 allocs/op
+BenchmarkW15Storage/pointers-8            	   29113	      8228 ns/op	   40960 B/op	     512 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	7.456s

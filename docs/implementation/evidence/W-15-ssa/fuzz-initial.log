@@ -1,0 +1,15 @@
+fuzz: elapsed: 0s, gathering baseline coverage: 0/6 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 6/6 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 39581 (13191/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 6s, execs: 78504 (12973/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 9s, execs: 121523 (14344/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 12s, execs: 162539 (13668/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 15s, execs: 203340 (13603/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 18s, execs: 244702 (13789/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 21s, execs: 284879 (13392/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 24s, execs: 326329 (13813/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 27s, execs: 367051 (13575/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 30s, execs: 408076 (13676/sec), new interesting: 36 (total: 42)
+fuzz: elapsed: 30s, execs: 408076 (0/sec), new interesting: 36 (total: 42)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	30.376s
