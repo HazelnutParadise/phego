@@ -9751,6 +9751,5151 @@
       ],
       "diagnostics": []
     },
+    "r11-enum-unit-zero": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-minus-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-float-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-float-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-nan": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-negative-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-empty-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-numeric-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-text": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-empty-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-false": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-true": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-null": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-object": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-resource": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-same": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-unit-other": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-zero": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-minus-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-float-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-float-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-nan": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-negative-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-empty-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-numeric-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-text": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-empty-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-false": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-true": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-null": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-object": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-resource": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-same": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-int-other": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-zero": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-minus-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-float-one": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-float-two": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-nan": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-negative-inf": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-empty-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-numeric-string": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-text": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-empty-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-array": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-false": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-true": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-null": {
+      "result": [
+        false,
+        1,
+        -1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-object": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-resource": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-same": {
+      "result": [
+        true,
+        0,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r11-enum-string-other": {
+      "result": [
+        false,
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-int-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_int"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-int-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_int"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-null-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_null"
+          ]
+        ],
+        [
+          "null",
+          null
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-null-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_null"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-uninitialized-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_uninitialized"
+          ]
+        ],
+        [
+          "Error",
+          "Typed property W13R11Traits_private_uninitialized::$x must not be accessed before initialization"
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-uninitialized-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_uninitialized"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-nullable-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_nullable"
+          ]
+        ],
+        [
+          "null",
+          null
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-nullable-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_nullable"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-union-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_union"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "string",
+          "new"
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-union-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_union"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "string",
+          "new"
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-array-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_array"
+          ]
+        ],
+        [
+          "array",
+          {
+            "k": 1,
+            "2": "v"
+          }
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "array",
+          [
+            2
+          ]
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-array-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_array"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "array",
+          [
+            2
+          ]
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-empty-array-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_empty_array"
+          ]
+        ],
+        [
+          "array",
+          []
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "array",
+          [
+            2
+          ]
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-empty-array-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_empty_array"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "array",
+          [
+            2
+          ]
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-string-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_string"
+          ]
+        ],
+        [
+          "string",
+          ""
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "string",
+          "new"
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-string-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_string"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "string",
+          "new"
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-float-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_float"
+          ]
+        ],
+        [
+          "float",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "float",
+          7.5
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-float-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_float"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "float",
+          7.5
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-self-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_self"
+          ]
+        ],
+        [
+          "Error",
+          "Typed property W13R11Traits_private_self::$x must not be accessed before initialization"
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        true,
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-private-self-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_private_self"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        true,
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-public-int-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_public_int"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-public-int-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_public_int"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-protected-int-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_protected_int"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-protected-int-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_protected_int"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-ancestor-private-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_ancestor_private"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        9,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-ancestor-private-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_ancestor_private"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        9,
+        [
+          false,
+          1
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-class-own-private-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_class_own_private"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-class-own-private-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_class_own_private"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-nested-private-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_nested_private"
+          ]
+        ],
+        [
+          "int",
+          1
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-nested-private-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_nested_private"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-readonly-private-normal": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_readonly_private"
+          ]
+        ],
+        [
+          "Error",
+          "Typed property W13R11Traits_readonly_private::$x must not be accessed before initialization"
+        ],
+        [
+          false,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-readonly-private-lazy": {
+      "result": [
+        [
+          [
+            "x",
+            "W13R11Traits_readonly_private"
+          ]
+        ],
+        null,
+        [
+          true,
+          0
+        ],
+        null,
+        [
+          false,
+          0
+        ],
+        [
+          "int",
+          7
+        ],
+        null,
+        [
+          false,
+          0
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-public_instance_one": {
+      "result": [
+        [
+          "W13R11Child_public_instance_one",
+          "W13R11Parent_public_instance_one"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          9
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-public_instance_two": {
+      "result": [
+        [
+          "W13R11Child_public_instance_two",
+          "W13R11Parent_public_instance_two"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          9
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-public_static_one": {
+      "result": [
+        [
+          "W13R11Child_public_static_one",
+          "W13R11Parent_public_static_one"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          10
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-public_static_two": {
+      "result": [
+        [
+          "W13R11Child_public_static_two",
+          "W13R11Parent_public_static_two"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          10
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-protected_instance_one": {
+      "result": [
+        [
+          "W13R11Child_protected_instance_one",
+          "W13R11Parent_protected_instance_one"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          9
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-protected_instance_two": {
+      "result": [
+        [
+          "W13R11Child_protected_instance_two",
+          "W13R11Parent_protected_instance_two"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          9
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-protected_static_one": {
+      "result": [
+        [
+          "W13R11Child_protected_static_one",
+          "W13R11Parent_protected_static_one"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          10
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-inherit-protected_static_two": {
+      "result": [
+        [
+          "W13R11Child_protected_static_two",
+          "W13R11Parent_protected_static_two"
+        ],
+        [
+          9,
+          2,
+          9
+        ],
+        [
+          10,
+          20,
+          10
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-iterable-normal": {
+      "result": [
+        [
+          false,
+          0
+        ],
+        [
+          false,
+          0
+        ],
+        [
+          2
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-iterable-lazy": {
+      "result": [
+        [
+          true,
+          0
+        ],
+        [
+          false,
+          0
+        ],
+        [
+          2
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-setter-protected-private": {
+      "result": [
+        false,
+        true,
+        [
+          "Error",
+          "Cannot modify protected(set) property W13R11Setter_protected_private::$x from global scope"
+        ],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-setter-private-protected": {
+      "result": [
+        true,
+        false,
+        [
+          "Error",
+          "Cannot modify private(set) property W13R11Setter_private_protected::$x from global scope"
+        ],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r11-trait-setter-public-protected": {
+      "result": [
+        false,
+        false,
+        null,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-0-string-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-0-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-0-array-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-0-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-0-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-1-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-1-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-2-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-2-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-2-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"static\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-2-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-2-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-3-string-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-3-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-3-array-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-3-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-3-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-4-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-4-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-4-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-4-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-4-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-5-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-6-string-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-6-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-6-array-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-sarg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-sret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-C-sref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-6-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-6-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-7-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-8-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-9-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-9-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-9-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-O-arg": {
+      "result": [
+        "TypeError",
+        "W13R11O::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-O-ret": {
+      "result": [
+        "TypeError",
+        "W13R11O::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-O-ref": {
+      "result": [
+        "TypeError",
+        "W13R11O::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"self\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-9-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-9-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-string-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-string-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, string returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-string-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, string given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-string-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-P-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-arg": {
+      "result": [
+        "TypeError",
+        "W13R11P::arg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 39"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-O-arg": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-array-P-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-sarg": {
+      "result": [
+        "TypeError",
+        "W13R11P::sarg(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 36"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-P-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-ret": {
+      "result": [
+        "TypeError",
+        "W13R11P::ret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-O-ret": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-array-P-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-sret": {
+      "result": [
+        "TypeError",
+        "W13R11P::sret(): Return value must be of type callable, array returned"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-P-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-ref": {
+      "result": [
+        "TypeError",
+        "W13R11P::ref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 40"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-O-ref": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Use of \"parent\" in callables is deprecated"
+        ]
+      ]
+    },
+    "r11-callable-10-array-P-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-C-sref": {
+      "result": [
+        "TypeError",
+        "W13R11P::sref(): Argument #1 ($c) must be of type callable, array given, called in /w/review_r11_callable.php on line 38"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-P-union": {
+      "result": [
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r11-callable-10-array-unscoped": {
+      "result": [
+        false
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

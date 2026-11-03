@@ -24,7 +24,7 @@
   "scope": "private runtime operations and W-14 execution integration; not execution of PHP source",
   "status": "local_runtime_pass_pending_remote_review",
   "product_acceptance_status": "not_run",
-  "working_tree_parent": "a8aba28cfbec9923ad42a84ee5a53edf935d5785",
+  "working_tree_parent": "f772b2c776e1b3d03828f67aedf9529844e55e6e",
   "environment": {
     "go": "go1.26.5",
     "host": "darwin/arm64",
@@ -35,77 +35,85 @@
   "reference_profiles": [
     {
       "width": 32,
-      "cases": 809,
+      "cases": 1291,
       "platform": "linux/386",
       "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
       "output": "internal/runtime/testdata/w13-ref-32.json",
-      "output_sha256": "eb0f25a46109038004052a1bfa5e74d8dcedb52c6bd2a16532cfae6459a25d6e",
+      "output_sha256": "525cf33e111efdc14e14859e554ca389ff6c23c8c7a84b9eb7ddabd7c51f3227",
       "run_record": "internal/runtime/testdata/w13-run-32.json",
+      "run_record_sha256": "2421facb5a57d2f56861ec920980a803521181167ea5eaff7e3d08b6dcb260bb",
       "status": "pass",
-      "command": "python3 tests/semantics/w13-objects/reference.py --width 32 --output-dir /tmp/phego-w13-r10-reference-complete"
+      "command": "python3 tests/semantics/w13-objects/reference.py --width 32 --output-dir /tmp/phego-w13-r11-reference-final"
     },
     {
       "width": 64,
-      "cases": 809,
+      "cases": 1291,
       "platform": "linux/arm64",
       "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
       "output": "internal/runtime/testdata/w13-ref-64.json",
-      "output_sha256": "b643d53307d6b8bb8343a50a8ff6b53de1bfd93654de6a33dc941e952bd76051",
+      "output_sha256": "ccd5b064dcf26c902bb6e74c1bc3ade289df512413e931458d974e1bb5e1fe58",
       "run_record": "internal/runtime/testdata/w13-run-64.json",
+      "run_record_sha256": "1e745170fbb86cb7c504f31f569a69fd5304ccfb10504f4c1821ad3dd8ee6c84",
       "status": "pass",
-      "command": "python3 tests/semantics/w13-objects/reference.py --width 64 --output-dir /tmp/phego-w13-r10-reference-complete"
+      "command": "python3 tests/semantics/w13-objects/reference.py --width 64 --output-dir /tmp/phego-w13-r11-reference-final"
     }
   ],
   "checks": [
     {
       "command": "gofmt -l internal",
       "exit_code": 0,
+      "duration_seconds": 0.041,
       "result": "pass",
-      "output": "W-13-r10-local-format.txt",
+      "output": "W-13-r11-local-gofmt.txt",
       "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "CGO_ENABLED=0 go test ./...",
       "exit_code": 0,
+      "duration_seconds": 6.739,
       "result": "pass",
-      "output": "W-13-r10-local-pure.txt",
-      "output_sha256": "4cc72d46eb79983c30e98d98dc94c19341ca1792bf504dfd7fbdc51c192424bf"
+      "output": "W-13-r11-local-go-test.txt",
+      "output_sha256": "14e5e8f0673bde307cd664771b46692c311082dad6b78d316e9e0d1edd822c7f"
     },
     {
       "command": "go test -race ./...",
       "exit_code": 0,
+      "duration_seconds": 95.015,
       "result": "pass",
-      "output": "W-13-r10-local-race.txt",
-      "output_sha256": "f531446e3625b8f6d08423aa58d0fd18e8a5c32a07655f08d5cf592c0f6a2ce4"
+      "output": "W-13-r11-local-go-race.txt",
+      "output_sha256": "437e0d37908b37c9839eebc616ef1175605ffe1d7ba76522cdbeb04480faa434"
     },
     {
       "command": "go vet ./...",
       "exit_code": 0,
+      "duration_seconds": 0.522,
       "result": "pass",
-      "output": "W-13-r10-local-vet.txt",
+      "output": "W-13-r11-local-go-vet.txt",
       "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
       "exit_code": 0,
+      "duration_seconds": 130.891,
       "result": "pass",
-      "output": "W-13-r10-local-python.txt",
-      "output_sha256": "470d6948e952e2e1ddf37e250544fb95df5c4ea9e44554ce6baea5fcf061d2bc",
-      "seconds": 152.007
+      "output": "W-13-r11-local-python-tests.txt",
+      "output_sha256": "5821fed7dedb1cea9a32c7714b8ad1934468cde86d656ec7c3cbaec088b76c0a"
     },
     {
       "command": "python3 tools/validate_docs.py",
       "exit_code": 0,
+      "duration_seconds": 0.144,
       "result": "pass",
-      "scope": "documentation_only;34checks",
-      "output": "W-13-r10-local-docs.json",
-      "output_sha256": "8ba1619119d36474c36fa2304f84fb0ae924b3dd6e07ada3ebee92d67f2337f1"
+      "output": "W-13-r11-local-docs.json",
+      "output_sha256": "74187372d3f380102093c36f5dfd968e15a18562c2a98710239f68a90933e1c3"
     }
   ],
   "python_tests": 536,
   "source_sha256": {
     ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
-    "docs/compatibility/profile-matrix.json": "edfe0b34fd57a505d721e4f46ad6cdbb212df9625b383d82ba5ef18ad6b648a7",
+    "docs/compatibility/profile-matrix.json": "7ae7f07bd5e31f80b52f47cdf4c32a8fdd47f9fe48494ea993317a7e9a3d6962",
+    "docs/decisions/W-13-objects.md": "03c9e8f761dd075f502e3acd9327d66048453a53f194ff51ca8bd477c3a0b9b0",
+    "docs/implementation/W-13.md": "3717482eb3119808d645f4926914a94b9a59c2a050ca11a11f6bd2449dca9eae",
     "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
     "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
@@ -144,7 +152,7 @@
     "internal/runtime/object_basic_test.go": "cf7419540b0b0f82935f6dc114b1cca8cf6014b8fd6232026bd77f0855a92dbc",
     "internal/runtime/object_captures_test.go": "f9a45a617c1cb55cad01c50b25cc2c24a7e7a5f56569c7d68fe2aeeabebabd6e",
     "internal/runtime/object_checks.go": "9c644913761e2ed878b321b344784d07ecc6359048e43fffc624ece8f4615658",
-    "internal/runtime/object_compare.go": "0e9035cae7acba733a3f3c295deec9c5575bd248f52673a62fed8b553d9634ab",
+    "internal/runtime/object_compare.go": "93504c00763930f3cbe7d71a8c776cf5b4681de650e15d6d151f9600a1cebcd3",
     "internal/runtime/object_execution.go": "4152a2fb9455dc4c63f946d7dec78d13567afeb622737dbce1dec2f10d81fc79",
     "internal/runtime/object_execution_test.go": "a79dc77b4913389daa4f8b5eaf2965c63f9ac55aa96d0594dcaab12105a19025",
     "internal/runtime/object_gc_cancel_test.go": "e584c3cfcc9280dc7ffe15a449d7d11f5482dc5a65400e1b3a92016e28799d06",
@@ -159,11 +167,11 @@
     "internal/runtime/object_lazy.go": "2a836ca1964763df2c6c70ab5209dbbaa28f5c5bc9663359bd0276f296608f3c",
     "internal/runtime/object_metadata_test.go": "1f31bfffe4e980544f7f9a9431a06c49c065d6e13ccad719f90bf69ebfed5120",
     "internal/runtime/object_method_ownership_test.go": "8b0f51c0d464bb24f81c45d68a3d2e80f0208135a41db69f93c95099bc9b355c",
-    "internal/runtime/object_methods.go": "0cf50b57f4ab797b9c56068d56ec9f0c8da0d6f122d56f512f5642ef61e1d8d5",
+    "internal/runtime/object_methods.go": "1dfd383c7da0070eadc961593ead3cbf44ddd917cb5dc85b8e5eab62f930869b",
     "internal/runtime/object_methods_lifetime_test.go": "e59020f9bc31f6c3a5ffe2b8263b80c20b184da69d5d9fc62c3147305161a01f",
     "internal/runtime/object_methods_test.go": "f8adbcb4266a9cc35238e76d4895b7b0b5279012e16a8b906f15b3e49d47c855",
-    "internal/runtime/object_model.go": "1c6c4f89b3b557b62e2d2bba62afe456ff834912b40a3ec02ff5a729be164014",
-    "internal/runtime/object_model_test.go": "6c69782eb4426997afc88e5947b44c375935c801dff3f93ae3b205c7cfee1d8a",
+    "internal/runtime/object_model.go": "7839c50c95f55ce348eb4d330527622a7a2c17eb8d36eaa568f7737f9bd005c3",
+    "internal/runtime/object_model_test.go": "eb59cb0f10307927d41844b27855a4de99160b33bcf569779f2a1f0535f896c4",
     "internal/runtime/object_names.go": "8a0227b0af816af711de364f01394388dbe87b1138a9b62978085b4267ca177c",
     "internal/runtime/object_names_test.go": "93484a09ee0115be39c6669dc1729c65932f148ab856529bb819c9412966b6fd",
     "internal/runtime/object_oracle_test.go": "5d535e4e8fd489ea8194ca5d770904611e8da7c47edd1eae66a4019f519dff14",
@@ -183,6 +191,13 @@
     "internal/runtime/object_review_r10_lifetime_test.go": "41d2ddcc92b29f6d08925a34c4e1c017a10efa0abdab03cc6783d19320d0eac4",
     "internal/runtime/object_review_r10_proxy_control_test.go": "d6d634d8af74037caf5995208fdb752a2ac449d78f61e3b5c536248ad7b02850",
     "internal/runtime/object_review_r10_proxy_test.go": "498f0cf7cd41faeb8be9bec6d8b3bacc6da5611ea40d200d1233e37a18fac374",
+    "internal/runtime/object_review_r11_callable_test.go": "9b69622d5a943fc021320505b44fa84a0001190974387eaac72033ce371e7665",
+    "internal/runtime/object_review_r11_enum_test.go": "70993f6080a51ee5f320b75699c157753b2072229b62df5abff76830aff8979c",
+    "internal/runtime/object_review_r11_registration_test.go": "ab14cc8fc0b4184f7385b643e822aa26176e7625cf4acbc95be49ff72eb8b364",
+    "internal/runtime/object_review_r11_trait_inheritance_test.go": "0b6fb75920dcc730d2f5cdce9fa8011c5d62060929f3978ed3c53976ef6288dc",
+    "internal/runtime/object_review_r11_trait_snapshot_test.go": "d15b7bb9b54d95dbd8184823b29756b7fe7229b984efe917584712cfcce4261f",
+    "internal/runtime/object_review_r11_trait_validation_test.go": "e83a1775387f9668d964ffbf5ba46a540bf344174e0d6890ca33c95811a0913a",
+    "internal/runtime/object_review_r11_traits_test.go": "b1a86c062bde6a8d2b3d246a080a829512a0cb6595a2518e8179fd60555dd6c4",
     "internal/runtime/object_review_r2_cleanup_test.go": "9adda019ae4c62ae5b4089a6c5a7f21e17e7566ccbef815453923955a8d25389",
     "internal/runtime/object_review_r2_lazy_test.go": "338f809558c7ef8cc9bc4ce576f36e0f457b6e16f3cd94e640cfebfe58a39707",
     "internal/runtime/object_review_r2_properties_test.go": "f46cbbf71b0616e7f938529e3f516889d1c00e86594ed858e5ecdc7981ec1efe",
@@ -225,6 +240,7 @@
     "internal/runtime/object_statics_test.go": "34d040f083c1695885925cc38f1b2d5472709d523c32892295efab585b12f42f",
     "internal/runtime/object_table.go": "95bbf29aaca042b4181ea6f25db93b1911e4a8194f85e4ff1b6310bd9bcbd331",
     "internal/runtime/object_table_test.go": "a6069213fc85d047020d64f03bb0c18fa23d828af6f6085cdc8ef26aced4de2b",
+    "internal/runtime/object_trait_properties.go": "1caee14aced2cc7dfa0082fd6e50b55999db8aaf4973459fe169564ae2dff8e4",
     "internal/runtime/object_types_test.go": "ce8de494a2940e9be3e40f2778d92086ddd31d3ae44c06ac2bd08e004f160c6b",
     "internal/runtime/object_weakmap.go": "a47d52b13f1ab0127923ba29f2a495207b1664a2d093cebd0f189385e635e78a",
     "internal/runtime/object_weakmap_test.go": "d20f34acb12fbfc986d9415f927edbf394fb48b174edb16f2ddea22b8bbed287",
@@ -252,7 +268,7 @@
     "tests/semantics/w13-objects/isolated/case_lazy_rollback_declared.php": "3c49f9c17aba9a47d8e838cba98d33db5153c9338ba046739ccdcf0c04009ec8",
     "tests/semantics/w13-objects/isolated/case_lazy_rollback_dynamic.php": "9f34966cca631c1b5d46ed6e7b890330ce0bf98dd72ac2e7c050d48d5462c562",
     "tests/semantics/w13-objects/isolated/common.php": "8cb3d04e0232ded16e30caa04af1af9b31394a74f5485be2ca3ffd19e27df88c",
-    "tests/semantics/w13-objects/matrix.php": "bd7991af04016d62237983a0b89ec8186e13486a208a021d5939403f5f0eeead",
+    "tests/semantics/w13-objects/matrix.php": "86948bff1e97759e3abc3e64e2f9b916998665695a40fff17acca969e8cf7ee2",
     "tests/semantics/w13-objects/method_ownership.php": "43dd7e9640c0932d47cb292b9eda66c703be2ec2e925a78aa9466fb3eaea6780",
     "tests/semantics/w13-objects/methods.php": "f94055252326fbb3c504b5e740e5740cc891665bf1ee38d249dfee2b3b3ad7a2",
     "tests/semantics/w13-objects/names.php": "5dfb896d63587782218a31a3463d81d7028fcccddc41ae0f233da62a67b91270",
@@ -267,6 +283,10 @@
     "tests/semantics/w13-objects/review_r10_proxy_hooks.php": "cfccd4d384a838067dae933386e30f9802056d776e923b07a32a7361aaf97161",
     "tests/semantics/w13-objects/review_r10_proxy_static.php": "ba6c44f9368a39ebbd7ef6a8730ea8ad588b46f42a86f07b6b27449e0f850bfe",
     "tests/semantics/w13-objects/review_r10_strict.php": "cceb06e37e4f4eec305308d5a06a5734ab4d56c0b9278022c17c4f000f6ba742",
+    "tests/semantics/w13-objects/review_r11_callable.php": "15829119468208c6a1379bd8aa90bd7e95eedf330d85e6137363a545721ea20e",
+    "tests/semantics/w13-objects/review_r11_enum.php": "b7b4de914727646bb6adf57f9cb84e04187ac2f46a0814dd8137c72137f16331",
+    "tests/semantics/w13-objects/review_r11_trait_inheritance.php": "4bcf3abcea1370475f16113467d2af09bfea9bdc6bbe321af4fcc741ec30bc17",
+    "tests/semantics/w13-objects/review_r11_traits.php": "2177956dec2170cdf8b326a651d00fc6e700f1aee6060f65a0c182337d8d6c1a",
     "tests/semantics/w13-objects/review_r2_cleanup.php": "b0c2384375a332c80a3419c43958cdcd24ba75b402b259fbbafac97c9a3bab5d",
     "tests/semantics/w13-objects/review_r2_lazy.php": "6f6512d76267264aec75092e4afcb6d63246b76ee5fedf3fa3a28cdee83ec942",
     "tests/semantics/w13-objects/review_r2_properties.php": "126fd1c6eeb66e56ed802680872c1732ed58cdac8cec29fcaedc25c765b67261",
@@ -351,13 +371,14 @@
     "raw_lifecycle_evidence": "W-13-r7-review.json",
     "rollback_sources_evidence": "W-13-r8-review.json",
     "dynamic_storage_evidence": "W-13-r9-review.json",
-    "fixed_holds_evidence": "W-13-r10-review.json"
+    "fixed_holds_evidence": "W-13-r10-review.json",
+    "r11_evidence": "W-13-r11-review.json"
   },
   "review": {
-    "scope": "R2-R10Codex findings and independent runtime review;809fixed-profile cases",
-    "result": "All confirmed local findings repaired and regression-tested; all six local gates and independent runtime/fresh-context documentation reviews passed. Four specified unsafe-reference limitations explicitly approved and remain blocked/not-pass. Exact pushed-head CI and latest Codex reviews remain separate delivery gates.",
+    "scope": "R2-R11 Codex findings and independent runtime review;1291 fixed-profile cases",
+    "result": "All confirmed R11 findings repaired with test-first evidence; six final local gates passed. Independent runtime and final fresh-context evidence reviews found no outstanding confirmed issues. Four specified unsafe-reference limitations remain explicitly approved and blocked/not-pass. Exact pushed-head CI and latest Codex code/security reviews remain separate delivery gates.",
     "tools": "OpenCode big-pickle180/360s timeouts left reviewed partial tests; Copilot Auto unavailable; native gpt-6-luna completed test slots; native gpt-6-astra consultations; agy Opus quota429 was not a successful review; native gpt-6.1-sol final review.",
-    "regression_evidence": "W-13-r10-review.json"
+    "regression_evidence": "W-13-r11-review.json"
   },
   "remaining_gaps": [
     "PHP frontend/VM execution entry point",
@@ -388,6 +409,7 @@
       "go_runtime_result": "cached on refresh; original full uncached CGO0 and race runs for identical runtime source passed at a8aba28 (3.583s and27.904s).",
       "python": "536tests passed152.007s",
       "remote": "Latest pushed-head CI and Codex reviews are independent remaining gates."
-    }
+    },
+    "record_scope": "Historical approval-only refresh for runtime source a8aba28cfbec9923ad42a84ee5a53edf935d5785 and delivery commit f772b2c776e1b3d03828f67aedf9529844e55e6e. Source unchanged/cached/152.007s statements apply only to that historical refresh. Current R11 source and local results are recorded by source_sha256/checks above."
   }
 }

@@ -190,6 +190,22 @@ Go/arm64 比較 144 B／一次降至零配置；getter 88 B／兩次降至 8 B�
 
 每種寬度 809 案、原 609 案不變，實際 Go/386 回歸與前後三次量測見 `W-13-r10-review.json`。所有新輸入在兩個固定映像正常結束，沒有新增不安全參考引擎例外。第三與第四項既有診斷已於 2026-11-03 取得使用者明確核准，保留 Go 安全行為並明列限制後可合併，仍不計相容通過。
 
+## R11：類別註冊、相對 callable 與 trait 組合
+
+類別登錄遇到同一份已發布祖先即停止。已發布鏈在登錄時已完整驗證，且描述不可變；沿用這個條件可移除平方重掃，不新增索引或永久狀態。未發布部分保留取消檢查、名稱衝突與整批發布。1,024 類別三次樣本由約 54.7 MB／54 萬次配置降至約 158.5 KB／3,096 次。
+
+Enum 與非物件比較先保留 bool／null 規則，其餘交由 enum unordered 規則，兩個方向都回傳 1，不執行普通物件的數值或字串轉換。一般物件及同 identity enum 的既有路徑保持原語意。
+
+Callable 驗證以區域 `callableContext` 保存 callee lexical scope、實際 called class 與 `$this` 是否存在，不在 heap 或共享類別加狀態。relative class 成功解析後只記一次 deprecation，再判斷方法是否合法。回傳的 scalar／Stringable 轉換共用不重複驗證 callable 的尾段，保留原持有及例外順序。字串與陣列形式保留 PHP 的 `ce_org` 差異，array self 可查到實際 receiver 的方法時，不將同一規則套到 compound string。union 的其他成員原樣接受時不產生 callable deprecation。
+
+Trait 組合用現有屬性索引範圍識別本次匯入，只有同 consumer 的碰撞才嚴格檢查並保留第一份描述。setter 權限依固定 PHP 保留第一份，不參與 trait 相容性遮罩。PHP 先組合 trait 再繼承，因此父類別非 private 宣告走既有覆寫路徑，保留 prototype 並建立 consumer owner；重新使用 trait 的 static 儲存因此獨立。祖先 private 維持各自實體位置。新增 permanent origin metadata 沒有必要。
+
+型別比較處理 nullable、無序 union／intersection、self／parent、大小寫與 iterable 別名。Default 使用嚴格值比較，保留 NaN 不相等、空 bytes、陣列順序及重複正規化鍵的最後值。無平台的私人 schema 採 64 位元正規化，另掃描所有原始項目以保留兩端 32 位元可匯入性，包括最後被覆寫的項目；不用臨時 request heap，也不重做整套 32 位元遞迴比較。這是私人輸入可攜性條件，不宣稱完整的各平台 PHP 宣告接受條件。合法 float default 的最外層 int widening 保留，`int|float` 的整數與巢狀陣列的整數不改成 float。
+
+Trait 首次建構取得獨立 snapshot，consumer 共用不可變內容，實例另行匯入請求值。省掉重複深複製後，256 組巢狀預設陣列的 consumer 建置由 32,936 B／1,041 次降至 912 B／15 次配置。原始輸入修改與平行請求中的巢狀寫入都不會影響其他 consumer。不為此建立快取或每屬性的共享旗標。
+
+R11 共 482 個新增原生案例，兩種固定映像各 1,291 案且原 809 案完全不變。一般非法繼承宣告、autoload／alias 型別及 throwing deprecation handler 的完整 frontend／VM 流程未驗收。原始失敗、局部控制、樣本與重跑命令見 `W-13-r11-review.json`。
+
 ## 驗證與尚未完成項目
 
 ### 第三、第四項已核准的指定輸入

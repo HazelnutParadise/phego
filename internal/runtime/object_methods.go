@@ -487,7 +487,7 @@ func (h *heap) bindMethodArgument(obj value, m *methodSpec, p *methodParameter, 
 			// A typed property source constrains the existing reference.
 			// Reject before coercion, which could execute Stringable code.
 			if a.slot.kind == valueReference && len(h.typedSources[a.slot.ref]) != 0 {
-				if !methodTypeHas(p.typeName, "callable") || !h.isObjectCallable(v, m.owner) {
+				if !methodTypeHas(p.typeName, "callable") || !h.isCallable(v, callableContext{m.owner, called, !m.static && m.owner != nil}) {
 					return value{}, h.methodArgumentTypeError(m, p, index, v, site)
 				}
 			} else {
@@ -652,7 +652,7 @@ func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool)
 		called = obj.object.class
 	}
 	if typ != "void" && typ != "never" && (methodAcceptsType(m, called, typ, v) ||
-		(methodTypeHas(typ, "callable") && h.isObjectCallable(v, m.owner))) {
+		(methodTypeHas(typ, "callable") && h.isCallable(v, callableContext{m.owner, called, !m.static && m.owner != nil}))) {
 		return v, nil
 	}
 	if err := h.claimValues(v); err != nil {
@@ -690,7 +690,7 @@ func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool)
 	if m.returnsReference && v.kind == valueReference && len(h.typedSources[v.ref]) != 0 {
 		return value{}, methodReturnTypeError(m, v)
 	}
-	if coerced, ok, err := h.coerceTypedValue(m, called, typ, v, strict); err != nil {
+	if coerced, ok, err := h.coerceTypedValueAfterCallable(m, called, typ, v, strict); err != nil {
 		if objectPHPException(err) {
 			return value{}, h.mergeObjectErrors(err, methodReturnTypeError(m, v))
 		}
@@ -976,9 +976,16 @@ func (h *heap) coerceTypedValue(m *methodSpec, called *class, typ string, v valu
 	if err := h.claimValues(v); err != nil {
 		return value{}, false, err
 	}
-	if methodTypeHas(typ, "callable") && h.isObjectCallable(v, m.owner) {
+	if methodAcceptsType(m, called, typ, v) ||
+		(methodTypeHas(typ, "callable") && h.isCallable(v, callableContext{m.owner, called, !m.static && m.owner != nil})) {
 		return v, true, nil
 	}
+	return h.coerceTypedValueAfterCallable(m, called, typ, v, strict)
+}
+
+// Both callers have claimed the value and performed callable validation once.
+// Scalar/Stringable coercion must not repeat an observable deprecation.
+func (h *heap) coerceTypedValueAfterCallable(m *methodSpec, called *class, typ string, v value, strict bool) (value, bool, error) {
 	if out, ok := h.coerceMethodValue(m, called, typ, v, strict); ok {
 		return out, true, nil
 	}
@@ -991,12 +998,51 @@ func (h *heap) coerceTypedValue(m *methodSpec, called *class, typ string, v valu
 	return value{}, false, nil
 }
 
+type callableContext struct {
+	scope, called *class
+	hasThis       bool
+}
+
 func (h *heap) isObjectCallable(v value, scope *class) bool {
+	return h.isCallable(v, callableContext{scope: scope, called: scope})
+}
+
+func (h *heap) isCallable(v value, context callableContext) bool {
+	scope := context.scope
 	v = v.deref()
 	var target *class
 	name := "__invoke"
 	requireStatic := false
-	className := func(name string) *class { return h.classes[phpNameLower(strings.TrimPrefix(name, "\\"))] }
+	strictClass, classArray := false, false
+	className := func(name string) *class {
+		strictClass = true
+		var c *class
+		relative := phpNameLower(name)
+		switch relative {
+		case "self":
+			c = scope
+			strictClass = false
+		case "parent":
+			if scope != nil && scope.schema != nil {
+				c = scope.schema.parent
+			}
+		case "static":
+			c = context.called
+		default:
+			c = h.classes[phpNameLower(strings.TrimPrefix(name, "\\"))]
+			if c != nil && context.hasThis && classIs(context.called, scope) && classIs(scope, c) {
+				requireStatic = false
+			}
+			return c
+		}
+		if c != nil {
+			h.warn(levelDeprecated, "Use of \""+relative+"\" in callables is deprecated")
+			if context.hasThis {
+				requireStatic = false
+			}
+		}
+		return c
+	}
 	switch v.kind {
 	case valueObject:
 		if v.object == nil || v.object.owner != h || v.object.freed {
@@ -1014,9 +1060,9 @@ func (h *heap) isObjectCallable(v value, scope *class) bool {
 		if !ok {
 			return false
 		}
+		requireStatic = true
 		target = className(c)
 		name = method
-		requireStatic = true
 	case valueArray:
 		if v.array == nil || v.array.count() != 2 {
 			return false
@@ -1037,8 +1083,9 @@ func (h *heap) isObjectCallable(v value, scope *class) bool {
 			}
 			target = obj.object.class
 		case valueString:
-			target = className(obj.text)
 			requireStatic = true
+			classArray = true
+			target = className(obj.text)
 		default:
 			return false
 		}
@@ -1048,7 +1095,19 @@ func (h *heap) isObjectCallable(v value, scope *class) bool {
 	if target == nil {
 		return false
 	}
-	if method, ok := h.resolveMethod(target, name, scope); ok && canAccess(scope, method.owner, method.visibility) {
+	lookupScope := scope
+	if strictClass {
+		lookupScope = nil
+	}
+	method, found := h.resolveMethod(target, name, lookupScope)
+	if !found && classArray && !requireStatic {
+		// PHP array class callables provide ce_org; compound strings do not.
+		method, found = h.resolveMethod(context.called, name, scope)
+		if found && strictClass && !classIs(target, method.owner) {
+			found = false
+		}
+	}
+	if found && canAccess(scope, method.owner, method.visibility) {
 		return !method.abstract && method.call != nil && (!requireStatic || method.static)
 	}
 	magic := "__call"

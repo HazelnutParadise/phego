@@ -26,7 +26,7 @@ type propertySpec struct {
 	static         bool
 	virtual        bool
 	hasDefault     bool
-	initial        any // immutable Go snapshot, copied at class build and instantiation
+	initial        any // first build copies the snapshot; trait imports share it immutably
 	get, set       objectHook
 	hookStrict     bool
 	getReference   bool
@@ -158,6 +158,7 @@ func buildClass(spec classSpec) (*class, error) {
 			methods = append(methods, *trait.schema.methods[name])
 		}
 	}
+	traitEnd := len(properties)
 	traitMethodCount := len(methods)
 	methods = append(methods, spec.methods...)
 	if spec.enumKind != enumNone {
@@ -173,21 +174,30 @@ func buildClass(spec classSpec) (*class, error) {
 			properties = append(properties, propertySpec{name: "value", typeName: typ, readonly: true})
 		}
 	}
-	for _, p := range properties {
+	for propertyIndex, p := range properties {
+		fromTrait := propertyIndex >= len(spec.properties) && propertyIndex < traitEnd
 		if p.name == "" {
 			return nil, fmt.Errorf("property name is required")
 		}
 		if s.readonly {
+			if fromTrait && !p.readonly {
+				return nil, fmt.Errorf("readonly class cannot import non-readonly trait property %s", p.name)
+			}
 			p.readonly = true
 		}
 		if p.readonly && p.setVisibility == publicAccess {
 			p.setVisibility = protectedAccess
 		}
 		if p.hasDefault {
-			var err error
-			p.initial, err = copyObjectDefault(p.initial, 0)
-			if err != nil {
-				return nil, err
+			if integer, ok := p.initial.(int64); ok && methodTypeHas(p.typeName, "float") && !methodTypeHas(p.typeName, "int") {
+				p.initial = float64(integer)
+			}
+			if !fromTrait {
+				var err error
+				p.initial, err = copyObjectDefault(p.initial, 0)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 		key := p.name
@@ -199,6 +209,13 @@ func buildClass(spec classSpec) (*class, error) {
 		info := propertyInfo{propertySpec: p, owner: c, key: key, prototypeOwner: c}
 		replaced := false
 		for i, old := range s.props {
+			if fromTrait && old.name == p.name && old.owner == c {
+				if !compatibleTraitProperty(old, info) {
+					return nil, fmt.Errorf("incompatible trait property %s::$%s", spec.name, p.name)
+				}
+				replaced = true
+				break
+			}
 			if old.name == p.name && old.visibility != privateAccess {
 				if p.visibility > old.visibility {
 					return nil, &Throwable{"Error", "Access level to " + spec.name + "::$" + p.name + " must be " + accessName(old.visibility) + " (as in class " + old.owner.name + ")"}
@@ -351,8 +368,12 @@ func (h *heap) registerClass(c *class) error {
 			}
 			return &Throwable{"Error", "Cannot declare class " + node.name + ", because the name is already in use"}
 		}
-		if old := h.classes[name]; old != nil && old != node {
-			return &Throwable{"Error", "Cannot declare class " + node.name + ", because the name is already in use"}
+		if old := h.classes[name]; old != nil {
+			if old != node {
+				return &Throwable{"Error", "Cannot declare class " + node.name + ", because the name is already in use"}
+			}
+			// Published immutable ancestors have already been fully validated.
+			break
 		}
 		pending[name] = node
 		if node.schema == nil {

@@ -303,6 +303,26 @@ func (h *heap) attachPropertySource(o *object, slot *value, key string) {
 }
 
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R11TraitInheritanceNames() {
+		if name == review {
+			return w13R11TraitInheritanceCase(t, h, name)
+		}
+	}
+	for _, review := range w13R11TraitNames() {
+		if name == review {
+			return w13R11TraitCase(t, h, name)
+		}
+	}
+	for _, review := range w13R11CallableNames() {
+		if name == review {
+			return w13R11CallableCase(t, h, name)
+		}
+	}
+	for _, review := range w13R11EnumNames() {
+		if name == review {
+			return w13R11EnumCase(t, h, name)
+		}
+	}
 	for _, review := range w13R10ProxyControlNames() {
 		if name == review {
 			return w13R10ProxyControlCase(t, h, name)
@@ -824,6 +844,10 @@ func w13CaseNames() []string {
 	names = append(names, w13R8Names()...)
 	names = append(names, w13R9Names()...)
 	names = append(names, w13R10ProxyNames()...)
+	names = append(names, w13R11EnumNames()...)
+	names = append(names, w13R11TraitNames()...)
+	names = append(names, w13R11TraitInheritanceNames()...)
+	names = append(names, w13R11CallableNames()...)
 	names = append(names, w13R10ProxyControlNames()...)
 	names = append(names, w13R10LifeNames()...)
 	names = append(names, w13R10AliasNames()...)

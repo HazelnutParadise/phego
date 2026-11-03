@@ -66,7 +66,16 @@
             "TestW13R10ProxyMetadata",
             "TestW13R10LazyReleasedReceiver",
             "TestW13R10PropertyAliasStrictness",
-            "TestW13R10ProxyControls"
+            "TestW13R10ProxyControls",
+            "TestW13R11ClassRegistration",
+            "TestW13R11EnumScalarComparison",
+            "TestW13R11TraitProperties",
+            "TestW13R11TraitDescriptorCollisions",
+            "TestW13R11TraitSnapshotAndTypeEquivalence",
+            "TestW13R11RelativeCallables",
+            "TestW13R11TraitIgnoredUntypedInitial",
+            "TestW13R11TraitInheritance",
+            "TestW13R11TraitDefaultIsolation"
           ]
         },
         {
@@ -156,7 +165,16 @@
             "TestW13R10ProxyMetadata",
             "TestW13R10LazyReleasedReceiver",
             "TestW13R10PropertyAliasStrictness",
-            "TestW13R10ProxyControls"
+            "TestW13R10ProxyControls",
+            "TestW13R11ClassRegistration",
+            "TestW13R11EnumScalarComparison",
+            "TestW13R11TraitProperties",
+            "TestW13R11TraitDescriptorCollisions",
+            "TestW13R11TraitSnapshotAndTypeEquivalence",
+            "TestW13R11RelativeCallables",
+            "TestW13R11TraitIgnoredUntypedInitial",
+            "TestW13R11TraitInheritance",
+            "TestW13R11TraitDefaultIsolation"
           ]
         }
       ],

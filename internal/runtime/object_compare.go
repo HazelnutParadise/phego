@@ -8,6 +8,10 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 		if obj.kind != valueObject {
 			obj, other, sign = b, a, -1
 		}
+		if other.kind != valueBool && other.kind != valueNull && other.kind != valueUndefined &&
+			obj.object.class.schema != nil && obj.object.class.schema.enumKind != enumNone {
+			return 1, nil
+		}
 		switch other.kind {
 		case valueBool:
 			if other.boolean {
