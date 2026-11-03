@@ -1,0 +1,9 @@
+ok  	github.com/HazelnutParadise/phego	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	2.298s
+ok  	github.com/HazelnutParadise/phego/internal/compat	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/frontend	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/ir	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/policy	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/profile	2.432s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	(cached)

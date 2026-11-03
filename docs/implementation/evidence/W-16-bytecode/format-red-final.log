@@ -1,0 +1,272 @@
+--- FAIL: TestBuildEncodeLoadRoundTripAndInputOwnership (0.00s)
+    bytecode_test.go:97: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram (0.00s)
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/bad_profile (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/bad_constant_index (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/unknown_opcode (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/unknown_binary_aux (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/unused_operand (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/register_index (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/parameter_count_exceeds_frame (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/value_location_mismatch (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/invalid_bool_bits (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/invalid_constant_kind (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/undefined_read (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/jump_out_of_bounds (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/source_position_out_of_bounds (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/source_line_zero (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsMalformedSemanticsWithoutPartialProgram/parameter_not_value (0.00s)
+        bytecode_test.go:186: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildRejectsZeroIndependentLimits (0.00s)
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxBytes (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxMemory (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxWork (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxFunctions (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxInstructions (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxConstants (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxRegisters (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxLocals (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxStack (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxHandlers (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsZeroIndependentLimits/MaxSources (0.00s)
+        bytecode_test.go:193: valid control Build failed: invalid bytecode
+--- FAIL: TestScalarConstantRoundTripPreservesBitsAndBinaryStrings (0.00s)
+    bytecode_test.go:238: valid control Build failed: invalid bytecode
+--- FAIL: TestIntegerConstantsRespectSignedGuestWidths (0.00s)
+    --- FAIL: TestIntegerConstantsRespectSignedGuestWidths/32-bit (0.00s)
+        bytecode_test.go:263: valid control Build failed: invalid bytecode
+    --- FAIL: TestIntegerConstantsRespectSignedGuestWidths/64-bit (0.00s)
+        bytecode_test.go:263: valid control Build failed: invalid bytecode
+    bytecode_test.go:276: valid control Build failed: invalid bytecode
+--- FAIL: TestIdentityFieldsAreComparedIndividually (0.00s)
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/short_tag (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/guest_platform (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/compiler (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/modules (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/target (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/source (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/runtime_ABI (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/policy (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/scope (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/release (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+    --- FAIL: TestIdentityFieldsAreComparedIndividually/width (0.00s)
+        bytecode_test.go:288: valid control Build failed: invalid bytecode
+--- FAIL: TestLoadRejectsHeaderAndTrustFailures (0.00s)
+    bytecode_test.go:305: valid control Build failed: invalid bytecode
+--- FAIL: TestSafetyMetadataIsIntrinsic (0.00s)
+    bytecode_test.go:373: opcode 1 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 2 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 3 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 4 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 5 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 6 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 7 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 8 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 9 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 10 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 11 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 12 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 13 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 14 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 15 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 16 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 17 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 18 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 19 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 20 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 21 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 22 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 23 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 24 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+    bytecode_test.go:373: opcode 25 safety={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0} known=false
+--- FAIL: TestCancellationAndRequiredCapability (0.00s)
+    bytecode_test.go:389: cancelled Build=(<nil>,invalid bytecode)
+--- FAIL: TestConcurrentImmutableReaders (0.00s)
+    bytecode_test.go:414: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildBoundsControlFlowAndFrameEdges (0.00s)
+    --- FAIL: TestBuildBoundsControlFlowAndFrameEdges/branch_target (0.00s)
+        bytecode_test.go:456: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildBoundsControlFlowAndFrameEdges/bad_local (0.00s)
+        bytecode_test.go:456: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildBoundsControlFlowAndFrameEdges/bad_source_range (0.00s)
+        bytecode_test.go:456: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow (0.00s)
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/load_from_value (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/store_into_value (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/move_across_classes (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/read_after_drop (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/one_undefined_diamond_predecessor (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsRegisterClassesAndMustDefineFlow/undefined_on_backedge (0.00s)
+        bytecode_test.go:506: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildRejectsCallAndHandlerBoundaries (0.00s)
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/direct_call_wrong_arity (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/direct_call_argument_is_location (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/call_stack_overflow (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/return_with_pending_argument (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/handler_nonzero_stack_depth (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/handler_target_inside_protected_interval (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/catch_register_out_of_range (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/catch_location_register (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/finally_has_register (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/crossing_handlers (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/handler_endpoint_beyond_code (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/body_end_missing (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/body_end_not_after_target (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/body_end_beyond_code (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/branch_into_handler_body_middle (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/normal_fallthrough_into_handler_body (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/normal_fallthrough_out_of_handler_body (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/finally_end_outside_body (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/catch_reads_preexisting_undefined_register (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/leave_continuation_reads_cleared_register (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/leave_target_beyond_code (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsCallAndHandlerBoundaries/end_finally_operands (0.00s)
+        bytecode_test.go:562: valid control Build failed: invalid bytecode
+--- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers (0.00s)
+    --- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers/value_location_store_load_push_direct_call_and_ref_return (0.00s)
+        bytecode_test.go:597: valid image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers/finally_body_and_leave_continuation (0.00s)
+        bytecode_test.go:597: valid image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers/catch_entry_defines_only_catch_register (0.00s)
+        bytecode_test.go:597: valid image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers/diamond_defines_value_on_both_arms (0.00s)
+        bytecode_test.go:597: valid image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidCallsControlFlowAndHandlers/backedge_preserves_must_defined_values (0.00s)
+        bytecode_test.go:597: valid image Build=(<nil>,invalid bytecode)
+--- FAIL: TestBuildAcceptsValidPureOpcodeOperands (0.00s)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/checkpoint (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/move (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/local_load_and_store (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/output (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/new_array (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/array_get (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/call_value (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/drop_then_redefine (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_add (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_subtract (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_multiply (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_divide (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_concat (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_equal (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_identical (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_less (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_bitand (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_bitor (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+    --- FAIL: TestBuildAcceptsValidPureOpcodeOperands/binary_bitxor (0.00s)
+        bytecode_test.go:637: valid opcode image Build=(<nil>,invalid bytecode)
+--- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata (0.00s)
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_bytes (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_memory (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_work (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_functions (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_instructions (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_constants (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_registers (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_locals (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_stack (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_handlers (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/exhausted_sources (0.00s)
+        bytecode_test.go:674: valid control Build failed: invalid bytecode
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/intrinsic_callback (0.00s)
+        bytecode_test.go:730: Safety(13)={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/intrinsic_include (0.00s)
+        bytecode_test.go:730: Safety(20)={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/intrinsic_eval (0.00s)
+        bytecode_test.go:730: Safety(21)={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false
+    --- FAIL: TestBuildRejectsResourceExhaustionAndCapabilityMetadata/intrinsic_shell (0.00s)
+        bytecode_test.go:730: Safety(22)={Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false
+--- FAIL: TestSourceNamesAndBytesAreOpaque (0.00s)
+    bytecode_test.go:740: valid control Build failed: invalid bytecode
+--- FAIL: FuzzLoadRejectsMalformedAndRepairedPayloads (0.00s)
+    fuzz_test.go:15: cannot construct valid bytecode fuzz seed: Program=<nil> err=invalid bytecode
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.367s
+FAIL

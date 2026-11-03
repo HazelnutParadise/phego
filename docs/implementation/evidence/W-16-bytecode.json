@@ -1,0 +1,189 @@
+{
+  "scope": "W-16 local bytecode format/verifier and synthetic dispatch evidence; no PHP VM execution or product acceptance",
+  "requirements": [
+    "REQ-025",
+    "REQ-061",
+    "REQ-064"
+  ],
+  "tests": [
+    "T-049",
+    "T-050",
+    "T-121",
+    "T-122",
+    "T-127",
+    "T-128"
+  ],
+  "source_base": "33dce7949c9686ee86fa0f365d36dcc33e9ad9a1",
+  "source_sha256": {
+    "internal/bytecode/budget.go": "5bb735f14f091250269ca8486c7d725960382f87140fccc430bc0871fa94f91d",
+    "internal/bytecode/build.go": "b14e5da8f63eb6c2bfc90c40f16587d190dbc6e8dd6e5833fb69872ab5b84ca1",
+    "internal/bytecode/bytecode.go": "5be0a476e3df39ab736aae2c5bc732ddb7aa60d26d99435c38fbffd312af33e9",
+    "internal/bytecode/bytecode_test.go": "0568ebd45e580762333c82c503d4cee66efc3a14039eeaba403bed73a1e48bab",
+    "internal/bytecode/dispatch_bench_test.go": "6e97b045799807f5aae8b703584c4364b88637c8c0f81543a66eb674905da473",
+    "internal/bytecode/fuzz_test.go": "c0a5bdb8167610545979e1babe801420358cf0ab7a364ebe8d942b9af39127c8",
+    "internal/bytecode/opcode.go": "f69d1754090d063e9d69ebe065d543c8e6318098293cc1705273e5b5a3a758d2",
+    "internal/bytecode/review_test.go": "16e0cbfb658e897fcb842fb6af2597dc85042258d44cbb93e0936a84f2545ffd",
+    "internal/bytecode/verify.go": "32bd031aa1de86911ee9c7719aa7666b310d4eb82948973b4fc8f30eaa020c63",
+    "internal/bytecode/wire.go": "dd52f1f4701a3ff4ab04b2fa3804eee91545bada654d5965c25caa23d43f8b1f"
+  },
+  "captured_at": "2026-11-03T18:03:06.325791+00:00",
+  "environment": {
+    "go": "go1.26.5",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "cpu": "Apple M3",
+    "default_core_cgo": false,
+    "race_build_cgo": true
+  },
+  "local_verifier_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "result": "no output"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "no output"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "exit_code": 0,
+      "log": "W-16-bytecode/go-final.log"
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 0,
+      "log": "W-16-bytecode/race-current.log"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "log": "W-16-bytecode/vet-final.log"
+    },
+    {
+      "command": "go test ./internal/bytecode -run '^$' -fuzz '^FuzzLoadRejectsMalformedAndRepairedPayloads$' -fuzztime=30s -parallel=4",
+      "exit_code": 0,
+      "log": "W-16-bytecode/fuzz-final.log",
+      "executions": 2128593,
+      "elapsed_seconds": 31.569
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "log": "W-16-bytecode/python.log",
+      "tests": 536
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "log": "W-16-bytecode/docs.log",
+      "checks": 34,
+      "product_test_status": "not_run"
+    }
+  ],
+  "earlier_failed_checks": [
+    {
+      "command": "go test -race ./...",
+      "log": "W-16-bytecode/race.log",
+      "cause": "A wall-clock scaling assertion in unchanged frontend failed; concurrent test load was present, but causality was not established.",
+      "followup": "Three isolated repetitions passed, then full race suite passed.",
+      "recheck_logs": [
+        "W-16-bytecode/race-frontend-recheck.log",
+        "W-16-bytecode/race-final.log"
+      ],
+      "recheck_command": "go test -race ./internal/frontend -run '^TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically$' -count=3"
+    }
+  ],
+  "reproduced_findings": [
+    {
+      "issue": "stub implementation did not satisfy positive or negative format controls",
+      "red_log": "W-16-bytecode/format-red-final.log",
+      "resolution": "implemented bounded Build/Encode/Load and semantic verifier"
+    },
+    {
+      "issue": "dispatch variants differed in partial PC on cancellation",
+      "red_log": "W-16-bytecode/dispatch-pc-red.log",
+      "resolution": "checkpoint each semantic step, preserve next PC before the second fused step"
+    },
+    {
+      "issue": "Encode rejected declared capabilities, verifier rejected infinite loops and over-reserved a full state matrix",
+      "red_log": "W-16-bytecode/root-review-red.log",
+      "resolution": "reuse immutable Program verification, accept bounded analysis of loops, account actual flow states"
+    },
+    {
+      "issue": "normal function entry could point into a handler body",
+      "red_log": "W-16-bytecode/handler-entry-red.log",
+      "resolution": "reject handler Target zero"
+    },
+    {
+      "issue": "Output rejected pending call arguments",
+      "red_log": "W-16-bytecode/output-args-red.log",
+      "resolution": "apply empty-stack terminal rule only to terminal instructions"
+    },
+    {
+      "issue": "finally could not contain try/catch and Encode replaced explicit limits",
+      "red_log": "W-16-bytecode/nested-limits-red.log",
+      "resolution": "validate whole nested handler regions and retain immutable admission limits"
+    },
+    {
+      "issue": "EndFinally could finish an outer completion inside an inner catch; payload diagnostics lacked offsets",
+      "red_log": "W-16-bytecode/nested-offset-red.log",
+      "resolution": "require innermost handler body to be Finally; report reader position"
+    },
+    {
+      "issue": "off+chunk could overflow signed host index",
+      "red_log": "W-16-bytecode/chunk-overflow-red.log",
+      "resolution": "chunkEnd uses remaining length; all copying and name-comparison loops share it",
+      "limit": "Arithmetic boundary reproduced on host int; no 2 GiB allocation or 32-bit runtime claim"
+    },
+    {
+      "issue": "header diagnostics lacked fixed-field offsets",
+      "red_log": "W-16-bytecode/header-offset-red.log",
+      "resolution": "report exact fixed-field or truncation offset"
+    }
+  ],
+  "benchmark": {
+    "kind": "synthetic, not PHP/application/competitor performance",
+    "samples_per_case": 5,
+    "benchtime": "150ms",
+    "training_workloads": [
+      "arithmetic",
+      "branch-heavy",
+      "binary-mixed"
+    ],
+    "heldout_workload": "heldout-alternating",
+    "summary": "W-16-bytecode/bench-summary.json",
+    "profile": "W-16-bytecode/dispatch-final-training.pprof",
+    "profile_sha256": "11c30c197538adaf48490879990bf53a815782b083215ea223b43244444afa11",
+    "raw_logs": [
+      "W-16-bytecode/bench-final-no-pgo.txt",
+      "W-16-bytecode/bench-final-training.txt",
+      "W-16-bytecode/bench-final-pgo.txt"
+    ]
+  },
+  "review": {
+    "adversarial": "independent Codex gpt-6.1-sol review; reproduced findings repaired and inspected by parent",
+    "no_cost_improvements": [
+      "one immutable instruction/constant representation, no request state in Program",
+      "derive security obligations from opcode rather than serialized flags",
+      "sequential length-prefixed tables eliminate arbitrary offset/overlap machinery",
+      "reuse verified Program during encoding",
+      "allocate only reached flow states; reuse seed and scratch buffers",
+      "overflow-safe chunk endpoint shared across all bounded copies"
+    ],
+    "remote_latest_head": "not_yet_submitted_at_capture; consult PR #76 latest-head code and security review status",
+    "remote_source": "https://github.com/HazelnutParadise/phego/pull/76"
+  },
+  "remaining_gaps": [
+    "W-17 PHP VM execution, ownership/unwind and runtime enforcement of opcode safety",
+    "W-23 cache hit/miss and invalidation integration",
+    "W-41 complete validation scenarios",
+    "W-44 filesystem cache recovery and native signature policy",
+    "No 32-bit runtime or 2 GiB input execution in this evidence; no cross-platform performance claim",
+    "No real PHP workload or application performance acceptance"
+  ],
+  "next_work_package": "W-17 after W-16 merge; W-12 and W-14 already merged"
+}

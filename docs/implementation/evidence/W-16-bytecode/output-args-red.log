@@ -1,0 +1,5 @@
+--- FAIL: TestOutputDuringArgumentPreparation (0.00s)
+    review_test.go:185: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 2: terminal instruction leaves pending arguments
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.247s
+FAIL

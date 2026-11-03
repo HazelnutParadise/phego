@@ -1,0 +1,7 @@
+--- FAIL: TestEndFinallyCannotTerminateAnInnerCatch (0.00s)
+    review_test.go:236: Build accepted invalid image
+--- FAIL: TestParserDiagnosticIdentifiesPayloadOffset (0.00s)
+    review_test.go:243: expected offset 68 after malformed length, got invalid bytecode at byte -1, function -1, instruction -1: string length exceeds remaining payload
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.884s
+FAIL
