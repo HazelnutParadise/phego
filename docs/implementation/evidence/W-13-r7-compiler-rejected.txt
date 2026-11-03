@@ -1,0 +1,66 @@
+internal/runtime/object_lazy.go:85:6: can inline isLazyPropertyInfo with cost 48 as: func(*object, *propertyInfo) bool { if p == nil || p.propertySpec.static || p.propertySpec.virtual || o.lazy == nil || o.lazy.initialize == nil || !o.lazy.proxy && o.lazy.running { return false }; _, nonLazy := (struct {})(.autotmp_4), .autotmp_5; return !nonLazy }
+internal/runtime/object_properties.go:437:6: cannot inline (*heap).writeObjectSlot: function too complex: cost 588 exceeds budget 80
+internal/runtime/object_raw.go:7:6: cannot inline (*heap).writeRawObjectProperty: unhandled op DEFER
+internal/runtime/object_raw.go:34:8: can inline (*heap).writeRawObjectProperty.func1 with cost 139 as: func() { for loop }
+internal/runtime/object_lazy.go:82:41: inlining call to isLazyPropertyInfo
+internal/runtime/object_raw.go:11:23: inlining call to value.deref
+internal/runtime/object_raw.go:12:13: inlining call to value.deref
+internal/runtime/object_raw.go:28:20: inlining call to errors.New
+internal/runtime/object_raw.go:40:31: inlining call to isLazyPropertyInfo
+internal/runtime/object_raw.go:49:32: inlining call to (*propertyTable).lookup
+internal/runtime/object_properties.go:462:23: "\x00clone:" + p.key escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:437:7: parameter h leaks to {heap} for (*heap).writeObjectSlot with derefs=0:
+internal/runtime/object_properties.go:437:43: parameter p leaks to {heap} for (*heap).writeObjectSlot with derefs=1:
+internal/runtime/object_properties.go:437:60: parameter v leaks to {heap} for (*heap).writeObjectSlot with derefs=0:
+internal/runtime/object_properties.go:437:32: parameter o leaks to {heap} for (*heap).writeObjectSlot with derefs=3:
+internal/runtime/object_properties.go:448:10: &Throwable{...} escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:459:10: &Throwable{...} escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:439:44: &Throwable{...} escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:454:40: &Throwable{...} escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:459:66: "Cannot write to virtual property " + ~r0 escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:448:130: "Cannot modify " + ~r0 + "(set) " + ro + "property " + ~r0 + " from " + from escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:454:40: "Object was released while assigning to property " + ~r0 escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_properties.go:439:44: "Cannot modify readonly property " + ~r0 escapes to heap in (*heap).writeObjectSlot:
+internal/runtime/object_raw.go:43:20: make(map[string]struct {}) escapes to heap in (*heap).writeRawObjectProperty:
+internal/runtime/object_raw.go:43:20:   flow: {heap} ← &{storage for make(map[string]struct {})}:
+internal/runtime/object_raw.go:43:20:     from make(map[string]struct {}) (spill) at internal/runtime/object_raw.go:43:20
+internal/runtime/object_raw.go:43:20:     from l.nonLazy = make(map[string]struct {}) (assign) at internal/runtime/object_raw.go:43:14
+internal/runtime/object_raw.go:31:2: (*heap).writeRawObjectProperty capturing by ref: holds (addr=true assign=false width=24)
+internal/runtime/object_raw.go:7:86: (*heap).writeRawObjectProperty capturing by ref: err (addr=false assign=true width=16)
+internal/runtime/object_raw.go:7:7: (*heap).writeRawObjectProperty capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_raw.go:7:7: parameter h leaks to {heap} for (*heap).writeRawObjectProperty with derefs=0:
+internal/runtime/object_raw.go:7:7:   flow: {heap} ← h:
+internal/runtime/object_raw.go:7:7:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/object_raw.go:8:25
+internal/runtime/object_raw.go:7:39: parameter obj leaks to {heap} for (*heap).writeRawObjectProperty with derefs=0:
+internal/runtime/object_raw.go:7:39:   flow: {heap} ← obj:
+internal/runtime/object_raw.go:7:39:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_raw.go:13:27
+internal/runtime/object_raw.go:7:63: parameter v leaks to {heap} for (*heap).writeRawObjectProperty with derefs=0:
+internal/runtime/object_raw.go:7:63:   flow: {heap} ← v:
+internal/runtime/object_raw.go:7:63:     from (*heap).holdMethodValue(h, v, &holds) (call parameter) at internal/runtime/object_raw.go:33:19
+internal/runtime/object_raw.go:30:6: storage escapes to heap in (*heap).writeRawObjectProperty:
+internal/runtime/object_raw.go:30:6:   flow: holds ← &storage:
+internal/runtime/object_raw.go:30:6:     from storage (address-of) at internal/runtime/object_raw.go:31:18
+internal/runtime/object_raw.go:30:6:     from storage[:0] (slice) at internal/runtime/object_raw.go:31:18
+internal/runtime/object_raw.go:30:6:     from holds := storage[:0] (assign) at internal/runtime/object_raw.go:31:8
+internal/runtime/object_raw.go:30:6:   flow: {temp} ← &holds:
+internal/runtime/object_raw.go:30:6:     from &holds (address-of) at internal/runtime/object_raw.go:32:30
+internal/runtime/object_raw.go:30:6:     from (*heap).holdMethodValue(h, receiver, &holds) (call parameter) at internal/runtime/object_raw.go:32:19
+internal/runtime/object_raw.go:30:6:   flow: {heap} ← *{temp}:
+internal/runtime/object_raw.go:28:20: &errors.errorString{...} escapes to heap in (*heap).writeRawObjectProperty:
+internal/runtime/object_raw.go:28:20:   flow: ~r0 ← &{storage for &errors.errorString{...}}:
+internal/runtime/object_raw.go:28:20:     from &errors.errorString{...} (spill) at internal/runtime/object_raw.go:28:20
+internal/runtime/object_raw.go:28:20:     from &errors.errorString{...} (interface-converted) at internal/runtime/object_raw.go:28:20
+internal/runtime/object_raw.go:28:20:     from ~r0 = &errors.errorString{...} (assign-pair) at internal/runtime/object_raw.go:28:20
+internal/runtime/object_raw.go:28:20:   flow: err ← ~r0:
+internal/runtime/object_raw.go:28:20:     from return ~r0 (return) at internal/runtime/object_raw.go:28:3
+internal/runtime/object_raw.go:28:20:   flow: {heap} ← err:
+internal/runtime/object_raw.go:28:20:     from (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, holds[i])) (call parameter) at internal/runtime/object_raw.go:36:29
+internal/runtime/object_raw.go:7:7: leaking param: h
+internal/runtime/object_raw.go:7:39: leaking param: obj
+internal/runtime/object_raw.go:7:50: name does not escape
+internal/runtime/object_raw.go:7:63: leaking param: v
+internal/runtime/object_raw.go:30:6: moved to heap: storage
+internal/runtime/object_raw.go:8:25: ... argument does not escape
+internal/runtime/object_raw.go:28:20: &errors.errorString{...} escapes to heap
+internal/runtime/object_raw.go:34:8: func literal does not escape
+internal/runtime/object_raw.go:43:20: make(map[string]struct {}) escapes to heap

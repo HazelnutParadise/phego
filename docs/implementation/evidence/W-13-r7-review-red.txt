@@ -1,0 +1,28 @@
+--- FAIL: TestW13R7RawControls (0.02s)
+    --- FAIL: TestW13R7RawControls/32/r7-raw-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1],["Error","Cannot clone an uninitialized lazy proxy"],[["Error","Lazy proxy factory must return a non-lazy object"],true]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1],[42,2,true,false],[2,false]],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/32/r7-raw-running-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-running-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,false,true,1],[false,false,false,41,42,1]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,false,true,1],[true,false,false,41,42,1]],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/32/r7-raw-receiver-reference-rebind (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-receiver-reference-rebind
+            Go: {"result":[["Error","Object was released while assigning to property W13R7RawString::$x"],null,null,[["convert",false]],false],"diagnostics":[]}
+            PHP: {"result":[null,null,null,[["convert",true],"dtor:raw"],false],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1],["Error","Cannot clone an uninitialized lazy proxy"],[["Error","Lazy proxy factory must return a non-lazy object"],true]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1],[42,2,true,false],[2,false]],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-running-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-running-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,false,true,1],[false,false,false,41,42,1]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,false,true,1],[true,false,false,41,42,1]],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-receiver-reference-rebind (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-receiver-reference-rebind
+            Go: {"result":[["Error","Object was released while assigning to property W13R7RawString::$x"],null,null,[["convert",false]],false],"diagnostics":[]}
+            PHP: {"result":[null,null,null,[["convert",true],"dtor:raw"],false],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.956s
+FAIL

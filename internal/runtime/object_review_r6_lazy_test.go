@@ -91,7 +91,7 @@ func w13R6LazyCase(t *testing.T, h *heap, name string) w13Case {
 		c := w13Build(t, classSpec{name: "W13R6RoRaw", properties: []propertySpec{{name: "ro", typeName: "int", readonly: true}, {name: "q", typeName: "int", hasDefault: true, initial: int64(0)}}})
 		calls := 0
 		o := newLazy(c, func(*heap, value) (value, error) { calls++; return nullValue(), nil })
-		must(t, h.assign(o.object.props.slot("ro"), w13Int(123)))
+		must(t, h.writeRawObjectProperty(o, "ro", w13Int(123), false))
 		rawSlot, _ := o.object.props.lookup("ro")
 		raw := w13Encode(*rawSlot)
 		err := h.unsetObject(o, "ro", nil)
@@ -106,7 +106,7 @@ func w13R6LazyCase(t *testing.T, h *heap, name string) w13Case {
 		c := w13Build(t, classSpec{name: "W13R6RawPlain", properties: []propertySpec{{name: "q", typeName: "int"}, {name: "spare", typeName: "int"}}})
 		calls := 0
 		o := newLazy(c, func(*heap, value) (value, error) { calls++; return value{}, &Throwable{"Exception", "init"} })
-		must(t, h.assign(o.object.props.slot("q"), w13Int(11)))
+		must(t, h.writeRawObjectProperty(o, "q", w13Int(11), false))
 		rawSlot, _ := o.object.props.lookup("q")
 		raw := w13Encode(*rawSlot)
 		err := h.unsetObject(o, "q", nil)

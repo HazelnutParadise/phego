@@ -107,7 +107,7 @@ func w13R6ProxyGuardCase(t *testing.T, h *heap, name string) w13Case {
 	}
 	if mode != "isset-fresh" && !dynamic {
 		for _, field := range []string{"q", "r"} {
-			must(t, h.assign(proxy.object.props.slot(field), w13Int(11)))
+			must(t, h.writeRawObjectProperty(proxy, field, w13Int(11), false))
 			must(t, h.unsetObject(proxy, field, nil))
 		}
 	}

@@ -58,7 +58,7 @@ func w13R6RawUnsetCase(t *testing.T, h *heap, name string) w13Case {
 			t.Fatal("raw-unset fixture retained request values")
 		}
 	}()
-	must(t, h.assign(o.object.props.slot("q"), w13Int(11)))
+	must(t, h.writeRawObjectProperty(o, "q", w13Int(11), false))
 	read := func(field string) any {
 		return w13ObserveValue(func() (value, error) { return h.readObject(o, field, nil) })
 	}

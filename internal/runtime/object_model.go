@@ -90,6 +90,8 @@ type lazyObject struct {
 	proxy       bool
 	running     bool
 	target      value
+	nonLazy     map[string]struct{} // raw operations mark locations, not value payloads
+	remaining   int                 // running proxy raw writes clear flags without decrementing
 }
 
 type propertySource struct {
@@ -276,6 +278,11 @@ func (h *heap) initializeProperties(o *object) error {
 			continue
 		}
 		slot := o.props.slot(p.key)
+		if o.lazy != nil {
+			if _, nonLazy := o.lazy.nonLazy[p.key]; nonLazy {
+				continue
+			}
+		}
 		if p.hasDefault {
 			v, err := h.importSnapshotPHP8512(p.initial, 1024, 1<<20)
 			if err != nil {

@@ -128,6 +128,24 @@ forwarded guard 只用 stack 值保存本次取得的 target 與 key，還原時
 
 曾考慮加入 proxy cache-link flag，但固定來源的 initialized proxy 使用 `properties=NULL` 與 `UNINIT|LAZY` slots，既有狀態足以區分，沒有新增旗標的必要。共享 key 建構與 read/write wrapper 均由 Go 編譯器確認 inline；不是應用效能證據。兩種寬度各 587 案、原 564 案不變，修正前失敗、編譯器輸出及限制見 `W-13-r6-followup.json`。
 
+## R7：raw 位置、旗標與完成計數
+
+Ghost 初始化只安裝仍 lazy 的宣告預設值，保留 raw 值、明確 unset、reference identity 與物件持有權。一般新物件仍安裝全部預設值。已有值不等於 non-lazy：proxy factory 普通寫入後失敗時，固定 PHP 會保留值及 lazy 旗標，因此不能只看 `value.kind`。
+
+狀態放在每個 lazy object 的稀疏 `nonLazy` map，key 是實際 property storage key。raw adapter 先解析有效 descriptor，再以同一個 key 判斷、標記與寫入。父類別 private 與子類別同名屬性不能按名稱第一次命中判斷，否則會重複扣減剩餘計數。`isLazyPropertyInfo` 同時服務已解析 descriptor 與 by-name 查詢，後者先選有效宣告。一般 `h.assign` 不能猜測呼叫者是不是 Reflection。
+
+不把旗標放進 value padding，因為值會隨賦值、回傳、clone 與參照綁定搬移，位置狀態不應跟著移動。維持這個區別會迫使所有值複製路徑多負擔協定，成本較高。位元集合需增加索引及溢位處理，目前沒有原生工作負載證明其收益，保留為未量測選項。稀疏 map 只有明確 raw 操作才配置，普通物件的 cell 與 property table 不變。
+
+raw 寫入在 coercion 前標記，讓 callback 看見正確狀態。錯誤僅在原位置 lazy、值仍 undefined 且物件仍 pending 時回復旗標。實體寫入共用 `writeObjectSlot`，保留原 readonly、coercion、owner revalidation 與 typed-reference 規則，沒有追加先前已被原生否定的 coercion 後 readonly 重檢。adapter 只接受依名稱選到的實體宣告，明確祖先 private descriptor 與完整公開 Reflection 驗證仍未實作，不能把私有 unsupported-descriptor 錯誤當成 PHP 診斷。
+
+remaining 計數與旗標分開保存。proxy factory 執行中的 raw 寫入清除旗標，但 PHP 不會遞減計數，失敗後保留兩者差異。只有本次原先 lazy、標記最後仍有效、pending 且非 running 的外部 raw 操作才減一次，不能用 map 長度或掃描重新推導。這也省去每次完成判定掃描所有位置的成本，不宣稱整個名稱 resolver 都因此變成常數時間。
+
+最後一個位置完成時，先清除 pending 與 proxy 身分、移出 initializer，再釋放 initializer owner；其 destructor 可重入並觀察已提交的值。receiver 與 RHS 先解參照，持有實際物件而非可被改綁的 reference container。各自讀原 refcount 後才取得 hold，receiver 取得後再判斷 RHS，清理依 RHS、receiver 次序合併錯誤。個別 stack hold 取代會逃逸的固定 slice，保留既有 constructor temporary 契約。
+
+running ghost 對所有位置回報 non-lazy，所以唯一 raw producer 不會修改同一份 map。初始化可保存原 map 指標，失敗還原，不需 `maps.Clone`；清理只設 nil、不 `clear` 原 map。initializer 內 raw 寫入後拋例外、再重試的雙寬度案例保護這個前提。若未來增加 producer 或清空原 map，須重新驗證共享快照的條件。proxy 不回滾 raw 旗標。現有 clone 先完成初始化，因此沒有未初始化 ghost 共用可變 map 的情況。
+
+本機 `lazyObject` 由 144 B 變成 160 B，`value`／`object`／property table 維持 64／96／64 B。raw 生命週期相對原直接 slot fixture 多 272 B／2 次配置；舊初始化會丟 raw 值，不能算相容的效能勝出。普通宣告物件維持原配置量，部分時間樣本較慢。同樣通過 605 案的 map-clone／slice-hold 候選，raw 初始化多 400 B／3 次配置，正式版本已省去；只有 raw、不初始化時省 144 B／一次。原始樣本、兩種 overlay、編譯器輸出、18 個新增案例及限制見 `W-13-r7-review.json`。
+
 ## 驗證與尚未完成項目
 
 ### 等待使用者裁決的額外參考引擎不安全案例

@@ -48,7 +48,11 @@
             "TestW13PendingReferenceCloneSafety",
             "TestW13R6PHP8512Regression",
             "TestW13ExplicitResourceCloseAfterCancellation",
-            "TestW13CalledScopeExecutionFrames"
+            "TestW13CalledScopeExecutionFrames",
+            "TestW13R7PHP8512Regression",
+            "TestW13R7RawControls",
+            "TestW13R7LazyPropertyState",
+            "TestW13R7FreshDefaults"
           ]
         },
         {
@@ -120,7 +124,11 @@
             "TestW13PendingReferenceCloneSafety",
             "TestW13R6PHP8512Regression",
             "TestW13ExplicitResourceCloseAfterCancellation",
-            "TestW13CalledScopeExecutionFrames"
+            "TestW13CalledScopeExecutionFrames",
+            "TestW13R7PHP8512Regression",
+            "TestW13R7RawControls",
+            "TestW13R7LazyPropertyState",
+            "TestW13R7FreshDefaults"
           ]
         }
       ],

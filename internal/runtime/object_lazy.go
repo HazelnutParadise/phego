@@ -41,7 +41,7 @@ func (h *heap) newLazyObject(c *class, proxy bool, initialize func(*heap, value)
 	if err != nil {
 		return value{}, err
 	}
-	obj.object.lazy = &lazyObject{initialize: initialize, proxy: proxy}
+	obj.object.lazy = &lazyObject{initialize: initialize, proxy: proxy, remaining: len(obj.object.props.declared)}
 	return obj, nil
 }
 
@@ -75,12 +75,17 @@ func (h *heap) isLazyProperty(obj value, name string) bool {
 		(!o.lazy.proxy && o.lazy.running) || o.class.schema == nil {
 		return false
 	}
-	for _, p := range o.class.schema.props {
-		if p.name == name && !p.static && !p.virtual {
-			return true
-		}
+	p, err := h.resolveInstanceProperty(o, name, o.class, true)
+	return err == nil && isLazyPropertyInfo(o, p)
+}
+
+func isLazyPropertyInfo(o *object, p *propertyInfo) bool {
+	if p == nil || p.static || p.virtual || o.lazy == nil || o.lazy.initialize == nil ||
+		(!o.lazy.proxy && o.lazy.running) {
+		return false
 	}
-	return false
+	_, nonLazy := o.lazy.nonLazy[p.key]
+	return !nonLazy
 }
 
 // Resolve a backing location only when an actual access needs initialization.
@@ -181,8 +186,12 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 	}
 	var before *propertyTable
 	var hooksBefore map[string]bool
+	var nonLazyBefore map[string]struct{}
 	if !l.proxy {
 		before = copyPropertyTable(o.props)
+		// A running ghost has no lazy properties. Raw writes cannot change
+		// this map until initialization returns, so the snapshot can share it.
+		nonLazyBefore = l.nonLazy
 		if o.hooks != nil {
 			hooksBefore = make(map[string]bool, len(o.hooks))
 			for key, active := range o.hooks {
@@ -246,6 +255,7 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 			if cleanup := h.restoreLazyProperties(o, before); cleanup != nil {
 				err = h.mergeObjectErrors(err, cleanup)
 			}
+			l.nonLazy = nonLazyBefore
 			if hooksBefore == nil {
 				o.hooks = nil
 			} else {
@@ -268,6 +278,8 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 		l.initializer = value{}
 		cleanup = h.mergeObjectErrors(cleanup, h.release(initializer))
 		l.initialize = nil
+		l.nonLazy = nil
+		l.remaining = 0
 		l.target = result
 		result = value{}
 		cleanup = h.mergeObjectErrors(cleanup, h.freeProperties(o, nil))
@@ -277,6 +289,8 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 		l.initializer = value{}
 		cleanup = h.mergeObjectErrors(cleanup, h.release(initializer))
 		l.initialize = nil
+		l.nonLazy = nil
+		l.remaining = 0
 	}
 	cleanup = h.mergeObjectErrors(cleanup, h.discard(result))
 	if cleanup != nil {
@@ -294,6 +308,8 @@ func (h *heap) freeLazyStorage(o *object, dead map[gcNode]bool) error {
 	}
 	initializer, target := o.lazy.initializer, o.lazy.target
 	o.lazy.initializer, o.lazy.target = value{}, value{}
+	o.lazy.nonLazy = nil
+	o.lazy.remaining = 0
 	err := h.releaseOutside(initializer, dead)
 	return h.mergeObjectErrors(err, h.releaseOutside(target, dead))
 }

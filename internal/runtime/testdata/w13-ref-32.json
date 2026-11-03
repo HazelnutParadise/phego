@@ -5984,6 +5984,439 @@
       ],
       "diagnostics": []
     },
+    "r7-raw-shadow-public": {
+      "result": [
+        [
+          true,
+          false,
+          41,
+          0
+        ],
+        [
+          true,
+          false,
+          42,
+          0
+        ],
+        11,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-shadow-private": {
+      "result": [
+        [
+          true,
+          false,
+          41,
+          0
+        ],
+        [
+          true,
+          false,
+          42,
+          0
+        ],
+        11,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-last-slot": {
+      "result": [
+        [
+          true,
+          null,
+          false,
+          false,
+          42,
+          [
+            [
+              "release",
+              false,
+              42
+            ]
+          ]
+        ],
+        [
+          [
+            "release",
+            false,
+            42
+          ],
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-type-error": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign array to property W13R7LazyState::$x of type int"
+        ],
+        true,
+        true,
+        true,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-proxy-failure": {
+      "result": [
+        [
+          "Exception",
+          "factory"
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          false,
+          42,
+          2,
+          1
+        ],
+        [
+          42,
+          2,
+          true,
+          false
+        ],
+        [
+          2,
+          false
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-running-proxy-failure": {
+      "result": [
+        [
+          "Exception",
+          "factory"
+        ],
+        [
+          true,
+          false,
+          true,
+          1
+        ],
+        [
+          true,
+          false,
+          false,
+          41,
+          42,
+          1
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-raw-receiver-reference-rebind": {
+      "result": [
+        null,
+        null,
+        null,
+        [
+          [
+            "convert",
+            true
+          ],
+          "dtor:raw"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r7-lazy-state-ghost": {
+      "result": [
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        2,
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-lazy-state-proxy": {
+      "result": [
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        2,
+        [
+          false,
+          true
+        ],
+        [
+          false,
+          false
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-int": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          42,
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-null": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          null,
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-unset-typed": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          [
+            "Error",
+            "Typed property W13R7DefaultsInt::$x must not be accessed before initialization"
+          ],
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-unset-untyped": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          null,
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R7DefaultsUntyped::$x"
+        ]
+      ]
+    },
+    "r7-default-array": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          [
+            42
+          ],
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-reference": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          43,
+          43
+        ],
+        [
+          [
+            "init",
+            1
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-object": {
+      "result": [
+        true,
+        [
+          true,
+          2,
+          false,
+          true,
+          3,
+          [
+            [
+              "init",
+              1
+            ]
+          ],
+          [
+            [
+              "init",
+              1
+            ]
+          ],
+          [
+            [
+              "init",
+              1
+            ],
+            "dtor"
+          ]
+        ],
+        [
+          [
+            "init",
+            1
+          ],
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-retry": {
+      "result": [
+        true,
+        [
+          true,
+          [
+            "Exception",
+            "retry"
+          ],
+          true,
+          2,
+          false,
+          42,
+          [
+            "Error",
+            "Typed property W13R7DefaultsMixed::$z must not be accessed before initialization"
+          ]
+        ],
+        [
+          [
+            "init",
+            1
+          ],
+          "throw",
+          [
+            "init",
+            2
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r7-default-retry-raw": {
+      "result": [
+        true,
+        [
+          true,
+          [
+            "Exception",
+            "retry"
+          ],
+          true,
+          true,
+          2,
+          false,
+          42,
+          3
+        ],
+        [
+          [
+            "init",
+            1
+          ],
+          [
+            "raw",
+            false
+          ],
+          "throw",
+          [
+            "init",
+            2
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

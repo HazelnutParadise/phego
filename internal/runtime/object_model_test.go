@@ -288,6 +288,21 @@ func w13Isset(h *heap, obj value, name string, scope *class) bool {
 }
 
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R7RawControlNames() {
+		if name == review {
+			return w13R7RawControlCase(t, h, name)
+		}
+	}
+	for _, review := range w13R7Names() {
+		if name == review {
+			return w13R7Case(t, h, name)
+		}
+	}
+	for _, review := range w13R7LazyStateNames() {
+		if name == review {
+			return w13R7LazyStateCase(t, h, name)
+		}
+	}
 	if name == w13R6GuardLifetimeName {
 		return w13R6GuardLifetimeCase(t, h)
 	}
@@ -758,6 +773,9 @@ func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
 
 func w13CaseNames() []string {
 	names := append([]string{}, w13MethodCaseNames()...)
+	names = append(names, w13R7LazyStateNames()...)
+	names = append(names, w13R7Names()...)
+	names = append(names, w13R7RawControlNames()...)
 	names = append(names, w13R6ProxyGuardNames()...)
 	names = append(names, w13R6GuardLifetimeName)
 	names = append(names, w13R6LazyNames()...)

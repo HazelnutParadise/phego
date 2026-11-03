@@ -1,0 +1,53 @@
+=== RUN   TestW13R7LayoutEvidence
+    object_review_r7_bench_test.go:10: value=64 object=96 propertyTable=64 lazyObject=160
+--- PASS: TestW13R7LayoutEvidence (0.00s)
+=== RUN   TestW13R7LayoutEvidence
+    object_review_r7_bench_test.go:10: value=64 object=96 propertyTable=64 lazyObject=160
+--- PASS: TestW13R7LayoutEvidence (0.00s)
+=== RUN   TestW13R7LayoutEvidence
+    object_review_r7_bench_test.go:10: value=64 object=96 propertyTable=64 lazyObject=160
+--- PASS: TestW13R7LayoutEvidence (0.00s)
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13RawGhost
+BenchmarkW13RawGhost/2/initialize=false
+BenchmarkW13RawGhost/2/initialize=false-8         	  401703	       525.4 ns/op	     720 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-8         	  445544	       526.0 ns/op	     720 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-8         	  453182	       523.8 ns/op	     720 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=true
+BenchmarkW13RawGhost/2/initialize=true-8          	  285708	       833.4 ns/op	     992 B/op	       9 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-8          	  290126	       833.0 ns/op	     992 B/op	       9 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-8          	  291139	       833.6 ns/op	     992 B/op	       9 allocs/op
+BenchmarkW13RawGhost/32/initialize=false
+BenchmarkW13RawGhost/32/initialize=false-8        	  342940	       707.4 ns/op	    2896 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-8        	  336567	       706.7 ns/op	    2896 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-8        	  338241	       709.7 ns/op	    2896 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=true
+BenchmarkW13RawGhost/32/initialize=true-8         	  103316	      2338 ns/op	    5344 B/op	       9 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-8         	  100988	      2314 ns/op	    5344 B/op	       9 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-8         	  102958	      2339 ns/op	    5344 B/op	       9 allocs/op
+BenchmarkW13RawGhost/256/initialize=false
+BenchmarkW13RawGhost/256/initialize=false-8       	  137949	      1785 ns/op	   19024 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-8       	  132786	      1833 ns/op	   19024 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-8       	  132164	      1806 ns/op	   19024 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=true
+BenchmarkW13RawGhost/256/initialize=true-8        	   18712	     12784 ns/op	   37600 B/op	       9 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-8        	   18614	     12943 ns/op	   37600 B/op	       9 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-8        	   18513	     12818 ns/op	   37600 B/op	       9 allocs/op
+BenchmarkW13ObjectLifecycle
+BenchmarkW13ObjectLifecycle/1/declared=true
+BenchmarkW13ObjectLifecycle/1/declared=true-8     	 1269301	       190.2 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-8     	 1264760	       189.6 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-8     	 1271317	       189.2 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true
+BenchmarkW13ObjectLifecycle/32/declared=true-8    	   75696	      3148 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-8    	   77518	      3154 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-8    	   77509	      3133 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true
+BenchmarkW13ObjectLifecycle/256/declared=true-8   	   10000	     23910 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-8   	   10000	     23757 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-8   	   10000	     23817 ns/op	   18592 B/op	       2 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	8.171s

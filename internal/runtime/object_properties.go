@@ -431,6 +431,11 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 			return callErr
 		}
 	}
+	return h.writeObjectSlot(o, p, v, scope, strict)
+}
+
+func (h *heap) writeObjectSlot(o *object, p *propertyInfo, v value, scope *class, strict bool) error {
+	slot, _ := o.props.lookup(p.key)
 	if err := readonlyObjectPropertyWriteError(o, p, slot); err != nil {
 		return err
 	}
@@ -442,7 +447,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		}
 		return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) " + ro + "property " + p.label() + " from " + from}
 	}
-	v, err = h.coerceProperty(p, v, strict, false)
+	v, err := h.coerceProperty(p, v, strict, false)
 	if err != nil {
 		return err
 	}
