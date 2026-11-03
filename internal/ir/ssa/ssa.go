@@ -67,7 +67,8 @@ type Options struct {
 	MaxNodes         int    // positive definition + operand record limit for the whole unit
 	MaxDepth         int    // positive HIR operand nesting limit
 	MaxConstantBytes int    // nonnegative total newly folded string bytes
-	// Sources is copied, never retained. Missing source introducers become
+	// Source values are copied; Program does not retain the map. The caller
+	// must keep it unchanged during Build. Missing source introducers become
 	// UnknownSource. An explicit zero asserts only that the node's own source
 	// is verified trusted; it cannot clear sources inherited from operands.
 	Sources map[*ir.Node]Sources

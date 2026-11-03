@@ -203,7 +203,7 @@
     "internal/ir/ssa/build.go": "c1f17b161ef5810134dc8a3761a53ed67703e96dea7f04df3045730d3c9dfb4c",
     "internal/ir/ssa/limits_test.go": "c14cca249161fedb179e37f5ff829ded9a42aef3e6725f1b6d1d2cc977bef21d",
     "internal/ir/ssa/metadata_test.go": "a317395fe95e559bb1b56d131f8c7398ce002734e4b5daaa822d7a72aff9b25f",
-    "internal/ir/ssa/ssa.go": "ecc12867c07caa5e474df478d5db6509d051a57e2472d94c0b9ca6a290e2f05d",
+    "internal/ir/ssa/ssa.go": "ba01db541a402396352b0b7da84b9a45db4f27e07140470c234c6c6e80f829a1",
     "internal/ir/ssa/ssa_test.go": "890b506674299ef76151b22ea4b9af7101463bd28d1d6ad93ef578af929d555b",
     "internal/runtime/optimization_w15_properties_test.go": "1b2ed7cd652847d8694edcb3762b34232842f49a6f3eae35271181b579e10844",
     "internal/runtime/optimization_w15_replay_test.go": "50e1e21352efac271158ea3c217365a8c7c78a2b17f51430c8af52954a15e0f5",
@@ -212,7 +212,7 @@
     "tests/optimization/w15/ref-64.json": "ed38eddccbd20aa818fcc9e55ebe3cbabd90d200a1f3bb1456420edb4d642b60",
     "tests/optimization/w15/reference.php": "85e20f82758b9c3a38efd24b49595b2bf19000ffcbf276629dcdb9f07ed70a25"
   },
-  "source_fingerprint_sha256": "c919b1527153db1137847182dbc0c3cd63e7f9e586a70c2a68aaa1526f435f73",
+  "source_fingerprint_sha256": "4e5fad0079165151b1bed5531558ec2bd6c1ce5f38de36729bc1f5e08c439b33",
   "source_identity": "source_base plus source_files_sha256 identifies the tested local changes; the containing Git commit records the final repository snapshot",
   "fuzz_final": {
     "seconds": 30,
@@ -226,5 +226,13 @@
     "effects_consultation": "native gpt-6-astra medium, read-only",
     "adversarial_review": "agy claude-opus-4-6-thinking quota exhausted -> native gpt-6.1-sol medium",
     "documentation_review": "agy claude-opus-4-6-thinking quota exhausted -> native gpt-6.1-sol medium"
+  },
+  "comment_only_followup": {
+    "change": "Clarify that source values are copied, Program does not retain the map, and caller keeps map stable during Build; no executable statements changed",
+    "validation": [
+      "go test ./internal/ir/ssa -count=1: exit 0",
+      "git diff --check: exit 0"
+    ],
+    "full_suite_snapshot": "0319381; executable code unchanged; latest-head full checks additionally run in CI"
   }
 }
