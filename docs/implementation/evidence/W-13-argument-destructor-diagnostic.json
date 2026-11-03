@@ -10,7 +10,7 @@
     "T-039",
     "T-040"
   ],
-  "status": "compatibility_blocked_awaiting_user_decision",
+  "status": "compatibility_blocked_not_pass",
   "case": "weak Stringable argument destructor throws before a conditional method body",
   "fixture": "tests/semantics/w13-objects/diagnostics/argument_destructor_conditional.php",
   "fixture_sha256": "58e95410eb5e5e9b90fa4995562aa5f6abee863946b9dbce13a727bbf44f7d0f",
@@ -92,5 +92,7 @@
   ],
   "go_safety_test": "TestW13PendingArgumentDestructorSafety",
   "go_result": "private runtime finishes safely, preserves destructor exception and releases request objects; this is not a PHP compatibility pass",
-  "approval": "pending; earlier two approvals do not apply to this input"
+  "approval": "2026-11-03 explicit user approval: retain Go safety, list this specified input as compatibility-blocked and never a pass; PR73 may merge only after all other acceptance checks and latest-head reviews pass.",
+  "approval_scope": "Only the fixture and hash recorded here; no authorization for other differences, omitted tests or failed checks.",
+  "approval_quote": "允許第三、第四項明列限制後合併（建議）"
 }

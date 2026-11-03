@@ -10,7 +10,7 @@
     "T-039",
     "T-040"
   ],
-  "status": "compatibility_blocked_awaiting_user_decision",
+  "status": "compatibility_blocked_not_pass",
   "case": "Stringable reference assignment unsets global alias then clones source object",
   "fixture": "tests/semantics/w13-objects/diagnostics/reference_unset_clone.php",
   "fixture_sha256": "20827facaaf21afa2190364620c0458ef0a99b326ccb1b5c9c983387b94be295",
@@ -97,6 +97,8 @@
   ],
   "go_safety_test": "TestW13PendingReferenceCloneSafety",
   "go_result": "Both Go widths complete safely: source and clone contain new, global alias remains absent; shutdown leaves zero live objects and typed sources. This is host safety only, not a PHP compatibility pass.",
-  "approval": "pending; earlier two approvals do not apply to this distinct input",
-  "reproduction": "Use reference.py.run_php with repository tests/semantics/w13-objects directory, recorded platform/image, and diagnostics/reference_unset_clone.php. The historical commands mounted identical-byte clonehold.php in a temporary directory. Catch CalledProcessError/TimeoutExpired to retain raw stdout/stderr; run_php removes container in finally."
+  "approval": "2026-11-03 explicit user approval: retain Go safety, list this specified input as compatibility-blocked and never a pass; PR73 may merge only after all other acceptance checks and latest-head reviews pass.",
+  "reproduction": "Use reference.py.run_php with repository tests/semantics/w13-objects directory, recorded platform/image, and diagnostics/reference_unset_clone.php. The historical commands mounted identical-byte clonehold.php in a temporary directory. Catch CalledProcessError/TimeoutExpired to retain raw stdout/stderr; run_php removes container in finally.",
+  "approval_scope": "Only the fixture and hash recorded here; no authorization for other differences, omitted tests or failed checks.",
+  "approval_quote": "允許第三、第四項明列限制後合併（建議）"
 }

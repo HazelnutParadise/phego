@@ -188,17 +188,17 @@ static-as-instance notice 以當次 receiver class 組訊息。proxy 可以合�
 
 Go/arm64 比較 144 B／一次降至零配置；getter 88 B／兩次降至 8 B／一次，scalar／object setter 的 80／224 B 降至零。Go/386 比較 96 B／一次降至零，getter 56→8 B、兩次→一次，兩種 setter 的 48／144 B 也降至零。getter 名稱仍需配置；把標籤快取到共享 metadata 會增加描述或建置成本，目前沒有宣稱消除此成本。此輪不更改 value、物件或屬性表布局。
 
-每種寬度 809 案、原 609 案不變，實際 Go/386 回歸與前後三次量測見 `W-13-r10-review.json`。所有新輸入在兩個固定映像正常結束，沒有新增不安全參考引擎例外。第三與第四項既有診斷仍等待各自核准，不計相容通過。
+每種寬度 809 案、原 609 案不變，實際 Go/386 回歸與前後三次量測見 `W-13-r10-review.json`。所有新輸入在兩個固定映像正常結束，沒有新增不安全參考引擎例外。第三與第四項既有診斷已於 2026-11-03 取得使用者明確核准，保留 Go 安全行為並明列限制後可合併，仍不計相容通過。
 
 ## 驗證與尚未完成項目
 
-### 等待使用者裁決的額外參考引擎不安全案例
+### 第三、第四項已核准的指定輸入
 
 `diagnostics/argument_destructor_conditional.php` 在弱 Stringable argument 轉換後，來源解構拋例外，再進入包含條件分支的 body。固定 arm64 映像以 139 結束，i386 在 120 秒後逾時。Go 的 `TestW13PendingArgumentDestructorSafety` 安全完成、保留解構例外並清空請求物件，這是宿主安全測試，不是 PHP 相容通過。測試只執行 fixture 指定的 `ok` 分支，其他分支未驗證。
 
-原始輸入、雜湊與雙寬度結果位於 `W-13-argument-destructor-diagnostic.json`。這是前兩項核准之外的新案例，已請使用者另外裁決，目前不得因此合併 PR #73，也不計為通過。
+原始輸入、雜湊與雙寬度結果位於 `W-13-argument-destructor-diagnostic.json`。使用者於 2026-11-03 另外明確核准：保留 Go 安全行為，將這個指定輸入明列相容性受阻、不計通過，其餘驗收與最新審查全數通過後允許合併 PR #73。此核准不擴及其他輸入或尚未執行的分支。
 
-`diagnostics/reference_unset_clone.php` 是另一個獨立輸入：`__toString` 先 unset global alias，再 clone 原物件。固定 arm64 exit 139，i386 回報 target SIGSEGV 後於 120 秒逾時。Go 以原 reference hold 保住有效位置，原物件與 clone 都得到轉換後的值，alias 名稱不會重建，shutdown 無殘留。`TestW13PendingReferenceCloneSafety` 只證明宿主安全，不能算成 PHP 相容通過。原始雙寬度結果見 `W-13-reference-clone-diagnostic.json`，目前等待第四項獨立裁決，前兩項核准不適用。
+`diagnostics/reference_unset_clone.php` 是另一個獨立輸入：`__toString` 先 unset global alias，再 clone 原物件。固定 arm64 exit 139，i386 回報 target SIGSEGV 後於 120 秒逾時。Go 以原 reference hold 保住有效位置，原物件與 clone 都得到轉換後的值，alias 名稱不會重建，shutdown 無殘留。`TestW13PendingReferenceCloneSafety` 只證明宿主安全，不能算成 PHP 相容通過。原始雙寬度結果見 `W-13-reference-clone-diagnostic.json`，使用者於 2026-11-03 另行明確核准保留 Go 安全行為並明列本例限制，其餘驗收與最新審查全數通過後允許合併。此核准只適用記錄的輸入，不擴及其他差異。
 
 ### 使用者核准保留安全修正的參考引擎不安全案例
 

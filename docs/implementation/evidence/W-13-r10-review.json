@@ -251,7 +251,7 @@
   },
   "source_sha256": {
     ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
-    "docs/compatibility/profile-matrix.json": "595f11e573421c4f965ee6df76b5bd3a3496e66dd447729f0102930a6a76c7b1",
+    "docs/compatibility/profile-matrix.json": "edfe0b34fd57a505d721e4f46ad6cdbb212df9625b383d82ba5ef18ad6b648a7",
     "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
     "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
@@ -463,14 +463,14 @@
       "exit_code": 0,
       "result": "pass",
       "output": "W-13-r10-local-pure.txt",
-      "output_sha256": "bd95d88109b4ce6e8e6d96275355cbfeb577455489f02871e8a76722b795698b"
+      "output_sha256": "4cc72d46eb79983c30e98d98dc94c19341ca1792bf504dfd7fbdc51c192424bf"
     },
     {
       "command": "go test -race ./...",
       "exit_code": 0,
       "result": "pass",
       "output": "W-13-r10-local-race.txt",
-      "output_sha256": "facd233a71829a4a31464aaf9368f08599d03cba0cd1dac03072ca91b49ee17f"
+      "output_sha256": "f531446e3625b8f6d08423aa58d0fd18e8a5c32a07655f08d5cf592c0f6a2ce4"
     },
     {
       "command": "go vet ./...",
@@ -484,8 +484,8 @@
       "exit_code": 0,
       "result": "pass",
       "output": "W-13-r10-local-python.txt",
-      "output_sha256": "16bb2fbfe0c4498310cb203a8f8c308be8ed4fb8afcba8688acf0971713cce2e",
-      "seconds": 131.284
+      "output_sha256": "470d6948e952e2e1ddf37e250544fb95df5c4ea9e44554ce6baea5fcf061d2bc",
+      "seconds": 152.007
     },
     {
       "command": "python3 tools/validate_docs.py",
@@ -499,7 +499,7 @@
   "review": {
     "runtime": "Independentnativegpt-6.1-sol full809TestW13pass2.716s; reviewed5productiondiffs,6R10testadapters and30controls; nooutstandingconfirmedfindingsoruncertainties. Rootverifiedbothfixedpins andGo386 separately. Astra consulted allprivatebehaviorchanges, correctedpredelegation andmagicguardsuppression againstprimarysource.",
     "documentation": "Independentfresh-contextgpt-6.1-solverified427source/artifact/checkhashes,62fixtures/profile,809cases/profile withall609parentcasesunchanged,alllocalanchors,18Go386samplesbeforeandafter. Adoptedformaloutputnameswithscratchprovenance; reproducibleoverlay/acceptedbuild/hostcommands addedperreaderrecommendation. NoPHPapprovalorremoteexecutioninferred. Followupreaderverified7zshrecipes,2PythonASTs,5baselinefilesand4mount/outputmappings; rootmockedoverlayexecutionproducedvalidJSON5replacements.",
-    "delivery": "ExactnextpushedheadCI/Codexreview andthird/fourthcompatibilitydecisions remainseparategates."
+    "delivery": "Third/fourth specified compatibility decisions explicitly approved on2026-11-03; allfourunsafeinputsremainblocked/notpass. Exact nextpushedheadCI/Codexreview still required."
   },
   "coverage_limits": [
     "PHP frontend/VM execution entry point",
@@ -529,7 +529,7 @@
     "W-13-r10-go386-after-benchmark.txt": "edf9bc22d6944985df2689e5492cc3d4df3205768d6fc096bf51d1650d6b8de1",
     "W-13-r10-go386-mount-failure.txt": "02f90799392a983b05947bfefd4cf68d223d19f5e97316a688cb5247a6871259"
   },
-  "status": "local_runtime_pass_pending_compatibility_decision",
+  "status": "local_runtime_pass_pending_remote_review",
   "reproduction": {
     "purpose": "Commands to reproduce the paired measurements; these recipes are not additional claimed executions. Run from repository root. Builds retain current test/fixture sources; only baseline production is overlaid.",
     "setup": "export W13_REPLAY=\"$(mktemp -d /tmp/phego-w13-r10-replay.XXXXXX)\"",
@@ -540,5 +540,17 @@
     "go386_after_build": "CGO_ENABLED=0 GOOS=linux GOARCH=386 go test -c ./internal/runtime -o \"$W13_REPLAY/accepted.test\"",
     "go386_run_script": "python3 - <<'PYRUN'\nfrom pathlib import Path\nimport json, os, subprocess\nrecord=json.loads(Path('docs/implementation/evidence/W-13-r10-review.json').read_text())\nscratch=os.environ['W13_REPLAY']\nrefs=str(Path('internal/runtime/testdata').resolve())+':/testdata:ro'\nfor run in record['go386']['commands']:\n    command=[scratch+':/w:ro' if arg=='/tmp/phego-w13-r10-go386:/w:ro' else refs if arg.endswith('/internal/runtime/testdata:/testdata:ro') else arg for arg in run['command']]\n    with (Path(scratch)/run['output']).open('wb') as output:\n        subprocess.run(command,stdout=output,stderr=subprocess.STDOUT,check=True)\nPYRUN",
     "scope": "Before binary runs constructor/hold controls and microbenchmarks, not the new semantic regressions that intentionally fail on baseline. After binary runs all TestW13. Run serially without other builds/tests for timing; simulated Go386 ns are not application/PHP comparisons."
+  },
+  "compatibility_approval_update": {
+    "date": "2026-11-03",
+    "decision": "User explicitly approved third and fourth specified unsafe-reference inputs, keeping Go safety and blocking/not-pass status; merge remains conditional on every other gate and latest review passing.",
+    "runtime_source_revision": "a8aba28cfbec9923ad42a84ee5a53edf935d5785",
+    "scope": "Only argument_destructor_conditional.php and reference_unset_clone.php as hashed in their diagnostic evidence; original crash outputs and canonical809observations unchanged.",
+    "local_check_refresh": {
+      "reason": "Explicit third/fourth scoped approval recorded; Go/PHPsource bytes unchanged. All six commands rerun after the update.",
+      "go_runtime_result": "cached on refresh; original full uncached CGO0 and race runs for identical runtime source passed at a8aba28 (3.583s and27.904s).",
+      "python": "536tests passed152.007s",
+      "remote": "Latest pushed-head CI and Codex reviews are independent remaining gates."
+    }
   }
 }
