@@ -6527,6 +6527,42 @@
       ],
       "diagnostics": []
     },
+    "r9-dynamic-churn-detached": {
+      "result": [
+        [
+          "anchor",
+          "tail"
+        ],
+        3,
+        2,
+        [
+          "anchor",
+          "tail"
+        ],
+        3,
+        9,
+        7
+      ],
+      "diagnostics": []
+    },
+    "r9-dynamic-churn-shared": {
+      "result": [
+        [
+          "anchor",
+          "tail"
+        ],
+        7,
+        2,
+        [
+          "anchor",
+          "tail"
+        ],
+        7,
+        9,
+        7
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

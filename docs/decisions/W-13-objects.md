@@ -156,6 +156,22 @@ initializer 只有一個 receiver hold，改用單一 `methodHold` 值，先記�
 
 PHP fixture 原先以 `ReflectionProperty::isInitialized` 觀察 untouched private lazy 欄位，該查詢本身會觸發第三次初始化。兩個固定映像的標記追蹤證明失敗發生於結果觀察，與 alias 建立無關。改用不初始化的 `isLazy`，Go 另檢查原 slot 仍 undefined；原始失敗及帶來源的 trace 保留，沒有更動 production 來迎合錯誤 fixture。
 
+## R9：分批回收空的動態 block
+
+刪除動態屬性後，舊版只解除值與 index，block 仍按歷史保留。空表反覆建立／刪除 `x` 十萬次會保留 100000 個位置與 6254 個 block，遍歷、clone 及清理也掃描這段歷史。位置可能已逃逸，不能搬動活位置或重用刪除位置。
+
+選擇只回收完全沒有 index 成員的 block，存活判斷使用 index 的位置身分，不依值是否 undefined。每次成功動態 remove 累積飽和 uint32 計數，達到 `live+16` 向上對齊 16 的門檻後才掃描。門檻最多為 MaxUint32，先轉 uint64 再運算。掃描後歸零，以新增刪除量攤銷成本，不因稀疏活 block 的舊洞反覆掃描。空表兩次掃描間最多保留 15 個退休位置，每個保留的非空 block 最多 16 格。活屬性數改變及回收間隔仍會影響短暫保留量，不能把這個說明當成即時零保留。
+
+最初 `live+16` 未對齊時，一個活屬性會讓每 17 次刪除丟棄兩個 16 格 block，量測由約 88 B/op 增為 165 B/op。改用對齊門檻不增加狀態，三種控制組都回到約 88 B/op。容量 hint 記住既有最大 block 容量，上限 16，避免全空回收後重新從 1 成長；它不允許重用舊位置。每項退休名稱及空 block 的 next 會解除，讓逃逸的刪除位置不再保留後續鏈，但不覆寫該位置的值。
+
+`each` 與直接 hash comparison 在整段 callback 期間保護鏈。進入時保存原 bool，defer 還原，只有最外層出口能回收，巢狀或 panic 都不會提早解除外層保護。rollback 把容量及退休計數隨 dynamic storage 轉移，原 wrapper 的遍歷狀態保留。暫存清理 wrapper 保守維持保護，避免另一個 wrapper 的出口斷掉舊游標鏈。兩個 Go 內部指標控制在正常版本通過，移除比較 guard 或暫存 wrapper 保護後各自失敗。它們不算新增 PHP oracle，也沒有宣稱新的原生 comparison mutation 行為已驗收。
+
+此策略不新增每個 entry 的 owner pointer 或每個 block 的 prev／live 欄位。每次 remove 全掃、依總洞數決定重掃、直接移動活位置，以及遍歷中 unlink 都不採用。立即清空每個零 live 表也會讓每次 churn 配置 block，因此保留分批門檻。活動 callback 可暫時累積歷史，保留量約束在最外層遍歷返回後成立。既有 Go map 容量不縮小，記憶體仍可能維持過往活屬性的高水位。
+
+可讀 metadata 放進 Go/arm64 原 padding，表頭仍為 64 B，entry／block 不變。Go/386 表頭 32→36 B，十個合併配置物件生命週期格的 B/op 與次數不變，獨立 lazy snapshot 因配置級距多 16 B、次數不變。位元打包會改 materialized consumers、增加狀態操作並縮小計數範圍，這項成本不值得只為免除 Go/386 snapshot 的局部代價而引入。Go/386 的結構大小、配置量與回歸均已實跑，模擬環境時間只作原始紀錄。
+
+普通及空歷史路徑增加 guard 成本，部分量測較慢；churn 也仍有分批配置。保留量及歷史掃描的改善不能抹去這些輸項。所有前後三次樣本、原始失敗、游標對照、對齊候選、可重建 overlay 與 609 案局部對照見 `W-13-r9-review.json`。
+
 ## 驗證與尚未完成項目
 
 ### 等待使用者裁決的額外參考引擎不安全案例

@@ -347,10 +347,15 @@ func (h *heap) restoreLazyProperties(o *object, before *propertyTable) error {
 			physical++
 		}
 	}
-	dynamic := &propertyTable{index: o.props.index, head: o.props.head, tail: o.props.tail}
+	// The detached chain may still have an outer traversal. Cleanup must not
+	// unlink it, even though this temporary wrapper has a different address.
+	dynamic := &propertyTable{index: o.props.index, head: o.props.head, tail: o.props.tail,
+		capacity: o.props.capacity, retired: o.props.retired, iterating: true}
 	o.props.index = nil
 	o.props.head = nil
 	o.props.tail = nil
+	o.props.capacity = 0
+	o.props.retired = 0
 	o.props.materialized = false
 	if err := h.freePropertyTable(dynamic, nil, false); err != nil {
 		first = h.mergeObjectErrors(first, err)
@@ -358,10 +363,14 @@ func (h *heap) restoreLazyProperties(o *object, before *propertyTable) error {
 	o.props.index = before.index
 	o.props.head = before.head
 	o.props.tail = before.tail
+	o.props.capacity = before.capacity
+	o.props.retired = before.retired
 	o.props.materialized = before.materialized
 	before.index = nil
 	before.head = nil
 	before.tail = nil
+	before.capacity = 0
+	before.retired = 0
 	return first
 }
 

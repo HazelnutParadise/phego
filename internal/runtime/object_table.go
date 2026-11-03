@@ -25,6 +25,9 @@ type propertyTable struct {
 	head         *propertyBlock
 	tail         *propertyBlock
 	materialized bool
+	iterating    bool
+	capacity     uint8
+	retired      uint32
 }
 
 // Each dynamic block and its fixed-capacity entries will share one safe Go
@@ -124,7 +127,9 @@ func (p *propertyTable) slot(name string) *value {
 				capacity = 16
 			}
 		}
+		capacity = max(capacity, int(p.capacity))
 		block := newPropertyBlock(capacity)
+		p.capacity = uint8(capacity)
 		if p.tail == nil {
 			p.head = block
 		} else {
@@ -142,17 +147,91 @@ func (p *propertyTable) slot(name string) *value {
 
 // remove detaches ownership before a destructor can reenter the table.
 func (p *propertyTable) remove(name string) (value, bool) {
-	v, ok := p.lookup(name)
+	if p.layout != nil {
+		if i, ok := p.layout.index[name]; ok {
+			v := &p.declared[i]
+			if v.kind == valueUndefined {
+				return value{}, false
+			}
+			old := *v
+			*v = value{}
+			return old, true
+		}
+	}
+	v, ok := p.index[name]
 	if !ok || v.kind == valueUndefined {
 		return value{}, false
 	}
 	old := *v
 	*v = value{}
 	delete(p.index, name)
+	if p.retired != ^uint32(0) {
+		p.retired++
+	}
+	p.reclaimRetired()
 	return old, true
 }
 
+// Reclaim whole empty blocks without moving live or reusing removed locations.
+// Successful removals, rather than total holes, amortize even unproductive
+// scans of sparse live blocks. Preserve index materialization state.
+func (p *propertyTable) reclaimRetired() {
+	if p.iterating || p.retired < 16 {
+		return
+	}
+	// Align live+16 to a full block: with one live anchor, sweeping every
+	// 17 removals would discard two blocks with 15 unused locations.
+	threshold := min((uint64(len(p.index))+31)&^uint64(15), uint64(^uint32(0)))
+	if uint64(p.retired) < threshold {
+		return
+	}
+	var head, tail *propertyBlock
+	for block := p.head; block != nil; {
+		next := block.next
+		live := false
+		for i := 0; i < block.used; i++ {
+			entry := &block.entries[i]
+			if p.index[entry.name] == &entry.value {
+				live = true
+			} else {
+				entry.name = ""
+			}
+		}
+		if live {
+			if tail == nil {
+				head = block
+			} else {
+				tail.next = block
+			}
+			tail = block
+		} else {
+			// An escaped removed slot must not retain later blocks.
+			block.next = nil
+		}
+		block = next
+	}
+	if tail != nil {
+		tail.next = nil
+	}
+	p.head, p.tail = head, tail
+	p.retired = 0
+}
+
+func (p *propertyTable) beginIteration() bool {
+	previous := p.iterating
+	p.iterating = true
+	return previous
+}
+
+func (p *propertyTable) endIteration(previous bool) {
+	p.iterating = previous
+	if !previous {
+		p.reclaimRetired()
+	}
+}
+
 func (p *propertyTable) each(visit func(string, *value)) {
+	defer p.endIteration(p.beginIteration())
 	if p.layout != nil {
 		for i, name := range p.layout.names {
 			if v := &p.declared[i]; v.kind != valueUndefined {

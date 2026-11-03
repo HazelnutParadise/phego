@@ -136,6 +136,7 @@ func (h *heap) compareDeclaredObjectProperties(x, y *object, arrays map[*phpArra
 }
 
 func (h *heap) compareHashObjectProperties(x, y *object, arrays map[*phpArray]bool) (int, error) {
+	defer x.props.endIteration(x.props.beginIteration())
 	if comparison, err := h.compareDeclaredObjectProperties(x, y, arrays, false); err != nil || comparison != 0 {
 		return comparison, err
 	}

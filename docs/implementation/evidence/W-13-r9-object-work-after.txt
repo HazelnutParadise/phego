@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13ChurnObjectWork/0/clone-8         	  632092	       186.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/0/clone-8         	  664665	       187.0 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/0/clone-8         	  662983	       187.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/0/cleanup-8       	19164099	         6.410 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/0/cleanup-8       	18637999	         6.389 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/0/cleanup-8       	18660585	         6.412 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/10000/clone-8     	  643963	       187.1 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/10000/clone-8     	  631177	       187.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/10000/clone-8     	  639942	       187.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/10000/cleanup-8   	18706156	         6.407 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/10000/cleanup-8   	18608378	         6.418 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/10000/cleanup-8   	18837195	         6.419 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/100000/clone-8    	  651303	       188.3 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/100000/clone-8    	  654932	       186.6 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/100000/clone-8    	  649130	       187.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ChurnObjectWork/100000/cleanup-8  	18703728	         6.387 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/100000/cleanup-8  	18658651	         6.464 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnObjectWork/100000/cleanup-8  	18676920	         6.401 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	3.256s
