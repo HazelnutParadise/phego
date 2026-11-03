@@ -1,0 +1,23 @@
+goos: linux
+goarch: 386
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: QEMU TCG CPU version 2.5+
+BenchmarkW13ObjectComparison/0-2  	   89256	      2681 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/0-2  	   91526	      2782 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/0-2  	   91698	      2714 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/1-2  	   76581	      3155 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/1-2  	   76633	      3230 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/1-2  	   76822	      3185 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/32-2 	   12960	     18087 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/32-2 	   12678	     18527 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13ObjectComparison/32-2 	   13254	     26161 ns/op	      96 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/get-2         	   55656	      4342 ns/op	      56 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/get-2         	   55710	      4418 ns/op	      56 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/get-2         	   55461	      4362 ns/op	      56 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-2  	   25436	      9563 ns/op	      48 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-2  	   24972	      9375 ns/op	      48 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-2  	   25296	     13868 ns/op	      48 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-2  	   21445	     11346 ns/op	     144 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-2  	   21337	     11122 ns/op	     144 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-2  	   21282	     11161 ns/op	     144 B/op	       2 allocs/op
+PASS

@@ -1,0 +1,20 @@
+--- FAIL: TestW13R7RawControls (0.03s)
+    --- FAIL: TestW13R7RawControls/32/r7-raw-shadow-public (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-shadow-public
+            Go: {"result":[[true,true,41,0],[false,false,42,0],["Error","Typed property W13R7RawParent::$x must not be accessed before initialization"],0],"diagnostics":[]}
+            PHP: {"result":[[true,false,41,0],[true,false,42,0],11,1],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/32/r7-raw-shadow-private (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-shadow-private
+            Go: {"result":[[true,true,41,0],[false,false,42,0],["Error","Typed property W13R7RawParent::$x must not be accessed before initialization"],0],"diagnostics":[]}
+            PHP: {"result":[[true,false,41,0],[true,false,42,0],11,1],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-shadow-public (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-shadow-public
+            Go: {"result":[[true,true,41,0],[false,false,42,0],["Error","Typed property W13R7RawParent::$x must not be accessed before initialization"],0],"diagnostics":[]}
+            PHP: {"result":[[true,false,41,0],[true,false,42,0],11,1],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-shadow-private (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-shadow-private
+            Go: {"result":[[true,true,41,0],[false,false,42,0],["Error","Typed property W13R7RawParent::$x must not be accessed before initialization"],0],"diagnostics":[]}
+            PHP: {"result":[[true,false,41,0],[true,false,42,0],11,1],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.000s
+FAIL

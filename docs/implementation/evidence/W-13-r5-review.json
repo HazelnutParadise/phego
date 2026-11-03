@@ -1,0 +1,148 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "eab2690a43c95b117d462715755f3b00aab45b16",
+  "reference_result": "510 cases per fixed profile; all463 committed observations unchanged; 21 reference,15 operation and11 lifetime/type cases added",
+  "findings": [
+    {
+      "comment": 4449709334,
+      "repair": "Safe original-extent iteration with mutable immutable-info cells, first-metadata-identity swap removal and surviving-slot remap; no per-write source snapshot.",
+      "proof": "W-13-r5-reference-red.txt"
+    },
+    {
+      "comment": 4449709341,
+      "repair": "Hold original reference and RHS through verification/store; unset writes original target without recreating name, rebind follows current reference with ownership checks and without second type verification.",
+      "proof": "W-13-r5-baseline-red.txt"
+    },
+    {
+      "comment": 4449709353,
+      "repair": "Reject positional after named before __call callback; preserve duplicate-name precedence and packed-array cleanup.",
+      "proof": "W-13-r5-baseline-red.txt"
+    },
+    {
+      "comment": 4449709358,
+      "repair": "Separate copied references once, then register retained typed instance references in one schema pass; skip static/virtual/untyped/dynamic collisions.",
+      "proof": [
+        "W-13-r5-clone-before-five.txt",
+        "W-13-r5-clone-after-five.txt",
+        "W-13-r5-baseline-red.txt"
+      ]
+    },
+    {
+      "comment": 4449709365,
+      "repair": "Inside own backed getter, isset reads backing undefined/null without recursively reading typed uninitialized value.",
+      "proof": "W-13-r5-baseline-red.txt"
+    },
+    {
+      "comment": 4449709374,
+      "repair": "Free incomplete lazy-proxy clone shell without invoking its destructor; backing clone keeps its real destructor/exception chain.",
+      "proof": "W-13-r5-baseline-red.txt"
+    },
+    {
+      "source": "independent gpt-6.1-sol review",
+      "repair": "Preserve property declaring owner in exact type acceptance for self/parent. Reviewer reproduced four red cases and verified same cases green after one-line fix.",
+      "proof": "W-13-r5-relative-red.txt"
+    },
+    {
+      "source": "root source-identity follow-through plus Astra consultation",
+      "repair": "Inherited Go descriptor copies retain PHP declaring-owner/storage-key identity. Keep pointer equality fast path, then compare nonnil owner/key; redeclarations, private same-name declarations and separate trait consumers remain distinct. Native four-case controls and root red/green cover source removal order and remaining slot bookkeeping.",
+      "proof": "W-13-r5-inherited-red.txt"
+    }
+  ],
+  "additional_verified_behavior": [
+    "TypeError replaces coercion Exception while retaining previous chain. A nonconvertible lone int source creates one TypeError, no duplicate previous.",
+    "Mixed exact then int may-coerce rejects array as inconsistent before attempted conversion, matching both fixed images.",
+    "Two string sources re-run conversion against original RHS; source mutation can swap remaining metadata and preserve old tail observations.",
+    "RHS cleanup follows successful store and precedes old target garbage: convert,convert,rhs,old.",
+    "Rebinding to typed int reference during string conversion stores the already converted string as pinned PHP does; retain request ownership guard, do not add a second type check."
+  ],
+  "test_parity_corrections": [
+    "Use actual stable assignment cell, not copied/pinned reference wrapper; extra test-side RHS hold hides destruction timing.",
+    "Go assign is by value, not reference aliasing; use referenceObject/bind and transfer one cleanup owner.",
+    "Construct nested callback arrays with explicit child retain and rc0 result; observe then discard return.",
+    "Separate basic and mutation Stringable classes/destructors; canonical object|string metadata; full exception previous chains and named PHP classes.",
+    "Proxy tests use actual lazy factory and incomplete wrapper; typed clone tests write through surviving alias, not merely property setter."
+  ],
+  "benchmark": {
+    "command": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW13AliasedClone$' -benchmem -benchtime=100ms -count=5",
+    "before_command": "go test -overlay /tmp/phego-w13-r5-baseline/overlay.json ./internal/runtime -run '^$' -bench '^BenchmarkW13AliasedClone$' -benchmem -benchtime=100ms -count=5",
+    "baseline_commit": "eab2690a43c95b117d462715755f3b00aab45b16",
+    "reproduction": "Write git show baseline:internal/runtime/{heap,object_properties,object_statics,object_methods,object_lazy}.go to temporary files. Go overlay Replace maps the five absolute repository paths to those files; current benchmark/test sources remain unchanged. Run before command, then after without overlay.",
+    "scope": "host Go1.26.5 darwin/arm64 Apple M3; independent aliases, sizes1/32/256, typed/plain/dynamic. Five100ms samples plus earlier three1s samples retained. Warm-up source-capacity growth is amortized; this is not total retained memory.",
+    "typed_256_ns_before": [
+      105616,
+      114549
+    ],
+    "typed_256_ns_after": [
+      19204,
+      19659
+    ],
+    "plain_256_bytes_before": 18672,
+    "plain_256_bytes_after": 18592,
+    "plain_256_allocs_before": 3,
+    "plain_256_allocs_after": 2,
+    "benefits": "Remove single-source hold slice (80B allocation) and nested per-property schema scan. Dynamic256 samples also fall from27 to26 allocations; no layout field added.",
+    "costs": "Matching PHP source capacity4 instead of prior Go cap2 retains32 additional bytes per reference with two propertySource entries on this host. Quarter-full shrink reduces larger buffers. Extra typed-write holds add retain/release work; no universal no-cost/performance claim."
+  },
+  "review": {
+    "local": "Independent Sol adversarial review found self/parent owner regression; root fixed it and reviewer reproduced green. No unresolved confirmed finding. Root final full510 replay passes both profiles; reviewer full-run scope was502 plus four relative-type subcases.",
+    "remote": "New pushed-head CI and Codex review are separate gates, not inferred from local tests.",
+    "documentation": "Fresh-context Sol review and final reread verified160 source hashes,16 R5 artifact hashes,six local-check hashes,510 cases/profile,source anchors and standalone claims. No unresolved mandatory correction. Reviewer did not rerun tests,dangerous diagnostics,benchmarks or remote CI."
+  },
+  "coverage_limits": [
+    "Native realloc/free during an active source verifier may depend on allocator behavior. Old Go backing storage remains memory-safe; cross-reallocation inputs are unverified, not compatibility passes.",
+    "Full frontend source argument unpacking is not covered: final methodArgument input matches call_user_func_array error without during-unpacking suffix.",
+    "No PHP frontend/VM, real application, historical or competitor acceptance; full scenarios stay not_run.",
+    "Third conditional-argument and fourth reference-unset-clone corruption diagnostics await separate explicit user decision; earlier two approvals do not cover either input."
+  ],
+  "check_retries": [
+    {
+      "evidence": "W-13-r5-reference-initial-mismatch.txt",
+      "reason": "Overlapping local regeneration into one output directory left64-bit504-case reference while Go had506. Case-count guard rejected it. Re-generated frozen sources into fresh /tmp/phego-w13-r5-final-reference, checked506/profile and every source hash, then reran full Go gates. No expected behavior changed."
+    }
+  ],
+  "artifacts_sha256": {
+    "W-13-r5-reference-red.txt": "e7f333624baa6c2757c48e5512aa86973e7d15c378915e3938c901e0ac4d22b6",
+    "W-13-r5-baseline-red.txt": "ca327ee5b7537efb896c9cfb88b40dbb1e583c5948d138edeab44a0895620fac",
+    "W-13-r5-relative-red.txt": "cb9c9527c5aa6caef1df3251b3275c5b5f8f5d6a144005cc7d9e2f25a25df8fe",
+    "W-13-r5-runtime.txt": "eb20586d13239e467f075158c3cbf8aceec5a8d03bbbfeeda755c8b777caa89a",
+    "W-13-r5-clone-before.txt": "65f7c7700b9f238a8e96878d20ecb7a77745db0a67956531551a65868ce2cc7c",
+    "W-13-r5-clone-after.txt": "96d48aa216920c026e79111842070a47da66bfd24fd46fb0f6d245e414c58bfa",
+    "W-13-r5-clone-before-five.txt": "fff0f1753056d107fe77fb2d219f24f3ca73ceec3abfc5f5beaa9ea1ec7f3d7a",
+    "W-13-r5-clone-after-five.txt": "186b5130e24b4e51ea1b516c8236d9a4abe44309bc0e989815bb2afbd00d687b",
+    "W-13-r5-local-pure.txt": "7e5aeb8581fda52ab82bca72b117ef72c3a3a850cf881c6c36e1907c129bb80e",
+    "W-13-r5-local-race.txt": "78de0c8299358133ce1c57415d8b99820d31ee096a8f343c8f4b4c59ff02002f",
+    "W-13-r5-local-vet.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r5-local-format.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r5-local-python.txt": "04641a4268b32b0d1c02ab3083750129c596a117f4d0dc3c0054e7ce0fedc972",
+    "W-13-r5-reference-initial-mismatch.txt": "f73314605a13238d223c0d13b63233e6f37cc7d1b864be0d9129bbf900ff9bce",
+    "W-13-r5-clone-safety.txt": "ba51d7a2cf68213fb0e1443326baa9eeb4208ddc850822985ff714f22ff7ffe4",
+    "W-13-r5-inherited-red.txt": "3d94db1350a422f175ff78e1a020b96c8c6e35a4e287ae6654d4fedd0e4b5fd7"
+  },
+  "additional_native_diagnostic": {
+    "evidence": "W-13-reference-clone-diagnostic.json",
+    "status": "compatibility_blocked_awaiting_user_decision",
+    "go_safety": "TestW13PendingReferenceCloneSafety passes both Go widths; no PHP compatibility pass"
+  },
+  "regression_command": "CGO_ENABLED=0 PHEGO_W13_REFERENCE=/tmp/phego-w13-r5-identity-reference go test ./internal/runtime -run 'TestW13(R5PHP8512Regression|PHP8512Objects|PendingReferenceCloneSafety)$' -count=1",
+  "baseline_red_command": "CGO_ENABLED=0 PHEGO_W13_REFERENCE=/tmp/phego-w13-r5-identity-reference go test -overlay /tmp/phego-w13-r5-baseline/overlay.json ./internal/runtime -run 'TestW13R5PHP8512Regression/64/(r5-(op|life)-|r5-ref-(unset-alias|rebind-alias|drop-rhs|string-mixed|mixed-first)$)' -count=1"
+}

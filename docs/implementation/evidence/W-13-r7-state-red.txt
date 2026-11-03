@@ -1,0 +1,8 @@
+--- FAIL: TestW13R7LazyPropertyState (0.00s)
+    object_review_r7_lazy_state_test.go:24: 32/r7-lazy-state-ghost: Go [[true,true],[true,true],[true,true],2,[false,false],[false,false]]; pinned PHP [[true,true],[false,true],[false,true],2,[false,false],[false,false]]
+    object_review_r7_lazy_state_test.go:24: 32/r7-lazy-state-proxy: Go [[true,true],[true,true],[true,true],2,[true,true],[false,false]]; pinned PHP [[true,true],[false,true],[false,true],2,[false,true],[false,false]]
+    object_review_r7_lazy_state_test.go:24: 64/r7-lazy-state-ghost: Go [[true,true],[true,true],[true,true],2,[false,false],[false,false]]; pinned PHP [[true,true],[false,true],[false,true],2,[false,false],[false,false]]
+    object_review_r7_lazy_state_test.go:24: 64/r7-lazy-state-proxy: Go [[true,true],[true,true],[true,true],2,[true,true],[false,false]]; pinned PHP [[true,true],[false,true],[false,true],2,[false,true],[false,false]]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.302s
+FAIL

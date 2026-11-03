@@ -1,0 +1,7 @@
+=== RUN   TestW13R9RetainedCounts
+    object_table_test.go:225: anchors=0 live=0 retained_used=100000 capacity=100015 blocks=6254
+    object_table_test.go:225: anchors=1 live=1 retained_used=100001 capacity=100015 blocks=6254
+    object_table_test.go:225: anchors=32 live=32 retained_used=100032 capacity=100047 blocks=6256
+--- PASS: TestW13R9RetainedCounts (0.03s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	1.342s

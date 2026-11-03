@@ -1,0 +1,204 @@
+--- FAIL: TestW13PHP8512Objects (0.04s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.02s)
+        object_model_test.go:798: r3-value-stringable-plain-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValuePlain to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValuePlain to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValuePlain given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValuePlain given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValuePlain returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValuePlain returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueInherited to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueInherited to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueInherited given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueInherited given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueInherited returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueInherited returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueTraitUser to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueTraitUser to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueTraitUser given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueTraitUser given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueTraitUser returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueTraitUser returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-property-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-property-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-argument-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-argument-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-return-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-return-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":["converted",false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-conversion-throw
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-destructor-throw
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-argument-stringable-destructor-throw
+            Go:  {"result":[["Exception","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],["convert","destructor","body"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":["converted",false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-conversion-throw-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-destructor-throw-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-argument-stringable-destructor-throw-frame
+            Go:  {"result":[["Exception","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],["convert","destructor","body"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-hook-borrowed-stringable
+            Go:  {"result":[["TypeError","W13R3BorrowedGetter::$value::get(): Return value must be of type Stringable, W13R3BorrowedStringable returned"],[],["destructor"],["destructor"]],"diagnostics":[]}
+            PHP: {"result":[true,[],[],["destructor"]],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.02s)
+        object_model_test.go:798: r3-value-stringable-plain-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValuePlain to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValuePlain to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValuePlain given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValuePlain given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValuePlain returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-plain-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValuePlain returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueInherited to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueInherited to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueInherited given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueInherited given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueInherited returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-inherited-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueInherited returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-property-weak
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueTraitUser to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-property-strict
+            Go:  {"result":["TypeError","Cannot assign W13R3ValueTraitUser to property W13R3ValueStringBox::$value of type Stringable"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-argument-weak
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueTraitUser given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-argument-strict
+            Go:  {"result":["TypeError","W13R3ValueStringArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueTraitUser given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-return-weak
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueTraitUser returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-stringable-trait-return-strict
+            Go:  {"result":["TypeError","W13R3ValueStringReturn::produce(): Return value must be of type Stringable, W13R3ValueTraitUser returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-property-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-property-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-argument-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-argument-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-return-precision
+            Go:  {"result":"1.2345678901234567","diagnostics":[]}
+            PHP: {"result":"1.2345678901235","diagnostics":[]}
+        object_model_test.go:798: r3-value-float-string-return-boundary-exponent
+            Go:  {"result":"100000000000000","diagnostics":[]}
+            PHP: {"result":"1.0E+14","diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":["converted",false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-conversion-throw
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-destructor-throw
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-argument-stringable-destructor-throw
+            Go:  {"result":[["Exception","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],["convert","destructor","body"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":["converted",false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-conversion-throw-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-owned-stringable-destructor-throw-frame
+            Go:  {"result":[["Error","object belongs to another or closed request"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],false,["convert","destructor"],["convert","destructor"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-return-argument-stringable-destructor-throw-frame
+            Go:  {"result":[["Exception","destructor"],["convert","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor"],["convert","destructor","body"]],"diagnostics":[]}
+        object_model_test.go:798: r3-value-hook-borrowed-stringable
+            Go:  {"result":[["TypeError","W13R3BorrowedGetter::$value::get(): Return value must be of type Stringable, W13R3BorrowedStringable returned"],[],["destructor"],["destructor"]],"diagnostics":[]}
+            PHP: {"result":[true,[],[],["destructor"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.942s
+FAIL

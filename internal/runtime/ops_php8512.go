@@ -8,6 +8,7 @@ import (
 // PHP diagnostic levels raised by modeled operations.
 const (
 	levelWarning    = 2
+	levelNotice     = 8
 	levelDeprecated = 8192
 )
 
@@ -31,7 +32,13 @@ func (h *heap) warn(level int, message string) {
 }
 
 func binopError(op string, a, b value) error {
-	return &Throwable{"TypeError", "Unsupported operand types: " + typeName(a) + " " + op + " " + typeName(b)}
+	name := func(v value) string {
+		if v.deref().kind == valueResource {
+			return "resource"
+		}
+		return typeName(v)
+	}
+	return &Throwable{"TypeError", "Unsupported operand types: " + name(a) + " " + op + " " + name(b)}
 }
 
 // valueName is PHP's zend_zval_value_name: booleans are spelled by value.
@@ -172,6 +179,8 @@ func cString(s string) string {
 // ToInt is the (int) cast.
 func (h *heap) toInt(v value) int64 {
 	switch v = v.deref(); v.kind {
+	case valueResource:
+		return int64(v.object.handle)
 	case valueInt:
 		return v.integer
 	case valueBool:
@@ -199,6 +208,8 @@ func (h *heap) toInt(v value) int64 {
 // toFloat is the (float) cast.
 func (h *heap) toFloat(v value) float64 {
 	switch v = v.deref(); v.kind {
+	case valueResource:
+		return float64(v.object.handle)
 	case valueInt:
 		return float64(v.integer)
 	case valueFloat:
@@ -234,7 +245,7 @@ func (h *heap) toBool(v value) bool {
 		return len(v.text) > 1 || (len(v.text) == 1 && v.text[0] != '0')
 	case valueArray:
 		return v.array.count() > 0
-	case valueObject:
+	case valueObject, valueResource:
 		return true
 	}
 	return false
@@ -242,7 +253,31 @@ func (h *heap) toBool(v value) bool {
 
 // toString is the (string) cast and the conversion used by concatenation.
 func (h *heap) toString(v value) (string, error) {
+	if err := h.claimValues(v); err != nil {
+		return "", err
+	}
 	switch v = v.deref(); v.kind {
+	case valueObject:
+		if _, err := h.checkedObject(v); err != nil {
+			return "", err
+		}
+		if _, ok := h.resolveMethod(v.object.class, "__toString", nil); ok {
+			raw, err := h.callMethod(v, "__toString", nil, nil, false)
+			if err != nil {
+				return "", err
+			}
+			out, err := h.dereferenceMethodReturn(raw)
+			if err != nil {
+				return "", err
+			}
+			if out.kind != valueString {
+				typeErr := &Throwable{"TypeError", v.object.class.name + "::__toString(): Return value must be of type string, " + valueName(out) + " returned"}
+				return "", h.mergeObjectErrors(typeErr, h.discardMethodReturn(out))
+			}
+			return out.text, nil
+		}
+	case valueResource:
+		return "Resource id #" + strconv.FormatUint(v.object.handle, 10), nil
 	case valueNull, valueUndefined:
 		return "", nil
 	case valueBool:
@@ -276,6 +311,9 @@ func (h *heap) intOrFloat(i int64, ok bool, f float64) value {
 }
 
 func (h *heap) arith(op string, a, b value) (value, error) {
+	if err := h.claimValues(a, b); err != nil {
+		return value{}, err
+	}
 	a, b = a.deref(), b.deref()
 	if op == "+" && a.kind == valueArray && b.kind == valueArray {
 		return h.arrayUnion(a.array, b.array), nil
@@ -488,6 +526,9 @@ func (h *heap) bitwiseNot(a value) (value, error) {
 }
 
 func (h *heap) concat(a, b value) (value, error) {
+	if err := h.claimValues(a, b); err != nil {
+		return value{}, err
+	}
 	x, err := h.toString(a)
 	if err != nil {
 		return value{}, err
@@ -661,6 +702,8 @@ func (h *heap) sameOverflow(x, y numericString) bool {
 // silentNumber is the silent scalar-to-number conversion used by comparison.
 func (h *heap) silentNumber(v value) value {
 	switch v.kind {
+	case valueResource:
+		return h.number(int64(v.object.handle))
 	case valueNull, valueUndefined:
 		return h.number(0)
 	case valueBool:
@@ -692,6 +735,9 @@ func isNaN(v value) bool { return v.kind == valueFloat && math.IsNaN(v.floating)
 
 // compare is PHP 8.5.12's zend_compare, the basis of <=>, <, and loose ==.
 func (h *heap) compare(a, b value) (int, error) {
+	if err := h.claimValues(a, b); err != nil {
+		return 0, err
+	}
 	return h.compareIn(a, b, map[*phpArray]bool{})
 }
 
@@ -746,7 +792,7 @@ func (h *heap) compareIn(a, b value, active map[*phpArray]bool) (int, error) {
 			if a.kind == valueObject && b.kind == valueObject && a.object == b.object {
 				return 0, nil
 			}
-			return 0, &Throwable{"Error", "object comparison is not modeled"}
+			return h.compareObjectValues(a, b, active)
 		}
 		if !converted {
 			switch {
@@ -829,6 +875,9 @@ func (h *heap) compareArrays(a, b *phpArray, active map[*phpArray]bool) (int, er
 
 // looseEqual is PHP ==.
 func (h *heap) looseEqual(a, b value) (bool, error) {
+	if err := h.claimValues(a, b); err != nil {
+		return false, err
+	}
 	if x, y := a.deref(), b.deref(); x.kind == valueString && y.kind == valueString {
 		return h.smartStringEqual(x.text, y.text), nil
 	}

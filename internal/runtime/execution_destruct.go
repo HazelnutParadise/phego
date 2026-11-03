@@ -5,7 +5,7 @@ import "errors"
 // REQ-020, REQ-022, REQ-040; T-039, T-040, T-043, T-044, T-079, T-080.
 // W-06 supplies ownership and PHP 8.5.12 destruction order. Here the PHP
 // destructor phase is separate from storage invalidation so output handlers
-// can still use values. The existing W-06 prototype shutdown stays unchanged.
+// can still use values. Both shutdown paths use the same object-store order.
 func (x *execution) destruct() completion {
 	if x.destructorStop {
 		return completion{}
@@ -46,6 +46,7 @@ func (x *execution) destruct() completion {
 			}
 		}
 	}
+	x.heap.noHandleReuse = true
 	// The bound is checked again as destructors may create more objects.
 	for id := uint64(1); id <= x.heap.nextHandle; id++ {
 		o, ok := x.heap.live[id]
@@ -53,7 +54,7 @@ func (x *execution) destruct() completion {
 			continue
 		}
 		o.destructorCalled = true
-		if o.class != nil && o.class.destructor != nil {
+		if objectHasDestructor(o) {
 			o.refcount++
 			before := x.serial
 			err := o.class.destructor(x.heap, value{kind: valueObject, object: o})

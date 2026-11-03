@@ -5,8 +5,14 @@ import "fmt"
 // arrayKey applies operation-specific PHP 8.5.12 diagnostics. Snapshot import
 // retains its narrower int/string contract. REQ-017; T-033/034.
 func (h *heap) arrayKey(k value, unset bool) (arrayKey, error) {
+	if err := h.claimValues(k); err != nil {
+		return arrayKey{}, err
+	}
 	k = k.deref()
 	switch k.kind {
+	case valueResource:
+		h.warn(levelWarning, fmt.Sprintf("Resource ID#%d used as offset, casting to integer (%d)", k.object.handle, k.object.handle))
+		return intKey(int64(k.object.handle)), nil
 	case valueFloat:
 		i := h.floatToIntSafe(k.floating)
 		return intKey(i), nil
@@ -28,6 +34,9 @@ func (h *heap) arrayKey(k value, unset bool) (arrayKey, error) {
 func (h *heap) arrayPointer(slot *value, op string) (value, error) {
 	if h.closed {
 		return value{}, ErrHeapClosed
+	}
+	if err := h.claimValues(*slot); err != nil {
+		return value{}, err
 	}
 	v := slot.deref()
 	if v.kind != valueArray {
@@ -100,13 +109,18 @@ func (h *heap) foreachValue(arr value, item *value, fn func(arrayKey) error) (er
 	if h.closed {
 		return ErrHeapClosed
 	}
+	if err := h.claimValues(arr, *item); err != nil {
+		return err
+	}
 	arr = arr.deref()
 	if arr.kind != valueArray {
 		h.warnForeach(arr)
 		return nil
 	}
 	retain(arr)
+	temporaries := h.pushGCTemporary(arr)
 	defer func() {
+		h.popGCTemporaries(temporaries)
 		if e := h.release(arr); err == nil {
 			err = e
 		}
@@ -144,6 +158,9 @@ func (h *heap) sortArrayRegular(slot *value, preserveKeys bool) error {
 // REQ-017; T-033/T-034. Retain snapshots only for this invocation. The user
 // adapter receives live locations separately so a bool retry can reload them.
 func (h *heap) sortCompareValues(a, b *value, compare func(value, value) (int, error)) (n int, err error) {
+	if err := h.claimValues(*a, *b); err != nil {
+		return 0, err
+	}
 	x, y := a.deref(), b.deref()
 	retain(x)
 	retain(y)
@@ -160,6 +177,9 @@ func (h *heap) sortCompareValues(a, b *value, compare func(value, value) (int, e
 func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(*value, *value) (int, error), stopUserCalls bool) (err error) {
 	if h.closed {
 		return ErrHeapClosed
+	}
+	if err := h.claimValues(*slot); err != nil {
+		return err
 	}
 	v := slot.deref()
 	if v.kind != valueArray {

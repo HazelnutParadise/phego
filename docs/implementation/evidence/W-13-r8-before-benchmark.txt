@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13RollbackSources/32/typed=true-8         	   51092	      4752 ns/op	    3000 B/op	      37 allocs/op
+BenchmarkW13RollbackSources/32/typed=true-8         	   52203	      4687 ns/op	    3000 B/op	      37 allocs/op
+BenchmarkW13RollbackSources/32/typed=true-8         	   53355	      4399 ns/op	    3000 B/op	      37 allocs/op
+BenchmarkW13RollbackSources/32/typed=false-8        	   65552	      3563 ns/op	    2488 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/32/typed=false-8        	   67528	      3554 ns/op	    2488 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/32/typed=false-8        	   66885	      3606 ns/op	    2488 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/256/typed=true-8        	    3817	     64985 ns/op	   22712 B/op	     261 allocs/op
+BenchmarkW13RollbackSources/256/typed=true-8        	    3781	     66652 ns/op	   22712 B/op	     261 allocs/op
+BenchmarkW13RollbackSources/256/typed=true-8        	    3702	     64176 ns/op	   22712 B/op	     261 allocs/op
+BenchmarkW13RollbackSources/256/typed=false-8       	    2676	     88834 ns/op	   18616 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/256/typed=false-8       	    2698	     88661 ns/op	   18616 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/256/typed=false-8       	    2832	     89431 ns/op	   18616 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/1024/typed=true-8       	     252	    923854 ns/op	   90296 B/op	    1029 allocs/op
+BenchmarkW13RollbackSources/1024/typed=true-8       	     260	    917637 ns/op	   90296 B/op	    1029 allocs/op
+BenchmarkW13RollbackSources/1024/typed=true-8       	     261	    912538 ns/op	   90296 B/op	    1029 allocs/op
+BenchmarkW13RollbackSources/1024/typed=false-8      	     141	   1685919 ns/op	   73912 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/1024/typed=false-8      	     142	   1666814 ns/op	   73912 B/op	       5 allocs/op
+BenchmarkW13RollbackSources/1024/typed=false-8      	     142	   1673530 ns/op	   73912 B/op	       5 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	6.234s

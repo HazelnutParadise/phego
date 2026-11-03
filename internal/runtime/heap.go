@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"cmp"
 	"errors"
 	"fmt"
 	"slices"
@@ -12,19 +11,24 @@ var ErrHeapClosed = errors.New("request heap is closed")
 
 // class is the minimal class shape needed to model destruction.
 type class struct {
-	name       string
-	destructor func(h *heap, this value) error
+	name            string
+	destructor      func(h *heap, this value) error
+	destructorOwner *class // immutable identity for prototype destructor callbacks
+	schema          *classSchema
 }
 
 type object struct {
+	owner            *heap
 	handle           uint64
 	class            *class
 	refcount         int
-	props            *phpArray // exclusively owned; not a separate PHP value
+	props            *propertyTable // exclusively owned; not a separate PHP value
 	destructorCalled bool
 	freed            bool
 	weak             *weakReference
 	weakMaps         []*weakMap
+	lazy             *lazyObject
+	hooks            map[string]bool
 }
 
 // weakReference observes an object without owning it. PHP returns the same
@@ -33,19 +37,26 @@ type weakReference struct{ target *object }
 
 // weakMap owns its values but not its object keys.
 type weakMap struct {
-	keys    []*object
-	entries map[*object]value
+	owner    *heap
+	identity *object
+	closed   bool
+	keys     []*object
+	entries  map[*object]value
 }
 
 // heap owns the mutable PHP values of one request. It is not safe for
 // concurrent use; an Execution must not share it with another request.
 type heap struct {
-	width      int
-	nextHandle uint64
-	live       map[uint64]*object
-	roots      map[gcNode]uint64 // possible cycle roots with buffering order
-	rootSeq    uint64
-	closed     bool
+	width         int
+	nextHandle    uint64
+	freeHandles   []uint64
+	noHandleReuse bool
+	live          map[uint64]*object
+	roots         map[gcNode]uint64 // possible cycle roots with buffering order
+	rootSlots     []gcNode
+	freeRootSlots []int
+	closed        bool
+	collecting    bool
 	// diagnostics are the PHP warnings and deprecations raised by modeled
 	// operations, in order.
 	diagnostics []diagnostic
@@ -53,34 +64,106 @@ type heap struct {
 	// user sort resets it; returning from that sort does not restore it.
 	// REQ-017; T-033/T-034.
 	sortCompareDeprecated bool
+	enums                 map[*class]map[string]value
+	comparingObjects      map[*object]bool
+	resources             map[uint64]*phpResource
+	nextResource          uint64
+	typedSources          map[*reference][]propertySource
+	execution             *execution
+	classStatics          map[*class]*propertyTable
+	gcTemporaries         []gcTemporary
+	weakMapObjects        map[*object]*weakMap
+	classes               map[string]*class
+	currentHook           activePropertyHook
+	currentCalledScope    *class
 }
 
 func newHeap(width int) (*heap, error) {
 	if width != 32 && width != 64 {
 		return nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64 bits", width)
 	}
-	return &heap{width: width, live: make(map[uint64]*object), roots: make(map[gcNode]uint64)}, nil
+	return &heap{width: width, live: make(map[uint64]*object), roots: make(map[gcNode]uint64), nextResource: 4}, nil
 }
 
 // Temporaries returned by constructors start with no owner. assign, bind, and
 // property or element writes take a count; discard releases an unowned
 // temporary that was never stored.
 
-func (h *heap) newArrayValue() value { return value{kind: valueArray, array: newArray()} }
+func (h *heap) newArrayValue() value {
+	a := newArray()
+	a.owner = h
+	return value{kind: valueArray, array: a}
+}
 
 func (h *heap) newObject(c *class) (value, error) {
-	if h.closed {
-		return value{}, ErrHeapClosed
+	v, err := h.newObjectShell(c)
+	if err != nil {
+		return value{}, err
 	}
-	h.nextHandle++
-	o := &object{handle: h.nextHandle, class: c, props: newArray()}
-	o.props.refcount = 1
-	h.live[o.handle] = o
+	o := v.object
+	if c != nil && c.schema != nil {
+		if err := h.initializeProperties(o); err != nil {
+			o.destructorCalled = true
+			_ = h.freeObject(o)
+			return value{}, err
+		}
+	}
+	return v, nil
+}
+
+// One safe Go allocation holds the identity and its private property table.
+// Interior pointers preserve both addresses; resources still allocate only an
+// identity and do not pay for an unused property table.
+func (h *heap) newObjectShell(c *class) (value, error) {
+	if err := h.runtimeCheck(); err != nil {
+		return value{}, err
+	}
+	var handle uint64
+	if !h.noHandleReuse && len(h.freeHandles) > 0 {
+		last := len(h.freeHandles) - 1
+		handle = h.freeHandles[last]
+		h.freeHandles = h.freeHandles[:last]
+	} else {
+		h.nextHandle++
+		handle = h.nextHandle
+	}
+	var layout *propertyLayout
+	if c != nil && c.schema != nil {
+		layout = c.schema.layout
+	}
+	storage := &struct {
+		object     object
+		properties propertyTable
+	}{}
+	o := &storage.object
+	*o = object{owner: h, handle: handle, class: c, props: &storage.properties}
+	o.props.initializeLayout(layout)
+	h.live[handle] = o
 	return value{kind: valueObject, object: o}, nil
 }
 
 func (h *heap) discard(v value) error {
+	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
+		v.object.freed && h.live[v.object.handle] != v.object {
+		if v.object.refcount > 0 {
+			return h.release(v)
+		}
+		return nil
+	}
+	if err := h.claimValues(v); err != nil {
+		return err
+	}
 	switch v.kind {
+	case valueReference:
+		if v.ref.refcount == 0 {
+			retain(v)
+			return h.release(v)
+		}
+	case valueResource:
+		if v.object.refcount == 0 {
+			retain(v)
+			return h.releaseResource(v)
+		}
 	case valueArray:
 		if v.array.refcount == 0 {
 			return h.freeArray(v.array)
@@ -97,7 +180,7 @@ func retain(v value) {
 	switch v.kind {
 	case valueArray:
 		v.array.refcount++
-	case valueObject:
+	case valueObject, valueResource:
 		v.object.refcount++
 	case valueReference:
 		v.ref.refcount++
@@ -107,7 +190,20 @@ func retain(v value) {
 // release drops one logical owner and destroys values that reach zero.
 // Destructor errors are returned after cleanup of the released value finishes.
 func (h *heap) release(v value) error {
+	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
+		v.object.freed && h.live[v.object.handle] != v.object {
+		if v.object.refcount <= 0 {
+			return fmt.Errorf("released object has no owned reference")
+		}
+		v.object.refcount--
+		return nil
+	}
+	if err := h.claimValues(v); err != nil {
+		return err
+	}
 	switch v.kind {
+	case valueResource:
+		return h.releaseResource(v)
 	case valueArray:
 		v.array.refcount--
 		if v.array.refcount == 0 {
@@ -137,31 +233,65 @@ func (h *heap) release(v value) error {
 
 func (h *heap) possibleRoot(n gcNode) {
 	if _, ok := h.roots[n]; !ok && !h.closed {
-		h.rootSeq++
-		h.roots[n] = h.rootSeq
+		var index int
+		if len(h.freeRootSlots) > 0 {
+			last := len(h.freeRootSlots) - 1
+			index = h.freeRootSlots[last]
+			h.freeRootSlots = h.freeRootSlots[:last]
+			h.rootSlots[index] = n
+		} else {
+			index = len(h.rootSlots)
+			h.rootSlots = append(h.rootSlots, n)
+		}
+		h.roots[n] = uint64(index)
 	}
 }
 
-func (h *heap) dropRoot(n gcNode) { delete(h.roots, n) }
-
-// bufferedRoots returns roots in the order they were buffered.
-func (h *heap) bufferedRoots() []gcNode {
-	out := make([]gcNode, 0, len(h.roots))
-	for n := range h.roots {
-		out = append(out, n)
+func (h *heap) dropRoot(n gcNode) {
+	if index, ok := h.roots[n]; ok {
+		h.rootSlots[index] = nil
+		h.freeRootSlots = append(h.freeRootSlots, int(index))
+		delete(h.roots, n)
 	}
-	slices.SortFunc(out, func(a, b gcNode) int { return cmp.Compare(h.roots[a], h.roots[b]) })
-	return out
+}
+
+// PHP 8.5.12 reuses holes LIFO and compacts by filling early holes from the
+// tail. A stable compaction or a monotonically increasing timestamp changes
+// observable destructor order. Slots also remove the old map-to-slice sort.
+func (h *heap) bufferedRoots() []gcNode {
+	last := len(h.rootSlots) - 1
+	for first := 0; first <= last; first++ {
+		if h.rootSlots[first] != nil {
+			continue
+		}
+		for last > first && h.rootSlots[last] == nil {
+			last--
+		}
+		if last <= first {
+			break
+		}
+		n := h.rootSlots[last]
+		h.rootSlots[first] = n
+		h.rootSlots[last] = nil
+		h.roots[n] = uint64(first)
+		last--
+	}
+	for len(h.rootSlots) > 0 && h.rootSlots[len(h.rootSlots)-1] == nil {
+		h.rootSlots = h.rootSlots[:len(h.rootSlots)-1]
+	}
+	h.freeRootSlots = nil
+	return slices.Clone(h.rootSlots)
 }
 
 func (h *heap) freeArray(a *phpArray) error {
+	if err := h.claimValues(value{kind: valueArray, array: a}); err != nil {
+		return err
+	}
 	h.dropRoot(a)
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
-		if err := h.release(b.val); err != nil && first == nil {
-			first = err
-		}
+		first = h.mergeObjectErrors(first, h.release(b.val))
 	}
 	for it := range a.cursors {
 		delete(it.arrays, a)
@@ -173,24 +303,28 @@ func (h *heap) freeArray(a *phpArray) error {
 // deleteObject follows the PHP 8.5.12 order: run the destructor once while the
 // object is temporarily owned, then free it only if nothing resurrected it.
 func (h *heap) deleteObject(o *object) error {
+	if err := h.validateObject(o); err != nil {
+		return err
+	}
 	var first error
 	if !o.destructorCalled {
 		o.destructorCalled = true
-		if o.class != nil && o.class.destructor != nil {
+		if objectHasDestructor(o) {
 			o.refcount++
 			first = o.class.destructor(h, value{kind: valueObject, object: o})
 			o.refcount--
 		}
 	}
 	if o.refcount == 0 && !o.freed {
-		if err := h.freeObject(o); err != nil && first == nil {
-			first = err
-		}
+		first = h.mergeObjectErrors(first, h.freeObject(o))
 	}
 	return first
 }
 
 func (h *heap) freeObject(o *object) error {
+	if err := h.validateObject(o); err != nil {
+		return err
+	}
 	o.freed = true
 	h.dropRoot(o)
 	delete(h.live, o.handle)
@@ -199,18 +333,20 @@ func (h *heap) freeObject(o *object) error {
 		o.weak.target = nil
 		o.weak = nil
 	}
-	for _, m := range o.weakMaps {
+	first = h.mergeObjectErrors(first, h.freeWeakMap(o, nil))
+	maps := o.weakMaps
+	o.weakMaps = nil
+	for _, m := range maps {
 		if v, ok := m.entries[o]; ok {
 			delete(m.entries, o)
 			m.keys = slices.DeleteFunc(m.keys, func(k *object) bool { return k == o })
-			if err := h.release(v); err != nil && first == nil {
-				first = err
-			}
+			first = h.mergeObjectErrors(first, h.release(v))
 		}
 	}
-	o.weakMaps = nil
-	if err := h.freeArray(o.props); err != nil && first == nil {
-		first = err
+	first = h.mergeObjectErrors(first, h.freeLazyStorage(o, nil))
+	first = h.mergeObjectErrors(first, h.freeProperties(o, nil))
+	if !h.noHandleReuse {
+		h.freeHandles = append(h.freeHandles, o.handle)
 	}
 	return first
 }
@@ -219,10 +355,27 @@ func (h *heap) freeObject(o *object) error {
 // reference is written through. The old value is released after the store,
 // so its destructor observes the new value.
 func (h *heap) assign(slot *value, v value) error {
-	if h.closed {
-		return ErrHeapClosed
+	return h.assignPHP(slot, v, true)
+}
+
+// The source file controls scalar coercion for assignments through PHP aliases.
+// Keep the existing host helper strict; VM adapters pass their actual mode.
+func (h *heap) assignPHP(slot *value, v value, strict bool) error {
+	if err := h.runtimeCheck(); err != nil {
+		return err
+	}
+	if err := h.claimValues(*slot, v); err != nil {
+		return err
 	}
 	v = v.deref()
+	if v.kind == valueResource {
+		if _, err := h.resourceRecord(v); err != nil {
+			return err
+		}
+	}
+	if slot.kind == valueReference && len(h.typedSources[slot.ref]) != 0 {
+		return h.assignTypedReference(slot, v, strict)
+	}
 	retain(v)
 	var old value
 	if slot.kind == valueReference {
@@ -233,13 +386,56 @@ func (h *heap) assign(slot *value, v value) error {
 	return h.release(old)
 }
 
+// Coercion may unset/rebind the alias or remove the RHS's final external owner.
+// Protect the original location and operand until after the successful store.
+func (h *heap) assignTypedReference(slot *value, v value, strict bool) (err error) {
+	original := *slot
+	retain(original)
+	var rhs methodHold
+	count := methodRefcount(v)
+	if count >= 0 {
+		retain(v)
+		rhs = methodHold{value: v, temporary: count == 0}
+	}
+	var old value
+	defer func() {
+		if count >= 0 {
+			err = h.mergeObjectErrors(err, h.releaseMethodHold(rhs))
+		}
+		err = h.mergeObjectErrors(err, h.release(original))
+		err = h.mergeObjectErrors(err, h.release(old))
+	}()
+	converted, err := h.checkReferenceWrite(original.ref, v, strict)
+	if err != nil {
+		return err
+	}
+	destination := original.ref
+	if slot.kind == valueReference {
+		if err := h.claimValues(*slot); err != nil {
+			return err
+		}
+		destination = slot.ref
+	}
+	// Verification belongs to the original sources. PHP follows a rebound
+	// reference after conversion without checking the new sources a second time.
+	retain(converted)
+	old, destination.target = destination.target, converted
+	return nil
+}
+
 // bind implements $dst =& $src, converting src into a shared location.
 func (h *heap) bind(dst, src *value) error {
 	if h.closed {
 		return ErrHeapClosed
 	}
+	if err := h.claimValues(*dst, *src); err != nil {
+		return err
+	}
+	if err := ownReferenceLocations(dst, src); err != nil {
+		return err
+	}
 	if src.kind != valueReference {
-		*src = value{kind: valueReference, ref: &reference{refcount: 1, target: *src}}
+		*src = value{kind: valueReference, ref: &reference{owner: h, refcount: 1, target: *src}}
 	}
 	if dst == src {
 		return nil
@@ -261,8 +457,14 @@ func (h *heap) bindForeachItem(dst, src *value) error {
 	if h.closed {
 		return ErrHeapClosed
 	}
+	if err := h.claimValues(*dst, *src); err != nil {
+		return err
+	}
+	if err := ownReferenceLocations(dst, src); err != nil {
+		return err
+	}
 	if src.kind != valueReference {
-		*src = value{kind: valueReference, ref: &reference{refcount: 1, target: *src}}
+		*src = value{kind: valueReference, ref: &reference{owner: h, refcount: 1, target: *src}}
 	}
 	if dst == src {
 		return nil
@@ -288,7 +490,32 @@ func (h *heap) bindForeachItem(dst, src *value) error {
 	return first
 }
 
+// A writable location takes ownership of a constructor-style temporary before
+// its value is moved into a reference or overwritten. Validate both locations
+// first, and count the raw wrapper rather than its dereferenced target.
+func ownReferenceLocations(dst, src *value) error {
+	sourceTemporary, destinationTemporary := methodRefcount(*src) == 0, methodRefcount(*dst) == 0
+	for _, slot := range [2]*value{dst, src} {
+		switch slot.kind {
+		case valueArray, valueObject, valueResource, valueReference:
+			if methodRefcount(*slot) < 0 {
+				return fmt.Errorf("reference location has a negative owner count")
+			}
+		}
+	}
+	if sourceTemporary {
+		retain(*src)
+	}
+	if dst != src && destinationTemporary {
+		retain(*dst)
+	}
+	return nil
+}
+
 func (h *heap) unset(slot *value) error {
+	if err := h.claimValues(*slot); err != nil {
+		return err
+	}
 	old := *slot
 	*slot = value{}
 	return h.release(old)
@@ -297,19 +524,37 @@ func (h *heap) unset(slot *value) error {
 // separate gives slot a writable array, creating one for null or undefined
 // and duplicating a shared one.
 func (h *heap) separate(slot *value) (*phpArray, error) {
-	if h.closed {
-		return nil, ErrHeapClosed
+	if err := h.runtimeCheck(); err != nil {
+		return nil, err
+	}
+	if err := h.claimValues(*slot); err != nil {
+		return nil, err
 	}
 	if slot.kind == valueReference {
+		if slot.ref.target.kind == valueNull || slot.ref.target.kind == valueUndefined {
+			for _, source := range h.typedSources[slot.ref] {
+				if !acceptsObjectType(source.info.typeName, value{kind: valueArray}) {
+					return nil, &Throwable{"TypeError", "Cannot auto-initialize an array inside a reference held by property " + source.info.label() + " of type " + source.info.typeName}
+				}
+			}
+		}
 		slot = &slot.ref.target
 	}
 	switch slot.kind {
 	case valueUndefined, valueNull:
 		a := newArray()
+		a.owner = h
 		a.refcount = 1
 		*slot = value{kind: valueArray, array: a}
 		return a, nil
 	case valueArray:
+		if slot.array.refcount < 0 {
+			return nil, fmt.Errorf("array has a negative owner count")
+		}
+		if slot.array.refcount == 0 {
+			slot.array.refcount = 1
+			return slot.array, nil
+		}
 		if slot.array.refcount == 1 {
 			return slot.array, nil
 		}
@@ -325,14 +570,16 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
+	// Callers validate the source first; copying only preserves same-heap edges.
 	// REQ-017; T-033/T-034. An empty COW copy is uninitialized even if the
 	// source was allocated. It keeps nextFree, but not capacity or iterators.
 	if src.live == 0 {
 		dup := newArray()
+		dup.owner = h
 		dup.nextFree = src.nextFree
 		return dup
 	}
-	dup := &phpArray{nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
+	dup := &phpArray{owner: h, nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
 	if !src.packed() {
 		dup.index = make(map[arrayKey]int, src.live)
 	} else {
@@ -382,6 +629,9 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 
 // element returns a writable element slot, creating it as null when absent.
 func (h *heap) element(slot *value, key value) (*value, error) {
+	if err := h.claimValues(*slot, key); err != nil {
+		return nil, err
+	}
 	a, err := h.separate(slot)
 	if err != nil {
 		return nil, err
@@ -397,6 +647,9 @@ func (h *heap) element(slot *value, key value) (*value, error) {
 }
 
 func (h *heap) appendElement(slot *value) (*value, error) {
+	if err := h.claimValues(*slot); err != nil {
+		return nil, err
+	}
 	a, err := h.separate(slot)
 	if err != nil {
 		return nil, err
@@ -409,17 +662,56 @@ func (h *heap) appendElement(slot *value) (*value, error) {
 }
 
 func (h *heap) setElement(slot *value, key, v value) error {
+	if err := h.runtimeCheck(); err != nil {
+		return err
+	}
+	if err := h.claimValues(*slot, key, v); err != nil {
+		return err
+	}
+	if err := ownArrayLocation(slot); err != nil {
+		return err
+	}
 	return h.storeElement(v, func() (*value, error) { return h.element(slot, key) })
 }
 
 func (h *heap) appendValue(slot *value, v value) error {
+	if err := h.runtimeCheck(); err != nil {
+		return err
+	}
+	if err := h.claimValues(*slot, v); err != nil {
+		return err
+	}
+	if err := ownArrayLocation(slot); err != nil {
+		return err
+	}
 	return h.storeElement(v, func() (*value, error) { return h.appendElement(slot) })
+}
+
+// Passing an unowned array as a writable location acquires its location owner
+// before retaining the RHS. A copied Go value alone never acquires an owner.
+func ownArrayLocation(slot *value) error {
+	if slot.kind == valueReference {
+		slot = &slot.ref.target
+	}
+	if slot.kind != valueArray {
+		return nil
+	}
+	if slot.array.refcount < 0 {
+		return fmt.Errorf("array has a negative owner count")
+	}
+	if slot.array.refcount == 0 {
+		slot.array.refcount = 1
+	}
+	return nil
 }
 
 // storeElement holds the right-hand side while the destination element is
 // created, so writing an array into itself separates it first: $a[] = $a
 // yields [1, [1]] rather than a recursive array.
 func (h *heap) storeElement(v value, element func() (*value, error)) error {
+	if err := h.claimValues(v); err != nil {
+		return err
+	}
 	v = v.deref()
 	retain(v)
 	e, err := element()
@@ -433,6 +725,9 @@ func (h *heap) storeElement(v value, element func() (*value, error)) error {
 }
 
 func (h *heap) getElement(container value, key value) (value, bool, error) {
+	if err := h.claimValues(container, key); err != nil {
+		return value{}, false, err
+	}
 	container = container.deref()
 	if container.kind != valueArray {
 		return value{}, false, nil
@@ -448,6 +743,9 @@ func (h *heap) getElement(container value, key value) (value, bool, error) {
 }
 
 func (h *heap) unsetElement(slot *value, key value) error {
+	if err := h.claimValues(*slot, key); err != nil {
+		return err
+	}
 	if slot.deref().kind != valueArray {
 		return nil
 	}
@@ -575,17 +873,24 @@ func typeName(v value) string {
 		return "string"
 	case valueArray:
 		return "array"
+	case valueResource:
+		if v.deref().object.freed {
+			return "resource (closed)"
+		}
+		return "resource"
 	}
 	return v.deref().object.class.name
 }
 
 func (h *heap) property(obj value, name string) (*value, error) {
-	obj = obj.deref()
-	if obj.kind != valueObject || obj.object.freed {
-		return nil, fmt.Errorf("property access requires a live object")
+	if h.closed {
+		return nil, ErrHeapClosed
 	}
-	props := value{kind: valueArray, array: obj.object.props}
-	return h.element(&props, value{kind: valueString, text: name})
+	o, err := h.checkedObject(obj)
+	if err != nil {
+		return nil, err
+	}
+	return o.props.slot(name), nil
 }
 
 func (h *heap) setProperty(obj value, name string, v value) error {
@@ -597,14 +902,21 @@ func (h *heap) setProperty(obj value, name string, v value) error {
 }
 
 func (h *heap) weakReferenceFor(obj value) (*weakReference, error) {
+	if err := h.claimValues(obj); err != nil {
+		return nil, err
+	}
 	obj = obj.deref()
-	if obj.kind != valueObject || obj.object.freed {
+	if obj.kind != valueObject || obj.object == nil || obj.object.freed || obj.object.owner != h {
 		return nil, fmt.Errorf("WeakReference requires a live object")
 	}
-	if obj.object.weak == nil {
-		obj.object.weak = &weakReference{target: obj.object}
+	o, err := h.checkedObject(obj)
+	if err != nil {
+		return nil, err
 	}
-	return obj.object.weak, nil
+	if o.weak == nil {
+		o.weak = &weakReference{target: o}
+	}
+	return o.weak, nil
 }
 
 // get returns the target while its storage has not been freed. During its
@@ -619,14 +931,43 @@ func (w *weakReference) get() (value, bool) {
 func newWeakMap() *weakMap { return &weakMap{entries: make(map[*object]value)} }
 
 func (h *heap) weakMapSet(m *weakMap, key, v value) error {
-	key = key.deref()
-	if key.kind != valueObject || key.object.freed {
+	if err := h.runtimeCheck(); err != nil {
+		return err
+	}
+	if m == nil || (m.owner != nil && m.owner != h) || m.closed {
+		return fmt.Errorf("WeakMap belongs to another or closed request")
+	}
+	if m.identity != nil {
+		if err := h.validateObject(m.identity); err != nil {
+			return err
+		}
+	}
+	pending, err := h.pendingValues(key, v)
+	if err != nil {
+		return err
+	}
+	rawKey := key.deref()
+	if rawKey.kind != valueObject || h.validateObject(rawKey.object) != nil {
 		return fmt.Errorf("WeakMap key must be a live object")
 	}
-	o := key.object
+	o := rawKey.object
+	old, exists := m.entries[o]
+	if exists {
+		next, err := h.pendingValues(old)
+		if err != nil {
+			return err
+		}
+		pending = append(pending, next...)
+	}
+	h.commitValueOwnership(pending)
 	v = v.deref()
 	retain(v)
-	old, exists := m.entries[o]
+	if m.entries == nil {
+		m.entries = make(map[*object]value)
+	}
+	if m.owner == nil {
+		m.owner = h
+	}
 	m.entries[o] = v
 	if !exists {
 		m.keys = append(m.keys, o)
@@ -660,14 +1001,22 @@ func edges(n gcNode, visit func(gcNode)) {
 	case *phpArray:
 		arr = x
 	case *object:
-		arr = x.props
+		x.props.each(func(_ string, v *value) { cell(*v) })
+		if x.lazy != nil {
+			cell(x.lazy.initializer)
+			cell(x.lazy.target)
+		}
 		// A WeakMap entry value is kept alive through its key, so a value
 		// that refers back to its key forms a collectable cycle.
 		for _, m := range x.weakMaps {
+			if m.identity != nil {
+				continue
+			}
 			if v, ok := m.entries[x]; ok {
 				cell(v)
 			}
 		}
+		return
 	case *reference:
 		cell(x.target)
 		return
@@ -690,70 +1039,110 @@ func refcountOf(n gcNode) int {
 	return 0
 }
 
-// garbage returns, in discovery order, the nodes reachable from roots whose
-// counts are explained entirely by edges inside that set.
-func garbage(roots []gcNode) []gcNode {
-	var order []gcNode
-	seen := map[gcNode]bool{}
-	internal := map[gcNode]int{}
-	var walk func(n gcNode)
-	walk = func(n gcNode) {
-		if seen[n] {
-			return
-		}
-		seen[n] = true
-		order = append(order, n)
-		edges(n, func(c gcNode) {
-			internal[c]++
-			walk(c)
-		})
-	}
-	for _, r := range roots {
-		walk(r)
-	}
-	alive := map[gcNode]bool{}
-	var mark func(n gcNode)
-	mark = func(n gcNode) {
-		if alive[n] {
-			return
-		}
-		alive[n] = true
-		edges(n, mark)
-	}
-	for _, n := range order {
-		if refcountOf(n) > internal[n] {
-			mark(n)
-		}
-	}
-	var out []gcNode
-	for _, n := range order {
-		if !alive[n] {
-			out = append(out, n)
-		}
-	}
-	return out
-}
-
 // collectCycles implements gc_collect_cycles for the buffered roots. Garbage
 // destructors run once; any node they resurrect survives, and the remainder is
 // freed without running destructors again. It returns the number of freed
 // arrays and objects.
 func (h *heap) collectCycles() (int, error) {
-	if h.closed {
-		return 0, ErrHeapClosed
+	if err := h.runtimeCheck(); err != nil {
+		return 0, err
 	}
+	if h.collecting {
+		return 0, nil
+	}
+	h.collecting = true
+	defer func() { h.collecting = false }()
+	total, first, rerun := h.collectCyclePass()
+	if rerun {
+		n, err, _ := h.collectCyclePass()
+		total += n
+		if first == nil {
+			first = err
+		}
+	}
+	h.bufferedRoots()
+	// PHP re-buffers live VM temporaries after collection. Visit current
+	// frames first and each frame's live ranges in creation order.
+	for end := len(h.gcTemporaries); end > 0; {
+		start := end - 1
+		depth := h.gcTemporaries[start].depth
+		for start > 0 && h.gcTemporaries[start-1].depth == depth {
+			start--
+		}
+		for _, temp := range h.gcTemporaries[start:end] {
+			h.possibleRoot(temp.node)
+		}
+		end = start
+	}
+	return total, first
+}
+
+func (h *heap) collectCyclePass() (int, error, bool) {
 	roots := h.bufferedRoots()
-	clear(h.roots)
-	white := garbage(roots)
+	white, err := garbageChecked(roots, h.runtimeCheck)
+	if err != nil {
+		return 0, err, false
+	}
+	// Remove live roots before the second compaction, as the target PHP
+	// release does. This can change the order of the remaining white roots.
+	whiteRoots := make(map[gcNode]bool, len(white))
+	for _, n := range white {
+		whiteRoots[n] = true
+	}
+	for _, n := range roots {
+		if !whiteRoots[n] {
+			h.dropRoot(n)
+		}
+	}
+	// No PHP code ran between the scans, so reuse the proven white set.
+	// Only rediscover its order after compaction, without redoing ownership
+	// counting and liveness marking for the whole graph.
+	stack := h.bufferedRoots()
+	slices.Reverse(stack)
+	white = white[:0]
+	for len(stack) > 0 {
+		last := len(stack) - 1
+		n := stack[last]
+		stack = stack[:last]
+		if !whiteRoots[n] {
+			continue
+		}
+		whiteRoots[n] = false
+		white = append(white, n)
+		start := len(stack)
+		discoveryEdges(n, func(child gcNode) { stack = append(stack, child) })
+		slices.Reverse(stack[start:])
+	}
 	var first error
 	ranDestructor := false
+	// A destructor may introduce external ownership without changing the
+	// graph's counts. Defer its reachable garbage until the next tracing pass,
+	// as PHP 8.5.12 does. There are at most two passes per explicit collection.
+	whiteSet := make(map[gcNode]bool, len(white))
+	for _, n := range white {
+		whiteSet[n] = true
+	}
+	deferred := make(map[gcNode]bool)
+	var deferTree func(gcNode)
+	deferTree = func(n gcNode) {
+		if deferred[n] || !whiteSet[n] {
+			return
+		}
+		deferred[n] = true
+		discoveryEdges(n, deferTree)
+	}
+	for _, n := range white {
+		if o, ok := n.(*object); ok && !o.destructorCalled && objectHasDestructor(o) {
+			deferTree(o)
+		}
+	}
 	for _, n := range white {
 		o, ok := n.(*object)
 		if !ok || o.destructorCalled {
 			continue
 		}
 		o.destructorCalled = true
-		if o.class != nil && o.class.destructor != nil {
+		if objectHasDestructor(o) {
 			ranDestructor = true
 			o.refcount++
 			if err := o.class.destructor(h, value{kind: valueObject, object: o}); err != nil && first == nil {
@@ -763,21 +1152,36 @@ func (h *heap) collectCycles() (int, error) {
 		}
 	}
 	if ranDestructor {
-		// Destructors may break the cycle so that members are freed by
-		// ordinary counting; those are no longer garbage and are not counted.
-		// A destructed object whose count fell to zero is still freed here.
-		white = garbage(slices.DeleteFunc(white, func(n gcNode) bool {
-			if o, ok := n.(*object); ok {
-				return o.freed
-			}
-			return refcountOf(n) == 0
-		}))
+		// Destructors can create owners outside their original reachable graph.
+		// Retest liveness before freeing any remaining candidate.
+		current, err := garbageChecked(h.bufferedRoots(), h.runtimeCheck)
+		if err != nil {
+			return 0, h.mergeObjectErrors(first, err), true
+		}
+		clear(whiteSet)
+		for _, n := range current {
+			whiteSet[n] = true
+		}
 	}
+	white = slices.DeleteFunc(white, func(n gcNode) bool {
+		if ranDestructor && !whiteSet[n] {
+			return true
+		}
+		if o, ok := n.(*object); ok && o.freed {
+			return true
+		}
+		if deferred[n] {
+			h.possibleRoot(n)
+			return true
+		}
+		return false
+	})
 	dead := map[gcNode]bool{}
 	for _, n := range white {
 		dead[n] = true
 	}
 	freed := 0
+	var freedHandles []uint64
 	for _, n := range white {
 		var err error
 		switch x := n.(type) {
@@ -791,7 +1195,9 @@ func (h *heap) collectCycles() (int, error) {
 			if x.weak != nil {
 				x.weak.target, x.weak = nil, nil
 			}
-			for _, m := range x.weakMaps {
+			maps := x.weakMaps
+			x.weakMaps = nil
+			for _, m := range maps {
 				if v, ok := m.entries[x]; ok {
 					delete(m.entries, x)
 					m.keys = slices.DeleteFunc(m.keys, func(k *object) bool { return k == x })
@@ -800,9 +1206,17 @@ func (h *heap) collectCycles() (int, error) {
 					}
 				}
 			}
-			x.weakMaps = nil
-			if e := h.freeGarbage(x.props, dead); e != nil && err == nil {
+			if e := h.freeWeakMap(x, dead); err == nil {
 				err = e
+			}
+			if e := h.freeLazyStorage(x, dead); err == nil {
+				err = e
+			}
+			if e := h.freeProperties(x, dead); e != nil && err == nil {
+				err = e
+			}
+			if !h.noHandleReuse {
+				freedHandles = append(freedHandles, x.handle)
 			}
 		case *reference:
 			if e := h.releaseOutside(x.target, dead); e != nil {
@@ -814,16 +1228,15 @@ func (h *heap) collectCycles() (int, error) {
 			first = err
 		}
 	}
-	// Survivors stay buffered so a later collection can find them again.
-	for _, r := range roots {
-		if !dead[r] && refcountOf(r) > 0 {
-			h.possibleRoot(r)
-		}
-	}
-	return freed, first
+	// Keep white object slots unavailable until every white node is cleaned.
+	h.freeHandles = append(h.freeHandles, freedHandles...)
+	return freed, first, ranDestructor
 }
 
 func (h *heap) freeGarbage(a *phpArray, dead map[gcNode]bool) error {
+	if err := h.claimValues(value{kind: valueArray, array: a}); err != nil {
+		return err
+	}
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
@@ -843,6 +1256,8 @@ func (h *heap) freeGarbage(a *phpArray, dead map[gcNode]bool) error {
 func (h *heap) releaseOutside(v value, dead map[gcNode]bool) error {
 	var n gcNode
 	switch v.kind {
+	case valueResource:
+		return h.release(v)
 	case valueArray:
 		n = v.array
 	case valueObject:
@@ -860,8 +1275,8 @@ func (h *heap) releaseOutside(v value, dead map[gcNode]bool) error {
 
 // shutdown follows PHP 8.5.12 request shutdown. Global objects owned only by
 // their variable are destroyed in reverse symbol-table order until no more
-// qualify, remaining live objects get destructors in creation order, and then
-// all storage is released without further destructor calls.
+// qualify, remaining live objects get destructors in object-store-slot order,
+// and then all storage is released without further destructor calls.
 func (h *heap) shutdown(globals *value) error {
 	if h.closed {
 		return ErrHeapClosed
@@ -889,15 +1304,16 @@ func (h *heap) shutdown(globals *value) error {
 			}
 		}
 	}
-	// Objects created by these destructors get later handles and are visited
-	// too, as PHP's object store walk reads its growing top each step.
+	// Objects created by these destructors get slots after the high-water mark.
+	h.noHandleReuse = true
+	// The object-store walk reads its growing top each step.
 	for id := uint64(1); id <= h.nextHandle; id++ {
 		o, ok := h.live[id]
 		if !ok || o.destructorCalled {
 			continue
 		}
 		o.destructorCalled = true
-		if o.class != nil && o.class.destructor != nil {
+		if objectHasDestructor(o) {
 			o.refcount++
 			keep(o.class.destructor(h, value{kind: valueObject, object: o}))
 			o.refcount--
@@ -910,7 +1326,13 @@ func (h *heap) shutdown(globals *value) error {
 			o.weak.target, o.weak = nil, nil
 		}
 	}
-	h.live, h.roots = nil, nil
+	h.live, h.roots, h.freeHandles = nil, nil, nil
+	h.rootSlots, h.freeRootSlots = nil, nil
+	h.enums, h.typedSources = nil, nil
+	h.classStatics = nil
+	h.classes = nil
+	h.gcTemporaries = nil
+	h.weakMapObjects = nil
 	*globals = value{}
 	return first
 }

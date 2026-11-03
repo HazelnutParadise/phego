@@ -1,0 +1,16 @@
+--- FAIL: TestW13R7RawControls (0.01s)
+    --- FAIL: TestW13R7RawControls/32/r7-raw-last-slot (0.00s)
+        object_review_r7_lazy_state_test.go:23: property access requires a live object owned by this request
+    --- FAIL: TestW13R7RawControls/32/r7-raw-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,true],[false,true],[true,false,false,42,2,1]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1]],"diagnostics":[]}
+    --- FAIL: TestW13R7RawControls/64/r7-raw-last-slot (0.00s)
+        object_review_r7_lazy_state_test.go:23: property access requires a live object owned by this request
+    --- FAIL: TestW13R7RawControls/64/r7-raw-proxy-failure (0.00s)
+        object_review_r7_lazy_state_test.go:23: r7-raw-proxy-failure
+            Go: {"result":[["Exception","factory"],[true,true],[false,true],[true,false,false,42,2,1]],"diagnostics":[]}
+            PHP: {"result":[["Exception","factory"],[true,true],[false,true],[false,false,false,42,2,1]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.939s
+FAIL

@@ -1,0 +1,49 @@
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=192 B
+    object_table_test.go:12: methodSpec=88 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=192 B
+    object_table_test.go:12: methodSpec=88 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=192 B
+    object_table_test.go:12: methodSpec=88 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13PropertyHookHolds
+BenchmarkW13PropertyHookHolds/get
+BenchmarkW13PropertyHookHolds/get-8         	 1472498	       146.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1638430	       146.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1647616	       145.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  671250	       358.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  671179	       359.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  671641	       358.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set
+BenchmarkW13PropertyHookHolds/object-set-8  	  589257	       401.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  598185	       437.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  596174	       407.7 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	3.042s

@@ -1,0 +1,36 @@
+--- FAIL: TestW13PHP8512Objects (0.07s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.05s)
+        object_model_test.go:848: r4-access-virtual-writeonly
+            Go:  {"result":["set",false,["Error","Property W13R4VirtualWriteOnly::$x is write-only"]],"diagnostics":[]}
+            PHP: {"result":["set",["Error","Property W13R4VirtualWriteOnly::$x is write-only"],["Error","Property W13R4VirtualWriteOnly::$x is write-only"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-magic-bare
+            Go:  {"result":[true,"body"],"diagnostics":[]}
+            PHP: {"result":[false,["TypeError","W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-weak-strict-args
+            Go:  {"result":["body","body","body","body"],"diagnostics":[]}
+            PHP: {"result":["body","body",["TypeError","W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"],["TypeError","W13R4CallableSink::acceptStrict(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given, called in /w/review_r4_strict.php on line 5"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-weak-strict-returns
+            Go:  {"result":[true,true,{},{}],"diagnostics":[]}
+            PHP: {"result":[true,true,["TypeError","W13R4CallableSink::badReturnWeak(): Return value must be of type callable, W13R4MagicCallable returned"],["TypeError","W13R4StrictCallableSink::badReturnStrict(): Return value must be of type callable, W13R4MagicCallable returned"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-private-invoke
+            Go:  {"result":[[false,"private"],[false,"protected"]],"diagnostics":[]}
+            PHP: {"result":[[true,"private"],[true,"protected"]],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.03s)
+        object_model_test.go:848: r4-access-virtual-writeonly
+            Go:  {"result":["set",false,["Error","Property W13R4VirtualWriteOnly::$x is write-only"]],"diagnostics":[]}
+            PHP: {"result":["set",["Error","Property W13R4VirtualWriteOnly::$x is write-only"],["Error","Property W13R4VirtualWriteOnly::$x is write-only"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-magic-bare
+            Go:  {"result":[true,"body"],"diagnostics":[]}
+            PHP: {"result":[false,["TypeError","W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-weak-strict-args
+            Go:  {"result":["body","body","body","body"],"diagnostics":[]}
+            PHP: {"result":["body","body",["TypeError","W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"],["TypeError","W13R4CallableSink::acceptStrict(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given, called in /w/review_r4_strict.php on line 5"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-weak-strict-returns
+            Go:  {"result":[true,true,{},{}],"diagnostics":[]}
+            PHP: {"result":[true,true,["TypeError","W13R4CallableSink::badReturnWeak(): Return value must be of type callable, W13R4MagicCallable returned"],["TypeError","W13R4StrictCallableSink::badReturnStrict(): Return value must be of type callable, W13R4MagicCallable returned"]],"diagnostics":[]}
+        object_model_test.go:848: r4-callable-private-invoke
+            Go:  {"result":[[false,"private"],[false,"protected"]],"diagnostics":[]}
+            PHP: {"result":[[true,"private"],[true,"protected"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.003s
+FAIL

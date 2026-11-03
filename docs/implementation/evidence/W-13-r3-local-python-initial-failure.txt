@@ -1,0 +1,32 @@
+...............................................................................F.............error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source
+......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases
+....................................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+......................................................................................................................................................................................................................................................F..........................................................................
+======================================================================
+FAIL: test_additive_requirement_and_unrun_scenarios (test_diagnostic_registry.DiagnosticRegistryTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w06-values/phego/tools/test_diagnostic_registry.py", line 27, in test_additive_requirement_and_unrun_scenarios
+    self.assertEqual(validate(self.root)["status"], "pass")
+AssertionError: 'fail' != 'pass'
+- fail
++ pass
+
+
+======================================================================
+FAIL: test_valid_package (test_validate_docs.DocumentationValidatorTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w06-values/phego/tools/test_validate_docs.py", line 34, in test_valid_package
+    self.assertEqual(report["status"], "pass", report["errors"])
+AssertionError: 'fail' != 'pass'
+- fail
++ pass
+ : ['local Markdown links: docs/implementation/W-13.md -> evidence/W-13-r3-review.json']
+
+----------------------------------------------------------------------
+Ran 536 tests in 126.417s
+
+FAILED (failures=2)
+
+[PHP/FI build and engine exit code: 23]

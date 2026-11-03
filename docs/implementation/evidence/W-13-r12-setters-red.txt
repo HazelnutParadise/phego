@@ -1,0 +1,1264 @@
+--- FAIL: TestW13R12SetterParameters (1.21s)
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-weak-normal (0.01s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-normal
+            Go: {"result":[null,false,[["body","int",12]],12,[["body","int",12]],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-ghost
+            Go: {"result":[null,false,[["body","int",12],"init"],12,[["body","int",12],"init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-proxy
+            Go: {"result":[null,false,[["body","int",12],"factory"],12,[["body","int",12],"factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"]],3,["convert",["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"init"],3,["convert",["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"factory"],3,["convert",["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-backed-wide-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-normal
+            Go: {"result":[null,false,[["body","int",12]],12,[["body","int",12]],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-ghost
+            Go: {"result":[null,false,[["body","int",12],"init"],12,[["body","int",12],"init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-proxy
+            Go: {"result":[null,false,[["body","int",12],"factory"],12,[["body","int",12],"factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"]],3,["convert",["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"init"],3,["convert",["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"factory"],3,["convert",["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-strict-ghost (0.01s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-virtual-wide-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-implicit-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-explicit-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-inherited-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-trait-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-metadata-override-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/32/r12-setter-held-receiver (0.00s)
+        object_review_r12_setters_test.go:230: conversion did not unset receiver owner: runtime.value{kind:0x7, boolean:false, integer:0, floating:0, text:"", array:(*runtime.phpArray)(nil), object:(*runtime.object)(0x22fab1c28a00), ref:(*runtime.reference)(nil)}
+        object_review_r12_setters_test.go:230: r12-setter-held-receiver
+            Go: {"result":[["TypeError","Cannot assign W13R12HeldInput to property W13R12HeldReceiver::$x of type int"],["rhs","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["convert",["Error","Indirect modification of W13R12HeldReceiver::$x is not allowed"],"body",["stored",3],"receiver","rhs","after"]],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-normal
+            Go: {"result":[null,false,[["body","int",12]],12,[["body","int",12]],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-ghost
+            Go: {"result":[null,false,[["body","int",12],"init"],12,[["body","int",12],"init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-weak-proxy
+            Go: {"result":[null,false,[["body","int",12],"factory"],12,[["body","int",12],"factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"]],3,["convert",["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"init"],3,["convert",["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"factory"],3,["convert",["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-backed-wide-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-backed-wide-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-normal
+            Go: {"result":[null,false,[["body","int",12]],12,[["body","int",12]],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-ghost
+            Go: {"result":[null,false,[["body","int",12],"init"],12,[["body","int",12],"init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-weak-proxy
+            Go: {"result":[null,false,[["body","int",12],"factory"],12,[["body","int",12],"factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"]],2,[["body","string","12"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"init"],2,[["body","string","12"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","12"],"factory"],2,[["body","string","12"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"]],3,["convert",["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"init"],3,["convert",["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,["convert",["body","string","abc"],"factory"],3,["convert",["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-virtual-wide-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-virtual-wide-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterVirtualWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterVirtualWide::$x::set(): Argument #1 ($incoming) must be of type string|int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-implicit-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-implicit-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterImplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterImplicit::$x::set(): Argument #1 ($value) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-text-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-text-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-numeric-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-numeric-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-numeric-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-numeric-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, string given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-float-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-normal
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-float-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-float-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-float-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign float to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, float given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-bool-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-normal
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-bool-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-bool-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-bool-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign bool to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, true given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-normal
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-null-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-null-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign null to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, null given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-array-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-array-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, array given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-strict-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-normal
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-strict-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-ghost
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-explicit-object-strict-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-explicit-object-strict-proxy
+            Go: {"result":[["TypeError","Cannot assign W13R12SetterText to property W13R12SetterExplicit::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterExplicit::$x::set(): Argument #1 ($incoming) must be of type int, W13R12SetterText given, called in /w/review_r12_setter_strict.php on line 3"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-inherited-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-inherited-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterBackedWide::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterBackedWide::$x::set(): Argument #1 ($incoming) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterComposed::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-trait-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-trait-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterComposed::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterComposed::$x::set(): Argument #1 ($traitInput) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-text-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-normal
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"]],3,[["body","string","abc"]],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-text-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"init"],3,[["body","string","abc"],"init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-text-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-text-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign string to property W13R12SetterOverride::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[null,false,[["body","string","abc"],"factory"],3,[["body","string","abc"],"factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-array-weak-normal (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-normal
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],false,[],0,[],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],false,[],0,[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-array-weak-ghost (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-ghost
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],true,[],0,["init"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-metadata-override-array-weak-proxy (0.00s)
+        object_review_r12_setters_test.go:230: r12-setter-metadata-override-array-weak-proxy
+            Go: {"result":[["TypeError","Cannot assign array to property W13R12SetterOverride::$x of type int"],true,[],0,["factory"],false],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R12SetterOverride::$x::set(): Argument #1 ($renamed) must be of type string|int, array given, called in /w/review_r12_setters.php on line 10"],true,[],0,["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12SetterParameters/64/r12-setter-held-receiver (0.00s)
+        object_review_r12_setters_test.go:230: conversion did not unset receiver owner: runtime.value{kind:0x7, boolean:false, integer:0, floating:0, text:"", array:(*runtime.phpArray)(nil), object:(*runtime.object)(0x22fab1c281e0), ref:(*runtime.reference)(nil)}
+        object_review_r12_setters_test.go:230: r12-setter-held-receiver
+            Go: {"result":[["TypeError","Cannot assign W13R12HeldInput to property W13R12HeldReceiver::$x of type int"],["rhs","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["convert",["Error","Indirect modification of W13R12HeldReceiver::$x is not allowed"],"body",["stored",3],"receiver","rhs","after"]],"diagnostics":[]}
+--- FAIL: TestW13R12SetterMetadataIsolation (0.00s)
+    object_review_r12_setters_test.go:249: setter metadata changed after build: runtime.hookParameter{name:"changed", typeName:"array"}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	2.268s
+FAIL

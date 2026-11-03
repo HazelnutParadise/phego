@@ -1,0 +1,58 @@
+--- FAIL: TestW13R11TraitInheritance (0.00s)
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-public_instance_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_instance_one): incompatible trait property W13R11Child_public_instance_one::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-public_instance_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_instance_two): incompatible trait property W13R11Child_public_instance_two::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-public_static_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_static_one): incompatible trait property W13R11Child_public_static_one::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-public_static_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_static_two): incompatible trait property W13R11Child_public_static_two::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-protected_instance_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_instance_one): incompatible trait property W13R11Child_protected_instance_one::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-protected_instance_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_instance_two): incompatible trait property W13R11Child_protected_instance_two::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-protected_static_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_static_one): incompatible trait property W13R11Child_protected_static_one::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-inherit-protected_static_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_static_two): incompatible trait property W13R11Child_protected_static_two::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-iterable-normal (0.00s)
+        object_review_r11_trait_inheritance_test.go:87: buildClass(W13R11Iterable): incompatible trait property W13R11Iterable::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-iterable-lazy (0.00s)
+        object_review_r11_trait_inheritance_test.go:87: buildClass(W13R11Iterable): incompatible trait property W13R11Iterable::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-setter-protected-private (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_protected_private): incompatible trait property W13R11Setter_protected_private::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-setter-private-protected (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_private_protected): incompatible trait property W13R11Setter_private_protected::$x
+    --- FAIL: TestW13R11TraitInheritance/32/r11-trait-setter-public-protected (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_public_protected): incompatible trait property W13R11Setter_public_protected::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-public_instance_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_instance_one): incompatible trait property W13R11Child_public_instance_one::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-public_instance_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_instance_two): incompatible trait property W13R11Child_public_instance_two::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-public_static_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_static_one): incompatible trait property W13R11Child_public_static_one::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-public_static_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_public_static_two): incompatible trait property W13R11Child_public_static_two::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-protected_instance_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_instance_one): incompatible trait property W13R11Child_protected_instance_one::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-protected_instance_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_instance_two): incompatible trait property W13R11Child_protected_instance_two::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-protected_static_one (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_static_one): incompatible trait property W13R11Child_protected_static_one::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-inherit-protected_static_two (0.00s)
+        object_review_r11_trait_inheritance_test.go:55: buildClass(W13R11Child_protected_static_two): incompatible trait property W13R11Child_protected_static_two::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-iterable-normal (0.00s)
+        object_review_r11_trait_inheritance_test.go:87: buildClass(W13R11Iterable): incompatible trait property W13R11Iterable::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-iterable-lazy (0.00s)
+        object_review_r11_trait_inheritance_test.go:87: buildClass(W13R11Iterable): incompatible trait property W13R11Iterable::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-setter-protected-private (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_protected_private): incompatible trait property W13R11Setter_protected_private::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-setter-private-protected (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_private_protected): incompatible trait property W13R11Setter_private_protected::$x
+    --- FAIL: TestW13R11TraitInheritance/64/r11-trait-setter-public-protected (0.00s)
+        object_review_r11_trait_inheritance_test.go:115: buildClass(W13R11Setter_public_protected): incompatible trait property W13R11Setter_public_protected::$x
+--- FAIL: TestW13R11TraitIgnoredUntypedInitial (0.00s)
+    object_review_r11_trait_validation_test.go:57: buildClass(W13R11IgnoredInitialConsumer): incompatible trait property W13R11IgnoredInitialConsumer::$x
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.908s
+FAIL

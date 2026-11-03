@@ -1,0 +1,33 @@
+--- FAIL: TestW13R5ReferenceReentry (0.00s)
+    --- FAIL: TestW13R5ReferenceReentry/32 (0.00s)
+        --- FAIL: TestW13R5ReferenceReentry/32/r5-ref-unset-first (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x50 pc=0x100eef228]
+
+goroutine 36 [running]:
+testing.tRunner.func1.2({0x1012482e0, 0x1012ba7c0})
+	/usr/local/go/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1977 +0x318
+panic({0x1012482e0?, 0x1012ba7c0?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/HazelnutParadise/phego/internal/runtime.(*heap).coerceProperty(0x3bdba8a74c60, 0x0, {0x7, 0x0, 0x0, 0x0, {0x0, 0x0}, 0x0, 0x3bdba89d12c0, ...}, ...)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_properties.go:18 +0x1b8
+github.com/HazelnutParadise/phego/internal/runtime.(*heap).checkReferenceWrite(0x3bdba8a74c60, 0x3bdba89a65a0, {0x7, 0x0, 0x0, 0x0, {0x0, 0x0}, 0x0, 0x3bdba89d12c0, ...}, ...)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_properties.go:36 +0x204
+github.com/HazelnutParadise/phego/internal/runtime.(*heap).assignPHP(0x3bdba8a74c60, 0x3bdba8a87ac8, {0x7, 0x0, 0x0, 0x0, {0x0, 0x0}, 0x0, 0x3bdba89d12c0, ...}, ...)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/heap.go:377 +0x1e8
+github.com/HazelnutParadise/phego/internal/runtime.w13R5ReferenceCase.func7()
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r5_references_test.go:223 +0x5c
+github.com/HazelnutParadise/phego/internal/runtime.w13R5ReferenceAttempt(0x10124cdc0?)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r5_references_test.go:25 +0x2c
+github.com/HazelnutParadise/phego/internal/runtime.w13R5ReferenceCase(0x3bdba89f26c8, 0x3bdba8a74c60, {0x100ff7f06, 0x12})
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r5_references_test.go:222 +0x1b64
+github.com/HazelnutParadise/phego/internal/runtime.TestW13R5ReferenceReentry.func1.1(0x3bdba89f26c8)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r5_references_test.go:341 +0x11c
+testing.tRunner(0x3bdba89f26c8, 0x3bdba8985980)
+	/usr/local/go/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 35
+	/usr/local/go/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.402s
+FAIL

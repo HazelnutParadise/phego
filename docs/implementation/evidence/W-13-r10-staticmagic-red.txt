@@ -1,0 +1,84 @@
+--- FAIL: TestW13R10ProxyControls (0.11s)
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-cold-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-read
+            Go: {"result":[9,["wrapper:get:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[9,["wrapper:get:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-cold-write (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-write
+            Go: {"result":[null,["wrapper:set:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["wrapper:set:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-cold-reference (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-reference
+            Go: {"result":[3,["wrapper:get:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+            PHP: {"result":[3,["wrapper:get:x"],true],"diagnostics":[[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-cold-unset (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-unset
+            Go: {"result":[null,["wrapper:unset:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["wrapper:unset:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-warm-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-read
+            Go: {"result":[9,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[9,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-warm-write (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-write
+            Go: {"result":[null,["factory",["warm",2],"wrapper:set:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2],"wrapper:set:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-warm-reference (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-reference
+            Go: {"result":[3,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+            PHP: {"result":[3,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-staticmagic-warm-unset (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-unset
+            Go: {"result":[null,["factory",["warm",2],"parent:unset:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Accessing static property W13R10StaticMagicParent::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2],"wrapper:unset:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-staticmagic-guarded-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-staticmagic-guarded-read
+            Go: {"result":[null,["get"]],"diagnostics":[[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8,"Accessing static property W13R10StaticGuard::$x as non static"],[2,"Undefined property: W13R10StaticGuard::$x"]]}
+            PHP: {"result":[null,["get"]],"diagnostics":[[2,"Undefined property: W13R10StaticGuard::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-staticmagic-dynamic-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-staticmagic-dynamic-read
+            Go: {"result":[5,["set"]],"diagnostics":[[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8192,"Creation of dynamic property W13R10StaticGuard::$x is deprecated"],[8,"Accessing static property W13R10StaticGuard::$x as non static"]]}
+            PHP: {"result":[5,["set"]],"diagnostics":[[8192,"Creation of dynamic property W13R10StaticGuard::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-cold-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-read
+            Go: {"result":[9,["wrapper:get:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[9,["wrapper:get:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-cold-write (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-write
+            Go: {"result":[null,["wrapper:set:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["wrapper:set:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-cold-reference (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-reference
+            Go: {"result":[3,["wrapper:get:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+            PHP: {"result":[3,["wrapper:get:x"],true],"diagnostics":[[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-cold-unset (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-cold-unset
+            Go: {"result":[null,["wrapper:unset:x"],true],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["wrapper:unset:x"],true],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-warm-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-read
+            Go: {"result":[9,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[9,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-warm-write (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-write
+            Go: {"result":[null,["factory",["warm",2],"wrapper:set:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2],"wrapper:set:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-warm-reference (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-reference
+            Go: {"result":[3,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+            PHP: {"result":[3,["factory",["warm",2],"wrapper:get:x"],false],"diagnostics":[[8,"Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-staticmagic-warm-unset (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-proxy-staticmagic-warm-unset
+            Go: {"result":[null,["factory",["warm",2],"parent:unset:x"],false],"diagnostics":[[8,"Accessing static property W13R10StaticMagicChild::$x as non static"],[8,"Accessing static property W13R10StaticMagicParent::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2],"wrapper:unset:x"],false],"diagnostics":[]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-staticmagic-guarded-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-staticmagic-guarded-read
+            Go: {"result":[null,["get"]],"diagnostics":[[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8,"Accessing static property W13R10StaticGuard::$x as non static"],[2,"Undefined property: W13R10StaticGuard::$x"]]}
+            PHP: {"result":[null,["get"]],"diagnostics":[[2,"Undefined property: W13R10StaticGuard::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-staticmagic-dynamic-read (0.00s)
+        object_review_r10_proxy_control_test.go:161: r10-staticmagic-dynamic-read
+            Go: {"result":[5,["set"]],"diagnostics":[[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8,"Accessing static property W13R10StaticGuard::$x as non static"],[8192,"Creation of dynamic property W13R10StaticGuard::$x is deprecated"],[8,"Accessing static property W13R10StaticGuard::$x as non static"]]}
+            PHP: {"result":[5,["set"]],"diagnostics":[[8192,"Creation of dynamic property W13R10StaticGuard::$x is deprecated"]]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.541s
+FAIL

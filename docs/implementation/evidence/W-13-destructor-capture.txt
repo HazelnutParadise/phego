@@ -1,0 +1,6 @@
+before:
+internal/runtime/object_model.go:90:17: buildClass capturing by ref: spec (addr=false assign=false width=184)
+internal/runtime/object_model.go:90:17: buildClass capturing by ref: spec (addr=true assign=false width=184)
+after:
+internal/runtime/object_model.go:102:3: buildClass capturing by value: destroy (addr=false assign=false width=8)
+internal/runtime/object_model.go:102:3: buildClass capturing by value: destroy (addr=false assign=false width=8)

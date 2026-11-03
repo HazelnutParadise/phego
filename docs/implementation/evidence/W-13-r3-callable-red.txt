@@ -1,0 +1,54 @@
+--- FAIL: TestW13PHP8512Objects (0.05s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.02s)
+        object_model_test.go:836: r3-callable-return-array-typed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_typed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-typed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_typed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-mixed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_mixed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-mixed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_mixed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-typed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_typed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-typed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_typed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-mixed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_mixed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-mixed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_mixed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.02s)
+        object_model_test.go:836: r3-callable-return-array-typed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_typed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-typed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_typed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-mixed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_mixed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-array-mixed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_array_mixed::value(): Return value must be of type callable, array returned"],[{},"go"]],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],[{},"go"]],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-typed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_typed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-typed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_typed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-mixed
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_mixed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+        object_model_test.go:836: r3-callable-return-object-mixed-frame
+            Go:  {"result":[["TypeError","W13R3TypedCallable_object_mixed::value(): Return value must be of type callable, W13R3CallableTarget returned"],{}],"diagnostics":[]}
+            PHP: {"result":[["ok",true,"go",true],{}],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.945s
+FAIL

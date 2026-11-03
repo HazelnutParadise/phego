@@ -1,0 +1,18 @@
+--- FAIL: TestW13R5PHP8512Regression (0.01s)
+    --- FAIL: TestW13R5PHP8512Regression/32 (0.00s)
+        --- FAIL: TestW13R5PHP8512Regression/32/r5-life-self (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5Self to reference held by property W13R5Self::$p of type ?self"]],false],"diagnostics":[]}
+                PHP: {"result":["ok",true],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/32/r5-life-parent (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5ParentBase to reference held by property W13R5Parent::$p of type ?parent"]],false],"diagnostics":[]}
+                PHP: {"result":["ok",true],"diagnostics":[]}
+    --- FAIL: TestW13R5PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-self (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5Self to reference held by property W13R5Self::$p of type ?self"]],false],"diagnostics":[]}
+                PHP: {"result":["ok",true],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-parent (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5ParentBase to reference held by property W13R5Parent::$p of type ?parent"]],false],"diagnostics":[]}
+                PHP: {"result":["ok",true],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.418s
+FAIL

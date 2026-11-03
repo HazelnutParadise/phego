@@ -1,0 +1,292 @@
+--- FAIL: TestW13R12HookReferences (0.24s)
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-int-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-int-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-int-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-normal
+            Go: {"result":[false,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-ghost
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-proxy
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-null-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-null-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-null-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-array-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-normal
+            Go: {"result":[false,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-array-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-ghost
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-array-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-proxy
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-virtual-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-virtual-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-virtual-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-object-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-normal
+            Go: {"result":[false,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,null,["W13R12Payload",null],["bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-object-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-ghost
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["init","bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-set-object-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-proxy
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["factory","bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-scalar-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-scalar-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-scalar-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-object-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,null,["W13R12Payload",null],["get","bound","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-object-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["get","bound","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-object-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["get","bound","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","init","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-get-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","factory","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-normal
+            Go: {"result":[false,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-ghost
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-inherited-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-proxy
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-helper-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-normal
+            Go: {"result":[false,null,["int",7],["set"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-helper-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-ghost
+            Go: {"result":[true,null,["int",7],["set","init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set","init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/32/r12-reference-helper-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-proxy
+            Go: {"result":[true,null,["int",7],["set","factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set","factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-int-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-int-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-int-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-int-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetInt::$x is not allowed"],["int",1],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-normal
+            Go: {"result":[false,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-ghost
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-uninit-proxy
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-null-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-null-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-null-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-null-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetNull::$x is not allowed"],["null",null],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-array-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-normal
+            Go: {"result":[false,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-array-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-ghost
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-array-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-array-proxy
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetArray::$x of type array"],["array",[]],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefSetArray::$x is not allowed"],["array",[]],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-virtual-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-virtual-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-virtual-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-virtual-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefSetVirtual::$x is not allowed"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Property W13R12RefSetVirtual::$x is write-only"],["Error","Property W13R12RefSetVirtual::$x is write-only"],[],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-object-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-normal
+            Go: {"result":[false,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,null,["W13R12Payload",null],["bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-object-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-ghost
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["init","bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-set-object-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-set-object-proxy
+            Go: {"result":[true,["TypeError","Cannot assign int to reference held by property W13R12RefSetObject::$x of type object"],["W13R12Payload",null],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["factory","bound"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-scalar-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-scalar-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-scalar-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-scalar-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefGetScalar::$x is not allowed"],["int",1],["get","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-object-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,null,["W13R12Payload",null],["get","bound","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-object-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["get","bound","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-object-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-object-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetObject::$x is not allowed"],["W13R12Payload",null],["get"],true],"diagnostics":[]}
+            PHP: {"result":[true,null,["W13R12Payload",null],["get","bound","get"],true],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-normal
+            Go: {"result":[false,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-ghost
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","init","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-get-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-get-uninit-proxy
+            Go: {"result":[true,["Error","Indirect modification of W13R12RefGetUninit::$x is not allowed"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefGetUninit::$x must not be accessed before initialization"],["get","factory","get"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-normal
+            Go: {"result":[false,null,["int",2],["bound"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-ghost
+            Go: {"result":[true,null,["int",2],["init","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-proxy
+            Go: {"result":[true,null,["int",2],["factory","bound"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefInherited::$x is not allowed"],["int",1],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-uninit-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-normal
+            Go: {"result":[false,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],[],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-uninit-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-ghost
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-inherited-uninit-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-inherited-uninit-proxy
+            Go: {"result":[true,["Error","Cannot access uninitialized non-nullable property W13R12RefSetUninit::$x by reference"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["Error","Typed property W13R12RefSetUninit::$x must not be accessed before initialization"],["factory"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-helper-normal (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-normal
+            Go: {"result":[false,null,["int",7],["set"],false],"diagnostics":[]}
+            PHP: {"result":[false,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-helper-ghost (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-ghost
+            Go: {"result":[true,null,["int",7],["set","init"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set","init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R12HookReferences/64/r12-reference-helper-proxy (0.00s)
+        object_review_r12_references_test.go:231: r12-reference-helper-proxy
+            Go: {"result":[true,null,["int",7],["set","factory"],false],"diagnostics":[]}
+            PHP: {"result":[true,["Error","Indirect modification of W13R12RefHelper::$x is not allowed"],["int",1],["set","factory"],false],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.612s
+FAIL

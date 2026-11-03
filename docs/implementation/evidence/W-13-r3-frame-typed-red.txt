@@ -1,0 +1,198 @@
+--- FAIL: TestW13PHP8512Objects (0.07s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.04s)
+        object_model_test.go:830: r3-frame-return-instance
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-static
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-reference
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-errors
+            Go:  {"result":[[["Exception","local"]],["local","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":[[["Exception","local"],["TypeError","W13R3FrameProducer::value(): Return value must be of type string, W13R3FrameText returned"],["Exception","conversion"]],["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-method
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-method-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-hook
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-hook-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-method
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-method-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-hook
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-hook-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-method
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-method-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-hook
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-hook-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-method
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-method-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-hook
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-hook-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-method
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-method-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-hook
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-hook-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-method
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-method-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-hook
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-hook-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-method
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-method-frame
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-hook
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-hook-frame
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.03s)
+        object_model_test.go:830: r3-frame-return-instance
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-static
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-reference
+            Go:  {"result":["text",["local","convert","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":["text",["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-frame-return-errors
+            Go:  {"result":[[["Exception","local"]],["local","temporary","after"]],"diagnostics":[]}
+            PHP: {"result":[[["Exception","local"],["TypeError","W13R3FrameProducer::value(): Return value must be of type string, W13R3FrameText returned"],["Exception","conversion"]],["convert","temporary","local","after"]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-method
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-method-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-hook
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-int-hook-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-method
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-method-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-hook
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-union-hook-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-method
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-method-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-hook
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-string-mixed-hook-frame
+            Go:  {"result":["7","string","7",[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-method
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-method-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-hook
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-int-hook-frame
+            Go:  {"result":[7,"int",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-method
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-method-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-hook
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-union-hook-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-method
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-method-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-hook
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-float-mixed-hook-frame
+            Go:  {"result":[7,"float",7,[]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"],"int",7,[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-method
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-method-frame
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-hook
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+        object_model_test.go:830: r3-typed-return-text-mixed-hook-frame
+            Go:  {"result":["text","string","text",["convert"]],"diagnostics":[]}
+            PHP: {"result":[["TypeError","W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"],"W13R3TypedReturnText",{},[]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.016s
+FAIL

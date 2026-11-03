@@ -1,0 +1,156 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "e3abab031dd49a157f1214daf6608515c9aac44d",
+  "reference_result": "564 cases per pinned profile; all510 previously committed observations unchanged;27 parameter,17 unset/lazy,10 called-scope cases added",
+  "findings": [
+    {
+      "review_comment": 4450525603,
+      "issue": "Descriptor-only unset denials executed lazy initializer first",
+      "repair": "Reject hooked/readonly/setter access before initialization; preserve raw slots, explicit-unset magic and readonly clone reinitialization. Revalidate ghost or proxy after actual initialization."
+    },
+    {
+      "review_comment": 4450525605,
+      "issue": "Typed property references were coerced when passed by reference",
+      "repair": "Reject incompatible typed sources before coercion/body; preserve full callable acceptance and ordinary untyped writeback. Variadic errors use next positional index and omit parameter name."
+    },
+    {
+      "review_comment": 4450525613,
+      "issue": "Explicit close rejected cleanup after operation context cancellation",
+      "repair": "Validate request/identity/generation/kind/open/heap state separately; invoke close once with exact supplied cleanup context. Ordinary operations still reject operation cancellation."
+    },
+    {
+      "issue": "Inherited asymmetric visibility diagnostics reported declaring rather than called class; private readonly qualifier differed",
+      "repair": "A request-local called-scope pointer is saved/restored across full callback frames, including local cleanup; actual method/hook/destructor receiver supplies class. Generic callbacks reset to nil. Access decisions stay lexical. private(set) errors omit readonly qualifier, matching fixed PHP."
+    }
+  ],
+  "primary_source": {
+    "commit": "136e049ac10b032c83018e65b63b6df858943750",
+    "files": [
+      "Zend/zend_object_handlers.c:1556-1690",
+      "Zend/zend_execute.c:932-959",
+      "Zend/zend_execute.c:1196"
+    ]
+  },
+  "regression_command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestW13(R6PHP8512Regression|CalledScopeExecutionFrames|ExplicitResourceCloseAfterCancellation|R6LazyUnset)$' -count=1",
+  "baseline_red_command": "CGO_ENABLED=0 PHEGO_W13_REFERENCE=/tmp/phego-w13-r6-private-reference go test -overlay /tmp/phego-w13-r6-baseline/overlay.json ./internal/runtime -run '^TestW13(R6PHP8512Regression|CalledScopeExecutionFrames|ExplicitResourceCloseAfterCancellation)$' -count=1",
+  "baseline_overlay": {
+    "revision": "e3abab031dd49a157f1214daf6608515c9aac44d",
+    "files": [
+      "internal/runtime/execution.go",
+      "internal/runtime/heap.go",
+      "internal/runtime/object_execution.go",
+      "internal/runtime/object_methods.go",
+      "internal/runtime/object_model.go",
+      "internal/runtime/object_properties.go",
+      "internal/runtime/object_resource.go",
+      "internal/runtime/object_statics.go"
+    ],
+    "recipe": "For each file use git show REV:PATH as the replacement file; create Go overlay Replace map from each absolute working-tree path to that saved file. Tests and canonical references stay current."
+  },
+  "benchmark": {
+    "resource_command": "CGO_ENABLED=0 go test ./internal/runtime -run '^$' -bench '^BenchmarkW13ResourceValidation$' -benchmem -benchtime=1s -count=5",
+    "resource_baseline_overlay": "Only internal/runtime/object_resource.go from reviewed_head; same new benchmark on both sides",
+    "ordinary_operation_ns_before": [
+      9.065,
+      8.945,
+      8.941,
+      8.91,
+      8.909
+    ],
+    "ordinary_operation_ns_after": [
+      9.11,
+      8.892,
+      8.9,
+      8.876,
+      9.148
+    ],
+    "explicit_close_ns_before": [
+      102.2,
+      102.1,
+      101.2,
+      105.5,
+      101.3
+    ],
+    "explicit_close_ns_after": [
+      101.6,
+      98.49,
+      94.6,
+      94.05,
+      94.5
+    ],
+    "resource_allocations": "ordinary0 B/0 allocs, explicitclose160 B/2 allocs on both revisions",
+    "method_command": "CGO_ENABLED=0 go test ./internal/runtime -run '^$' -bench '^BenchmarkW13MethodDispatch$' -benchmem -benchtime=200ms -count=5",
+    "method_baseline_overlay": "All eight baseline_overlay files",
+    "method_ns_before": [
+      195.4,
+      195.2,
+      195.0,
+      195.7,
+      196.7
+    ],
+    "method_ns_after": [
+      197.3,
+      197.1,
+      200.4,
+      202.0,
+      208.8
+    ],
+    "method_allocations": "0 B/0 allocs on both revisions",
+    "cost": "Called scope adds one pointer per request heap and frame save/restore. Method timing samples are slower and not a performance win. Existing value/object/property layouts are unchanged. Resource ordinary path has no added helper call."
+  },
+  "review": {
+    "result": "Native gpt-6.1-sol final review found no new confirmed defect; root verified all regression commands. Latest pushed-head Codex review remains required.",
+    "no_extra_cost_improvements": [
+      "Only typed-source branch checks callable separately; ordinary references check once in existing coercion path.",
+      "Reuse prefetched declared slot after unchanged receiver, avoiding a second lookup.",
+      "Use errors.New for two fixed resource messages instead of formatting.",
+      "Share owner/generation lookup without adding a helper call to ordinary resource validation."
+    ],
+    "tools": "OpenCode big-pickle180/360s timeouts left reviewed partial tests; Copilot Auto unavailable; native gpt-6-luna completed test slots; native gpt-6-astra consultations; agy Opus quota429 was not a successful review; native gpt-6.1-sol final review."
+  },
+  "test_parity_corrections": [
+    "PHP fixtures must preserve existing tests map when required by matrix.",
+    "Raw lazy slot probe has another physical property so last-lazy-bit Reflection behavior does not obscure unset.",
+    "Execution tests use required deadline-bearing cleanup context.",
+    "Plain readObject slots are borrowed; fixture owners are balanced explicitly.",
+    "Variadic callback instrumentation counts its argument array, not the parameter vector; rejected cases still never enter body."
+  ],
+  "coverage_limits": [
+    "Private runtime operations only; complete PHP frontend/VM remains not_run.",
+    "No new unsafe input was promoted to compatibility pass. Third and fourth diagnostic merge decisions remain pending.",
+    "Lazy callbacks model current host callback contract; class-scoped Closure execution context is not implemented.",
+    "Method and resource microbenchmarks do not establish application/competitor performance."
+  ],
+  "artifacts_sha256": {
+    "W-13-r6-regressions-red.txt": "1ab2c02ce9e47329a3329d1f3d78a56ed93cef4e1ba24aa5aa5d5754ede6f109",
+    "W-13-r6-regressions-green.txt": "11655bd89c2ae887a89caea1682d2d6dceca7a03cd2305baf8d781959a7d2e65",
+    "W-13-r6-resource-before.txt": "b725fe4c80901d8abe884164488e124b640016677fd8ac0479c720b0576da954",
+    "W-13-r6-resource-after.txt": "f1f6b48f7ed25943a65961bf7b56ae3ec6f0770fd6db32dfc39fe47f1109d96a",
+    "W-13-r6-method-before.txt": "130be719f3c62601a6b1c5619c09af851c12bf9b3aca3709b8833884b32ec998",
+    "W-13-r6-method-after.txt": "94fadf08e6e74d31789e713b862c0f60c02d2f1851b5e5f8ed8774816ef5defa"
+  },
+  "documentation_review": {
+    "result": "Independent reader verified169source,6check and6artifacthashes,2profiles/49fixturehashes each,564counts and510unchangedoldcases. Corrected a stale lineanchor and recovered original pre-GC rollback helper/wrappers from creation record. Four separate fixed-profile replays byte-match old stdout; original dependencyhash remains explicitly unrecorded. Fresh follow-up independent reader review passed with no required correction; source/artifact/check hashes, counts, anchors and recovered replay were rechecked.",
+    "evidence": "W-13-lazy-rollback-diagnostic.json isolated_cases_source_archive/isolated_cases_replay"
+  }
+}
