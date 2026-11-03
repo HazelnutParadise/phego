@@ -521,7 +521,7 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 		}
 		return false, nil
 	}
-	if p.get != nil {
+	if p.get != nil || p.virtual {
 		v, err := h.readObject(obj, name, scope)
 		set := err == nil && v.deref().kind != valueNull
 		return set, h.mergeObjectErrors(err, h.discardMethodReturn(v))

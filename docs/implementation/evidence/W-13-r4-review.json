@@ -1,0 +1,139 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "a0e0fd881596a0b46cfde846c81ec64b10f541fb",
+  "reference_result": "463 cases per fixed profile; all433 committed observations unchanged; 13 WeakMap plus17 access/callable cases added",
+  "findings": [
+    {
+      "comment": 4449381367,
+      "repair": "WeakMap standard empty properties compare equal regardless entries; earlyreturn0 afteridentity/class checks",
+      "native_disagreement_with_recommendation": "Bot suggested content comparison; both fixedimages prove counts, keys, values, order and cycles are ignored. Content comparison would introduce wrong callbacks/errors.",
+      "test_files": [
+        "object_review_r4_weakmap_test.go",
+        "review_r4_weakmap.php"
+      ],
+      "proof": "W-13-r4-weakmap-red.txt"
+    },
+    {
+      "comment": 4449381371,
+      "repair": "Virtualsetter-only isset reuses readObject write-only error; backed self-isset retains false",
+      "test_files": [
+        "object_review_r4_access_test.go",
+        "review_r4_access.php"
+      ],
+      "proof": "W-13-r4-access-red.txt"
+    },
+    {
+      "comment": 4449381374,
+      "repair": "Normalize once and use existing method-name indexes, retaining scope-private owner qualification; no added descriptor/index state",
+      "proof": [
+        "W-13-r4-lookup-before.txt",
+        "W-13-r4-lookup-after.txt"
+      ]
+    },
+    {
+      "comment": 4449381375,
+      "repair": "Bare object requires effective concrete __invoke handler; ignore caller visibility and do not fall back to __call. Explicit method arrays retain magic behavior.",
+      "test_files": [
+        "object_review_r4_access_test.go",
+        "review_r4_access.php"
+      ],
+      "proof": "W-13-r4-access-red.txt"
+    }
+  ],
+  "test_parity_corrections": [
+    "WeakMap test shares immutable Stringable descriptor, uses real backed lazy property, different arrays, transfers clone owner through tracked location, and avoids class-name collision with access fixture.",
+    "SelfIsset references its own property and PHP therefore makes it backed; corrected Go descriptor from virtual to backed. Pure virtual setter remains a separate error regression.",
+    "ReflectionMethod invocation alone is weak. review_r4_strict.php now provides actual strict caller line5 and strict return definitions. Go callMethodAt compares full caller-location suffix; no message trimming.",
+    "appendValue owns its writable array location; test transfers that owner to cleanup instead of taking a phantom extra owner. Both helpers assert h.live empty. PHP releases own callable globals after observation; regeneration preserves all463 observations byte-for-byte."
+  ],
+  "benchmark": {
+    "lowercase_public_lookup": {
+      "method_counts": [
+        1,
+        64,
+        1024
+      ],
+      "samples_per_version": 5,
+      "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^$' -bench '^BenchmarkW13ScopedMethodResolution$' -benchmem -benchtime=100ms -count=5",
+      "scoped_1024_ns_before": [
+        6292,
+        6360
+      ],
+      "scoped_1024_ns_after": [
+        18.71,
+        19.37
+      ],
+      "bytes": 0,
+      "allocs": 0
+    },
+    "uppercase_private_lookup": {
+      "samples_per_version": 3,
+      "scope": "same benchmark via Go overlay, private target queried as TARGET",
+      "input": "W-13-r4-private-lookup-benchmark.go.txt",
+      "before_source_commit": "a0e0fd881596a0b46cfde846c81ec64b10f541fb",
+      "before_source_file": "internal/runtime/object_methods.go",
+      "reproduction": "Write git show <before_source_commit>:<before_source_file> to temporary source; Go -overlay Replace maps absolute object_methods.go to it and object_review_r4_lookup_test.go to input; after maps only benchmark. Run same benchmark with -count=3.",
+      "scoped_1024_ns_before": [
+        3108,
+        3124
+      ],
+      "scoped_1024_ns_after": [
+        32.26,
+        32.37
+      ],
+      "bytes_before": 0,
+      "allocs_before": 0,
+      "bytes_after": 8,
+      "allocs_after": 1,
+      "decision": "Accept one normalization string for uppercase private calls in exchange for indexed lookup. This is an added cost, not a universal zero-allocation improvement. No new cache/index/unsafe normalization mechanism justified by this microcell.",
+      "commands": [
+        "CGO_ENABLED=0 go test -overlay /tmp/phego-w13-r4-private-lookup/before.json ./internal/runtime -run '^$' -bench '^BenchmarkW13ScopedMethodResolution$' -benchmem -benchtime=100ms -count=3",
+        "CGO_ENABLED=0 go test -overlay /tmp/phego-w13-r4-private-lookup/after.json ./internal/runtime -run '^$' -bench '^BenchmarkW13ScopedMethodResolution$' -benchmem -benchtime=100ms -count=3"
+      ]
+    },
+    "method_dispatch": "Five final samples201.5-206.5ns,0B0alloc for existing lowercase no-argument int-return cell; unchanged layout sizes. No fullapplication/competitor claim."
+  },
+  "review": "Independent fresh gpt-6.1-sol adversarial review and test-cleanup recheck found no confirmed production defects. Root checked every finding against native results, source and fixture parity. Astra consulted private behavior and no-cost WeakMap fast path. Latest pushed-head remote review remains separate.",
+  "coverage_limits": [
+    "Private/protected declaration warnings are preserved in W-13-r4-invoke-probe.json; main matrix deliberately handles them in PHP source. Go declaration/frontend diagnostic parity is not claimed.",
+    "Private invocation Go control calls existing invokeMethod kernel; fullfrontend bare-call handler selection remains not_run.",
+    "No discriminating parent-private-scope acceptance counterexample was found; reviewer withdrew redundant supplemental test suggestion.",
+    "Third conditional-argument native corruption diagnostic remains pending separate user decision and never counts as pass."
+  ],
+  "artifacts_sha256": {
+    "W-13-r4-weakmap-red.txt": "067e563c532235cf9b2c4b23b461970f8bf2cbd3b25f63a4179b2051d7c1d0d5",
+    "W-13-r4-access-red.txt": "4192a47dbd27f67abbd0580f1ec79e42193ca0f97517a24fd1e84dd15f64f5fb",
+    "W-13-r4-runtime.txt": "3c5128830d6adae12e9280b393e8aff7e2d34c81dc3423bebfe2f384b74360ce",
+    "W-13-r4-lookup-before.txt": "f9839f4fd8b0273f16c155165e5e2e4d1dce5ba0523b40a0d17c047c16a0862c",
+    "W-13-r4-lookup-after.txt": "ab649277b4dc5b40419360e672fc032c3af76eaed3f3223216687a79ef92e431",
+    "W-13-r4-private-lookup-before.txt": "05b5f972d764485e6040f7d832a05fb1b1adbcbdded987d30404be78038d76d8",
+    "W-13-r4-private-lookup-after.txt": "9afd7bbdbf87fe6cd968d0fed448ddb463014357e9db3e695bae20d5df0b9919",
+    "W-13-r4-method-layout.txt": "3202e82fdd6494828d067771819ba5f4e92458b27c3628e2bb182dbf8844ed73",
+    "W-13-r4-local-pure.txt": "77d250022e31a22757aa0067feba44f8b17aff7428eb278ade2ca35fd12e1e69",
+    "W-13-r4-local-race.txt": "27fbde579057d85799dc863c3af180c15337236396a6041ca5c30fcbaf95526f",
+    "W-13-r4-local-vet.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r4-local-format.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r4-private-lookup-benchmark.go.txt": "a354090f2522a68fe02e99dcafeffc72d6885486a94b8a98c58893267ede17bd",
+    "W-13-r4-local-python.txt": "bc3d579bd40abaa603b17bfc94696eb00681ddf52425135426b290334451c0e8"
+  }
+}

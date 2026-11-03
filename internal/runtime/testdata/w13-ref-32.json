@@ -3853,6 +3853,324 @@
       ],
       "diagnostics": []
     },
+    "r4-weakmap-empty": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-sameentries": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-clone": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-differentkey": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-differentvalue": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-differentcount": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-reversedinsertorder": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-arrayvalues": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-selfcycle": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-mutualcycle": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-callback-values": {
+      "result": [
+        0,
+        0,
+        true,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-sharedidentity": {
+      "result": [
+        0,
+        0,
+        true,
+        true,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-weakmap-ordinary-class": {
+      "result": [
+        1,
+        1,
+        false,
+        false,
+        0
+      ],
+      "diagnostics": []
+    },
+    "r4-access-virtual-writeonly": {
+      "result": [
+        "set",
+        [
+          "Error",
+          "Property W13R4VirtualWriteOnly::$x is write-only"
+        ],
+        [
+          "Error",
+          "Property W13R4VirtualWriteOnly::$x is write-only"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-self-isset": {
+      "result": [
+        1,
+        false,
+        false
+      ],
+      "diagnostics": []
+    },
+    "r4-access-backed-uninitialized": {
+      "result": [
+        false,
+        [
+          "Error",
+          "Typed property W13R4BackedWriteOnly::$x must not be accessed before initialization"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-backed-initialized": {
+      "result": [
+        true,
+        7
+      ],
+      "diagnostics": []
+    },
+    "r4-access-backed-default": {
+      "result": [
+        true,
+        5
+      ],
+      "diagnostics": []
+    },
+    "r4-access-getter-null": {
+      "result": [
+        false,
+        null,
+        [
+          "get",
+          "get"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-getter-value": {
+      "result": [
+        true,
+        4,
+        [
+          "get",
+          "get"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-getter-throw": {
+      "result": [
+        [
+          "RuntimeException",
+          "getter"
+        ],
+        [
+          "RuntimeException",
+          "getter"
+        ],
+        [
+          "get",
+          "get"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-magic-control": {
+      "result": [
+        true,
+        9,
+        [
+          "isset:x",
+          "get:x"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-lazy-ghost": {
+      "result": [
+        true,
+        true,
+        false,
+        [
+          "get",
+          "initialize"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-access-lazy-proxy": {
+      "result": [
+        true,
+        true,
+        true,
+        [
+          "get",
+          "initialize"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-magic-bare": {
+      "result": [
+        false,
+        [
+          "TypeError",
+          "W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-magic-array": {
+      "result": [
+        true,
+        "body",
+        true
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-weak-strict-args": {
+      "result": [
+        "body",
+        "body",
+        [
+          "TypeError",
+          "W13R4CallableSink::acceptWeak(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given"
+        ],
+        [
+          "TypeError",
+          "W13R4CallableSink::acceptStrict(): Argument #1 ($value) must be of type callable, W13R4MagicCallable given, called in /w/review_r4_strict.php on line 5"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-weak-strict-returns": {
+      "result": [
+        true,
+        true,
+        [
+          "TypeError",
+          "W13R4CallableSink::badReturnWeak(): Return value must be of type callable, W13R4MagicCallable returned"
+        ],
+        [
+          "TypeError",
+          "W13R4StrictCallableSink::badReturnStrict(): Return value must be of type callable, W13R4MagicCallable returned"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-private-invoke": {
+      "result": [
+        [
+          true,
+          "private"
+        ],
+        [
+          true,
+          "protected"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r4-callable-inherited-invoke": {
+      "result": [
+        true,
+        "child"
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

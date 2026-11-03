@@ -49,6 +49,11 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 	if x.class != y.class {
 		return 1, nil
 	}
+	// WeakMap uses PHP's empty standard property comparison. Its entries are
+	// debug data, so comparing them must not inspect values or run callbacks.
+	if x.class == weakMapBuiltin {
+		return 0, nil
+	}
 	owners := make([]methodHold, 0, 2)
 	h.holdMethodValue(a, &owners)
 	h.holdMethodValue(b, &owners)
@@ -66,9 +71,6 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 		}
 	}
 	if x.class != y.class {
-		return 1, nil
-	}
-	if x.class == weakMapBuiltin {
 		return 1, nil
 	}
 	if x.class.schema != nil && x.class.schema.enumKind != enumNone {

@@ -62,6 +62,12 @@ clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。�
 
 最後兩次配置來自 union／intersection 拆分的暫存 `[]string`。Go 的 `iter.Seq[string]` 直接逐段產生原字串切片，保留空 token、括號深度與提前停止規則，不增加快取或描述欄位。五次前後微型量測將無參數、回傳 int 的呼叫降至 0 B／0 次配置；全套 433 案及既有 DNF 控制維持一致。scanner 狀態物件也可省配置，但呼叫端較繁，現有 iterator 已達到目標，因此未採用。量測只支持這個操作，不推論所有方法或應用零配置。
 
+WeakMap 沿用固定 PHP 的空標準屬性比較，兩個不同實例的 entries、順序、數量與循環均不影響相等結果。不同 class 仍不可比較。以 builtin identity 在 owner、materialization 與 recursion bookkeeping 前直接回傳相等，因為這條路徑不讀值也不執行 callback。這保留既有入口驗證，不新增另一套內容比較；Codex 建議的 entries 比較已被雙寬度原生區辨否定。
+
+virtual setter-only 的 isset 走既有 readObject 錯誤路徑，backed setter 的自身 isset 保持 false。裸物件 callable 直接讀有效類別的 `__invoke` handler，不套 caller visibility 或 `__call`；明確 method-array callable 保留 magic 分流。private／protected 宣告警告由獨立原生探針保存，完整 frontend 裸物件呼叫與宣告診斷未驗收。
+
+scoped private 查找以一次 ASCII 正規化及既有 method map 取代整表掃描，private owner 規則不變，不增加索引或快取。小寫 public、1024 個無關方法的五次量測從約 6.3 微秒降至 19 奈秒且零配置。大寫 private 的三次 overlay 量測新增 8 B／一次配置，從約 3.1 微秒降至 32 奈秒；接受此字串成本以免線性掃描，不宣稱全面零配置。各大小、無 scope 控制及重播方法見 `W-13-r4-review.json`。
+
 類別 destructor adapter 只捕捉 callback 本身。Go `-gcflags=all=-m=2` 證明從以 reference 捕捉整個 184 B 的 classSpec，改成以 value 捕捉 8 B 的函式值。沒有新增狀態或改變 callback 行為，原始編譯器結果保存在 `W-13-destructor-capture.txt`。
 
 執行 scalar 或 Stringable 轉換前先保護 receiver 與全部實參，避免前一個參數的 PHP callback 釋放後續參數。綁定完成後先解除原 operand owner，已轉成 scalar 的來源可在方法 body 前解構，其他值由參數 owner 接手。參數按宣告順序釋放，包含以相反順序傳入的具名參數。呼叫端不用回傳值時，還必須保存其 operand 存活範圍，先捨棄結果，再清理呼叫端暫存值；不能把使用與不使用結果的兩種輸入混為一談。

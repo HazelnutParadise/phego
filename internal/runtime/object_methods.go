@@ -92,15 +92,14 @@ func (h *heap) resolveMethod(c *class, name string, scope *class) (*methodSpec, 
 	if c == nil || c.schema == nil {
 		return nil, false
 	}
+	key := phpNameLower(name)
 	if scope != nil && classIs(c, scope) && scope.schema != nil {
-		for _, candidate := range scope.schema.methods {
-			if candidate.visibility == privateAccess && candidate.owner == scope &&
-				phpNameEqual(candidate.name, name) {
-				return candidate, true
-			}
+		if candidate := scope.schema.methods[key]; candidate != nil &&
+			candidate.visibility == privateAccess && candidate.owner == scope {
+			return candidate, true
 		}
 	}
-	if m, ok := c.schema.methods[phpNameLower(name)]; ok {
+	if m, ok := c.schema.methods[key]; ok {
 		return m, true
 	}
 	return nil, false
@@ -980,7 +979,13 @@ func (h *heap) isObjectCallable(v value, scope *class) bool {
 		if v.object == nil || v.object.owner != h || v.object.freed {
 			return false
 		}
-		target = v.object.class
+		// A bare object uses its invocation handler, independently of caller
+		// visibility. Only explicit method callables can fall back to __call.
+		if v.object.class == nil || v.object.class.schema == nil {
+			return false
+		}
+		method := v.object.class.schema.methods["__invoke"]
+		return method != nil && !method.abstract && method.call != nil
 	case valueString:
 		c, method, ok := strings.Cut(v.text, "::")
 		if !ok {
