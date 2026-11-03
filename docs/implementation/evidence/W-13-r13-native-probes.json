@@ -1,0 +1,328 @@
+{
+  "32": {
+    "observations": {
+      "php": "8.5.12",
+      "int_size": 4,
+      "cases": {
+        "r13-graph-parent-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-left0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-right0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-left12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-right12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-parent": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-child": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-extra": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-stringable": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-unrelated": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-case": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-qualified": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-left0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-right0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-left12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-right12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-parent": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-child": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-extra": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-stringable": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-unrelated": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-child-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-child-case": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-qualified": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-40-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-40-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-deep-80-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-80-missing": {
+          "result": false,
+          "diagnostics": []
+        }
+      }
+    },
+    "run": {
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--cidfile",
+        "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-n8sasil_/cid",
+        "--platform",
+        "linux/386",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w13-objects:/w:ro",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "php",
+        "-n",
+        "/w/review_r13_graph.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "4d35865cbee413f98cca97eab1415594877031760050dbce028d98edabf1a391"
+    }
+  },
+  "64": {
+    "observations": {
+      "php": "8.5.12",
+      "int_size": 8,
+      "cases": {
+        "r13-graph-parent-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-left0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-right0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-left12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-right12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-parent": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-child": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-extra": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-stringable": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-unrelated": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-parent-case": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-parent-qualified": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-left0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-right0": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-left12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-right12": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-parent": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-child": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-extra": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-stringable": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-unrelated": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-child-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-graph-child-case": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-graph-child-qualified": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-40-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-40-missing": {
+          "result": false,
+          "diagnostics": []
+        },
+        "r13-deep-80-root": {
+          "result": true,
+          "diagnostics": []
+        },
+        "r13-deep-80-missing": {
+          "result": false,
+          "diagnostics": []
+        }
+      }
+    },
+    "run": {
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--cidfile",
+        "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-2hrvjyrn/cid",
+        "--platform",
+        "linux/arm64",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w13-objects:/w:ro",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "/w/review_r13_graph.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "source_sha256": "4d35865cbee413f98cca97eab1415594877031760050dbce028d98edabf1a391"
+    }
+  }
+}

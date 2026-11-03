@@ -73,10 +73,15 @@ func closeResourceRecord(r *phpResource, ctx context.Context) (err error) {
 	r.identity.freed = true
 	close := r.close
 	r.close = nil
+	// The callback may acquire, release and reacquire a closed alias. Keep
+	// the identity valid throughout that activation, even between owners.
+	r.identity.refcount++
 	defer func() {
 		if p := recover(); p != nil {
 			err = fmt.Errorf("resource close panicked: %v", p)
 		}
+		// Formatting a host panic can itself call a reentrant Stringer.
+		r.identity.refcount--
 	}()
 	return close(ctx)
 }
@@ -95,7 +100,12 @@ func (h *heap) closeResource(v value, kind string, ctx context.Context) error {
 	if r.closed || r.kind != kind {
 		return fmt.Errorf("expected an open %s resource", kind)
 	}
-	return closeResourceRecord(r, ctx)
+	hadOwners := r.identity.refcount > 0
+	err = closeResourceRecord(r, ctx)
+	if hadOwners && r.identity.refcount == 0 {
+		delete(h.resources, r.identity.handle)
+	}
+	return err
 }
 
 func (h *heap) releaseResource(v value) error {
@@ -112,7 +122,9 @@ func (h *heap) releaseResource(v value) error {
 		ctx = h.execution.cleanupContext
 	}
 	err = closeResourceRecord(r, ctx)
-	delete(h.resources, v.object.handle)
+	if v.object.refcount == 0 {
+		delete(h.resources, v.object.handle)
+	}
 	return err
 }
 

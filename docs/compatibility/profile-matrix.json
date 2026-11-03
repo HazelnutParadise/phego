@@ -80,7 +80,12 @@
             "TestW13R12HookReferences",
             "TestW13R12SetterParameters",
             "TestW13R12SetterMetadataIsolation",
-            "TestW13R12SetterDescriptorValidation"
+            "TestW13R12SetterDescriptorValidation",
+            "TestW13R13InterfaceGraph",
+            "TestW13R13ClassTraversalControls",
+            "TestW13R13GetterFastPathAllocations",
+            "TestW13R13SuccessfulGraphAllocations",
+            "TestW13R13ResourceCloseReentry"
           ]
         },
         {
@@ -184,7 +189,12 @@
             "TestW13R12HookReferences",
             "TestW13R12SetterParameters",
             "TestW13R12SetterMetadataIsolation",
-            "TestW13R12SetterDescriptorValidation"
+            "TestW13R12SetterDescriptorValidation",
+            "TestW13R13InterfaceGraph",
+            "TestW13R13ClassTraversalControls",
+            "TestW13R13GetterFastPathAllocations",
+            "TestW13R13SuccessfulGraphAllocations",
+            "TestW13R13ResourceCloseReentry"
           ]
         }
       ],

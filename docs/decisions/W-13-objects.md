@@ -220,6 +220,20 @@ shared hook worker 在轉型前持有 receiver 與原始 RHS。傳值參數先 d
 
 兩種固定映像各 1,566 案，R12 新增 275 案且原 1,291 案完全不變。四項已核准的不安全原生輸入維持相容性受阻且不計通過。本輪沒有新增相容性例外。紅燈、原始觀察、命令與量測見 `W-13-r12-review.json`。
 
+## R13：介面圖、延後診斷與資源重入
+
+`classIs` 與名稱型別查詢原先遞迴展開每條介面路徑，菱形繼承的失敗查詢重複拜訪相同節點，22 層已需約 65～111 ms。描述建構只指向先前已完成的類別或 intrinsic，因此它們是不可變、無循環的圖。正式版保留 parent-only 與單一 successor 的直接迴圈，分支改用迭代深度優先走訪。只有所有介面與 parent 都失敗後才記住該節點，保留先命中的成功路徑零配置。nil schema 只結束該分支，不會略過其他待查節點。手動修改私人描述形成循環不屬於此建構契約。
+
+走訪先使用 stack 上的 32 個 frame 與 8 個失敗節點，超過後才由 Go slice／pointer map 成長。狀態只屬於當次查詢，不保存在類別或請求快取。30 個固定 PHP 案例涵蓋父類別、重複介面、名稱大小寫、前導反斜線、Stringable 與 40／80 層；Go 另區分指標身分、同名描述、nil 及空名稱控制。這驗證 runtime 判斷核心，公開 `is_a` 的 frontend／VM 整合仍為 `not_run`。
+
+比較三種做法。候選 A 在進入節點時記錄 visited，22 層成功與失敗都需 2,504 B／9 次配置。候選 B 為每個類別永久建立祖先閉包，鏈狀描述可能累積平方筆數，未實作或量測。正式候選 C 只記失敗節點，先命中路徑零配置，22 層失敗為 1,848 B／6 次配置及約 1.5～1.6 μs。較晚命中的名稱路徑相對 A 有小幅時間代價，單一介面鏈的身分查詢也有較慢樣本。22 層第一路徑成功的身分查詢由約 63～65 ns 變成 135～138 ns，單一 32 層介面鏈則由約 99 ns 變成 113～115 ns。原始全部樣本包含一筆 15,098 ns 的高值，不能宣稱每格都勝出。接受有限的失敗快取成本以移除指數展開，不加入永久 metadata 或另一層泛用圖抽象。
+
+getter 沒有型別或恰為 mixed 時，在原持有與 invocation wrapper 內直接回傳 raw。typed getter 的暫時 `methodSpec` 沿用屬性名稱，新增 bool 標記，僅在 TypeError／never 錯誤格式化時組合 `$name::get`。原本先建標籤讓成功 getter 配置 8 B，延後後普通 getter 基準及八組成功控制為零配置，包含 weak string-to-int。既有參照、轉型、錯誤訊息與清理順序維持雙寬度對照。旗標使用原 padding，實測 arm64 的 methodSpec 88 B、386 的 44 B 都不增加。沒有每屬性名稱快取、建構期 wrapper 或成功路徑字串配置。
+
+資源在執行 close callback 前先提交 closed／freed／close=nil，再取得 identity 暫時持有。持有直到 callback 及 panic 的 Stringer 格式化結束後才釋放，避免兩個 owner 交替期間短暫歸零造成有效 handle 提早刪除。最後一次 release 依 callback 結束後的 refcount 決定是否移除 registry。明確 close 若原有 owner 全部釋放也移除；原先為零的 constructor temporary 則保留到呼叫端 discard。關閉狀態不回復、callback 不重跑，cleanup context、取消及 shutdown 已關閉請求的限制保留。
+
+72 組 Go 宿主控制涵蓋兩種寬度、三個入口、三種 owner 變化與成功／錯誤／panic／可重入 panic Stringer。它們不是新增 PHP 案例。原始版本、先釋放暫時 hold 再格式化的中間候選都曾失敗，正式版通過；實際 Go/386 回歸亦通過。兩個固定 PHP 映像各 1,596 案，原 1,566 案完全不變，四項已核准的不安全指定輸入保持受阻且不計通過，沒有新增例外。完整紅燈、原始觀察、來源雜湊、量測與重跑命令見 [R13 證據](../implementation/evidence/W-13-r13-review.json)。
+
 ## 驗證與尚未完成項目
 
 ### 第三、第四項已核准的指定輸入

@@ -335,7 +335,10 @@ func (h *heap) getPropertyHook(o *object, p *propertyInfo, byReference bool) (va
 		if err != nil {
 			return value{}, err
 		}
-		out, err := h.checkMethodReturn(raw, &methodSpec{owner: p.owner, name: "$" + p.name + "::get", returnType: p.typeName, returnsReference: p.getReference}, this, p.hookStrict)
+		if p.typeName == "" || p.typeName == "mixed" {
+			return raw, nil
+		}
+		out, err := h.checkMethodReturn(raw, &methodSpec{owner: p.owner, name: p.name, propertyGetter: true, returnType: p.typeName, returnsReference: p.getReference}, this, p.hookStrict)
 		return out, err
 	}, nullValue(), byReference)
 }

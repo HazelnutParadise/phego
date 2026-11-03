@@ -42,6 +42,7 @@ type methodSpec struct {
 	returnType       string
 	returnStrict     bool // strict_types belongs to the declaring source file
 	returnsReference bool
+	propertyGetter   bool // transient return descriptor; reuses bool padding
 	name             string
 	visibility       access
 	static           bool
@@ -421,21 +422,7 @@ func accessName(v access) string {
 }
 func (p *propertyInfo) label() string { return p.owner.name + "::$" + p.name }
 func classIs(c, want *class) bool {
-	for c != nil {
-		if c == want {
-			return true
-		}
-		if c.schema == nil {
-			return false
-		}
-		for _, i := range c.schema.interfaces {
-			if classIs(i, want) {
-				return true
-			}
-		}
-		c = c.schema.parent
-	}
-	return false
+	return want != nil && classReachable(c, want, nil)
 }
 func canAccess(scope, owner *class, visibility access) bool {
 	return visibility == publicAccess || scope == owner || (visibility == protectedAccess && scope != nil && (classIs(scope, owner) || classIs(owner, scope)))

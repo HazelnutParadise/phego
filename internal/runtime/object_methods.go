@@ -682,7 +682,7 @@ func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool)
 	case "void":
 		return nullValue(), nil
 	case "never":
-		return value{}, &Throwable{"Error", m.owner.name + "::" + m.name + "(): never-returning method must not return"}
+		return value{}, &Throwable{"Error", m.owner.name + "::" + methodDisplayName(m) + "(): never-returning method must not return"}
 	}
 	if m.returnsReference && v.kind == valueReference && len(h.typedSources[v.ref]) != 0 {
 		return value{}, methodReturnTypeError(m, v)
@@ -707,7 +707,14 @@ func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool)
 }
 
 func methodReturnTypeError(m *methodSpec, v value) *Throwable {
-	return &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Return value must be of type %s, %s returned", m.owner.name, m.name, m.returnType, valueName(v))}
+	return &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Return value must be of type %s, %s returned", m.owner.name, methodDisplayName(m), m.returnType, valueName(v))}
+}
+
+func methodDisplayName(m *methodSpec) string {
+	if m.propertyGetter {
+		return "$" + m.name + "::get"
+	}
+	return m.name
 }
 
 // Invalid and coerced-away callback results obey the same temporary contract
@@ -830,23 +837,7 @@ func methodAcceptsPart(m *methodSpec, called *class, part string, v value) bool 
 }
 
 func classMatchesAnyName(c *class, names ...string) bool {
-	for c != nil {
-		for _, want := range names {
-			if phpNameEqual(c.name, strings.TrimPrefix(want, "\\")) {
-				return true
-			}
-		}
-		if c.schema == nil {
-			return false
-		}
-		for _, iface := range c.schema.interfaces {
-			if classMatchesAnyName(iface, names...) {
-				return true
-			}
-		}
-		c = c.schema.parent
-	}
-	return false
+	return len(names) != 0 && classReachable(c, nil, names)
 }
 
 func methodTypeHas(typ, want string) bool {

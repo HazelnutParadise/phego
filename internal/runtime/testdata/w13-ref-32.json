@@ -15292,6 +15292,126 @@
       ],
       "diagnostics": []
     },
+    "r13-graph-parent-root": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-left0": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-right0": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-left12": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-right12": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-parent": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-child": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-parent-extra": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-parent-stringable": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-parent-unrelated": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-parent-missing": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-parent-case": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-parent-qualified": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-root": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-left0": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-right0": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-left12": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-right12": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-parent": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-child": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-extra": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-stringable": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-unrelated": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-child-missing": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-graph-child-case": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-graph-child-qualified": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-deep-40-root": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-deep-40-missing": {
+      "result": false,
+      "diagnostics": []
+    },
+    "r13-deep-80-root": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r13-deep-80-missing": {
+      "result": false,
+      "diagnostics": []
+    },
     "r11-trait-private-int-normal": {
       "result": [
         [
