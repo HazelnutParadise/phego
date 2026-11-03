@@ -4171,6 +4171,763 @@
       ],
       "diagnostics": []
     },
+    "r5-ref-control": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "new",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-unset-first": {
+      "result": [
+        "ok",
+        {
+          "a": "unset",
+          "b": "new",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-unset-next": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "unset",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-unset-all": {
+      "result": [
+        "ok",
+        {
+          "a": "unset",
+          "b": "unset",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-add-source": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "new",
+          "c": "new",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-replace-source": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "other",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-unset-alias": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "new",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "unset",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-rebind-alias": {
+      "result": [
+        "ok",
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "new",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-drop-rhs": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "new",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert",
+          "dtor:new"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-string-mixed": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5Stringable to reference held by property W13R5Reference::$a of type string and property W13R5Reference::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "old",
+        "other",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-mixed-first": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5Stringable to reference held by property W13R5Reference::$m of type mixed and property W13R5Reference::$a of type string, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "old",
+        "other",
+        []
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-string-objectunion": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5Stringable to reference held by property W13R5Reference::$a of type string and property W13R5Reference::$so of type object|string, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "old",
+          "u": "old",
+          "so": "old"
+        },
+        "old",
+        "other",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-string-union": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "old",
+          "c": "old",
+          "m": "old",
+          "u": "new",
+          "so": "old"
+        },
+        "new",
+        "other",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-triple-unset-first": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$a of type string and property W13R5Mutation::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "unset",
+          "b": "old",
+          "c": "old",
+          "m": "old"
+        },
+        "old",
+        7,
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-triple-unset-next": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$a of type string and property W13R5Mutation::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "unset",
+          "c": "old",
+          "m": "old"
+        },
+        "old",
+        7,
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-triple-unset-last": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$a of type string and property W13R5Mutation::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "unset"
+        },
+        "old",
+        7,
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-triple-replace-last": {
+      "result": [
+        "ok",
+        {
+          "a": "new",
+          "b": "new",
+          "c": "new",
+          "m": "unset"
+        },
+        "new",
+        7,
+        [
+          "convert",
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-append-remove": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$a of type string and property W13R5Mutation::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "unset",
+          "c": "old",
+          "m": "old"
+        },
+        "old",
+        7,
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-remove-append": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$a of type string and property W13R5Mutation::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "unset",
+          "c": "old",
+          "m": "old"
+        },
+        "old",
+        7,
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-duplicate-clone": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5MutationStringable to reference held by property W13R5Mutation::$m of type mixed and property W13R5Mutation::$a of type string, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        {
+          "a": "old",
+          "b": "unset",
+          "c": "old",
+          "m": "old"
+        },
+        "old",
+        7,
+        [],
+        "ok",
+        "stdClass"
+      ],
+      "diagnostics": []
+    },
+    "r5-ref-rebind-typed": {
+      "result": [
+        "ok",
+        {
+          "a": "old",
+          "b": "old",
+          "c": "old",
+          "m": "old"
+        },
+        "new",
+        "new",
+        [
+          "convert",
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-throw-1": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5Throw to reference held by property W13R5Life::$a of type string"
+          ],
+          [
+            "Exception",
+            "convert"
+          ]
+        ],
+        "old",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-throw-2": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5Throw to reference held by property W13R5Life::$a of type string"
+          ],
+          [
+            "Exception",
+            "convert"
+          ]
+        ],
+        "old",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-cleanup-order": {
+      "result": [
+        "ok",
+        "new",
+        [
+          "convert",
+          "convert",
+          "rhs",
+          "old"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-self": {
+      "result": [
+        "ok",
+        true
+      ],
+      "diagnostics": []
+    },
+    "r5-life-parent": {
+      "result": [
+        "ok",
+        true
+      ],
+      "diagnostics": []
+    },
+    "r5-life-invalid-array": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign array to reference held by property W13R5MixedScalar::$i of type int"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-mixed-array": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign array to reference held by property W13R5MixedScalar::$m of type mixed and property W13R5MixedScalar::$i of type int, as this would result in an inconsistent type conversion"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-life-source-inherited": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed and property W13R5InfoBase::$a of type string, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        [],
+        null,
+        "stdClass"
+      ],
+      "diagnostics": []
+    },
+    "r5-life-source-redeclared": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$a of type string and property W13R5InfoBase::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        [
+          "convert"
+        ],
+        null,
+        "stdClass"
+      ],
+      "diagnostics": []
+    },
+    "r5-life-source-private": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5InfoStringable to reference held by property W13R5PrivateBase::$a of type string and property W13R5PrivateBase::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        [
+          "convert"
+        ],
+        null,
+        "stdClass"
+      ],
+      "diagnostics": []
+    },
+    "r5-life-source-trait": {
+      "result": [
+        [
+          [
+            "TypeError",
+            "Cannot assign W13R5InfoStringable to reference held by property W13R5TraitA::$a of type string and property W13R5TraitA::$m of type mixed, as this would result in an inconsistent type conversion"
+          ]
+        ],
+        [
+          "convert"
+        ],
+        null,
+        "stdClass"
+      ],
+      "diagnostics": []
+    },
+    "r5-op-missing-invalid-order": {
+      "result": [
+        [
+          "Error",
+          "Cannot use positional argument after named argument"
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r5-op-hidden-invalid-order": {
+      "result": [
+        [
+          "Error",
+          "Cannot use positional argument after named argument"
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r5-op-valid-positional-before-named": {
+      "result": [
+        "missing",
+        {
+          "0": 1,
+          "second": 2
+        }
+      ],
+      "diagnostics": []
+    },
+    "r5-op-named-only": {
+      "result": [
+        "missing",
+        {
+          "first": 1
+        }
+      ],
+      "diagnostics": []
+    },
+    "r5-op-ordinary-positional": {
+      "result": [
+        1,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r5-op-ordinary-invalid-order": {
+      "result": [
+        "Error",
+        "Cannot use positional argument after named argument"
+      ],
+      "diagnostics": []
+    },
+    "r5-op-getter-uninitialized": {
+      "result": [
+        42,
+        true,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r5-op-getter-null": {
+      "result": [
+        42,
+        true,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r5-op-getter-initialized": {
+      "result": [
+        7,
+        true,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r5-op-proxy-clone-throws": {
+      "result": [
+        [
+          "Exception",
+          "clone"
+        ],
+        [
+          "factory",
+          "clone:source",
+          "dtor:source"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r5-op-ordinary-clone-failure": {
+      "result": [
+        [
+          "Exception",
+          "clone"
+        ],
+        [
+          "clone:source",
+          "dtor:source"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r5-op-proxy-clone-dtor-chain": {
+      "result": [
+        [
+          "Exception",
+          "destructor failure"
+        ],
+        [
+          "factory",
+          "clone:source",
+          "dtor:source"
+        ],
+        [
+          [
+            "Exception",
+            "clone failure"
+          ],
+          [
+            "RuntimeException",
+            "previous"
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r5-op-clone-source-reference": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R5Typed::$x of type int"
+        ],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r5-op-clone-reference-detach": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R5Typed::$x of type int"
+        ],
+        "written",
+        "free"
+      ],
+      "diagnostics": []
+    },
+    "r5-op-clone-dynamic-reference": {
+      "result": [
+        "written",
+        {
+          "s": "free"
+        },
+        "free"
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R5DynamicRef::$s as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R5DynamicRef::$s as non static"
+        ]
+      ]
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

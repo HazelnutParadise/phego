@@ -62,10 +62,7 @@ func (h *heap) bindPropertyReference(dst, slot *value, p *propertyInfo) error {
 				return h.bind(dst, slot)
 			}
 		}
-		if h.typedSources == nil {
-			h.typedSources = make(map[*reference][]propertySource)
-		}
-		h.typedSources[slot.ref] = append(h.typedSources[slot.ref], propertySource{slot, p})
+		h.addPropertySource(slot.ref, propertySource{slot, p})
 	}
 	return h.bind(dst, slot)
 }

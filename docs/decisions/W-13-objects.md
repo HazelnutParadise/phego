@@ -36,7 +36,13 @@ PHP 比較物件時，僅有宣告值的直接路徑與已建立屬性檢視的 
 
 型別限制按實際屬性位置附加，別名寫入同一 reference 時一起驗證。unset、物件釋放、clone 與循環釋放必須維護來源的加入與解除。限制放在 heap 的按需側表，避免每個 reference 都增加一個 slice header。value 維持 64 B；為拒絕跨請求的活陣列與 reference，各自增加一個 heap owner 指標，phpArray 為 88 B、reference 為 80 B。
 
-[建構函式回傳的暫存值](../../internal/runtime/heap.go#L85)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
+typed-source 的來源順序可被 `__toString` 重入觀察。驗證保存原長度，但每一步讀取目前 metadata cell。移除採 PHP 的「第一個相同 property-info、尾端補洞」順序，clone 的重複 metadata 另外調整存活 Go slot 對應。繼承複製描述時保留 declaring owner 與 storage key 作為宣告身分，先用 info 指標相等快速判斷，再比對 owner／key；重新宣告、private 同名與不同 trait 使用者維持各自來源。這不新增索引或描述欄位，避免註冊時另查 canonical descriptor 的成本。尾端只清 slot 指標，保留不可變 info 給進行中的驗證；不配置每次寫入的快照或變更帳本。來源容量為 1、4、倍增，刪除後四分之一滿且至少四格時縮半。兩來源比先前 Go cap 2 多保留 32 B，此成本由原生 append／remove 區辨要求，不能只省容量而改變 PHP callback 次數。跨原生 realloc／free 的輸入沒有驗證，Go 保留舊 storage 的安全性不構成該類輸入的相容證據。
+
+型別來源先區分原樣接受、拒絕、可能轉型，再對同一原始 RHS 比較每次轉換。mixed 在前、int 在後而寫入 array，原生先報 inconsistent conversion；不能提早排除實際不可轉換的值。`self`／`parent` 的原樣接受保留屬性宣告類別。轉型拋出的 PHP Exception 由 TypeError 取代並保留 previous，普通無法轉換則只有一個 TypeError。
+
+參照寫入在轉換期間持有原 reference 及 RHS。alias 被 unset 時更新原位置而不重建名稱，被重新綁定時追隨目前 reference，重新核對 request owner，依固定 PHP 不重跑新目的地的型別限制。寫入後先釋放 RHS，再釋放舊 target garbage，精確保留 `convert,convert,rhs,old`。Go 測試使用真正的可寫 cell；額外複製／持有測試 operand 會掩蓋這些生命週期錯誤。
+
+[建構函式回傳的暫存值](../../internal/runtime/heap.go#L87)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
 
 類別描述不保存物件欄位、static 值、enum 活實例、lazy 初始化錯誤或 hook 重入狀態。這些狀態由該請求的 heap／object 擁有。Go callback 是受信任的宿主程式；程式描述中的 callback 不應捕捉 PHP 請求的可變值。
 
@@ -47,6 +53,8 @@ resource 使用既有 identity 指標欄位與獨立的請求登錄，不在每�
 明確 unset 的宣告屬性以 undefined 值內原本未使用的 boolean 位元區別，維持 value 64 B，不另配置 bitmap 或側表。這個標記讓 magic get／set／isset／unset／reference 與真正從未初始化的 typed 屬性分流，clone 與 rollback 會保留標記。弱型別轉換可能執行 PHP callback，寫入前必須重新核對 receiver 仍存活並重新取得 slot。readonly 初始化資格依 PHP 在轉換前判斷；原生重入案例證明內層賦值後外層仍可完成首次賦值，因此不追加轉換後的 readonly 拒絕。
 
 callback 回傳 reference 時，按值讀取先保護 target，再消耗暫存 wrapper，於 W-14 取得回傳 owner 前完成。按參照綁定則直接為目的地取得 owner，避免把 Go 區域複本誤算成第二個來源 owner。magic setter／unset、magic 與 hooked isset、clone 的未使用結果都在操作結束前消耗，清理例外保留 previous chain。clone 以單一 `methodHold` 保護新物件，涵蓋回傳自己、含自己的陣列與回傳值解構重入 readonly 初始化，不增加持有權帳本。
+
+clone 先複製及分離無外部 alias 的 reference，再單次掃描 schema，僅對仍共享的 typed instance slot 登錄來源。這排除 static／virtual／untyped 宣告與同名動態位置，也移除每個屬性都重掃 schema 的平方成本。單一來源保護改用 stack `methodHold`，省掉 80 B／一次配置；256 typed 屬性的五次樣本由 105616～114549 ns 降至 19204～19659 ns，plain 256 由 18672 B／3 次降至 18592 B／2 次。來源容量的額外保留空間與 warm-up 不包含在穩態 B/op 結論內。proxy backing clone 失敗時，尚未完成的 wrapper 直接清理其 storage，不額外執行 wrapper destructor；backing clone 的真實解構與完整 previous chain 保留。
 
 clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。檢查先於 lazy 初始化與 clone 配置，省掉拒絕操作的不必要配置與副作用。具名 magic 參數重複檢查重用已打包的陣列索引，不另建集合。union 的 int 轉換溢位時繼續嘗試允許的 string／bool，包含固定映像的 NaN 診斷。已知零個實體屬性的 lazy 類別直接建立普通物件；未知舊描述不套用這個快速路徑，initializer 的請求 owner 仍先檢查。
 
@@ -63,6 +71,8 @@ clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。�
 最後兩次配置來自 union／intersection 拆分的暫存 `[]string`。Go 的 `iter.Seq[string]` 直接逐段產生原字串切片，保留空 token、括號深度與提前停止規則，不增加快取或描述欄位。五次前後微型量測將無參數、回傳 int 的呼叫降至 0 B／0 次配置；全套 433 案及既有 DNF 控制維持一致。scanner 狀態物件也可省配置，但呼叫端較繁，現有 iterator 已達到目標，因此未採用。量測只支持這個操作，不推論所有方法或應用零配置。
 
 WeakMap 沿用固定 PHP 的空標準屬性比較，兩個不同實例的 entries、順序、數量與循環均不影響相等結果。不同 class 仍不可比較。以 builtin identity 在 owner、materialization 與 recursion bookkeeping 前直接回傳相等，因為這條路徑不讀值也不執行 callback。這保留既有入口驗證，不新增另一套內容比較；Codex 建議的 entries 比較已被雙寬度原生區辨否定。
+
+backed getter 在自身 frame 呼叫 isset 時直接檢查 backing 是否 undefined／null，避免轉成未初始化讀取錯誤。magic call 打包參數時保存是否已遇到具名參數，後續位置參數立即拒絕，不執行 `__call`。輸入對應 `call_user_func_array`，原始碼的 unpacking 診斷仍由 frontend／VM 整合驗收。
 
 virtual setter-only 的 isset 走既有 readObject 錯誤路徑，backed setter 的自身 isset 保持 false。裸物件 callable 直接讀有效類別的 `__invoke` handler，不套 caller visibility 或 `__call`；明確 method-array callable 保留 magic 分流。private／protected 宣告警告由獨立原生探針保存，完整 frontend 裸物件呼叫與宣告診斷未驗收。
 
@@ -105,6 +115,8 @@ lazy ghost 失敗時按宣告順序還原快照。固定 PHP 8.5.12 會直接覆
 `diagnostics/argument_destructor_conditional.php` 在弱 Stringable argument 轉換後，來源解構拋例外，再進入包含條件分支的 body。固定 arm64 映像以 139 結束，i386 在 120 秒後逾時。Go 的 `TestW13PendingArgumentDestructorSafety` 安全完成、保留解構例外並清空請求物件，這是宿主安全測試，不是 PHP 相容通過。測試只執行 fixture 指定的 `ok` 分支，其他分支未驗證。
 
 原始輸入、雜湊與雙寬度結果位於 `W-13-argument-destructor-diagnostic.json`。這是前兩項核准之外的新案例，已請使用者另外裁決，目前不得因此合併 PR #73，也不計為通過。
+
+`diagnostics/reference_unset_clone.php` 是另一個獨立輸入：`__toString` 先 unset global alias，再 clone 原物件。固定 arm64 exit 139，i386 回報 target SIGSEGV 後於 120 秒逾時。Go 以原 reference hold 保住有效位置，原物件與 clone 都得到轉換後的值，alias 名稱不會重建，shutdown 無殘留。`TestW13PendingReferenceCloneSafety` 只證明宿主安全，不能算成 PHP 相容通過。原始雙寬度結果見 `W-13-reference-clone-diagnostic.json`，目前等待第四項獨立裁決，前兩項核准不適用。
 
 ### 使用者核准保留安全修正的參考引擎不安全案例
 

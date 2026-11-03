@@ -1,9 +1,5 @@
 package runtime
 
-import (
-	"slices"
-)
-
 // REQ-018; T-035/036. Every PHP write, including writes through aliases,
 // checks the sources attached to the shared location before changing it.
 func acceptsObjectType(typ string, v value) bool {
@@ -32,29 +28,133 @@ func (h *heap) checkReferenceWrite(r *reference, v value, strict bool) (value, e
 		return value{}, err
 	}
 	result := v
-	for i, source := range h.typedSources[r] {
-		candidate, err := h.coerceProperty(source.info, v, strict, true)
-		if err != nil {
-			return value{}, err
+	var first *propertyInfo
+	coerced := false
+	// Capture the original range, but read each metadata cell at its turn:
+	// callbacks can remove/reorder sources in the same backing storage.
+	for _, source := range h.typedSources[r] {
+		p := source.info
+		state := referenceTypeState(p, v, strict)
+		if state == 0 {
+			return value{}, referenceWriteError(p, v)
 		}
-		if i > 0 {
-			same, err := identical(candidate, result)
-			if err != nil || !same {
-				return value{}, &Throwable{"TypeError", "Cannot assign " + typeName(v) + " to reference held by property " + source.info.label() + " of type " + source.info.typeName}
+		if first != nil && (state < 0) != coerced {
+			return value{}, referenceCoercionError(first, p, v)
+		}
+		if state < 0 {
+			candidate, ok, err := h.coerceTypedValue(&methodSpec{owner: p.owner}, p.owner, p.typeName, v, strict)
+			if err != nil {
+				if objectPHPException(err) {
+					err = h.mergeObjectErrors(err, referenceWriteError(p, v))
+				}
+				return value{}, err
 			}
+			if !ok {
+				return value{}, referenceWriteError(p, v)
+			}
+			if first != nil {
+				same, err := identical(candidate, result)
+				if err != nil {
+					return value{}, err
+				}
+				if !same {
+					return value{}, referenceCoercionError(first, p, v)
+				}
+			}
+			result, coerced = candidate, true
 		}
-		result = candidate
+		if first == nil {
+			first = p
+		}
 	}
 	return result, nil
 }
 
+// Acceptance is distinct from possible scalar coercion. In particular, a
+// previous exact type conflicts before a later Stringable conversion runs.
+func referenceTypeState(p *propertyInfo, v value, strict bool) int {
+	if methodAcceptsType(&methodSpec{owner: p.owner}, p.owner, p.typeName, v) {
+		return 1
+	}
+	if strict {
+		if v.kind == valueInt && methodTypeHas(p.typeName, "float") {
+			return -1
+		}
+		return 0
+	}
+	if v.kind != valueNull && (methodTypeHas(p.typeName, "int") || methodTypeHas(p.typeName, "float") ||
+		methodTypeHas(p.typeName, "string") || methodTypeHas(p.typeName, "bool")) {
+		return -1
+	}
+	return 0
+}
+
+func referenceWriteError(p *propertyInfo, v value) error {
+	return &Throwable{"TypeError", "Cannot assign " + typeName(v) + " to reference held by property " + p.label() + " of type " + p.typeName}
+}
+
+func referenceCoercionError(first, next *propertyInfo, v value) error {
+	return &Throwable{"TypeError", "Cannot assign " + typeName(v) + " to reference held by property " + first.label() + " of type " + first.typeName +
+		" and property " + next.label() + " of type " + next.typeName + ", as this would result in an inconsistent type conversion"}
+}
+
+// PHP's observable source-buffer order uses one inline source, then capacity
+// four and doubling. Keep that capacity independently of Go's append policy.
+func (h *heap) addPropertySource(r *reference, source propertySource) {
+	if h.typedSources == nil {
+		h.typedSources = make(map[*reference][]propertySource)
+	}
+	sources := h.typedSources[r]
+	if len(sources) == cap(sources) {
+		capacity := max(1, 2*cap(sources))
+		if capacity == 2 {
+			capacity = 4
+		}
+		grown := make([]propertySource, len(sources), capacity)
+		copy(grown, sources)
+		sources = grown
+	}
+	h.typedSources[r] = append(sources, source)
+}
+
 func (h *heap) detachPropertySource(slot *value) {
-	if slot.kind == valueReference {
-		sources := slices.DeleteFunc(h.typedSources[slot.ref], func(s propertySource) bool { return s.slot == slot })
-		if len(sources) == 0 {
-			delete(h.typedSources, slot.ref)
-		} else {
-			h.typedSources[slot.ref] = sources
+	if slot.kind != valueReference {
+		return
+	}
+	sources := h.typedSources[slot.ref]
+	for j, source := range sources {
+		if source.slot != slot {
+			continue
+		}
+		// PHP removes the first matching property-info identity, even when
+		// clone added the same definition again. Remap its surviving Go slot.
+		for i := range sources {
+			info := sources[i].info
+			// Inheritance copies Go descriptors without creating a new PHP
+			// declaration. Redeclarations and trait consumers have new owners.
+			if info != source.info && (source.info.owner == nil || info.owner != source.info.owner || info.key != source.info.key) {
+				continue
+			}
+			if i != j {
+				sources[j].slot = sources[i].slot
+			}
+			last := len(sources) - 1
+			sources[i] = sources[last]
+			// In-flight verifiers still observe the immutable tail metadata.
+			// Drop only the mutable slot pointer so freed tables can be collected.
+			sources[last].slot = nil
+			sources = sources[:last]
+			if last == 0 {
+				delete(h.typedSources, slot.ref)
+			} else {
+				if last >= 4 && last*4 == cap(sources) {
+					shrunk := make([]propertySource, last, last*2)
+					copy(shrunk, sources)
+					sources = shrunk
+				}
+				h.typedSources[slot.ref] = sources
+			}
+			return
 		}
 	}
 }
@@ -521,7 +621,7 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 		}
 		return false, nil
 	}
-	if p.get != nil || p.virtual {
+	if p.virtual || (p.get != nil && !h.propertyHookBypasses(o, p)) {
 		v, err := h.readObject(obj, name, scope)
 		set := err == nil && v.deref().kind != valueNull
 		return set, h.mergeObjectErrors(err, h.discardMethodReturn(v))

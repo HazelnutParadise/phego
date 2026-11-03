@@ -329,11 +329,8 @@ func (h *heap) attachPropertySource(o *object, slot *value, key string) {
 	}
 	for i := range o.class.schema.props {
 		p := &o.class.schema.props[i]
-		if p.key == key && p.typeName != "" {
-			if h.typedSources == nil {
-				h.typedSources = make(map[*reference][]propertySource)
-			}
-			h.typedSources[slot.ref] = append(h.typedSources[slot.ref], propertySource{slot, p})
+		if p.key == key && !p.static && !p.virtual && p.typeName != "" {
+			h.addPropertySource(slot.ref, propertySource{slot, p})
 			return
 		}
 	}
@@ -344,11 +341,12 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 	if err != nil {
 		return value{}, err
 	}
-	var source []methodHold
-	h.holdMethodValue(obj.deref(), &source)
+	count := methodRefcount(obj.deref())
+	retain(obj.deref())
+	source := methodHold{value: obj.deref(), temporary: count == 0}
 	defer func() {
 		hold, protected := h.holdMethodResult(result)
-		err = h.mergeObjectErrors(err, h.releaseMethodHold(source[0]))
+		err = h.mergeObjectErrors(err, h.releaseMethodHold(source))
 		if protected {
 			if err != nil {
 				hold.temporary = false
@@ -384,8 +382,8 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 		cloneObjectProperties(h, clone.object, wrapper)
 		backing, err := h.cloneObject(wrapper.lazy.target, scope)
 		if err != nil {
-			retain(clone)
-			return value{}, h.mergeObjectErrors(err, h.release(clone))
+			clone.object.destructorCalled = true
+			return value{}, h.mergeObjectErrors(err, h.freeObject(clone.object))
 		}
 		clone.object.lazy = &lazyObject{proxy: true, target: backing}
 		retain(backing)
@@ -424,7 +422,7 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 
 func cloneObjectProperties(h *heap, dst, src *object) {
 	copyPropertyValues(dst.props, src.props)
-	dst.props.each(func(key string, slot *value) {
+	dst.props.each(func(_ string, slot *value) {
 		if slot.kind != valueReference {
 			return
 		}
@@ -437,18 +435,18 @@ func cloneObjectProperties(h *heap, dst, src *object) {
 			_ = h.release(old)
 			return
 		}
-		if s := src.class.schema; s != nil {
-			for i := range s.props {
-				p := &s.props[i]
-				if p.key == key && p.typeName != "" {
-					if h.typedSources == nil {
-						h.typedSources = make(map[*reference][]propertySource)
-					}
-					h.typedSources[slot.ref] = append(h.typedSources[slot.ref], propertySource{slot, p})
-				}
+	})
+	if schema := src.class.schema; schema != nil {
+		for i := range schema.props {
+			p := &schema.props[i]
+			if p.static || p.virtual || p.typeName == "" {
+				continue
+			}
+			if slot, ok := dst.props.lookup(p.key); ok && slot.kind == valueReference {
+				h.addPropertySource(slot.ref, propertySource{slot, p})
 			}
 		}
-	})
+	}
 }
 
 func (h *heap) enumCase(c *class, name string) (value, error) {

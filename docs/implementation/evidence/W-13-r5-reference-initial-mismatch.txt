@@ -1,0 +1,22 @@
+ok  	github.com/HazelnutParadise/phego	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/compat	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/frontend	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/ir	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/policy	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/profile	0.619s
+--- FAIL: TestW13PHP8512Objects (0.05s)
+    --- FAIL: TestW13PHP8512Objects/64 (0.02s)
+        object_model_test.go:845: reference has 502 cases, want 506
+--- FAIL: TestW13R5PHP8512Regression (0.00s)
+    --- FAIL: TestW13R5PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-self (0.00s)
+            object_review_r5_references_test.go:342: missing case "r5-life-self" in reference
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-parent (0.00s)
+            object_review_r5_references_test.go:342: missing case "r5-life-parent" in reference
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-invalid-array (0.00s)
+            object_review_r5_references_test.go:342: missing case "r5-life-invalid-array" in reference
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-mixed-array (0.00s)
+            object_review_r5_references_test.go:342: missing case "r5-life-mixed-array" in reference
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	2.441s
+FAIL

@@ -372,12 +372,8 @@ func (h *heap) assignPHP(slot *value, v value, strict bool) error {
 			return err
 		}
 	}
-	if slot.kind == valueReference {
-		var err error
-		v, err = h.checkReferenceWrite(slot.ref, v, strict)
-		if err != nil {
-			return err
-		}
+	if slot.kind == valueReference && len(h.typedSources[slot.ref]) != 0 {
+		return h.assignTypedReference(slot, v, strict)
 	}
 	retain(v)
 	var old value
@@ -387,6 +383,43 @@ func (h *heap) assignPHP(slot *value, v value, strict bool) error {
 		old, *slot = *slot, v
 	}
 	return h.release(old)
+}
+
+// Coercion may unset/rebind the alias or remove the RHS's final external owner.
+// Protect the original location and operand until after the successful store.
+func (h *heap) assignTypedReference(slot *value, v value, strict bool) (err error) {
+	original := *slot
+	retain(original)
+	var rhs methodHold
+	count := methodRefcount(v)
+	if count >= 0 {
+		retain(v)
+		rhs = methodHold{value: v, temporary: count == 0}
+	}
+	var old value
+	defer func() {
+		if count >= 0 {
+			err = h.mergeObjectErrors(err, h.releaseMethodHold(rhs))
+		}
+		err = h.mergeObjectErrors(err, h.release(original))
+		err = h.mergeObjectErrors(err, h.release(old))
+	}()
+	converted, err := h.checkReferenceWrite(original.ref, v, strict)
+	if err != nil {
+		return err
+	}
+	destination := original.ref
+	if slot.kind == valueReference {
+		if err := h.claimValues(*slot); err != nil {
+			return err
+		}
+		destination = slot.ref
+	}
+	// Verification belongs to the original sources. PHP follows a rebound
+	// reference after conversion without checking the new sources a second time.
+	retain(converted)
+	old, destination.target = destination.target, converted
+	return nil
 }
 
 // bind implements $dst =& $src, converting src into a shared location.

@@ -130,13 +130,18 @@ func (h *heap) invokeMagicCall(obj value, magic *methodSpec, methodName string, 
 			res = value{}
 		}
 	}()
+	seenNamed := false
 	for i := range args {
 		a := &args[i]
 		v := a.value.deref()
 		var setErr error
 		if a.name == "" {
+			if seenNamed {
+				return value{}, &Throwable{"Error", "Cannot use positional argument after named argument"}
+			}
 			setErr = h.appendValue(&packed, v)
 		} else {
+			seenNamed = true
 			key := bytesValue([]byte(a.name))
 			if _, found, err := h.getElement(packed, key); err != nil {
 				return value{}, err
