@@ -1,0 +1,66 @@
+package runtime
+
+import "strings"
+
+// REQ-018/020; T-035/036/039/040. Descriptors are immutable DAGs: builders
+// reference already completed descriptors, never the descriptor being built.
+func classReachable(c, want *class, names []string) bool {
+	for c != nil {
+		if c == want {
+			return true
+		}
+		for _, name := range names {
+			if phpNameEqual(c.name, strings.TrimPrefix(name, "\\")) {
+				return true
+			}
+		}
+		if c.schema == nil {
+			return false
+		}
+		if len(c.schema.interfaces) == 0 {
+			c = c.schema.parent
+		} else if c.schema.parent == nil && len(c.schema.interfaces) == 1 {
+			c = c.schema.interfaces[0]
+		} else {
+			return classGraphReachable(c, want, names)
+		}
+	}
+	return false
+}
+
+func classGraphReachable(c, want *class, names []string) bool {
+	var inline [8]*class
+	pending := inline[:0]
+	visited := make(map[*class]struct{}, 8)
+	push := func(node *class) {
+		if node == nil {
+			return
+		}
+		if _, seen := visited[node]; seen {
+			return
+		}
+		visited[node] = struct{}{}
+		pending = append(pending, node)
+	}
+	push(c)
+	for len(pending) != 0 {
+		node := pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		if node == want {
+			return true
+		}
+		for _, name := range names {
+			if phpNameEqual(node.name, strings.TrimPrefix(name, "\\")) {
+				return true
+			}
+		}
+		if node.schema == nil {
+			continue
+		}
+		push(node.schema.parent)
+		for i := len(node.schema.interfaces) - 1; i >= 0; i-- {
+			push(node.schema.interfaces[i])
+		}
+	}
+	return false
+}

@@ -1,0 +1,33 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13AliasedClone/typed/1-8         	 4430965	       256.7 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	 4653549	       260.7 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	 4135674	       261.3 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	 5210956	       231.4 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	 5164766	       231.3 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	 5183533	       231.3 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	 3193915	       370.2 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	 3063931	       379.8 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	 3136380	       368.3 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	  482365	      2491 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	  464822	      2568 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	  457774	      2493 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	  819301	      1447 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	  826903	      1445 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	  834370	      1449 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	  285241	      4166 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	  280622	      4173 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	  288252	      4173 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	   62766	     19180 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	   59600	     19169 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	   61422	     18938 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	  119414	     10151 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	  117181	     10181 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	  119532	     10197 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	   37874	     31269 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	   37628	     31792 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	   38114	     38320 ns/op	   56200 B/op	      26 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	37.652s

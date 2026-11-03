@@ -1,0 +1,11 @@
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=40 B
+    object_table_test.go:12: reference=48 B
+    object_table_test.go:12: bucket=60 B
+    object_table_test.go:12: phpArray=48 B
+    object_table_test.go:12: object=52 B
+    object_table_test.go:12: propertyTable=36 B
+    object_table_test.go:12: classSpec=100 B
+    object_table_test.go:12: methodSpec=44 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+PASS

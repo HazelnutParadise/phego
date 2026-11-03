@@ -1,0 +1,105 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_parent": "edff41bc480226e11a93627d5ad13db4ebf8d7da",
+  "reference_result": "587 exact cases per pinned profile; all564 committed observations unchanged;23 new cases:4 raw-unset,18 proxy-guard,1 reference-guard lifetime. Entire R6 adds77 cases over R5:21 unset/lazy,27 parameters,10 scope,19 proxy/guard lifetime.",
+  "previous_review_evidence": "W-13-r6-review.json; historical564-case snapshot remains unchanged",
+  "findings": [
+    {
+      "issue": "Raw explicit-unset slot initialized on later read/isset/reference",
+      "repair": "Shared resolver receives readUnset policy through inline wrappers. Reads/references/isset bypass initialization for explicitly unset slots; writes without __set still initialize. Magic runs first, including throws and guarded reentry."
+    },
+    {
+      "issue": "Proxy forwarding dropped or incorrectly copied magic recursion state",
+      "repair": "Guard forwarding depends on operation, declared/dynamic slot and actual initialization transition. Dynamic property magic remains on wrapper; existing target guards retain ownership. isset returns false directly for absent backing; GET reuses slot and skips unobservable guard."
+    },
+    {
+      "issue": "Reference GET guard remained active while replacing destination ran destructor",
+      "repair": "Restore owned guard after source address resolution and before bindPropertyReference releases old destination. Pointer restore clears ownership before deletion and is idempotent, so deferred cleanup cannot erase a newly installed guard."
+    }
+  ],
+  "primary_source": {
+    "commit": "136e049ac10b032c83018e65b63b6df858943750",
+    "files": [
+      "Zend/zend_object_handlers.c:739",
+      "Zend/zend_object_handlers.c:990",
+      "Zend/zend_object_handlers.c:1044",
+      "Zend/zend_object_handlers.c:1066",
+      "Zend/zend_object_handlers.c:1424",
+      "Zend/zend_object_handlers.c:1440",
+      "Zend/zend_object_handlers.c:1556",
+      "Zend/zend_object_handlers.c:1676",
+      "Zend/zend_object_handlers.c:2370",
+      "Zend/zend_object_handlers.c:2535",
+      "Zend/zend_lazy_objects.c:540-555"
+    ]
+  },
+  "regression_command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestW13R6PHP8512Regression$' -count=1",
+  "baseline_red": {
+    "revision": "edff41bc480226e11a93627d5ad13db4ebf8d7da",
+    "exit_code": 1,
+    "files": [
+      "internal/runtime/object_lazy.go",
+      "internal/runtime/object_properties.go"
+    ],
+    "recipe": "Save git show REV:PATH for both files; create Go overlay Replace map from absolute current paths to saved files. Run current regression command with -overlay FILE. Tests and canonical587 references remain current.",
+    "output": "W-13-r6-followup-baseline-red.txt"
+  },
+  "intermediate_red_provenance": "raw/proxy/lifetime red logs were executed before their corresponding repair on uncommitted candidates, not claimed as outputs of a committed revision. edff baseline overlay separately reproduces prior omissions.",
+  "compiler": {
+    "command": "go test -gcflags=all=-m=2 ./internal/runtime -run '^$'",
+    "exit_code": 0,
+    "filter": "Retain lines containing objectForProperty, resolvePropertyBacking, forwardedPropertyGuard, unsetForwardedProperty, magicPropertyKey or installPropertyGuard.",
+    "result": "Both resolver wrappers inline at cost73; magic key and restore inline. Forwarded ownership is stack state, no object layout field. Magic key strings and target map may allocate; no universal zero-allocation claim."
+  },
+  "architecture": {
+    "rejected": [
+      "Unconditionally bypass initialization after raw unset: native writes still initialize.",
+      "Uniformly forward all magic guards: native declared get/reference/unset can invoke twice after another access initializes proxy.",
+      "New proxy cache-link flag: primary source shows properties=NULL plus UNINIT|LAZY slots; existing slot/transition state suffices."
+    ],
+    "no_extra_cost_improvements": [
+      "Reuse prefetched GET slot and skip guard when value already exists.",
+      "Return isset false for absent backing without allocating unobservable target guard.",
+      "Share guard key derivation and inline read/write resolver wrappers.",
+      "Move unset forwarded defer outside traversal loop."
+    ],
+    "cost": "No new heap/object/value/property-table fields. Required forwarding may allocate target magic map/key; no new performance win measured."
+  },
+  "review": {
+    "result": "Native gpt-6.1-sol adversarial review found no new confirmed defect after final cache/fixture delta; root reviewed diff and verified current full Go suite. Fresh-context documentation review passed. Exact remote-head review remains a separate gate.",
+    "documentation": "Fresh-context independent gpt-6.1-sol reader verified175 current source,6 current check,6 follow-up artifact and6 historical R6 artifact hashes; both profiles52fixture hashes,587 counts,564 and510 unchanged prior observations, line anchors, archived rollback replay and explicit pending approvals. No required correction. Adopted same-cost wording clarification: each width has587 cases."
+  },
+  "coverage_limits": [
+    "Private runtime operations; complete PHP frontend/VM remains not_run.",
+    "Third and fourth unsafe PHP diagnostics still require explicit merge approval; no new unsafe case included in587 passes.",
+    "No application/competitor performance conclusion."
+  ],
+  "artifacts_sha256": {
+    "W-13-r6-followup-baseline-red.txt": "1d341f75733099918546910abb87c47427ab63843ff5c6191af8fd15cbb46d2b",
+    "W-13-r6-followup-raw-red.txt": "fb8d6ee8c9883a7d1c0c0e53affc132d50cfe3feac6c70dbc8f3f32b70897b3a",
+    "W-13-r6-followup-proxy-red.txt": "94f526aaf2842748a5deeff7d434808ed3859ba6169764714b96642386e8ef5d",
+    "W-13-r6-followup-lifetime-red.txt": "c04b0d3808557950b2bed47d14d5315af1014fe9c30288bd8b5e9345ab201fbb",
+    "W-13-r6-followup-green.txt": "d8f49f3adb6f3462fc97e0a50db85d5fc3633eec6c1821908a387622dbfdc3af",
+    "W-13-r6-followup-compiler.txt": "75fdd12439de39b661f7cd32059bc3db8104948e9b01194f6bc57b8df7e93b9c"
+  }
+}

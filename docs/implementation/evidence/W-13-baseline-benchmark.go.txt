@@ -1,0 +1,4 @@
+package runtime
+import("fmt";"reflect";"testing")
+func TestW13BaselineLayout(t *testing.T){for _,v:=range []any{value{},reference{},bucket{},object{},phpArray{}}{typ:=reflect.TypeOf(v);t.Logf("%s=%d B",typ.Name(),typ.Size())}}
+func BenchmarkW13BaselineObjectLifecycle(b *testing.B){for _,size:=range []int{0,1,4,32,256}{b.Run(fmt.Sprint(size),func(b *testing.B){names:=make([]string,size);for i:=range names{names[i]=fmt.Sprintf("p%d",i)};c:=&class{name:"Bench"};h,err:=newHeap(64);if err!=nil{b.Fatal(err)};b.ReportAllocs();b.ResetTimer();for range b.N{o,err:=h.newObject(c);if err!=nil{b.Fatal(err)};retain(o);for _,name:=range names{if err:=h.setProperty(o,name,w12Int(1));err!=nil{b.Fatal(err)}};if err:=h.release(o);err!=nil{b.Fatal(err)}}})}}

@@ -1,0 +1,440 @@
+=== grammar-impact-before.txt ===
+test_news_and_source_paths_have_consistent_impact (tools.test_upstream_diff.TestImpact) ... test_rules_separator_allows_trailing_comment (tools.test_upstream_diff.TestGrammarSymbols) ... FAIL
+
+======================================================================
+FAIL: test_news_and_source_paths_have_consistent_impact (tools.test_upstream_diff.TestImpact) (section='mysqlnd')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 41, in test_news_and_source_paths_have_consistent_impact
+    self.assertEqual(upstream_diff.impact(prefix + "x.c"),
+AssertionError: Lists differ: ['W-52'] != ['W-31']
+
+First differing element 0:
+'W-52'
+'W-31'
+
+- ['W-52']
+?     ^^
+
++ ['W-31']
+?     ^^
+
+
+======================================================================
+FAIL: test_news_and_source_paths_have_consistent_impact (tools.test_upstream_diff.TestImpact) (section='opcache')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 41, in test_news_and_source_paths_have_consistent_impact
+    self.assertEqual(upstream_diff.impact(prefix + "x.c"),
+AssertionError: Lists differ: ['W-52'] != ['W-15']
+
+First differing element 0:
+'W-52'
+'W-15'
+
+- ['W-52']
+?      -
+
++ ['W-15']
+?     +
+
+
+======================================================================
+FAIL: test_rules_separator_allows_trailing_comment (tools.test_upstream_diff.TestGrammarSymbols)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 325, in test_rules_separator_allows_trailing_comment
+    self.assertEqual(upstream_diff.grammar_symbols(parser_y),
+AssertionError: {'tokens': ['T_STRING'], 'rules': []} != {'tokens': ['T_STRING'], 'rules': ['program']}
+- {'rules': [], 'tokens': ['T_STRING']}
++ {'rules': ['program'], 'tokens': ['T_STRING']}
+?            +++++++++
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=3)
+
+=== grammar-body-before.txt ===
+test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) ... ERROR
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name    { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* changed */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_NAME ;\nname: T_STRING ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%right T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%precedence T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 2;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return helper; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols) (parser='%{\nint helper = 1;\n%}\n%token T_STRING T_NAME\n%left T_STRING\n%start program\n%% /* Rules */\nprogram:\n    name { /* action */ }\n;\nname: T_STRING ;\nname: T_NAME ;\n%%\nint main(void) { return 0; }\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 344, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], rules)
+KeyError: 'rules_changed'
+
+======================================================================
+ERROR: test_existing_rule_bodies_and_full_source_changes (tools.test_upstream_diff.TestGrammarSymbols)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 351, in test_existing_rule_bodies_and_full_source_changes
+    self.assertEqual(report["grammar"]["rules_changed"], [])
+KeyError: 'rules_changed'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (errors=9)
+
+=== stub-tests-before.txt ===
+test_report_flags_use_raw_source_comparisons_and_schema_two (tools.test_upstream_diff_review.TestGrammarReportContracts) ... ok
+test_attribute_adds_one_token_at_token_budget_boundary (tools.test_upstream_diff_review.TestMetadataBudgets) ... FAIL
+test_attribute_is_preserved_at_exact_token_budget (tools.test_upstream_diff_review.TestMetadataBudgets) ... FAIL
+test_condition_budget_accepts_exact_condition_bytes_with_metadata (tools.test_upstream_diff_review.TestMetadataBudgets) ... FAIL
+test_condition_budget_rejects_one_byte_below_condition_bytes (tools.test_upstream_diff_review.TestMetadataBudgets) ... ok
+test_signature_budget_accepts_actual_metadata_output_bytes (tools.test_upstream_diff_review.TestMetadataBudgets) ... FAIL
+test_signature_budget_rejects_one_byte_below_actual_metadata_output (tools.test_upstream_diff_review.TestMetadataBudgets) ... FAIL
+test_hooks_skip_matched_bodies_and_do_not_create_properties_from_locals (tools.test_upstream_diff_review.TestPropertyStubs) ... FAIL
+test_multiple_properties_split_only_at_top_level_commas (tools.test_upstream_diff_review.TestPropertyStubs) ... FAIL
+test_typed_properties_keep_modifiers_types_and_defaults (tools.test_upstream_diff_review.TestPropertyStubs) ... FAIL
+test_attribute_argument_changes_are_reported_with_normalized_whitespace (tools.test_upstream_diff_review.TestStubMetadata) ... FAIL
+test_attributes_are_kept_at_declarations_and_parameters (tools.test_upstream_diff_review.TestStubMetadata) ... FAIL
+test_doc_and_attribute_source_order_does_not_change_prefix_order (tools.test_upstream_diff_review.TestStubMetadata) ... FAIL
+test_only_documented_metadata_tags_are_included_and_metadata_order_is_canonical (tools.test_upstream_diff_review.TestStubMetadata) ... FAIL
+
+======================================================================
+FAIL: test_attribute_adds_one_token_at_token_budget_boundary (tools.test_upstream_diff_review.TestMetadataBudgets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 264, in test_attribute_adds_one_token_at_token_budget_boundary
+    upstream_diff.parse_stubs(source)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_attribute_is_preserved_at_exact_token_budget (tools.test_upstream_diff_review.TestMetadataBudgets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 252, in test_attribute_is_preserved_at_exact_token_budget
+    self.assertEqual(
+AssertionError: {'function budget': 'function budget(): void'} != {'function budget': '#[Budget(value: [1, 2])] function budget(): void'}
+- {'function budget': 'function budget(): void'}
++ {'function budget': '#[Budget(value: [1, 2])] function budget(): void'}
+?                      +++++++++++++++++++++++++
+
+
+======================================================================
+FAIL: test_condition_budget_accepts_exact_condition_bytes_with_metadata (tools.test_upstream_diff_review.TestMetadataBudgets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 283, in test_condition_budget_accepts_exact_condition_bytes_with_metadata
+    self.assertEqual(
+AssertionError: {'fun[24 chars]URE] function budget(): void'} != {'fun[24 chars]URE] [@tentative-return-type] #[Budget(value: [29 chars]oid'}
+- {'function budget': '[if FEATURE] function budget(): void'}
++ {'function budget': '[if FEATURE] [@tentative-return-type] #[Budget(value: [1, '
++                     '2])] function budget(): void'}
+
+======================================================================
+FAIL: test_signature_budget_accepts_actual_metadata_output_bytes (tools.test_upstream_diff_review.TestMetadataBudgets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 269, in test_signature_budget_accepts_actual_metadata_output_bytes
+    self.assertEqual(
+AssertionError: {'fun[24 chars]URE] function budget(): void'} != {'fun[24 chars]URE] [@tentative-return-type] #[Budget(value: [29 chars]oid'}
+- {'function budget': '[if FEATURE] function budget(): void'}
++ {'function budget': '[if FEATURE] [@tentative-return-type] #[Budget(value: [1, '
++                     '2])] function budget(): void'}
+
+======================================================================
+FAIL: test_signature_budget_rejects_one_byte_below_actual_metadata_output (tools.test_upstream_diff_review.TestMetadataBudgets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 278, in test_signature_budget_rejects_one_byte_below_actual_metadata_output
+    upstream_diff.parse_stubs(self.DECLARATION)
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_hooks_skip_matched_bodies_and_do_not_create_properties_from_locals (tools.test_upstream_diff_review.TestPropertyStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 54, in test_hooks_skip_matched_bodies_and_do_not_create_properties_from_locals
+    self.assertEqual(
+AssertionError: {'cla[24 chars]d', 'method Hooked::update': 'public function [25 chars]oid'} != {'cla[24 chars]d', 'property Hooked::$label': 'public string [76 chars]oid'}
+  {'class Hooked': 'class Hooked',
+-  'method Hooked::update': 'public function update(int $parameter): void'}
+?                                                                         ^
+
++  'method Hooked::update': 'public function update(int $parameter): void',
+?                                                                         ^
+
++  'property Hooked::$label': 'public string $label'}
+
+======================================================================
+FAIL: test_multiple_properties_split_only_at_top_level_commas (tools.test_upstream_diff_review.TestPropertyStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 74, in test_multiple_properties_split_only_at_top_level_commas
+    self.assertEqual(
+AssertionError: {'cla[37 chars]ties'} != {'cla[37 chars]ties', 'property ManyProperties::$items': "pub[204 chars]3]]"}
+- {'class ManyProperties': 'class ManyProperties'}
+?                                                ^
+
++ {'class ManyProperties': 'class ManyProperties',
+?                                                ^
+
++  'property ManyProperties::$empty': 'public array $empty = []',
++  'property ManyProperties::$items': "public array $items = ['outer' => "
++                                     "['left,right' => [1, 2]]]",
++  'property ManyProperties::$nested': "public array $nested = ['key' => "
++                                      "['value' => 3]]"}
+
+======================================================================
+FAIL: test_typed_properties_keep_modifiers_types_and_defaults (tools.test_upstream_diff_review.TestPropertyStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 24, in test_typed_properties_keep_modifiers_types_and_defaults
+    self.assertEqual(
+AssertionError: {'cla[47 chars]ties'} != {'cla[47 chars]ties', 'property Review\\TypedProperties::$nul[209 chars]ull'}
+- {'class Review\\TypedProperties': 'class TypedProperties'}
+?                                                          ^
+
++ {'class Review\\TypedProperties': 'class TypedProperties',
+?                                                          ^
+
++  'property Review\\TypedProperties::$intersection': 'private (A&B)|null '
++                                                     '$intersection = null',
++  'property Review\\TypedProperties::$nullable': 'public ?Foo $nullable = null',
++  'property Review\\TypedProperties::$union': 'protected A|B $union = '
++                                              'A::DEFAULT'}
+
+======================================================================
+FAIL: test_attribute_argument_changes_are_reported_with_normalized_whitespace (tools.test_upstream_diff_review.TestStubMetadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 210, in test_attribute_argument_changes_are_reported_with_normalized_whitespace
+    self.assertEqual(before, {"function attributed": expected_before})
+AssertionError: {'fun[15 chars]d': 'function attributed(): void'} != {'fun[15 chars]d': '#[Audit(data: [\'a\' => [1, 2]], text: "t[38 chars]oid'}
+- {'function attributed': 'function attributed(): void'}
++ {'function attributed': '#[Audit(data: [\'a\' => [1, 2]], text: "two  '
++                         'spaces")] function attributed(): void'}
+
+======================================================================
+FAIL: test_attributes_are_kept_at_declarations_and_parameters (tools.test_upstream_diff_review.TestStubMetadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 110, in test_attributes_are_kept_at_declarations_and_parameters
+    self.assertEqual(
+AssertionError: {'class Decorated': 'class Decorated', 'method Decorated::set'[41 chars]oid'} != {'class Decorated': '#[Entity(data: [\'x\' => [1, 2]], note: "[358 chars]oid'}
+Diff is 696 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_doc_and_attribute_source_order_does_not_change_prefix_order (tools.test_upstream_diff_review.TestStubMetadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 191, in test_doc_and_attribute_source_order_does_not_change_prefix_order
+    self.assertEqual(upstream_diff.parse_stubs(doc_then_attribute)["method Ordered::ordered"], expected)
+AssertionError: 'public function ordered(): void' != '[@tentative-return-type string] #[Audit(v[42 chars]void'
+- public function ordered(): void
++ [@tentative-return-type string] #[Audit(value: [1, 2])] public function ordered(): void
+
+
+======================================================================
+FAIL: test_only_documented_metadata_tags_are_included_and_metadata_order_is_canonical (tools.test_upstream_diff_review.TestStubMetadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff_review.py", line 154, in test_only_documented_metadata_tags_are_included_and_metadata_order_is_canonical
+    self.assertIn(expected_attribute, signature)
+AssertionError: "#[Audit(payload: ['x' => [1, 2]])]" not found in '[if FEATURE] public static function canonical(): void'
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.004s
+
+FAILED (failures=12)
+
+=== stub-extra-before.txt ===
+test_parameter_attribute_content_changes_without_spacing_artifact (tools.test_upstream_diff.TestParseStubs) ... FAIL
+test_doc_tag_names_are_exact_and_apply_to_class_property_and_constant (tools.test_upstream_diff.TestParseStubs) ... FAIL
+
+======================================================================
+FAIL: test_parameter_attribute_content_changes_without_spacing_artifact (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 87, in test_parameter_attribute_content_changes_without_spacing_artifact
+    self.assertEqual(upstream_diff.parse_stubs(source), {'function f': expected})
+AssertionError: {'function f': 'function f( string $value): void'} != {'function f': 'function f(#[A(1)] string $value): void'}
+- {'function f': 'function f( string $value): void'}
++ {'function f': 'function f(#[A(1)] string $value): void'}
+?                            +++++++
+
+
+======================================================================
+FAIL: test_doc_tag_names_are_exact_and_apply_to_class_property_and_constant (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 103, in test_doc_tag_names_are_exact_and_apply_to_class_property_and_constant
+    self.assertEqual(upstream_diff.parse_stubs(source), {
+AssertionError: {'class C': 'class C', 'const C::X': 'public const X =[43 chars]oid'} != {'class C': '[@strict-properties] class C', 'property [131 chars]oid'}
+- {'class C': 'class C',
++ {'class C': '[@strict-properties] class C',
+-  'const C::X': 'public const X = 1',
++  'const C::X': '[@virtual] public const X = 1',
+?                 +++++++++++
+
+-  'method C::f': 'public function f(): void'}
+?                                            ^
+
++  'method C::f': 'public function f(): void',
+?                                            ^
+
++  'property C::$name': '[@readonly] public string $name'}
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=2)
+
+=== attribute-comment-before.txt ===
+test_attribute_comment_brackets_are_preserved (tools.test_upstream_diff.TestParseStubs) ... FAIL
+
+======================================================================
+FAIL: test_attribute_comment_brackets_are_preserved (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 89, in test_attribute_comment_brackets_are_preserved
+    self.assertEqual(upstream_diff.parse_stubs(text), {
+AssertionError: {} != {'function f': '#[A(/* ] */ value: [1, 2])[36 chars]oid'}
+- {}
++ {'function f': '#[A(/* ] */ value: [1, 2])] function f(#[B("]")] string $x): '
++                'void'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+
+=== stub-review-before.txt ===
+test_unlisted_doc_comments_inside_declarations_are_ignored (tools.test_upstream_diff.TestParseStubs) ... FAIL
+test_enum_case_attributes_and_whitelisted_doc_tags_are_retained (tools.test_upstream_diff.TestParseStubs) ... FAIL
+
+======================================================================
+FAIL: test_unlisted_doc_comments_inside_declarations_are_ignored (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 93, in test_unlisted_doc_comments_inside_declarations_are_ignored
+    self.assertEqual(upstream_diff.parse_stubs(source), upstream_diff.parse_stubs(expected))
+AssertionError: {'class C': 'class C', 'const C::X': 'publi[33 chars]/ 1'} != {'function f': 'function f( int $x): void',[53 chars]= 1'}
+  {'class C': 'class C',
+-  'const C::X': 'public const X = /** @cvalue ignored */ 1'}
++  'const C::X': 'public const X = 1',
++  'function f': 'function f( int $x): void'}
+
+======================================================================
+FAIL: test_enum_case_attributes_and_whitelisted_doc_tags_are_retained (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 104, in test_enum_case_attributes_and_whitelisted_doc_tags_are_retained
+    self.assertEqual(upstream_diff.parse_stubs(source), {
+AssertionError: {'enum E': 'enum E', 'case E::X': 'case X'} != {'enum E': 'enum E', 'case E::X': '[@readonly] #[A(1)] case X'}
+- {'case E::X': 'case X', 'enum E': 'enum E'}
++ {'case E::X': '[@readonly] #[A(1)] case X', 'enum E': 'enum E'}
+?                ++++++++++++++++++++
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=2)
+
+=== ignored-doc-budget-before.txt ===
+test_ignored_doc_comments_do_not_consume_tokens (tools.test_upstream_diff.TestParseStubs) ... ERROR
+
+======================================================================
+ERROR: test_ignored_doc_comments_do_not_consume_tokens (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 87, in test_ignored_doc_comments_do_not_consume_tokens
+    self.assertEqual(upstream_diff.parse_stubs(source),
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_diff.py", line 436, in parse_stubs
+    tokens = _tokenize(cleaned)
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/upstream_diff.py", line 250, in _tokenize
+    raise ValueError("stub token limit exceeded")
+ValueError: stub token limit exceeded
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (errors=1)
+
+=== doc-separation-before.txt ===
+test_doc_comments_keep_token_separation_inside_declarations (tools.test_upstream_diff.TestParseStubs) ... FAIL
+
+======================================================================
+FAIL: test_doc_comments_keep_token_separation_inside_declarations (tools.test_upstream_diff.TestParseStubs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w49-history/phego/tools/test_upstream_diff.py", line 89, in test_doc_comments_keep_token_separation_inside_declarations
+    self.assertEqual(upstream_diff.parse_stubs(source), {
+AssertionError: {'fun[14 chars]ctionf(): void', 'class C': 'class C', 'const [25 chars]1+2'} != {'fun[14 chars]ction f(): void', 'class C': 'class C', 'const[27 chars] +2'}
+  {'class C': 'class C',
+-  'const C::X': 'public const X = 1+2',
++  'const C::X': 'public const X = 1 +2',
+?                                   +
+
+-  'function f': 'functionf(): void'}
++  'function f': 'function f(): void'}
+?                         +
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

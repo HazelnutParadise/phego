@@ -1,0 +1,15 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13PropertyHookHolds/get-8         	 1264870	       193.4 ns/op	      88 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1243500	       195.3 ns/op	      88 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1232887	       199.5 ns/op	      88 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  621284	       401.7 ns/op	      80 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  590962	       406.8 ns/op	      80 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  633523	       401.8 ns/op	      80 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  526705	       479.1 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  515149	       479.4 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  527583	       481.5 ns/op	     224 B/op	       2 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	4.057s

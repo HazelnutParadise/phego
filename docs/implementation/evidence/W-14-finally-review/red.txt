@@ -1,0 +1,18 @@
+--- FAIL: TestExecutionOracleReplay (0.00s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/array_finally_return_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[destroy:first finally destroy:local caught:destructor previous:suppressed previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first finally destroy:local caught:destructor previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/finally_return_object_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[finally destroy:local destroy:returned caught:returned previous:destructor previous:suppressed shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[finally destroy:local destroy:returned caught:returned previous:destructor shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/finally_return_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[finally destroy:local caught:destructor previous:suppressed shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[finally destroy:local caught:destructor shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/array_finally_return_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[destroy:first finally destroy:local caught:destructor previous:suppressed previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:first finally destroy:local caught:destructor previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/finally_return_object_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[finally destroy:local destroy:returned caught:returned previous:destructor previous:suppressed shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[finally destroy:local destroy:returned caught:returned previous:destructor shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/finally_return_suppresses_throw (0.00s)
+            execution_oracle_test.go:574: events=[finally destroy:local caught:destructor previous:suppressed shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[finally destroy:local caught:destructor shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.111s
+FAIL

@@ -1,0 +1,22 @@
+{
+  "archive_sha256": "efdd1dbd089b99bfcfcde7b8eb1236163f2e88df5a981cca4f783ec9cb5e0378",
+  "archive_url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.4/LLVM-23.1.4-Linux-X64.tar.zst",
+  "component": "llvm",
+  "entries": 11465,
+  "expanded_bytes": 12407722424,
+  "files": [
+    {
+      "encoding": "utf8_text",
+      "path": "LLVM-23.1.4-Linux-X64/include/llvm/Support/LICENSE.TXT",
+      "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241",
+      "size": 303
+    }
+  ],
+  "format": "tar.zst",
+  "license_applicability": "unknown",
+  "platform": "linux/amd64",
+  "schema_version": 1,
+  "selection": "case-insensitive basename contains LICENSE, LICENCE, COPYING, NOTICE or PATENTS",
+  "status": "partial",
+  "version": "23.1.4"
+}

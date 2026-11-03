@@ -1,0 +1,7 @@
+--- FAIL: TestW13R9ComparisonCursorProtection (0.00s)
+    object_review_r9_table_test.go:282: comparison invalidated its active block cursor
+--- FAIL: TestW13R9RollbackCursorTransfer (0.00s)
+    object_review_r9_table_test.go:359: temporary rollback wrapper invalidated an outer cursor
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.731s
+FAIL

@@ -1,0 +1,45 @@
+name: PHP 8.5.12 object semantics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    name: Object reference (${{ matrix.width }}-bit)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - width: 64
+            runner: ubuntu-24.04-arm
+          - width: 32
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      # REQ-012/018/019/020/021; T-023/024/035-042.
+      - name: Test reference runner
+        run: python3 -m unittest discover -s tools -p test_w13_reference.py
+      - name: Regenerate and compare pinned PHP observations
+        run: |
+          python3 tests/semantics/w13-objects/reference.py --width ${{ matrix.width }} --output-dir "$RUNNER_TEMP/w13-reference"
+          cmp "internal/runtime/testdata/w13-ref-${{ matrix.width }}.json" "$RUNNER_TEMP/w13-reference/w13-ref-${{ matrix.width }}.json"
+      - name: Compare with Go runtime
+        env:
+          CGO_ENABLED: '0'
+          PHEGO_W13_REFERENCE: ${{ runner.temp }}/w13-reference
+        run: go test -count=1 -run '^TestW13PHP8512Objects/${{ matrix.width }}$' -v ./internal/runtime
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: w13-reference-${{ matrix.width }}
+          path: ${{ runner.temp }}/w13-reference

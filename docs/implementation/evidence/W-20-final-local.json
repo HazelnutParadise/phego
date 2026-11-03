@@ -1,0 +1,58 @@
+{
+  "scope": "local_policy_regression",
+  "source_commit": "9798659c849dc589fa5d3a4f2bc86fbd784fa8b2",
+  "recorded_at_utc": "2026-11-01T08:21:47.855868+00:00",
+  "go_version": "go version go1.26.5 darwin/arm64",
+  "platform": "Darwin arm64",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "CGO_ENABLED=0 go test -race ./...",
+      "exit_code": 0,
+      "stdout": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.505s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "stderr": ""
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 309,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "stdout": "\n[PHP/FI build and engine exit code: 23]\n",
+      "stderr": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n...................................................................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 466 tests in 128.081s\n\nOK\n"
+    },
+    {
+      "command": "GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go test -c ./internal/policy -o /tmp/phego-policy-windows.test.exe",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "fs_contract": "User approved trusted and confinement-safe FS providers; host disk directories use Root. Legacy Files behavior remains compatible.",
+  "limitations": [
+    "VM remains unimplemented; no full PHP execution/application acceptance.",
+    "Windows policy tests cross-compiled but not executed.",
+    "Case-insensitive filesystem tests passed on this Mac; skip only on case-sensitive filesystems.",
+    "Trusted host code and arbitrary host filesystem topology changes are outside PHP capability isolation."
+  ],
+  "fs_contract_status": "approved",
+  "supersedes_local_gate_status_of": [
+    "W-20-overlap-local.json",
+    "W-20-read-alias-local.json"
+  ]
+}

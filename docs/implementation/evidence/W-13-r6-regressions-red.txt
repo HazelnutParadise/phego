@@ -1,0 +1,350 @@
+--- FAIL: TestW13ExplicitResourceCloseAfterCancellation (0.00s)
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/32/valid (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:138: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/32/canceled-cleanup (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/32/panic (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:130: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/32/callback-error (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:134: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/32/reentry (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:138: context canceled
+        object_review_r6_resources_test.go:142: reentry: <nil>
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/64/valid (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:138: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/64/canceled-cleanup (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/64/panic (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:130: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/64/callback-error (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:134: context canceled
+    --- FAIL: TestW13ExplicitResourceCloseAfterCancellation/64/reentry (0.00s)
+        object_review_r6_resources_test.go:121: err=context canceled calls=0 supplied context retained=false closed=false freed=false
+        object_review_r6_resources_test.go:138: context canceled
+        object_review_r6_resources_test.go:142: reentry: <nil>
+--- FAIL: TestW13CalledScopeExecutionFrames (0.02s)
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-write (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-write
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-reference (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-reference
+            Go: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-static (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-static
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-target (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-target
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-nested (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-nested
+            Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-global (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-global
+            Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-conversion (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-conversion
+            Go: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-hook (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-hook
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-readonly-private (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-readonly-private
+            Go: {"result":["Error","Cannot modify private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/32/r6-scope-readonly-private-unset (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-readonly-private-unset
+            Go: {"result":["Error","Cannot unset private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot unset private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-write (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-write
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-reference (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-reference
+            Go: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-static (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-static
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-target (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-target
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-nested (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-nested
+            Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-global (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-global
+            Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-conversion (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-conversion
+            Go: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-hook (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-hook
+            Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-readonly-private (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-readonly-private
+            Go: {"result":["Error","Cannot modify private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13CalledScopeExecutionFrames/64/r6-scope-readonly-private-unset (0.00s)
+        object_review_r6_scope_test.go:144: r6-scope-readonly-private-unset
+            Go: {"result":["Error","Cannot unset private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+            PHP: {"result":["Error","Cannot unset private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+--- FAIL: TestW13R6PHP8512Regression (0.01s)
+    --- FAIL: TestW13R6PHP8512Regression/32 (0.00s)
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-virtual-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[true,["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[true,["Error","Cannot unset hooked property W13R6Virtual::$v"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-backed-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[false,["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[false,["Error","Cannot unset hooked property W13R6Backed::$b"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-private-set-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset private(set) property W13R6PrivSet::$p from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-protected-set-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset protected(set) property W13R6ProtSet::$p from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-readonly-uninit-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset protected(set) readonly property W13R6RoUninit::$ro from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-readonly-raw-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[123,["Error","Cannot unset readonly property W13R6RoRaw::$ro"],1,false],[]],"diagnostics":[]}
+                PHP: {"result":[true,[123,["Error","Cannot unset readonly property W13R6RoRaw::$ro"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-private-set-hook-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset hooked property W13R6PrivateHook::$p"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-raw-plain-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[11,["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[11,null,0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-dynamic-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,0,true],["magic:missing"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-magic-asym (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot unset private(set) property W13R6MagicAsym::$p from global scope"],[]],"diagnostics":[]}
+                PHP: {"result":[null,["magic:p"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-recursive-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[null,["Error","Cannot unset private(set) property W13R6RecurChild::$p from global scope"],[]],"diagnostics":[]}
+                PHP: {"result":[null,["Error","Cannot unset private(set) property W13R6RecurChild::$p from scope W13R6RecurChild"],["magic:p"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-readonly-clone (0.00s)
+            object_model_test.go:298: Error: Cannot unset readonly property W13R6RoClone::$ro
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-readonly-cleared-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,1,false,["Error","Cannot unset protected(set) readonly property W13R6RoMagic::$ro from global scope"]],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,1,false,null],["init","magic:ro"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-direct-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 41"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-direct-int-float (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["TypeError","Cannot assign float to reference held by property W13R6Source::$intProp of type int"],[],1],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeFloat(): Argument #1 ($v) must be of type float, int given, called in /w/review_r6_references.php on line 46"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-direct-object-stringable (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["convert","body:string:string"],"string"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 51"],[],"W13R6Stringable"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-direct-mixed-stringable (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["convert","body:string:string"],"string"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 56"],[],"W13R6Stringable"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-direct-mixed-int (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 61"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-named-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:named"],"1","x"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeNamed(): Argument #1 ($first) must be of type string, int given, called in /w/review_r6_references.php on line 91"],[],1,"x"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:1"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 96"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-named (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-reflect-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-post-failure (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R6Source::$intProp of type int"],["TypeError","Cannot assign array to property W13R6Source::$intProp of type int"],"write",2],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 138"],["TypeError","Cannot assign array to property W13R6Source::$intProp of type int"],"write",2],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 146"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-named-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 151"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-fixedprefix (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:prefix:1"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takePrefix(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 157"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-variadic-pos-named (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 162"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-literal-pos-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #2 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-param-literal-named-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-write (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-reference (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-static (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-target (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-nested (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-global (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-conversion (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-hook (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-readonly-private (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-scope-readonly-private-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot unset private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot unset private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+    --- FAIL: TestW13R6PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-virtual-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[true,["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[true,["Error","Cannot unset hooked property W13R6Virtual::$v"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-backed-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[false,["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[false,["Error","Cannot unset hooked property W13R6Backed::$b"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-private-set-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset private(set) property W13R6PrivSet::$p from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-protected-set-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset protected(set) property W13R6ProtSet::$p from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-readonly-uninit-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset protected(set) readonly property W13R6RoUninit::$ro from global scope"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-readonly-raw-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[123,["Error","Cannot unset readonly property W13R6RoRaw::$ro"],1,false],[]],"diagnostics":[]}
+                PHP: {"result":[true,[123,["Error","Cannot unset readonly property W13R6RoRaw::$ro"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-private-set-hook-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[["Error","Cannot unset hooked property W13R6PrivateHook::$p"],0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-raw-plain-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[11,["Exception","init"],1,true],[]],"diagnostics":[]}
+                PHP: {"result":[true,[11,null,0,true],[]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-dynamic-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[["Exception","init"],1,true],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,0,true],["magic:missing"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-magic-asym (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot unset private(set) property W13R6MagicAsym::$p from global scope"],[]],"diagnostics":[]}
+                PHP: {"result":[null,["magic:p"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-recursive-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[null,["Error","Cannot unset private(set) property W13R6RecurChild::$p from global scope"],[]],"diagnostics":[]}
+                PHP: {"result":[null,["Error","Cannot unset private(set) property W13R6RecurChild::$p from scope W13R6RecurChild"],["magic:p"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-readonly-clone (0.00s)
+            object_model_test.go:298: Error: Cannot unset readonly property W13R6RoClone::$ro
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-readonly-cleared-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,1,false,["Error","Cannot unset protected(set) readonly property W13R6RoMagic::$ro from global scope"]],["init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,1,false,null],["init","magic:ro"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-direct-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 41"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-direct-int-float (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["TypeError","Cannot assign float to reference held by property W13R6Source::$intProp of type int"],[],1],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeFloat(): Argument #1 ($v) must be of type float, int given, called in /w/review_r6_references.php on line 46"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-direct-object-stringable (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["convert","body:string:string"],"string"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 51"],[],"W13R6Stringable"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-direct-mixed-stringable (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["convert","body:string:string"],"string"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 56"],[],"W13R6Stringable"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-direct-mixed-int (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 61"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-named-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:named"],"1","x"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeNamed(): Argument #1 ($first) must be of type string, int given, called in /w/review_r6_references.php on line 91"],[],1,"x"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:1"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 96"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-named (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-reflect-union-string (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:string:string"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-post-failure (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R6Source::$intProp of type int"],["TypeError","Cannot assign array to property W13R6Source::$intProp of type int"],"write",2],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 138"],["TypeError","Cannot assign array to property W13R6Source::$intProp of type int"],"write",2],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 146"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-named-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 151"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-fixedprefix (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:prefix:1"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takePrefix(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 157"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-variadic-pos-named (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["ok",["body:variadic:2"],"1"],"diagnostics":[]}
+                PHP: {"result":[["TypeError","W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 162"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-literal-pos-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #2 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-param-literal-named-second (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 ($v) could not be passed by reference"],[],1],"diagnostics":[]}
+                PHP: {"result":[["Error","W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"],[],1],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-write (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-reference (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-static (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-target (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-nested (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-global (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-conversion (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"]],"diagnostics":[]}
+                PHP: {"result":[["Exception","convert"],["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-hook (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-readonly-private (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot modify private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot modify private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-scope-readonly-private-unset (0.00s)
+            object_review_r6_test.go:47: Go: {"result":["Error","Cannot unset private(set) readonly property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeParent"],"diagnostics":[]}
+                PHP: {"result":["Error","Cannot unset private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.637s
+FAIL

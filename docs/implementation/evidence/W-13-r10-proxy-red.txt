@@ -1,0 +1,24 @@
+--- FAIL: TestW13R10ProxyMetadata (0.00s)
+    --- FAIL: TestW13R10ProxyMetadata/32/r10-proxy-plain-cold-global-read (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x0 pc=0x105096fa8]
+
+goroutine 5 [running]:
+testing.tRunner.func1.2({0x105460b40, 0x1054d6800})
+	/usr/local/go/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1977 +0x318
+panic({0x105460b40?, 0x1054d6800?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/HazelnutParadise/phego/internal/runtime.(*heap).readObject(0x4bc0ec49e000, {0x7, 0x0, 0x0, 0x0, {0x0, 0x0}, 0x0, 0x4bc0ec3d05a0, 0x0}, ...)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_properties.go:254 +0xb28
+github.com/HazelnutParadise/phego/internal/runtime.w13R10ProxyCase(0x4bc0ec496488, 0x4bc0ec49e000, {0x4bc0ec36e160, 0x20})
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r10_proxy_test.go:116 +0xf9c
+github.com/HazelnutParadise/phego/internal/runtime.TestW13R10ProxyMetadata.func1(0x4bc0ec496488)
+	/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_review_r10_proxy_test.go:36 +0x5c
+testing.tRunner(0x4bc0ec496488, 0x4bc0ec3da260)
+	/usr/local/go/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 4
+	/usr/local/go/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.930s
+FAIL

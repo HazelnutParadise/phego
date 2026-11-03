@@ -1,0 +1,103 @@
+{
+  "scope": "latest_review_local_regression",
+  "source_commit": "1d905f0c2ad5c322db44a8f8828156c300b1fdc5",
+  "recorded_at_utc": "2026-11-01T09:00:38.875783+00:00",
+  "go_version": "go version go1.26.5 darwin/arm64",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "CGO_ENABLED=0 go test -race ./...",
+      "exit_code": 0,
+      "stdout": "ok  \tgithub.com/HazelnutParadise/phego\t1.896s\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t2.001s\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.799s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t(cached)\n",
+      "stderr": ""
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go test -c ./internal/policy -o /tmp/phego-policy-windows.test.exe",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 311,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+      "stderr": ""
+    }
+  ],
+  "prior_tool_suite_evidence": "W-20-final-local.json (466 tests, unchanged Python tools)",
+  "approved_behavior": "Overlapping FS mounts require bounded ReadDirFile enumeration with exact names consistent with Open; unverifiable paths are denied. Legacy Files remains unchanged.",
+  "regressions_failed_before_fix": [
+    "TestNetworkIPv6ZoneNamesRemainCaseSensitive: grant for En0 authorized the different en0 zone",
+    "TestPublicRefusesDeprecatedIPv6LocalRanges: fec0::1, feff:ffff::1, ::2, ::127.0.0.1 classified public",
+    "TestReadOnlyParentsResolveWritableChildAliases: aliases to explicit writable child denied",
+    "TestFSMountsRejectUnlistedCaseAliases: read hidden data via /Protected/hidden",
+    "TestFSMountsRequireBoundedDirectoryEnumeration: unverifiable FS accepted beside shadow mount",
+    "TestFSVirtualAncestorsDoNotEnableCaseAliases: virtual ancestor enabled hidden case alias",
+    "Public zone-bearing fec0::1%En0 and 2001:db8::1%En0 bypassed prefix checks"
+  ],
+  "limitations": [
+    "VM unimplemented; full PHP and application acceptance not_run",
+    "Windows cross-compiled only",
+    "Trusted host FS must confine operations and provide consistent exact names"
+  ],
+  "pre_fix_reproductions": [
+    {
+      "source_commit": "04cfb82de952906107a0e2c2e3ae2a28f1a66031",
+      "test_source_commit": "1d905f0c2ad5c322db44a8f8828156c300b1fdc5",
+      "test_file": "internal/policy/review_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace only test_file with git show test_source_commit:test_file",
+      "command": "CGO_ENABLED=0 go test ./internal/policy -run 'TestNetworkIPv6ZoneNamesRemainCaseSensitive|TestPublicRefusesDeprecatedIPv6LocalRanges' -count=1",
+      "expected_exit": "nonzero: regression reproduced",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestNetworkIPv6ZoneNamesRemainCaseSensitive (0.00s)\n    review_test.go:234: grant for En0 authorized the different en0 zone\n--- FAIL: TestPublicRefusesDeprecatedIPv6LocalRanges (0.00s)\n    review_test.go:246: non-public address fec0::1 classified as public\n    review_test.go:246: non-public address feff:ffff::1 classified as public\n    review_test.go:246: non-public address ::2 classified as public\n    review_test.go:246: non-public address ::127.0.0.1 classified as public\n    review_test.go:246: non-public address fec0::1%En0 classified as public\n    review_test.go:246: non-public address 2001:db8::1%En0 classified as public\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.533s\nFAIL\n",
+      "stderr": "",
+      "argv": [
+        "go",
+        "test",
+        "./internal/policy",
+        "-run",
+        "TestNetworkIPv6ZoneNamesRemainCaseSensitive|TestPublicRefusesDeprecatedIPv6LocalRanges",
+        "-count=1"
+      ],
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "recorded_at_utc": "2026-11-01T09:33:25.534092+00:00"
+    },
+    {
+      "source_commit": "005b5623bb5f48175da13b94d0516246fe148744",
+      "test_source_commit": "d500e155322cfcb8f88dd8a95cc9078e4fe3cedb",
+      "test_file": "internal/policy/overlap_test.go",
+      "setup": "git archive source_commit into a disposable directory; replace only test_file with git show test_source_commit:test_file",
+      "command": "CGO_ENABLED=0 go test ./internal/policy -run 'TestReadOnlyParentsResolveWritableChildAliases|TestFSMountsRejectUnlistedCaseAliases|TestFSMountsRequireBoundedDirectoryEnumeration|TestFSVirtualAncestorsDoNotEnableCaseAliases' -count=1",
+      "expected_exit": "nonzero: regression reproduced",
+      "exit_code": 1,
+      "stdout": "--- FAIL: TestReadOnlyParentsResolveWritableChildAliases (0.01s)\n    --- FAIL: TestReadOnlyParentsResolveWritableChildAliases/same (0.00s)\n        overlap_test.go:679: policy: file-write open \"/alias/file\" refused (not-granted)\n    --- FAIL: TestReadOnlyParentsResolveWritableChildAliases/separate (0.00s)\n        overlap_test.go:679: policy: file-write open \"/alias/file\" refused (not-granted)\n    overlap_test.go:706: policy: file-write open \"/alias/new\" refused (not-granted)\n--- FAIL: TestFSMountsRejectUnlistedCaseAliases (0.00s)\n    overlap_test.go:742: read hidden data via /Protected/hidden\n--- FAIL: TestFSMountsRequireBoundedDirectoryEnumeration (0.00s)\n    overlap_test.go:760: unverifiable FS accepted beside shadow mount\n--- FAIL: TestFSVirtualAncestorsDoNotEnableCaseAliases (0.00s)\n    overlap_test.go:778: virtual ancestor enabled hidden case alias\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/policy\t0.535s\nFAIL\n",
+      "stderr": "",
+      "argv": [
+        "go",
+        "test",
+        "./internal/policy",
+        "-run",
+        "TestReadOnlyParentsResolveWritableChildAliases|TestFSMountsRejectUnlistedCaseAliases|TestFSMountsRequireBoundedDirectoryEnumeration|TestFSVirtualAncestorsDoNotEnableCaseAliases",
+        "-count=1"
+      ],
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "recorded_at_utc": "2026-11-01T09:33:25.534250+00:00"
+    }
+  ]
+}

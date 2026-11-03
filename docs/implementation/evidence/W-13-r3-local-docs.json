@@ -1,0 +1,21 @@
+{
+  "scope": "documentation_only",
+  "status": "pass",
+  "counts": {
+    "chapters": 40,
+    "requirements": 101,
+    "acceptance_scenarios": 202,
+    "work_packages": 60,
+    "decisions": 28,
+    "sources": 57,
+    "local_markdown_links": 419,
+    "checks": 34,
+    "catalogs": {
+      "php-history-policy.json": 7,
+      "competitor-catalog.json": 8,
+      "application-catalog.json": 9
+    }
+  },
+  "product_test_status": "not_run",
+  "errors": []
+}

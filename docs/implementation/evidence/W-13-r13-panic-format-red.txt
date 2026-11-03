@@ -1,0 +1,52 @@
+--- FAIL: TestW13R13ResourceCloseReentry (0.00s)
+    --- FAIL: TestW13R13ResourceCloseReentry/32/last-release/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/last-release/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/last-release/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-owned/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-owned/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-owned/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-temporary/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-temporary/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+    --- FAIL: TestW13R13ResourceCloseReentry/32/explicit-temporary/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+    --- FAIL: TestW13R13ResourceCloseReentry/64/last-release/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/last-release/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/last-release/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-owned/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-owned/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-owned/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-temporary/keep-alias/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-temporary/drop-reacquire/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+    --- FAIL: TestW13R13ResourceCloseReentry/64/explicit-temporary/drop-only/panic-reentry (0.00s)
+        object_review_r13_resources_test.go:98: callback assign=resource generation is no longer valid unset=<nil>
+        object_review_r13_resources_test.go:128: raw temporary record should remain until discard: resource generation is no longer valid
+        object_review_r13_resources_test.go:142: resource generation is no longer valid
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.077s
+FAIL

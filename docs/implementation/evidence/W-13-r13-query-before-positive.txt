@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13InterfaceTraversal/identity/plain-chain-32/hit-root-8         	 2046639	        58.26 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/plain-chain-32/hit-root-8         	 2045104	        58.95 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/plain-chain-32/hit-root-8         	 2058531	        58.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/interface-chain-32/hit-root-8     	 1209979	        98.79 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/interface-chain-32/hit-root-8     	 1211288	        98.93 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/interface-chain-32/hit-root-8     	 1210896	        98.99 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/diamond-22/hit-root-8             	 1895876	        64.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/diamond-22/hit-root-8             	 1878106	        63.38 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/identity/diamond-22/hit-root-8             	 1900520	        63.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/plain-chain-32/hit-root-8            	  509157	       231.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/plain-chain-32/hit-root-8            	  524695	       226.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/plain-chain-32/hit-root-8            	  521899	       226.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/interface-chain-32/hit-root-8        	  445474	       271.4 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/interface-chain-32/hit-root-8        	  443022	       270.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/interface-chain-32/hit-root-8        	  435748	       270.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/diamond-22/hit-root-8                	  991564	       120.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/diamond-22/hit-root-8                	  992384	       120.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13InterfaceTraversal/named/diamond-22/hit-root-8                	 1000000	       120.5 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	3.382s

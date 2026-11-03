@@ -1,0 +1,14 @@
+--- FAIL: TestW13R9DynamicChurnBounded (0.02s)
+    --- FAIL: TestW13R9DynamicChurnBounded/0 (0.01s)
+        object_review_r9_table_test.go:45: retained storage too large: anchors=0 used=100000 capacity=100015
+    --- FAIL: TestW13R9DynamicChurnBounded/1 (0.01s)
+        object_review_r9_table_test.go:45: retained storage too large: anchors=1 used=100001 capacity=100015
+    --- FAIL: TestW13R9DynamicChurnBounded/32 (0.01s)
+        object_review_r9_table_test.go:45: retained storage too large: anchors=32 used=100032 capacity=100047
+--- FAIL: TestW13R9ReentrantTable (0.00s)
+    object_review_r9_table_test.go:129: panic left reclamation inhibited: used=1053
+--- FAIL: TestW13R9DetachedStorage (0.00s)
+    object_review_r9_table_test.go:183: removed location retains later blocks or its old name
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.612s
+FAIL

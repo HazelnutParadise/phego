@@ -1,0 +1,268 @@
+--- FAIL: TestW13R11TraitDescriptorCollisions (0.00s)
+    --- FAIL: TestW13R11TraitDescriptorCollisions/default-kind (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible default-kind visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/default-value (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible default-value visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/visibility (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible visibility visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/static (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible static visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/readonly (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible readonly visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/type (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible type visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/get-hook (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible get-hook visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/set-hook (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible set-hook visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/array-order (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible array-order visibility=2
+    --- FAIL: TestW13R11TraitDescriptorCollisions/nan (0.00s)
+        object_review_r11_trait_validation_test.go:47: accepted incompatible nan visibility=2
+--- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence (0.00s)
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/duplicate-normalized-key (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/nested-keys (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/empty-array (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/empty-string (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/union (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/nullable (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/intersection (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+    --- FAIL: TestW13R11TraitSnapshotAndTypeEquivalence/float-widen (0.00s)
+        object_review_r11_trait_validation_test.go:75: compatible traits produced 2 descriptors/2 slots
+--- FAIL: TestW13R11TraitProperties (0.15s)
+    --- FAIL: TestW13R11TraitProperties/32 (0.08s)
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-int-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-int-normal
+                Go: {"result":[[["x","W13R11Traits_private_int"],["x","W13R11Traits_private_int"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_int"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-int-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-int-lazy
+                Go: {"result":[[["x","W13R11Traits_private_int"],["x","W13R11Traits_private_int"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_int"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-null-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-null-normal
+                Go: {"result":[[["x","W13R11Traits_private_null"],["x","W13R11Traits_private_null"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_null"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-null-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-null-lazy
+                Go: {"result":[[["x","W13R11Traits_private_null"],["x","W13R11Traits_private_null"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_null"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-uninitialized-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-uninitialized-normal
+                Go: {"result":[[["x","W13R11Traits_private_uninitialized"],["x","W13R11Traits_private_uninitialized"]],["Error","Typed property W13R11Traits_private_uninitialized::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_uninitialized"]],["Error","Typed property W13R11Traits_private_uninitialized::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-uninitialized-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-uninitialized-lazy
+                Go: {"result":[[["x","W13R11Traits_private_uninitialized"],["x","W13R11Traits_private_uninitialized"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_uninitialized"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-nullable-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-nullable-normal
+                Go: {"result":[[["x","W13R11Traits_private_nullable"],["x","W13R11Traits_private_nullable"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_nullable"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-nullable-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-nullable-lazy
+                Go: {"result":[[["x","W13R11Traits_private_nullable"],["x","W13R11Traits_private_nullable"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_nullable"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-union-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-union-normal
+                Go: {"result":[[["x","W13R11Traits_private_union"],["x","W13R11Traits_private_union"]],["int",1],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_union"]],["int",1],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-union-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-union-lazy
+                Go: {"result":[[["x","W13R11Traits_private_union"],["x","W13R11Traits_private_union"]],null,[true,0],null,[true,0],["string","new"],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_union"]],null,[true,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-array-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-array-normal
+                Go: {"result":[[["x","W13R11Traits_private_array"],["x","W13R11Traits_private_array"]],["array",{"2":"v","k":1}],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_array"]],["array",{"2":"v","k":1}],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-array-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-array-lazy
+                Go: {"result":[[["x","W13R11Traits_private_array"],["x","W13R11Traits_private_array"]],null,[true,0],null,[true,0],["array",[2]],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_array"]],null,[true,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-empty-array-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-empty-array-normal
+                Go: {"result":[[["x","W13R11Traits_private_empty_array"],["x","W13R11Traits_private_empty_array"]],["array",[]],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_empty_array"]],["array",[]],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-empty-array-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-empty-array-lazy
+                Go: {"result":[[["x","W13R11Traits_private_empty_array"],["x","W13R11Traits_private_empty_array"]],null,[true,0],null,[true,0],["array",[2]],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_empty_array"]],null,[true,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-string-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-string-normal
+                Go: {"result":[[["x","W13R11Traits_private_string"],["x","W13R11Traits_private_string"]],["string",""],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_string"]],["string",""],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-string-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-string-lazy
+                Go: {"result":[[["x","W13R11Traits_private_string"],["x","W13R11Traits_private_string"]],null,[true,0],null,[true,0],["string","new"],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_string"]],null,[true,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-float-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-float-normal
+                Go: {"result":[[["x","W13R11Traits_private_float"],["x","W13R11Traits_private_float"]],["float",1],[false,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_float"]],["float",1],[false,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-float-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-float-lazy
+                Go: {"result":[[["x","W13R11Traits_private_float"],["x","W13R11Traits_private_float"]],null,[true,0],null,[true,0],["float",7.5],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_float"]],null,[true,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-self-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-self-normal
+                Go: {"result":[[["x","W13R11Traits_private_self"],["x","W13R11Traits_private_self"]],["Error","Typed property W13R11Traits_private_self::$x must not be accessed before initialization"],[false,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_self"]],["Error","Typed property W13R11Traits_private_self::$x must not be accessed before initialization"],[false,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-private-self-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-self-lazy
+                Go: {"result":[[["x","W13R11Traits_private_self"],["x","W13R11Traits_private_self"]],null,[true,0],null,[true,0],true,null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_self"]],null,[true,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-ancestor-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-ancestor-private-normal
+                Go: {"result":[[["x","W13R11Traits_ancestor_private"],["x","W13R11Traits_ancestor_private"]],["int",1],[false,0],null,[false,0],["int",7],9,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_ancestor_private"]],["int",1],[false,0],null,[false,0],["int",7],9,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-ancestor-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-ancestor-private-lazy
+                Go: {"result":[[["x","W13R11Traits_ancestor_private"],["x","W13R11Traits_ancestor_private"]],null,[true,0],null,[true,0],["int",7],9,[false,1]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_ancestor_private"]],null,[true,0],null,[true,0],["int",7],9,[false,1]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-class-own-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-class-own-private-normal
+                Go: {"result":[[["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_class_own_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-class-own-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-class-own-private-lazy
+                Go: {"result":[[["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_class_own_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-nested-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-nested-private-normal
+                Go: {"result":[[["x","W13R11Traits_nested_private"],["x","W13R11Traits_nested_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_nested_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-nested-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-nested-private-lazy
+                Go: {"result":[[["x","W13R11Traits_nested_private"],["x","W13R11Traits_nested_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_nested_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-readonly-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-readonly-private-normal
+                Go: {"result":[[["x","W13R11Traits_readonly_private"],["x","W13R11Traits_readonly_private"]],["Error","Typed property W13R11Traits_readonly_private::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_readonly_private"]],["Error","Typed property W13R11Traits_readonly_private::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/32/r11-trait-readonly-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-readonly-private-lazy
+                Go: {"result":[[["x","W13R11Traits_readonly_private"],["x","W13R11Traits_readonly_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_readonly_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+    --- FAIL: TestW13R11TraitProperties/64 (0.07s)
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-int-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-int-normal
+                Go: {"result":[[["x","W13R11Traits_private_int"],["x","W13R11Traits_private_int"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_int"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-int-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-int-lazy
+                Go: {"result":[[["x","W13R11Traits_private_int"],["x","W13R11Traits_private_int"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_int"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-null-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-null-normal
+                Go: {"result":[[["x","W13R11Traits_private_null"],["x","W13R11Traits_private_null"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_null"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-null-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-null-lazy
+                Go: {"result":[[["x","W13R11Traits_private_null"],["x","W13R11Traits_private_null"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_null"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-uninitialized-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-uninitialized-normal
+                Go: {"result":[[["x","W13R11Traits_private_uninitialized"],["x","W13R11Traits_private_uninitialized"]],["Error","Typed property W13R11Traits_private_uninitialized::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_uninitialized"]],["Error","Typed property W13R11Traits_private_uninitialized::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-uninitialized-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-uninitialized-lazy
+                Go: {"result":[[["x","W13R11Traits_private_uninitialized"],["x","W13R11Traits_private_uninitialized"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_uninitialized"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-nullable-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-nullable-normal
+                Go: {"result":[[["x","W13R11Traits_private_nullable"],["x","W13R11Traits_private_nullable"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_nullable"]],["null",null],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-nullable-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-nullable-lazy
+                Go: {"result":[[["x","W13R11Traits_private_nullable"],["x","W13R11Traits_private_nullable"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_nullable"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-union-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-union-normal
+                Go: {"result":[[["x","W13R11Traits_private_union"],["x","W13R11Traits_private_union"]],["int",1],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_union"]],["int",1],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-union-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-union-lazy
+                Go: {"result":[[["x","W13R11Traits_private_union"],["x","W13R11Traits_private_union"]],null,[true,0],null,[true,0],["string","new"],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_union"]],null,[true,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-array-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-array-normal
+                Go: {"result":[[["x","W13R11Traits_private_array"],["x","W13R11Traits_private_array"]],["array",{"2":"v","k":1}],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_array"]],["array",{"2":"v","k":1}],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-array-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-array-lazy
+                Go: {"result":[[["x","W13R11Traits_private_array"],["x","W13R11Traits_private_array"]],null,[true,0],null,[true,0],["array",[2]],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_array"]],null,[true,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-empty-array-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-empty-array-normal
+                Go: {"result":[[["x","W13R11Traits_private_empty_array"],["x","W13R11Traits_private_empty_array"]],["array",[]],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_empty_array"]],["array",[]],[false,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-empty-array-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-empty-array-lazy
+                Go: {"result":[[["x","W13R11Traits_private_empty_array"],["x","W13R11Traits_private_empty_array"]],null,[true,0],null,[true,0],["array",[2]],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_empty_array"]],null,[true,0],null,[false,0],["array",[2]],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-string-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-string-normal
+                Go: {"result":[[["x","W13R11Traits_private_string"],["x","W13R11Traits_private_string"]],["string",""],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_string"]],["string",""],[false,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-string-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-string-lazy
+                Go: {"result":[[["x","W13R11Traits_private_string"],["x","W13R11Traits_private_string"]],null,[true,0],null,[true,0],["string","new"],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_string"]],null,[true,0],null,[false,0],["string","new"],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-float-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-float-normal
+                Go: {"result":[[["x","W13R11Traits_private_float"],["x","W13R11Traits_private_float"]],["float",1],[false,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_float"]],["float",1],[false,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-float-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-float-lazy
+                Go: {"result":[[["x","W13R11Traits_private_float"],["x","W13R11Traits_private_float"]],null,[true,0],null,[true,0],["float",7.5],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_float"]],null,[true,0],null,[false,0],["float",7.5],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-self-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-self-normal
+                Go: {"result":[[["x","W13R11Traits_private_self"],["x","W13R11Traits_private_self"]],["Error","Typed property W13R11Traits_private_self::$x must not be accessed before initialization"],[false,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_self"]],["Error","Typed property W13R11Traits_private_self::$x must not be accessed before initialization"],[false,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-private-self-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-private-self-lazy
+                Go: {"result":[[["x","W13R11Traits_private_self"],["x","W13R11Traits_private_self"]],null,[true,0],null,[true,0],true,null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_private_self"]],null,[true,0],null,[false,0],true,null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-ancestor-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-ancestor-private-normal
+                Go: {"result":[[["x","W13R11Traits_ancestor_private"],["x","W13R11Traits_ancestor_private"]],["int",1],[false,0],null,[false,0],["int",7],9,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_ancestor_private"]],["int",1],[false,0],null,[false,0],["int",7],9,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-ancestor-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-ancestor-private-lazy
+                Go: {"result":[[["x","W13R11Traits_ancestor_private"],["x","W13R11Traits_ancestor_private"]],null,[true,0],null,[true,0],["int",7],9,[false,1]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_ancestor_private"]],null,[true,0],null,[true,0],["int",7],9,[false,1]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-class-own-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-class-own-private-normal
+                Go: {"result":[[["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_class_own_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-class-own-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-class-own-private-lazy
+                Go: {"result":[[["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"],["x","W13R11Traits_class_own_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_class_own_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-nested-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-nested-private-normal
+                Go: {"result":[[["x","W13R11Traits_nested_private"],["x","W13R11Traits_nested_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_nested_private"]],["int",1],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-nested-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-nested-private-lazy
+                Go: {"result":[[["x","W13R11Traits_nested_private"],["x","W13R11Traits_nested_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_nested_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-readonly-private-normal (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-readonly-private-normal
+                Go: {"result":[[["x","W13R11Traits_readonly_private"],["x","W13R11Traits_readonly_private"]],["Error","Typed property W13R11Traits_readonly_private::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_readonly_private"]],["Error","Typed property W13R11Traits_readonly_private::$x must not be accessed before initialization"],[false,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+        --- FAIL: TestW13R11TraitProperties/64/r11-trait-readonly-private-lazy (0.00s)
+            object_review_r11_traits_test.go:192: r11-trait-readonly-private-lazy
+                Go: {"result":[[["x","W13R11Traits_readonly_private"],["x","W13R11Traits_readonly_private"]],null,[true,0],null,[true,0],["int",7],null,[true,0]],"diagnostics":[]}
+                PHP: {"result":[[["x","W13R11Traits_readonly_private"]],null,[true,0],null,[false,0],["int",7],null,[false,0]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.068s
+FAIL

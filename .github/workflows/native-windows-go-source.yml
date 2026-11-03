@@ -1,0 +1,124 @@
+name: Native Windows Go source reference
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/native-windows-go-source.yml'
+      - 'compat.lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-windows-go-source:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify runner and locked inputs
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw 'Expected an amd64 runner' }
+          $lock = Get-Content -Raw -LiteralPath compat.lock.json | ConvertFrom-Json
+          $windows = @($lock.go.additional_archives | Where-Object { $_.platform -eq 'windows/amd64' })
+          if ($lock.go.version -ne '1.27.3' -or $windows.Count -ne 1) { throw 'Unexpected Go lock' }
+          if ($windows[0].archive_url -ne 'https://go.dev/dl/go1.27.3.windows-amd64.zip' -or $windows[0].archive_sha256 -ne 'f26081f438319757f8a1b46d7d0b2c5ec7583d4038e485e0aa725cfde7885fff') { throw 'Unexpected bootstrap lock' }
+          if ($lock.go.source_build.version -ne $lock.go.version -or $lock.go.source_build.archive_url -ne 'https://go.dev/dl/go1.27.3.src.tar.gz' -or $lock.go.source_build.archive_sha256 -ne '6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb') { throw 'Unexpected source lock' }
+          $evidence = Join-Path $env:RUNNER_TEMP 'phego-windows-go-source-evidence'
+          New-Item -ItemType Directory -Path $evidence | Out-Null
+          Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, OSArchitecture | Format-List | Out-File (Join-Path $evidence 'os.txt')
+          Get-CimInstance Win32_Processor | Select-Object Name, Architecture | Format-List | Out-File (Join-Path $evidence 'cpu.txt')
+          @('ImageOS=' + $env:ImageOS, 'ImageVersion=' + $env:ImageVersion, 'RunnerOS=' + $env:RUNNER_OS, 'RunnerArch=' + $env:RUNNER_ARCH) | Set-Content -LiteralPath (Join-Path $evidence 'runner.txt')
+          git rev-parse HEAD | Set-Content -LiteralPath (Join-Path $evidence 'commit.txt')
+          Get-FileHash -Algorithm SHA256 -LiteralPath compat.lock.json | Format-List | Out-File (Join-Path $evidence 'lock-sha256.txt')
+      - name: Download and verify both locked archives
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archives = @(
+            @{ Name = 'bootstrap.zip'; Url = 'https://go.dev/dl/go1.27.3.windows-amd64.zip'; Hash = 'f26081f438319757f8a1b46d7d0b2c5ec7583d4038e485e0aa725cfde7885fff' },
+            @{ Name = 'source.tar.gz'; Url = 'https://go.dev/dl/go1.27.3.src.tar.gz'; Hash = '6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb' }
+          )
+          foreach ($item in $archives) {
+            $path = Join-Path $env:RUNNER_TEMP $item.Name
+            & curl.exe --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 $item.Url -o $path
+            if ($LASTEXITCODE -ne 0) { throw "Download failed: $($item.Name)" }
+            if ((Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLowerInvariant() -ne $item.Hash) { throw "Digest mismatch: $($item.Name)" }
+          }
+      - name: Rebuild and execute twice
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $false
+          $evidence = Join-Path $env:RUNNER_TEMP 'phego-windows-go-source-evidence'
+          $root = Join-Path $env:RUNNER_TEMP 'phego-windows-go-source'
+          New-Item -ItemType Directory -Path $root | Out-Null
+          $env:CGO_ENABLED = '0'
+          $env:GOTOOLCHAIN = 'local'
+          $env:GOPROXY = 'off'
+          $env:GOSUMDB = 'off'
+          $env:GOENV = 'off'
+          $env:GOWORK = 'off'
+          Remove-Item Env:GOROOT, Env:GOFLAGS -ErrorAction SilentlyContinue
+          $utf8 = [System.Text.UTF8Encoding]::new($false)
+          $goHashes = @()
+          $probeHashes = @()
+          foreach ($number in 1, 2) {
+            $run = Join-Path $root "run$number"
+            $source = Join-Path $run 'source'
+            $bootstrap = Join-Path $run 'bootstrap'
+            New-Item -ItemType Directory -Path $source, $bootstrap -Force | Out-Null
+            Expand-Archive -LiteralPath (Join-Path $env:RUNNER_TEMP 'bootstrap.zip') -DestinationPath $bootstrap
+            & tar.exe -xzf (Join-Path $env:RUNNER_TEMP 'source.tar.gz') -C $source
+            if ($LASTEXITCODE -ne 0) { throw "Source extraction $number failed" }
+            $env:GOROOT_BOOTSTRAP = Join-Path $bootstrap 'go'
+            $env:GOCACHE = Join-Path $run 'cache'
+            $env:GOPATH = Join-Path $run 'gopath'
+            $src = Join-Path $source 'go/src'
+            Push-Location $src
+            try {
+              & cmd.exe /d /c make.bat *> (Join-Path $evidence "build-$number.log")
+              $buildExit = $LASTEXITCODE
+              $buildExit | Set-Content -LiteralPath (Join-Path $evidence "build-$number-exit.txt")
+              if ($buildExit -ne 0) { throw "Go source build $number failed with exit $buildExit" }
+            } finally { Pop-Location }
+            $go = Join-Path $source 'go/bin/go.exe'
+            $version = & $go version
+            if ($LASTEXITCODE -ne 0 -or $version -ne 'go version go1.27.3 windows/amd64') { throw "Unexpected rebuilt version: $version" }
+            $probeDir = Join-Path $run 'probe'
+            New-Item -ItemType Directory -Path $probeDir | Out-Null
+            [System.IO.File]::WriteAllText((Join-Path $probeDir 'go.mod'), "module example.com/phego/source-probe`n`ngo 1.27`n", $utf8)
+            [System.IO.File]::WriteAllText((Join-Path $probeDir 'main.go'), "package main`nimport (`n`"fmt`"`n`"runtime`"`n)`nfunc main() { fmt.Printf(`"probe %s %s/%s\n`", runtime.Version(), runtime.GOOS, runtime.GOARCH) }`n", $utf8)
+            Push-Location $probeDir
+            try {
+              & $go build -trimpath -buildvcs=false -o (Join-Path $run 'probe.exe') . *> (Join-Path $evidence "probe-build-$number.log")
+              $probeBuildExit = $LASTEXITCODE
+              $probeBuildExit | Set-Content -LiteralPath (Join-Path $evidence "probe-build-$number-exit.txt")
+              if ($probeBuildExit -ne 0) { throw "Probe build $number failed with exit $probeBuildExit" }
+            } finally { Pop-Location }
+            & (Join-Path $run 'probe.exe') *> (Join-Path $evidence "probe-run-$number.log")
+            $probeExit = $LASTEXITCODE
+            $probeExit | Set-Content -LiteralPath (Join-Path $evidence "probe-run-$number-exit.txt")
+            $output = (Get-Content -Raw -LiteralPath (Join-Path $evidence "probe-run-$number.log")).Trim()
+            if ($probeExit -ne 0 -or $output -ne 'probe go1.27.3 windows/amd64') { throw "Probe $number failed with exit ${probeExit}: $output" }
+            $goHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $go).Hash.ToLowerInvariant()
+            $probeHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $run 'probe.exe')).Hash.ToLowerInvariant()
+            $goHashes += $goHash
+            $probeHashes += $probeHash
+            @($version, $output, "go sha256 $goHash", "probe sha256 $probeHash") | Set-Content -LiteralPath (Join-Path $evidence "result-$number.txt")
+          }
+          if ($goHashes[0] -ne $goHashes[1] -or $probeHashes[0] -ne $probeHashes[1]) { throw 'Independent builds differ' }
+          'Independent Go and probe binaries match' | Set-Content -LiteralPath (Join-Path $evidence 'comparison.txt')
+      - name: Retain raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-windows-go-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/phego-windows-go-source-evidence/
+          if-no-files-found: warn
+          retention-days: 30

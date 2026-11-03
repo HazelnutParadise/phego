@@ -1,0 +1,12 @@
+--- FAIL: TestW13R5PHP8512Regression (0.01s)
+    --- FAIL: TestW13R5PHP8512Regression/32 (0.00s)
+        --- FAIL: TestW13R5PHP8512Regression/32/r5-life-source-inherited (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$a of type string and property W13R5InfoBase::$m of type mixed, as this would result in an inconsistent type conversion"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed and property W13R5InfoBase::$a of type string, as this would result in an inconsistent type conversion"]],[],null,"stdClass"],"diagnostics":[]}
+    --- FAIL: TestW13R5PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-source-inherited (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$a of type string and property W13R5InfoBase::$m of type mixed, as this would result in an inconsistent type conversion"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed and property W13R5InfoBase::$a of type string, as this would result in an inconsistent type conversion"]],[],null,"stdClass"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.923s
+FAIL

@@ -1,0 +1,229 @@
+{
+  "scope": "first 4096 bytes of regular .c/.h files under ext/bcmath/libbcmath; marker matches only, not license classification",
+  "archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "status": "partial",
+  "files": [
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/add.c",
+      "size": 2278,
+      "sha256": "d2cca4a01d2664cdb1ed46ba4771bb771d4ea12f39100e19d0c7940c2fcd0a0c",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/bcmath.h",
+      "size": 5583,
+      "sha256": "c7ba5cd2c678db392f397f6676dba7a896dc1fe1d48eaa1d542638ede0a11b8f",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/compare.c",
+      "size": 4798,
+      "sha256": "5df22443f5fc0d2693fc8c97c4bf87484cc8e141ec873598fe609815ddf71c84",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/config.h",
+      "size": 95,
+      "sha256": "2ed8458ae606124eb31d51ba05e3b1786dea4b924379d1a78e13dea9238cb048",
+      "markers": []
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/convert.c",
+      "size": 5249,
+      "sha256": "3eec3408f5a2fc9306da258c6dc2ac0db5b2920c4b6d3b71b1a20173fda58649",
+      "markers": [
+        "PHP license 3.01 text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/convert.h",
+      "size": 3271,
+      "sha256": "ea1e9f601274f209df10a1d3f16ce9ed9c5c3c7eb9a38370c2b4d2f323683010",
+      "markers": [
+        "PHP license 3.01 text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/div.c",
+      "size": 17711,
+      "sha256": "f77508ae0a2433cfb905cb2db14f459bc48e470133878c187f6ed2123d9275f8",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/divmod.c",
+      "size": 2624,
+      "sha256": "7f13114356b815acb5ca67d2067faf50d73c4a83c2124178745acdbf30965184",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/doaddsub.c",
+      "size": 8789,
+      "sha256": "bf4650e3602bd994acc4354dafdc1e1af107196513919e409c5a0b836baf5087",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/floor_or_ceil.c",
+      "size": 2118,
+      "sha256": "fe42d9ff3dcdaf45a86569b2dda545f542582592784712aa62ac9824d00d0271",
+      "markers": [
+        "PHP license 3.01 text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/init.c",
+      "size": 3323,
+      "sha256": "4398b7c18bc4e14642291015e31392960b4e313bf7f32d1cd6888e475b3d30e8",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/int2num.c",
+      "size": 1910,
+      "sha256": "12eab11e5df77b838c6a92a45c8fd899c836a215f52c832741ed1e5aaabe7f16",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/long2num.c",
+      "size": 1846,
+      "sha256": "bd1c4a20e5f8cae280f5cd092ae7e1150a45b87be77d81169c07be2be2cc16fb",
+      "markers": [
+        "PHP license 3.01 text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/nearzero.c",
+      "size": 1829,
+      "sha256": "b88866e3559b7b74f7a0ae6f7b252afbda915f05ee597a5c3bfc57cc21b3cebe",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/neg.c",
+      "size": 1408,
+      "sha256": "858bc804b1659e7c0f587e2f4e9f49cda3fadf6cdf784b0c4f1c51f39005882c",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/num2long.c",
+      "size": 1993,
+      "sha256": "6a7a11bac089d81fbe62790f7ba19c5d2d0ac5c81670f60c2debb38a8167d22b",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/num2str.c",
+      "size": 2376,
+      "sha256": "a143543028d981091b92742cfd59370a6b592f7d468e7052da6dfec221d29a4f",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/private.h",
+      "size": 3204,
+      "sha256": "617e85a2fba5c400398b6f9c9571a7512a5e2b9ab6455f4ecd4dfcabc20d20ca",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/raise.c",
+      "size": 8464,
+      "sha256": "c1ae502b8412359e5738ce1cfb5fbbebed4b421ed53dda09342ffd5dc3a172d0",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/raisemod.c",
+      "size": 2896,
+      "sha256": "132ebe36468c299d1475ae8e458808d8f201b69b88952b5c148419154ec23fd9",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/recmul.c",
+      "size": 6742,
+      "sha256": "a758d3586f7a847853c91865af0be4b28a5ed7f2a4179446b738a4d6763a7258",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/rmzero.c",
+      "size": 1865,
+      "sha256": "fe1440c5e9864498568f5ceb8cc5341a877d9ec9eecf169b52379a7ee98d5ca6",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/round.c",
+      "size": 6256,
+      "sha256": "36d08f7d8a598217b9e17cdbf29dabe3caa5f0e42551b3cc96f2cf61f6cbcd5e",
+      "markers": [
+        "PHP license 3.01 text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/sqrt.c",
+      "size": 3442,
+      "sha256": "f98b69bdcac041523839cf6fab73f73d953f2cf07423d31eb04a9019757f3cd8",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/str2num.c",
+      "size": 6636,
+      "sha256": "9f4f1278b6143d33722ec47a305c08f4c92a236ff50d046b487c2a3b7c7af74f",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/sub.c",
+      "size": 2372,
+      "sha256": "f10beae07f960b92e8fc253fc3f380015b9c475852127f0cde2bbe1c2d71e0de",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/xsse.h",
+      "size": 81050,
+      "sha256": "d53aeb660a0f6ac5f515c16d36d5ae17f3acc682b9ee7fefdeb5734a055eafaa",
+      "markers": [
+        "MIT License text"
+      ]
+    },
+    {
+      "path": "php-8.5.12/ext/bcmath/libbcmath/src/zero.c",
+      "size": 1815,
+      "sha256": "51d1dd8f716962009cdc24d9605d29961bc3bd0be5339247f14f6af0beda19c5",
+      "markers": [
+        "LGPL version 2 or later text"
+      ]
+    }
+  ]
+}

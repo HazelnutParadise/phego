@@ -1,0 +1,47 @@
+temp-reference-red
+--- FAIL: TestW13TemporaryReferenceLocationOwnership (0.00s)
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/object/bind (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 0 -1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/array/bind (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 0 -1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/reference/bind (0.00s)
+        object_request_ownership_test.go:205: first alias released the source 1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/resource/bind (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 1 -1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/object/foreach (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 0 -1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/array/foreach (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 0 -1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/reference/foreach (0.00s)
+        object_request_ownership_test.go:205: first alias released the source 1
+    --- FAIL: TestW13TemporaryReferenceLocationOwnership/resource/foreach (0.00s)
+        object_request_ownership_test.go:209: temporary reference lost ownership 1 -1
+    object_request_ownership_test.go:226: overwritten temporary was not released
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.083s
+FAIL
+
+isolated-runner-red
+E.....
+======================================================================
+ERROR: test_isolated_cases_preserve_observations (test_w13_reference.ReferenceRunnerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w06-values/phego/tools/test_w13_reference.py", line 74, in test_isolated_cases_preserve_observations
+    self.assertEqual(data["cases"]["lazy-rollback-write-declared"],{"result":["isolated","declared"],"diagnostics":[]})
+KeyError: 'lazy-rollback-write-declared'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.023s
+
+FAILED (errors=1)
+
+reference-unit-green
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.048s
+
+OK
+
+owner-green
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.657s
