@@ -1,0 +1,9 @@
+--- FAIL: TestCapabilityProgramsRoundTrip (0.00s)
+    review_test.go:134: capability 1: unsupported bytecode capability at byte -1, function -1, instruction -1: host does not support required capabilities
+--- FAIL: TestVerifierAcceptsBoundedValidationOfInfiniteLoop (0.00s)
+    review_test.go:144: valid control Build failed: invalid bytecode at byte -1, function 0, instruction -1: function has no reachable terminal instruction
+--- FAIL: TestFlowMemoryTracksReachableStates (0.00s)
+    review_test.go:157: empty reachable stacks should fit 256 KiB: bytecode verification limit exceeded
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.273s
+FAIL

@@ -1,0 +1,5 @@
+--- FAIL: TestChunkEndCannotOverflowNearMaximumIndex (0.00s)
+    review_test.go:250: chunk end overflowed: -9223372036854772532, want 9223372036854775807
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.603s
+FAIL

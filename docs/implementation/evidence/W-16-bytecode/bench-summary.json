@@ -1,0 +1,3082 @@
+{
+  "off": {
+    "BenchmarkDispatch/arithmetic/switch": {
+      "samples": [
+        {
+          "iterations": 226806,
+          "ns/op": 811.8,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 237732346.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 243016,
+          "ns/op": 818.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 235808814.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 215440,
+          "ns/op": 807.3,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 239078585.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 220910,
+          "ns/op": 816.0,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 236510611.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 219584,
+          "ns/op": 815.6,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 236637701.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 815.6,
+      "min_ns": 807.3,
+      "max_ns": 818.5
+    },
+    "BenchmarkDispatch/arithmetic/function-table": {
+      "samples": [
+        {
+          "iterations": 260956,
+          "ns/op": 696.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 277090415.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 248869,
+          "ns/op": 705.1,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 273721910.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 257128,
+          "ns/op": 735.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 262267006.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 252024,
+          "ns/op": 695.2,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 277637827.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 249135,
+          "ns/op": 707.8,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 272662307.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 705.1,
+      "min_ns": 695.2,
+      "max_ns": 735.9
+    },
+    "BenchmarkDispatch/arithmetic/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 222720,
+          "ns/op": 780.4,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 247315683.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 246628,
+          "ns/op": 781.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 246847721.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 265797,
+          "ns/op": 696.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 277086854.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 189774,
+          "ns/op": 831.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 231989840.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 251425,
+          "ns/op": 682.0,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 282972871.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 780.4,
+      "min_ns": 682.0,
+      "max_ns": 831.9
+    },
+    "BenchmarkDispatch/arithmetic/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 245238,
+          "ns/op": 722.0,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 267312394.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 240795,
+          "ns/op": 764.6,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 252410231.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 242672,
+          "ns/op": 733.2,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 263218992.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 248319,
+          "ns/op": 731.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 263855667.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 239520,
+          "ns/op": 728.4,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 264959295.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 731.5,
+      "min_ns": 722.0,
+      "max_ns": 764.6
+    },
+    "BenchmarkDispatch/arithmetic/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 295034,
+          "ns/op": 609.1,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 316846253.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 299262,
+          "ns/op": 604.6,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 319194423.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 297765,
+          "ns/op": 604.3,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 319390761.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 299689,
+          "ns/op": 611.4,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 315673013.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 296186,
+          "ns/op": 611.4,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 315687616.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 609.1,
+      "min_ns": 604.3,
+      "max_ns": 611.4
+    },
+    "BenchmarkDispatch/branch-heavy/switch": {
+      "samples": [
+        {
+          "iterations": 193437,
+          "ns/op": 940.7,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 271067685.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 189237,
+          "ns/op": 936.9,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 272169745.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 192618,
+          "ns/op": 933.6,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 273127258.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 192135,
+          "ns/op": 929.2,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 274422904.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 193356,
+          "ns/op": 934.4,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 272894424.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 934.4,
+      "min_ns": 929.2,
+      "max_ns": 940.7
+    },
+    "BenchmarkDispatch/branch-heavy/function-table": {
+      "samples": [
+        {
+          "iterations": 191797,
+          "ns/op": 910.2,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 280147849.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 196588,
+          "ns/op": 909.8,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 280269256.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 193114,
+          "ns/op": 898.3,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 283880807.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 193032,
+          "ns/op": 899.7,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 283417499.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 185955,
+          "ns/op": 911.4,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 279792589.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 909.8,
+      "min_ns": 898.3,
+      "max_ns": 911.4
+    },
+    "BenchmarkDispatch/branch-heavy/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 234164,
+          "ns/op": 769.7,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 331310678.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 234231,
+          "ns/op": 771.5,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 330510030.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 234423,
+          "ns/op": 765.8,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 332966582.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 234106,
+          "ns/op": 768.4,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 331874951.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 233554,
+          "ns/op": 768.3,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 331905680.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 768.4,
+      "min_ns": 765.8,
+      "max_ns": 771.5
+    },
+    "BenchmarkDispatch/branch-heavy/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 180408,
+          "ns/op": 1067.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 238961027.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 179704,
+          "ns/op": 1079.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 236424980.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 149143,
+          "ns/op": 1062.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 240214972.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 181238,
+          "ns/op": 1053.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 242150161.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 177728,
+          "ns/op": 1040.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 245305386.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 1062.0,
+      "min_ns": 1040.0,
+      "max_ns": 1079.0
+    },
+    "BenchmarkDispatch/branch-heavy/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 178111,
+          "ns/op": 1011.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 252278600.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 177639,
+          "ns/op": 1015.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 251136931.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 177312,
+          "ns/op": 1012.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 251953459.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 177868,
+          "ns/op": 1011.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 252202270.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 178281,
+          "ns/op": 1011.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 252150162.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 1011.0,
+      "min_ns": 1011.0,
+      "max_ns": 1015.0
+    },
+    "BenchmarkDispatch/binary-mixed/switch": {
+      "samples": [
+        {
+          "iterations": 428668,
+          "ns/op": 421.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 230202178.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 427798,
+          "ns/op": 416.0,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 233176474.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 433060,
+          "ns/op": 416.5,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 232913590.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 432804,
+          "ns/op": 420.7,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 230589969.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 433221,
+          "ns/op": 415.8,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 233305039.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 416.5,
+      "min_ns": 415.8,
+      "max_ns": 421.4
+    },
+    "BenchmarkDispatch/binary-mixed/function-table": {
+      "samples": [
+        {
+          "iterations": 436852,
+          "ns/op": 413.2,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 234754658.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 439716,
+          "ns/op": 411.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 235978156.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 438391,
+          "ns/op": 411.6,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 235681295.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 438172,
+          "ns/op": 412.8,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 234977677.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 441564,
+          "ns/op": 413.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 234790351.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 412.8,
+      "min_ns": 411.1,
+      "max_ns": 413.2
+    },
+    "BenchmarkDispatch/binary-mixed/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 508138,
+          "ns/op": 354.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 273897129.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 509691,
+          "ns/op": 356.9,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271796469.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 505032,
+          "ns/op": 356.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 272431213.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 509193,
+          "ns/op": 357.9,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271063738.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 505398,
+          "ns/op": 360.8,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 268816684.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 356.9,
+      "min_ns": 354.1,
+      "max_ns": 360.8
+    },
+    "BenchmarkDispatch/binary-mixed/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 426241,
+          "ns/op": 464.0,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 209056911.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 432601,
+          "ns/op": 408.7,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 237346776.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 450008,
+          "ns/op": 407.3,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 238164371.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 445723,
+          "ns/op": 403.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 240474891.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 443850,
+          "ns/op": 407.2,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 238226859.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 407.3,
+      "min_ns": 403.4,
+      "max_ns": 464.0
+    },
+    "BenchmarkDispatch/binary-mixed/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 424611,
+          "ns/op": 417.9,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 232106214.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 434961,
+          "ns/op": 415.0,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 233726069.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 429286,
+          "ns/op": 416.1,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 233092827.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 436857,
+          "ns/op": 415.6,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 233377277.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 431430,
+          "ns/op": 413.8,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 234415092.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 415.6,
+      "min_ns": 413.8,
+      "max_ns": 417.9
+    },
+    "BenchmarkDispatch/heldout-alternating/switch": {
+      "samples": [
+        {
+          "iterations": 366757,
+          "ns/op": 479.8,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 254269434.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 376125,
+          "ns/op": 480.4,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 253960941.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 370093,
+          "ns/op": 477.5,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 255496647.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 373300,
+          "ns/op": 481.5,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 253358356.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 369982,
+          "ns/op": 479.9,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 254231721.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 479.9,
+      "min_ns": 477.5,
+      "max_ns": 481.5
+    },
+    "BenchmarkDispatch/heldout-alternating/function-table": {
+      "samples": [
+        {
+          "iterations": 371852,
+          "ns/op": 482.8,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 252690661.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 373088,
+          "ns/op": 481.2,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 253533876.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 374931,
+          "ns/op": 481.3,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 253473601.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 367077,
+          "ns/op": 483.5,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 252309577.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 373072,
+          "ns/op": 485.9,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 251055334.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 482.8,
+      "min_ns": 481.2,
+      "max_ns": 485.9
+    },
+    "BenchmarkDispatch/heldout-alternating/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 438760,
+          "ns/op": 410.2,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 297432313.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 436848,
+          "ns/op": 410.3,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 297317395.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 434646,
+          "ns/op": 412.0,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 296094778.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 434966,
+          "ns/op": 410.1,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 297513044.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 438908,
+          "ns/op": 412.2,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 295999282.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 410.3,
+      "min_ns": 410.1,
+      "max_ns": 412.2
+    },
+    "BenchmarkDispatch/heldout-alternating/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 292262,
+          "ns/op": 557.1,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 219010083.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 374804,
+          "ns/op": 544.9,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 223879896.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 364590,
+          "ns/op": 827.4,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 147443191.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 135254,
+          "ns/op": 1157.0,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 105468848.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 315730,
+          "ns/op": 498.2,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 244886728.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 557.1,
+      "min_ns": 498.2,
+      "max_ns": 1157.0
+    },
+    "BenchmarkDispatch/heldout-alternating/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 347300,
+          "ns/op": 514.1,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 237287779.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 349130,
+          "ns/op": 514.8,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 236969909.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 349958,
+          "ns/op": 515.1,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 236842877.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 349488,
+          "ns/op": 515.0,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 236884960.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 340558,
+          "ns/op": 516.5,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 236193253.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 515.0,
+      "min_ns": 514.1,
+      "max_ns": 516.5
+    },
+    "BenchmarkEncoding/fixed16/encode": {
+      "samples": [
+        {
+          "iterations": 616948,
+          "ns/op": 266.3,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 631882,
+          "ns/op": 262.4,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 683175,
+          "ns/op": 261.1,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 650102,
+          "ns/op": 263.1,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 688335,
+          "ns/op": 263.5,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 263.1,
+      "min_ns": 261.1,
+      "max_ns": 266.3
+    },
+    "BenchmarkEncoding/fixed16/decode": {
+      "samples": [
+        {
+          "iterations": 1000000,
+          "ns/op": 172.6,
+          "MB/s": 8992.77,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 172.3,
+          "MB/s": 9006.23,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 172.9,
+          "MB/s": 8976.54,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 173.5,
+          "MB/s": 8947.13,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 175.3,
+          "MB/s": 8853.97,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 172.9,
+      "min_ns": 172.3,
+      "max_ns": 175.3
+    },
+    "BenchmarkEncoding/compact8/encode": {
+      "samples": [
+        {
+          "iterations": 709976,
+          "ns/op": 221.6,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 765726,
+          "ns/op": 219.9,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 762577,
+          "ns/op": 222.6,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 739750,
+          "ns/op": 221.9,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 778098,
+          "ns/op": 222.7,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 221.9,
+      "min_ns": 219.9,
+      "max_ns": 222.7
+    },
+    "BenchmarkEncoding/compact8/decode": {
+      "samples": [
+        {
+          "iterations": 1202872,
+          "ns/op": 149.6,
+          "MB/s": 5185.52,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1203968,
+          "ns/op": 149.5,
+          "MB/s": 5189.55,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 150.3,
+          "MB/s": 5161.91,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1206194,
+          "ns/op": 149.3,
+          "MB/s": 5198.26,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 153.6,
+          "MB/s": 5051.84,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 149.6,
+      "min_ns": 149.3,
+      "max_ns": 153.6
+    },
+    "BenchmarkEncoding/uvarint/encode": {
+      "samples": [
+        {
+          "iterations": 385365,
+          "ns/op": 446.5,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 387721,
+          "ns/op": 439.3,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 402530,
+          "ns/op": 449.8,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 389708,
+          "ns/op": 455.5,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 388628,
+          "ns/op": 449.0,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 449.0,
+      "min_ns": 439.3,
+      "max_ns": 455.5
+    },
+    "BenchmarkEncoding/uvarint/decode": {
+      "samples": [
+        {
+          "iterations": 178820,
+          "ns/op": 997.4,
+          "MB/s": 486.26,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 181450,
+          "ns/op": 994.6,
+          "MB/s": 487.63,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 181484,
+          "ns/op": 993.4,
+          "MB/s": 488.21,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 181094,
+          "ns/op": 993.8,
+          "MB/s": 488.05,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 179929,
+          "ns/op": 994.8,
+          "MB/s": 487.51,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 994.6,
+      "min_ns": 993.4,
+      "max_ns": 997.4
+    },
+    "BenchmarkPreparation/predecode-super-pairs": {
+      "samples": [
+        {
+          "iterations": 1870972,
+          "ns/op": 95.52,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1882550,
+          "ns/op": 95.52,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1889701,
+          "ns/op": 95.16,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1887424,
+          "ns/op": 97.25,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1838750,
+          "ns/op": 106.9,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 95.52,
+      "min_ns": 95.16,
+      "max_ns": 106.9
+    },
+    "BenchmarkPreparation/predecode-closures": {
+      "samples": [
+        {
+          "iterations": 127293,
+          "ns/op": 1403.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 130765,
+          "ns/op": 1377.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 129784,
+          "ns/op": 1372.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 130747,
+          "ns/op": 1367.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 132096,
+          "ns/op": 1363.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        }
+      ],
+      "median_ns": 1372.0,
+      "min_ns": 1363.0,
+      "max_ns": 1403.0
+    },
+    "BenchmarkPreparation/compact-decode": {
+      "samples": [
+        {
+          "iterations": 733906,
+          "ns/op": 241.5,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 734630,
+          "ns/op": 244.6,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 734131,
+          "ns/op": 246.4,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 737553,
+          "ns/op": 244.2,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 709498,
+          "ns/op": 242.7,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 244.2,
+      "min_ns": 241.5,
+      "max_ns": 246.4
+    }
+  },
+  "pgo": {
+    "BenchmarkDispatch/arithmetic/switch": {
+      "samples": [
+        {
+          "iterations": 321330,
+          "ns/op": 473.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 407250769.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 374496,
+          "ns/op": 480.4,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 401716082.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 370808,
+          "ns/op": 480.8,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 401433981.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 370264,
+          "ns/op": 477.3,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 404321447.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 374914,
+          "ns/op": 475.1,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 406244559.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 477.3,
+      "min_ns": 473.9,
+      "max_ns": 480.8
+    },
+    "BenchmarkDispatch/arithmetic/function-table": {
+      "samples": [
+        {
+          "iterations": 253251,
+          "ns/op": 718.0,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 268809264.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 250462,
+          "ns/op": 719.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 268079301.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 250604,
+          "ns/op": 727.2,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 265413707.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 251684,
+          "ns/op": 740.3,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 260692525.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 251756,
+          "ns/op": 717.1,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 269146016.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 719.9,
+      "min_ns": 717.1,
+      "max_ns": 740.3
+    },
+    "BenchmarkDispatch/arithmetic/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 335784,
+          "ns/op": 536.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 359761498.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 336330,
+          "ns/op": 537.4,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 359166705.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 328754,
+          "ns/op": 538.7,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 358263733.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 338499,
+          "ns/op": 541.4,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 356491591.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 331249,
+          "ns/op": 540.7,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 356941547.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 538.7,
+      "min_ns": 536.5,
+      "max_ns": 541.4
+    },
+    "BenchmarkDispatch/arithmetic/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 285138,
+          "ns/op": 614.8,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 313939734.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 295831,
+          "ns/op": 612.9,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 314908962.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 296454,
+          "ns/op": 607.8,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 317535418.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 297582,
+          "ns/op": 609.5,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 316661251.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 297356,
+          "ns/op": 649.1,
+          "dispatches/op": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 297324291.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 612.9,
+      "min_ns": 607.8,
+      "max_ns": 649.1
+    },
+    "BenchmarkDispatch/arithmetic/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 351822,
+          "ns/op": 456.0,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 423285188.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 397369,
+          "ns/op": 429.4,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 449456463.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 445672,
+          "ns/op": 418.2,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 461499583.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 444375,
+          "ns/op": 442.1,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 436567306.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 415069,
+          "ns/op": 423.1,
+          "dispatches/op": 129.0,
+          "fusion-index-B": 193.0,
+          "instruction-B": 3088.0,
+          "semantic-steps/s": 456208747.0,
+          "steps/op": 193.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 429.4,
+      "min_ns": 418.2,
+      "max_ns": 456.0
+    },
+    "BenchmarkDispatch/branch-heavy/switch": {
+      "samples": [
+        {
+          "iterations": 185156,
+          "ns/op": 931.9,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 273650042.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 200290,
+          "ns/op": 782.6,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 325856088.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 184442,
+          "ns/op": 820.4,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 310809028.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 178210,
+          "ns/op": 896.6,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 284409918.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 186186,
+          "ns/op": 969.1,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 263139822.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 896.6,
+      "min_ns": 782.6,
+      "max_ns": 969.1
+    },
+    "BenchmarkDispatch/branch-heavy/function-table": {
+      "samples": [
+        {
+          "iterations": 161016,
+          "ns/op": 1155.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 220852578.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 162142,
+          "ns/op": 1140.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 223650288.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 139472,
+          "ns/op": 1137.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 224232395.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 139591,
+          "ns/op": 1158.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 220188188.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 139778,
+          "ns/op": 1157.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 220326880.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 1155.0,
+      "min_ns": 1137.0,
+      "max_ns": 1158.0
+    },
+    "BenchmarkDispatch/branch-heavy/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 248607,
+          "ns/op": 729.7,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 349479605.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 246130,
+          "ns/op": 728.9,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 349840340.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 248198,
+          "ns/op": 724.5,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 351961967.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 247477,
+          "ns/op": 725.8,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 351335753.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 248188,
+          "ns/op": 731.1,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 348776674.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 728.9,
+      "min_ns": 724.5,
+      "max_ns": 731.1
+    },
+    "BenchmarkDispatch/branch-heavy/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 173853,
+          "ns/op": 1061.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 240372032.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 147764,
+          "ns/op": 1056.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 241575119.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 177756,
+          "ns/op": 1091.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 233624616.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 185263,
+          "ns/op": 999.7,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 255085080.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 188140,
+          "ns/op": 1048.0,
+          "dispatches/op": 255.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 243238947.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 1056.0,
+      "min_ns": 999.7,
+      "max_ns": 1091.0
+    },
+    "BenchmarkDispatch/branch-heavy/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 186483,
+          "ns/op": 908.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 280822944.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 196350,
+          "ns/op": 925.2,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 275606126.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 186336,
+          "ns/op": 867.5,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 293962639.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 179937,
+          "ns/op": 913.0,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 279309749.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 185910,
+          "ns/op": 870.8,
+          "dispatches/op": 255.0,
+          "fusion-index-B": 3.0,
+          "instruction-B": 48.0,
+          "semantic-steps/s": 292851306.0,
+          "steps/op": 255.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 908.0,
+      "min_ns": 867.5,
+      "max_ns": 925.2
+    },
+    "BenchmarkDispatch/binary-mixed/switch": {
+      "samples": [
+        {
+          "iterations": 561746,
+          "ns/op": 321.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 301762468.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 559382,
+          "ns/op": 322.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 301108854.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 552811,
+          "ns/op": 322.3,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 300981168.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 549100,
+          "ns/op": 323.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 299969376.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 561928,
+          "ns/op": 322.5,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 300782090.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 322.3,
+      "min_ns": 321.4,
+      "max_ns": 323.4
+    },
+    "BenchmarkDispatch/binary-mixed/function-table": {
+      "samples": [
+        {
+          "iterations": 476420,
+          "ns/op": 379.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 255860117.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 477141,
+          "ns/op": 380.1,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 255179238.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 467400,
+          "ns/op": 378.6,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 256236724.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 458680,
+          "ns/op": 378.2,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 256507481.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 463468,
+          "ns/op": 377.6,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 256892651.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 378.6,
+      "min_ns": 377.6,
+      "max_ns": 380.1
+    },
+    "BenchmarkDispatch/binary-mixed/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 501026,
+          "ns/op": 358.2,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 270832159.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 506672,
+          "ns/op": 358.5,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 270566235.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 507924,
+          "ns/op": 358.6,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 270504551.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 503530,
+          "ns/op": 357.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271394970.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 508084,
+          "ns/op": 357.3,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271473503.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 358.2,
+      "min_ns": 357.3,
+      "max_ns": 358.6
+    },
+    "BenchmarkDispatch/binary-mixed/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 501968,
+          "ns/op": 358.8,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 270351654.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 500277,
+          "ns/op": 359.2,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 270078484.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 502664,
+          "ns/op": 357.7,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271172937.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 506340,
+          "ns/op": 357.9,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 271003808.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 505292,
+          "ns/op": 356.4,
+          "dispatches/op": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 272174019.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 357.9,
+      "min_ns": 356.4,
+      "max_ns": 359.2
+    },
+    "BenchmarkDispatch/binary-mixed/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 572229,
+          "ns/op": 319.6,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 303530612.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 572101,
+          "ns/op": 315.5,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 307462816.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 567352,
+          "ns/op": 314.4,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 308567439.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 571776,
+          "ns/op": 317.0,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 305968849.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 561206,
+          "ns/op": 315.5,
+          "dispatches/op": 97.0,
+          "fusion-index-B": 97.0,
+          "instruction-B": 1552.0,
+          "semantic-steps/s": 307420919.0,
+          "steps/op": 97.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 315.5,
+      "min_ns": 314.4,
+      "max_ns": 319.6
+    },
+    "BenchmarkDispatch/heldout-alternating/switch": {
+      "samples": [
+        {
+          "iterations": 439940,
+          "ns/op": 408.4,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 298734907.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 439524,
+          "ns/op": 408.6,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 298561411.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 436442,
+          "ns/op": 407.6,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 299324215.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 442268,
+          "ns/op": 411.1,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 296735127.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 435145,
+          "ns/op": 408.2,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 298893472.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 408.4,
+      "min_ns": 407.6,
+      "max_ns": 411.1
+    },
+    "BenchmarkDispatch/heldout-alternating/function-table": {
+      "samples": [
+        {
+          "iterations": 358803,
+          "ns/op": 513.5,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 237578333.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 357535,
+          "ns/op": 517.7,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 235641319.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 345931,
+          "ns/op": 609.3,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 200222735.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 344571,
+          "ns/op": 517.8,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 235613072.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 301711,
+          "ns/op": 528.7,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 230752965.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 517.8,
+      "min_ns": 513.5,
+      "max_ns": 609.3
+    },
+    "BenchmarkDispatch/heldout-alternating/predecoded-closures": {
+      "samples": [
+        {
+          "iterations": 431913,
+          "ns/op": 415.1,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 293876404.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 443071,
+          "ns/op": 408.4,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 298692123.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 432674,
+          "ns/op": 410.7,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 297049568.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 447704,
+          "ns/op": 406.9,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 299826609.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 409672,
+          "ns/op": 407.1,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 299708471.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 408.4,
+      "min_ns": 406.9,
+      "max_ns": 415.1
+    },
+    "BenchmarkDispatch/heldout-alternating/bounded-trampoline": {
+      "samples": [
+        {
+          "iterations": 397789,
+          "ns/op": 523.3,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 233154424.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 394311,
+          "ns/op": 506.7,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 240785243.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 397555,
+          "ns/op": 550.8,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 221512868.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 386134,
+          "ns/op": 521.5,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 233948018.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 386065,
+          "ns/op": 548.4,
+          "dispatches/op": 122.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 222472101.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 523.3,
+      "min_ns": 506.7,
+      "max_ns": 550.8
+    },
+    "BenchmarkDispatch/heldout-alternating/superinstruction-add-pair": {
+      "samples": [
+        {
+          "iterations": 429150,
+          "ns/op": 420.3,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 290292184.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 435001,
+          "ns/op": 420.8,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 289932276.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 425824,
+          "ns/op": 420.5,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 290154685.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 425434,
+          "ns/op": 488.6,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 249673895.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 424644,
+          "ns/op": 423.9,
+          "dispatches/op": 122.0,
+          "fusion-index-B": 6.0,
+          "instruction-B": 96.0,
+          "semantic-steps/s": 287784689.0,
+          "steps/op": 122.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 420.8,
+      "min_ns": 420.3,
+      "max_ns": 488.6
+    },
+    "BenchmarkEncoding/fixed16/encode": {
+      "samples": [
+        {
+          "iterations": 567114,
+          "ns/op": 462.3,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 605660,
+          "ns/op": 276.3,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 674493,
+          "ns/op": 263.6,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 698384,
+          "ns/op": 260.5,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 698937,
+          "ns/op": 260.4,
+          "program-B": 1552.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 263.6,
+      "min_ns": 260.4,
+      "max_ns": 462.3
+    },
+    "BenchmarkEncoding/fixed16/decode": {
+      "samples": [
+        {
+          "iterations": 1000000,
+          "ns/op": 173.4,
+          "MB/s": 8952.03,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 172.2,
+          "MB/s": 9010.25,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 172.5,
+          "MB/s": 8999.24,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 172.2,
+          "MB/s": 9013.85,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1000000,
+          "ns/op": 177.6,
+          "MB/s": 8740.39,
+          "program-B": 1552.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 172.5,
+      "min_ns": 172.2,
+      "max_ns": 177.6
+    },
+    "BenchmarkEncoding/compact8/encode": {
+      "samples": [
+        {
+          "iterations": 762630,
+          "ns/op": 276.4,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 801423,
+          "ns/op": 221.2,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 792441,
+          "ns/op": 221.3,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 811069,
+          "ns/op": 220.3,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 813283,
+          "ns/op": 220.0,
+          "program-B": 776.0,
+          "B/op": 896.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 221.2,
+      "min_ns": 220.0,
+      "max_ns": 276.4
+    },
+    "BenchmarkEncoding/compact8/decode": {
+      "samples": [
+        {
+          "iterations": 1206832,
+          "ns/op": 150.7,
+          "MB/s": 5150.34,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1201392,
+          "ns/op": 150.4,
+          "MB/s": 5159.44,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1203598,
+          "ns/op": 149.9,
+          "MB/s": 5176.81,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1202524,
+          "ns/op": 149.6,
+          "MB/s": 5186.03,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 1203586,
+          "ns/op": 149.6,
+          "MB/s": 5187.01,
+          "program-B": 776.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 149.9,
+      "min_ns": 149.6,
+      "max_ns": 150.7
+    },
+    "BenchmarkEncoding/uvarint/encode": {
+      "samples": [
+        {
+          "iterations": 409221,
+          "ns/op": 439.5,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 409504,
+          "ns/op": 460.6,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 414463,
+          "ns/op": 440.7,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 412401,
+          "ns/op": 505.4,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 414069,
+          "ns/op": 457.7,
+          "program-B": 485.0,
+          "B/op": 704.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 457.7,
+      "min_ns": 439.5,
+      "max_ns": 505.4
+    },
+    "BenchmarkEncoding/uvarint/decode": {
+      "samples": [
+        {
+          "iterations": 180606,
+          "ns/op": 995.9,
+          "MB/s": 487.02,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 180960,
+          "ns/op": 993.8,
+          "MB/s": 488.04,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 181106,
+          "ns/op": 1002.0,
+          "MB/s": 483.89,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 179127,
+          "ns/op": 1003.0,
+          "MB/s": 483.46,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        },
+        {
+          "iterations": 176851,
+          "ns/op": 1007.0,
+          "MB/s": 481.51,
+          "program-B": 485.0,
+          "B/op": 0.0,
+          "allocs/op": 0.0
+        }
+      ],
+      "median_ns": 1002.0,
+      "min_ns": 993.8,
+      "max_ns": 1007.0
+    },
+    "BenchmarkPreparation/predecode-super-pairs": {
+      "samples": [
+        {
+          "iterations": 1847690,
+          "ns/op": 95.88,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1873242,
+          "ns/op": 96.04,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1854088,
+          "ns/op": 96.25,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1884519,
+          "ns/op": 95.25,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 1874838,
+          "ns/op": 95.55,
+          "B/op": 112.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 95.88,
+      "min_ns": 95.25,
+      "max_ns": 96.25
+    },
+    "BenchmarkPreparation/predecode-closures": {
+      "samples": [
+        {
+          "iterations": 130454,
+          "ns/op": 1565.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 130496,
+          "ns/op": 1377.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 131923,
+          "ns/op": 1373.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 129357,
+          "ns/op": 1567.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        },
+        {
+          "iterations": 132723,
+          "ns/op": 1383.0,
+          "B/op": 3968.0,
+          "allocs/op": 97.0
+        }
+      ],
+      "median_ns": 1383.0,
+      "min_ns": 1373.0,
+      "max_ns": 1567.0
+    },
+    "BenchmarkPreparation/compact-decode": {
+      "samples": [
+        {
+          "iterations": 769148,
+          "ns/op": 244.8,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 740233,
+          "ns/op": 243.9,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 762079,
+          "ns/op": 241.3,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 741502,
+          "ns/op": 245.0,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        },
+        {
+          "iterations": 745495,
+          "ns/op": 243.8,
+          "B/op": 1792.0,
+          "allocs/op": 1.0
+        }
+      ],
+      "median_ns": 243.9,
+      "min_ns": 241.3,
+      "max_ns": 245.0
+    }
+  }
+}
