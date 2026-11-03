@@ -5575,6 +5575,415 @@
       ],
       "diagnostics": []
     },
+    "r6-lazy-raw-unset-followup": {
+      "result": [
+        true,
+        [
+          null,
+          [
+            "Error",
+            "Typed property W13R6RawFollowup::$q must not be accessed before initialization"
+          ],
+          false,
+          [
+            "Error",
+            "Cannot access uninitialized non-nullable property W13R6RawFollowup::$q by reference"
+          ],
+          [
+            "Exception",
+            "init"
+          ],
+          [
+            "Error",
+            "Typed property W13R6RawFollowup::$q must not be accessed before initialization"
+          ],
+          [
+            1,
+            true
+          ],
+          [
+            "Exception",
+            "init"
+          ],
+          [
+            2,
+            true,
+            [
+              "Error",
+              "Typed property W13R6RawFollowup::$q must not be accessed before initialization"
+            ]
+          ]
+        ],
+        [
+          "init",
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-raw-unset-magic": {
+      "result": [
+        true,
+        [
+          null,
+          23,
+          true,
+          null,
+          23,
+          [
+            0,
+            true
+          ],
+          [
+            "Exception",
+            "init"
+          ],
+          [
+            1,
+            true,
+            23
+          ]
+        ],
+        [
+          "get:q",
+          "isset:q",
+          "set:q:12",
+          "get:q",
+          "init",
+          "get:q"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-raw-unset-magic-throw": {
+      "result": [
+        true,
+        [
+          null,
+          23,
+          true,
+          [
+            "Exception",
+            "set"
+          ],
+          23,
+          [
+            0,
+            true
+          ],
+          [
+            "Exception",
+            "init"
+          ],
+          [
+            1,
+            true,
+            23
+          ]
+        ],
+        [
+          "get:q",
+          "isset:q",
+          "set:q:12",
+          "get:q",
+          "init",
+          "get:q"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-raw-unset-magic-reentry": {
+      "result": [
+        true,
+        [
+          null,
+          23,
+          true,
+          [
+            "Exception",
+            "init"
+          ],
+          23,
+          [
+            1,
+            true
+          ],
+          [
+            "Exception",
+            "init"
+          ],
+          [
+            2,
+            true,
+            23
+          ]
+        ],
+        [
+          "get:q",
+          "isset:q",
+          "set:q:12",
+          "init",
+          "get:q",
+          "init",
+          "get:q"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-get": {
+      "result": [
+        [
+          "Error",
+          "Typed property W13R6ProxyGuard::$q must not be accessed before initialization"
+        ],
+        [
+          "get:q",
+          "init",
+          "get:q"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-reference": {
+      "result": [
+        [
+          "Error",
+          "Typed property W13R6ProxyGuard::$q must not be accessed before initialization"
+        ],
+        [
+          "get:q",
+          "init",
+          "get:q"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-isset": {
+      "result": [
+        false,
+        [
+          "isset:q",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-set": {
+      "result": [
+        12,
+        [
+          "set:q",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-unset": {
+      "result": [
+        null,
+        [
+          "unset:q",
+          "init",
+          "unset:q"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-set-spare": {
+      "result": [
+        12,
+        [
+          "set:q",
+          "init",
+          "set:q"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-isset-fresh": {
+      "result": [
+        false,
+        [
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-set-owned": {
+      "result": [
+        17,
+        [
+          "set:q:target",
+          "set:q:proxy",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-set-different": {
+      "result": [
+        12,
+        [
+          "set:q",
+          "set:r",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-get-dynamic": {
+      "result": [
+        null,
+        [
+          "get:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R6ProxyGuard::$x"
+        ]
+      ]
+    },
+    "r6-proxy-guard-reference-dynamic": {
+      "result": [
+        null,
+        [
+          "get:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R6ProxyGuard::$x"
+        ],
+        [
+          8,
+          "Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"
+        ]
+      ]
+    },
+    "r6-proxy-guard-isset-dynamic": {
+      "result": [
+        false,
+        [
+          "isset:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-set-dynamic": {
+      "result": [
+        12,
+        [
+          "set:x",
+          "init",
+          "get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-unset-dynamic": {
+      "result": [
+        null,
+        [
+          "unset:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-get-dynamic-direct": {
+      "result": [
+        null,
+        [
+          "get:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R6ProxyGuard::$x"
+        ]
+      ]
+    },
+    "r6-proxy-guard-reference-dynamic-direct": {
+      "result": [
+        null,
+        [
+          "get:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R6ProxyGuard::$x"
+        ],
+        [
+          8,
+          "Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"
+        ]
+      ]
+    },
+    "r6-proxy-guard-isset-dynamic-direct": {
+      "result": [
+        false,
+        [
+          "isset:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-unset-dynamic-direct": {
+      "result": [
+        null,
+        [
+          "unset:x",
+          "init"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r6-proxy-guard-reference-lifetime": {
+      "result": [
+        [
+          "get:proxy",
+          "init",
+          "dtor",
+          "get:target",
+          "value:23"
+        ],
+        null,
+        null,
+        23,
+        false
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

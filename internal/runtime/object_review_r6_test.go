@@ -30,6 +30,8 @@ func TestW13R6PHP8512Regression(t *testing.T) {
 			}
 			names := append(w13R6LazyNames(), w13R6ReferenceNames()...)
 			names = append(names, w13R6ScopeNames()...)
+			names = append(names, w13R6ProxyGuardNames()...)
+			names = append(names, w13R6GuardLifetimeName)
 			for _, name := range names {
 				t.Run(name, func(t *testing.T) {
 					want, ok := ref.Cases[name]

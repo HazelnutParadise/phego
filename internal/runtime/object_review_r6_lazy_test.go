@@ -13,11 +13,16 @@ func w13R6LazyNames() []string {
 		"r6-lazy-dynamic-magic", "r6-lazy-dynamic-plain", "r6-lazy-plain-unset", "r6-lazy-init-throw",
 		"r6-lazy-magic-asym", "r6-lazy-recursive-unset", "r6-lazy-readonly-clone",
 		"r6-lazy-readonly-cleared-magic",
+		"r6-lazy-raw-unset-followup", "r6-lazy-raw-unset-magic",
+		"r6-lazy-raw-unset-magic-throw", "r6-lazy-raw-unset-magic-reentry",
 	}
 }
 
 func w13R6LazyCase(t *testing.T, h *heap, name string) w13Case {
 	t.Helper()
+	if name == "r6-lazy-raw-unset-followup" || name == "r6-lazy-raw-unset-magic" || name == "r6-lazy-raw-unset-magic-throw" || name == "r6-lazy-raw-unset-magic-reentry" {
+		return w13R6RawUnsetCase(t, h, name)
+	}
 	events := []any{}
 	var result any
 	owners := []*value{}

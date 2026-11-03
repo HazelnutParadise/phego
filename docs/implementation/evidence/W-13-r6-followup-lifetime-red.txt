@@ -1,0 +1,12 @@
+--- FAIL: TestW13R6PHP8512Regression (0.01s)
+    --- FAIL: TestW13R6PHP8512Regression/32 (0.00s)
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-reference-lifetime (0.00s)
+            object_review_r6_test.go:49: Go: {"result":[["get:proxy","init","dtor","value:"],null,null,23,false],"diagnostics":[[2,"Undefined property: W13R6GuardLifetime::$x"]]}
+                PHP: {"result":[["get:proxy","init","dtor","get:target","value:23"],null,null,23,false],"diagnostics":[]}
+    --- FAIL: TestW13R6PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-reference-lifetime (0.00s)
+            object_review_r6_test.go:49: Go: {"result":[["get:proxy","init","dtor","value:"],null,null,23,false],"diagnostics":[[2,"Undefined property: W13R6GuardLifetime::$x"]]}
+                PHP: {"result":[["get:proxy","init","dtor","get:target","value:23"],null,null,23,false],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.348s
+FAIL

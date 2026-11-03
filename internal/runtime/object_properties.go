@@ -201,12 +201,34 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	} else if p != nil && !p.static && p.get != nil && !bypassHook {
 		return h.readPropertyHook(o, p)
 	}
-	o, err = h.objectForProperty(o, p, name)
+	if p == nil && o.lazy != nil && !o.lazy.running {
+		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
+			if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
+				if callErr != nil {
+					return value{}, callErr
+				}
+				return h.dereferenceMethodReturn(out)
+			}
+		}
+	}
+	previous := o
+	pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+	guarded := o.lazy != nil && !o.lazy.running && o.hooks[magicPropertyKey("get", name)]
+	o, err = h.objectForPropertyRead(o, p, name)
 	if err != nil {
 		return value{}, err
 	}
+	key := name
+	if p != nil {
+		key = p.key
+	}
+	slot, exists := o.props.lookup(key)
+	if (!exists || slot.kind == valueUndefined) && o != previous && guarded && (p == nil || (pending && previous.lazy != nil && previous.lazy.initialize == nil)) {
+		guard := h.installPropertyGuard(o, "get", name)
+		defer guard.restore()
+	}
 	if p == nil {
-		if slot, ok := o.props.lookup(name); ok && slot.kind != valueUndefined {
+		if exists && slot.kind != valueUndefined {
 			return slot.deref(), nil
 		}
 		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
@@ -221,7 +243,6 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	if p.virtual {
 		return value{}, &Throwable{"Error", "Property " + p.label() + " is write-only"}
 	}
-	slot, _ := o.props.lookup(p.key)
 	if slot != nil && slot.isExplicitlyUnset() {
 		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
 			if callErr != nil {
@@ -364,9 +385,30 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		_, err = h.propertyHook(o, p, p.set, v)
 		return err
 	}
+	if o.lazy != nil && !o.lazy.running {
+		key := name
+		if p != nil {
+			key = p.key
+		}
+		slot, exists := o.props.lookup(key)
+		if (p == nil && (!exists || slot.kind == valueUndefined)) || (p != nil && o.lazy.initialize != nil && o.lazy.target.kind != valueObject && exists && slot.isExplicitlyUnset()) {
+			// Magic assignment runs before initialization. Guarded reentry
+			// falls through to the ordinary write/initialization path.
+			if _, called, callErr := h.magicProperty(o, "set", name, []value{v}); called {
+				return callErr
+			}
+		}
+	}
+	previous := o
+	pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+	guarded := o.lazy != nil && !o.lazy.running && o.hooks[magicPropertyKey("set", name)]
 	o, err = h.objectForProperty(o, p, name)
 	if err != nil {
 		return err
+	}
+	if o != previous && guarded && (p == nil || (pending && previous.lazy != nil && previous.lazy.initialize == nil)) {
+		guard := h.installPropertyGuard(o, "set", name)
+		defer guard.restore()
 	}
 	if p == nil {
 		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
@@ -425,6 +467,23 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 	for {
 		// An initialized proxy's values and readonly state live on its target.
 		if o.lazy != nil && o.lazy.target.kind == valueObject {
+			if info, lookupErr := resolvePropertyIn(o.class, name, scope, true); lookupErr == nil && info == nil {
+				if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
+					return callErr
+				}
+				if o.hooks[magicPropertyKey("unset", name)] {
+					next, forwardErr := h.initializeLazy(o)
+					if forwardErr != nil {
+						return forwardErr
+					}
+					guard := h.installPropertyGuard(next, "unset", name)
+					if guard.target != nil {
+						return h.unsetForwardedProperty(guard, name, scope)
+					}
+					o = next
+					continue
+				}
+			}
 			o, err = h.initializeLazy(o)
 			if err != nil {
 				return err
@@ -474,11 +533,18 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 			}
 		}
 		pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+		guarded := pending && o.hooks[magicPropertyKey("unset", name)]
 		next, err := h.objectForProperty(o, p, name)
 		if err != nil {
 			return err
 		}
 		if next != o || (pending && o.lazy.initialize == nil) {
+			if next != o && guarded && o.lazy != nil && o.lazy.initialize == nil {
+				guard := h.installPropertyGuard(next, "unset", name)
+				if guard.target != nil {
+					return h.unsetForwardedProperty(guard, name, scope)
+				}
+			}
 			// Ghost initialization can fill a readonly slot in place. Resolve
 			// and validate again, just as for a newly selected proxy target.
 			o = next
@@ -499,6 +565,11 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 		}
 		return h.release(old)
 	}
+}
+
+func (h *heap) unsetForwardedProperty(guard forwardedPropertyGuard, name string, scope *class) error {
+	defer guard.restore()
+	return h.unsetObject(value{kind: valueObject, object: guard.target}, name, scope)
 }
 
 func (h *heap) referenceObject(dst *value, obj value, name string, scope *class) error {
@@ -540,9 +611,24 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 			return &Throwable{"Error", "Indirect modification of " + p.label() + " is not allowed"}
 		}
 	}
-	o, err = h.objectForProperty(o, p, name)
+	if p == nil && o.lazy != nil && !o.lazy.running {
+		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
+			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
+				return callErr
+			}
+		}
+	}
+	previous := o
+	pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+	guarded := o.lazy != nil && !o.lazy.running && o.hooks[magicPropertyKey("get", name)]
+	o, err = h.objectForPropertyRead(o, p, name)
 	if err != nil {
 		return err
+	}
+	var forwardingGuard forwardedPropertyGuard
+	if o != previous && guarded && (p == nil || (pending && previous.lazy != nil && previous.lazy.initialize == nil)) {
+		forwardingGuard = h.installPropertyGuard(o, "get", name)
+		defer forwardingGuard.restore()
 	}
 	var slot *value
 	if p == nil {
@@ -564,6 +650,8 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 	if err != nil {
 		return err
 	}
+	// Address resolution ends before binding can destroy the old destination.
+	forwardingGuard.restore()
 	return h.bindPropertyReference(dst, slot, p)
 }
 
@@ -580,7 +668,7 @@ func (h *heap) referenceMagicProperty(dst *value, o *object, name string) (bool,
 
 // __get/__set/__isset/__unset recurse independently for each property.
 func (h *heap) magicProperty(o *object, operation, name string, extra []value) (value, bool, error) {
-	key := "\x00magic:" + operation + ":" + name
+	key := magicPropertyKey(operation, name)
 	if o.hooks[key] {
 		return value{}, false, nil
 	}
@@ -621,13 +709,26 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 	}
 	if accessErr != nil || p == nil {
 		if accessErr == nil {
-			o, err = h.objectForProperty(o, p, name)
+			if o.lazy != nil && !o.lazy.running {
+				if slot, ok := o.props.lookup(key); !ok || slot.kind == valueUndefined {
+					if v, called, callErr := h.magicProperty(o, "isset", name, nil); called {
+						return h.toBool(v), callErr
+					}
+				}
+			}
+			previous := o
+			o, err = h.objectForPropertyRead(o, p, name)
 			if err != nil {
 				return false, err
 			}
 			if slot, ok := o.props.lookup(key); ok && slot.kind != valueUndefined {
 				v := slot.deref()
 				return v.kind != valueNull, nil
+			}
+			// No PHP callback follows an absent backing value: returning
+			// false directly avoids allocating an unobservable target guard.
+			if o != previous && previous.lazy != nil && previous.lazy.proxy {
+				return false, nil
 			}
 		}
 		v, called, err := h.magicProperty(o, "isset", name, nil)
@@ -641,12 +742,17 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 		set := err == nil && v.deref().kind != valueNull
 		return set, h.mergeObjectErrors(err, h.discardMethodReturn(v))
 	}
-	o, err = h.initializeLazy(o)
+	previous := o
+	pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+	o, err = h.objectForPropertyRead(o, p, name)
 	if err != nil {
 		return false, err
 	}
 	slot, ok := o.props.lookup(key)
 	if ok && slot.isExplicitlyUnset() {
+		if (pending && previous.lazy != nil && previous.lazy.initialize == nil) || (o != previous && previous.lazy != nil && previous.lazy.proxy) {
+			return false, nil
+		}
 		v, called, err := h.magicProperty(o, "isset", name, nil)
 		if called {
 			return v.boolean, err

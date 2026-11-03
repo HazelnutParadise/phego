@@ -85,6 +85,14 @@ func (h *heap) isLazyProperty(obj value, name string) bool {
 
 // Resolve a backing location only when an actual access needs initialization.
 func (h *heap) objectForProperty(o *object, p *propertyInfo, name string) (*object, error) {
+	return h.resolvePropertyBacking(o, p, name, false)
+}
+
+func (h *heap) objectForPropertyRead(o *object, p *propertyInfo, name string) (*object, error) {
+	return h.resolvePropertyBacking(o, p, name, true)
+}
+
+func (h *heap) resolvePropertyBacking(o *object, p *propertyInfo, name string, readUnset bool) (*object, error) {
 	if o.lazy == nil {
 		return o, nil
 	}
@@ -100,11 +108,45 @@ func (h *heap) objectForProperty(o *object, p *propertyInfo, name string) (*obje
 		if p != nil {
 			key = p.key
 		}
-		if slot, ok := o.props.lookup(key); ok && slot.kind != valueUndefined {
+		if slot, ok := o.props.lookup(key); ok && (slot.kind != valueUndefined || (readUnset && slot.isExplicitlyUnset())) {
 			return o, nil
 		}
 	}
 	return h.initializeLazy(o)
+}
+
+// A forwarded guard owns only the bit it installed, for one target operation.
+// Keep restoration on the Go stack; an existing target guard belongs to its caller.
+type forwardedPropertyGuard struct {
+	target *object
+	key    string
+}
+
+func magicPropertyKey(operation, name string) string {
+	return "\x00magic:" + operation + ":" + name
+}
+
+func (h *heap) installPropertyGuard(target *object, operation, name string) forwardedPropertyGuard {
+	if _, ok := h.resolveMethod(target.class, "__"+operation, nil); !ok {
+		return forwardedPropertyGuard{}
+	}
+	key := magicPropertyKey(operation, name)
+	if target.hooks[key] {
+		return forwardedPropertyGuard{}
+	}
+	if target.hooks == nil {
+		target.hooks = make(map[string]bool)
+	}
+	target.hooks[key] = true
+	return forwardedPropertyGuard{target, key}
+}
+
+func (g *forwardedPropertyGuard) restore() {
+	target, key := g.target, g.key
+	*g = forwardedPropertyGuard{}
+	if target != nil {
+		delete(target.hooks, key)
+	}
 }
 
 func copyPropertyTable(src *propertyTable) *propertyTable {

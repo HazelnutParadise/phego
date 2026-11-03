@@ -118,6 +118,16 @@ typed property reference 傳入 by-reference 參數時只接受目前型別，�
 
 明確 resource close 不先檢查已取消的 operation context。它保留 heap、owner、generation、kind、open 檢查，並把原樣傳入的 cleanup context 交給一次性 close callback。普通操作繼續檢查 operation cancellation。兩者共用 `resourceRecord` 的 owner／generation 查找，保留簡短 state 檢查，避免為抽共用層增加普通操作呼叫；固定訊息使用 `errors.New`，不呼叫格式化器。完整雙寬度對照、失敗重播、資源控制與前後基準見 `W-13-r6-review.json`。
 
+### raw-unset、proxy magic 與 guard 的存活範圍
+
+raw 設值後再 unset 的位置已有明確狀態。固定 PHP 8.5.12 的讀取、isset 與取得參照都不執行 initializer，但沒有 `__set` 的寫入仍會初始化。因此不能一律繞過初始化；讀取與寫入透過兩個可 inline 的 wrapper 傳入共用 resolver，保留 target 與 running 狀態的原優先順序。magic setter 先於初始化，包含拋例外與 guarded reentry。
+
+已初始化 proxy 的動態位置仍先走 wrapper magic。遞迴進入 backing 時，guard 是否轉移取決於操作及是否真的發生初始化；把所有操作一律複製 guard 會少掉 PHP 應執行的第二次 callback。既有 target guard 由原呼叫者擁有，內層不得清除。原生區辨案例包含 declared／dynamic、直接／經其他屬性初始化、不同屬性及既有 guard，全部保留精確事件。
+
+forwarded guard 只用 stack 值保存本次取得的 target 與 key，還原時先清空所有權再刪除，因此可安全地提早還原並保留錯誤路徑的 defer。取得參照的 guard 在來源位置解析後、綁定目的地前就必須結束，否則目的地解構中的 getter 會被錯誤抑制。`isset` 遇到不存在的 backing 直接返回 false；GET 重用查得的 slot，已有值時不安裝不可觀察的 guard。unset 的 defer 移至單次轉交 helper，避免放在遍歷迴圈中。這些調整不新增物件狀態，magic key／map 仍可能配置。
+
+曾考慮加入 proxy cache-link flag，但固定來源的 initialized proxy 使用 `properties=NULL` 與 `UNINIT|LAZY` slots，既有狀態足以區分，沒有新增旗標的必要。共享 key 建構與 read/write wrapper 均由 Go 編譯器確認 inline；不是應用效能證據。兩種寬度各 587 案、原 564 案不變，修正前失敗、編譯器輸出及限制見 `W-13-r6-followup.json`。
+
 ## 驗證與尚未完成項目
 
 ### 等待使用者裁決的額外參考引擎不安全案例
