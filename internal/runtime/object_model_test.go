@@ -288,6 +288,41 @@ func w13Isset(h *heap, obj value, name string, scope *class) bool {
 }
 
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R3CallableReturnNames() {
+		if name == review {
+			return w13R3CallableReturnCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3TypedReturnNames() {
+		if name == review {
+			return w13R3TypedReturnCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3FrameNames() {
+		if name == review {
+			return w13R3FrameCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3HookNames() {
+		if name == review {
+			return w13R3HookCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3ValueNames() {
+		if name == review {
+			return w13R3ValueCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3PropertyNames() {
+		if name == review {
+			return w13R3PropertyCase(t, h, name)
+		}
+	}
+	for _, review := range w13R3EnumNames() {
+		if name == review {
+			return w13R3EnumCase(t, h, name)
+		}
+	}
 	for _, review := range w13R2CleanupNames() {
 		if name == review {
 			return w13R2CleanupCase(t, h, name)
@@ -691,6 +726,13 @@ func w13CaseNames() []string {
 	names = append(names, w13R2PropertyNames()...)
 	names = append(names, w13R2LazyNames()...)
 	names = append(names, w13R2CleanupNames()...)
+	names = append(names, w13R3EnumNames()...)
+	names = append(names, w13R3PropertyNames()...)
+	names = append(names, w13R3ValueNames()...)
+	names = append(names, w13R3HookNames()...)
+	names = append(names, w13R3FrameNames()...)
+	names = append(names, w13R3TypedReturnNames()...)
+	names = append(names, w13R3CallableReturnNames()...)
 	names = append(names, w13WeakMapCaseNames()...)
 	for i := 1; i <= 64; i++ {
 		names = append(names, fmt.Sprintf("gc-sequence-%d", i))

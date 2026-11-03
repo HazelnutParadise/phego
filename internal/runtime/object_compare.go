@@ -71,7 +71,7 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 	if x.class == weakMapBuiltin {
 		return 1, nil
 	}
-	if x.class.schema != nil && len(x.class.schema.enumCases) > 0 {
+	if x.class.schema != nil && x.class.schema.enumKind != enumNone {
 		return 1, nil
 	}
 	if h.comparingObjects[x] {

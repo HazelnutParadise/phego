@@ -55,10 +55,20 @@ type classSpec struct {
 	final, abstract, isInterface, isTrait bool
 	readonly, allowDynamic                bool
 	noDynamic                             bool
+	enumKind                              enumKind
 	enumCases                             []string
 	enumValues                            []any
 	destructor                            func(*heap, value) error
 }
+
+type enumKind uint8
+
+const (
+	enumNone enumKind = iota
+	enumUnit
+	enumInt
+	enumString
+)
 
 type propertyInfo struct {
 	propertySpec
@@ -90,6 +100,9 @@ type propertySource struct {
 func buildClass(spec classSpec) (*class, error) {
 	if spec.name == "" {
 		return nil, fmt.Errorf("class name is required")
+	}
+	if err := normalizeEnumSpec(&spec); err != nil {
+		return nil, err
 	}
 	if spec.parent != nil && spec.parent.schema != nil && spec.parent.schema.final {
 		return nil, &Throwable{"Error", "Class " + spec.name + " cannot extend final class " + spec.parent.name}
@@ -145,6 +158,19 @@ func buildClass(spec classSpec) (*class, error) {
 	}
 	traitMethodCount := len(methods)
 	methods = append(methods, spec.methods...)
+	if spec.enumKind != enumNone {
+		if len(properties) != 0 {
+			return nil, fmt.Errorf("enum cannot declare properties")
+		}
+		properties = append(properties, propertySpec{name: "name", typeName: "string", readonly: true})
+		if spec.enumKind != enumUnit {
+			typ := "string"
+			if spec.enumKind == enumInt {
+				typ = "int"
+			}
+			properties = append(properties, propertySpec{name: "value", typeName: typ, readonly: true})
+		}
+	}
 	for _, p := range properties {
 		if p.name == "" {
 			return nil, fmt.Errorf("property name is required")
@@ -211,6 +237,7 @@ func buildClass(spec classSpec) (*class, error) {
 		s.methods[key] = &m
 	}
 	var names []string
+	addIntrinsicInterfaces(c)
 	for _, p := range s.props {
 		if !p.static && !p.virtual {
 			names = append(names, p.key)
@@ -282,7 +309,7 @@ func (h *heap) instantiate(c *class) (value, error) {
 			kind = "trait"
 		} else if s.abstract {
 			kind = "abstract class"
-		} else if len(s.enumCases) > 0 {
+		} else if s.enumKind != enumNone {
 			kind = "enum"
 		}
 		if kind != "" {
@@ -382,6 +409,10 @@ func (h *heap) checkedObject(obj value) (*object, error) {
 }
 
 func resolveProperty(c *class, name string, scope *class) (*propertyInfo, error) {
+	return resolvePropertyIn(c, name, scope, false)
+}
+
+func resolvePropertyIn(c *class, name string, scope *class, instance bool) (*propertyInfo, error) {
 	if c.schema == nil {
 		return nil, nil
 	}
@@ -396,6 +427,9 @@ func resolveProperty(c *class, name string, scope *class) (*propertyInfo, error)
 	for i := len(c.schema.props) - 1; i >= 0; i-- {
 		p := &c.schema.props[i]
 		if p.name != name {
+			continue
+		}
+		if instance && p.visibility == privateAccess && p.owner != c {
 			continue
 		}
 		if !canAccess(scope, p.owner, p.visibility) {

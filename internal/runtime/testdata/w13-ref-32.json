@@ -3853,6 +3853,1535 @@
       ],
       "diagnostics": []
     },
+    "r3-enum-empty-unit": {
+      "result": [
+        [
+          "Error",
+          "Cannot instantiate enum W13R3EmptyUnit"
+        ],
+        [
+          [
+            "name",
+            "string",
+            true
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-enum-empty-int": {
+      "result": [
+        [
+          "Error",
+          "Cannot instantiate enum W13R3EmptyInt"
+        ],
+        [
+          [
+            "name",
+            "string",
+            true
+          ],
+          [
+            "value",
+            "int",
+            true
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-enum-empty-string": {
+      "result": [
+        [
+          "Error",
+          "Cannot instantiate enum W13R3EmptyString"
+        ],
+        [
+          [
+            "name",
+            "string",
+            true
+          ],
+          [
+            "value",
+            "string",
+            true
+          ]
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-property-private-inherited": {
+      "result": [
+        null,
+        null,
+        2,
+        true,
+        null,
+        1,
+        null,
+        4,
+        6,
+        null,
+        null,
+        1,
+        9
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R3PrivateChild::$x"
+        ],
+        [
+          2,
+          "Undefined property: W13R3PrivateChild::$x"
+        ]
+      ]
+    },
+    "r3-property-private-static": {
+      "result": [
+        "Error",
+        "Cannot access private property W13R3StaticChild::$x"
+      ],
+      "diagnostics": []
+    },
+    "r3-property-lazy-ghost": {
+      "result": [
+        true,
+        false,
+        7,
+        false,
+        null,
+        false,
+        [
+          "Error",
+          "Typed property W13R3Lazy::$value must not be accessed before initialization"
+        ],
+        false,
+        [
+          "Exception",
+          "initializer"
+        ],
+        true,
+        11,
+        true,
+        false,
+        4
+      ],
+      "diagnostics": []
+    },
+    "r3-property-enum-readonly": {
+      "result": [
+        [
+          {
+            "name": "A"
+          },
+          [
+            "Error",
+            "Cannot modify readonly property W13R3PureEnum::$name"
+          ],
+          [
+            "Error",
+            "Cannot unset readonly property W13R3PureEnum::$name"
+          ],
+          [
+            "Error",
+            "Cannot indirectly modify readonly property W13R3PureEnum::$name"
+          ],
+          {
+            "name": "A"
+          },
+          [
+            "Error",
+            "Cannot create dynamic property W13R3PureEnum::$extra"
+          ],
+          false
+        ],
+        [
+          {
+            "name": "A",
+            "value": "a"
+          },
+          [
+            "Error",
+            "Cannot modify readonly property W13R3BackedEnum::$name"
+          ],
+          [
+            "Error",
+            "Cannot unset readonly property W13R3BackedEnum::$name"
+          ],
+          [
+            "Error",
+            "Cannot indirectly modify readonly property W13R3BackedEnum::$name"
+          ],
+          [
+            "Error",
+            "Cannot modify readonly property W13R3BackedEnum::$value"
+          ],
+          [
+            "Error",
+            "Cannot unset readonly property W13R3BackedEnum::$value"
+          ],
+          [
+            "Error",
+            "Cannot indirectly modify readonly property W13R3BackedEnum::$value"
+          ],
+          {
+            "name": "A",
+            "value": "a"
+          },
+          [
+            "Error",
+            "Cannot create dynamic property W13R3BackedEnum::$extra"
+          ],
+          false
+        ],
+        {
+          "name": "A",
+          "value": "a"
+        },
+        {
+          "name": "A"
+        },
+        {
+          "name": "A",
+          "value": "a"
+        },
+        [
+          "TypeError",
+          "Cannot assign W13R3PureEnum to property W13R3EnumBox::$backed of type BackedEnum"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-property-leading-nul": {
+      "result": [
+        [
+          "magic",
+          null,
+          true,
+          null,
+          "magic"
+        ],
+        [
+          "magic",
+          null,
+          true,
+          null,
+          "magic"
+        ],
+        [
+          "magic",
+          null,
+          true,
+          null,
+          "magic"
+        ],
+        [
+          "get",
+          "set",
+          "isset",
+          "unset",
+          "get",
+          "get",
+          "set",
+          "isset",
+          "unset",
+          "get",
+          "get",
+          "set",
+          "isset",
+          "unset",
+          "get"
+        ],
+        {
+          "\u0000W13R3Nul\u0000x": 1,
+          "\u0000*\u0000y": 2
+        }
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R3Nul::$ has no effect"
+        ],
+        [
+          8,
+          "Indirect modification of overloaded property W13R3Nul::$ has no effect"
+        ],
+        [
+          8,
+          "Indirect modification of overloaded property W13R3Nul::$x has no effect"
+        ]
+      ]
+    },
+    "r3-property-mangled-nul": {
+      "result": [
+        [
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          false,
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          1,
+          2
+        ],
+        [
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          false,
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          [
+            "Error",
+            "Cannot access property starting with \"\\0\""
+          ],
+          1,
+          2
+        ],
+        "ok",
+        "ok"
+      ],
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-property-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-property-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-argument-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-argument-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-return-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-plain-return-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-property-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-property-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-argument-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-argument-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-return-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-inherited-return-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-property-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-property-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-argument-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-argument-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-return-weak": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-trait-return-strict": {
+      "result": true,
+      "diagnostics": []
+    },
+    "r3-value-stringable-negative-property": {
+      "result": [
+        "TypeError",
+        "Cannot assign W13R3ValueNotStringable to property W13R3ValueNegativeBox::$value of type Stringable"
+      ],
+      "diagnostics": []
+    },
+    "r3-value-stringable-negative-argument": {
+      "result": [
+        "TypeError",
+        "W13R3ValueNegativeArgument::accept(): Argument #1 ($value) must be of type Stringable, W13R3ValueNotStringable given"
+      ],
+      "diagnostics": []
+    },
+    "r3-value-stringable-negative-return": {
+      "result": [
+        "TypeError",
+        "W13R3ValueNegativeReturn::produce(): Return value must be of type Stringable, W13R3ValueNotStringable returned"
+      ],
+      "diagnostics": []
+    },
+    "r3-value-float-string-property-precision": {
+      "result": "1.2345678901235",
+      "diagnostics": []
+    },
+    "r3-value-float-string-argument-precision": {
+      "result": "1.2345678901235",
+      "diagnostics": []
+    },
+    "r3-value-float-string-return-precision": {
+      "result": "1.2345678901235",
+      "diagnostics": []
+    },
+    "r3-value-float-string-property-exponent": {
+      "result": "1.0E+20",
+      "diagnostics": []
+    },
+    "r3-value-float-string-argument-exponent": {
+      "result": "1.0E+20",
+      "diagnostics": []
+    },
+    "r3-value-float-string-return-exponent": {
+      "result": "1.0E+20",
+      "diagnostics": []
+    },
+    "r3-value-float-string-property-negative-zero": {
+      "result": "-0",
+      "diagnostics": []
+    },
+    "r3-value-float-string-argument-negative-zero": {
+      "result": "-0",
+      "diagnostics": []
+    },
+    "r3-value-float-string-return-negative-zero": {
+      "result": "-0",
+      "diagnostics": []
+    },
+    "r3-value-float-string-property-boundary-fixed": {
+      "result": "99999999999999",
+      "diagnostics": []
+    },
+    "r3-value-float-string-argument-boundary-fixed": {
+      "result": "99999999999999",
+      "diagnostics": []
+    },
+    "r3-value-float-string-return-boundary-fixed": {
+      "result": "99999999999999",
+      "diagnostics": []
+    },
+    "r3-value-float-string-property-boundary-exponent": {
+      "result": "1.0E+14",
+      "diagnostics": []
+    },
+    "r3-value-float-string-argument-boundary-exponent": {
+      "result": "1.0E+14",
+      "diagnostics": []
+    },
+    "r3-value-float-string-return-boundary-exponent": {
+      "result": "1.0E+14",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-property-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-argument-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-return-huge": {
+      "result": "1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-property-negative-huge": {
+      "result": "-1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-argument-negative-huge": {
+      "result": "-1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-return-negative-huge": {
+      "result": "-1.0E+30",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-property-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r3-value-intstring-overflow-argument-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r3-value-intstring-overflow-return-nan": {
+      "result": "NAN",
+      "diagnostics": [
+        [
+          2,
+          "unexpected NAN value was coerced to string"
+        ]
+      ]
+    },
+    "r3-value-intstring-overflow-property-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-argument-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r3-value-intstring-overflow-return-inf": {
+      "result": "INF",
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable": {
+      "result": [
+        "converted",
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable-conversion-throw": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"
+        ],
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "Exception",
+          "conversion"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable-destructor-throw": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable-frame": {
+      "result": [
+        "converted",
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable-conversion-throw-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3OwnedStringDirectReturn::produce(): Return value must be of type string, W13R3OwnedStringable returned"
+        ],
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "Exception",
+          "conversion"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-owned-stringable-destructor-throw-frame": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        false,
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable": {
+      "result": [
+        "converted",
+        [
+          "convert",
+          "destructor",
+          "body"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable-frame": {
+      "result": [
+        "converted",
+        [
+          "convert",
+          "destructor",
+          "body"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable-conversion-throw": {
+      "result": [
+        [
+          "Exception",
+          "conversion"
+        ],
+        [
+          "convert",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable-conversion-throw-frame": {
+      "result": [
+        [
+          "Exception",
+          "conversion"
+        ],
+        [
+          "convert",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable-destructor-throw": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor",
+          "body"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-return-argument-stringable-destructor-throw-frame": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor",
+          "body"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-hook-borrowed-stringable": {
+      "result": [
+        true,
+        [],
+        [],
+        [
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-value-hook-borrowed-string-conversion": {
+      "result": [
+        "hook-text",
+        [
+          "convert"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-normal": {
+      "result": [
+        "converted",
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-normal-frame": {
+      "result": [
+        "converted",
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-conversion": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3DroppingGetter::$value::get(): Return value must be of type string, W13R3OwnedStringable returned"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "Exception",
+          "conversion"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-conversion-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3DroppingGetter::$value::get(): Return value must be of type string, W13R3OwnedStringable returned"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        [
+          "Exception",
+          "conversion"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-destructor": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-hook-drop-destructor-frame": {
+      "result": [
+        [
+          "Exception",
+          "destructor"
+        ],
+        [
+          "convert",
+          "destructor"
+        ],
+        null
+      ],
+      "diagnostics": []
+    },
+    "r3-frame-return-instance": {
+      "result": [
+        "text",
+        [
+          "convert",
+          "temporary",
+          "local",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-frame-return-static": {
+      "result": [
+        "text",
+        [
+          "convert",
+          "temporary",
+          "local",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-frame-return-reference": {
+      "result": [
+        "text",
+        [
+          "convert",
+          "temporary",
+          "local",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-frame-return-errors": {
+      "result": [
+        [
+          [
+            "Exception",
+            "local"
+          ],
+          [
+            "TypeError",
+            "W13R3FrameProducer::value(): Return value must be of type string, W13R3FrameText returned"
+          ],
+          [
+            "Exception",
+            "conversion"
+          ]
+        ],
+        [
+          "convert",
+          "temporary",
+          "local",
+          "after"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-int-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-int-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_int_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-int-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-int-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_int_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-union-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-union-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_union_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-union-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-union-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_union_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-mixed-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-mixed-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_mixed_method::value(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-mixed-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-mixed-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_string_mixed_hook::$value::get(): Return value must be of type string, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-untyped-method": {
+      "result": [
+        "7",
+        "string",
+        "7",
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-untyped-method-frame": {
+      "result": [
+        "7",
+        "string",
+        "7",
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-untyped-hook": {
+      "result": [
+        "7",
+        "string",
+        "7",
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-string-untyped-hook-frame": {
+      "result": [
+        "7",
+        "string",
+        "7",
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-int-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-int-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_int_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-int-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-int-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_int_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-union-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-union-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_union_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-union-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-union-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_union_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-mixed-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-mixed-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_mixed_method::value(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-mixed-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-mixed-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_float_mixed_hook::$value::get(): Return value must be of type float, int returned"
+        ],
+        "int",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-untyped-method": {
+      "result": [
+        7,
+        "float",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-untyped-method-frame": {
+      "result": [
+        7,
+        "float",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-untyped-hook": {
+      "result": [
+        7,
+        "float",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-float-untyped-hook-frame": {
+      "result": [
+        7,
+        "float",
+        7,
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-mixed-method": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"
+        ],
+        "W13R3TypedReturnText",
+        {},
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-mixed-method-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_text_mixed_method::value(): Return value must be of type string, W13R3TypedReturnText returned"
+        ],
+        "W13R3TypedReturnText",
+        {},
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-mixed-hook": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"
+        ],
+        "W13R3TypedReturnText",
+        {},
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-mixed-hook-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedReturn_text_mixed_hook::$value::get(): Return value must be of type string, W13R3TypedReturnText returned"
+        ],
+        "W13R3TypedReturnText",
+        {},
+        []
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-untyped-method": {
+      "result": [
+        "text",
+        "string",
+        "text",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-untyped-method-frame": {
+      "result": [
+        "text",
+        "string",
+        "text",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-untyped-hook": {
+      "result": [
+        "text",
+        "string",
+        "text",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-typed-return-text-untyped-hook-frame": {
+      "result": [
+        "text",
+        "string",
+        "text",
+        [
+          "convert"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-typed": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-typed-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-mixed": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-mixed-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-untyped": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-array-untyped-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        [
+          {},
+          "go"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-typed": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-typed-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-mixed": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-mixed-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-untyped": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-object-untyped-frame": {
+      "result": [
+        [
+          "ok",
+          true,
+          "go",
+          true
+        ],
+        {}
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-invalid-typed": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedCallable_invalid_typed::value(): Return value must be of type callable, array returned"
+        ],
+        [
+          {},
+          "missing"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r3-callable-return-invalid-typed-frame": {
+      "result": [
+        [
+          "TypeError",
+          "W13R3TypedCallable_invalid_typed::value(): Return value must be of type callable, array returned"
+        ],
+        [
+          {},
+          "missing"
+        ]
+      ],
+      "diagnostics": []
+    },
     "shutdown-handle-reuse": {
       "result": "hole\nbody-end\nmaker\nold\nnew\n",
       "diagnostics": []

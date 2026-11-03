@@ -41,7 +41,9 @@
             "TestW13TemporaryArrayMutationOwnership",
             "TestW13TemporaryReferenceLocationOwnership",
             "TestW13LazyRollbackConsecutiveSafety",
-            "TestW13ZeroLazyInitializerOwnership"
+            "TestW13ZeroLazyInitializerOwnership",
+            "TestW13EnumDescriptorValidation",
+            "TestW13PendingArgumentDestructorSafety"
           ]
         },
         {
@@ -62,7 +64,8 @@
       "security_exceptions": [],
       "known_gaps": [
         "Cross-cycle WeakReference resurrection remains compatibility-blocked: pinned arm64 PHP exits 139 and i386 exposes an invalid externally held object. The user approved keeping Go owner safety and merging PR #73 with this explicit limit. This diagnostic is never a compatibility pass (docs/implementation/evidence/W-13-gc-weak-diagnostic.json).",
-        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (docs/implementation/evidence/W-13-lazy-rollback-diagnostic.json)."
+        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (docs/implementation/evidence/W-13-lazy-rollback-diagnostic.json).",
+        "Stringable argument source destruction before a conditional method body is compatibility-blocked pending explicit user decision: pinned arm64 PHP exits139 and i386 times out120s; Go safely preserves the exception. This diagnostic is not a compatibility pass (docs/implementation/evidence/W-13-argument-destructor-diagnostic.json)."
       ]
     },
     {
@@ -104,7 +107,9 @@
             "TestW13TemporaryArrayMutationOwnership",
             "TestW13TemporaryReferenceLocationOwnership",
             "TestW13LazyRollbackConsecutiveSafety",
-            "TestW13ZeroLazyInitializerOwnership"
+            "TestW13ZeroLazyInitializerOwnership",
+            "TestW13EnumDescriptorValidation",
+            "TestW13PendingArgumentDestructorSafety"
           ]
         }
       ],
@@ -112,7 +117,8 @@
       "known_gaps": [
         "The ** operator does not reproduce i386 glibc x87 pow results (docs/implementation/W-10.md).",
         "Cross-cycle WeakReference resurrection remains compatibility-blocked: pinned arm64 PHP exits 139 and i386 exposes an invalid externally held object. The user approved keeping Go owner safety and merging PR #73 with this explicit limit. This diagnostic is never a compatibility pass (docs/implementation/evidence/W-13-gc-weak-diagnostic.json).",
-        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (docs/implementation/evidence/W-13-lazy-rollback-diagnostic.json)."
+        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (docs/implementation/evidence/W-13-lazy-rollback-diagnostic.json).",
+        "Stringable argument source destruction before a conditional method body is compatibility-blocked pending explicit user decision: pinned arm64 PHP exits139 and i386 times out120s; Go safely preserves the exception. This diagnostic is not a compatibility pass (docs/implementation/evidence/W-13-argument-destructor-diagnostic.json)."
       ]
     }
   ]

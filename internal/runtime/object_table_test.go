@@ -7,7 +7,7 @@ import (
 )
 
 func TestW13LayoutEvidence(t *testing.T) {
-	for _, v := range []any{value{}, reference{}, bucket{}, phpArray{}, object{}, propertyTable{}} {
+	for _, v := range []any{value{}, reference{}, bucket{}, phpArray{}, object{}, propertyTable{}, classSpec{}} {
 		typ := reflect.TypeOf(v)
 		t.Logf("%s=%d B", typ.Name(), typ.Size())
 	}

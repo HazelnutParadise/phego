@@ -50,7 +50,17 @@ callback 回傳 reference 時，按值讀取先保護 target，再消耗暫存 w
 
 clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。檢查先於 lazy 初始化與 clone 配置，省掉拒絕操作的不必要配置與副作用。具名 magic 參數重複檢查重用已打包的陣列索引，不另建集合。union 的 int 轉換溢位時繼續嘗試允許的 string／bool，包含固定映像的 NaN 診斷。已知零個實體屬性的 lazy 類別直接建立普通物件；未知舊描述不套用這個快速路徑，initializer 的請求 owner 仍先檢查。
 
+實例查找跳過不屬於目前類別的祖先 private 宣告，宣告者 scope 則先取得自己的 private 位置。static 查找保留原有可見性規則。PHP-facing 名稱在 instance resolver 驗證，避免 NUL 開頭的輸入命中內部 mangled key；既有錯誤分流維持 magic 優先、沒有 magic 時的 isset 回傳 false。動態 isset 先取 lazy backing storage，不能只看 wrapper 空殼。
+
+有 `__toString` 的類別加入不可變 Stringable interface 描述，繼承與 trait 共用同一套型別匹配。enum 以四值 `enumKind` 區分普通類別、unit、int-backed、string-backed，填入 classSpec 原有 padding，實測仍為 184 B。這能表示零 case enum，也能在建置時驗證 backing 數量／型別。`name` 與 `value` 納入 readonly 宣告布局，UnitEnum／BackedEnum 描述一併加入；建立 case 時只初始化一次，不再使用無屬性限制的動態位置。
+
+回傳型別驗證放在方法自身的 W-14 callback 內，先完成轉換，再移交回傳 owner，最後釋放局部值。需轉型的 raw 結果由 `checkMethodReturn` 暫時持有並消耗一次。普通 PHP 轉換例外在 return 邊界由 TypeError 取代並保留 previous；argument 邊界保留原例外。成功的 argument 轉換若在釋放來源時解構拋例外，仍執行方法 body 並保留 pending 事件。取消、exit 與 internal failure 不使用這條繼續執行規則。
+
+連到 typed property 的按參照回傳，值不符合回傳型別時，在轉換前拒絕，包含 mixed／union 來源與 int→float，避免改寫來源或執行 `__toString`。合法 callable 先做請求內符號／scope 驗證，屬於原樣接受，不會被這個限制誤認為需轉型。
+
 方法表保存建置後不可變的 descriptor 指標。新定義與 trait 套用各有自己的 descriptor，純繼承共享原 descriptor；trait 綁定只複製描述本身，已凍結的參數與 defaults 可以共享。這讓方法實作身分可直接比較，也省掉原先每次 lookup 複製 descriptor 的配置。固定本機微型測試中，單次方法呼叫從 208 B／4 次配置降至 112 B／3 次配置。再把只保存單一 receiver 的 slice 改成一個 `methodHold` 值，降到 32 B／2 次配置。這批前後樣本執行時有其他工作，不能用其時間宣稱速度提升。
+
+最後兩次配置來自 union／intersection 拆分的暫存 `[]string`。Go 的 `iter.Seq[string]` 直接逐段產生原字串切片，保留空 token、括號深度與提前停止規則，不增加快取或描述欄位。五次前後微型量測將無參數、回傳 int 的呼叫降至 0 B／0 次配置；全套 433 案及既有 DNF 控制維持一致。scanner 狀態物件也可省配置，但呼叫端較繁，現有 iterator 已達到目標，因此未採用。量測只支持這個操作，不推論所有方法或應用零配置。
 
 類別 destructor adapter 只捕捉 callback 本身。Go `-gcflags=all=-m=2` 證明從以 reference 捕捉整個 184 B 的 classSpec，改成以 value 捕捉 8 B 的函式值。沒有新增狀態或改變 callback 行為，原始編譯器結果保存在 `W-13-destructor-capture.txt`。
 
@@ -83,6 +93,12 @@ lazy ghost 失敗時按宣告順序還原快照。固定 PHP 8.5.12 會直接覆
 `diagnostics/lazy_rollback_pair.php` 將 declared 與 dynamic rollback 連續執行，固定 arm64 PHP 發生 `zend_mm_heap corrupted` 並以 133 結束，i386 也發生記憶體損毀並在本機模擬環境中逾時。兩種單案各自執行及追加 GC 都以 0 結束，Go 也符合單案檢查點結果。使用者於 2026-11-02 另外明確核准保留單案精確比對與原始崩潰證據，連續案例明列相容性受阻、不計通過，其他驗收與審查完成後允許合併。此項核准與下列弱參照復活例外各自限於指定輸入。原始結果位於 `W-13-lazy-rollback-diagnostic.json`。
 
 ## 驗證與尚未完成項目
+
+### 等待使用者裁決的額外參考引擎不安全案例
+
+`diagnostics/argument_destructor_conditional.php` 在弱 Stringable argument 轉換後，來源解構拋例外，再進入包含條件分支的 body。固定 arm64 映像以 139 結束，i386 在 120 秒後逾時。Go 的 `TestW13PendingArgumentDestructorSafety` 安全完成、保留解構例外並清空請求物件，這是宿主安全測試，不是 PHP 相容通過。測試只執行 fixture 指定的 `ok` 分支，其他分支未驗證。
+
+原始輸入、雜湊與雙寬度結果位於 `W-13-argument-destructor-diagnostic.json`。這是前兩項核准之外的新案例，已請使用者另外裁決，目前不得因此合併 PR #73，也不計為通過。
 
 ### 使用者核准保留安全修正的參考引擎不安全案例
 

@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"iter"
 	"math"
 	"strconv"
 	"strings"
@@ -227,26 +228,28 @@ func (h *heap) invokeMethod(obj value, m *methodSpec, supplied []methodArgument,
 		err = h.mergeObjectErrors(err, h.releaseMethodHold(hold))
 	}
 	operands = nil
-	if err != nil {
+	if err != nil && !objectPHPException(err) {
 		return value{}, err
 	}
+	argumentCleanup := err
 	this := obj
 	if m.static {
 		this = nullValue()
 	}
-	raw, err := h.invokeObject(func() (value, error) { return m.call(h, this, callArgs) }, m.returnsReference)
-	if err != nil {
-		return value{}, err
-	}
-	out, err := h.checkMethodReturn(raw, m, obj, m.returnStrict)
-	if err != nil {
-		err = h.mergeObjectErrors(err, h.discardMethodReturn(raw))
-		return value{}, err
-	}
-	if raw.kind != out.kind {
-		if err := h.discardMethodReturn(raw); err != nil {
+	// Successful coercion remains successful when releasing its source throws.
+	// PHP enters the body with that ordinary exception pending; sticky stops
+	// above still prevent entry. Preserve the pending event across the call.
+	out, callErr := h.invokeObject(func() (value, error) {
+		raw, err := m.call(h, this, callArgs)
+		if err != nil {
 			return value{}, err
 		}
+		// Return verification belongs to this frame, before its locals unwind.
+		return h.checkMethodReturn(raw, m, obj, m.returnStrict)
+	}, m.returnsReference)
+	err = h.mergeObjectErrors(argumentCleanup, callErr)
+	if err != nil {
+		return value{}, h.mergeObjectErrors(err, h.discardMethodReturn(out))
 	}
 	if hold, ok := h.holdMethodResult(out); ok {
 		result = &hold
@@ -615,36 +618,77 @@ func (h *heap) releaseMethodHold(hold methodHold) error {
 	return h.release(hold.value)
 }
 
-func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool) (value, error) {
+// Rejected or coerced-away raw results are consumed here. A coercion may run
+// PHP that removes their last external owner, so keep a hold until it finishes.
+func (h *heap) checkMethodReturn(v value, m *methodSpec, obj value, strict bool) (out value, err error) {
 	typ := m.returnType
 	if typ == "" || typ == "mixed" {
 		return v, nil
 	}
+	called := (*class)(nil)
+	if obj.kind == valueObject && obj.object != nil {
+		called = obj.object.class
+	}
+	if typ != "void" && typ != "never" && (methodAcceptsType(m, called, typ, v) ||
+		(methodTypeHas(typ, "callable") && h.isObjectCallable(v, m.owner))) {
+		return v, nil
+	}
+	if err := h.claimValues(v); err != nil {
+		return value{}, err
+	}
+	hold, protected := h.holdMethodResult(v)
+	consume := true
+	defer func() {
+		if protected {
+			if consume {
+				// A converted composite can still share storage with the raw value.
+				outHold, outProtected := h.holdMethodResult(out)
+				hold.temporary = false
+				err = h.mergeObjectErrors(err, h.releaseMethodHold(hold))
+				if outProtected {
+					if err != nil {
+						outHold.temporary = false
+					}
+					err = h.mergeObjectErrors(err, h.releaseMethodHold(outHold))
+				}
+			} else {
+				err = h.mergeObjectErrors(err, h.releaseMethodHold(hold))
+			}
+		}
+		if err != nil {
+			out = value{}
+		}
+	}()
 	switch typ {
 	case "void":
 		return nullValue(), nil
 	case "never":
 		return value{}, &Throwable{"Error", m.owner.name + "::" + m.name + "(): never-returning method must not return"}
 	}
-	called := (*class)(nil)
-	if obj.kind == valueObject && obj.object != nil {
-		called = obj.object.class
-	}
-	if methodAcceptsType(m, called, typ, v) {
-		return v, nil
+	if m.returnsReference && v.kind == valueReference && len(h.typedSources[v.ref]) != 0 {
+		return value{}, methodReturnTypeError(m, v)
 	}
 	if coerced, ok, err := h.coerceTypedValue(m, called, typ, v, strict); err != nil {
+		if objectPHPException(err) {
+			return value{}, h.mergeObjectErrors(err, methodReturnTypeError(m, v))
+		}
 		return value{}, err
 	} else if ok {
 		if m.returnsReference && v.kind == valueReference {
 			if err := h.assignPHP(&v, coerced, strict); err != nil {
 				return value{}, err
 			}
+			// This branch updates the same wrapper and transfers its raw hold.
+			consume = false
 			return v, nil
 		}
 		return coerced, nil
 	}
-	return value{}, &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Return value must be of type %s, %s returned", m.owner.name, m.name, typ, valueName(v))}
+	return value{}, methodReturnTypeError(m, v)
+}
+
+func methodReturnTypeError(m *methodSpec, v value) *Throwable {
+	return &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Return value must be of type %s, %s returned", m.owner.name, m.name, m.returnType, valueName(v))}
 }
 
 // Invalid and coerced-away callback results obey the same temporary contract
@@ -665,7 +709,7 @@ func methodAcceptsType(m *methodSpec, called *class, typ string, v value) bool {
 		}
 		return methodAcceptsType(m, called, strings.TrimSpace(typ[1:]), v)
 	}
-	for _, part := range splitMethodType(typ, '|') {
+	for part := range splitMethodType(typ, '|') {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue
@@ -675,7 +719,7 @@ func methodAcceptsType(m *methodSpec, called *class, typ string, v value) bool {
 		}
 		intersection := splitMethodType(part, '&')
 		matches := true
-		for _, name := range intersection {
+		for name := range intersection {
 			if !methodAcceptsPart(m, called, strings.TrimSpace(name), v) {
 				matches = false
 				break
@@ -688,26 +732,29 @@ func methodAcceptsType(m *methodSpec, called *class, typ string, v value) bool {
 	return false
 }
 
-// splitMethodType splits a type expression on sep at parenthesis depth zero.
-func splitMethodType(typ string, sep byte) []string {
-	var out []string
-	start, depth := 0, 0
-	for i := 0; i < len(typ); i++ {
-		switch typ[i] {
-		case '(':
-			depth++
-		case ')':
-			if depth > 0 {
-				depth--
-			}
-		case sep:
-			if depth == 0 {
-				out = append(out, typ[start:i])
-				start = i + 1
+// Yield depth-zero parts directly, without allocating temporary token slices.
+func splitMethodType(typ string, sep byte) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		start, depth := 0, 0
+		for i := 0; i < len(typ); i++ {
+			switch typ[i] {
+			case '(':
+				depth++
+			case ')':
+				if depth > 0 {
+					depth--
+				}
+			case sep:
+				if depth == 0 {
+					if !yield(typ[start:i]) {
+						return
+					}
+					start = i + 1
+				}
 			}
 		}
+		yield(typ[start:])
 	}
-	return append(out, typ[start:])
 }
 
 func methodAcceptsPart(m *methodSpec, called *class, part string, v value) bool {
@@ -788,12 +835,12 @@ func methodTypeHas(typ, want string) bool {
 	if typ == "mixed" {
 		return true
 	}
-	for _, part := range splitMethodType(typ, '|') {
+	for part := range splitMethodType(typ, '|') {
 		part = strings.TrimSpace(part)
 		if strings.HasPrefix(part, "(") && strings.HasSuffix(part, ")") && len(part) > 1 {
 			part = strings.TrimSpace(part[1 : len(part)-1])
 		}
-		for _, name := range splitMethodType(part, '&') {
+		for name := range splitMethodType(part, '&') {
 			if strings.TrimSpace(name) == want {
 				return true
 			}
@@ -888,7 +935,7 @@ func (h *heap) coerceMethodValue(m *methodSpec, called *class, typ string, v val
 			if math.IsNaN(v.floating) {
 				h.warn(levelWarning, "unexpected NAN value was coerced to string")
 			}
-			return bytesValue([]byte(php8512FormatFloat(v.floating, -1))), true
+			return bytesValue([]byte(php8512FormatFloat(v.floating, 14))), true
 		}
 	}
 	if hasBool {

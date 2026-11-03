@@ -8,6 +8,15 @@ type activePropertyHook struct {
 	name           string
 }
 
+func objectPHPException(err error) bool {
+	var c completion
+	if errors.As(err, &c) {
+		return c.kind == endThrow
+	}
+	var php *Throwable
+	return errors.As(err, &php)
+}
+
 // A later cleanup exception replaces the active one while retaining its chain.
 // Reuse W-14 completion identities and sticky termination precedence.
 func (h *heap) mergeObjectErrors(previous, next error) error {

@@ -27,7 +27,7 @@ func (h *heap) newLazyObject(c *class, proxy bool, initialize func(*heap, value)
 			kind = "trait"
 		} else if s.abstract {
 			kind = "abstract class"
-		} else if len(s.enumCases) > 0 {
+		} else if s.enumKind != enumNone {
 			kind = "enum"
 		}
 		if kind != "" {
@@ -362,7 +362,7 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 	if m := h.weakMapObjects[o]; m != nil {
 		return h.cloneWeakMap(m)
 	}
-	if o.class.schema != nil && len(o.class.schema.enumCases) > 0 {
+	if o.class.schema != nil && o.class.schema.enumKind != enumNone {
 		return value{}, &Throwable{"Error", "Trying to clone an uncloneable object of class " + o.class.name}
 	}
 	m, hasClone := h.resolveMethod(o.class, "__clone", nil)
@@ -477,7 +477,7 @@ func (h *heap) enumCase(c *class, name string) (value, error) {
 		if err != nil {
 			return value{}, err
 		}
-		if err = h.setProperty(v, "name", value{kind: valueString, text: name}); err != nil {
+		if err = h.writeObject(v, "name", value{kind: valueString, text: name}, c, true); err != nil {
 			return value{}, err
 		}
 		if i < len(c.schema.enumValues) {
@@ -485,7 +485,7 @@ func (h *heap) enumCase(c *class, name string) (value, error) {
 			if err != nil {
 				return value{}, err
 			}
-			err = h.setProperty(v, "value", backing)
+			err = h.writeObject(v, "value", backing, c, true)
 			_ = h.release(backing)
 			if err != nil {
 				return value{}, err

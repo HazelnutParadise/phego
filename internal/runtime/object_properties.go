@@ -188,9 +188,6 @@ func (h *heap) getPropertyHook(o *object, p *propertyInfo, byReference bool) (va
 			return value{}, err
 		}
 		out, err := h.checkMethodReturn(raw, &methodSpec{owner: p.owner, name: "$" + p.name + "::get", returnType: p.typeName, returnsReference: p.getReference}, this, p.hookStrict)
-		if err != nil || raw.kind != out.kind {
-			err = h.mergeObjectErrors(err, h.discardMethodReturn(raw))
-		}
 		return out, err
 	}, nullValue(), byReference)
 }
@@ -461,7 +458,7 @@ func (h *heap) referenceMagicProperty(dst *value, o *object, name string) (bool,
 		return called, err
 	}
 	if raw.kind != valueReference && raw.deref().kind != valueObject {
-		h.warn(levelNotice, "Indirect modification of overloaded property "+o.class.name+"::$"+name+" has no effect")
+		h.warn(levelNotice, "Indirect modification of overloaded property "+o.class.name+"::$"+cString(name)+" has no effect")
 	}
 	return true, h.bindMethodReference(dst, raw)
 }
@@ -509,6 +506,10 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 	}
 	if accessErr != nil || p == nil {
 		if accessErr == nil {
+			o, err = h.objectForProperty(o, p, name)
+			if err != nil {
+				return false, err
+			}
 			if slot, ok := o.props.lookup(key); ok && slot.kind != valueUndefined {
 				v := slot.deref()
 				return v.kind != valueNull, nil

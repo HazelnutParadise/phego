@@ -80,6 +80,13 @@ require __DIR__.'/review_r2_values.php';
 require __DIR__.'/review_r2_properties.php';
 require __DIR__.'/review_r2_lazy.php';
 require __DIR__.'/review_r2_cleanup.php';
+require __DIR__.'/review_r3_enum.php';
+require __DIR__.'/review_r3_properties.php';
+require __DIR__.'/review_r3_values.php';
+require __DIR__.'/review_r3_hooks.php';
+require __DIR__.'/review_r3_frames.php';
+require __DIR__.'/review_r3_typed_return.php';
+require __DIR__.'/review_r3_callable_return.php';
 foreach($tests as $name=>$test) {
     // These cases have exact independent observations. Their consecutive
     // execution corrupts pinned PHP; preserve that separate diagnostic.

@@ -28,7 +28,10 @@ func (h *heap) unsetStatic(c *class, name string) error {
 // An accessible static declaration accessed through an object is a separate
 // dynamic instance property. Visibility is checked before raising the notice.
 func (h *heap) resolveInstanceProperty(o *object, name string, scope *class, silent bool) (*propertyInfo, error) {
-	p, err := resolveProperty(o.class, name, scope)
+	if len(name) != 0 && name[0] == 0 {
+		return nil, &Throwable{"Error", "Cannot access property starting with \"\\0\""}
+	}
+	p, err := resolvePropertyIn(o.class, name, scope, true)
 	if err != nil || p == nil || !p.static {
 		return p, err
 	}
@@ -69,7 +72,7 @@ func (h *heap) bindPropertyReference(dst, slot *value, p *propertyInfo) error {
 
 func (h *heap) dynamicPropertySlot(o *object, name string) (*value, error) {
 	if schema := o.class.schema; schema != nil {
-		if schema.noDynamic || schema.readonly || len(schema.enumCases) != 0 {
+		if schema.noDynamic || schema.readonly {
 			return nil, &Throwable{"Error", "Cannot create dynamic property " + o.class.name + "::$" + name}
 		}
 		if _, exists := o.props.lookup(name); !exists && !schema.allowDynamic {
