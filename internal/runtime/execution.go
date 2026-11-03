@@ -221,6 +221,10 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 // call owns local values until return/throw/exit unwinds them. Exit bypasses
 // PHP finally; fatal and host stops retain live values for request teardown.
 func (x *execution) call(body, finally executionAction) completion {
+	return x.callInScope(body, finally, nil)
+}
+
+func (x *execution) callInScope(body, finally executionAction, called *class) completion {
 	if body == nil || x.closed {
 		return completion{kind: endInternal, err: errors.New("invalid execution action")}
 	}
@@ -232,8 +236,10 @@ func (x *execution) call(body, finally executionAction) completion {
 	}
 	x.calls++
 	previousHook := x.heap.currentHook
+	previousScope := x.heap.currentCalledScope
 	x.heap.currentHook = activePropertyHook{}
-	defer func() { x.heap.currentHook = previousHook }()
+	x.heap.currentCalledScope = called
+	defer func() { x.heap.currentHook, x.heap.currentCalledScope = previousHook, previousScope }()
 	f := &executionFrame{}
 	x.frames = append(x.frames, f)
 	enclosingPending := x.phaseCompletion

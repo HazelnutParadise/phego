@@ -42,7 +42,7 @@ typed-source 的來源順序可被 `__toString` 重入觀察。驗證保存原�
 
 參照寫入在轉換期間持有原 reference 及 RHS。alias 被 unset 時更新原位置而不重建名稱，被重新綁定時追隨目前 reference，重新核對 request owner，依固定 PHP 不重跑新目的地的型別限制。寫入後先釋放 RHS，再釋放舊 target garbage，精確保留 `convert,convert,rhs,old`。Go 測試使用真正的可寫 cell；額外複製／持有測試 operand 會掩蓋這些生命週期錯誤。
 
-[建構函式回傳的暫存值](../../internal/runtime/heap.go#L87)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
+[建構函式回傳的暫存值](../../internal/runtime/heap.go#L88)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
 
 類別描述不保存物件欄位、static 值、enum 活實例、lazy 初始化錯誤或 hook 重入狀態。這些狀態由該請求的 heap／object 擁有。Go callback 是受信任的宿主程式；程式描述中的 callback 不應捕捉 PHP 請求的可變值。
 
@@ -107,6 +107,16 @@ GC 不依賴 Go finalizer。固定 PHP 映像的 `gc-created` 案例證明析構
 lazy ghost 失敗時按宣告順序還原快照。固定 PHP 8.5.12 會直接覆寫 destructor 重入寫入的新值，不解除這筆持有計數。單案對照證明，提前 release 會提早執行原本未執行的 destructor，因此不採用。物件與 resource 保留在當次請求的登錄，由既有 shutdown 與資源清理處理。額外的 orphan ledger 會增加保存空間，而且不能新增 GC edges 或 roots，否則又改變可觀察行為，目前沒有採用的必要。
 
 `diagnostics/lazy_rollback_pair.php` 將 declared 與 dynamic rollback 連續執行，固定 arm64 PHP 發生 `zend_mm_heap corrupted` 並以 133 結束，i386 也發生記憶體損毀並在本機模擬環境中逾時。兩種單案各自執行及追加 GC 都以 0 結束，Go 也符合單案檢查點結果。使用者於 2026-11-02 另外明確核准保留單案精確比對與原始崩潰證據，連續案例明列相容性受阻、不計通過，其他驗收與審查完成後允許合併。此項核准與下列弱參照復活例外各自限於指定輸入。原始結果位於 `W-13-lazy-rollback-diagnostic.json`。
+
+## R6：拒絕順序、參照參數與呼叫類別
+
+unset 先檢查不需讀取值的 hook 與 setter 權限，並依 readonly slot 的實際狀態及 clone reinitialization 判斷。已明確 unset 的位置先嘗試 magic，遞迴 guard 仍保留；缺少的動態屬性也先走 magic。需要初始化時沿用 `objectForProperty`，初始化或選到 proxy backing 後重跑 descriptor 檢查，避免 ghost 原地寫入 readonly slot 後被錯誤移除。receiver 未變時沿用已取得的 slot，省掉第二次查找。
+
+typed property reference 傳入 by-reference 參數時只接受目前型別，不能先執行 scalar／Stringable 轉換。request-aware callable 驗證仍屬於合法接受，普通未受型別來源約束的參照維持 weak coercion 與 writeback。只有 typed source 分支額外查 callable，普通參照由原轉換路徑檢查一次。variadic 共用 binder 與錯誤建構，只保存已處理的位置參數數量；具名參數不推進它，兩種 variadic 錯誤均省略參數名稱。
+
+非對稱屬性的權限檢查採 lexical scope，PHP 訊息則採 called scope。直接從目標物件推導會在操作其他物件時出錯，僅使用方法宣告者也會漏掉繼承呼叫。因此新增當次 heap 的 called-scope 指標，callback 入口以 `defer` 保存及還原，execution 版本涵蓋 local cleanup。方法、static、hook 與 destructor 傳實際 called class；一般 callback 清成 nil。既有入口名稱與簽章保留為 wrapper。這增加一個 request-local 指標及進出 frame 的操作，沒有每次呼叫配置；微型時間樣本較慢，明列成本。現有無 class lazy host callback 仍傳 nil，帶 class scope 的 Closure 由未完成的公開介面整合。
+
+明確 resource close 不先檢查已取消的 operation context。它保留 heap、owner、generation、kind、open 檢查，並把原樣傳入的 cleanup context 交給一次性 close callback。普通操作繼續檢查 operation cancellation。兩者共用 `resourceRecord` 的 owner／generation 查找，保留簡短 state 檢查，避免為抽共用層增加普通操作呼叫；固定訊息使用 `errors.New`，不呼叫格式化器。完整雙寬度對照、失敗重播、資源控制與前後基準見 `W-13-r6-review.json`。
 
 ## 驗證與尚未完成項目
 

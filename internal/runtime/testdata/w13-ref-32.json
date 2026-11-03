@@ -4928,6 +4928,653 @@
         ]
       ]
     },
+    "r6-param-direct-union-string": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 41"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-int-float": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeFloat(): Argument #1 ($v) must be of type float, int given, called in /w/review_r6_references.php on line 46"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-object-stringable": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 51"
+        ],
+        [],
+        "W13R6Stringable"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-mixed-stringable": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, W13R6Stringable given, called in /w/review_r6_references.php on line 56"
+        ],
+        [],
+        "W13R6Stringable"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-mixed-int": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 61"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-union-int": {
+      "result": [
+        "ok",
+        [
+          "body:int:int"
+        ],
+        2
+      ],
+      "diagnostics": []
+    },
+    "r6-param-direct-object-union": {
+      "result": [
+        "ok",
+        [
+          "body:object:W13R6Stringable"
+        ],
+        "W13R6Stringable"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-ordinary-int-string": {
+      "result": [
+        "ok",
+        [
+          "body:string:string"
+        ],
+        "1"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-untyped-property": {
+      "result": [
+        "ok",
+        [
+          "body:string:string"
+        ],
+        "1"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-ordinary-string-int": {
+      "result": [
+        "ok",
+        [
+          "body:int:int"
+        ],
+        8
+      ],
+      "diagnostics": []
+    },
+    "r6-param-named-union-string": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeNamed(): Argument #1 ($first) must be of type string, int given, called in /w/review_r6_references.php on line 91"
+        ],
+        [],
+        1,
+        "x"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-union-string": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 96"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-named": {
+      "result": [
+        [
+          "Error",
+          "W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-reflect-union-string": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-reflect-ordinary": {
+      "result": [
+        "ok",
+        [
+          "body:string:string"
+        ],
+        "1"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-callable-invoke": {
+      "result": [
+        "ok",
+        [
+          "body:callable:W13R6Invokable"
+        ],
+        "W13R6Invokable"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-callable-array": {
+      "result": [
+        "ok",
+        [
+          "body:callable:array"
+        ],
+        "array"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-callable-static": {
+      "result": [
+        "ok",
+        [
+          "body:callable:string"
+        ],
+        "string"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-callable-reject": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeCallable(): Argument #1 ($v) must be of type callable, W13R6Stringable given, called in /w/review_r6_references.php on line 133"
+        ],
+        [],
+        "W13R6Stringable"
+      ],
+      "diagnostics": []
+    },
+    "r6-param-post-failure": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeString(): Argument #1 ($v) must be of type string, int given, called in /w/review_r6_references.php on line 138"
+        ],
+        [
+          "TypeError",
+          "Cannot assign array to property W13R6Source::$intProp of type int"
+        ],
+        "write",
+        2
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-second": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 146"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-named-second": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeVariadic(): Argument #1 must be of type string, int given, called in /w/review_r6_references.php on line 151"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-fixedprefix": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takePrefix(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 157"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-variadic-pos-named": {
+      "result": [
+        [
+          "TypeError",
+          "W13R6Sink::takeVariadic(): Argument #2 must be of type string, int given, called in /w/review_r6_references.php on line 162"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-literal": {
+      "result": [
+        [
+          "Error",
+          "W13R6Sink::takeString(): Argument #1 ($v) could not be passed by reference"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-literal-pos-second": {
+      "result": [
+        [
+          "Error",
+          "W13R6Sink::takeVariadic(): Argument #2 could not be passed by reference"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-param-literal-named-second": {
+      "result": [
+        [
+          "Error",
+          "W13R6Sink::takeVariadic(): Argument #1 could not be passed by reference"
+        ],
+        [],
+        1
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-virtual-unset": {
+      "result": [
+        true,
+        [
+          true,
+          [
+            "Error",
+            "Cannot unset hooked property W13R6Virtual::$v"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-backed-unset": {
+      "result": [
+        true,
+        [
+          false,
+          [
+            "Error",
+            "Cannot unset hooked property W13R6Backed::$b"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-private-set-unset": {
+      "result": [
+        true,
+        [
+          [
+            "Error",
+            "Cannot unset private(set) property W13R6PrivSet::$p from global scope"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-protected-set-unset": {
+      "result": [
+        true,
+        [
+          [
+            "Error",
+            "Cannot unset protected(set) property W13R6ProtSet::$p from global scope"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-readonly-uninit-unset": {
+      "result": [
+        true,
+        [
+          [
+            "Error",
+            "Cannot unset protected(set) readonly property W13R6RoUninit::$ro from global scope"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-readonly-raw-unset": {
+      "result": [
+        true,
+        [
+          123,
+          [
+            "Error",
+            "Cannot unset readonly property W13R6RoRaw::$ro"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-private-set-hook-unset": {
+      "result": [
+        true,
+        [
+          [
+            "Error",
+            "Cannot unset hooked property W13R6PrivateHook::$p"
+          ],
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-raw-plain-unset": {
+      "result": [
+        true,
+        [
+          11,
+          null,
+          0,
+          true
+        ],
+        []
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-dynamic-magic": {
+      "result": [
+        true,
+        [
+          null,
+          0,
+          true
+        ],
+        [
+          "magic:missing"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-dynamic-plain": {
+      "result": [
+        true,
+        [
+          [
+            "Exception",
+            "init"
+          ],
+          1,
+          true
+        ],
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-readonly-init-unset": {
+      "result": [
+        true,
+        [
+          [
+            "Error",
+            "Cannot unset readonly property W13R6ReadonlyInit::$ro"
+          ],
+          1,
+          false
+        ],
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-plain-unset": {
+      "result": [
+        true,
+        [
+          null,
+          false,
+          [
+            "Error",
+            "Typed property W13R6Plain::$q must not be accessed before initialization"
+          ],
+          1,
+          false
+        ],
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-init-throw": {
+      "result": [
+        true,
+        [
+          [
+            "Exception",
+            "boom"
+          ],
+          1,
+          true,
+          [
+            "Exception",
+            "boom"
+          ],
+          2,
+          true
+        ],
+        [
+          "init",
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-magic-asym": {
+      "result": [
+        null,
+        [
+          "magic:p"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-recursive-unset": {
+      "result": [
+        null,
+        [
+          "Error",
+          "Cannot unset private(set) property W13R6RecurChild::$p from scope W13R6RecurChild"
+        ],
+        [
+          "magic:p"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-readonly-clone": {
+      "result": [
+        42,
+        [
+          "clone"
+        ],
+        [
+          "Error",
+          "Cannot unset readonly property W13R6RoClone::$ro"
+        ],
+        [
+          "clone"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-lazy-readonly-cleared-magic": {
+      "result": [
+        true,
+        [
+          null,
+          1,
+          false,
+          null
+        ],
+        [
+          "init",
+          "magic:ro"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-write": {
+      "result": [
+        "Error",
+        "Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-reference": {
+      "result": [
+        "Error",
+        "Cannot indirectly modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-static": {
+      "result": [
+        "Error",
+        "Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-target": {
+      "result": [
+        "Error",
+        "Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-readonly-private": {
+      "result": [
+        "Error",
+        "Cannot modify private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-readonly-private-unset": {
+      "result": [
+        "Error",
+        "Cannot unset private(set) property W13R6ScopeTargetReadonly::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-nested": {
+      "result": [
+        [
+          "Error",
+          "Cannot modify private(set) property W13R6ScopeTarget::$p from scope W13R6ScopeOther"
+        ],
+        [
+          "Error",
+          "Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-global": {
+      "result": [
+        [
+          "Error",
+          "Cannot modify private(set) property W13R6ScopeTarget::$p from global scope"
+        ],
+        [
+          "Error",
+          "Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-conversion": {
+      "result": [
+        [
+          "Exception",
+          "convert"
+        ],
+        [
+          "Error",
+          "Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r6-scope-hook": {
+      "result": [
+        "Error",
+        "Cannot modify private(set) property W13R6ScopeChild::$p from scope W13R6ScopeChild"
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

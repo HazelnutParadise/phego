@@ -75,6 +75,7 @@ type heap struct {
 	weakMapObjects        map[*object]*weakMap
 	classes               map[string]*class
 	currentHook           activePropertyHook
+	currentCalledScope    *class
 }
 
 func newHeap(width int) (*heap, error) {

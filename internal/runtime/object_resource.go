@@ -41,11 +41,11 @@ func (h *heap) newResource(ctx context.Context, kind string, close func(context.
 func (h *heap) resourceRecord(v value) (*phpResource, error) {
 	v = v.deref()
 	if v.kind != valueResource || v.object == nil || v.object.owner != h {
-		return nil, fmt.Errorf("resource does not belong to this request")
+		return nil, errors.New("resource does not belong to this request")
 	}
 	r := h.resources[v.object.handle]
 	if r == nil || r.identity != v.object || r.generation != v.object.handle {
-		return nil, fmt.Errorf("resource generation is no longer valid")
+		return nil, errors.New("resource generation is no longer valid")
 	}
 	return r, nil
 }
@@ -85,10 +85,16 @@ func (h *heap) closeResource(v value, kind string, ctx context.Context) error {
 	if ctx == nil {
 		return errors.New("resource cleanup context is required")
 	}
-	if err := h.checkResource(v, kind); err != nil {
+	if h.closed {
+		return ErrHeapClosed
+	}
+	r, err := h.resourceRecord(v)
+	if err != nil {
 		return err
 	}
-	r, _ := h.resourceRecord(v)
+	if r.closed || r.kind != kind {
+		return fmt.Errorf("expected an open %s resource", kind)
+	}
 	return closeResourceRecord(r, ctx)
 }
 

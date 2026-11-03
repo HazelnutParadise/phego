@@ -243,14 +243,14 @@ func (h *heap) invokeMethod(obj value, m *methodSpec, supplied []methodArgument,
 	// Successful coercion remains successful when releasing its source throws.
 	// PHP enters the body with that ordinary exception pending; sticky stops
 	// above still prevent entry. Preserve the pending event across the call.
-	out, callErr := h.invokeObject(func() (value, error) {
+	out, callErr := h.invokeObjectInScope(func() (value, error) {
 		raw, err := m.call(h, this, callArgs)
 		if err != nil {
 			return value{}, err
 		}
 		// Return verification belongs to this frame, before its locals unwind.
 		return h.checkMethodReturn(raw, m, obj, m.returnStrict)
-	}, m.returnsReference)
+	}, m.returnsReference, obj.object.class)
 	err = h.mergeObjectErrors(argumentCleanup, callErr)
 	if err != nil {
 		return value{}, h.mergeObjectErrors(err, h.discardMethodReturn(out))
@@ -480,21 +480,28 @@ func (h *heap) bindMethodArgument(obj value, m *methodSpec, p *methodParameter, 
 	v := a.value.deref()
 	if p.byReference {
 		if a.slot == nil {
-			return value{}, &Throwable{"Error", fmt.Sprintf("%s::%s(): Argument #%d ($%s) could not be passed by reference", m.owner.name, m.name, index+1, p.name)}
+			return value{}, &Throwable{"Error", fmt.Sprintf("%s::%s(): Argument #%d%s could not be passed by reference", m.owner.name, m.name, index+1, methodArgumentName(p))}
 		}
 		called := obj.object.class
 		if p.typeName != "" && !methodAcceptsType(m, called, p.typeName, v) {
-			coerced, ok, err := h.coerceTypedValue(m, called, p.typeName, v, strict)
-			if err != nil {
-				return value{}, err
-			}
-			if !ok {
-				return value{}, h.methodArgumentTypeError(m, p, index, v, site)
-			}
-			// Weak by-reference coercion writes the coerced value back to the
-			// source location before the callback can observe the reference.
-			if err := h.assign(a.slot, coerced); err != nil {
-				return value{}, err
+			// A typed property source constrains the existing reference.
+			// Reject before coercion, which could execute Stringable code.
+			if a.slot.kind == valueReference && len(h.typedSources[a.slot.ref]) != 0 {
+				if !methodTypeHas(p.typeName, "callable") || !h.isObjectCallable(v, m.owner) {
+					return value{}, h.methodArgumentTypeError(m, p, index, v, site)
+				}
+			} else {
+				coerced, ok, err := h.coerceTypedValue(m, called, p.typeName, v, strict)
+				if err != nil {
+					return value{}, err
+				}
+				if !ok {
+					return value{}, h.methodArgumentTypeError(m, p, index, v, site)
+				}
+				// Ordinary references retain weak coercion and source writeback.
+				if err := h.assign(a.slot, coerced); err != nil {
+					return value{}, err
+				}
 			}
 		}
 		var bound value
@@ -526,11 +533,15 @@ func (h *heap) bindVariadicArgument(obj value, m *methodSpec, p *methodParameter
 		return value{}, err
 	}
 	*cleanup = append(*cleanup, methodHold{value: arr})
+	positionals := 0
 	for ai := range supplied {
 		a := &supplied[ai]
-		bv, err := h.bindMethodArgument(obj, m, p, a, index, strict, site, cleanup)
+		bv, err := h.bindMethodArgument(obj, m, p, a, index+positionals, strict, site, cleanup)
 		if err != nil {
 			return value{}, err
+		}
+		if a.name == "" {
+			positionals++
 		}
 		if p.byReference {
 			var slot *value
@@ -555,7 +566,14 @@ func (h *heap) bindVariadicArgument(obj value, m *methodSpec, p *methodParameter
 }
 
 func (h *heap) methodArgumentTypeError(m *methodSpec, p *methodParameter, index int, v value, site methodCallSite) error {
-	return &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Argument #%d ($%s) must be of type %s, %s given%s", m.owner.name, m.name, index+1, p.name, p.typeName, valueName(v), methodCalledLocation(site))}
+	return &Throwable{"TypeError", fmt.Sprintf("%s::%s(): Argument #%d%s must be of type %s, %s given%s", m.owner.name, m.name, index+1, methodArgumentName(p), p.typeName, valueName(v), methodCalledLocation(site))}
+}
+
+func methodArgumentName(p *methodParameter) string {
+	if p.variadic {
+		return ""
+	}
+	return " ($" + p.name + ")"
 }
 
 func methodRefcount(v value) int {
@@ -1075,7 +1093,7 @@ func (h *heap) writeStatic(c *class, name string, v value, scope *class, strict 
 		return err
 	}
 	if !canAccess(scope, p.owner, p.setVisibility) {
-		return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + methodScopeLabel(scope)}
+		return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 	}
 	tbl, err := h.staticTable(p.owner)
 	if err != nil {

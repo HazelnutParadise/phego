@@ -45,7 +45,10 @@
             "TestW13EnumDescriptorValidation",
             "TestW13PendingArgumentDestructorSafety",
             "TestW13R5PHP8512Regression",
-            "TestW13PendingReferenceCloneSafety"
+            "TestW13PendingReferenceCloneSafety",
+            "TestW13R6PHP8512Regression",
+            "TestW13ExplicitResourceCloseAfterCancellation",
+            "TestW13CalledScopeExecutionFrames"
           ]
         },
         {
@@ -114,7 +117,10 @@
             "TestW13EnumDescriptorValidation",
             "TestW13PendingArgumentDestructorSafety",
             "TestW13R5PHP8512Regression",
-            "TestW13PendingReferenceCloneSafety"
+            "TestW13PendingReferenceCloneSafety",
+            "TestW13R6PHP8512Regression",
+            "TestW13ExplicitResourceCloseAfterCancellation",
+            "TestW13CalledScopeExecutionFrames"
           ]
         }
       ],

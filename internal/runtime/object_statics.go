@@ -9,7 +9,7 @@ func (h *heap) referenceStatic(dst *value, c *class, name string, scope *class) 
 		return err
 	}
 	if !canAccess(scope, p.owner, p.setVisibility) {
-		return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + methodScopeLabel(scope)}
+		return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 	}
 	table, err := h.staticTable(p.owner)
 	if err != nil {

@@ -252,10 +252,10 @@ func (h *heap) runPropertyHook(o *object, p *propertyInfo, hook objectHook, v va
 	var owners []methodHold
 	h.holdMethodValue(value{kind: valueObject, object: o}, &owners)
 	h.holdMethodValue(v, &owners)
-	out, err = h.invokeObject(func() (value, error) {
+	out, err = h.invokeObjectInScope(func() (value, error) {
 		h.currentHook = activePropertyHook{receiver: o, prototypeOwner: p.prototypeOwner, name: p.name}
 		return hook(h, value{kind: valueObject, object: o}, v)
-	}, byReference)
+	}, byReference, o.class)
 	result, protected := h.holdMethodResult(out)
 	for i := len(owners) - 1; i >= 0; i-- {
 		if cleanup := h.releaseMethodHold(owners[i]); cleanup != nil {
@@ -327,7 +327,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		}
 		if p.set != nil {
 			if !canAccess(scope, p.owner, p.setVisibility) {
-				return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + methodScopeLabel(scope)}
+				return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 			}
 			v, err = h.coerceProperty(p, v, strict, false)
 			if err != nil {
@@ -347,12 +347,9 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 			return err
 		}
 		if !canAccess(scope, p.owner, p.setVisibility) {
-			from := "global scope"
-			if scope != nil {
-				from = "scope " + scope.name
-			}
+			from := h.calledScopeLabel(scope)
 			ro := ""
-			if p.readonly {
+			if p.readonly && p.setVisibility == protectedAccess {
 				ro = "readonly "
 			}
 			return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) " + ro + "property " + p.label() + " from " + from}
@@ -396,12 +393,9 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		return err
 	}
 	if !canAccess(scope, p.owner, p.setVisibility) {
-		from := "global scope"
-		if scope != nil {
-			from = "scope " + scope.name
-		}
+		from := h.calledScopeLabel(scope)
 		ro := ""
-		if p.readonly {
+		if p.readonly && p.setVisibility == protectedAccess {
 			ro = "readonly "
 		}
 		return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) " + ro + "property " + p.label() + " from " + from}
@@ -428,62 +422,83 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 	if err != nil {
 		return err
 	}
-	p, err := h.resolveInstanceProperty(o, name, scope, false)
-	if err != nil {
-		if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
-			return callErr
+	for {
+		// An initialized proxy's values and readonly state live on its target.
+		if o.lazy != nil && o.lazy.target.kind == valueObject {
+			o, err = h.initializeLazy(o)
+			if err != nil {
+				return err
+			}
 		}
-		return err
-	}
-	o, err = h.initializeLazy(o)
-	if err != nil {
-		return err
-	}
-	key := name
-	if p == nil {
-		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
+		p, err := h.resolveInstanceProperty(o, name, scope, false)
+		if err != nil {
 			if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
 				return callErr
 			}
+			return err
 		}
-	}
-	if p != nil {
-		key = p.key
-		slot, _ := o.props.lookup(key)
-		if p.readonly && slot != nil && slot.kind != valueUndefined {
-			return &Throwable{"Error", "Cannot unset readonly property " + p.label()}
-		}
-		if !canAccess(scope, p.owner, p.setVisibility) {
-			readonly := ""
-			if p.readonly {
-				readonly = "readonly "
+		key := name
+		var slot *value
+		if p == nil {
+			if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
+				if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
+					return callErr
+				}
 			}
-			return &Throwable{"Error", "Cannot unset " + accessName(p.setVisibility) + "(set) " + readonly + "property " + p.label() + " from " + methodScopeLabel(scope)}
 		}
-		if p.get != nil || p.set != nil {
-			return &Throwable{"Error", "Cannot unset hooked property " + p.label()}
-		}
-		if slot != nil && slot.isExplicitlyUnset() {
-			if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
-				return callErr
+		if p != nil {
+			key = p.key
+			if p.get != nil || p.set != nil {
+				return &Throwable{"Error", "Cannot unset hooked property " + p.label()}
 			}
-			return nil
+			slot, _ = o.props.lookup(key)
+			explicit := slot != nil && slot.isExplicitlyUnset()
+			if explicit {
+				if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
+					return callErr
+				}
+			}
+			if p.readonly && slot != nil && slot.kind != valueUndefined &&
+				(!o.hooks["\x00clone"] || o.hooks["\x00clone:"+p.key]) {
+				return &Throwable{"Error", "Cannot unset readonly property " + p.label()}
+			}
+			if !canAccess(scope, p.owner, p.setVisibility) {
+				readonly := ""
+				if p.readonly && p.setVisibility == protectedAccess {
+					readonly = "readonly "
+				}
+				return &Throwable{"Error", "Cannot unset " + accessName(p.setVisibility) + "(set) " + readonly + "property " + p.label() + " from " + h.calledScopeLabel(scope)}
+			}
+			if explicit {
+				return nil
+			}
 		}
-		if slot != nil && !p.virtual {
+		pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
+		next, err := h.objectForProperty(o, p, name)
+		if err != nil {
+			return err
+		}
+		if next != o || (pending && o.lazy.initialize == nil) {
+			// Ghost initialization can fill a readonly slot in place. Resolve
+			// and validate again, just as for a newly selected proxy target.
+			o = next
+			continue
+		}
+		if p != nil && slot != nil && !p.virtual {
 			h.detachPropertySource(slot)
 			old := *slot
 			*slot = explicitlyUnsetValue()
 			return h.release(old)
 		}
+		if slot, ok := o.props.lookup(key); ok {
+			h.detachPropertySource(slot)
+		}
+		old, ok := o.props.remove(key)
+		if !ok {
+			return nil
+		}
+		return h.release(old)
 	}
-	if slot, ok := o.props.lookup(key); ok {
-		h.detachPropertySource(slot)
-	}
-	old, ok := o.props.remove(key)
-	if !ok {
-		return nil
-	}
-	return h.release(old)
 }
 
 func (h *heap) referenceObject(dst *value, obj value, name string, scope *class) error {
@@ -508,7 +523,7 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 			return &Throwable{"Error", "Cannot indirectly modify readonly property " + p.label()}
 		}
 		if !canAccess(scope, p.owner, p.setVisibility) {
-			return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + methodScopeLabel(scope)}
+			return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 		}
 		bypassHook := h.propertyHookBypasses(o, p)
 		if p.virtual && bypassHook {

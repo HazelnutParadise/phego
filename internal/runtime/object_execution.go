@@ -8,6 +8,14 @@ type activePropertyHook struct {
 	name           string
 }
 
+// Asymmetric access is decided in lexical scope; PHP reports the called scope.
+func (h *heap) calledScopeLabel(lexical *class) string {
+	if lexical != nil && h.currentCalledScope != nil {
+		return methodScopeLabel(h.currentCalledScope)
+	}
+	return methodScopeLabel(lexical)
+}
+
 func objectPHPException(err error) bool {
 	var c completion
 	if errors.As(err, &c) {
@@ -49,10 +57,16 @@ func (h *heap) mergeObjectErrors(previous, next error) error {
 // REQ-018/020; T-035/036/039/040. Use the existing frame/termination
 // boundary rather than creating a second callback and shutdown system.
 func (h *heap) invokeObject(fn func() (value, error), byReference bool) (value, error) {
+	return h.invokeObjectInScope(fn, byReference, nil)
+}
+
+func (h *heap) invokeObjectInScope(fn func() (value, error), byReference bool, called *class) (value, error) {
 	if h.execution == nil {
 		previous := h.currentHook
+		previousScope := h.currentCalledScope
 		h.currentHook = activePropertyHook{}
-		defer func() { h.currentHook = previous }()
+		h.currentCalledScope = called
+		defer func() { h.currentHook, h.currentCalledScope = previous, previousScope }()
 		v, err := fn()
 		if err != nil {
 			return value{}, err
@@ -66,7 +80,7 @@ func (h *heap) invokeObject(fn func() (value, error), byReference bool) (value, 
 		return v, nil
 	}
 	x := h.execution
-	c := x.call(func(*execution) completion {
+	c := x.callInScope(func(*execution) completion {
 		v, err := fn()
 		if err == nil {
 			err = h.claimValues(v)
@@ -86,7 +100,7 @@ func (h *heap) invokeObject(fn func() (value, error), byReference bool) (value, 
 			return x.fail(endInternal, err)
 		}
 		return completion{kind: endReturn, value: v, returnByReference: byReference}
-	}, nil)
+	}, nil, called)
 	if c.kind != endReturn {
 		return value{}, c
 	}

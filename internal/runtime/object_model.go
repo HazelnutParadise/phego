@@ -114,7 +114,7 @@ func buildClass(spec classSpec) (*class, error) {
 		c.destructorOwner = c
 		destroy := spec.destructor
 		c.destructor = func(h *heap, this value) error {
-			_, err := h.invokeObject(func() (value, error) { return nullValue(), destroy(h, this) }, false)
+			_, err := h.invokeObjectInScope(func() (value, error) { return nullValue(), destroy(h, this) }, false, this.object.class)
 			return err
 		}
 	}

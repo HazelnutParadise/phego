@@ -397,5 +397,193 @@
     "diagnostics/lazy_rollback_declared.php": "4326b4c5f10ca9f3d0680aaf1561ca090b29918ec469db77ffeac98f66c041bc",
     "diagnostics/lazy_rollback_dynamic.php": "71db343d4a60494fbac0991b437974ad38abbecfd2c7270eca1c30288ec0fda3",
     "diagnostics/lazy_rollback_pair.php": "d54875b31cb02b0616465b41513164b609cd0c735f83d0c8b99ede90520672ae"
+  },
+  "fixture_sources_sha256_scope": "Current helper includes explicit GC and identifies isolated_after_gc and consecutive fixtures; it does not identify the earlier isolated_cases helper.",
+  "isolated_cases_source_archive": {
+    "provenance": "Original file creation patch recovered from this task execution record, timestamp 2026-11-02T15:14:36.123Z",
+    "sources": {
+      "diagnostics/lazy_rollback_common.php": {
+        "source": "<?php\n// Diagnostic only: execute one rollback case without the normal matrix loop.\nfunction attempt($fn){try{return $fn();}catch(Throwable $e){return [$e::class,$e->getMessage()];}}\n$tests=[];\nrequire dirname(__DIR__).'/review.php';\necho 'case=',$case,' bits=',PHP_INT_SIZE*8,\"\\n\";\n$result=attempt($tests[$case]);\necho json_encode($result,JSON_THROW_ON_ERROR),\"\\n\";\n",
+        "sha256": "d1a5797a08cd8dcca8eefc1fc8e75cf0eefb3499ea414352a22cac6b4130f3b4"
+      },
+      "diagnostics/lazy_rollback_declared.php": {
+        "source": "<?php\n$case='lazy-rollback-write-declared';\nrequire __DIR__.'/lazy_rollback_common.php';\n",
+        "sha256": "4326b4c5f10ca9f3d0680aaf1561ca090b29918ec469db77ffeac98f66c041bc"
+      },
+      "diagnostics/lazy_rollback_dynamic.php": {
+        "source": "<?php\n$case='lazy-rollback-write-dynamic';\nrequire __DIR__.'/lazy_rollback_common.php';\n",
+        "sha256": "71db343d4a60494fbac0991b437974ad38abbecfd2c7270eca1c30288ec0fda3"
+      }
+    },
+    "dependency": {
+      "path": "review.php",
+      "revision": "e3abab031dd49a157f1214daf6608515c9aac44d",
+      "sha256": "ec8f2b299af51c32ba4c18b41a35be8bde8b977446630acd2bd3492f823e90a2",
+      "scope": "R6 replay dependency is pinned. The original isolated_cases did not archive the review.php hash."
+    }
+  },
+  "isolated_cases_replay": {
+    "date": "2026-11-03",
+    "preparation": [
+      "Create an empty temporary directory with diagnostics subdirectory. Write each isolated_cases_source_archive.sources entry source as UTF-8 bytes at its relative path and verify its sha256.",
+      "Materialize review.php with git show <dependency.revision>:tests/semantics/w13-objects/review.php and verify dependency.sha256.",
+      "Run each recovered diagnostic separately with reference.py.run_php using the same fixed IMAGES width; compare stdout bytes with isolated_cases. Do not execute the consecutive diagnostic."
+    ],
+    "runs": [
+      {
+        "width": 64,
+        "fixture": "diagnostics/lazy_rollback_declared.php",
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--cidfile",
+          "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-wkaaj4cz/cid",
+          "--platform",
+          "linux/arm64",
+          "-v",
+          "/tmp/phego-w13-r6-rollback-replay:/w:ro",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+          "php",
+          "-n",
+          "/w/diagnostics/lazy_rollback_declared.php"
+        ],
+        "exit_code": 0,
+        "stdout": "case=lazy-rollback-write-declared bits=64\n[[\"Exception\",\"rollback\"],[\"writer\"],9,false,false,[\"writer\"]]\n",
+        "stderr": "",
+        "stdout_sha256": "d914f04854d91d58d688d87065996845e1778bcc2044f62c1deeb2eba984e489"
+      },
+      {
+        "width": 64,
+        "fixture": "diagnostics/lazy_rollback_dynamic.php",
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--cidfile",
+          "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-p3rgxepm/cid",
+          "--platform",
+          "linux/arm64",
+          "-v",
+          "/tmp/phego-w13-r6-rollback-replay:/w:ro",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+          "php",
+          "-n",
+          "/w/diagnostics/lazy_rollback_dynamic.php"
+        ],
+        "exit_code": 0,
+        "stdout": "case=lazy-rollback-write-dynamic bits=64\n[[\"Exception\",\"rollback\"],[\"writer\"],9,false,false,[\"writer\"]]\n",
+        "stderr": "",
+        "stdout_sha256": "e202fc9f9c2c6f3c2f081f678dc26cc0b95669a05525b1571367bd0aaf581e88"
+      },
+      {
+        "width": 32,
+        "fixture": "diagnostics/lazy_rollback_declared.php",
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--cidfile",
+          "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-_b_13zcw/cid",
+          "--platform",
+          "linux/386",
+          "-v",
+          "/tmp/phego-w13-r6-rollback-replay:/w:ro",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+          "php",
+          "-n",
+          "/w/diagnostics/lazy_rollback_declared.php"
+        ],
+        "exit_code": 0,
+        "stdout": "case=lazy-rollback-write-declared bits=32\n[[\"Exception\",\"rollback\"],[\"writer\"],9,false,false,[\"writer\"]]\n",
+        "stderr": "",
+        "stdout_sha256": "5841f89dae1e92efe389157d8db71b937227581a57c75939700be7183ef0b91e"
+      },
+      {
+        "width": 32,
+        "fixture": "diagnostics/lazy_rollback_dynamic.php",
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--cidfile",
+          "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-oracle-nzmcvg5n/cid",
+          "--platform",
+          "linux/386",
+          "-v",
+          "/tmp/phego-w13-r6-rollback-replay:/w:ro",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+          "php",
+          "-n",
+          "/w/diagnostics/lazy_rollback_dynamic.php"
+        ],
+        "exit_code": 0,
+        "stdout": "case=lazy-rollback-write-dynamic bits=32\n[[\"Exception\",\"rollback\"],[\"writer\"],9,false,false,[\"writer\"]]\n",
+        "stderr": "",
+        "stdout_sha256": "660a80f14ff1288254732d41fa7271963f2af4b5049dec3511529cc9fcc4d02e"
+      }
+    ],
+    "result": "all four recovered-helper replays byte-match original isolated_cases; no consecutive/crash input replayed",
+    "scope": "Recovered helper and wrappers are original creation bytes. Replay dependency is pinned separately; original dependency checksum was not recorded. Original observations are preserved unchanged. This replay does not add compatibility cases."
   }
 }
