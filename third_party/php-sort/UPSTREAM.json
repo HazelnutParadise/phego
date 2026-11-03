@@ -1,0 +1,55 @@
+{
+  "commit": "136e049ac10b032c83018e65b63b6df858943750",
+  "files": {
+    "Zend/zend_sort.c": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_sort.c",
+      "sha256": "97b82e65fd73a1e0e5ca62ab90b0ab1c5f4ef39663c477fda8432af8567c1730"
+    },
+    "Zend/LICENSE": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/LICENSE",
+      "sha256": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b"
+    },
+    "ext/standard/array.c": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/ext/standard/array.c",
+      "sha256": "ceb94742d43efbd862447f5b59cd9be34f873d51d871c5f11ba4124ba836038a"
+    },
+    "LICENSE": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/LICENSE",
+      "sha256": "b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a"
+    },
+    "Zend/zend_hash.c": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_hash.c",
+      "sha256": "239d017e100adc8bc9a4c4277cc64b1ccd30e8635d5f45e1fd7802b19f7e1acf"
+    }
+  },
+  "version": "PHP 8.5.12",
+  "requirements": [
+    "REQ-017"
+  ],
+  "tests": [
+    "T-033",
+    "T-034"
+  ],
+  "scope": {
+    "internal/runtime/array_sort_php8512.go": "Go translation of Zend/zend_sort.c including small/insertion/partition comparison order",
+    "internal/runtime/array_w12.go:sortArray": "Stable ordinal fallback and sorting integration informed by ext/standard/array.c",
+    "internal/runtime/array_sort_user_php8512.go": "Go user comparison result adapter based on ext/standard/array.c",
+    "internal/runtime/array_w12.go:sortArrayWithPolicy": "Stable ordinal fallback, user-copy/native-in-place sorting and hash reset informed by ext/standard/array.c and Zend/zend_hash.c",
+    "internal/runtime/heap.go:duplicate": "Empty copy preserves next-free index but resets cursors and initialized storage, informed by Zend/zend_hash.c"
+  },
+  "licenses": [
+    "Zend Engine License 2.00",
+    "PHP License 3.01",
+    "libc++ NCSA/MIT notices retained in full"
+  ],
+  "modifications": [
+    "Go slices and indices replace C memory addresses and element sizes",
+    "Stable bucket identities and original live-entry ordinals preserve Go ownership",
+    "No Zend allocator or native runtime is imported"
+  ],
+  "distribution_notices": {
+    "Zend-LICENSE": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b",
+    "PHP-LICENSE": "b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a",
+    "LIBCXX-NOTICE": "3fa48ecfee084d54d7a90d416ddbe0336d2f1a2c363c942f4840b09cbf181442"
+  }
+}

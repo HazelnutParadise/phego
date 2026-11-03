@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "scope": "local_callback_probe_only",
+  "requirement_ids": [
+    "REQ-052",
+    "REQ-053"
+  ],
+  "test_ids": [
+    "T-103",
+    "T-104",
+    "T-105",
+    "T-106"
+  ],
+  "product_acceptance": "not_run",
+  "checked_date": "2026-10-30",
+  "source_sha256": {
+    "experiments/nativecallback/main.go": "5a69c26ad82db1cc11a591897d1314ea97b2a4e56ca902b3ea3fc3f6b6280574",
+    "experiments/nativecallback/invoke.ll": "ef43ebfcf096c6cd661d071bc93acc41bf0c48ab5d3f64e46c94ab907c79307a",
+    "experiments/nativecallback/callback_test.go": "c7d0ea1a6e3483b00b5ed70a02d056166315c142d2f6d04b86c0ef110a5d2cd3"
+  },
+  "runs": [
+    {
+      "platform": "linux/arm64",
+      "emulated": false,
+      "image": "buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3",
+      "llvm_archive_sha256": "0975f753e0f9b5f83146a7a2f4678bc143e713496b56520716a4de047a63f99f",
+      "go_archive_sha256": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49",
+      "command": "set -o pipefail\nzstd --long=30 -dc /tmp/phego-llvm-probe/LLVM-23.1.4-Linux-ARM64.tar.zst | docker run --rm -i --platform linux/arm64 --network none --read-only --user 65534:65534 --pids-limit 128 --memory 3g --cpus 2 --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,exec,nosuid,size=2g --mount type=bind,src=/tmp/phego-source.z6hT5t/go1.27.3.linux-arm64.tar.gz,dst=/input/go.tar.gz,readonly --mount type=bind,src=/Users/timlai/.codex/worktrees/w07-native-abi/phego/experiments/nativecallback,dst=/src,readonly buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3 timeout 600 sh -ec 'tar -xf - -C /tmp LLVM-23.1.4-Linux-ARM64/bin/clang LLVM-23.1.4-Linux-ARM64/bin/clang-23 LLVM-23.1.4-Linux-ARM64/lib/clang/23/include; tar -xzf /input/go.tar.gz -C /tmp; /tmp/LLVM-23.1.4-Linux-ARM64/bin/clang --version | head -1; /tmp/go/bin/go version; /tmp/LLVM-23.1.4-Linux-ARM64/bin/clang -c /src/invoke.ll -o /tmp/probe.o; ar rcs /tmp/libphegocallback.a /tmp/probe.o; cd /src; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache GO111MODULE=off CGO_ENABLED=1 CC=/tmp/LLVM-23.1.4-Linux-ARM64/bin/clang CGO_LDFLAGS=\"-L/tmp -lphegocallback\" /tmp/go/bin/go test -race -count=1 -tags=phego_native_probe -v .'",
+      "exit_code": 0,
+      "passed_tests": [
+        "TestRegisterReturnsUniqueNonzeroToken",
+        "TestRegisterRejectsZeroOwner",
+        "TestRegisterRejectsTokenExhaustionInSubprocess",
+        "TestNativeInvokeCountsValidCalls",
+        "TestNativeInvokeConcurrentCallsAreCounted",
+        "TestConcurrentReleaseAndNativeInvoke",
+        "TestNativeInvokeRejectsInvalidOwnerAndTokensWithoutCounting",
+        "TestReleaseRequiresMatchingOwnerAndRejectsRepeat",
+        "TestNativeInvokeRecoversCallbackPanicAndRemainsUsable",
+        "TestNativeInvokeKeepsCallbackAliveAcrossGC"
+      ],
+      "captured_output_excerpt": [
+        "clang version 23.1.4 (https://github.com/llvm/llvm-project 7a941dfb2877a0b8cf30323fefa85ad019e0b0f5)",
+        "go version go1.27.3 linux/arm64",
+        "PASS",
+        "ok  \t_/src\t2.039s"
+      ]
+    },
+    {
+      "platform": "linux/amd64",
+      "emulated": true,
+      "image": "buildpack-deps@sha256:0766bfc10a5b87c895c6f675bb8dd09067821b4de144b047a6d029e0c366ecac",
+      "llvm_archive_sha256": "efdd1dbd089b99bfcfcde7b8eb1236163f2e88df5a981cca4f783ec9cb5e0378",
+      "go_archive_sha256": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+      "command": "set -o pipefail\nzstd --long=30 -dc /tmp/phego-llvm-x64.JelvL2/LLVM-23.1.4-Linux-X64.tar.zst | docker run --rm -i --platform linux/amd64 --network none --read-only --user 65534:65534 --pids-limit 128 --memory 3g --cpus 2 --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,exec,nosuid,size=2g --mount type=bind,src=/tmp/phego-go-amd64.bzF76r/go.tar.gz,dst=/input/go.tar.gz,readonly --mount type=bind,src=/Users/timlai/.codex/worktrees/w07-native-abi/phego/experiments/nativecallback,dst=/src,readonly buildpack-deps@sha256:0766bfc10a5b87c895c6f675bb8dd09067821b4de144b047a6d029e0c366ecac timeout 600 sh -ec 'tar -xf - -C /tmp LLVM-23.1.4-Linux-X64/bin/clang LLVM-23.1.4-Linux-X64/bin/clang-23 LLVM-23.1.4-Linux-X64/lib/clang/23/include; tar -xzf /input/go.tar.gz -C /tmp; /tmp/LLVM-23.1.4-Linux-X64/bin/clang --version | head -1; /tmp/go/bin/go version; /tmp/LLVM-23.1.4-Linux-X64/bin/clang -c /src/invoke.ll -o /tmp/probe.o; ar rcs /tmp/libphegocallback.a /tmp/probe.o; cd /src; HOME=/tmp GOPATH=/tmp/gopath GOCACHE=/tmp/gocache GO111MODULE=off CGO_ENABLED=1 CC=/tmp/LLVM-23.1.4-Linux-X64/bin/clang CGO_LDFLAGS=\"-L/tmp -lphegocallback\" /tmp/go/bin/go test -race -count=1 -tags=phego_native_probe -v .'",
+      "exit_code": 0,
+      "passed_tests": [
+        "TestRegisterReturnsUniqueNonzeroToken",
+        "TestRegisterRejectsZeroOwner",
+        "TestRegisterRejectsTokenExhaustionInSubprocess",
+        "TestNativeInvokeCountsValidCalls",
+        "TestNativeInvokeConcurrentCallsAreCounted",
+        "TestConcurrentReleaseAndNativeInvoke",
+        "TestNativeInvokeRejectsInvalidOwnerAndTokensWithoutCounting",
+        "TestReleaseRequiresMatchingOwnerAndRejectsRepeat",
+        "TestNativeInvokeRecoversCallbackPanicAndRemainsUsable",
+        "TestNativeInvokeKeepsCallbackAliveAcrossGC"
+      ],
+      "captured_output_excerpt": [
+        "clang version 23.1.4 (https://github.com/llvm/llvm-project 7a941dfb2877a0b8cf30323fefa85ad019e0b0f5)",
+        "go version go1.27.3 linux/amd64",
+        "PASS",
+        "ok  \t_/src\t2.181s"
+      ]
+    }
+  ],
+  "limits": [
+    "Commands document observed runs, not a hardened replay entrypoint; original temporary archive paths may no longer exist.",
+    "The container timeout does not by itself verify cleanup after interruption.",
+    "Archive hashes were checked before earlier probes; paths were not made immutable for these callback runs.",
+    "Owner and token are caller-supplied, guessable values and do not isolate untrusted native code.",
+    "The experiment uses a test registry, not the product request lifecycle; GC coverage is one explicit collection, not stress testing.",
+    "Concurrent release is a smoke test and does not force a callback to be in progress when release begins.",
+    "Native-created threads, reentrancy, cancellation, PHP exceptions and complete ABI compatibility were not verified."
+  ]
+}

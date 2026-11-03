@@ -1,0 +1,8 @@
+<?php
+$warnings=[];set_error_handler(function($n,$s)use(&$warnings){$warnings[]=$s;return true;});
+eval('class W4PrivateInvoke {private function __invoke(){return "private";}}');
+eval('class W4ProtectedInvoke {protected function __invoke(){return "protected";}}');
+eval('class W4ParentInvoke {private function __invoke(){return "parent";}} class W4ChildInvoke extends W4ParentInvoke {public function __invoke(){return "child";}}');
+restore_error_handler();
+$out=[$warnings];foreach([new W4PrivateInvoke,new W4ProtectedInvoke,new W4ChildInvoke] as $o){$out[]=[is_callable($o),$o()];}
+echo json_encode($out,JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT);

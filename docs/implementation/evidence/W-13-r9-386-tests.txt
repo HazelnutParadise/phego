@@ -1,0 +1,27 @@
+=== RUN   TestW13R9PHP8512Regression
+=== RUN   TestW13R9PHP8512Regression/32/r9-dynamic-churn-detached
+=== RUN   TestW13R9PHP8512Regression/32/r9-dynamic-churn-shared
+=== RUN   TestW13R9PHP8512Regression/64/r9-dynamic-churn-detached
+=== RUN   TestW13R9PHP8512Regression/64/r9-dynamic-churn-shared
+--- PASS: TestW13R9PHP8512Regression (0.08s)
+    --- PASS: TestW13R9PHP8512Regression/32/r9-dynamic-churn-detached (0.03s)
+    --- PASS: TestW13R9PHP8512Regression/32/r9-dynamic-churn-shared (0.02s)
+    --- PASS: TestW13R9PHP8512Regression/64/r9-dynamic-churn-detached (0.02s)
+    --- PASS: TestW13R9PHP8512Regression/64/r9-dynamic-churn-shared (0.02s)
+=== RUN   TestW13R9DynamicChurnBounded
+=== RUN   TestW13R9DynamicChurnBounded/0
+=== RUN   TestW13R9DynamicChurnBounded/1
+=== RUN   TestW13R9DynamicChurnBounded/32
+--- PASS: TestW13R9DynamicChurnBounded (0.33s)
+    --- PASS: TestW13R9DynamicChurnBounded/0 (0.11s)
+    --- PASS: TestW13R9DynamicChurnBounded/1 (0.10s)
+    --- PASS: TestW13R9DynamicChurnBounded/32 (0.12s)
+=== RUN   TestW13R9ReentrantTable
+--- PASS: TestW13R9ReentrantTable (0.00s)
+=== RUN   TestW13R9DetachedStorage
+--- PASS: TestW13R9DetachedStorage (0.00s)
+=== RUN   TestW13R9ComparisonCursorProtection
+--- PASS: TestW13R9ComparisonCursorProtection (0.00s)
+=== RUN   TestW13R9RollbackCursorTransfer
+--- PASS: TestW13R9RollbackCursorTransfer (0.00s)
+PASS

@@ -1,0 +1,68 @@
+--- FAIL: TestW13R7PHP8512Regression (0.03s)
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-int (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-int
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,42,3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-null (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-null
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,null,3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-unset-typed (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-unset-typed
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,["Error","Typed property W13R7DefaultsInt::$x must not be accessed before initialization"],3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-unset-untyped (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-unset-untyped
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,null,3],[["init",1]]],"diagnostics":[[2,"Undefined property: W13R7DefaultsUntyped::$x"]]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-array (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-array
+            Go: {"result":[true,[true,2,false,[1],3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,[42],3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-reference (0.00s)
+        object_review_r7_defaults_test.go:73: defaults case retained values: live=0 typed=1
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-object (0.00s)
+        object_review_r7_defaults_test.go:73: defaults case retained values: live=1 typed=0
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-retry (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-retry
+            Go: {"result":[true,[true,["Exception","retry"],true,2,false,1,3],[["init",1],"throw",["init",2]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,["Exception","retry"],true,2,false,42,["Error","Typed property W13R7DefaultsMixed::$z must not be accessed before initialization"]],[["init",1],"throw",["init",2]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/32/r7-default-retry-raw (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-retry-raw
+            Go: {"result":[true,[true,["Exception","retry"],true,true,2,false,1,3],[["init",1],["raw",false],"throw",["init",2]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,["Exception","retry"],true,true,2,false,42,3],[["init",1],["raw",false],"throw",["init",2]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-int (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-int
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,42,3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-null (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-null
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,null,3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-unset-typed (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-unset-typed
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,["Error","Typed property W13R7DefaultsInt::$x must not be accessed before initialization"],3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-unset-untyped (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-unset-untyped
+            Go: {"result":[true,[true,2,false,1,3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,null,3],[["init",1]]],"diagnostics":[[2,"Undefined property: W13R7DefaultsUntyped::$x"]]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-array (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-array
+            Go: {"result":[true,[true,2,false,[1],3],[["init",1]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,2,false,[42],3],[["init",1]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-reference (0.00s)
+        object_review_r7_defaults_test.go:73: defaults case retained values: live=0 typed=1
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-object (0.00s)
+        object_review_r7_defaults_test.go:73: defaults case retained values: live=1 typed=0
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-retry (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-retry
+            Go: {"result":[true,[true,["Exception","retry"],true,2,false,1,3],[["init",1],"throw",["init",2]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,["Exception","retry"],true,2,false,42,["Error","Typed property W13R7DefaultsMixed::$z must not be accessed before initialization"]],[["init",1],"throw",["init",2]]],"diagnostics":[]}
+    --- FAIL: TestW13R7PHP8512Regression/64/r7-default-retry-raw (0.00s)
+        object_review_r7_defaults_test.go:134: r7-default-retry-raw
+            Go: {"result":[true,[true,["Exception","retry"],true,true,2,false,1,3],[["init",1],["raw",false],"throw",["init",2]]],"diagnostics":[]}
+            PHP: {"result":[true,[true,["Exception","retry"],true,true,2,false,42,3],[["init",1],["raw",false],"throw",["init",2]]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.625s
+FAIL

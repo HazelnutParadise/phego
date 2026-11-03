@@ -1,0 +1,59 @@
+--- FAIL: TestW13R5PHP8512Regression (0.01s)
+    --- FAIL: TestW13R5PHP8512Regression/64 (0.01s)
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-ref-unset-alias (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":["ok",{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"unset","other",["convert","convert"]],"diagnostics":[]}
+                PHP: {"result":["ok",{"a":"new","b":"new","c":"old","m":"old","so":"old","u":"old"},"unset","other",["convert","convert"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-ref-drop-rhs (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["Error","object belongs to another or closed request"]],{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"old","other",["convert","dtor:old"]],"diagnostics":[]}
+                PHP: {"result":["ok",{"a":"new","b":"new","c":"old","m":"old","so":"old","u":"old"},"new","other",["convert","convert","dtor:new"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-ref-string-mixed (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5Stringable to reference held by property W13R5Reference::$m of type mixed"]],{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"old","other",["convert"]],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5Stringable to reference held by property W13R5Reference::$a of type string and property W13R5Reference::$m of type mixed, as this would result in an inconsistent type conversion"]],{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"old","other",["convert"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-ref-mixed-first (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5Stringable to reference held by property W13R5Reference::$a of type string"]],{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"old","other",["convert"]],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5Stringable to reference held by property W13R5Reference::$m of type mixed and property W13R5Reference::$a of type string, as this would result in an inconsistent type conversion"]],{"a":"old","b":"old","c":"old","m":"old","so":"old","u":"old"},"old","other",[]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-missing-invalid-order (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["missing",{"0":2,"first":1}],["magic"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot use positional argument after named argument"],[]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-hidden-invalid-order (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["hidden",{"0":2,"first":1}],["magic"]],"diagnostics":[]}
+                PHP: {"result":[["Error","Cannot use positional argument after named argument"],[]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-getter-uninitialized (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["Error","Typed property W13R5Getter::$x must not be accessed before initialization"],["Error","Typed property W13R5Getter::$x must not be accessed before initialization"],2],"diagnostics":[]}
+                PHP: {"result":[42,true,2],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-proxy-clone-throws (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["Error","Typed property W13R5ProxyTarget::$name must not be accessed before initialization"],["factory","clone:source","dtor:source"],[["Exception","clone"]]],"diagnostics":[]}
+                PHP: {"result":[["Exception","clone"],["factory","clone:source","dtor:source"],null],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-proxy-clone-dtor-chain (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["Error","Typed property W13R5ProxyTarget::$name must not be accessed before initialization"],["factory","clone:source","dtor:source"],[["Exception","destructor failure"],["Exception","clone failure"],["RuntimeException","previous"]]],"diagnostics":[]}
+                PHP: {"result":[["Exception","destructor failure"],["factory","clone:source","dtor:source"],[["Exception","clone failure"],["RuntimeException","previous"]]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-op-clone-dynamic-reference (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R5DynamicRef::$s of type int"],{"s":5},5],"diagnostics":[[8,"Accessing static property W13R5DynamicRef::$s as non static"],[8,"Accessing static property W13R5DynamicRef::$s as non static"]]}
+                PHP: {"result":["written",{"s":"free"},"free"],"diagnostics":[[8,"Accessing static property W13R5DynamicRef::$s as non static"],[8,"Accessing static property W13R5DynamicRef::$s as non static"]]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-throw-1 (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["Exception","convert"]],"old",["convert"]],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5Throw to reference held by property W13R5Life::$a of type string"],["Exception","convert"]],"old",["convert"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-throw-2 (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["Exception","convert"]],"old",["convert"]],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5Throw to reference held by property W13R5Life::$a of type string"],["Exception","convert"]],"old",["convert"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-cleanup-order (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["Error","object belongs to another or closed request"]],[{}],["convert","rhs"]],"diagnostics":[]}
+                PHP: {"result":["ok","new",["convert","convert","rhs","old"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-mixed-array (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[["TypeError","Cannot assign array to reference held by property W13R5MixedScalar::$i of type int"]],"diagnostics":[]}
+                PHP: {"result":[["TypeError","Cannot assign array to reference held by property W13R5MixedScalar::$m of type mixed and property W13R5MixedScalar::$i of type int, as this would result in an inconsistent type conversion"]],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-source-inherited (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed and property W13R5InfoBase::$a of type string, as this would result in an inconsistent type conversion"]],[],null,"stdClass"],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-source-redeclared (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$m of type mixed"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5InfoBase::$a of type string and property W13R5InfoBase::$m of type mixed, as this would result in an inconsistent type conversion"]],["convert"],null,"stdClass"],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-source-private (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5PrivateBase::$m of type mixed"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5PrivateBase::$a of type string and property W13R5PrivateBase::$m of type mixed, as this would result in an inconsistent type conversion"]],["convert"],null,"stdClass"],"diagnostics":[]}
+        --- FAIL: TestW13R5PHP8512Regression/64/r5-life-source-trait (0.00s)
+            object_review_r5_references_test.go:358: Go: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5TraitA::$m of type mixed"]],["convert"],null,"stdClass"],"diagnostics":[]}
+                PHP: {"result":[[["TypeError","Cannot assign W13R5InfoStringable to reference held by property W13R5TraitA::$a of type string and property W13R5TraitA::$m of type mixed, as this would result in an inconsistent type conversion"]],["convert"],null,"stdClass"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	2.778s
+FAIL

@@ -1,0 +1,529 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_parent": "76c70cb42950eaaea4c34c755f3ac105f2e71f32",
+  "review_comment": 4451714707,
+  "reference_result": "607 cases per fixed32/64 profile; all605 committed observations unchanged;55 fixture hashes verified in each run. Two added cases verify typed-source ordering during and after repeated rollback, inherited private/override/static/virtual layout and untouched lazy state.",
+  "test_first": {
+    "command": "CGO_ENABLED=0 PHEGO_W13_REFERENCE=/tmp/phego-w13-r8-final-reference go test ./internal/runtime -run '^TestW13(R8PHP8512Regression|PHP8512Objects)$' -count=1",
+    "before_result": "pass before production refactor; performance defect reproduced by before benchmark, not a semantic mismatch",
+    "fixture_correction": "Initial observer ReflectionProperty::isInitialized on untouched lazy private slot invoked a third initializer and threw. Restricted two-pin instrumented trace located failure in result observation, after both rollback attempts. Replace with noninitializing isLazy and Go internal undefined invariant; no production behavior changed or expected result weakened. Initial failure and traced source retained.",
+    "compile_correction": "Removing unique production attachPropertySource consumer also broke five R5 test-only seeding consumers. Preserve identical helper body/name/signature in object_model_test.go; no production rescan. Final R5/R8/full607 passed."
+  },
+  "architecture": {
+    "root_cause": "restoreLazyProperties called attachPropertySource for every restored reference; helper rescanned entire schema each time, including untyped references with no source to attach.",
+    "selected": "Traverse immutable class.schema.props once in original order, skipping static/virtual, pairing a monotonically increasing physical index with declared slots. buildClass produces exactly this filtered order. Preserve each detach -> old release/callback -> snapshot ownership transfer -> known typed descriptor attach sequence. No new metadata/index/map or public API change. Nil schema has no declared slots and remains guarded.",
+    "alternatives": [
+      "Per-slot schema rescan is avoidably quadratic.",
+      "Name lookup/index adds redundant hashes; known descriptor and filtered physical order suffice.",
+      "Batch detach/reattach changes callbacks typed-source ordering.",
+      "Cache/extra schema map adds state with no benefit."
+    ],
+    "same_or_less_cost_improvements": [
+      "Single methodHold value replaces one-element escaping slice in initializeLazy; capture original zero count before retain and preserve release -> running=false -> error/out order.",
+      "Remove production-only-unused scan helper; retain unchanged test-only seeding adapter for existing R5 fixtures."
+    ],
+    "scope_limit": "Only the repeated schema-search factor is removed. Snapshot/default work, source-list identity/removal and callback work retain existing costs; arbitrary shared-source graphs are not claimed globally linear."
+  },
+  "baseline_overlay": {
+    "revision": "76c70cb42950eaaea4c34c755f3ac105f2e71f32",
+    "recipe": "git show revision:internal/runtime/object_lazy.go into overlay file; current object_model_test.go with only the moved attachPropertySource comment/function removed into second overlay file to avoid duplicate declaration. All other current sources/tests607 unchanged. Go overlay Replace maps the two absolute repository paths to those files.",
+    "replay_command": "CGO_ENABLED=0 go test -overlay OVERLAY ./internal/runtime -run '^TestW13(R8PHP8512Regression|PHP8512Objects)$' -count=1",
+    "replay_result": "exit0, runtime0.662s; old production passes607 semantics and still has the measured performance defect."
+  },
+  "benchmark": {
+    "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^$' -bench '^BenchmarkW13RollbackSources$' -benchmem -benchtime=200ms -count=3",
+    "execution": "Before on original76 production, then after on accepted production, serial on Go1.26.5 darwin/arm64 AppleM3 before concurrent full gates. Setup/cleanup outside timer; distinct externally held references; one persistent throwing ghost initializer per fixture; no timing assertion.",
+    "before_samples": {
+      "BenchmarkW13RollbackSources/32/typed=true-8": [
+        {
+          "ns_op": 4752.0,
+          "bytes_op": 3000,
+          "allocs_op": 37
+        },
+        {
+          "ns_op": 4687.0,
+          "bytes_op": 3000,
+          "allocs_op": 37
+        },
+        {
+          "ns_op": 4399.0,
+          "bytes_op": 3000,
+          "allocs_op": 37
+        }
+      ],
+      "BenchmarkW13RollbackSources/32/typed=false-8": [
+        {
+          "ns_op": 3563.0,
+          "bytes_op": 2488,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 3554.0,
+          "bytes_op": 2488,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 3606.0,
+          "bytes_op": 2488,
+          "allocs_op": 5
+        }
+      ],
+      "BenchmarkW13RollbackSources/256/typed=true-8": [
+        {
+          "ns_op": 64985.0,
+          "bytes_op": 22712,
+          "allocs_op": 261
+        },
+        {
+          "ns_op": 66652.0,
+          "bytes_op": 22712,
+          "allocs_op": 261
+        },
+        {
+          "ns_op": 64176.0,
+          "bytes_op": 22712,
+          "allocs_op": 261
+        }
+      ],
+      "BenchmarkW13RollbackSources/256/typed=false-8": [
+        {
+          "ns_op": 88834.0,
+          "bytes_op": 18616,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 88661.0,
+          "bytes_op": 18616,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 89431.0,
+          "bytes_op": 18616,
+          "allocs_op": 5
+        }
+      ],
+      "BenchmarkW13RollbackSources/1024/typed=true-8": [
+        {
+          "ns_op": 923854.0,
+          "bytes_op": 90296,
+          "allocs_op": 1029
+        },
+        {
+          "ns_op": 917637.0,
+          "bytes_op": 90296,
+          "allocs_op": 1029
+        },
+        {
+          "ns_op": 912538.0,
+          "bytes_op": 90296,
+          "allocs_op": 1029
+        }
+      ],
+      "BenchmarkW13RollbackSources/1024/typed=false-8": [
+        {
+          "ns_op": 1685919.0,
+          "bytes_op": 73912,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 1666814.0,
+          "bytes_op": 73912,
+          "allocs_op": 5
+        },
+        {
+          "ns_op": 1673530.0,
+          "bytes_op": 73912,
+          "allocs_op": 5
+        }
+      ]
+    },
+    "after_samples": {
+      "BenchmarkW13RollbackSources/32/typed=true-8": [
+        {
+          "ns_op": 3255.0,
+          "bytes_op": 2920,
+          "allocs_op": 36
+        },
+        {
+          "ns_op": 3445.0,
+          "bytes_op": 2920,
+          "allocs_op": 36
+        },
+        {
+          "ns_op": 3483.0,
+          "bytes_op": 2920,
+          "allocs_op": 36
+        }
+      ],
+      "BenchmarkW13RollbackSources/32/typed=false-8": [
+        {
+          "ns_op": 2118.0,
+          "bytes_op": 2408,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 1766.0,
+          "bytes_op": 2408,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 1767.0,
+          "bytes_op": 2408,
+          "allocs_op": 4
+        }
+      ],
+      "BenchmarkW13RollbackSources/256/typed=true-8": [
+        {
+          "ns_op": 24808.0,
+          "bytes_op": 22632,
+          "allocs_op": 260
+        },
+        {
+          "ns_op": 25078.0,
+          "bytes_op": 22632,
+          "allocs_op": 260
+        },
+        {
+          "ns_op": 25049.0,
+          "bytes_op": 22632,
+          "allocs_op": 260
+        }
+      ],
+      "BenchmarkW13RollbackSources/256/typed=false-8": [
+        {
+          "ns_op": 12926.0,
+          "bytes_op": 18536,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 12618.0,
+          "bytes_op": 18536,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 13071.0,
+          "bytes_op": 18536,
+          "allocs_op": 4
+        }
+      ],
+      "BenchmarkW13RollbackSources/1024/typed=true-8": [
+        {
+          "ns_op": 106889.0,
+          "bytes_op": 90217,
+          "allocs_op": 1028
+        },
+        {
+          "ns_op": 106477.0,
+          "bytes_op": 90217,
+          "allocs_op": 1028
+        },
+        {
+          "ns_op": 107272.0,
+          "bytes_op": 90216,
+          "allocs_op": 1028
+        }
+      ],
+      "BenchmarkW13RollbackSources/1024/typed=false-8": [
+        {
+          "ns_op": 54694.0,
+          "bytes_op": 73832,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 55050.0,
+          "bytes_op": 73832,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 54816.0,
+          "bytes_op": 73832,
+          "allocs_op": 4
+        }
+      ]
+    },
+    "result": "All six measured cells improved. 1024 typed median917637 ->106889ns; untyped1673530 ->54816ns. Each measured cell saves one allocation; observed B/op falls80 in all but two typed1024 samples where rounded/amortized B/op falls79. This is a microbenchmark, not application/competitor acceptance."
+  },
+  "compiler": {
+    "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestW13R8PHP8512Regression$' -gcflags='-m=2'",
+    "before_command": "Same command with baseline overlay",
+    "filter": "Only object_lazy.go compiler lines retained.",
+    "result": "Accepted held is captured by value and its defer closure does not escape. Before filtered output shows holds captured by reference and the holdMethodValue call; append-backed storage is visible in object_methods.go:602-608 source. One fewer allocation is established by the benchmark, not by an omitted append compiler line."
+  },
+  "source_sha256": {
+    ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
+    "docs/compatibility/profile-matrix.json": "3a9296e14ad35242db8e3e17fddaeb044ef438d12fa51ee067abf468a856fc44",
+    "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
+    "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/array_sort_bench_test.go": "fa801a85983588a2d341a3436795a61a30cf8261b62d04fd3c060089745b6433",
+    "internal/runtime/array_sort_php8512.go": "b408c4432667de42ecde470cfa86ea43feb5e388a2f1bc03f92cf962925077d1",
+    "internal/runtime/array_sort_php8512_test.go": "a54bcc4981662513d877ccc5bab04040ebc37975992bb8752fdfd4ee5e08ec3f",
+    "internal/runtime/array_sort_regression_test.go": "a223d1263d0caf32f44ffa35788ab0024dfd45bbe7b18e5bbc7e6fe314902da0",
+    "internal/runtime/array_sort_user_php8512.go": "88795809c5306f56f478a2ccf56e73896b043c9558d73bc0172065f3dd7b5d06",
+    "internal/runtime/array_sort_user_php8512_test.go": "3c2c10c4eeb176d48dbb5fad2f26d4cc47a73195b5cafc6a6633778b96081700",
+    "internal/runtime/array_w12.go": "fa3391007b2182b2514eb655768dfec3593ae0ff6d2769bd63fd31f1f1862607",
+    "internal/runtime/array_w12_fuzz_test.go": "dd5d0ef510143dcd3243aa34141672802a4a260a99af6eb37d4f9ed9549e6823",
+    "internal/runtime/array_w12_safety_test.go": "e050d8904e93d09838f7dd814f0d837fb2da7fbef8e6e04d4292ff7f5c086e24",
+    "internal/runtime/array_w12_test.go": "628865cd3db20da9f7a8d73f79a8c08c66b5b184ac1fab80e75b9e05d5239259",
+    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    "internal/runtime/execution.go": "9c2bb1257c1921a85a504faaff4a8b800488a1e54d3acb60cfccd642d60e3275",
+    "internal/runtime/execution_catch_test.go": "0c5ebd40864748ec491e3b203a6290dd939f87ca2ca058e796feff41d73421e3",
+    "internal/runtime/execution_ci_review_test.go": "7e451a7e0ac37cf84981d9497f7b504c2df3f2cb8ce7990e0cd256beba429d97",
+    "internal/runtime/execution_destruct.go": "1f6feedabb8f401cf539ed4f69ddf95b09c37134714ccdad233012483469a28b",
+    "internal/runtime/execution_finally_review_test.go": "cbb5e793aacf5a9a92e5fe09e1387e0b51685816de6b4854bb8708ee0c14863e",
+    "internal/runtime/execution_oracle_test.go": "e63615eff969c7f782412c2769875529b481bb83753553b9a545db832c7292c5",
+    "internal/runtime/execution_output.go": "e12e3313985d5085430e1078a90529ff897256911dd8f3aef216dd1236fe2694",
+    "internal/runtime/execution_review_test.go": "8996f23e22fe173f18279fa2d31828afb4542a4468235e2e31a457cbae26104c",
+    "internal/runtime/execution_slots_review_test.go": "0fda6de66c8eb02446cc7a36965272ac1a5b5652877fc1831439a504c3db0f1c",
+    "internal/runtime/execution_snapshot_test.go": "62801091c1acb8f2065e2cd414ef1d5f8d6a72102cdb6f4b186ce31f3aad3259",
+    "internal/runtime/execution_test.go": "6b84a0a59450e25d157102241bbe26ccb41e330ccad4b709808b2c9e8685113c",
+    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
+    "internal/runtime/heap.go": "f0f68f966d3787c87253bc2c813e84aecb45aff0a219d061c14786e448539894",
+    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
+    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
+    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
+    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
+    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
+    "internal/runtime/numeric_php8512_fuzz_test.go": "44e5366621e66b2526a751da33b82dac01766c412ebf9d480cca8bce263eb74d",
+    "internal/runtime/object_basic_test.go": "cf7419540b0b0f82935f6dc114b1cca8cf6014b8fd6232026bd77f0855a92dbc",
+    "internal/runtime/object_captures_test.go": "f9a45a617c1cb55cad01c50b25cc2c24a7e7a5f56569c7d68fe2aeeabebabd6e",
+    "internal/runtime/object_checks.go": "9c644913761e2ed878b321b344784d07ecc6359048e43fffc624ece8f4615658",
+    "internal/runtime/object_compare.go": "2855a8c3c2710cc155caf0f496eb219352d81eb9a55f117f00838633fb06c687",
+    "internal/runtime/object_execution.go": "4152a2fb9455dc4c63f946d7dec78d13567afeb622737dbce1dec2f10d81fc79",
+    "internal/runtime/object_execution_test.go": "a79dc77b4913389daa4f8b5eaf2965c63f9ac55aa96d0594dcaab12105a19025",
+    "internal/runtime/object_gc_cancel_test.go": "e584c3cfcc9280dc7ffe15a449d7d11f5482dc5a65400e1b3a92016e28799d06",
+    "internal/runtime/object_gc_corpus_test.go": "2a476666b71fbdf351f89b187f32b486ee918aee53d8040f3d44f5cd385fae92",
+    "internal/runtime/object_gc_graph.go": "f54e843a3d35fe90443fcdcbdfe8671c3d7f62e791c9d91d2f1f76e527916445",
+    "internal/runtime/object_gc_temporaries.go": "dfde97435750d534755c69f4f7111c67374923abcf3a13ba92810ef186339854",
+    "internal/runtime/object_gc_test.go": "5d11013cd356a42e91fa5770a55f54d5e00bbd401cf3a435dca4510106b614a0",
+    "internal/runtime/object_handles_test.go": "49e4520d0dc76183be8a29ada64ab4c9a4a404f4c84187354afdfe3453da898e",
+    "internal/runtime/object_hook_frames_test.go": "e68e8d29be9edda5b641404f25327e8dce84c78d351e0a7b6c533ba67a6dde3f",
+    "internal/runtime/object_intrinsics.go": "b3ced38fc8b4085f525a4ad67d3a86348f2805c1754a85a1af277533542748ab",
+    "internal/runtime/object_isolation_test.go": "d8169335aa48fcd2e2cb78ecd9d0f0fad768efd08071c6eac23af0b3424b1179",
+    "internal/runtime/object_lazy.go": "58b0a5b48de6bdf69ce7a63d951d05633e1a16ad3dd052d1a8b8c609f21c98c7",
+    "internal/runtime/object_metadata_test.go": "1f31bfffe4e980544f7f9a9431a06c49c065d6e13ccad719f90bf69ebfed5120",
+    "internal/runtime/object_method_ownership_test.go": "8b0f51c0d464bb24f81c45d68a3d2e80f0208135a41db69f93c95099bc9b355c",
+    "internal/runtime/object_methods.go": "cf8e4f0bec007ed69bdd063dfa048f940ff5646e3879c3ebd2fce9cbd9206c50",
+    "internal/runtime/object_methods_lifetime_test.go": "e59020f9bc31f6c3a5ffe2b8263b80c20b184da69d5d9fc62c3147305161a01f",
+    "internal/runtime/object_methods_test.go": "f8adbcb4266a9cc35238e76d4895b7b0b5279012e16a8b906f15b3e49d47c855",
+    "internal/runtime/object_model.go": "1c6c4f89b3b557b62e2d2bba62afe456ff834912b40a3ec02ff5a729be164014",
+    "internal/runtime/object_model_test.go": "e4907b5e5f3dc8babb860373fb72f8f3b5bf27194c567c7a417e5117ca58258d",
+    "internal/runtime/object_names.go": "8a0227b0af816af711de364f01394388dbe87b1138a9b62978085b4267ca177c",
+    "internal/runtime/object_names_test.go": "93484a09ee0115be39c6669dc1729c65932f148ab856529bb819c9412966b6fd",
+    "internal/runtime/object_oracle_test.go": "5d535e4e8fd489ea8194ca5d770904611e8da7c47edd1eae66a4019f519dff14",
+    "internal/runtime/object_ownership.go": "f142abecffe79400a5f2d76a8558882dda8e6190e84cd8ef6b3a9412247c3bb4",
+    "internal/runtime/object_properties.go": "aa939518f098bfefff42665b2132937b2059e95687b5db233a3ce198aad0e705",
+    "internal/runtime/object_properties_reentry_test.go": "ba4eab7d62958ab02f02bb050224e2cd5d30078ac713f6c911ecb9c793cf409a",
+    "internal/runtime/object_property_view.go": "5202a8b03daad07ff5573e1c82cb677f85933678afae63780639e5031df4d462",
+    "internal/runtime/object_proxy_test.go": "740c83d1f177acd110cfd5c29c0f5c3b27e63cf17c91b56ebd61e6fe1e05356f",
+    "internal/runtime/object_raw.go": "1bafb322de41c3bd42fd63dab3b830beb6c60358c2ac58864b9c12a2b9e666a1",
+    "internal/runtime/object_request_ownership_test.go": "f8a828da616b5064590930d48508f5f5a7c206f05c7ebafc21117fe681e74ae8",
+    "internal/runtime/object_resource.go": "d6b7abbb15da33e6e9e748591d696a0bca04c4fe93ba88ab8d088d849ad7afd3",
+    "internal/runtime/object_resource_test.go": "97655d428f79f191632a1b50a8d9df8d46731bab6c429ffa4f572f815a930806",
+    "internal/runtime/object_returns.go": "b669f0fbc20162835e6abaf10c3878504d48cab799a48504bef18b99ecbbc114",
+    "internal/runtime/object_review_r2_cleanup_test.go": "9adda019ae4c62ae5b4089a6c5a7f21e17e7566ccbef815453923955a8d25389",
+    "internal/runtime/object_review_r2_lazy_test.go": "338f809558c7ef8cc9bc4ce576f36e0f457b6e16f3cd94e640cfebfe58a39707",
+    "internal/runtime/object_review_r2_properties_test.go": "f46cbbf71b0616e7f938529e3f516889d1c00e86594ed858e5ecdc7981ec1efe",
+    "internal/runtime/object_review_r2_returns_test.go": "034e6671fa5701fecf980c276d6f37a14c4a2779f61aa859ed0f21507b1189ca",
+    "internal/runtime/object_review_r2_values_test.go": "5b29632279296b57f6af947433ad716449914937f8405a9642c885aceb96d7f0",
+    "internal/runtime/object_review_r3_callable_return_test.go": "2073fdbd1511b926e6857455ac1b01c7302a657727a2d7a03e3e368480625bdd",
+    "internal/runtime/object_review_r3_enum_test.go": "452a316d8c2b9340134590d8eed0e99b867941715960f7cdf6a94132db582813",
+    "internal/runtime/object_review_r3_frame_test.go": "bef5e3e67a506bae6fa7ce327913b5a0f3309779e8f01506d2627d858a8b8cb6",
+    "internal/runtime/object_review_r3_hooks_test.go": "47b74fbbf1e162acf693e2ad1aab7477d45f6d4ffe5731753674852f5e993192",
+    "internal/runtime/object_review_r3_properties_test.go": "7eea61600746af1032b685a10904a8b44a824cff7d42ca67a8c4dd215399b237",
+    "internal/runtime/object_review_r3_safety_test.go": "0227981a6c62eaaf02d1e86ead067314d7dc518165beb37ec7f42ab0f624d6a6",
+    "internal/runtime/object_review_r3_typed_return_test.go": "4cdb861e00c803390a96d9e1f42764a8395364d928da2575847983329f40e77c",
+    "internal/runtime/object_review_r3_values_test.go": "604ccff7b25b942784a85d142d9b7b4eb5d83bccb3e0ce92edb5d6d165d3b73f",
+    "internal/runtime/object_review_r4_access_test.go": "41e7069b32bca0df8f0b20d13cc37d0c10b75bab0abd63d3c58e417dd4c8335f",
+    "internal/runtime/object_review_r4_lookup_test.go": "72266ddb4e2feff1451044459b86cf0fd10cd12e8211b49f89c1ca8f45a8caa5",
+    "internal/runtime/object_review_r4_weakmap_test.go": "43ebb9b7a1c8f42c144f603d553e1e253c45d97530f06eadd55426e692e1b350",
+    "internal/runtime/object_review_r5_bench_test.go": "d007e9eebd436c815fd084741c9dacc7a94931e0c69d9f40e62099fb2bd403ff",
+    "internal/runtime/object_review_r5_lifetime_test.go": "3d46395e4321a5f84fbacb8331eeb757e0569c0c06a849dcf4be1e814a07529c",
+    "internal/runtime/object_review_r5_operations_test.go": "7245b99a4baa68f8a85df1ebd89c172355f10687159d1d871f151225464ee0ef",
+    "internal/runtime/object_review_r5_references_test.go": "74bd16ff2a895f79868d5736e86e2ca17a66024edae66084169bc7fdf8bf00e0",
+    "internal/runtime/object_review_r5_safety_test.go": "45fda656bd13feec9427b65f1be4ede7f9bbdf2bc2dc0d10b22b3de286d4e4d9",
+    "internal/runtime/object_review_r6_guard_lifetime_test.go": "5047465dc091cc3e78a47c5532f80e4c0c05487a913ae8cdfaeda04af62bba6f",
+    "internal/runtime/object_review_r6_lazy_test.go": "63617537e0af723e28a433913d162f244082bc9b4ff2d1372e05ba75a91949f1",
+    "internal/runtime/object_review_r6_proxy_guard_test.go": "1d40814e59a6bdcf19e22304657765e25582ac1e2e0598e536e994f3203820fc",
+    "internal/runtime/object_review_r6_raw_unset_test.go": "ef281cee8297eab71d2a08d4af5224e6aa56421017c07a8b04ca2ccfafe9356c",
+    "internal/runtime/object_review_r6_references_test.go": "d8af7c3794ff0921cddcadfd4877241fb687926616d3aef7473135d7fc314830",
+    "internal/runtime/object_review_r6_resource_bench_test.go": "d65f0ead11fcbb66fc71041c85fb64fd7f203a0186882dae0952e52a30674366",
+    "internal/runtime/object_review_r6_resources_test.go": "cfe3df74f46c4228788c0e6ebb48688c48e14ee838e0a038a99b5bfd7e1c1764",
+    "internal/runtime/object_review_r6_scope_test.go": "66110adb40539f51629059ed481ff97548622202dc6efebd33f2c63a674338b4",
+    "internal/runtime/object_review_r6_test.go": "d969712439cd3b0f8574ef81be7318bdc79301ecd4323ff27b49ee8348193958",
+    "internal/runtime/object_review_r7_bench_test.go": "8d2cf53488db1284d50492d2444c6a32187e436243c31a8949c1bb9a332adbb2",
+    "internal/runtime/object_review_r7_defaults_test.go": "44de4095ff891f13f38ab4462d47f2320f111358a2c7e643a62ce5048c4bbbe1",
+    "internal/runtime/object_review_r7_lazy_state_test.go": "ea71b47bfb1c3e3fd850e03d00404fba109121c178ba1562a4637f7180823c34",
+    "internal/runtime/object_review_r8_bench_test.go": "8d0ba33863a7a21c712e14b82c263e849c84548522f9dbd589e3bd5c108a0b99",
+    "internal/runtime/object_review_r8_rollback_test.go": "b7a88e1180cd3a540fb30bd1efc9563cb583ffe8ede7d70b21f92ebc8e409bd4",
+    "internal/runtime/object_review_test.go": "518fec8b318b10b9c6bd93815a954b31bbc947ad7f9e631993b39bff913feadb",
+    "internal/runtime/object_statics.go": "ad918516d6f7933d23d8cbdc1fe14eb2a795b0d427c87cf92bf2d810d93b39f9",
+    "internal/runtime/object_statics_test.go": "34d040f083c1695885925cc38f1b2d5472709d523c32892295efab585b12f42f",
+    "internal/runtime/object_table.go": "cd5689bfacf3abd6fbfb033347766b6f7f88adca452cf1ed2370fff781e70a23",
+    "internal/runtime/object_table_test.go": "a6069213fc85d047020d64f03bb0c18fa23d828af6f6085cdc8ef26aced4de2b",
+    "internal/runtime/object_types_test.go": "ce8de494a2940e9be3e40f2778d92086ddd31d3ae44c06ac2bd08e004f160c6b",
+    "internal/runtime/object_weakmap.go": "a47d52b13f1ab0127923ba29f2a495207b1664a2d093cebd0f189385e635e78a",
+    "internal/runtime/object_weakmap_test.go": "d20f34acb12fbfc986d9415f927edbf394fb48b174edb16f2ddea22b8bbed287",
+    "internal/runtime/ops_php8512.go": "a1119dcffed1e049a1d32b68826d87b863fd4d9f8dc2c7ac1b76a65a1183b884",
+    "internal/runtime/ops_php8512_test.go": "db4932ace89fe1ef6b48a25895e4622e8990812d8793ba70d0cb5abb5068e7d3",
+    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
+    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
+    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
+    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
+    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
+    "internal/runtime/value.go": "abef91a8fc661e9ab78a12f791ca0b52a6d7ff053dda0753ff6d2f97f6fab06e",
+    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
+    "internal/runtime/value_test.go": "423bd4c06db7f27d78283c3488657eb09a691aa904dfb51ff0606e4e3bef195b",
+    "tests/semantics/w13-objects/captures.php": "cb67b8b99610063617d6a79cd0691b094d4824d1e0a76ee5d6e13b174c311ddd",
+    "tests/semantics/w13-objects/diagnostics/argument_destructor_conditional.php": "58e95410eb5e5e9b90fa4995562aa5f6abee863946b9dbce13a727bbf44f7d0f",
+    "tests/semantics/w13-objects/diagnostics/gc_weak_resurrection.php": "705ad2e40069b7a0775bceefc16518c5cb27d07f4f3869adad0f26f2be7acf31",
+    "tests/semantics/w13-objects/diagnostics/lazy_rollback_common.php": "65fb7f3f0aeaecd189b81d54b310304f419a849d56bdd1f9e1a1100a90a8d7f7",
+    "tests/semantics/w13-objects/diagnostics/lazy_rollback_declared.php": "4326b4c5f10ca9f3d0680aaf1561ca090b29918ec469db77ffeac98f66c041bc",
+    "tests/semantics/w13-objects/diagnostics/lazy_rollback_dynamic.php": "71db343d4a60494fbac0991b437974ad38abbecfd2c7270eca1c30288ec0fda3",
+    "tests/semantics/w13-objects/diagnostics/lazy_rollback_pair.php": "d54875b31cb02b0616465b41513164b609cd0c735f83d0c8b99ede90520672ae",
+    "tests/semantics/w13-objects/diagnostics/reference_unset_clone.php": "20827facaaf21afa2190364620c0458ef0a99b326ccb1b5c9c983387b94be295",
+    "tests/semantics/w13-objects/gc.php": "2a8bf7ed107a0a8227a1b7d0a8be4fc96f5942c64dc0e27496473b343ffca244",
+    "tests/semantics/w13-objects/gc_corpus.php": "14d218503763de1b42df53f023d159371054b01ae77b6e04a0250518639526a1",
+    "tests/semantics/w13-objects/hook_frames.php": "edff3546c3356bcd202c5257d9a0580fd1ecb846a0feebec3ddc51523442bf53",
+    "tests/semantics/w13-objects/isolated/case_lazy_rollback_declared.php": "3c49f9c17aba9a47d8e838cba98d33db5153c9338ba046739ccdcf0c04009ec8",
+    "tests/semantics/w13-objects/isolated/case_lazy_rollback_dynamic.php": "9f34966cca631c1b5d46ed6e7b890330ce0bf98dd72ac2e7c050d48d5462c562",
+    "tests/semantics/w13-objects/isolated/common.php": "8cb3d04e0232ded16e30caa04af1af9b31394a74f5485be2ca3ffd19e27df88c",
+    "tests/semantics/w13-objects/matrix.php": "46b4959dff40ee808c86abac4e31e68cb20f3e4d44d0ae771e5a7fedb805b399",
+    "tests/semantics/w13-objects/method_ownership.php": "43dd7e9640c0932d47cb292b9eda66c703be2ec2e925a78aa9466fb3eaea6780",
+    "tests/semantics/w13-objects/methods.php": "f94055252326fbb3c504b5e740e5740cc891665bf1ee38d249dfee2b3b3ad7a2",
+    "tests/semantics/w13-objects/names.php": "5dfb896d63587782218a31a3463d81d7028fcccddc41ae0f233da62a67b91270",
+    "tests/semantics/w13-objects/properties.php": "158f5836d5a335352c7cd4af9325d70e50300ae0d5c20f4a12b6577dd26cc453",
+    "tests/semantics/w13-objects/proxy.php": "d7045b3b0e5d9175b8e1550f112e492d32fa2c488843e1057d74bd9b585ad432",
+    "tests/semantics/w13-objects/reference.py": "6b671b13a8433b727ae17c3d1a6e658a4e0e6df37143550a2ede21c624632973",
+    "tests/semantics/w13-objects/resources.php": "8a79b3684bd1975e231c7d55226e9a2651d30fd86dd1bcc8a76a3d7963bba6b7",
+    "tests/semantics/w13-objects/review.php": "ec8f2b299af51c32ba4c18b41a35be8bde8b977446630acd2bd3492f823e90a2",
+    "tests/semantics/w13-objects/review_r2_cleanup.php": "b0c2384375a332c80a3419c43958cdcd24ba75b402b259fbbafac97c9a3bab5d",
+    "tests/semantics/w13-objects/review_r2_lazy.php": "6f6512d76267264aec75092e4afcb6d63246b76ee5fedf3fa3a28cdee83ec942",
+    "tests/semantics/w13-objects/review_r2_properties.php": "126fd1c6eeb66e56ed802680872c1732ed58cdac8cec29fcaedc25c765b67261",
+    "tests/semantics/w13-objects/review_r2_returns.php": "e1fb7054dcdb20572e0c5f8bfcd39f80580b3babe0cce5cef9bdd38c71b3dfa4",
+    "tests/semantics/w13-objects/review_r2_values.php": "0020ee114a051a017080d2a1c0338e06605f42e17dae8cf4267c8b35761450b5",
+    "tests/semantics/w13-objects/review_r3_callable_return.php": "3ebfaaa77834d1eb2a1029f9bad480159b9884538fb98c1f1bb9e7e23bb03d84",
+    "tests/semantics/w13-objects/review_r3_enum.php": "db178511afb22a97b38b9c30aa1aff6ad120b177bd61c9d6fdba7821ad9b91b3",
+    "tests/semantics/w13-objects/review_r3_frames.php": "8e37e0d174d2e4a2b0f4b11268918d881ff3cc3856a8834163a995175d6be511",
+    "tests/semantics/w13-objects/review_r3_hooks.php": "4729b7713fc55941570fd2db5d30b4f1e97517d4a6affa12f4ded6027756f691",
+    "tests/semantics/w13-objects/review_r3_properties.php": "fd1d02dbefcbf2cad385c8c1ff7d29308d297276cf67a952c4760dd2246af34d",
+    "tests/semantics/w13-objects/review_r3_typed_return.php": "7da00b38da4170bdaf619ada9dffa11f223a7894a101a6eaac0f29f178d87df5",
+    "tests/semantics/w13-objects/review_r3_values.php": "5cb25218195ee84d6fe3feeaeffe6b33f1e087d1a4945814dbf2fd9bc1974da2",
+    "tests/semantics/w13-objects/review_r4_access.php": "ff1df624fd13e453305938224d30c64ed9c45b61e6ed07690ba4963aa467b0a5",
+    "tests/semantics/w13-objects/review_r4_strict.php": "72b47ea2018e4a6cbb94d0dc513060bde9d7248d121b3763b52196165b2b230c",
+    "tests/semantics/w13-objects/review_r4_weakmap.php": "0c303c265026594a51c271fae121ed0c9a36b6aaa6f20eaedb958d336f5cc539",
+    "tests/semantics/w13-objects/review_r5_lifetime.php": "20c20e114aa174ad03475b0661d30b142f4da9a4f947320edecddb994eb8d16c",
+    "tests/semantics/w13-objects/review_r5_operations.php": "8414afae7d10504d2c773d68b074bf03d4fc86a604ec5014c8da94f52ef127a9",
+    "tests/semantics/w13-objects/review_r5_references.php": "e471600f17e1ef6b8c29d0ed2cc3bbcd08a57ede2f389bf7ce8f8dc92c524c92",
+    "tests/semantics/w13-objects/review_r6_guard_lifetime.php": "05c1e150f221ba436e85e9771940b54c8a7ba5bc7f5c0612c588a8fd87b22c97",
+    "tests/semantics/w13-objects/review_r6_lazy.php": "09be34b7d1447cb9d81d8f4b6066222afc37ab76821a300d021c7f78c91d1537",
+    "tests/semantics/w13-objects/review_r6_proxy_guard.php": "2235ed75d022e1475907e0959182b6c27e876b97266e71ea41146a132dec236a",
+    "tests/semantics/w13-objects/review_r6_raw_unset.php": "c5ded017f7dc94daed1805c15dfed80d5b647a2a00aad8d835bf65a845a6dfb1",
+    "tests/semantics/w13-objects/review_r6_references.php": "e346f0a7b56e9a813fd6b601f9366add779cfff305ede4df715999a8ea04d9fd",
+    "tests/semantics/w13-objects/review_r6_scope.php": "9e044d7f18ddbdc232480537afe7e8f05e3c738cf38603ba3c87eafa0996b739",
+    "tests/semantics/w13-objects/review_r7_defaults.php": "bd28735ed9d953f41534936a90f80243e1eceb9b9502b0a52148817b7c7d5381",
+    "tests/semantics/w13-objects/review_r7_lazy_state.php": "a21f26f6ed75f98104c00db8036e2f7b3c7a83980dcad730eb1f3dbb4c13bfe7",
+    "tests/semantics/w13-objects/review_r8_rollback.php": "2ec7b2d524f15faccf48acc4ac6958173c8bed1e39d37bbd6edf6b90ca3d1b4c",
+    "tests/semantics/w13-objects/shutdown/case_handle_reuse.php": "7974ece85230965852b9621aa1f34a6daef9d10b460929bcfc6951c947467605",
+    "tests/semantics/w13-objects/shutdown/case_late_hole.php": "6cf8c040940f6e8bcb7bc03552e59769dae540ae23de98dbba0a2ccca9f5f2ee",
+    "tests/semantics/w13-objects/shutdown/common.php": "ef6c69641e6b72c81c9a993d0cffa0179ad56c6c42b9c33f60c67152fe01e743",
+    "tests/semantics/w13-objects/statics.php": "b3d1358b3716dc5d50f39768ba7cad9e298a3071ff97c9dfd185c1ba04aaecc9",
+    "tests/semantics/w13-objects/types.php": "3d349de3ffeaae85f9019c60a108fb81055921654ed353078381d129daa9412c",
+    "tests/semantics/w13-objects/weakmaps.php": "a159dfd2480375ff83ca5971318621aa264aacfe5f87fcae1d9401f98d1d26ad",
+    "tools/test_w13_reference.py": "c0de658a409ce7556af1b47304bab2f94c6ce747ad11f187931933c08ebafa95",
+    "tools/w03-local-checks.json": "b1d9d34c5d3007da0835265d297a4a5151b6698809d328234c58b1027be3bea9"
+  },
+  "review": {
+    "result": "Independent native gpt-6.1-sol adversarial review found no confirmed defect or further evidence-backed no-extra-cost improvement. Focused allW13 passed independently0.714s; independent six-cell100ms benchmark passed, not used as formal samples. Root full gates and latest remote-head review remain separately recorded.",
+    "documentation": "Independent fresh-context native gpt-6.1-sol reader verified184current sources,6check outputs,9R8artifacts,55fixture hashes/profile,607counts and all605prior cases unchanged, all lineanchors, sixcells x3samples before/after and14R7historical artifacts. Sole required compiler wording clarification adopted and rechecked; no other required correction. No remote status or chat authorization inferred."
+  },
+  "coverage_limits": [
+    "PHP frontend/VM execution entry point",
+    "class-name static invocation and constructor entry integration through frontend/VM",
+    "autoload/namespaces/Closure/Reflection public integration",
+    "actual file/database I/O and complete gc public functions",
+    "historical PHP versions, real applications and competitor performance",
+    "full product scenarios remain not_run",
+    "raw adapter explicit ancestor-private descriptor selection and complete public Reflection argument/declaration validation",
+    "Third/fourth unsafe native diagnostics remain pending explicit user decision, never compatibility passes."
+  ],
+  "artifacts_sha256": {
+    "W-13-r8-before-benchmark.txt": "8640d2906919d206b6fad1bfeba207a244e734348205bb0fec8a651be9905916",
+    "W-13-r8-after-benchmark.txt": "93d2adce4a95d092a0cb9f6244ed78e7ec5d73943d657937f2dd6cb292919129",
+    "W-13-r8-before-green.txt": "eddeb16797a05249c2ede8ef47a72ef9b8f29d4f0368f48bd404f1b16fc3c704",
+    "W-13-r8-after-green.txt": "045d9563e7b0c9f73fdce8412b25977eecb8ec248a11477ec82dba308be8a4a6",
+    "W-13-r8-baseline-replay.txt": "193108d3ceedf4b8ec0a30fce79b3b8f59f5678fdd5941db92bffd401b296cb0",
+    "W-13-r8-observer-trace.json": "fb928a3b1b0e5730f4952d3dee3912c4e55817844a3fea29a5b4e6d263d42c94",
+    "W-13-r8-observer-initial-failure.txt": "832f8b0d106728f03bfc9003749d2e3218cdfefbea762e7f2a138a71e30bfad3",
+    "W-13-r8-before-compiler.txt": "6a958b1792e46acc93f2797dcb2d4ec526a91b54e022e55f669aa68c2d276faa",
+    "W-13-r8-after-compiler.txt": "2666d994e2c7b67532e3e36edefe2b0a49a09012e09a4499ebc5ca05a07a4c47"
+  },
+  "checks": [
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "result": "pass",
+      "output": "W-13-r8-local-format.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "exit_code": 0,
+      "result": "pass",
+      "output": "W-13-r8-local-pure.txt",
+      "output_sha256": "338953e5521da8dec4f018c9f9bc40860f358d02756330545140f7754f15382a"
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 0,
+      "result": "pass",
+      "output": "W-13-r8-local-race.txt",
+      "output_sha256": "58a74fc9409bb63085b17336c68f2c7f3b8cc7e1686c34cb06e94a237335f4b4"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "result": "pass",
+      "output": "W-13-r8-local-vet.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "result": "pass",
+      "output": "W-13-r8-local-python.txt",
+      "output_sha256": "f2194c0e4a1f4c65ff420f112f95000db401d5f08357010891631541d0202ac7",
+      "seconds": 139.293
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "result": "pass",
+      "scope": "documentation_only; 34 checks",
+      "output": "W-13-r8-local-docs.json",
+      "output_sha256": "41bac9b2e0c11dae065ce513420078b0688bfe8dd00ab47596922b394c9d56c0"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+F
+======================================================================
+ERROR: test_cold_image_pull_noise_is_separate_from_reference_streams (test_lifecycle_reference.LifecycleReferenceTests) (width=32)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w14-red-4errwk1x/tools/test_lifecycle_reference.py", line 80, in test_cold_image_pull_noise_is_separate_from_reference_streams
+    data = oracle.collect(width)
+TypeError: collect() takes 0 positional arguments but 1 was given
+
+======================================================================
+ERROR: test_cold_image_pull_noise_is_separate_from_reference_streams (test_lifecycle_reference.LifecycleReferenceTests) (width=64)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w14-red-4errwk1x/tools/test_lifecycle_reference.py", line 80, in test_cold_image_pull_noise_is_separate_from_reference_streams
+    data = oracle.collect(width)
+TypeError: collect() takes 0 positional arguments but 1 was given
+
+======================================================================
+FAIL: test_runner_stderr_and_wrong_profile_are_rejected (test_lifecycle_reference.LifecycleReferenceTests) (stderr=b'runner warning', size=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w14-red-4errwk1x/tools/test_lifecycle_reference.py", line 93, in test_runner_stderr_and_wrong_profile_are_rejected
+    oracle.collect()
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_pull_failure_does_not_start_container (test_lifecycle_reference.LifecycleReferenceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w14-red-4errwk1x/tools/test_lifecycle_reference.py", line 105, in test_pull_failure_does_not_start_container
+    self.assertEqual([c[1] for c in calls], ['image', 'pull'])
+AssertionError: Lists differ: ['run', 'rm'] != ['image', 'pull']
+
+First differing element 0:
+'run'
+'image'
+
+- ['run', 'rm']
++ ['image', 'pull']
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.055s
+
+FAILED (failures=2, errors=2)

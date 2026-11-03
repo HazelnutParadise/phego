@@ -1,0 +1,12 @@
+--- FAIL: TestW13R13GetterFastPathAllocations (0.00s)
+    --- FAIL: TestW13R13GetterFastPathAllocations/32/"" (0.00s)
+        object_review_r13_graph_test.go:163: getter allocations=1, want 0
+    --- FAIL: TestW13R13GetterFastPathAllocations/32/"mixed" (0.00s)
+        object_review_r13_graph_test.go:163: getter allocations=1, want 0
+    --- FAIL: TestW13R13GetterFastPathAllocations/64/"" (0.00s)
+        object_review_r13_graph_test.go:163: getter allocations=1, want 0
+    --- FAIL: TestW13R13GetterFastPathAllocations/64/"mixed" (0.00s)
+        object_review_r13_graph_test.go:163: getter allocations=1, want 0
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.481s
+FAIL

@@ -4,6 +4,8 @@
 
 Read `docs/spec/specification.zh-TW.md`, especially chapters 01-11, 22-28, and 36-40. Load the requirement, acceptance-test, and work-package JSON records under `docs/data/`. This repository is at the specification stage; do not mistake planned APIs for implemented APIs.
 
+Before selecting a work package, read `docs/implementation/README.md` and `docs/implementation/github-index.json` for its issue, draft PR, integration dependencies, and acceptance owner. Read the package plan on its draft branch before implementing it.
+
 ## Fixed product direction
 
 1. Keep the core Go-native and embeddable through a Go function. The default core must build without cgo or LLVM. Optional native builds must disclose their dependencies.
@@ -29,6 +31,10 @@ Keep security checks and cancellation semantics intact under optimization. Nativ
 Historical reference engines, application fixtures, and potentially unsafe tests run in disposable restricted environments without production data or secrets. Use test doubles or authorized sandboxes for payments, email, and external effects.
 
 Run `python3 tools/validate_docs.py` after changing planning records. Product test commands must be added when a runnable engine exists; do not invent passing CI for absent implementation.
+
+## Review
+
+Every review must look for approaches that cost the same or less and give a better result, and report each one it finds. Take every such benefit where PHP compatibility does not constrain the internals; it is not a trade-off to weigh. Judge approaches with added cost by the benefit they actually bring. Conventional code is not acceptable just because it works. This never overrides PHP-visible semantics or safety checks.
 
 ## Decision boundaries
 

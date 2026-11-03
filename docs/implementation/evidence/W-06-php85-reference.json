@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "scope": "reference_engine_fixture_only",
+  "php_release": "8.5.12",
+  "platform": "linux/arm64",
+  "emulated": false,
+  "source_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "container_image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+  "reference_binary_sha256": "e5d0591e0d82e30f413e4aa928ff66afddd1f752c707b17feffaae70c4f8b519",
+  "fixture_sha256": {
+    "tests/semantics/w06-php85/array_copy_reference.phpt": "9dc08be0c903acdd2a0150975e5d8c41ed50f48395406763a4b032dc502950d3",
+    "tests/semantics/w06-php85/destruct_last_reference.phpt": "ca9e74791acab2e13b188dec8d07b0b58a8c7790e2ee64559c496774527c8b8e",
+    "tests/semantics/w06-php85/reference_unset.phpt": "5db55b452733e24c0814c0f14e482f90b8fdd6825e326f4ed511bbadb21c525c"
+  },
+  "command": "set -o pipefail\nSOURCE=/tmp/phego-source.z6hT5t/php.tar.xz\ndocker run --rm --pull never --hostname phego-reference --platform linux/arm64 \\\n  --network none --read-only --user 65534:65534 --cpus 2 --memory 2g --pids-limit 256 \\\n  --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,exec,size=2g \\\n  --mount \"type=bind,src=$SOURCE,dst=/input/php.tar.xz,readonly\" \\\n  --mount \"type=bind,src=/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w06-fixtures.XlmU7ZWS10,dst=/input/fixtures,readonly\" \\\n  buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b \\\n  timeout --kill-after=5s 1800s sh -c 'set -eu\nexport SOURCE_DATE_EPOCH=1792540800 TZ=UTC LC_ALL=C NO_INTERACTION=1 REPORT_EXIT_STATUS=1\ncp /input/php.tar.xz /tmp/php.tar.xz\nprintf \"08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209  /tmp/php.tar.xz\\n\" | sha256sum -c -\nmkdir /tmp/build /tmp/fixtures\ncp /input/fixtures/*.phpt /tmp/fixtures/\ntar -xf /tmp/php.tar.xz -C /tmp/build\ncd /tmp/build/php-8.5.12\n./configure --disable-all --enable-cli --without-pear >/tmp/configure.log 2>&1 || { result=$?; cat /tmp/configure.log; exit \"$result\"; }\nmake -j2 >/tmp/make.log 2>&1 || { result=$?; cat /tmp/make.log; exit \"$result\"; }\n./sapi/cli/php -n -v\nsha256sum ./sapi/cli/php\nset +e\nTEST_PHP_EXECUTABLE=/tmp/build/php-8.5.12/sapi/cli/php ./sapi/cli/php -n run-tests.php -P /tmp/fixtures/*.phpt\nresult=$?\nset -e\nprintf \"REFERENCE_RUNNER_EXIT=%s\\n\" \"$result\"\nexit \"$result\"\n'\n",
+  "runner_exit_code": 0,
+  "passed": 3,
+  "failed": 0,
+  "skipped": 0,
+  "stdout_gzip": "W-06-php85-reference.log.gz",
+  "stdout_sha256": "8a144ddc95248ae24c6ab1c52d64ea4a40b94534379d0a30a99c368264716021",
+  "container_cleanup_observed": "docker inspect a5a5d1d74d14 returned 1 and no such object after execution",
+  "limits": [
+    "Only PHP 8.5.12 CLI on Linux arm64 was exercised, not historical releases or other platforms.",
+    "The commands use temporary source and fixture paths and are not a hardened reusable runner.",
+    "The reference PHP execution is not Phego execution or product acceptance.",
+    "The three fixtures do not cover cycles, weak references, resurrection, reentrancy, or the complete W-06 exit conditions.",
+    "The saved output is stdout; docker stderr and container startup inspection were not captured as evidence."
+  ]
+}

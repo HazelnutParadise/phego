@@ -1,0 +1,39 @@
+name: PHP 8.5.12 array semantics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    strategy:
+      matrix:
+        include:
+          - width: 64
+            runner: ubuntu-24.04-arm
+          - width: 32
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      # REQ-007/016/017; T-013/014/031/032/033/034. Generate the oracle afresh.
+      - name: Test reference runner
+        run: python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'
+      - name: Run the pinned reference
+        run: python3 tests/semantics/w12-arrays/reference.py --width ${{ matrix.width }} --output-dir "$RUNNER_TEMP/w12-reference"
+      - name: Compare with Go runtime
+        env:
+          PHEGO_W12_REFERENCE: ${{ runner.temp }}/w12-reference
+        run: go test -run '^TestW12PHP8512Arrays/${{ matrix.width }}$' -v ./internal/runtime
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: w12-reference-${{ matrix.width }}
+          path: ${{ runner.temp }}/w12-reference

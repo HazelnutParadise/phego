@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "scope": "reference_engine_fixture_only",
+  "php_release": "8.5.12",
+  "platform": "linux/arm64",
+  "emulated": false,
+  "source_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+  "container_image": "buildpack-deps@sha256:2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b",
+  "reference_binary_sha256": "e0926d4830ba003ccb6f5eae64f748cbf4e51be7c80330713867efcd96f33cdd",
+  "fixture": "tests/semantics/w06-php85/array_numeric_keys.phpt",
+  "fixture_sha256": "a47acafd308fcf9c522c067555619ed61b80bb8267ecadec970fc7e544699356",
+  "execution": "Configured with --disable-all --enable-cli --without-pear, built with make -j2; invoked sapi/cli/php -n run-tests.php -P /tmp/test.phpt with TEST_PHP_EXECUTABLE set to the built CLI. Source and fixture copied into container temporary storage before execution.",
+  "environment": "Docker linux/arm64, network none, read-only root, uid/gid 65534, 2 CPUs, 2 GiB memory, 256 pids, all capabilities dropped, no-new-privileges, executable tmpfs /tmp; SOURCE_DATE_EPOCH=1792540800, TZ=UTC, LC_ALL=C, NO_INTERACTION=1, REPORT_EXIT_STATUS=1; 1800s timeout with 5s kill grace.",
+  "runner_exit_code": 0,
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0,
+  "stdout_gzip": "W-06-php85-array-keys-linux-arm64.log.gz",
+  "stdout_uncompressed_sha256": "f81ad7b5163c852ba4f4c728a010efb561e27a1ea24aab449f91547f0e472651",
+  "stderr_bytes": 0,
+  "container_cleanup_observed": "docker inspect returned no such object for a942f9654da7426e611fe3553c72b51b9fe3260ee1f106669e3b2d03a1a78b2c after normal completion",
+  "limitations": [
+    "No actual 32-bit platform or other PHP versions were tested by this run.",
+    "This fixture is a reference PHP result, not execution of Phego or work-package acceptance.",
+    "The recorded command is a summary, not a complete replay script; interruption cleanup was not tested.",
+    "The fixture checks key types, not the numeric values of converted keys."
+  ]
+}

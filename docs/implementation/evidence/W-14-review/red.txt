@@ -1,0 +1,17 @@
+--- FAIL: TestExecutionReviewReturnSurvivesFinally (0.00s)
+    --- FAIL: TestExecutionReviewReturnSurvivesFinally/array (0.00s)
+        execution_review_test.go:56: pending array lost: got []runtime.SnapshotEntry{}, want []runtime.SnapshotEntry{runtime.SnapshotEntry{Key:"key", Value:[]uint8{0x6b, 0x65, 0x70, 0x74}}}
+    --- FAIL: TestExecutionReviewReturnSurvivesFinally/object (0.00s)
+        execution_review_test.go:59: return object destroyed in finally: count=1 freed=true
+--- FAIL: TestExecutionReviewUnwindReleasesReplacedReturn (0.00s)
+    execution_review_test.go:114: unwind order=[local caught returned]
+--- FAIL: TestExecutionReviewHostStopOverridesEarlierDestructorThrow (0.00s)
+    --- FAIL: TestExecutionReviewHostStopOverridesEarlierDestructorThrow/cancel (0.00s)
+        execution_review_test.go:177: host stop masked: got={end:{kind:2 code:255 value:{kind:0 boolean:false integer:0 floating:0 text: array:<nil> object:<nil> ref:<nil>} err:0x11d4b1ca05b0 previous:<nil>} returned:<nil> output:[] accepted:0 diagnostics:[{level:Fatal error message:first PHP failure}] cleanupErr:<nil> cleanupComplete:true} want kind=5
+    --- FAIL: TestExecutionReviewHostStopOverridesEarlierDestructorThrow/writer (0.00s)
+        execution_review_test.go:177: host stop masked: got={end:{kind:2 code:255 value:{kind:0 boolean:false integer:0 floating:0 text: array:<nil> object:<nil> ref:<nil>} err:0x11d4b1ca0670 previous:<nil>} returned:<nil> output:[] accepted:1 diagnostics:[{level:Fatal error message:first PHP failure}] cleanupErr:<nil> cleanupComplete:true} want kind=6
+    --- FAIL: TestExecutionReviewHostStopOverridesEarlierDestructorThrow/limit (0.00s)
+        execution_review_test.go:177: host stop masked: got={end:{kind:2 code:255 value:{kind:0 boolean:false integer:0 floating:0 text: array:<nil> object:<nil> ref:<nil>} err:0x11d4b1ca0730 previous:<nil>} returned:<nil> output:[] accepted:0 diagnostics:[{level:Fatal error message:first PHP failure}] cleanupErr:<nil> cleanupComplete:true} want kind=8
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.538s
+FAIL

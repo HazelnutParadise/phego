@@ -1,0 +1,10 @@
+--- FAIL: TestExecutionOracleReplay (0.00s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/caught_then_throw (0.00s)
+            execution_oracle_test.go:502: events=[caught:first caught:second previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[caught:first caught:second shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/caught_then_throw (0.00s)
+            execution_oracle_test.go:502: events=[caught:first caught:second previous:first shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[caught:first caught:second shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.539s
+FAIL

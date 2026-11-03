@@ -1,0 +1,48 @@
+=== RUN   TestW13BaselineLayout
+    w13_baseline_bench_test.go:3: value=64 B
+    w13_baseline_bench_test.go:3: reference=72 B
+    w13_baseline_bench_test.go:3: bucket=96 B
+    w13_baseline_bench_test.go:3: object=72 B
+    w13_baseline_bench_test.go:3: phpArray=80 B
+--- PASS: TestW13BaselineLayout (0.00s)
+=== RUN   TestW13BaselineLayout
+    w13_baseline_bench_test.go:3: value=64 B
+    w13_baseline_bench_test.go:3: reference=72 B
+    w13_baseline_bench_test.go:3: bucket=96 B
+    w13_baseline_bench_test.go:3: object=72 B
+    w13_baseline_bench_test.go:3: phpArray=80 B
+--- PASS: TestW13BaselineLayout (0.00s)
+=== RUN   TestW13BaselineLayout
+    w13_baseline_bench_test.go:3: value=64 B
+    w13_baseline_bench_test.go:3: reference=72 B
+    w13_baseline_bench_test.go:3: bucket=96 B
+    w13_baseline_bench_test.go:3: object=72 B
+    w13_baseline_bench_test.go:3: phpArray=80 B
+--- PASS: TestW13BaselineLayout (0.00s)
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13BaselineObjectLifecycle
+BenchmarkW13BaselineObjectLifecycle/0
+BenchmarkW13BaselineObjectLifecycle/0-8 	16855362	        69.92 ns/op	     160 B/op	       2 allocs/op
+BenchmarkW13BaselineObjectLifecycle/0-8 	16682914	        74.79 ns/op	     160 B/op	       2 allocs/op
+BenchmarkW13BaselineObjectLifecycle/0-8 	16568872	        70.50 ns/op	     160 B/op	       2 allocs/op
+BenchmarkW13BaselineObjectLifecycle/1
+BenchmarkW13BaselineObjectLifecycle/1-8 	 4876998	       234.8 ns/op	     664 B/op	       6 allocs/op
+BenchmarkW13BaselineObjectLifecycle/1-8 	 5113375	       230.5 ns/op	     664 B/op	       6 allocs/op
+BenchmarkW13BaselineObjectLifecycle/1-8 	 5266321	       230.4 ns/op	     664 B/op	       6 allocs/op
+BenchmarkW13BaselineObjectLifecycle/4
+BenchmarkW13BaselineObjectLifecycle/4-8 	 2275742	       535.2 ns/op	    1000 B/op	      11 allocs/op
+BenchmarkW13BaselineObjectLifecycle/4-8 	 2256720	       527.8 ns/op	    1000 B/op	      11 allocs/op
+BenchmarkW13BaselineObjectLifecycle/4-8 	 2305813	       519.8 ns/op	    1000 B/op	      11 allocs/op
+BenchmarkW13BaselineObjectLifecycle/32
+BenchmarkW13BaselineObjectLifecycle/32-8         	  227256	      5428 ns/op	    9040 B/op	      49 allocs/op
+BenchmarkW13BaselineObjectLifecycle/32-8         	  227437	      5412 ns/op	    9040 B/op	      49 allocs/op
+BenchmarkW13BaselineObjectLifecycle/32-8         	  226184	      5399 ns/op	    9040 B/op	      49 allocs/op
+BenchmarkW13BaselineObjectLifecycle/256
+BenchmarkW13BaselineObjectLifecycle/256-8        	   27168	     42982 ns/op	   72624 B/op	     282 allocs/op
+BenchmarkW13BaselineObjectLifecycle/256-8        	   27494	     42561 ns/op	   72624 B/op	     282 allocs/op
+BenchmarkW13BaselineObjectLifecycle/256-8        	   27909	     42555 ns/op	   72624 B/op	     282 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	22.641s

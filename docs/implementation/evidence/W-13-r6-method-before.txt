@@ -1,0 +1,11 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13MethodDispatch-8   	 1082714	       195.4 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13MethodDispatch-8   	 1229446	       195.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13MethodDispatch-8   	 1231138	       195.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13MethodDispatch-8   	 1232264	       195.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13MethodDispatch-8   	 1232412	       196.7 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	2.421s

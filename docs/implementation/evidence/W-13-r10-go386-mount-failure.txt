@@ -1,0 +1,3 @@
+--- FAIL: TestW13GCCorpus (0.00s)
+    object_gc_corpus_test.go:104: open testdata/w13-ref-32.json: no such file or directory
+FAIL

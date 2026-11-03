@@ -1,0 +1,118 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "885f47475dc9f6f7978e52951ec2ace01ec0d11b",
+  "reference_result": "298 cases per fixed profile; all original 222 observations preserved; 76 added",
+  "findings": [
+    {
+      "comment": 4444561901,
+      "cases": "r2-property-*: explicitly unset declared and typed magic behavior"
+    },
+    {
+      "comment": 4444561916,
+      "cases": "r2-property-*: receiver released during weak coercion"
+    },
+    {
+      "comment": 4444561924,
+      "cases": "r2-property-*: readonly uninitialized unset in declaring/child/global scope"
+    },
+    {
+      "comment": 4444561940,
+      "cases": "r2-values-string-reference-concat"
+    },
+    {
+      "comment": 4444561949,
+      "cases": "r2-values-typed-compare-*; r2-values-typed-materialized-*; r2-values-materialized-clone; r2-lazy-comparison-state"
+    },
+    {
+      "comment": 4444561963,
+      "cases": "r2-values-union-{property,argument,return}-{intstring,intbool}-{huge,nan,inf,numeric-string}"
+    },
+    {
+      "comment": 4444561975,
+      "cases": "r2-values-magic-duplicate-{missing,inaccessible}"
+    },
+    {
+      "comment": 4444561984,
+      "cases": "r2-values-clone-*"
+    },
+    {
+      "comment": 4444561999,
+      "cases": "r2-property-*: unused magic set/unset/isset results; r2-cleanup-isset*; r2-cleanup-clone*"
+    }
+  ],
+  "related_repairs": [
+    "r2-return-*: consume temporary reference wrappers before W14 owns by-value returns; directly bind one destination owner for by-reference returns",
+    "r2-lazy-zero-* and r2-lazy-capture-*: zero-backed-property classes are ordinary; foreign initializer rejected before allocation",
+    "r2-cleanup-dynamic: reuse existing dynamic slot before __get",
+    "r2-cleanup-handler: actual subclass clone handler beats parent private scope preference",
+    "r2-cleanup-clone-double: later destructor error replaces clone error with previous retained"
+  ],
+  "test_parity_corrections": [
+    "TestW13UninitializedLazyDoesNotDestruct formerly used a zero-property class, which pinned PHP makes ordinary. Add a real int property and retain the calls==0 assertion; separate native cases prove zero-property destructor behavior.",
+    "clone-array in cleanup-red includes a test-local array-location owner that was not transferred to a callback temporary. Correct this input lifetime; that red observation is not independent proof of a runtime defect. clone-self/array are protection controls. Other cleanup red cases reproduce the five reported issues.",
+    "readonly-reference control preserves the native Error; no relaxation. Native readonly coercion reentry permits the outer first assignment after an inner write; an extra post-coercion readonly rejection was removed."
+  ],
+  "materialization": {
+    "representation": "bool field instead of empty map; preserve effective state across clone/snapshot/rollback and dynamic removal",
+    "host": "Go1.26.5 darwin/arm64 Apple M3",
+    "table_size_before": 56,
+    "table_size_after": 64,
+    "object_coallocation_bytes_before": 160,
+    "object_coallocation_bytes_after": 160,
+    "once_or_repeated_before": {
+      "bytes": 296,
+      "allocs": 4
+    },
+    "once_or_repeated_after": {
+      "bytes": 248,
+      "allocs": 3
+    },
+    "clone_before": {
+      "bytes": 648,
+      "allocs": 8
+    },
+    "clone_after": {
+      "bytes": 552,
+      "allocs": 6
+    },
+    "note": "Three raw samples retained. Timing runs overlap other checks, so byte/allocation improvements are the claim; no general platform or application performance claim."
+  },
+  "local_review": "Independent gpt-6.1-sol reviewed current R2 and rechecked all five follow-up findings after fixes. Astra consulted ownership and layout changes. Root reviewed full production diff, native/Go program parity and benchmark evidence. Latest pushed-head Codex review remains a separate remote gate.",
+  "artifacts_sha256": {
+    "W-13-r2-red.txt": "916315fc70163eaa75a625e8b16598340a8fd8ce9ed681a338d77c6d41fd89f3",
+    "W-13-r2-returns-red.txt": "f2ba7ccc3336dcc183c38c70519f05887a7b28e392f1b090914f7f320974caed",
+    "W-13-r2-binding-red.txt": "22497cc87d21b605f43d9dbdd73a991e08c4d49de239a2048c67fcb8abdeca11",
+    "W-13-r2-lazy-state-red.txt": "201fe7bb816ae79c9f1e5343c9169baea668ed39d085d908a6a9d9a47e869765",
+    "W-13-r2-zero-owner-red.txt": "a67bcc182316e97c2f62f0fa80e393de943d693b62531900785c884fa3683b68",
+    "W-13-r2-cleanup-red.txt": "aea0b8f59f3c9dbb3dfb5d1c3f988d4b668e1c4be1ad52330375cbf6bd471dd6",
+    "W-13-r2-cleanup-green.txt": "46cf77af4bbd6ee98936bd70b511e102ea0a0e2b833a30f903939049df7f4fe7",
+    "W-13-r2-materialized-before.txt": "7ea4703836d6bd2aa9bc9ae5d2d807f7e3b09390c032e93123956dd2a97c2abb",
+    "W-13-r2-benchmark.txt": "992c18131a0f6a0319fa09e61c1da4a4c6f45efe510e2647c3538e4b5d371839",
+    "W-13-r2-local-pure.txt": "e9f10b4501484a3e675dc368b73ed285712652a597fb7d9b9e14b05d31e727a3",
+    "W-13-r2-local-race.txt": "2bb4c1f96758e78182e4fdf19138f714da3cedc8046e421e8e1399a298ebd31a",
+    "W-13-r2-local-vet.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r2-local-format.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r2-local-python.txt": "585d302461979a23e89ad38c7ed78cdc3cd68e1557d2d95522786f6826a3457d"
+  },
+  "compatibility_limits": "Exactly the two separately user-approved diagnostics in W-13-runtime-php8512.json. Neither is a compatibility pass."
+}

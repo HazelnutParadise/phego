@@ -1,0 +1,51 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13AliasedClone/typed/1-8         	  451611	       264.4 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	  449816	       268.4 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	  436918	       274.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	  470838	       256.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/1-8         	  498960	       255.7 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	  527414	       233.8 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	  534927	       225.8 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	  558301	       227.5 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	  551396	       228.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/1-8         	  551966	       227.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	  328898	       359.6 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	  327704	       360.2 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	  333348	       357.5 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	  340537	       357.9 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/dynamic/1-8       	  336181	       359.5 ns/op	     608 B/op	       5 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	   47536	      2499 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	   47682	      2509 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	   49142	      2500 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	   48854	      2440 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/32-8        	   48654	      2431 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	   83451	      1453 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	   84644	      1458 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	   85110	      1450 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	   84414	      1452 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/32-8        	   83601	      1434 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	   29284	      4239 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	   29018	      4242 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	   28747	      4161 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	   29445	      4159 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/dynamic/32-8      	   29108	      4380 ns/op	    8584 B/op	      12 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	    6160	     19447 ns/op	   18594 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	    6498	     19512 ns/op	   18594 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	    6261	     19356 ns/op	   18594 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	    6390	     19659 ns/op	   18594 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/typed/256-8       	    6463	     19204 ns/op	   18594 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	   10000	     10020 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	   10000	     10160 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	   10000	     10209 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	   10000	     10197 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/plain/256-8       	   10000	     10184 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	    3957	     30828 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	    3984	     31053 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	    3937	     31429 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	    3868	     31466 ns/op	   56200 B/op	      26 allocs/op
+BenchmarkW13AliasedClone/dynamic/256-8     	    4026	     32021 ns/op	   56200 B/op	      26 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	7.339s

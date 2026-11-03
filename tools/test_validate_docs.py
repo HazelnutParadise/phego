@@ -32,7 +32,7 @@ class DocumentationValidatorTests(unittest.TestCase):
     def test_valid_package(self) -> None:
         report = validate(self.root)
         self.assertEqual(report["status"], "pass", report["errors"])
-        self.assertEqual(report["counts"]["requirements"], 100)
+        self.assertEqual(report["counts"]["requirements"], 101)
         self.assertFalse(report["engine_implemented"])
 
     def test_dependency_cycle(self) -> None:

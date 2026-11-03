@@ -1,0 +1,127 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "7823a32e15b2d46202f7bdfa97c27cf5b6955642",
+  "reference_result": "433 cases per fixed profile; all 298 committed observations preserved; 135 added",
+  "findings": [
+    {
+      "comment": 4448821875,
+      "repair": "instance ancestor-private lookup ignores inherited slot outside declaring scope; static control preserved",
+      "tests": "object_review_r3_properties_test.go"
+    },
+    {
+      "comment": 4448821880,
+      "repair": "dynamic isset initializes lazy backing before lookup",
+      "tests": "object_review_r3_properties_test.go"
+    },
+    {
+      "comment": 4448821890,
+      "repair": "immutable implicit Stringable interface after effective method assembly, including traits and inheritance",
+      "tests": "object_review_r3_values_test.go"
+    },
+    {
+      "comment": 4448821897,
+      "repair": "weak float string coercion uses PHP precision14",
+      "tests": "object_review_r3_values_test.go"
+    },
+    {
+      "comment": 4448821907,
+      "repair": "intrinsic enum name/value are typed readonly declarations; enum kind also represents zero cases",
+      "tests": "object_review_r3_properties_test.go; object_review_r3_enum_test.go"
+    },
+    {
+      "comment": 4448821917,
+      "repair": "reject leading NUL before internal mangled-key lookup, preserving magic/isset diagnostic precedence",
+      "tests": "object_review_r3_properties_test.go"
+    },
+    {
+      "comment": 4448821925,
+      "repair": "hold raw method and hook results during weak conversion callbacks, consume exactly once",
+      "tests": "object_review_r3_values_test.go; object_review_r3_hooks_test.go"
+    }
+  ],
+  "independent_repairs": [
+    {
+      "repair": "return verification occurs inside callee frame before local cleanup; preserve full primary/previous exception chain",
+      "tests": "object_review_r3_frame_test.go",
+      "proof": "W-13-r3-frame-typed-red.txt"
+    },
+    {
+      "repair": "typed-source by-reference return mismatch rejects before coercion even mixed/union sources; untyped reference may transform",
+      "tests": "object_review_r3_typed_return_test.go",
+      "proof": "W-13-r3-frame-typed-red.txt"
+    },
+    {
+      "repair": "request-aware callable validation accepts an unchanged typed reference before mismatch guard",
+      "tests": "object_review_r3_callable_return_test.go",
+      "proof": "W-13-r3-callable-red.txt"
+    }
+  ],
+  "test_parity_corrections": [
+    "Root aligned lazy object/call/checkpoint shapes, by-reference callbacks and AllowDynamic controls with native PHP. Added actual mangled private/protected typed names plus no-magic controls.",
+    "Root separated normal direct-return, conversion-throw and argument cases. Return-float inputs are mixed so return coercion is actually exercised. Negative argument callbacks are concrete; ReflectionMethod avoids unmodeled caller-location suffix while retaining full message.",
+    "Old-head archive replay preserves all 298 old plus 62 new value cases; unrelated new hook cases excluded only from this diagnostic replay because their baseline fatal prevents later comparisons. Canonical 433 expectations are unchanged.",
+    "EnumKind descriptor skeleton preceded invalid-descriptor red; behavioral implementation followed red. Baseline replay was additionally executed after writing fixes, so it is evidence of old-code failure rather than a claim about replay chronology."
+  ],
+  "no_added_cost_improvements": {
+    "type_parts": {
+      "representation": "iter.Seq[string] yields depth-zero substrings directly; no token slice/cache/state",
+      "method_dispatch_before": {
+        "bytes": 32,
+        "allocs": 2,
+        "ns_range": [
+          221.3,
+          226.5
+        ]
+      },
+      "method_dispatch_after": {
+        "bytes": 0,
+        "allocs": 0,
+        "ns_range": [
+          194.3,
+          195.4
+        ]
+      },
+      "samples_per_version": 5,
+      "scope": "no-argument int-return microbenchmark only; no application performance claim"
+    },
+    "enum_kind": "uint8 occupies existing descriptor padding; classSpec remains184B",
+    "ownership": "one central raw-return consumption path removes duplicate hook/method discard logic; success fast path retains zero allocations"
+  },
+  "local_review": "Independent gpt-6.1-sol adversarial reviewer reproduced three follow-up failures, then rechecked their repairs and full433/profile. Astra consulted private API/layout choices. Root inspected all production changes, Go/PHP fixture parity and benchmark evidence. agy quota429 was not a successful review. Latest pushed-head remote review is a separate gate.",
+  "compatibility_limits": "Two earlier diagnostics are approved but not passes. Third argument-destructor conditional-body diagnostic awaits independent user decision; TestW13PendingArgumentDestructorSafety covers mode=ok only, with throw/bad body branches unexecuted. No merge approval inferred.",
+  "artifacts_sha256": {
+    "W-13-r3-baseline-values-red.txt": "68ad1cf0a118ddb22a7f13985f4d3abad3e71363785847eff59bcf2d579d33ac",
+    "W-13-r3-properties-red.txt": "888948a7a4290e2313ec15b38b109187bf6abfe1e32434e4d66fe118097ff5c3",
+    "W-13-r3-frame-typed-red.txt": "624aca047dbc734e3c368091023663cb3a2aa6114816f6ef48b52f2e41a634df",
+    "W-13-r3-callable-red.txt": "a24eae983aa9a1f63686c6fc28347e88fc298bbdfc9b2dd343aad44ab23bd99d",
+    "W-13-r3-runtime.txt": "fd2ee56508443d42fb91b7f741367afd17df918fa55d6ae81409058b0c9bfd9a",
+    "W-13-r3-layout-safety.txt": "6c92bca1a3f53730be51761c3fd085758805ecfbc99ff31ff902750dd50ac231",
+    "W-13-r3-benchmark.txt": "366fbec2a8aadc15d835e877503eb231857545f8124975945fe427689cdc1b3a",
+    "W-13-r3-type-parts-before.txt": "dcadb81402adec911c9700e570ce718f96ce1513a574f97525043d5afee68189",
+    "W-13-r3-type-parts-after.txt": "f361a1a6f863b5bdfddeff490a1b9090a5eafdb0db8c7c5fc3c31d32c1cb6554",
+    "W-13-r3-local-format.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "W-13-r3-local-pure.txt": "c5ba86a30acdccc710f4433ff8fc75ab95d28a65738176fffdb6a81aa943d5bb",
+    "W-13-r3-local-race.txt": "8e20a4ea7c422409c8fdcc94e25b18811df7cc105a100729468dc7e75d013808",
+    "W-13-r3-local-vet.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13RawGhost/2/initialize=false-8         	  392625	       517.1 ns/op	     864 B/op	       7 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-8         	  452143	       522.0 ns/op	     864 B/op	       7 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-8         	  447475	       519.9 ns/op	     864 B/op	       7 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-8          	  276710	       877.6 ns/op	    1392 B/op	      12 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-8          	  270832	       880.0 ns/op	    1392 B/op	      12 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-8          	  275770	       875.4 ns/op	    1392 B/op	      12 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-8        	  343556	       701.4 ns/op	    3040 B/op	       7 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-8        	  339624	       731.6 ns/op	    3040 B/op	       7 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-8        	  343005	       703.8 ns/op	    3040 B/op	       7 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-8         	  100449	      2331 ns/op	    5744 B/op	      12 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-8         	  101613	      2339 ns/op	    5744 B/op	      12 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-8         	  102370	      2350 ns/op	    5744 B/op	      12 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-8       	  133642	      1814 ns/op	   19168 B/op	       7 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-8       	  131665	      1822 ns/op	   19168 B/op	       7 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-8       	  134164	      1853 ns/op	   19168 B/op	       7 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-8        	   18566	     13520 ns/op	   38000 B/op	      12 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-8        	   18814	     12667 ns/op	   38000 B/op	      12 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-8        	   18789	     12720 ns/op	   38000 B/op	      12 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	5.429s

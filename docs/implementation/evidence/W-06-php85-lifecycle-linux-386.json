@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "scope": "reference_engine_fixture_and_model_measurement",
+  "php_release": "8.5.12",
+  "platform": "linux/386",
+  "emulated": true,
+  "container_image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+  "host": "macOS arm64 (Apple M3), Docker 29.8.2, linux/386 emulated",
+  "command": "For each tests/semantics/w06-php85/*.phpt: docker run --rm -i --network none --read-only --cap-drop ALL --security-opt no-new-privileges --platform linux/386 <container_image> php -n < FILE section; compare trimmed stdout with the EXPECT section, or with EXPECTF where %s matches one line of text",
+  "executed_at": "2026-10-31",
+  "fixtures": [
+    {
+      "fixture": "tests/semantics/w06-php85/array_copy_reference.phpt",
+      "sha256": "9dc08be0c903acdd2a0150975e5d8c41ed50f48395406763a4b032dc502950d3",
+      "exit_code": 0,
+      "stdout_sha256": "ad9d89ef506f4e819aaed3ea4d0164f6455252d2044eb61f2c082e7f7448a84b",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/array_copy_rules.phpt",
+      "sha256": "b351ca0d0b4ac78fdcc8cce405e0cf74c7b49bfd0be90af4deeb2f71230f19cf",
+      "exit_code": 0,
+      "stdout_sha256": "0c504b20a6e28b2f2683d4c410b7c9fe319ce7a949fc99e7516cadd5cdedbd0d",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/array_numeric_keys.phpt",
+      "sha256": "a47acafd308fcf9c522c067555619ed61b80bb8267ecadec970fc7e544699356",
+      "exit_code": 0,
+      "stdout_sha256": "c332d5767f8466cd3474fb532980fcdfa17742c69dd8417b45b7b13c5d6ff309",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/cycle_collect_destructors.phpt",
+      "sha256": "20c0700e89ea7ffa9e67fa91b68ea0877b3aee5483d5d67da98956686d5f15d5",
+      "exit_code": 0,
+      "stdout_sha256": "d0d32bbd5bc58ed9b7361d5532a518a21cb8734e684644c88f55a318ebd9a849",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/cycle_destructor_breaks_cycle.phpt",
+      "sha256": "e3c23ce50d611ee6ccb1133daa24c38a9fb239a5707ea7eac99dc1c23e1e0396",
+      "exit_code": 0,
+      "stdout_sha256": "c903973a101fd997f6f236f9d9481a675aa88f349c533cf7760a15bd2dd19acc",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/cycle_resurrection.phpt",
+      "sha256": "e41a04ddaa13f86ce32053f96b4bb525eae599f3cda4ed76f3d516a238b9b18d",
+      "exit_code": 0,
+      "stdout_sha256": "64e853d8feebd13db04afb5e035ff561a8eb1cddedcce36024a47f9c1d4dd09e",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/destruct_last_reference.phpt",
+      "sha256": "ca9e74791acab2e13b188dec8d07b0b58a8c7790e2ee64559c496774527c8b8e",
+      "exit_code": 0,
+      "stdout_sha256": "88a9583035c268f02771927dbb9efd515bedcbe9f40f3e46ccaa02a63952dbf7",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_destructor_exception.phpt",
+      "sha256": "b0b9adc8d0ac55b6f7a3b509f905f537a8ae6d594a684146d15d9550c8affc07",
+      "exit_code": 0,
+      "stdout_sha256": "293215f7caf5d61d1f77d9af1657c47d60195cba3dc89d65fd7c04b39175be25",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_non_array_replacement.phpt",
+      "sha256": "6af105ebaccc4948dc0c327b83ff56c50a5c05ade2898b933fe971640ab6485c",
+      "exit_code": 0,
+      "stdout_sha256": "b4962aa6815961badceeef8da29d351c61324dd1806beea199acaa91f31463f6",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_reference_replacement.phpt",
+      "sha256": "588fd182314fae038234f1e07729d0863fb2bc79f89ff43affb0a25e0bcc68dd",
+      "exit_code": 0,
+      "stdout_sha256": "9d116aa7e211f699c978fe9043ac5ef8557169a799a5aad4cb048522021d5fa1",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/foreach_reference_separation.phpt",
+      "sha256": "42be83c75a9bcdbc5d0a4176b47847172c56bd9124febb4a43bd0a1c5a744cf7",
+      "exit_code": 0,
+      "stdout_sha256": "bf36c42a0a6f57d6d86242886692466b9b2873e160eab35a081357fadf12f6b3",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/recursive_identity.phpt",
+      "sha256": "82fdb0d87df73970a9bf565d32266b5f51c5d072e9aa417e0306ac74f946eb94",
+      "exit_code": 0,
+      "stdout_sha256": "251825163a795427e28c18546a9637926e9172c6ae1b827171d6323d5c32024a",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/reentrant_destructors.phpt",
+      "sha256": "d45173efd3272083113bd1758f6db39a703073149b160aea785f6d78c526b344",
+      "exit_code": 0,
+      "stdout_sha256": "b49a86eb246966c47fe678e52a8c045749cef7d95a21f4e43bd59f80177d34d1",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/reference_unset.phpt",
+      "sha256": "5db55b452733e24c0814c0f14e482f90b8fdd6825e326f4ed511bbadb21c525c",
+      "exit_code": 0,
+      "stdout_sha256": "e9ed2e86826a3d3dc6e770a5525813fb305de096698789136c2a8dffdb666c77",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/resurrection.phpt",
+      "sha256": "770dc406ab4d302656ef72c4d0af02543031bd0488d00bc155be79e7cfc90e26",
+      "exit_code": 0,
+      "stdout_sha256": "ce7caa1d3fa7f5fd0fa2e24b640a738dd615e5ccda4fd0665b8f89f76ae6cdf3",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/self_assign_and_shutdown_created.phpt",
+      "sha256": "1fb43197370c96948470009c8a56a47e632be25b7ea5d6a50330410cf093ee44",
+      "exit_code": 0,
+      "stdout_sha256": "fffbd85cf438276ef43312c85568a389cb8408291f76ba6a923c8ea16abcfd9b",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/shared_storage_and_deleted_cursor.phpt",
+      "sha256": "d9f54e91a3f02dc81a9ccc869298cffd5c423b8bd4c45e59a1fd3579cee7aa13",
+      "exit_code": 0,
+      "stdout_sha256": "daef478ee2e02bba295d5e7a98bebf51c314a68c83becbc419e6680f6a8e0051",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/shutdown_order.phpt",
+      "sha256": "123a11456ea2c49346b0e8399667b2dd78ecd769ead1336bd87e8d4f5df75277",
+      "exit_code": 0,
+      "stdout_sha256": "70b9c296f373e91517ed219bccc071abc49a42a81687f339c1a15edca6330a7c",
+      "result": "pass"
+    },
+    {
+      "fixture": "tests/semantics/w06-php85/weak_references.phpt",
+      "sha256": "ec7df1e37f4ddb85f0ad273a0b3c7e801a847f603d0c21a532d433a687a8723e",
+      "exit_code": 0,
+      "stdout_sha256": "2466c4c8b5347f6bbc80e36a3eef3e3b57b971f0b05526693f39207713c00e3f",
+      "result": "pass"
+    }
+  ],
+  "passed": 19,
+  "failed": 0,
+  "go_model_tests": {
+    "command": "go test ./internal/runtime/ && go test -race ./... && CGO_ENABLED=0 go test ./...",
+    "go": "go1.26.5 darwin/arm64",
+    "result": "pass"
+  },
+  "model_benchmarks": {
+    "command": "go test -run '^$' -bench . -benchtime 2000x -count 3 ./internal/runtime/",
+    "cpu": "Apple M3",
+    "raw": [
+      "BenchmarkPackedAppend1K-8            \t    2000\t     85227 ns/op\t  128331 B/op\t    1040 allocs/op",
+      "BenchmarkPackedAppend1K-8            \t    2000\t     97625 ns/op\t  128328 B/op\t    1040 allocs/op",
+      "BenchmarkPackedAppend1K-8            \t    2000\t     94857 ns/op\t  128328 B/op\t    1040 allocs/op",
+      "BenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     69284 ns/op\t  128184 B/op\t    1037 allocs/op",
+      "BenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     67226 ns/op\t  128184 B/op\t    1037 allocs/op",
+      "BenchmarkCopyOnWriteSeparation1K-8   \t    2000\t     71070 ns/op\t  128184 B/op\t    1037 allocs/op",
+      "BenchmarkReferenceBindAndWrite-8     \t    2000\t        92.58 ns/op\t      80 B/op\t       1 allocs/op",
+      "BenchmarkReferenceBindAndWrite-8     \t    2000\t        87.90 ns/op\t      80 B/op\t       1 allocs/op",
+      "BenchmarkReferenceBindAndWrite-8     \t    2000\t        94.90 ns/op\t      80 B/op\t       1 allocs/op",
+      "BenchmarkObjectDestruct-8            \t    2000\t       163.5 ns/op\t     144 B/op\t       2 allocs/op",
+      "BenchmarkObjectDestruct-8            \t    2000\t       155.1 ns/op\t     144 B/op\t       2 allocs/op",
+      "BenchmarkObjectDestruct-8            \t    2000\t       151.9 ns/op\t     144 B/op\t       2 allocs/op",
+      "BenchmarkCollect100ObjectCycles-8    \t    2000\t    199406 ns/op\t   95566 B/op\t     642 allocs/op",
+      "BenchmarkCollect100ObjectCycles-8    \t    2000\t    131150 ns/op\t   95568 B/op\t     642 allocs/op",
+      "BenchmarkCollect100ObjectCycles-8    \t    2000\t    163468 ns/op\t   95567 B/op\t     642 allocs/op"
+    ]
+  },
+  "limits": [
+    "Expected outputs of the fifteen new fixtures were captured from this image and rerun once; they are reference observations for PHP 8.5.12 on emulated linux/386 only.",
+    "The image is the prebuilt one recorded in W-06-php85-i386-image-source.json; its binary is not proven to be built from the locked source archive.",
+    "No other PHP release, native 64-bit platform, or historical generation was exercised.",
+    "Go tests exercise the candidate value model directly; no PHP source is parsed or executed by Phego.",
+    "Benchmarks measure the model on one development machine and are not engine performance claims."
+  ]
+}

@@ -1,0 +1,578 @@
+{
+  "work_package": "W-13",
+  "date": "2026-11-03",
+  "requirements": [
+    "REQ-012",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-021"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-041",
+    "T-042"
+  ],
+  "reviewed_head": "ade7255ca91e3b93fd43c8feb03abd7dfef50df7",
+  "reference_result": "605 cases per pinned profile, all587 committed observations unchanged.18 added:9 defaults/rollback,2 lazy-state,7 raw controls including public/private shadow and reference rebind. Both run records verify54 PHP fixture hashes.",
+  "findings": [
+    {
+      "review_comment": 4451220725,
+      "issue": "Ghost initialization overwrote raw-populated and explicitly-unset slots, losing reference sources and object owners.",
+      "repair": "initializeProperties skips nonLazy location keys; ordinary new-object defaults remain unchanged."
+    },
+    {
+      "issue": "Value kind cannot determine per-property lazy state.",
+      "repair": "Explicit raw adapter marks sparse storage-key metadata before coercion. Ordinary proxy factory writes leave flags lazy. Raw type failure restores only still-undefined originally lazy slots, matching fixed Reflection code."
+    },
+    {
+      "issue": "Raw-realized proxy retained proxy identity, breaking clone and use as another factory target.",
+      "repair": "Commit initialize=nil,proxy=false and detached initializer before release. Last-slot initializer destructor observes completed state."
+    },
+    {
+      "issue": "Factory-running raw clear flags without decrementing native remaining count.",
+      "repair": "Separate remaining counter from flags; decrement once only for originally-lazy, still-non-lazy, pending and not-running raw operation. Never infer remaining from map size."
+    },
+    {
+      "issue": "Holding mutable reference container did not protect the actual receiver during RHS Stringable rebinding.",
+      "repair": "Capture and hold dereferenced receiver and RHS. Preserve receiver-then-RHS count acquisition and RHS-then-receiver cleanup. Single stack holds replace an escaping fixed slice."
+    },
+    {
+      "issue": "First name match selected ancestor private slot while write used effective child descriptor.",
+      "repair": "Use resolved propertyInfo.key in shared isLazyPropertyInfo. By-name query resolves effective descriptor. Public/private child tests verify repeated raw assignment does not double-decrement and parent default remains pending."
+    }
+  ],
+  "primary_source": {
+    "commit": "136e049ac10b032c83018e65b63b6df858943750",
+    "files": [
+      "Zend/zend_lazy_objects.c:494",
+      "Zend/zend_lazy_objects.c:620-675",
+      "Zend/zend_lazy_objects.c:691-705",
+      "ext/reflection/php_reflection.c:6323-6374",
+      "ext/reflection/php_reflection.c:6424-6449"
+    ]
+  },
+  "regression_command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestW13(R7PHP8512Regression|R7RawControls|R7FreshDefaults|R7LazyPropertyState|PHP8512Objects)$' -count=1",
+  "baseline_overlay": {
+    "revision": "ade7255ca91e3b93fd43c8feb03abd7dfef50df7",
+    "overlay": "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-r7-default-baseline-yzch6beq/overlay.json",
+    "recipe": "Replace only initializeProperties function in current object_model.go with the git-show revision function body; retain additive R7 adapter and metadata so final tests compile. Other production and tests stay current."
+  },
+  "baseline_command": "CGO_ENABLED=0 go test -overlay OVERLAY ./internal/runtime -run '^TestW13R7PHP8512Regression$' -count=1",
+  "baseline_result": "Actual exit1. Original initializeProperties body from reviewed_head is grafted into the current file, retaining additive R7 adapter/metadata so final tests compile; this is not a complete old checkout.",
+  "intermediate_red_provenance": "default/state/raw/review/shadow red artifacts are actual outputs of successive uncommitted candidates before their repairs. They are not claimed as outputs of one committed revision. Reconstructible original-default baseline is supplied separately.",
+  "architecture": {
+    "selected": "Sparse nonLazy map and remaining count live only on each lazy object. Keys identify storage positions, never PHP value payloads. Existing property table/value/reference layouts are unchanged. Raw slot writes share existing physical coercion/readonly/owner/typed-reference implementation through writeObjectSlot.",
+    "rejected": [
+      "Value padding flags: values are copied/rebound independently of locations; preserving slot metadata would require changing common assignment/reference/copy protocols.",
+      "Inferring flags from populated values: contradicted by proxy factory writes.",
+      "Deriving remaining from flags or scanning every slot for completion: contradicted by running-proxy raw failure; repeated completion scans also add avoidable work.",
+      "Dense bitset was considered but adds index/overflow handling; its benefit for this sparse private adapter has not been measured, so no superiority is claimed for either representation outside measured cases.",
+      "Cloning nonLazy map and using a slice of holds: semantics pass but measured extra allocations have no benefit."
+    ],
+    "no_extra_cost_improvements": [
+      "Shared isLazyPropertyInfo uses already-resolved descriptor, eliminating a second name scan and wrong private-slot identity.",
+      "Remaining counter replaces per-completion schema scan; this statement concerns completion bookkeeping, not the whole existing name resolver.",
+      "Running ghost cannot mutate nonLazy map: only wasLazy producer writes, and running ghost always reports false. Snapshot shares original map without clone; cleanup nils rather than clears it. Raw-inside-initializer throw/retry guards the invariant.",
+      "Single methodHold values stay on stack; constructor-style temporaries and existing-owner cleanup order are preserved."
+    ]
+  },
+  "benchmark": {
+    "command": "CGO_ENABLED=0 go test ./internal/runtime -run '^TestW13R7LayoutEvidence$' -bench '^(BenchmarkW13RawGhost|BenchmarkW13ObjectLifecycle)$/^(1|2|32|256)$/^(initialize=(false|true)|declared=true)$' -benchmem -benchtime=200ms -count=3 -v",
+    "execution": "Prior overlay then accepted candidate, sequential on the same host after full Go/Python checks finished. Samples are microbenchmarks, not application performance evidence.",
+    "prior_overlay": {
+      "revision": "ade7255ca91e3b93fd43c8feb03abd7dfef50df7",
+      "overlay": "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-r7-prior-bench-zeoqrcli/overlay.json",
+      "production_files": [
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_model.go",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_lazy.go",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_properties.go",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_raw.go"
+      ],
+      "raw_adapter_shim": "package runtime\nfunc (h *heap) writeRawObjectProperty(obj value, name string, v value, strict bool) error { return h.assign(obj.deref().object.props.slot(name), v) }\n",
+      "scope": "Prior private raw fixture operations used direct h.assign to slot. This reproduces their cost, not a compatibility pass: old initialization lost raw values. No performance win claimed against invalid semantics."
+    },
+    "rejected_overlay": {
+      "overlay": "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-w13-r7-cost-candidate-7zftix3n/overlay.json",
+      "files": [
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_lazy.go",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/internal/runtime/object_raw.go"
+      ],
+      "recipe": "From current frozen R7 sources, replace nonLazyBefore = l.nonLazy with maps.Clone(l.nonLazy) and add maps import. Replace separate stack methodHold values with storage[2], holdMethodValue(receiver), holdMethodValue(v), and reverse release loop. Keep dereferenced operands, resolved descriptor, counter and all other fixes unchanged.",
+      "raw_hold_before": "\tvar storage [2]methodHold\n\tholds := storage[:0]\n\th.holdMethodValue(receiver, &holds)\n\th.holdMethodValue(v, &holds)\n\tdefer func() {\n\t\tfor i := len(holds) - 1; i >= 0; i-- {\n\t\t\terr = h.mergeObjectErrors(err, h.releaseMethodHold(holds[i]))\n\t\t}\n\t}()\n",
+      "raw_hold_after": "\treceiverCount := methodRefcount(receiver)\n\treceiverHold, _ := h.holdMethodResult(receiver)\n\treceiverHold.temporary = receiverCount == 0\n\tvalueCount := methodRefcount(v)\n\tvalueHold, valueProtected := h.holdMethodResult(v)\n\tvalueHold.temporary = valueCount == 0\n\tdefer func() {\n\t\tif valueProtected {\n\t\t\terr = h.mergeObjectErrors(err, h.releaseMethodHold(valueHold))\n\t\t}\n\t\terr = h.mergeObjectErrors(err, h.releaseMethodHold(receiverHold))\n\t}()\n"
+    },
+    "rejected_command": "CGO_ENABLED=0 go test -overlay OVERLAY ./internal/runtime -run '^$' -bench '^BenchmarkW13RawGhost$' -benchmem -benchtime=200ms -count=3",
+    "rejected_semantics": "Reconstructed candidate changes only map snapshot cloning and slice holds; focused605 matrix actually passed, exit0. Its escaping storage is verified by compiler output.",
+    "layout": {
+      "prior": {
+        "value": 64,
+        "object": 96,
+        "propertyTable": 64,
+        "lazyObject": 144
+      },
+      "accepted": {
+        "value": 64,
+        "object": 96,
+        "propertyTable": 64,
+        "lazyObject": 160
+      },
+      "counter_note": "Counter is lazy-only. Final measured lazyObject layout is160 bytes; ordinary value/object/property-table layouts are unchanged."
+    },
+    "prior_samples": {
+      "BenchmarkW13RawGhost/2/initialize=false-8": [
+        {
+          "ns_op": 228.7,
+          "bytes_op": 448,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 229.8,
+          "bytes_op": 448,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 230.8,
+          "bytes_op": 448,
+          "allocs_op": 4
+        }
+      ],
+      "BenchmarkW13RawGhost/2/initialize=true-8": [
+        {
+          "ns_op": 559.8,
+          "bytes_op": 720,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 558.8,
+          "bytes_op": 720,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 559.4,
+          "bytes_op": 720,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=false-8": [
+        {
+          "ns_op": 345.6,
+          "bytes_op": 2624,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 343.5,
+          "bytes_op": 2624,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 344.6,
+          "bytes_op": 2624,
+          "allocs_op": 4
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=true-8": [
+        {
+          "ns_op": 1823.0,
+          "bytes_op": 5072,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 1900.0,
+          "bytes_op": 5072,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 1829.0,
+          "bytes_op": 5072,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=false-8": [
+        {
+          "ns_op": 1303.0,
+          "bytes_op": 18752,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 1360.0,
+          "bytes_op": 18752,
+          "allocs_op": 4
+        },
+        {
+          "ns_op": 1319.0,
+          "bytes_op": 18752,
+          "allocs_op": 4
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=true-8": [
+        {
+          "ns_op": 13003.0,
+          "bytes_op": 37328,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 11715.0,
+          "bytes_op": 37328,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 11154.0,
+          "bytes_op": 37328,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/1/declared=true-8": [
+        {
+          "ns_op": 188.0,
+          "bytes_op": 224,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 187.9,
+          "bytes_op": 224,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 187.3,
+          "bytes_op": 224,
+          "allocs_op": 2
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/32/declared=true-8": [
+        {
+          "ns_op": 3062.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 3061.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 3134.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/256/declared=true-8": [
+        {
+          "ns_op": 23399.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 23748.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 23491.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        }
+      ]
+    },
+    "accepted_samples": {
+      "BenchmarkW13RawGhost/2/initialize=false-8": [
+        {
+          "ns_op": 525.4,
+          "bytes_op": 720,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 526.0,
+          "bytes_op": 720,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 523.8,
+          "bytes_op": 720,
+          "allocs_op": 6
+        }
+      ],
+      "BenchmarkW13RawGhost/2/initialize=true-8": [
+        {
+          "ns_op": 833.4,
+          "bytes_op": 992,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 833.0,
+          "bytes_op": 992,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 833.6,
+          "bytes_op": 992,
+          "allocs_op": 9
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=false-8": [
+        {
+          "ns_op": 707.4,
+          "bytes_op": 2896,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 706.7,
+          "bytes_op": 2896,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 709.7,
+          "bytes_op": 2896,
+          "allocs_op": 6
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=true-8": [
+        {
+          "ns_op": 2338.0,
+          "bytes_op": 5344,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 2314.0,
+          "bytes_op": 5344,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 2339.0,
+          "bytes_op": 5344,
+          "allocs_op": 9
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=false-8": [
+        {
+          "ns_op": 1785.0,
+          "bytes_op": 19024,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 1833.0,
+          "bytes_op": 19024,
+          "allocs_op": 6
+        },
+        {
+          "ns_op": 1806.0,
+          "bytes_op": 19024,
+          "allocs_op": 6
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=true-8": [
+        {
+          "ns_op": 12784.0,
+          "bytes_op": 37600,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 12943.0,
+          "bytes_op": 37600,
+          "allocs_op": 9
+        },
+        {
+          "ns_op": 12818.0,
+          "bytes_op": 37600,
+          "allocs_op": 9
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/1/declared=true-8": [
+        {
+          "ns_op": 190.2,
+          "bytes_op": 224,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 189.6,
+          "bytes_op": 224,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 189.2,
+          "bytes_op": 224,
+          "allocs_op": 2
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/32/declared=true-8": [
+        {
+          "ns_op": 3148.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 3154.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 3133.0,
+          "bytes_op": 2464,
+          "allocs_op": 2
+        }
+      ],
+      "BenchmarkW13ObjectLifecycle/256/declared=true-8": [
+        {
+          "ns_op": 23910.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 23757.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        },
+        {
+          "ns_op": 23817.0,
+          "bytes_op": 18592,
+          "allocs_op": 2
+        }
+      ]
+    },
+    "rejected_samples": {
+      "BenchmarkW13RawGhost/2/initialize=false-8": [
+        {
+          "ns_op": 517.1,
+          "bytes_op": 864,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 522.0,
+          "bytes_op": 864,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 519.9,
+          "bytes_op": 864,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13RawGhost/2/initialize=true-8": [
+        {
+          "ns_op": 877.6,
+          "bytes_op": 1392,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 880.0,
+          "bytes_op": 1392,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 875.4,
+          "bytes_op": 1392,
+          "allocs_op": 12
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=false-8": [
+        {
+          "ns_op": 701.4,
+          "bytes_op": 3040,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 731.6,
+          "bytes_op": 3040,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 703.8,
+          "bytes_op": 3040,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13RawGhost/32/initialize=true-8": [
+        {
+          "ns_op": 2331.0,
+          "bytes_op": 5744,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 2339.0,
+          "bytes_op": 5744,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 2350.0,
+          "bytes_op": 5744,
+          "allocs_op": 12
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=false-8": [
+        {
+          "ns_op": 1814.0,
+          "bytes_op": 19168,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 1822.0,
+          "bytes_op": 19168,
+          "allocs_op": 7
+        },
+        {
+          "ns_op": 1853.0,
+          "bytes_op": 19168,
+          "allocs_op": 7
+        }
+      ],
+      "BenchmarkW13RawGhost/256/initialize=true-8": [
+        {
+          "ns_op": 13520.0,
+          "bytes_op": 38000,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 12667.0,
+          "bytes_op": 38000,
+          "allocs_op": 12
+        },
+        {
+          "ns_op": 12720.0,
+          "bytes_op": 38000,
+          "allocs_op": 12
+        }
+      ]
+    },
+    "cost": "Compared with prior direct-slot raw fixture cost, each measured raw lifecycle adds272B and2allocs. Prior initialized ghosts lost raw values, so that prior path is not a compatible performance baseline or a win. Ordinary declared lifecycles remain224/2464/18592B and2allocs for1/32/256properties; some timing cells are slower. Against the semantics-valid reconstructed candidate, stack holds save144B/1alloc without initialization; with initialization, avoiding map clone saves an additional256B/2allocs, total400B/3allocs. No universal speed claim."
+  },
+  "compiler": {
+    "accepted_command": "go test -gcflags=all=-m=2 ./internal/runtime -run '^$'",
+    "rejected_command": "Same command with rejected overlay",
+    "filter": "Retain object_raw.go lines, isLazyPropertyInfo lines or writeObjectSlot lines.",
+    "result": "Accepted raw holds have no moved-to-heap storage; rejected fixed-slice storage moves to heap. Map allocation remains intentional."
+  },
+  "review": {
+    "result": "Independent native gpt-6.1-sol final runtime review found no new confirmed finding; focused605 passed independently0.367s. Root reproduced each confirmed issue before repair and verified all six local checks. Fresh-context document review passed. Latest remote-head review and third/fourth compatibility approvals remain separate gates.",
+    "tools": "Testing OpenCode big-pickle timed out180s twice with no files; Copilot Auto unavailable; native gpt-6-luna wrote test skeleton. Root corrected invalid test metadata/ownership/parity before acceptance. Native gpt-6-astra consultations; agy Opus actual429 (not successful review), process group absence verified after cleanup EPERM; native gpt-6.1-sol adversarial review.",
+    "documentation": "Fresh-context independent gpt-6.1-sol reader verified181source,14R7artifact,6check hashes,54fixture hashes/profile and605counts, all W-13 lineanchors, all benchmark samples and69historical artifact hashes. Raw HTTP source bytes confirmed pinned Zend/Reflection anchors. No required correction; compatibility approvals/pending decisions and product not_run remain internally consistent."
+  },
+  "coverage_limits": [
+    "Private runtime operations only; complete PHP frontend/VM and public Reflection remain not_run.",
+    "Raw adapter selects effective physical declaration by name. Explicit ancestor-private descriptor selection and complete public Reflection argument/static/virtual declaration validation are not implemented; private unsupported descriptor errors are not claimed as PHP diagnostics.",
+    "No new unsafe diagnostic is counted as a pass. Third/fourth compatibility approvals remain pending.",
+    "No application/competitor performance acceptance."
+  ],
+  "artifacts_sha256": {
+    "W-13-r7-baseline-red.txt": "73f3bf2f72b948be7e3dd968b57f296dc05f3b244dc4f0eed836bfa38e436f48",
+    "W-13-r7-default-red.txt": "b647afcf5c9ffbe432e0c0706322b597cfb763b8f575b29c3dd4096c574df08d",
+    "W-13-r7-state-red.txt": "11e0a8e39b3729aabc6a8623cd133006ad1a6c83b7b96b71dcffadb18c9da3fb",
+    "W-13-r7-raw-red.txt": "5560d07092175b536db474b2aa98f2aec2a1550049809c8b3eadaa3f9e5db0a8",
+    "W-13-r7-review-red.txt": "520eb5881dcefdfdc69292ee72bcf279d88661b47b0f3b6f1d5557aee5238920",
+    "W-13-r7-shadow-red.txt": "a5eed687c7a1753ae31f7441f99d79c98fda526b1143bac5ec24e3b89e0fe308",
+    "W-13-r7-green.txt": "3941b3558ad3f6287655a296f3662300a42a0fcaeb93d48aa14e30e883092f64",
+    "W-13-r7-benchmark-before.txt": "38cb024d9d4cc9cbc2790b029fd6e358ae966e8470cfa349bb547878abc93c5f",
+    "W-13-r7-benchmark-after.txt": "60e0460b4b8396bad0c3bdc9d38b05615e7f3604dc661e226a4e8cadea2d8228",
+    "W-13-r7-benchmark-rejected.txt": "83cfc3ab0e964070692f2158d14283208e851c224f19fc38edaa85be5f02c7d6",
+    "W-13-r7-rejected-green.txt": "b653596a5b41a05c6fa57f599fd28215b80c1cd41b03653a9673ee25568a351e",
+    "W-13-r7-compiler.txt": "b0b2c3334f9f41f56770fd93a431a51a954e51e31fee376d19771d036cb9be54",
+    "W-13-r7-compiler-rejected.txt": "d7cc218258b1905f83d9c921708dcf3de9660381f0ecddccf395076368a9b370",
+    "W-13-r7-lazy-state-probe.json": "9446ade4151d212fe51336f03d754b28771544f4c0b35debceb2320bed420586"
+  }
+}

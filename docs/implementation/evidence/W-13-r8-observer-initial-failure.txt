@@ -1,0 +1,35 @@
+--- FAIL: TestW13PHP8512Objects (0.09s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.06s)
+        object_model_test.go:918: r8-rollback-sources-typed
+            Go:  {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+        object_model_test.go:918: r8-rollback-sources-untyped
+            Go:  {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.03s)
+        object_model_test.go:918: r8-rollback-sources-typed
+            Go:  {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+        object_model_test.go:918: r8-rollback-sources-untyped
+            Go:  {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+--- FAIL: TestW13R8PHP8512Regression (0.00s)
+    --- FAIL: TestW13R8PHP8512Regression/32/r8-rollback-sources-typed (0.00s)
+        object_review_r8_rollback_test.go:117: r8-rollback-sources-typed
+            Go: {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+    --- FAIL: TestW13R8PHP8512Regression/32/r8-rollback-sources-untyped (0.00s)
+        object_review_r8_rollback_test.go:117: r8-rollback-sources-untyped
+            Go: {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+    --- FAIL: TestW13R8PHP8512Regression/64/r8-rollback-sources-typed (0.00s)
+        object_review_r8_rollback_test.go:117: r8-rollback-sources-typed
+            Go: {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Typed::$a of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Typed::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+    --- FAIL: TestW13R8PHP8512Regression/64/r8-rollback-sources-untyped (0.00s)
+        object_review_r8_rollback_test.go:117: r8-rollback-sources-untyped
+            Go: {"result":[[["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"],["Exception","init"],["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],[["init",1],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]],["init",2],["globalAlias",["TypeError","Cannot assign string to reference held by property W13R8Untyped::$b of type int"]]],[1,1,1],true,false,2],"diagnostics":[]}
+            PHP: {"result":["Exception","init"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.296s
+FAIL

@@ -1,0 +1,30 @@
+--- FAIL: TestW13PHP8512Objects (0.03s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.02s)
+        object_model_test.go:770: r2-return-magic
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-hook
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-magic-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-hook-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.01s)
+        object_model_test.go:770: r2-return-magic
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-hook
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-magic-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:770: r2-return-hook-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.926s
+FAIL

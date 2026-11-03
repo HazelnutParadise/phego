@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-10-29T00:33:33.350396+00:00",
+  "description": "Later readback: container IDs no longer exist; this does not independently establish original docker exit codes or isolation settings.",
+  "checks": [
+    {
+      "container_id": "1de9feb4bf3bc0642c601d9e5db51a7f6028eff9143e8bd0ca5b0451959923db",
+      "exit_code": 1,
+      "stdout": "[]\n",
+      "stderr": "error: no such object: 1de9feb4bf3bc0642c601d9e5db51a7f6028eff9143e8bd0ca5b0451959923db\n"
+    },
+    {
+      "container_id": "fcb1968803b0046990cb6cda29fc88c35d0b3dc9042d53b1d3ac75f9afe4d82a",
+      "exit_code": 1,
+      "stdout": "[]\n",
+      "stderr": "error: no such object: fcb1968803b0046990cb6cda29fc88c35d0b3dc9042d53b1d3ac75f9afe4d82a\n"
+    }
+  ]
+}
