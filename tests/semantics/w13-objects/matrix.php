@@ -93,6 +93,7 @@ require __DIR__.'/review_r6_proxy_guard.php';
 require __DIR__.'/review_r6_guard_lifetime.php';
 require __DIR__.'/review_r7_lazy_state.php';
 require __DIR__.'/review_r7_defaults.php';
+require __DIR__.'/review_r8_rollback.php';
 require __DIR__.'/review_r3_enum.php';
 require __DIR__.'/review_r3_properties.php';
 require __DIR__.'/review_r3_values.php';

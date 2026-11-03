@@ -287,7 +287,27 @@ func w13Isset(h *heap, obj value, name string, scope *class) bool {
 	return err == nil && isset
 }
 
+// attachPropertySource seeds typed-source metadata for fixtures that bind slots
+// directly. Production rollback uses its already-known schema descriptor.
+func (h *heap) attachPropertySource(o *object, slot *value, key string) {
+	if slot.kind != valueReference || o.class.schema == nil {
+		return
+	}
+	for i := range o.class.schema.props {
+		p := &o.class.schema.props[i]
+		if p.key == key && !p.static && !p.virtual && p.typeName != "" {
+			h.addPropertySource(slot.ref, propertySource{slot, p})
+			return
+		}
+	}
+}
+
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R8Names() {
+		if name == review {
+			return w13R8Case(t, h, name)
+		}
+	}
 	for _, review := range w13R7RawControlNames() {
 		if name == review {
 			return w13R7RawControlCase(t, h, name)
@@ -776,6 +796,7 @@ func w13CaseNames() []string {
 	names = append(names, w13R7LazyStateNames()...)
 	names = append(names, w13R7Names()...)
 	names = append(names, w13R7RawControlNames()...)
+	names = append(names, w13R8Names()...)
 	names = append(names, w13R6ProxyGuardNames()...)
 	names = append(names, w13R6GuardLifetimeName)
 	names = append(names, w13R6LazyNames()...)

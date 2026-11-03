@@ -146,6 +146,16 @@ running ghost 對所有位置回報 non-lazy，所以唯一 raw producer 不會�
 
 本機 `lazyObject` 由 144 B 變成 160 B，`value`／`object`／property table 維持 64／96／64 B。raw 生命週期相對原直接 slot fixture 多 272 B／2 次配置；舊初始化會丟 raw 值，不能算相容的效能勝出。普通宣告物件維持原配置量，部分時間樣本較慢。同樣通過 605 案的 map-clone／slice-hold 候選，raw 初始化多 400 B／3 次配置，正式版本已省去；只有 raw、不初始化時省 144 B／一次。原始樣本、兩種 overlay、編譯器輸出、18 個新增案例及限制見 `W-13-r7-review.json`。
 
+## R8：依實體順序還原型別來源
+
+原 rollback 對每個 reference 呼叫 `attachPropertySource`，每次重新掃描完整 schema，untyped reference 也會掃描。`buildClass` 已按 schema 次序排除 static／virtual 並建立固定位置，override 留在原位置，繼承 private 則各自保留。因此直接走訪一次描述，以遞增的實體索引還原值，不需要名稱查表或新增索引。nil schema 沒有宣告位置，繼續保留 guard。
+
+每一欄仍依序 detach、釋放舊值及執行 callback、移回 snapshot owner、登錄已知型別來源。不能批次重建登錄，因為解構 callback 會看到先還原與尚未還原欄位的不同來源次序。兩個固定映像及 Go 的 typed／untyped 共用參照案例保護此行為。原 helper 還有五個 R5 測試建置呼叫，原樣移到測試檔，正式執行不再需要這個掃描。
+
+initializer 只有一個 receiver hold，改用單一 `methodHold` 值，先記錄原計數是否為零再 retain。釋放、`running=false` 及錯誤回傳順序不變。編譯器確認 defer closure 不逃逸，六個基準格都少一次配置，B/op 約少 80 B。1,024 個獨立參照欄位的 typed／untyped 中位數分別由 917637／1673530 ns 降至 106889／54816 ns。來源列表本身與 callback 仍有原有成本，不把整條路徑泛稱線性。相容的前後 607 案、三次樣本與可重建 overlay 見 `W-13-r8-review.json`。
+
+PHP fixture 原先以 `ReflectionProperty::isInitialized` 觀察 untouched private lazy 欄位，該查詢本身會觸發第三次初始化。兩個固定映像的標記追蹤證明失敗發生於結果觀察，與 alias 建立無關。改用不初始化的 `isLazy`，Go 另檢查原 slot 仍 undefined；原始失敗及帶來源的 trace 保留，沒有更動 production 來迎合錯誤 fixture。
+
 ## 驗證與尚未完成項目
 
 ### 等待使用者裁決的額外參考引擎不安全案例

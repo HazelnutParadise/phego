@@ -200,10 +200,10 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 		}
 	}
 	l.running = true
-	var holds []methodHold
-	h.holdMethodValue(value{kind: valueObject, object: o}, &holds)
+	held := methodHold{value: value{kind: valueObject, object: o}, temporary: o.refcount == 0}
+	retain(held.value)
 	defer func() {
-		if cleanup := h.releaseMethodHold(holds[0]); cleanup != nil {
+		if cleanup := h.releaseMethodHold(held); cleanup != nil {
 			err = h.mergeObjectErrors(err, cleanup)
 		}
 		l.running = false
@@ -322,17 +322,30 @@ func (h *heap) freeLazyStorage(o *object, dead map[gcNode]bool) error {
 // cleanup; the native consecutive-case corruption is diagnostic-only.
 func (h *heap) restoreLazyProperties(o *object, before *propertyTable) error {
 	var first error
-	for i := range o.props.declared {
-		slot := &o.props.declared[i]
-		h.detachPropertySource(slot)
-		old := *slot
-		*slot = value{}
-		if err := h.release(old); err != nil {
-			first = h.mergeObjectErrors(first, err)
+	if o.class.schema != nil {
+		// buildClass lays out instance slots in this filtered schema order.
+		// Keep each source update beside its slot's release: callbacks can
+		// observe which earlier declarations have already been restored.
+		physical := 0
+		for i := range o.class.schema.props {
+			p := &o.class.schema.props[i]
+			if p.static || p.virtual {
+				continue
+			}
+			slot := &o.props.declared[physical]
+			h.detachPropertySource(slot)
+			old := *slot
+			*slot = value{}
+			if err := h.release(old); err != nil {
+				first = h.mergeObjectErrors(first, err)
+			}
+			*slot = before.declared[physical]
+			before.declared[physical] = value{}
+			if slot.kind == valueReference && p.typeName != "" {
+				h.addPropertySource(slot.ref, propertySource{slot, p})
+			}
+			physical++
 		}
-		*slot = before.declared[i]
-		before.declared[i] = value{}
-		h.attachPropertySource(o, slot, o.props.layout.names[i])
 	}
 	dynamic := &propertyTable{index: o.props.index, head: o.props.head, tail: o.props.tail}
 	o.props.index = nil
@@ -379,19 +392,6 @@ func lazyProxyClassCompatible(h *heap, wrapper, target *class) bool {
 	wrapperClone, _ := h.resolveMethod(wrapper, "__clone", nil)
 	targetClone, _ := h.resolveMethod(target, "__clone", nil)
 	return wrapperClone == targetClone
-}
-
-func (h *heap) attachPropertySource(o *object, slot *value, key string) {
-	if slot.kind != valueReference || o.class.schema == nil {
-		return
-	}
-	for i := range o.class.schema.props {
-		p := &o.class.schema.props[i]
-		if p.key == key && !p.static && !p.virtual && p.typeName != "" {
-			h.addPropertySource(slot.ref, propertySource{slot, p})
-			return
-		}
-	}
 }
 
 func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
