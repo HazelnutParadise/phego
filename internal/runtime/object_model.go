@@ -18,6 +18,10 @@ const (
 )
 
 type objectHook func(*heap, value, value) (value, error)
+type hookParameter struct {
+	name, typeName string
+}
+
 type propertySpec struct {
 	name, typeName string
 	visibility     access
@@ -52,6 +56,7 @@ type classSpec struct {
 	interfaces, traits                    []*class
 	properties                            []propertySpec
 	methods                               []methodSpec
+	setterParameters                      map[string]hookParameter
 	final, abstract, isInterface, isTrait bool
 	readonly, allowDynamic                bool
 	noDynamic                             bool
@@ -124,6 +129,15 @@ func buildClass(spec classSpec) (*class, error) {
 	s.traits = slices.Clone(spec.traits)
 	s.properties = nil
 	s.classSpec.methods = nil
+	s.setterParameters = nil
+	if len(spec.setterParameters) != 0 {
+		s.setterParameters = maps.Clone(spec.setterParameters)
+	}
+	for name, parameter := range s.setterParameters {
+		if parameter.name == "" || !slices.ContainsFunc(spec.properties, func(p propertySpec) bool { return p.name == name && p.set != nil }) {
+			return nil, fmt.Errorf("invalid setter parameter for %s::$%s", spec.name, name)
+		}
+	}
 	s.enumCases = slices.Clone(spec.enumCases)
 	s.enumValues = slices.Clone(spec.enumValues)
 	for i, v := range s.enumValues {
@@ -150,6 +164,14 @@ func buildClass(spec classSpec) (*class, error) {
 		}
 		for _, p := range trait.schema.props {
 			properties = append(properties, p.propertySpec)
+			if parameter, ok := p.owner.schema.setterParameters[p.name]; ok {
+				if _, exists := s.setterParameters[p.name]; !exists {
+					if s.setterParameters == nil {
+						s.setterParameters = make(map[string]hookParameter)
+					}
+					s.setterParameters[p.name] = parameter
+				}
+			}
 		}
 		for _, name := range slices.Sorted(maps.Keys(trait.schema.methods)) {
 			if slices.ContainsFunc(spec.methods, func(m methodSpec) bool { return phpNameEqual(m.name, name) }) {

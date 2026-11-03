@@ -75,7 +75,12 @@
             "TestW13R11RelativeCallables",
             "TestW13R11TraitIgnoredUntypedInitial",
             "TestW13R11TraitInheritance",
-            "TestW13R11TraitDefaultIsolation"
+            "TestW13R11TraitDefaultIsolation",
+            "TestW13R12MagicHandlers",
+            "TestW13R12HookReferences",
+            "TestW13R12SetterParameters",
+            "TestW13R12SetterMetadataIsolation",
+            "TestW13R12SetterDescriptorValidation"
           ]
         },
         {
@@ -174,7 +179,12 @@
             "TestW13R11RelativeCallables",
             "TestW13R11TraitIgnoredUntypedInitial",
             "TestW13R11TraitInheritance",
-            "TestW13R11TraitDefaultIsolation"
+            "TestW13R11TraitDefaultIsolation",
+            "TestW13R12MagicHandlers",
+            "TestW13R12HookReferences",
+            "TestW13R12SetterParameters",
+            "TestW13R12SetterMetadataIsolation",
+            "TestW13R12SetterDescriptorValidation"
           ]
         }
       ],

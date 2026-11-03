@@ -1,0 +1,124 @@
+--- FAIL: TestW13R12MagicHandlers (0.12s)
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-missing (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-missing
+            Go: {"result":["Error","Call to undefined method W13R12Magic_protected::missing()"],"diagnostics":[]}
+            PHP: {"result":["magic:missing",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-secret (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-secret
+            Go: {"result":["Error","Call to private method W13R12Magic_protected::secret() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:secret",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-guarded (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-guarded
+            Go: {"result":["Error","Call to protected method W13R12Magic_protected::guarded() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:guarded",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-explicit (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-explicit
+            Go: {"result":["Error","Call to protected method W13R12Magic_protected::__call() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:__call",["named",[]]],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-callable-object (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-callable-object
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-protected-callable-class (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-callable-class
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-missing (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-missing
+            Go: {"result":["Error","Call to undefined method W13R12Magic_private::missing()"],"diagnostics":[]}
+            PHP: {"result":["magic:missing",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-secret (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-secret
+            Go: {"result":["Error","Call to private method W13R12Magic_private::secret() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:secret",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-guarded (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-guarded
+            Go: {"result":["Error","Call to protected method W13R12Magic_private::guarded() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:guarded",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-explicit (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-explicit
+            Go: {"result":["Error","Call to private method W13R12Magic_private::__call() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:__call",["named",[]]],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-callable-object (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-callable-object
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-private-callable-class (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-callable-class
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-child-forward (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-forward
+            Go: {"result":"parent:missing","diagnostics":[]}
+            PHP: {"result":"child:missing","diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-child-global (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-global
+            Go: {"result":["Error","Call to undefined method W13R12MagicChild::missing()"],"diagnostics":[]}
+            PHP: {"result":"child:missing","diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/32/r12-magic-child-callable (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-callable
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-missing (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-missing
+            Go: {"result":["Error","Call to undefined method W13R12Magic_protected::missing()"],"diagnostics":[]}
+            PHP: {"result":["magic:missing",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-secret (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-secret
+            Go: {"result":["Error","Call to private method W13R12Magic_protected::secret() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:secret",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-guarded (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-guarded
+            Go: {"result":["Error","Call to protected method W13R12Magic_protected::guarded() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:guarded",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-explicit (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-explicit
+            Go: {"result":["Error","Call to protected method W13R12Magic_protected::__call() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:__call",["named",[]]],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-callable-object (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-callable-object
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-protected-callable-class (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-protected-callable-class
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-missing (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-missing
+            Go: {"result":["Error","Call to undefined method W13R12Magic_private::missing()"],"diagnostics":[]}
+            PHP: {"result":["magic:missing",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-secret (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-secret
+            Go: {"result":["Error","Call to private method W13R12Magic_private::secret() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:secret",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-guarded (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-guarded
+            Go: {"result":["Error","Call to protected method W13R12Magic_private::guarded() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:guarded",{"0":7,"tail":8}],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-explicit (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-explicit
+            Go: {"result":["Error","Call to private method W13R12Magic_private::__call() from global scope"],"diagnostics":[]}
+            PHP: {"result":["magic:__call",["named",[]]],"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-callable-object (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-callable-object
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-private-callable-class (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-private-callable-class
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-child-forward (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-forward
+            Go: {"result":"parent:missing","diagnostics":[]}
+            PHP: {"result":"child:missing","diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-child-global (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-global
+            Go: {"result":["Error","Call to undefined method W13R12MagicChild::missing()"],"diagnostics":[]}
+            PHP: {"result":"child:missing","diagnostics":[]}
+    --- FAIL: TestW13R12MagicHandlers/64/r12-magic-child-callable (0.00s)
+        object_review_r12_magic_test.go:192: r12-magic-child-callable
+            Go: {"result":false,"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.050s
+FAIL

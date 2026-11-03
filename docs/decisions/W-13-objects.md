@@ -60,7 +60,7 @@ clone handler 從實際類別解析，再以呼叫端 scope 檢查可見性。�
 
 實例查找跳過不屬於目前類別的祖先 private 宣告，宣告者 scope 則先取得自己的 private 位置。static 查找保留原有可見性規則。PHP-facing 名稱在 instance resolver 驗證，避免 NUL 開頭的輸入命中內部 mangled key；既有錯誤分流維持 magic 優先、沒有 magic 時的 isset 回傳 false。動態 isset 先取 lazy backing storage，不能只看 wrapper 空殼。
 
-有 `__toString` 的類別加入不可變 Stringable interface 描述，繼承與 trait 共用同一套型別匹配。enum 以四值 `enumKind` 區分普通類別、unit、int-backed、string-backed，填入 classSpec 原有 padding，實測仍為 184 B。這能表示零 case enum，也能在建置時驗證 backing 數量／型別。`name` 與 `value` 納入 readonly 宣告布局，UnitEnum／BackedEnum 描述一併加入；建立 case 時只初始化一次，不再使用無屬性限制的動態位置。
+有 `__toString` 的類別加入不可變 Stringable interface 描述，繼承與 trait 共用同一套型別匹配。enum 以四值 `enumKind` 區分普通類別、unit、int-backed、string-backed，填入 classSpec 原有 padding，R3 當時實測為 184 B。這能表示零 case enum，也能在建置時驗證 backing 數量／型別。`name` 與 `value` 納入 readonly 宣告布局，UnitEnum／BackedEnum 描述一併加入；建立 case 時只初始化一次，不再使用無屬性限制的動態位置。
 
 回傳型別驗證放在方法自身的 W-14 callback 內，先完成轉換，再移交回傳 owner，最後釋放局部值。需轉型的 raw 結果由 `checkMethodReturn` 暫時持有並消耗一次。普通 PHP 轉換例外在 return 邊界由 TypeError 取代並保留 previous；argument 邊界保留原例外。成功的 argument 轉換若在釋放來源時解構拋例外，仍執行方法 body 並保留 pending 事件。取消、exit 與 internal failure 不使用這條繼續執行規則。
 
@@ -78,7 +78,7 @@ virtual setter-only 的 isset 走既有 readObject 錯誤路徑，backed setter 
 
 scoped private 查找以一次 ASCII 正規化及既有 method map 取代整表掃描，private owner 規則不變，不增加索引或快取。小寫 public、1024 個無關方法的五次量測從約 6.3 微秒降至 19 奈秒且零配置。大寫 private 的三次 overlay 量測新增 8 B／一次配置，從約 3.1 微秒降至 32 奈秒；接受此字串成本以免線性掃描，不宣稱全面零配置。各大小、無 scope 控制及重播方法見 `W-13-r4-review.json`。
 
-類別 destructor adapter 只捕捉 callback 本身。Go `-gcflags=all=-m=2` 證明從以 reference 捕捉整個 184 B 的 classSpec，改成以 value 捕捉 8 B 的函式值。沒有新增狀態或改變 callback 行為，原始編譯器結果保存在 `W-13-destructor-capture.txt`。
+類別 destructor adapter 只捕捉 callback 本身。Go `-gcflags=all=-m=2` 證明從以 reference 捕捉當時 184 B 的完整 classSpec，改成以 value 捕捉 8 B 的函式值。沒有新增狀態或改變 callback 行為，原始編譯器結果保存在 `W-13-destructor-capture.txt`。
 
 執行 scalar 或 Stringable 轉換前先保護 receiver 與全部實參，避免前一個參數的 PHP callback 釋放後續參數。綁定完成後先解除原 operand owner，已轉成 scalar 的來源可在方法 body 前解構，其他值由參數 owner 接手。參數按宣告順序釋放，包含以相反順序傳入的具名參數。呼叫端不用回傳值時，還必須保存其 operand 存活範圍，先捨棄結果，再清理呼叫端暫存值；不能把使用與不使用結果的兩種輸入混為一談。
 
@@ -205,6 +205,20 @@ Trait 組合用現有屬性索引範圍識別本次匯入，只有同 consumer �
 Trait 首次建構取得獨立 snapshot，consumer 共用不可變內容，實例另行匯入請求值。省掉重複深複製後，256 組巢狀預設陣列的 consumer 建置由 32,936 B／1,041 次降至 912 B／15 次配置。原始輸入修改與平行請求中的巢狀寫入都不會影響其他 consumer。不為此建立快取或每屬性的共享旗標。
 
 R11 共 482 個新增原生案例，兩種固定映像各 1,291 案且原 809 案完全不變。一般非法繼承宣告、autoload／alias 型別及 throwing deprecation handler 的完整 frontend／VM 流程未驗收。原始失敗、局部控制、樣本與重跑命令見 `W-13-r11-review.json`。
+
+## R12：hook 參照、magic handler 與 setter 參數
+
+外部取得 hooked property 參照時，先執行 getter。by-value object 結果可成為獨立參照，不能把 backing slot 暴露給外部寫入。其他值依固定 PHP 拒絕間接修改，typed UNDEF 保留先報未初始化的順序。setter-only 的 virtual 屬性不初始化 lazy object，自己的 hook backing 存取仍可 bypass。錯誤中的類別名稱使用實際 receiver。沿用既有 raw reference 解析結果，沒有新增參照種類或物件狀態。
+
+`__call` 的有效 handler 依 receiver 選取，隱含呼叫不套一般方法權限。明確但不可存取的 `__call` 也能再次走 magic fallback。可正常存取的 parent private 方法保持 lexical 查找，callable 的 magic fallback 使用相同規則。六個非 public magic 宣告警告單獨保存，Go frontend 宣告診斷保持 `not_run`。
+
+setter 參數可比 property 型別寬。例如 `int` backing 搭配 `set(int|string $incoming)`，輸入 `"12"` 以 string 進 body，再由 body 存入長度 2。參數名稱與型別放在 classSpec 的稀疏不可變 map，第一次建構複製輸入，trait 匯入在 owner 改綁前取得資料，繼承透過 declaring owner 查找。沒有額外 metadata 時保持 nil，不複製祖先 map，也不在每個 propertyInfo 增加兩個 string。classSpec 由 184 B 增至 192 B，共用類別描述有這筆成本，value／object／property table 布局不變。
+
+shared hook worker 在轉型前持有 receiver 與原始 RHS。傳值參數先 dereference，驗證成功後才啟用 own-hook bypass，避免 `__toString` 間接存取同一屬性時繞過限制。`writeObjectAt` 保留原呼叫檔案與行號，舊 `writeObject` 入口不變，proxy forwarding 繼續傳遞位置。清理沿用 raw RHS、receiver、受保護結果的順序。專用 `setPropertyHook` 移除無用途的 hook 參數，沒有另外建立一般參數綁定陣列或新增請求狀態。
+
+合成 setter 方法名稱原本讓成功呼叫多配置 8 B，實測後改成只在 TypeError 路徑建立。三次最終樣本中，scalar／object setter 維持 0 B／0 次配置，getter 保持 8 B／1 次。錯誤顯示型別只在失敗時依 PHP 的 named-first、builtin mask、nullable 與交集括號順序產生，不改寫共用型別資料。完整宣告型別變異、autoload／alias 與其他 frontend 合法性檢查保持未驗收，不以私人描述接受條件取代 PHP 編譯診斷。
+
+兩種固定映像各 1,566 案，R12 新增 275 案且原 1,291 案完全不變。四項已核准的不安全原生輸入維持相容性受阻且不計通過。本輪沒有新增相容性例外。紅燈、原始觀察、命令與量測見 `W-13-r12-review.json`。
 
 ## 驗證與尚未完成項目
 

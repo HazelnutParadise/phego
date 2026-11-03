@@ -264,12 +264,21 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	return slot.deref(), nil
 }
 
-func (h *heap) propertyHook(o *object, p *propertyInfo, hook objectHook, v value) (out value, err error) {
-	out, err = h.runPropertyHook(o, p, hook, v, false)
+type setterHookArgument struct {
+	site   methodCallSite
+	strict bool
+}
+
+func (h *heap) setPropertyHook(o *object, p *propertyInfo, v value, strict bool, site methodCallSite) (out value, err error) {
+	out, err = h.runPropertyHookWithArgument(o, p, p.set, v, false, &setterHookArgument{site, strict})
 	return out, h.mergeObjectErrors(err, h.discard(out))
 }
 
 func (h *heap) runPropertyHook(o *object, p *propertyInfo, hook objectHook, v value, byReference bool) (out value, err error) {
+	return h.runPropertyHookWithArgument(o, p, hook, v, byReference, nil)
+}
+
+func (h *heap) runPropertyHookWithArgument(o *object, p *propertyInfo, hook objectHook, v value, byReference bool, argument *setterHookArgument) (out value, err error) {
 	if err := h.claimValues(value{kind: valueObject, object: o}, v); err != nil {
 		return value{}, err
 	}
@@ -282,6 +291,13 @@ func (h *heap) runPropertyHook(o *object, p *propertyInfo, hook objectHook, v va
 		retain(v)
 	}
 	out, err = h.invokeObjectInScope(func() (value, error) {
+		if argument != nil {
+			var err error
+			v, err = h.prepareSetterArgument(o, p, v.deref(), argument.strict, argument.site)
+			if err != nil {
+				return value{}, err
+			}
+		}
 		h.currentHook = activePropertyHook{receiver: o, prototypeOwner: p.prototypeOwner, name: p.name}
 		return hook(h, value{kind: valueObject, object: o}, v)
 	}, byReference, o.class)
@@ -338,6 +354,10 @@ func (h *heap) propertyHookBypasses(o *object, p *propertyInfo) bool {
 }
 
 func (h *heap) writeObject(obj value, name string, v value, scope *class, strict bool) error {
+	return h.writeObjectAt(obj, name, v, scope, strict, methodCallSite{})
+}
+
+func (h *heap) writeObjectAt(obj value, name string, v value, scope *class, strict bool, site methodCallSite) error {
 	if err := h.claimValues(obj, v); err != nil {
 		return err
 	}
@@ -361,14 +381,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 			if !canAccess(scope, p.owner, p.setVisibility) {
 				return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 			}
-			v, err = h.coerceProperty(p, v, strict, false)
-			if err != nil {
-				return err
-			}
-			if err := h.revalidatePropertyReceiver(o, p); err != nil {
-				return err
-			}
-			_, err = h.propertyHook(o, p, p.set, v)
+			_, err = h.setPropertyHook(o, p, v, strict, site)
 			return err
 		}
 		return &Throwable{"Error", "Property " + p.label() + " is read-only"}
@@ -386,14 +399,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 			}
 			return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) " + ro + "property " + p.label() + " from " + from}
 		}
-		v, err = h.coerceProperty(p, v, strict, false)
-		if err != nil {
-			return err
-		}
-		if err := h.revalidatePropertyReceiver(o, p); err != nil {
-			return err
-		}
-		_, err = h.propertyHook(o, p, p.set, v)
+		_, err = h.setPropertyHook(o, p, v, strict, site)
 		return err
 	}
 	if o.lazy != nil && !o.lazy.running {
@@ -422,7 +428,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		defer guard.restore()
 	}
 	if o != previous {
-		return h.writeObject(value{kind: valueObject, object: o}, name, v, scope, strict)
+		return h.writeObjectAt(value{kind: valueObject, object: o}, name, v, scope, strict, site)
 	}
 	if p == nil {
 		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
@@ -641,15 +647,19 @@ func (h *heap) resolveObjectReference(o *object, name string, scope *class) (obj
 		if p.virtual && bypassHook {
 			return objectReferenceAddress{}, &Throwable{"Error", "Must not read from virtual property " + p.label()}
 		}
-		if p.get != nil && !bypassHook && p.getReference {
-			r, err := h.getPropertyHook(o, p, true)
+		if p.get != nil && !bypassHook {
+			r, err := h.getPropertyHook(o, p, p.getReference)
 			if err != nil {
 				return objectReferenceAddress{}, err
 			}
-			return objectReferenceAddress{raw: r}, nil
+			if p.getReference || r.kind == valueObject {
+				return objectReferenceAddress{raw: r}, nil
+			}
+			failure := indirectHookReferenceError(o, p)
+			return objectReferenceAddress{}, h.mergeObjectErrors(failure, h.discardMethodReturn(r))
 		}
-		if (p.get != nil && !bypassHook) || p.virtual {
-			return objectReferenceAddress{}, &Throwable{"Error", "Indirect modification of " + p.label() + " is not allowed"}
+		if p.virtual {
+			return objectReferenceAddress{}, &Throwable{"Error", "Property " + o.class.name + "::$" + p.name + " is write-only"}
 		}
 	}
 	if p == nil && o.lazy != nil && !o.lazy.running {
@@ -694,7 +704,22 @@ func (h *heap) resolveObjectReference(o *object, name string, scope *class) (obj
 	if err != nil {
 		return objectReferenceAddress{}, err
 	}
+	if p != nil && p.set != nil && !h.propertyHookBypasses(o, p) {
+		v := slot.deref()
+		if v.kind == valueUndefined && p.typeName != "" {
+			return objectReferenceAddress{}, &Throwable{"Error", "Typed property " + p.label() + " must not be accessed before initialization"}
+		}
+		if v.kind == valueObject {
+			// A hooked by-value read exposes the object, not the backing location.
+			return objectReferenceAddress{raw: v}, nil
+		}
+		return objectReferenceAddress{}, indirectHookReferenceError(o, p)
+	}
 	return objectReferenceAddress{slot: slot, property: p}, nil
+}
+
+func indirectHookReferenceError(o *object, p *propertyInfo) *Throwable {
+	return &Throwable{"Error", "Indirect modification of " + o.class.name + "::$" + p.name + " is not allowed"}
 }
 
 func (h *heap) resolveMagicPropertyReference(o *object, name string) (objectReferenceAddress, bool, error) {

@@ -303,6 +303,21 @@ func (h *heap) attachPropertySource(o *object, slot *value, key string) {
 }
 
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R12SetterNames() {
+		if name == review {
+			return w13R12SetterCase(t, h, name)
+		}
+	}
+	for _, review := range w13R12ReferenceNames() {
+		if name == review {
+			return w13R12ReferenceCase(t, h, name)
+		}
+	}
+	for _, review := range w13R12MagicNames() {
+		if name == review {
+			return w13R12MagicCase(t, h, name)
+		}
+	}
 	for _, review := range w13R11TraitInheritanceNames() {
 		if name == review {
 			return w13R11TraitInheritanceCase(t, h, name)
@@ -844,6 +859,9 @@ func w13CaseNames() []string {
 	names = append(names, w13R8Names()...)
 	names = append(names, w13R9Names()...)
 	names = append(names, w13R10ProxyNames()...)
+	names = append(names, w13R12MagicNames()...)
+	names = append(names, w13R12ReferenceNames()...)
+	names = append(names, w13R12SetterNames()...)
 	names = append(names, w13R11EnumNames()...)
 	names = append(names, w13R11TraitNames()...)
 	names = append(names, w13R11TraitInheritanceNames()...)

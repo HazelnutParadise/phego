@@ -1,0 +1,5 @@
+--- FAIL: TestW13R12SetterDescriptorValidation (0.00s)
+    object_review_r12_metadata_test.go:26: empty metadata should retain no map
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.863s
+FAIL

@@ -64,11 +64,8 @@ func (h *heap) callMethodAt(obj value, name string, args []methodArgument, scope
 		return h.invokeMethod(obj, m, args, scope, strict, site)
 	}
 
-	if !phpNameEqual(name, "__call") {
-		if magic, ok := h.resolveMethod(o.class, "__call", scope); ok && magic != nil &&
-			!magic.static && canAccess(scope, magic.owner, magic.visibility) {
-			return h.invokeMagicCall(obj, magic, name, args, scope, strict, site)
-		}
+	if magic, ok := h.resolveMethod(o.class, "__call", nil); ok && magic != nil && !magic.static {
+		return h.invokeMagicCall(obj, magic, name, args, scope, strict, site)
 	}
 	if found && m != nil {
 		return value{}, &Throwable{"Error", "Call to " + accessName(m.visibility) + " method " + m.owner.name + "::" + m.name + "() from " + methodScopeLabel(scope)}
@@ -1114,8 +1111,8 @@ func (h *heap) isCallable(v value, context callableContext) bool {
 	if requireStatic {
 		magic = "__callStatic"
 	}
-	method, ok := h.resolveMethod(target, magic, scope)
-	return ok && !method.abstract && method.call != nil && canAccess(scope, method.owner, method.visibility)
+	method, ok := h.resolveMethod(target, magic, nil)
+	return ok && !method.abstract && method.call != nil
 }
 
 // Static property storage is request-local and keyed by the declaring class so
