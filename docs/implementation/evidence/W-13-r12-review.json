@@ -406,11 +406,11 @@
   },
   "review": {
     "runtime": "Independent gpt-6.1-sol adversarial full R12 source/test review and followup no confirmed outstanding findings; root reviewed complete delta and ran all TestW13. Astra consulted private changes. Reviewer read source/probes/red/green/bench but did not run Go.",
-    "documentation": "pending fresh-context readability/evidence review",
+    "documentation": "Fresh-context gpt-6.1-sol reviews verified hashes, actual outputs, source anchors and local-versus-product acceptance boundaries with no blocking contradictions. Downstream entry contracts and historical layout measurements are explicitly scoped.",
     "delivery": "Exact pushed-head CI and latest Codex code/security review remain mandatory; local results do not imply merge."
   },
   "reproduction": {
-    "native": "Run committed reference.py --width32/64 into new directory; CI semantics-objects.yml does exact byte compare then Go profile operations. Standalone4fixture invocations and outputs in W-13-r12-native-probes.json, including six declarationwarnings.",
+    "native": "Use the complete commands in reference_profiles[].command. CI semantics-objects.yml performs exact byte comparison and Go profile operations. Standalone fixture invocations and outputs are in W-13-r12-native-probes.json, including six declaration warnings.",
     "benchmark": "go test ./internal/runtime -run ^TestW13LayoutEvidence$ -bench ^BenchmarkW13PropertyHookHolds$ -benchmem -benchtime=200ms -count=3 -v; baseline overlay maps internal/runtime/object_properties.go to committed W-13-r12-object-properties-before-setters.go.txt. Initial eager-name candidate reconstructed by setting m.name at synthetic method creation instead of failure branch in object_setter.go. Samples run serially with no project containers/other Go builds.",
     "benchmark_scope": "Both baseline/final layout logs include new classSpec pointer192B; historical184B proven earlier R11 layout. Do not infer zero cold schema-map cost from zero hot setter allocations."
   },

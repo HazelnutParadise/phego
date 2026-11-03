@@ -387,7 +387,7 @@
   },
   "review": {
     "scope": "R2-R12 Codex findings and independent runtime review;1566 fixed-profile cases",
-    "result": "R12 three findings reproduced and repaired; independent source review no outstanding findings. Four approved unsafe limits remain blocked/not-pass. Current actual local gate results recorded in checks; latest pushed-head CI/Codex and fresh documentation review separate.",
+    "result": "All three R12 findings reproduced and repaired; six final local gates passed. Independent runtime and fresh-context evidence reviews found no unresolved blocking issues. Four specified unsafe limits remain separately user-approved and blocked/not-pass. Exact pushed-head CI and latest Codex code/security reviews remain independent delivery gates.",
     "tools": "OpenCode big-pickle180/360s timeouts left reviewed partial tests; Copilot Auto unavailable; native gpt-6-luna completed test slots; native gpt-6-astra consultations; agy Opus quota429 was not a successful review; native gpt-6.1-sol final review.",
     "regression_evidence": "W-13-r12-review.json"
   },
