@@ -1,6 +1,9 @@
 package ir
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 // Effect is the set of PHP-observable behaviours an operation may have.
 // Sets are conservative: a missing flag is a guarantee, a present flag is
@@ -40,6 +43,47 @@ const (
 
 // Anything is the effect set of a call to unknown user code.
 const Anything = MayWarn | MayThrow | MayCallUser | MayOutput | MayExit | MayWrite | MayAlias
+
+// AllEffects is the conservative fallback for unknown operations and callbacks.
+const AllEffects = Anything | MayDynamicScope | MayCompile | MaySuspend | MayExternal
+
+// OperationEffects reports intrinsic effects, excluding operands. Malformed
+// context-dependent nodes conservatively return every effect, never pure.
+func OperationEffects(n *Node) Effect {
+	if n == nil {
+		return 0
+	}
+	switch n.Op {
+	case OpUnary, OpCast:
+		if len(n.Kids) != 1 {
+			return AllEffects
+		}
+	case OpBinary:
+		if len(n.Kids) != 2 {
+			return AllEffects
+		}
+	case OpClosure:
+		if n.Func == nil {
+			return AllEffects
+		}
+	case OpArray:
+		for _, k := range n.Kids {
+			if k != nil && k.Op == OpItem && len(k.Kids) != 2 {
+				return AllEffects
+			}
+		}
+	case OpMatch:
+		if len(n.Kids) == 0 {
+			return AllEffects
+		}
+		for _, k := range n.Kids[1:] {
+			if k == nil {
+				return AllEffects
+			}
+		}
+	}
+	return ownEffects(n)
+}
 
 var effectNames = []string{"warn", "throw", "call", "output", "exit", "write", "alias", "dynscope", "compile", "suspend", "external"}
 
@@ -84,9 +128,9 @@ var opEffects = map[Op]Effect{
 	OpPreInc:      MayWrite | MayWarn | MayThrow, OpPostInc: MayWrite | MayWarn | MayThrow,
 	OpUnary:   MayWarn | MayThrow,
 	OpSilence: 0,
-	OpBinary:  MayWarn | MayThrow, OpLogical: 0, OpCoalesce: 0, OpTernary: 0,
+	OpBinary:  MayWarn | MayThrow, OpLogical: MayWarn, OpCoalesce: 0, OpTernary: MayWarn,
 	OpCast:  MayWarn | MayThrow | MayCallUser,
-	OpIsset: 0, OpEmpty: 0,
+	OpIsset: 0, OpEmpty: MayWarn,
 	OpCall: Anything, OpCallValue: Anything, OpMethodCall: Anything, OpNullsafeMC: Anything, OpStaticCall: Anything,
 	OpCallable:   MayThrow | MayCallUser,
 	OpNew:        Anything,
@@ -106,11 +150,11 @@ var opEffects = map[Op]Effect{
 	OpYieldFrom:  MaySuspend | MayCallUser | MayThrow | MayExit | MayOutput | MayWarn | MayWrite,
 
 	OpEcho: MayOutput | MayWarn | MayThrow | MayCallUser, OpExpr: 0, OpVoid: 0,
-	OpHTML: MayOutput, OpIf: 0, OpWhile: 0, OpDo: 0, OpFor: 0,
+	OpHTML: MayOutput, OpIf: MayWarn, OpWhile: MayWarn, OpDo: MayWarn, OpFor: MayWarn,
 	// Iteration may run Iterator methods or warn about non-iterable values.
 	OpForeach: MayWarn | MayThrow | MayCallUser | MayWrite,
 	// Switch compares loosely, which may call __toString.
-	OpSwitch: MayThrow | MayCallUser, OpCase: 0,
+	OpSwitch: MayWarn | MayThrow | MayCallUser, OpCase: 0,
 	OpBreak: 0, OpContinue: 0, OpReturn: 0,
 	OpGlobal: MayWrite | MayAlias | MayCallUser | MayThrow, OpStatic: MayWrite | MayAlias | MayCallUser | MayThrow,
 	// Unsetting may run a destructor, offsetUnset or __unset.
@@ -128,7 +172,10 @@ var opEffects = map[Op]Effect{
 // ownEffects refines the table for operands whose types make an effect
 // impossible.
 func ownEffects(n *Node) Effect {
-	e := opEffects[n.Op]
+	e, known := opEffects[n.Op]
+	if !known {
+		return Anything | MayDynamicScope | MayCompile | MaySuspend | MayExternal
+	}
 	if n.Flags&FlagRef != 0 {
 		e |= MayAlias | MayWrite // the node is bound by reference
 	}
@@ -160,8 +207,10 @@ func ownEffects(n *Node) Effect {
 	case OpUnary:
 		v := lit(n.Kids[0])
 		switch {
-		case n.Text == "!":
+		case n.Text == "!" && v != nil && !nanLiteral(v):
 			e = 0
+		case n.Text == "!":
+			e = MayWarn // NaN truthiness warns, including a run-time variable.
 		case v != nil && v.Kind == LitInt, v != nil && v.Kind == LitFloat && n.Text != "~":
 			e = 0
 		case v != nil && v.Kind == LitFloat:
@@ -172,7 +221,7 @@ func ownEffects(n *Node) Effect {
 	case OpInterp:
 		allStrings := true
 		for _, k := range n.Kids {
-			if l := lit(k); l == nil || l.Kind == LitNull {
+			if l := lit(k); l == nil || l.Kind == LitNull || nanLiteral(l) {
 				allStrings = false
 			}
 		}
@@ -182,7 +231,7 @@ func ownEffects(n *Node) Effect {
 	case OpEcho, OpPrint:
 		allScalar := true
 		for _, k := range n.Kids {
-			if lit(k) == nil {
+			if l := lit(k); l == nil || nanLiteral(l) {
 				allScalar = false
 			}
 		}
@@ -204,15 +253,13 @@ func ownEffects(n *Node) Effect {
 	case OpClosure:
 		e = 0
 		for _, c := range n.Func.Captures {
-			if !c.ByRef {
-				e = MayWarn // capturing an undefined variable warns
+			if c == nil {
+				return AllEffects
 			}
-		}
-		if len(n.Func.Captures) > 0 {
-			for _, c := range n.Func.Captures {
-				if c.ByRef {
-					e |= MayAlias | MayWrite
-				}
+			if c.ByRef {
+				e |= MayAlias | MayWrite
+			} else {
+				e |= MayWarn
 			}
 		}
 	}
@@ -227,6 +274,8 @@ func lit(n *Node) *Literal {
 }
 
 func numeric(l *Literal) bool { return l.Kind == LitInt || l.Kind == LitFloat }
+
+func nanLiteral(l *Literal) bool { return l.Kind == LitFloat && math.IsNaN(l.Float) }
 
 func isArrayKeyLiteral(n *Node) bool {
 	l := lit(n)
@@ -251,7 +300,7 @@ func binaryEffects(n *Node) Effect {
 		}
 		return MayThrow | MayCallUser | MayWarn
 	case ".":
-		if a != nil && b != nil {
+		if a != nil && b != nil && !nanLiteral(a) && !nanLiteral(b) {
 			return 0
 		}
 		return MayWarn | MayThrow | MayCallUser
@@ -260,7 +309,14 @@ func binaryEffects(n *Node) Effect {
 		return MayWarn | MayThrow
 	}
 	switch n.Text {
-	case "+", "-", "*", "**":
+	case "+", "-", "*":
+		return 0
+	case "**":
+		// PHP 8.5 deprecates a zero base with a negative exponent.
+		if (a.Kind == LitInt && a.Int == 0 || a.Kind == LitFloat && a.Float == 0) &&
+			(b.Kind == LitInt && b.Int < 0 || b.Kind == LitFloat && b.Float < 0) {
+			return MayWarn
+		}
 		return 0
 	case "/", "%":
 		if (b.Kind == LitInt && b.Int != 0) && n.Text == "/" {
@@ -293,10 +349,15 @@ func simpleScalar(n *Node) bool {
 func castEffects(n *Node) Effect {
 	l := lit(n.Kids[0])
 	switch n.Text {
-	case "bool", "array", "object":
+	case "bool":
+		if l == nil || nanLiteral(l) {
+			return MayWarn
+		}
+		return 0
+	case "array", "object":
 		return 0
 	case "string":
-		if l != nil {
+		if l != nil && !nanLiteral(l) {
 			return 0
 		}
 		return MayWarn | MayThrow | MayCallUser
