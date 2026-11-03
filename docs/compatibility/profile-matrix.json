@@ -59,7 +59,14 @@
             "TestW13R9ReentrantTable",
             "TestW13R9DetachedStorage",
             "TestW13R9ComparisonCursorProtection",
-            "TestW13R9RollbackCursorTransfer"
+            "TestW13R9RollbackCursorTransfer",
+            "TestW13R10ComparisonHoldOwners",
+            "TestW13R10HookHoldOwners",
+            "TestW13R10HookCleanupOrder",
+            "TestW13R10ProxyMetadata",
+            "TestW13R10LazyReleasedReceiver",
+            "TestW13R10PropertyAliasStrictness",
+            "TestW13R10ProxyControls"
           ]
         },
         {
@@ -142,7 +149,14 @@
             "TestW13R9ReentrantTable",
             "TestW13R9DetachedStorage",
             "TestW13R9ComparisonCursorProtection",
-            "TestW13R9RollbackCursorTransfer"
+            "TestW13R9RollbackCursorTransfer",
+            "TestW13R10ComparisonHoldOwners",
+            "TestW13R10HookHoldOwners",
+            "TestW13R10HookCleanupOrder",
+            "TestW13R10ProxyMetadata",
+            "TestW13R10LazyReleasedReceiver",
+            "TestW13R10PropertyAliasStrictness",
+            "TestW13R10ProxyControls"
           ]
         }
       ],

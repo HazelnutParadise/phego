@@ -1,0 +1,68 @@
+--- FAIL: TestW13R10ProxyControls (0.08s)
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-cold-read (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-read
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-cold-write (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-write
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-cold-reference (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-reference
+            Go: {"result":[3,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[3,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-cold-unset (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-unset
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-warm-read (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-read
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-warm-write (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-write
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-warm-reference (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-reference
+            Go: {"result":[3,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[3,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/32/r10-proxy-static-warm-unset (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-unset
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-cold-read (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-read
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-cold-write (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-write
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-cold-reference (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-reference
+            Go: {"result":[3,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[3,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-cold-unset (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-cold-unset
+            Go: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+            PHP: {"result":[null,["factory"],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-warm-read (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-read
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[2,"Undefined property: W13R10StaticParent::$x"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-warm-write (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-write
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-warm-reference (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-reference
+            Go: {"result":[3,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+            PHP: {"result":[3,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"],[8192,"Creation of dynamic property W13R10StaticParent::$x is deprecated"]]}
+    --- FAIL: TestW13R10ProxyControls/64/r10-proxy-static-warm-unset (0.00s)
+        object_review_r10_proxy_control_test.go:127: r10-proxy-static-warm-unset
+            Go: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+            PHP: {"result":[null,["factory",["warm",2]],false],"diagnostics":[[8,"Accessing static property W13R10StaticChild::$x as non static"],[8,"Accessing static property W13R10StaticParent::$x as non static"]]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.808s
+FAIL

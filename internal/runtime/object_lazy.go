@@ -206,6 +206,9 @@ func (h *heap) initializeLazy(o *object) (out *object, err error) {
 		if cleanup := h.releaseMethodHold(held); cleanup != nil {
 			err = h.mergeObjectErrors(err, cleanup)
 		}
+		if o.freed && err == nil {
+			err = &Throwable{"Error", "Lazy object was released during initialization"}
+		}
 		l.running = false
 		if err != nil {
 			out = nil

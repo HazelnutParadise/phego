@@ -303,6 +303,26 @@ func (h *heap) attachPropertySource(o *object, slot *value, key string) {
 }
 
 func w13RunCase(t *testing.T, h *heap, f *w13Fixtures, name string) w13Case {
+	for _, review := range w13R10ProxyControlNames() {
+		if name == review {
+			return w13R10ProxyControlCase(t, h, name)
+		}
+	}
+	for _, review := range w13R10ProxyNames() {
+		if name == review {
+			return w13R10ProxyCase(t, h, name)
+		}
+	}
+	for _, review := range w13R10LifeNames() {
+		if name == review {
+			return w13R10LifeCase(t, h, name)
+		}
+	}
+	for _, review := range w13R10AliasNames() {
+		if name == review {
+			return w13R10AliasCase(t, h, name)
+		}
+	}
 	for _, review := range w13R9Names() {
 		if name == review {
 			return w13R9Case(t, h, name)
@@ -803,6 +823,10 @@ func w13CaseNames() []string {
 	names = append(names, w13R7RawControlNames()...)
 	names = append(names, w13R8Names()...)
 	names = append(names, w13R9Names()...)
+	names = append(names, w13R10ProxyNames()...)
+	names = append(names, w13R10ProxyControlNames()...)
+	names = append(names, w13R10LifeNames()...)
+	names = append(names, w13R10AliasNames()...)
 	names = append(names, w13R6ProxyGuardNames()...)
 	names = append(names, w13R6GuardLifetimeName)
 	names = append(names, w13R6LazyNames()...)

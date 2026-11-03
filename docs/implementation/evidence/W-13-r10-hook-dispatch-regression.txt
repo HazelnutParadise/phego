@@ -1,0 +1,21 @@
+--- FAIL: TestW13HookFrames (0.01s)
+    --- FAIL: TestW13HookFrames/32/hook-proxy-backing-receiver (0.00s)
+        object_hook_frames_test.go:124: hook-proxy-backing-receiver
+            Go: {"result":7,"diagnostics":[]}
+            PHP: {"result":["Error","Must not read from virtual property W13ProxyHookBase::$p"],"diagnostics":[]}
+    --- FAIL: TestW13HookFrames/64/hook-proxy-backing-receiver (0.00s)
+        object_hook_frames_test.go:124: hook-proxy-backing-receiver
+            Go: {"result":7,"diagnostics":[]}
+            PHP: {"result":["Error","Must not read from virtual property W13ProxyHookBase::$p"],"diagnostics":[]}
+--- FAIL: TestW13PHP8512Objects (0.11s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.05s)
+        object_model_test.go:957: hook-proxy-backing-receiver
+            Go:  {"result":7,"diagnostics":[]}
+            PHP: {"result":["Error","Must not read from virtual property W13ProxyHookBase::$p"],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.05s)
+        object_model_test.go:957: hook-proxy-backing-receiver
+            Go:  {"result":7,"diagnostics":[]}
+            PHP: {"result":["Error","Must not read from virtual property W13ProxyHookBase::$p"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.335s
+FAIL

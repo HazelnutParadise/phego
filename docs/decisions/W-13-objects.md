@@ -172,6 +172,24 @@ PHP fixture 原先以 `ReflectionProperty::isInitialized` 觀察 untouched priva
 
 普通及空歷史路徑增加 guard 成本，部分量測較慢；churn 也仍有分批配置。保留量及歷史掃描的改善不能抹去這些輸項。所有前後三次樣本、原始失敗、游標對照、對齊候選、可重建 overlay 與 609 案局部對照見 `W-13-r9-review.json`。
 
+## R10：代理轉接、初始化存活與固定持有
+
+代理物件的 wrapper descriptor 不必與相容父類別 backing 的位置相同。只換物件指標會沿用錯誤 storage key，甚至讀到 nil。先保留 wrapper 的權限與 hook dispatch，只有實際 backing resolver 回傳不同物件時，才重做完整 target descriptor、權限、hook、readonly 與位置解析。提前從已初始化 proxy 入口轉接會略過 wrapper getter，既有原生控制已重現此回歸，因此撤除。30 個控制另涵蓋冷／暖 setter、by-reference getter 與 hooked isset。
+
+參照解析回傳實體 slot 與 descriptor，或 magic／getter 的 raw 回傳值。所有 forwarding guards 由 resolver 的 Go 呼叫堆疊還原後，外層才綁定目的地，讓舊目的地 destructor 正常重入。兩者之間只有 guard 還原，沒有可釋放 raw temporary 的 PHP callback。不新增 heap 狀態、不把綁定放進遞迴 resolver，也保留既有 target guard 的所有權。
+
+lazy initializer 的 receiver hold 清理後，檢查的是原 wrapper 是否真正 freed，而非回傳的 backing 或零計數 constructor temporary。只在既有錯誤為 nil 時補上 `Lazy object was released during initialization`，保留 initializer、destructor 與 host stop 的優先順序。直接變數失去最後 owner 的五種屬性操作都報此錯誤；`$GLOBALS[...]` 的 read／isset 則有 VM temporary owner。測試 adapter 明確建模這個 operand hold，沒有暗改核心借用契約。
+
+一般 declared、dynamic 與 static 屬性的最終 PHP store 傳入呼叫端 strictness，raw adapter 共用 declared store。Reflection raw 寫入在 strict PHP helper 中仍採 weak coercion，兩種固定映像已確認。內部 `assign` 與 typed-reference by-reference 參數的嚴格前置檢查保留，不能把所有 assign 呼叫一律替換。
+
+static-as-instance notice 以當次 receiver class 組訊息。proxy 可以合法先印 Child 再印 Parent，不能去重。對應 magic method 只要存在就抑制這筆 lookup notice，與 guard 是否阻止 callback 無關。operation-aware optional 參數維持既有 private 呼叫可用，額外方法查找只在 static 分支執行；raw／lazy 查詢及 isset 保留 silent 行為。已初始化 proxy 的 unset 也先走 wrapper magic。共用小型 warning helper 省去重複格式來源，沒有新增物件狀態。
+
+比較只需兩個持有值，hook 也只有 receiver 與可選 RHS，改用個別 stack `methodHold`，省去會逃逸的固定 slice。比較持有原左右 operand，清理左再右；hook 先 retain receiver，再讀 raw RHS 的原計數，保留同 identity 與 reference container。回傳值先受保護，再依 RHS、receiver、result 次序清理並合併每筆例外。真正可變長度的方法參數與 operand 保留現有 slice，不為這個局部改善新增泛用抽象。
+
+Go/arm64 比較 144 B／一次降至零配置；getter 88 B／兩次降至 8 B／一次，scalar／object setter 的 80／224 B 降至零。Go/386 比較 96 B／一次降至零，getter 56→8 B、兩次→一次，兩種 setter 的 48／144 B 也降至零。getter 名稱仍需配置；把標籤快取到共享 metadata 會增加描述或建置成本，目前沒有宣稱消除此成本。此輪不更改 value、物件或屬性表布局。
+
+每種寬度 809 案、原 609 案不變，實際 Go/386 回歸與前後三次量測見 `W-13-r10-review.json`。所有新輸入在兩個固定映像正常結束，沒有新增不安全參考引擎例外。第三與第四項既有診斷仍等待各自核准，不計相容通過。
+
 ## 驗證與尚未完成項目
 
 ### 等待使用者裁決的額外參考引擎不安全案例

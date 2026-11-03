@@ -1,0 +1,188 @@
+--- FAIL: TestW13R10LazyReleasedReceiver (0.26s)
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-direct-read-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-read-released-none
+            Go: {"result":[["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-direct-write-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-write-released-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-direct-isset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-isset-released-none
+            Go: {"result":[false,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-direct-unset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-unset-released-none
+            Go: {"result":[null,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-direct-reference-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-reference-released-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-globals-write-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-write-released-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-globals-unset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-unset-released-none
+            Go: {"result":[null,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-globals-reference-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-reference-released-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-read-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-ephemeral-none
+            Go: {"result":[["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-read-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-external-none
+            Go: {"result":[42,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-read-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-external-dtor
+            Go: {"result":[42,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-write-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-ephemeral-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-write-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-external-none
+            Go: {"result":[null,["init"],false,7,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-write-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-external-dtor
+            Go: {"result":[null,["init"],false,7,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-isset-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-ephemeral-none
+            Go: {"result":[false,["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-isset-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-external-none
+            Go: {"result":[true,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-isset-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-external-dtor
+            Go: {"result":[true,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-unset-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-ephemeral-none
+            Go: {"result":[null,["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-unset-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-external-none
+            Go: {"result":[null,["init"],false,["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-unset-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-external-dtor
+            Go: {"result":[null,["init"],false,["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-reference-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-ephemeral-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-reference-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-external-none
+            Go: {"result":[42,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/32/r10-life-proxy-reference-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-external-dtor
+            Go: {"result":[42,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-direct-read-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-read-released-none
+            Go: {"result":[["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-direct-write-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-write-released-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-direct-isset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-isset-released-none
+            Go: {"result":[false,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-direct-unset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-unset-released-none
+            Go: {"result":[null,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-direct-reference-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-direct-reference-released-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-globals-write-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-write-released-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-globals-unset-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-unset-released-none
+            Go: {"result":[null,["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-globals-reference-released-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-globals-reference-released-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-read-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-ephemeral-none
+            Go: {"result":[["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-read-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-external-none
+            Go: {"result":[42,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-read-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-read-external-dtor
+            Go: {"result":[42,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-write-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-ephemeral-none
+            Go: {"result":[["Error","Object was released while assigning to property W13R10LazyLife::$x"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-write-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-external-none
+            Go: {"result":[null,["init"],false,7,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-write-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-write-external-dtor
+            Go: {"result":[null,["init"],false,7,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-isset-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-ephemeral-none
+            Go: {"result":[false,["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-isset-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-external-none
+            Go: {"result":[true,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-isset-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-isset-external-dtor
+            Go: {"result":[true,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-unset-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-ephemeral-none
+            Go: {"result":[null,["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-unset-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-external-none
+            Go: {"result":[null,["init"],false,["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-unset-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-unset-external-dtor
+            Go: {"result":[null,["init"],false,["Error","Typed property W13R10LazyLife::$x must not be accessed before initialization"],["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-reference-ephemeral-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-ephemeral-none
+            Go: {"result":[["Error","Cannot access uninitialized non-nullable property W13R10LazyLife::$x by reference"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init","dtor"],false,null,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-reference-external-none (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-external-none
+            Go: {"result":[42,["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,null,["init","dtor"]],"diagnostics":[]}
+    --- FAIL: TestW13R10LazyReleasedReceiver/64/r10-life-proxy-reference-external-dtor (0.00s)
+        object_review_r10_lifetime_test.go:167: r10-life-proxy-reference-external-dtor
+            Go: {"result":[42,["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Lazy object was released during initialization"],["init"],false,42,["Exception","dtor"],["init","dtor"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.878s
+FAIL

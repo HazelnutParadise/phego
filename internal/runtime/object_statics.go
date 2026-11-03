@@ -27,7 +27,7 @@ func (h *heap) unsetStatic(c *class, name string) error {
 
 // An accessible static declaration accessed through an object is a separate
 // dynamic instance property. Visibility is checked before raising the notice.
-func (h *heap) resolveInstanceProperty(o *object, name string, scope *class, silent bool) (*propertyInfo, error) {
+func (h *heap) resolveInstanceProperty(o *object, name string, scope *class, silent bool, magicOperation ...string) (*propertyInfo, error) {
 	if len(name) != 0 && name[0] == 0 {
 		return nil, &Throwable{"Error", "Cannot access property starting with \"\\0\""}
 	}
@@ -36,9 +36,20 @@ func (h *heap) resolveInstanceProperty(o *object, name string, scope *class, sil
 		return p, err
 	}
 	if !silent {
-		h.warn(levelNotice, "Accessing static property "+p.label()+" as non static")
+		h.warnStaticInstanceProperty(o, p.name, magicOperation...)
 	}
 	return nil, nil
+}
+
+func (h *heap) warnStaticInstanceProperty(o *object, name string, magicOperation ...string) {
+	if len(magicOperation) != 0 {
+		// PHP suppresses this lookup notice when the method exists, even
+		// when its reentry guard prevents the callback from running.
+		if _, exists := h.resolveMethod(o.class, "__"+magicOperation[0], nil); exists {
+			return
+		}
+	}
+	h.warn(levelNotice, "Accessing static property "+o.class.name+"::$"+name+" as non static")
 }
 
 // Install the constraint before bind can release the previous alias and invoke

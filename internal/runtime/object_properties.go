@@ -179,7 +179,7 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 	if err != nil {
 		return value{}, err
 	}
-	p, err := h.resolveInstanceProperty(o, name, scope, false)
+	p, err := h.resolveInstanceProperty(o, name, scope, false, "get")
 	if err != nil {
 		if out, called, callErr := h.magicProperty(o, "get", name, nil); called {
 			if callErr != nil {
@@ -227,6 +227,9 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 		guard := h.installPropertyGuard(o, "get", name)
 		defer guard.restore()
 	}
+	if o != previous {
+		return h.readObject(value{kind: valueObject, object: o}, name, scope)
+	}
 	if p == nil {
 		if exists && slot.kind != valueUndefined {
 			return slot.deref(), nil
@@ -270,18 +273,26 @@ func (h *heap) runPropertyHook(o *object, p *propertyInfo, hook objectHook, v va
 	if err := h.claimValues(value{kind: valueObject, object: o}, v); err != nil {
 		return value{}, err
 	}
-	var owners []methodHold
-	h.holdMethodValue(value{kind: valueObject, object: o}, &owners)
-	h.holdMethodValue(v, &owners)
+	receiver := methodHold{value: value{kind: valueObject, object: o}, temporary: o.refcount == 0}
+	retain(receiver.value)
+	// Capture the raw RHS after the receiver hold: they can be the same object.
+	count := methodRefcount(v)
+	rhs := methodHold{value: v, temporary: count == 0}
+	if count >= 0 {
+		retain(v)
+	}
 	out, err = h.invokeObjectInScope(func() (value, error) {
 		h.currentHook = activePropertyHook{receiver: o, prototypeOwner: p.prototypeOwner, name: p.name}
 		return hook(h, value{kind: valueObject, object: o}, v)
 	}, byReference, o.class)
 	result, protected := h.holdMethodResult(out)
-	for i := len(owners) - 1; i >= 0; i-- {
-		if cleanup := h.releaseMethodHold(owners[i]); cleanup != nil {
+	if count >= 0 {
+		if cleanup := h.releaseMethodHold(rhs); cleanup != nil {
 			err = h.mergeObjectErrors(err, cleanup)
 		}
+	}
+	if cleanup := h.releaseMethodHold(receiver); cleanup != nil {
+		err = h.mergeObjectErrors(err, cleanup)
 	}
 	if protected {
 		if err != nil {
@@ -334,7 +345,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 	if err != nil {
 		return err
 	}
-	p, err := h.resolveInstanceProperty(o, name, scope, false)
+	p, err := h.resolveInstanceProperty(o, name, scope, false, "set")
 	if err != nil {
 		if _, called, callErr := h.magicProperty(o, "set", name, []value{v}); called {
 			return callErr
@@ -410,6 +421,9 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		guard := h.installPropertyGuard(o, "set", name)
 		defer guard.restore()
 	}
+	if o != previous {
+		return h.writeObject(value{kind: valueObject, object: o}, name, v, scope, strict)
+	}
 	if p == nil {
 		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
 			if _, called, callErr := h.magicProperty(o, "set", name, []value{v}); called {
@@ -420,7 +434,7 @@ func (h *heap) writeObject(obj value, name string, v value, scope *class, strict
 		if err != nil {
 			return err
 		}
-		return h.assign(slot, v)
+		return h.assignPHP(slot, v, strict)
 	}
 	if p.virtual && p.set == nil {
 		return &Throwable{"Error", "Property " + p.label() + " is read-only"}
@@ -461,7 +475,7 @@ func (h *heap) writeObjectSlot(o *object, p *propertyInfo, v value, scope *class
 	if p.readonly && o.hooks["\x00clone"] {
 		o.hooks["\x00clone:"+p.key] = true
 	}
-	return h.assign(slot, v)
+	return h.assignPHP(slot, v, strict)
 }
 
 func (h *heap) unsetObject(obj value, name string, scope *class) error {
@@ -472,9 +486,13 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 	for {
 		// An initialized proxy's values and readonly state live on its target.
 		if o.lazy != nil && o.lazy.target.kind == valueObject {
-			if info, lookupErr := resolvePropertyIn(o.class, name, scope, true); lookupErr == nil && info == nil {
+			info, lookupErr := resolvePropertyIn(o.class, name, scope, true)
+			if lookupErr == nil && (info == nil || info.static) {
 				if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
 					return callErr
+				}
+				if info != nil {
+					h.warnStaticInstanceProperty(o, info.name, "unset")
 				}
 				if o.hooks[magicPropertyKey("unset", name)] {
 					next, forwardErr := h.initializeLazy(o)
@@ -494,7 +512,7 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 				return err
 			}
 		}
-		p, err := h.resolveInstanceProperty(o, name, scope, false)
+		p, err := h.resolveInstanceProperty(o, name, scope, false, "unset")
 		if err != nil {
 			if _, called, callErr := h.magicProperty(o, "unset", name, nil); called {
 				return callErr
@@ -585,41 +603,59 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 	if err != nil {
 		return err
 	}
-	p, err := h.resolveInstanceProperty(o, name, scope, false)
+	address, err := h.resolveObjectReference(o, name, scope)
 	if err != nil {
-		if called, callErr := h.referenceMagicProperty(dst, o, name); called {
-			return callErr
-		}
 		return err
+	}
+	// All forwarding guards end before old-destination cleanup can call PHP.
+	if address.slot != nil {
+		return h.bindPropertyReference(dst, address.slot, address.property)
+	}
+	return h.bindMethodReference(dst, address.raw)
+}
+
+type objectReferenceAddress struct {
+	slot     *value
+	property *propertyInfo
+	raw      value
+}
+
+func (h *heap) resolveObjectReference(o *object, name string, scope *class) (objectReferenceAddress, error) {
+	p, err := h.resolveInstanceProperty(o, name, scope, false, "get")
+	if err != nil {
+		if address, called, callErr := h.resolveMagicPropertyReference(o, name); called {
+			return address, callErr
+		}
+		return objectReferenceAddress{}, err
 	}
 	key := name
 	if p != nil {
 		key = p.key
 		if p.readonly {
-			return &Throwable{"Error", "Cannot indirectly modify readonly property " + p.label()}
+			return objectReferenceAddress{}, &Throwable{"Error", "Cannot indirectly modify readonly property " + p.label()}
 		}
 		if !canAccess(scope, p.owner, p.setVisibility) {
-			return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
+			return objectReferenceAddress{}, &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 		}
 		bypassHook := h.propertyHookBypasses(o, p)
 		if p.virtual && bypassHook {
-			return &Throwable{"Error", "Must not read from virtual property " + p.label()}
+			return objectReferenceAddress{}, &Throwable{"Error", "Must not read from virtual property " + p.label()}
 		}
 		if p.get != nil && !bypassHook && p.getReference {
 			r, err := h.getPropertyHook(o, p, true)
 			if err != nil {
-				return err
+				return objectReferenceAddress{}, err
 			}
-			return h.bindMethodReference(dst, r)
+			return objectReferenceAddress{raw: r}, nil
 		}
 		if (p.get != nil && !bypassHook) || p.virtual {
-			return &Throwable{"Error", "Indirect modification of " + p.label() + " is not allowed"}
+			return objectReferenceAddress{}, &Throwable{"Error", "Indirect modification of " + p.label() + " is not allowed"}
 		}
 	}
 	if p == nil && o.lazy != nil && !o.lazy.running {
 		if slot, ok := o.props.lookup(name); !ok || slot.kind == valueUndefined {
-			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
-				return callErr
+			if address, called, callErr := h.resolveMagicPropertyReference(o, name); called {
+				return address, callErr
 			}
 		}
 	}
@@ -628,47 +664,48 @@ func (h *heap) referenceObject(dst *value, obj value, name string, scope *class)
 	guarded := o.lazy != nil && !o.lazy.running && o.hooks[magicPropertyKey("get", name)]
 	o, err = h.objectForPropertyRead(o, p, name)
 	if err != nil {
-		return err
+		return objectReferenceAddress{}, err
 	}
 	var forwardingGuard forwardedPropertyGuard
 	if o != previous && guarded && (p == nil || (pending && previous.lazy != nil && previous.lazy.initialize == nil)) {
 		forwardingGuard = h.installPropertyGuard(o, "get", name)
 		defer forwardingGuard.restore()
 	}
+	if o != previous {
+		return h.resolveObjectReference(o, name, scope)
+	}
 	var slot *value
 	if p == nil {
 		slot, _ = o.props.lookup(name)
 		if slot == nil || slot.kind == valueUndefined {
-			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
-				return callErr
+			if address, called, callErr := h.resolveMagicPropertyReference(o, name); called {
+				return address, callErr
 			}
 			slot, err = h.dynamicPropertySlot(o, name)
 		}
 	} else {
 		slot = o.props.slot(key)
 		if slot.isExplicitlyUnset() {
-			if called, callErr := h.referenceMagicProperty(dst, o, name); called {
-				return callErr
+			if address, called, callErr := h.resolveMagicPropertyReference(o, name); called {
+				return address, callErr
 			}
 		}
 	}
 	if err != nil {
-		return err
+		return objectReferenceAddress{}, err
 	}
-	// Address resolution ends before binding can destroy the old destination.
-	forwardingGuard.restore()
-	return h.bindPropertyReference(dst, slot, p)
+	return objectReferenceAddress{slot: slot, property: p}, nil
 }
 
-func (h *heap) referenceMagicProperty(dst *value, o *object, name string) (bool, error) {
+func (h *heap) resolveMagicPropertyReference(o *object, name string) (objectReferenceAddress, bool, error) {
 	raw, called, err := h.magicProperty(o, "get", name, nil)
 	if !called || err != nil {
-		return called, err
+		return objectReferenceAddress{}, called, err
 	}
 	if raw.kind != valueReference && raw.deref().kind != valueObject {
 		h.warn(levelNotice, "Indirect modification of overloaded property "+o.class.name+"::$"+cString(name)+" has no effect")
 	}
-	return true, h.bindMethodReference(dst, raw)
+	return objectReferenceAddress{raw: raw}, true, nil
 }
 
 // __get/__set/__isset/__unset recurse independently for each property.
@@ -707,6 +744,10 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	return h.issetObjectProperty(o, name, scope, false)
+}
+
+func (h *heap) issetObjectProperty(o *object, name string, scope *class, skipMagic bool) (bool, error) {
 	p, accessErr := h.resolveInstanceProperty(o, name, scope, true)
 	key := name
 	if p != nil {
@@ -714,7 +755,7 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 	}
 	if accessErr != nil || p == nil {
 		if accessErr == nil {
-			if o.lazy != nil && !o.lazy.running {
+			if !skipMagic && o.lazy != nil && !o.lazy.running {
 				if slot, ok := o.props.lookup(key); !ok || slot.kind == valueUndefined {
 					if v, called, callErr := h.magicProperty(o, "isset", name, nil); called {
 						return h.toBool(v), callErr
@@ -722,19 +763,21 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 				}
 			}
 			previous := o
-			o, err = h.objectForPropertyRead(o, p, name)
+			next, err := h.objectForPropertyRead(o, p, name)
 			if err != nil {
 				return false, err
+			}
+			o = next
+			if o != previous {
+				return h.issetObjectProperty(o, name, scope, true)
 			}
 			if slot, ok := o.props.lookup(key); ok && slot.kind != valueUndefined {
 				v := slot.deref()
 				return v.kind != valueNull, nil
 			}
-			// No PHP callback follows an absent backing value: returning
-			// false directly avoids allocating an unobservable target guard.
-			if o != previous && previous.lazy != nil && previous.lazy.proxy {
-				return false, nil
-			}
+		}
+		if skipMagic {
+			return false, nil
 		}
 		v, called, err := h.magicProperty(o, "isset", name, nil)
 		if called {
@@ -743,19 +786,23 @@ func (h *heap) issetObject(obj value, name string, scope *class) (bool, error) {
 		return false, nil
 	}
 	if p.virtual || (p.get != nil && !h.propertyHookBypasses(o, p)) {
-		v, err := h.readObject(obj, name, scope)
+		v, err := h.readObject(value{kind: valueObject, object: o}, name, scope)
 		set := err == nil && v.deref().kind != valueNull
 		return set, h.mergeObjectErrors(err, h.discardMethodReturn(v))
 	}
 	previous := o
 	pending := o.lazy != nil && o.lazy.initialize != nil && !o.lazy.running
-	o, err = h.objectForPropertyRead(o, p, name)
+	next, err := h.objectForPropertyRead(o, p, name)
 	if err != nil {
 		return false, err
 	}
+	o = next
+	if o != previous {
+		return h.issetObjectProperty(o, name, scope, true)
+	}
 	slot, ok := o.props.lookup(key)
 	if ok && slot.isExplicitlyUnset() {
-		if (pending && previous.lazy != nil && previous.lazy.initialize == nil) || (o != previous && previous.lazy != nil && previous.lazy.proxy) {
+		if skipMagic || (pending && previous.lazy != nil && previous.lazy.initialize == nil) {
 			return false, nil
 		}
 		v, called, err := h.magicProperty(o, "isset", name, nil)

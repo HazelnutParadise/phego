@@ -6563,6 +6563,3194 @@
       ],
       "diagnostics": []
     },
+    "r10-proxy-plain-cold-global-read": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-global-write": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-global-reference": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-global-isset": {
+      "result": [
+        false,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-global-unset": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-parent-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-parent-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-parent-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-parent-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-parent-unset": {
+      "result": [
+        null,
+        [
+          "Error",
+          "Typed property W13R10ProxyParent::$x must not be accessed before initialization"
+        ],
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-child-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-child-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-child-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-child-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-cold-child-unset": {
+      "result": [
+        null,
+        [
+          "Error",
+          "Typed property W13R10ProxyParent::$x must not be accessed before initialization"
+        ],
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-global-read": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-global-write": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-global-reference": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-global-isset": {
+      "result": [
+        false,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-global-unset": {
+      "result": [
+        [
+          "Error",
+          "Cannot access protected property W13R10ProxyParent::$x"
+        ],
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-parent-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-parent-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-parent-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-parent-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-parent-unset": {
+      "result": [
+        null,
+        [
+          "Error",
+          "Typed property W13R10ProxyParent::$x must not be accessed before initialization"
+        ],
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-child-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-child-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-child-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-child-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-plain-warm-child-unset": {
+      "result": [
+        null,
+        [
+          "Error",
+          "Typed property W13R10ProxyParent::$x must not be accessed before initialization"
+        ],
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-global-read": {
+      "result": [
+        9,
+        1,
+        [
+          "factory",
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-global-write": {
+      "result": [
+        null,
+        1,
+        [
+          "factory",
+          "parent:set:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-global-reference": {
+      "result": [
+        3,
+        1,
+        [
+          "factory",
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R10ProxyMagicParent::$x has no effect"
+        ]
+      ]
+    },
+    "r10-proxy-magic-cold-global-isset": {
+      "result": [
+        false,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-global-unset": {
+      "result": [
+        null,
+        1,
+        [
+          "factory",
+          "parent:unset:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-parent-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-parent-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-parent-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-parent-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-parent-unset": {
+      "result": [
+        null,
+        9,
+        [
+          "factory",
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-child-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-child-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-child-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-child-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-cold-child-unset": {
+      "result": [
+        null,
+        9,
+        [
+          "factory",
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-global-read": {
+      "result": [
+        9,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-global-write": {
+      "result": [
+        null,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:set:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-global-reference": {
+      "result": [
+        3,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R10ProxyMagicParent::$x has no effect"
+        ]
+      ]
+    },
+    "r10-proxy-magic-warm-global-isset": {
+      "result": [
+        false,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-global-unset": {
+      "result": [
+        null,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:unset:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-parent-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-parent-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-parent-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-parent-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-parent-unset": {
+      "result": [
+        null,
+        9,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-child-read": {
+      "result": [
+        1,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-child-write": {
+      "result": [
+        null,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-child-reference": {
+      "result": [
+        3,
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-child-isset": {
+      "result": [
+        true,
+        1,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-magic-warm-child-unset": {
+      "result": [
+        null,
+        9,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "parent:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-cold-read": {
+      "result": [
+        7,
+        7,
+        11,
+        [
+          "wrapper:get"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-cold-write": {
+      "result": [
+        null,
+        7,
+        11,
+        [
+          [
+            "wrapper:set",
+            3
+          ]
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-cold-reference": {
+      "result": [
+        3,
+        3,
+        11,
+        [
+          "wrapper:get"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-cold-isset": {
+      "result": [
+        true,
+        7,
+        11,
+        [
+          "wrapper:get"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-warm-read": {
+      "result": [
+        7,
+        7,
+        11,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:get"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-warm-write": {
+      "result": [
+        null,
+        7,
+        11,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          [
+            "wrapper:set",
+            3
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-warm-reference": {
+      "result": [
+        3,
+        3,
+        11,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:get"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-hooks-warm-isset": {
+      "result": [
+        true,
+        7,
+        11,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:get"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-static-cold-read": {
+      "result": [
+        null,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          2,
+          "Undefined property: W13R10StaticParent::$x"
+        ]
+      ]
+    },
+    "r10-proxy-static-cold-write": {
+      "result": [
+        null,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          8192,
+          "Creation of dynamic property W13R10StaticParent::$x is deprecated"
+        ]
+      ]
+    },
+    "r10-proxy-static-cold-reference": {
+      "result": [
+        3,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          8192,
+          "Creation of dynamic property W13R10StaticParent::$x is deprecated"
+        ]
+      ]
+    },
+    "r10-proxy-static-cold-isset": {
+      "result": [
+        false,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-static-cold-unset": {
+      "result": [
+        null,
+        [
+          "factory"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ]
+      ]
+    },
+    "r10-proxy-static-warm-read": {
+      "result": [
+        null,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          2,
+          "Undefined property: W13R10StaticParent::$x"
+        ]
+      ]
+    },
+    "r10-proxy-static-warm-write": {
+      "result": [
+        null,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          8192,
+          "Creation of dynamic property W13R10StaticParent::$x is deprecated"
+        ]
+      ]
+    },
+    "r10-proxy-static-warm-reference": {
+      "result": [
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ],
+        [
+          8192,
+          "Creation of dynamic property W13R10StaticParent::$x is deprecated"
+        ]
+      ]
+    },
+    "r10-proxy-static-warm-isset": {
+      "result": [
+        false,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-static-warm-unset": {
+      "result": [
+        null,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ]
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Accessing static property W13R10StaticChild::$x as non static"
+        ],
+        [
+          8,
+          "Accessing static property W13R10StaticParent::$x as non static"
+        ]
+      ]
+    },
+    "r10-proxy-staticmagic-cold-read": {
+      "result": [
+        9,
+        [
+          "wrapper:get:x"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-cold-write": {
+      "result": [
+        null,
+        [
+          "wrapper:set:x"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-cold-reference": {
+      "result": [
+        3,
+        [
+          "wrapper:get:x"
+        ],
+        true
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"
+        ]
+      ]
+    },
+    "r10-proxy-staticmagic-cold-isset": {
+      "result": [
+        true,
+        [
+          "wrapper:isset:x"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-cold-unset": {
+      "result": [
+        null,
+        [
+          "wrapper:unset:x"
+        ],
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-warm-read": {
+      "result": [
+        9,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:get:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-warm-write": {
+      "result": [
+        null,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:set:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-warm-reference": {
+      "result": [
+        3,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:get:x"
+        ],
+        false
+      ],
+      "diagnostics": [
+        [
+          8,
+          "Indirect modification of overloaded property W13R10StaticMagicChild::$x has no effect"
+        ]
+      ]
+    },
+    "r10-proxy-staticmagic-warm-isset": {
+      "result": [
+        true,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:isset:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-proxy-staticmagic-warm-unset": {
+      "result": [
+        null,
+        [
+          "factory",
+          [
+            "warm",
+            2
+          ],
+          "wrapper:unset:x"
+        ],
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-staticmagic-guarded-read": {
+      "result": [
+        null,
+        [
+          "get"
+        ]
+      ],
+      "diagnostics": [
+        [
+          2,
+          "Undefined property: W13R10StaticGuard::$x"
+        ]
+      ]
+    },
+    "r10-staticmagic-dynamic-read": {
+      "result": [
+        5,
+        [
+          "set"
+        ]
+      ],
+      "diagnostics": [
+        [
+          8192,
+          "Creation of dynamic property W13R10StaticGuard::$x is deprecated"
+        ]
+      ]
+    },
+    "r10-life-direct-read-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-read-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-read-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-read-kept-none": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-read-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-read-kept-dtor": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-kept-none": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-write-kept-dtor": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-kept-none": {
+      "result": [
+        true,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-isset-kept-dtor": {
+      "result": [
+        true,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-kept-none": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-unset-kept-dtor": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-kept-none": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-direct-reference-kept-dtor": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-released-none": {
+      "result": [
+        42,
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-kept-none": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-read-kept-dtor": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-kept-none": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-write-kept-dtor": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-released-none": {
+      "result": [
+        true,
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-kept-none": {
+      "result": [
+        true,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-isset-kept-dtor": {
+      "result": [
+        true,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-kept-none": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-unset-kept-dtor": {
+      "result": [
+        null,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-released-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-released-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-released-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-kept-none": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-kept-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-globals-reference-kept-dtor": {
+      "result": [
+        42,
+        [
+          "init"
+        ],
+        false,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-ephemeral-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-ephemeral-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-ephemeral-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-external-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-external-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-read-external-dtor": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-ephemeral-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-ephemeral-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-ephemeral-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-external-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-external-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-write-external-dtor": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-ephemeral-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-ephemeral-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-ephemeral-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-external-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-external-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-isset-external-dtor": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-ephemeral-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-ephemeral-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-ephemeral-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-external-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-external-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-unset-external-dtor": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-ephemeral-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-ephemeral-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-ephemeral-dtor": {
+      "result": [
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ],
+        false,
+        null,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-external-none": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-external-init": {
+      "result": [
+        [
+          "Exception",
+          "init"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        null,
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-life-proxy-reference-external-dtor": {
+      "result": [
+        [
+          "Error",
+          "Lazy object was released during initialization"
+        ],
+        [
+          "init"
+        ],
+        false,
+        42,
+        [
+          "Exception",
+          "dtor"
+        ],
+        [
+          "init",
+          "dtor"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-declared-weak-numeric": {
+      "result": [
+        null,
+        2,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-declared-weak-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-declared-strict-numeric": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-declared-strict-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-dynamic-weak-numeric": {
+      "result": [
+        null,
+        2,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-dynamic-weak-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-dynamic-strict-numeric": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-dynamic-strict-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-static-weak-numeric": {
+      "result": [
+        null,
+        2,
+        2
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-static-weak-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$t of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-static-strict-numeric": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$t of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-static-strict-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$t of type int"
+        ],
+        1,
+        1
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-weak-numeric": {
+      "result": [
+        null,
+        2,
+        2,
+        0,
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-weak-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1,
+        0,
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-strict-numeric": {
+      "result": [
+        null,
+        2,
+        2,
+        0,
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-strict-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1,
+        0,
+        false
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-lazy-weak-numeric": {
+      "result": [
+        null,
+        2,
+        2,
+        0,
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-lazy-weak-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1,
+        0,
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-lazy-strict-numeric": {
+      "result": [
+        null,
+        2,
+        2,
+        0,
+        true
+      ],
+      "diagnostics": []
+    },
+    "r10-alias-raw-lazy-strict-bad": {
+      "result": [
+        [
+          "TypeError",
+          "Cannot assign string to reference held by property W13R10Alias::$b of type int"
+        ],
+        1,
+        1,
+        0,
+        true
+      ],
+      "diagnostics": []
+    },
     "r3-enum-empty-unit": {
       "result": [
         [

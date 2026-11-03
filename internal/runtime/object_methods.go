@@ -1107,7 +1107,7 @@ func (h *heap) writeStatic(c *class, name string, v value, scope *class, strict 
 	if slot == nil {
 		slot = tbl.slot(p.key)
 	}
-	return h.assign(slot, coerced)
+	return h.assignPHP(slot, coerced, strict)
 }
 
 func (h *heap) resolveStatic(c *class, name string, scope *class) (*propertyInfo, error) {

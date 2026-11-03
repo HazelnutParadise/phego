@@ -54,13 +54,13 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 	if x.class == weakMapBuiltin {
 		return 0, nil
 	}
-	owners := make([]methodHold, 0, 2)
-	h.holdMethodValue(a, &owners)
-	h.holdMethodValue(b, &owners)
+	leftHold := methodHold{value: a, temporary: x.refcount == 0}
+	retain(a)
+	rightHold := methodHold{value: b, temporary: y.refcount == 0}
+	retain(b)
 	defer func() {
-		for _, owner := range owners {
-			failure = h.mergeObjectErrors(failure, h.releaseMethodHold(owner))
-		}
+		failure = h.mergeObjectErrors(failure, h.releaseMethodHold(leftHold))
+		failure = h.mergeObjectErrors(failure, h.releaseMethodHold(rightHold))
 	}()
 	direct := directObjectComparisonEligible(x, y)
 	if !direct {
