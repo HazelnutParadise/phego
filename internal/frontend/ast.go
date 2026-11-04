@@ -8,11 +8,17 @@ package frontend
 // float literal; whether a number fits the integer type depends on the
 // profile's integer width.
 type Node struct {
-	Kind     string
-	Text     string
-	Token    Kind
-	Line     int
-	Children []*Node
+	// FunctionLine is the method function-keyword line, excluding attributes
+	// and modifiers. Zero means the metadata is absent.
+	FunctionLine int
+	// LeadingEmptyLine is the comma line when an array/list starts with an
+	// omitted element. Zero means absent; the omitted child remains nil.
+	LeadingEmptyLine int
+	Kind             string
+	Text             string
+	Token            Kind
+	Line             int
+	Children         []*Node
 }
 
 func node(kind string, line int, children ...*Node) *Node {
@@ -29,6 +35,9 @@ type SyntaxError struct {
 	Line    int
 	Message string
 	Compile bool
+	// CallerLocation means PHP resolves the displayed file and line from its
+	// current execution frame. Line remains the source anchor for Go callers.
+	CallerLocation bool
 }
 
 func (e *SyntaxError) Error() string { return e.Message }

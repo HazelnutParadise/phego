@@ -56,9 +56,11 @@ type lexer struct {
 }
 
 type heredocLabel struct {
-	name   string
-	marker int // start of the closing marker line, or -1 when unterminated
-	indent string
+	name           string
+	marker         int // start of the closing marker line, or -1 when unterminated
+	indent         string
+	startToken     int
+	callerLocation bool // first body token is an unindented interpolation
 	// unindented records an interpolation that starts a body line without
 	// the closing marker's indentation; PHP reports it at the marker.
 	unindented bool
@@ -806,7 +808,7 @@ func (l *lexer) heredocStart(start int) bool {
 	}
 	l.pos = end
 	l.emit(TStartHeredoc, start)
-	l.labels = append(l.labels, heredocLabel{name: name, marker: -1})
+	l.labels = append(l.labels, heredocLabel{name: name, marker: -1, startToken: len(l.out) - 1})
 	// Find the closing marker once; body segments reuse it instead of
 	// rescanning the remaining source after every interpolation.
 	label := &l.labels[len(l.labels)-1]
@@ -818,6 +820,7 @@ func (l *lexer) heredocStart(start int) bool {
 		}
 		label.indent = l.src[label.marker:m]
 	}
+	label.callerLocation = quote != '\'' && label.indent != "" && l.pos < len(l.src) && l.interpolationAt(l.pos)
 	if quote == '\'' {
 		l.push(stNowdoc)
 	} else {
@@ -852,10 +855,17 @@ func (l *lexer) closingMarkerAt(i int) int {
 
 func (l *lexer) endHeredoc(at, n int) {
 	l.pos = at + n
-	indent := l.src[at : at+n-len(l.labels[len(l.labels)-1].name)]
-	if strings.Contains(indent, " ") && strings.Contains(indent, "\t") {
+	label := l.labels[len(l.labels)-1]
+	indent := l.src[at : at+n-len(label.name)]
+	if label.callerLocation {
+		// PHP detects this during its look-ahead, before returning the start
+		// token. Attach it there while retaining the closing marker as source
+		// anchor. Recording it here avoids rescanning nested bodies for lines.
+		l.fatal(label.startToken, l.line, "Invalid body indentation level (expecting an indentation level of at least %d)", len(indent))
+		l.diags[len(l.diags)-1].CallerLocation = true
+	} else if strings.Contains(indent, " ") && strings.Contains(indent, "\t") {
 		l.fatal(-1, l.line, "Invalid indentation - tabs and spaces cannot be mixed")
-	} else if l.labels[len(l.labels)-1].unindented {
+	} else if label.unindented {
 		l.fatal(-1, l.line, "Invalid body indentation level (expecting an indentation level of at least %d)", len(indent))
 	}
 	l.emit(TEndHeredoc, at)

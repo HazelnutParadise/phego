@@ -1,0 +1,6 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <math.h>
+void raw(long double v){unsigned char b[12];memcpy(b,&v,12);for(int i=9;i>=0;i--)printf("%02x",b[i]);}
+int main(){unsigned short c=0x27f;__asm__("fldcw %0"::"m"(c));uint64_t a,b;while(scanf("%llx %llx",(unsigned long long*)&a,(unsigned long long*)&b)==2){double x,y;memcpy(&x,&a,8);memcpy(&y,&b,8);long double z=fabs(x),f=isfinite(y)?y-nearbyint(y):0,r;__asm__ volatile("fld1; fldt %1; fyl2x; fstpt %0":"=m"(r):"m"(z):"st");raw(r);putchar(' ');__asm__ volatile("fldt %1; f2xm1; fstpt %0":"=m"(r):"m"(f):"st");raw(r);putchar('\n');}}

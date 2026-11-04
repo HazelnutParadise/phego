@@ -1,0 +1,3 @@
+<?php
+set_error_handler(fn()=>true);
+while(($s=fgets(STDIN))!==false){[$a,$b]=explode(' ',trim($s));$x=(int)$a;$y=(int)$b;echo bin2hex(pack('E',(float)($x**$y))),"\n";}

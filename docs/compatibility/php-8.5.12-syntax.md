@@ -12,13 +12,13 @@ This list describes what `internal/frontend` accepts for the PHP 8.5.12 profile.
 - Expressions: PHP 8.5.12 operator precedence and associativity, non-associative comparisons, assignment to variables in any position, by-reference assignment, list and short-array destructuring with keys and nesting, closures, arrow functions, `static` closures, `match`, `throw` expressions, `new` with arbitrary expressions and argument-less member access rules, `clone` with arguments, first-class callable syntax, named arguments, spread, nullsafe access, dynamic class constant fetch, string interpolation in all forms, `yield`, `yield from`, `include`/`require`, `print`, `exit`/`die`, `isset`, `empty`, `eval`.
 - Errors PHP raises while building the tree: modifier conflicts and misplaced modifiers, `declare(encoding=...)` non-literal values, `__halt_compiler()` inside braces, heredoc indentation errors, the removed `(real)` cast, unterminated comments.
 
-## Known gaps
+## Diagnostic and depth checks
 
-- The nesting limit protects the Go stack but is not PHP's: PHP's parser stack accepts up to 9995 nested parentheses yet only 2499 nested if statements, while Phego allows about 5000 parentheses and up to 10000 levels of most other constructs. Such input is rejected with a different message (PHP reports "memory exhausted").
+The diagnostic replay uses pinned PHP 8.5.12 grammar data, including expected-token lists, scanner errors and modifier checks. PHP's 10000-state stack is separate from the Go recursion guard. Tests check the observed acceptance limits and the next rejected depth for parentheses (9995), unary operators (9996), variable variables (9997), nested if statements (2499), closures (768), and mixed if/while blocks (833). Successful cases must produce a Go AST. A bounded replay that cannot reach a conclusion reports a host resource error.
 
-- Of 16320 token-level mutants of the corpus, all receive PHP's accept or reject decision and 16318 the same error line; two heredoc indentation errors are reported on a different line.
+All 16320 token-level mutants agree under both integer widths. Four heredoc failures use PHP caller locations, recorded separately from source locations. Both `short_open_tag` settings have been compared with 32- and 64-bit references, 5449 files per setting/profile. See the [compatibility decision](../decisions/compatibility-php8512.md) for costs, tested scope and reproduction commands.
 
-- Error messages are located like PHP's but do not reproduce Bison's "expecting ..." lists.
+## Remaining verification
+
 - Tree shapes are checked by unit tests; their meaning is verified only once execution exists.
-- The reference ran with `short_open_tag` on; the off setting is covered by unit tests only.
 - Compile-time errors outside the parser, such as duplicate declarations or invalid `break` levels, belong to compilation.

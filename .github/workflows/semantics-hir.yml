@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Verify constant compilation fixtures on both PHP widths
+        run: python3 tools/verify_compile_fixtures.py
       - name: Regenerate references with the pinned PHP image
         run: |
           set -euo pipefail

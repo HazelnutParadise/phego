@@ -245,11 +245,11 @@ func TestBinaryPrefixedStringsAreCallable(t *testing.T) {
 func TestDeepNestingIsBoundedNotFatal(t *testing.T) {
 	_, err := parse(t, "<?php "+strings.Repeat("(", MaxNesting+10)+"1"+strings.Repeat(")", MaxNesting+10)+";")
 	var se *SyntaxError
-	if !errors.As(err, &se) || !strings.Contains(se.Message, "nesting") {
+	if !errors.As(err, &se) || se.Message != "memory exhausted" {
 		t.Fatalf("deep nesting: %v", err)
 	}
 	_, err = parse(t, "<?php "+strings.Repeat("$", MaxNesting+10)+"x;")
-	if !errors.As(err, &se) || !strings.Contains(se.Message, "nesting") {
+	if !errors.As(err, &se) || se.Message != "memory exhausted" {
 		t.Fatalf("deep variable variables: %v", err)
 	}
 	if _, err := parse(t, "<?php "+strings.Repeat("$", 9000)+"x;"); err != nil {

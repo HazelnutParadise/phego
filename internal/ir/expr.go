@@ -150,8 +150,15 @@ func (l *lowerer) node(op Op, line int, kids ...*Node) *Node {
 }
 
 func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
-	n = unparen(n)
+	if l.constants == nil {
+		l.constants = newSyntaxCompileBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	n = l.selectedSyntax(n)
 	l.cur = l.zline(n)
+	if entry := l.constants.syntax[n]; entry.known && (ctx == ctxRead || ctx == ctxQuiet) && n.Kind != "array" {
+		return l.constantValueNode(entry.value, n.Line, 0)
+	}
 	c := n.Children
 	switch n.Kind {
 	case "literal":
@@ -229,8 +236,8 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			nd.Name = name
 		} else {
 			nd.Kids[0] = l.expr(cls)
-			if k := constKind(nd.Kids[0]); k != "" {
-				if nd.Kids[0].Op == OpLiteral && k != "string" {
+			if k := l.compileClassKind(nd.Kids[0]); k != "" {
+				if cls.Kind == "literal" && k != "string" {
 					l.fail(l.cur, "Illegal class name")
 				}
 				l.fail(l.cur, "Cannot use \"::class\" on %s", k)
@@ -493,6 +500,10 @@ func (l *lowerer) memberName(nd *Node, name *frontend.Node) {
 		return
 	}
 	nd.Kids[1] = l.expr(name)
+	if constKind(nd.Kids[1]) == "array" {
+		l.diag(l.cur, "Warning", "Array to string conversion")
+		nd.Text, nd.Kids[1] = "Array", nil
+	}
 }
 
 // classOperand fills the class of a static access: a resolved name or an
@@ -722,6 +733,7 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 }
 
 func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
+	entry := l.preEvaluateSyntax(n)
 	nd := &Node{Op: OpArray, Line: n.Line}
 	for _, item := range n.Children {
 		if item == nil {
@@ -729,9 +741,6 @@ func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 		}
 		if item.Kind == "spread" {
 			v := l.expr(item.Children[0])
-			if lv := lit(v); lv != nil {
-				l.fail(l.cur, "Only arrays and Traversables can be unpacked, %s given", typeName(lv))
-			}
 			nd.Kids = append(nd.Kids, l.node(OpSpread, item.Line, v))
 			continue
 		}
@@ -750,6 +759,14 @@ func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 			it.Kids = []*Node{key, l.expr(v)}
 		}
 		nd.Kids = append(nd.Kids, l.seal(it))
+	}
+	if entry.known {
+		if l.constants.memo == nil {
+			l.constants.memo = make(map[*Node]compileMemoEntry)
+		}
+		l.constants.memo[nd] = compileMemoEntry{value: entry.value, known: true, height: entry.height}
+	} else {
+		l.evaluateConstant(nd)
 	}
 	return l.seal(nd)
 }
@@ -885,12 +902,23 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 			op = "||"
 		}
 		left := l.expr(c[0])
-		if v := lit(left); v != nil && op != "xor" && truthy(v) == (op == "||") {
-			// PHP decides the result from a constant left operand and does
-			// not compile the right operand at all.
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: op == "||"}})
+		v, known := l.evaluateConstant(left)
+		if known && op != "xor" {
+			if value, ok := l.compileTruth(v); ok && value == (op == "||") {
+				l.compileTruth(v) // PHP performs a second conversion for the result.
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: value}})
+			}
 		}
-		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, l.expr(c[1])}})
+		right := l.expr(c[1])
+		if known {
+			if rv, rknown := l.evaluateConstant(right); rknown {
+				if op == "xor" {
+					l.compileTruth(v)
+				}
+				l.compileTruth(rv)
+			}
+		}
+		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, right}})
 	case "|>":
 		if c[1].Kind == "arrow_function" {
 			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
@@ -906,6 +934,10 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 // args lowers an argument list, checking the ordering rules of
 // zend_compile_args. A nil result with callable set marks f(...).
 func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
+	return l.argsFor(n, line, nil)
+}
+
+func (l *lowerer) argsFor(n *frontend.Node, line int, callee *Func) []*Arg {
 	var out []*Arg
 	named, unpacked := false, false
 	for _, a := range n.Children {
@@ -931,7 +963,8 @@ func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
 				l.fail(l.cur, "Cannot use positional argument after named argument")
 			}
 		}
-		if !arg.Spread && isVariableLike(v) && !isThis(unparen(v)) {
+		byValue := !unpacked && l.knownValueArgument(callee, arg.Name, len(out))
+		if !arg.Spread && !byValue && isVariableLike(v) && !isThis(unparen(v)) {
 			arg.MayRef = true
 			arg.Value = l.sendVar(unparen(v))
 		} else {
@@ -941,6 +974,39 @@ func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
 	}
 	_ = line
 	return out
+}
+
+// Only completed, unconditional declarations can determine argument modes.
+// Unknown names and arguments following unpacking remain runtime decisions.
+func (l *lowerer) knownValueArgument(f *Func, name string, position int) bool {
+	if f == nil {
+		return false
+	}
+	if name != "" {
+		if l.namedParamRefs == nil {
+			l.namedParamRefs = make(map[*Func]map[string]bool)
+		}
+		m := l.namedParamRefs[f]
+		if m == nil {
+			m = make(map[string]bool, len(f.Params))
+			for _, p := range f.Params {
+				m[p.Name] = p.ByRef
+			}
+			l.namedParamRefs[f] = m
+		}
+		byRef, known := m[name]
+		return known && !byRef
+	}
+	if position < len(f.Params) {
+		return !f.Params[position].ByRef
+	}
+	if len(f.Params) != 0 {
+		last := f.Params[len(f.Params)-1]
+		if last.Variadic {
+			return !last.ByRef
+		}
+	}
+	return true
 }
 
 // sendVar lowers a variable argument whose passing mode depends on the
@@ -989,7 +1055,11 @@ func (l *lowerer) call(n *frontend.Node) *Node {
 	if argList.Kind == "callable_args" {
 		return l.node(OpCallable, n.Line, l.seal(nd))
 	}
-	nd.Args = l.args(argList, n.Line)
+	var known *Func
+	if nd.Name != nil {
+		known = l.hoisted[strings.ToLower(nd.Name.Resolved)]
+	}
+	nd.Args = l.argsFor(argList, n.Line, known)
 	return l.seal(nd)
 }
 
@@ -1132,10 +1202,18 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 // it is a constant expression. dynamic allows new and object casts, as in
 // parameter defaults and global constants.
 func (l *lowerer) constExpr(n *frontend.Node, dynamic bool) *Node {
+	if l.constants == nil {
+		l.constants = newSyntaxCompileBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	l.preEvaluateSyntax(n)
 	l.checkConstExpr(n, dynamic)
 	saved := l.inConstExpr
+	line := l.cur
 	l.inConstExpr = true
-	defer func() { l.inConstExpr = saved }()
+	// Lowering the value builds HIR, while PHP keeps the enclosing declaration
+	// location when it evaluates successive constant initializers.
+	defer func() { l.inConstExpr, l.cur = saved, line }()
 	return l.expr(n)
 }
 
@@ -1163,9 +1241,25 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 		return nil
 	}
 	sp := ref.Children[0]
-	if sp.Kind != "static_prop" || sp.Children[0].Kind != "name" || specialClass(sp.Children[0].Text) != "parent" ||
-		sp.Children[1].Kind != "variable" {
+	if sp.Kind != "static_prop" || sp.Children[0].Kind != "name" || specialClass(sp.Children[0].Text) != "parent" {
 		return nil
+	}
+	var prop string
+	if p := sp.Children[1]; p.Kind == "variable" {
+		prop = p.Text[1:]
+	} else {
+		if len(p.Children) != 1 || unparen(p.Children[0]).Kind != "literal" {
+			return nil
+		}
+		v := l.expr(p.Children[0])
+		var ok bool
+		if v.Value == nil {
+			return nil
+		}
+		prop, ok = constString(v.Value)
+		if !ok {
+			return nil
+		}
 	}
 	method := strings.ToLower(ref.Children[1].Text)
 	if method != "get" && method != "set" {
@@ -1177,7 +1271,7 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 	if n.Children[1].Kind == "callable_args" {
 		l.fail(n.Line, "Cannot create Closure for parent property hook call")
 	}
-	prop, hook := sp.Children[1].Text[1:], ref.Children[1].Text
+	hook := ref.Children[1].Text
 	f := l.fn
 	if f.Kind != FuncHook {
 		l.fail(n.Line, "Must not use parent::$%s::%s() outside a property hook", prop, hook)
@@ -1204,10 +1298,17 @@ var constExprKinds = map[string]bool{
 
 // checkConstExpr validates a constant expression as zend_compile_const_expr.
 func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
-	n = unparen(n)
 	if n == nil {
 		return
 	}
+	if l.constants == nil {
+		l.constants = newSyntaxCompileBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	if l.preEvaluateSyntax(n).known {
+		return
+	}
+	n = l.selectedSyntax(n)
 	switch n.Kind {
 	case "interpolated", "heredoc":
 		for _, p := range n.Children {
@@ -1225,6 +1326,12 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 	}
 	c := n.Children
 	switch n.Kind {
+	case "array":
+		for _, item := range c {
+			if item == nil {
+				l.fail(n.Line, "Cannot use empty array elements in arrays")
+			}
+		}
 	case "class_const":
 		cls := unparen(c[0])
 		if cls.Kind == "array" || cls.Kind == "literal" && cls.Token != frontend.TConstantEncapsedString {
@@ -1356,7 +1463,12 @@ func (l *lowerer) zline(n *frontend.Node) int {
 			break
 		}
 		spine = append(spine, cur)
-		next := zlineStep(unparen(cur))
+		plain := unparen(cur)
+		if plain.LeadingEmptyLine != 0 {
+			line = plain.LeadingEmptyLine
+			break
+		}
+		next := zlineStep(plain)
 		if next == nil {
 			line = unparen(cur).Line
 			break
@@ -1385,6 +1497,8 @@ func zlineStep(n *frontend.Node) *frontend.Node {
 		return nil
 	case "yield":
 		return n.Children[1]
+	case "item":
+		return n.Children[1]
 	}
 	if len(n.Children) == 0 {
 		return nil
@@ -1395,6 +1509,9 @@ func zlineStep(n *frontend.Node) *frontend.Node {
 func zline(n *frontend.Node) int {
 	for {
 		n = unparen(n)
+		if n.LeadingEmptyLine != 0 {
+			return n.LeadingEmptyLine
+		}
 		switch n.Kind {
 		case "closure", "arrow_function", "function", "class", "interface", "trait", "enum", "new_class",
 			"literal", "variable", "name", "magic_const", "interpolated", "heredoc", "match":
@@ -1412,6 +1529,9 @@ func zline(n *frontend.Node) int {
 				continue
 			}
 			return n.Line
+		case "item":
+			n = n.Children[1]
+			continue
 		}
 		if len(n.Children) == 0 || n.Children[0] == nil {
 			return n.Line

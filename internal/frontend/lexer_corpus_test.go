@@ -13,7 +13,8 @@ import (
 // PHP 8.5.12 token_get_all output. It runs when PHEGO_LEXER_CORPUS names a
 // directory holding corpus/*.php and the reference dump named by
 // PHEGO_LEXER_REFERENCE (default reference.jsonl) for the integer width in
-// PHEGO_LEXER_INT_WIDTH (default 32), with short_open_tag on; see
+// PHEGO_LEXER_INT_WIDTH (default 32), with short_open_tag on unless
+// PHEGO_LEXER_SHORT_OPEN_TAG is "0"; see
 // docs/implementation/W-09.md.
 func TestLexMatchesReferenceCorpus(t *testing.T) {
 	dir := os.Getenv("PHEGO_LEXER_CORPUS")
@@ -73,7 +74,7 @@ func TestLexMatchesReferenceCorpus(t *testing.T) {
 			t.Fatal(err)
 		}
 		files++
-		got, _, err := Lex(src, LexOptions{ShortOpenTag: true, IntWidth: width, MaxBytes: 1 << 24})
+		got, _, err := Lex(src, LexOptions{ShortOpenTag: os.Getenv("PHEGO_LEXER_SHORT_OPEN_TAG") != "0", IntWidth: width, MaxBytes: 1 << 24})
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}

@@ -1,0 +1,10 @@
+{
+  "sandbox": "/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-instructions-_0pinysl",
+  "mpfr_version": "4.2.2",
+  "cases": 200000,
+  "instruction_differences": 46,
+  "final_rn53_differences": 0,
+  "php_control_cases": 46,
+  "php_control_differences": 0,
+  "raw_sha256": "2397aad8c3f3b7502800a626a4287e6696c1a80ff3a0fb41f5aa4f17dcdc8ab4"
+}

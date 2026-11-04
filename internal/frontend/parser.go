@@ -1,19 +1,24 @@
 package frontend
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
-// MaxNesting bounds recursive syntax so hostile input cannot exhaust the Go
-// stack; deeper input is rejected with a located error. It matches the
-// default 10000-entry parser stack of the PHP 8.5.12 reference.
+// MaxNesting is the PHP 8.5.12 grammar-state stack limit. Go recursive calls
+// are counted separately: one parenthesized expression needs two Go frames.
 const MaxNesting = 10000
+
+const maxGoNesting = 4 * MaxNesting
+
+var errParserResourceLimit = errors.New("frontend: parser resource limit exceeded")
 
 const tEOF Kind = -1
 
 // Parse lexes and parses PHP 8.5.12 source into a syntax tree. A syntax
-// error returns *SyntaxError with the line PHP reports for it.
+// error returns *SyntaxError with a source line. CallerLocation marks the
+// exceptions whose displayed PHP location comes from its execution frame.
 func Parse(src []byte, opts LexOptions) (*Node, error) {
 	toks, diags, err := Lex(src, opts)
 	if err != nil {
@@ -45,7 +50,26 @@ func Parse(src []byte, opts LexOptions) (*Node, error) {
 			p.fatal[i] = d
 		}
 	}
-	return p.parse()
+	// A replay transition pushes at most one state. Below this bound the
+	// entire replay cannot fill PHP's stack, even if every step pushed.
+	// Larger inputs are checked before AST construction, including inputs
+	// whose later declaration error would otherwise hide earlier exhaustion.
+	if diagnosticWorkPerToken*(len(p.toks)+1)+1 >= MaxNesting {
+		diagnostic, complete := p.diagnoseSyntax()
+		if diagnostic != nil {
+			return nil, diagnostic
+		}
+		if !complete {
+			return nil, errParserResourceLimit
+		}
+	}
+	root, err := p.parse()
+	if se, ok := err.(*SyntaxError); ok && !se.Compile {
+		if detailed, _ := p.diagnoseSyntax(); detailed != nil {
+			err = detailed
+		}
+	}
+	return root, err
 }
 
 type parser struct {
@@ -64,7 +88,7 @@ type parser struct {
 	allowStatic bool
 }
 
-type parseFailure struct{ err *SyntaxError }
+type parseFailure struct{ err error }
 
 func (p *parser) parse() (root *Node, err error) {
 	defer func() {
@@ -91,7 +115,7 @@ func (p *parser) fail(line int, format string, args ...any) {
 
 func (p *parser) tok(i int) Token {
 	if d, ok := p.fatal[p.pos+i]; ok && i <= 1 {
-		p.fail(d.Line, "%s", d.Message)
+		panic(parseFailure{&SyntaxError{Line: d.Line, Message: d.Message, CallerLocation: d.CallerLocation}})
 	}
 	if p.pos+i < len(p.toks) {
 		return p.toks[p.pos+i]
@@ -197,8 +221,8 @@ func describe(t Token) string {
 
 func (p *parser) enter() {
 	p.depth++
-	if p.depth > MaxNesting {
-		p.fail(p.peek().Line, "syntax nesting exceeds %d levels", MaxNesting)
+	if p.depth > maxGoNesting {
+		panic(parseFailure{errParserResourceLimit})
 	}
 }
 
@@ -208,7 +232,9 @@ func isKeyword(k Kind) bool { return k >= TAbstract && k <= THaltCompiler }
 
 // isIdentifier reports tokens usable where PHP accepts semi-reserved words.
 // __halt_compiler is reserved even where other keywords are accepted.
-func isIdentifier(k Kind) bool { return k == TString || (isKeyword(k) && k != THaltCompiler) }
+func isIdentifier(k Kind) bool {
+	return k == TString || (isKeyword(k) && k != THaltCompiler && k != TPublicSet && k != TProtectedSet && k != TPrivateSet)
+}
 
 func isName(k Kind) bool {
 	return k == TString || k == TNameQualified || k == TNameFullyQualified || k == TNameRelative
@@ -280,7 +306,7 @@ func (p *parser) statementContext(top, single bool) *Node {
 		return p.block()
 	case ';', TCloseTag:
 		p.next()
-		return nil
+		return node("empty", t.Line)
 	case TInlineHTML:
 		p.next()
 		return leaf("inline_html", t)
@@ -681,19 +707,24 @@ func (p *parser) declareStatement() *Node {
 	t := p.next()
 	p.expect('(')
 	n := node("declare", t.Line)
+	invalidEncoding := false
 	for {
 		name := p.identifier()
 		p.expect('=')
 		v := p.expr()
-		if strings.EqualFold(name.Text, "encoding") && v.Kind != "literal" {
-			p.failCompile(p.peek().Line, "Encoding must be a literal")
+		if strings.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
+			invalidEncoding = true
 		}
 		n.Children = append(n.Children, node("directive", name.Line, name, v))
 		if !p.accept(',') {
 			break
 		}
 	}
-	p.expect(')')
+	closing := p.expect(')')
+	// PHP checks only after the complete directive list and closing token.
+	if invalidEncoding {
+		p.failCompile(closing.Line, "Encoding must be a literal")
+	}
 	switch {
 	case p.accept(':'):
 		body := p.altBody(TEnddeclare)
@@ -706,6 +737,37 @@ func (p *parser) declareStatement() *Node {
 		n.Children = append(n.Children, p.singleStatement())
 	}
 	return n
+}
+
+// encodingLiteral recognizes PHP's parse-time ZVAL expressions. Parentheses,
+// plain heredocs and concatenations of literals are already ZVALs in PHP's
+// syntax tree; general constant expressions (including unary +/-) are not.
+func encodingLiteral(n *Node) bool {
+	var local [32]*Node
+	pending := append(local[:0], n)
+	for len(pending) != 0 {
+		n = pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		switch n.Kind {
+		case "literal":
+		case "paren":
+			pending = append(pending, n.Children[0])
+		case "binary":
+			if n.Text != "." {
+				return false
+			}
+			// Visit the right operand first so left-associated chains need
+			// no growing Go call stack or pending-right-operand stack.
+			pending = append(pending, n.Children[0], n.Children[1])
+		case "heredoc":
+			if len(n.Children) != 1 && (len(n.Children) != 2 || n.Children[0].Kind != "string_part") {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func (p *parser) tryStatement() *Node {
@@ -1149,7 +1211,7 @@ func (p *parser) member() *Node {
 		return n
 	case p.at(TFunction):
 		p.checkModifiers(mods, targetMethod)
-		p.next()
+		functionLine := p.next().Line
 		byRef := p.byRef()
 		name := p.identifier()
 		params := p.parameters()
@@ -1158,7 +1220,7 @@ func (p *parser) member() *Node {
 		if !p.acceptSemi() {
 			body = p.block()
 		}
-		return &Node{Kind: "method", Text: byRef, Line: line, Children: []*Node{attrs, mods, name, params, ret, body}}
+		return &Node{Kind: "method", Text: byRef, Line: line, FunctionLine: functionLine, Children: []*Node{attrs, mods, name, params, ret, body}}
 	}
 	if len(mods.Children) == 0 {
 		p.unexpected()

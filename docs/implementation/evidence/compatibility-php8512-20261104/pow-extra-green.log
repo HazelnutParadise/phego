@@ -1,0 +1,6 @@
+=== RUN   TestResearchOracle
+    research_verify_test.go:18: new: 60000 cases, 0 differences
+    research_verify_test.go:18: int: 20000 cases, 0 differences
+--- PASS: TestResearchOracle (2.27s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	2.842s

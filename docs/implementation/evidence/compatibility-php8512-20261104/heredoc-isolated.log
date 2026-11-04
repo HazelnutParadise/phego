@@ -1,0 +1,8 @@
+=== RUN   TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically
+--- PASS: TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically (0.04s)
+=== RUN   TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically
+--- PASS: TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically (0.04s)
+=== RUN   TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically
+--- PASS: TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically (0.04s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/frontend	2.126s

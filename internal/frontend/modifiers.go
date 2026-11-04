@@ -1,6 +1,10 @@
 package frontend
 
-import "strings"
+import (
+	"fmt"
+	"iter"
+	"strings"
+)
 
 // Modifier targets, named as PHP 8.5.12 names them in errors.
 const (
@@ -32,25 +36,48 @@ func (p *parser) checkModifiers(mods *Node, target string) {
 	if mods == nil || len(mods.Children) == 0 {
 		return
 	}
-	line := p.peek().Line
+	// `var` is property-only grammar. In other member declarations the
+	// original parser reports the following token, before semantic checking.
+	if target != targetProperty && target != targetParameter && target != targetPropertyHook {
+		for _, m := range mods.Children {
+			if kindOfModifier(m.Text) == TVar {
+				p.unexpected()
+			}
+		}
+	}
+	if err := validateModifiers(modifierTokens(mods), target, p.peek().Line); err != nil {
+		panic(parseFailure{err})
+	}
+}
+
+func modifierTokens(mods *Node) iter.Seq[Token] {
+	return func(yield func(Token) bool) {
+		for _, m := range mods.Children {
+			if !yield(Token{Kind: kindOfModifier(m.Text), Text: m.Text, Line: m.Line}) {
+				return
+			}
+		}
+	}
+}
+
+// validateModifiers is shared by AST construction and error-only grammar
+// replay. The caller supplies the scanner position at the target reduction.
+func validateModifiers(tokens iter.Seq[Token], target string, line int) *SyntaxError {
+	fail := func(format string, args ...any) *SyntaxError {
+		return &SyntaxError{Line: line, Message: fmt.Sprintf(format, args...), Compile: true}
+	}
 	seen := map[string]bool{}
-	for _, m := range mods.Children {
-		k := kindOfModifier(m.Text)
+	for m := range tokens {
+		k := m.Kind
 		allowed := false
 		for _, t := range modifierTargets[k] {
 			allowed = allowed || t == target
 		}
 		if !allowed && k == TVar {
-			// var is property-only grammar, so misplacing it is a syntax
-			// error: at var itself where no member modifiers are allowed,
-			// otherwise at the token after the list.
-			if target == targetParameter || target == targetPropertyHook {
-				p.fail(m.Line, "syntax error, unexpected token %q", m.Text)
-			}
-			p.unexpected()
+			return &SyntaxError{Line: m.Line, Message: fmt.Sprintf("syntax error, unexpected token %q", m.Text)}
 		}
 		if !allowed {
-			p.failCompile(line, "Cannot use the %s modifier on a %s", strings.ToLower(m.Text), target)
+			return fail("Cannot use the %s modifier on a %s", strings.ToLower(m.Text), target)
 		}
 		group := strings.ToLower(m.Text)
 		switch k {
@@ -61,15 +88,16 @@ func (p *parser) checkModifiers(mods *Node, target string) {
 		}
 		if seen[group] {
 			if strings.HasSuffix(group, "access") {
-				p.failCompile(line, "Multiple access type modifiers are not allowed")
+				return fail("Multiple access type modifiers are not allowed")
 			}
-			p.failCompile(line, "Multiple %s modifiers are not allowed", group)
+			return fail("Multiple %s modifiers are not allowed", group)
 		}
 		seen[group] = true
 		if seen["abstract"] && seen["final"] {
-			p.failCompile(line, "Cannot use the final modifier on an abstract %s", target)
+			return fail("Cannot use the final modifier on an abstract %s", target)
 		}
 	}
+	return nil
 }
 
 // checkClassModifiers covers named and anonymous class declarations.
@@ -77,21 +105,35 @@ func (p *parser) checkClassModifiers(mods *Node, anonymous bool) {
 	if mods == nil {
 		return
 	}
-	line := p.peek().Line
+	if err := validateClassModifiers(modifierTokens(mods), anonymous, p.peek().Line); err != nil {
+		// Class modifier reductions may fail before reading the next line.
+		// Replay only the rejected input to preserve that exact error order.
+		if detailed, _ := p.diagnoseSyntax(); detailed != nil {
+			err = detailed
+		}
+		panic(parseFailure{err})
+	}
+}
+
+func validateClassModifiers(tokens iter.Seq[Token], anonymous bool, line int) *SyntaxError {
+	fail := func(format string, args ...any) *SyntaxError {
+		return &SyntaxError{Line: line, Message: fmt.Sprintf(format, args...), Compile: true}
+	}
 	seen := map[string]bool{}
-	for _, m := range mods.Children {
+	for m := range tokens {
 		name := strings.ToLower(m.Text)
 		if anonymous && name != "readonly" {
-			p.failCompile(line, "Cannot use the %s modifier on an anonymous class", name)
+			return fail("Cannot use the %s modifier on an anonymous class", name)
 		}
 		if seen[name] {
-			p.failCompile(line, "Multiple %s modifiers are not allowed", name)
+			return fail("Multiple %s modifiers are not allowed", name)
 		}
 		seen[name] = true
 		if seen["abstract"] && seen["final"] {
-			p.failCompile(line, "Cannot use the final modifier on an abstract class")
+			return fail("Cannot use the final modifier on an abstract class")
 		}
 	}
+	return nil
 }
 
 func kindOfModifier(text string) Kind {

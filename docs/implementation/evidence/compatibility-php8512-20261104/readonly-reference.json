@@ -1,0 +1,34 @@
+[
+  {
+    "name": "promoted-readonly",
+    "source": "<?php abstract class A { protected abstract int $prop { get; set; } } class B extends A { function __construct(protected readonly int $prop) {} }",
+    "events": [
+      {
+        "level": "Fatal error",
+        "message": "Class B contains 1 abstract method and must therefore be declared abstract or implement the remaining method (A::$prop::set)",
+        "line": 1
+      }
+    ]
+  },
+  {
+    "name": "plain-readonly",
+    "source": "<?php abstract class A { protected abstract int $prop { get; set; } } class B extends A { protected readonly int $prop; }",
+    "events": [
+      {
+        "level": "Fatal error",
+        "message": "Class B contains 1 abstract method and must therefore be declared abstract or implement the remaining method (A::$prop::set)",
+        "line": 1
+      }
+    ]
+  },
+  {
+    "name": "promoted-mutable",
+    "source": "<?php abstract class A { protected abstract int $prop { get; set; } } class B extends A { function __construct(protected int $prop) {} }",
+    "events": []
+  },
+  {
+    "name": "plain-mutable",
+    "source": "<?php abstract class A { protected abstract int $prop { get; set; } } class B extends A { protected int $prop; }",
+    "events": []
+  }
+]

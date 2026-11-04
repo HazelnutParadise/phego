@@ -240,4 +240,7 @@ type Diagnostic struct {
 	Message string
 	Fatal   bool
 	Token   int // index of the token the problem belongs to
+	// CallerLocation is propagated to SyntaxError without replacing its
+	// source anchor with a PHP execution-frame location.
+	CallerLocation bool
 }
