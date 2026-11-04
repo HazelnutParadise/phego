@@ -3,6 +3,7 @@
 import argparse
 import gzip
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -74,6 +75,7 @@ foreach(array_chunk($files,200) as $chunk) {
 ''')
         name = "phego-compile-oracle-" + uuid.uuid4().hex
         command = ["docker", "run", "--pull=never", "--rm", "--name", name,
+                   "--user", f"{os.getuid()}:{os.getgid()}",
                    "--network=none", "--read-only", "--cap-drop=ALL",
                    "--security-opt=no-new-privileges", "--pids-limit=32", "--memory=256m", "--cpus=1",
                    "--platform", platform, "-v", directory + ":/w:ro", image, "php", "-n", "/w/run.php"]
@@ -121,6 +123,14 @@ def main(argv=None):
                 raise ValueError("fixture changed during reference execution")
         print(f"PASS {total} reference cases; compilation evidence only")
         return 0
+    except subprocess.CalledProcessError as exc:
+        print(f"compile reference failed: {exc}", file=sys.stderr)
+        for stream, output in (("stdout", exc.stdout), ("stderr", exc.stderr)):
+            if output:
+                detail = output[:4096].decode(errors="replace")
+                suffix = " [truncated]" if len(output) > 4096 else ""
+                print(f"{stream}: {detail}{suffix}", file=sys.stderr)
+        return 1
     except (OSError, ValueError, KeyError, TypeError, RuntimeError, subprocess.SubprocessError) as exc:
         print(f"compile reference failed: {exc}", file=sys.stderr)
         return 1

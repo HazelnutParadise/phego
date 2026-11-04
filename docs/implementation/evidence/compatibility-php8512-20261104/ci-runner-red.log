@@ -1,0 +1,31 @@
+F...E.
+======================================================================
+ERROR: test_private_workspace_remains_readable_without_root_capabilities (test_verify_compile_fixtures.CompileFixtureTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w08-sdk/phego/tools/test_verify_compile_fixtures.py", line 59, in test_private_workspace_remains_readable_without_root_capabilities
+    self.assertEqual(collect([{'source': '<?php echo 1;'}], 32, 30), [[]])
+  File "/Users/timlai/.codex/worktrees/w08-sdk/phego/tools/verify_compile_fixtures.py", line 81, in collect
+    result = subprocess.run(command, capture_output=True, timeout=timeout, check=True)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1093, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1097, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/mock.py", line 1158, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/timlai/.codex/worktrees/w08-sdk/phego/tools/test_verify_compile_fixtures.py", line 52, in docker
+    raise subprocess.CalledProcessError(1, command, stderr=b'Could not open input file: /w/run.php')
+subprocess.CalledProcessError: Command '['docker', 'run', '--pull=never', '--rm', '--name', 'phego-compile-oracle-41f714bb51374955b066bcd5d4a09e56', '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--pids-limit=32', '--memory=256m', '--cpus=1', '--platform', 'linux/386', '-v', '/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-compile-oracle-q2ej_kfo:/w:ro', 'i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049', 'php', '-n', '/w/run.php']' returned non-zero exit status 1.
+
+======================================================================
+FAIL: test_failed_runner_preserves_bounded_diagnostics_and_cleanup (test_verify_compile_fixtures.CompileFixtureTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w08-sdk/phego/tools/test_verify_compile_fixtures.py", line 78, in test_failed_runner_preserves_bounded_diagnostics_and_cleanup
+    self.assertIn('OUT\ufffd', text)
+AssertionError: 'OUT�' not found in "compile reference failed: Command '['docker', 'run', '--pull=never', '--rm', '--name', 'phego-compile-oracle-25f8c7ce70b842b993669ec4754963e0', '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--pids-limit=32', '--memory=256m', '--cpus=1', '--platform', 'linux/386', '-v', '/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/phego-compile-oracle-m6di8psz:/w:ro', 'i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049', 'php', '-n', '/w/run.php']' returned non-zero exit status 1.\n"
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.006s
+
+FAILED (failures=1, errors=1)

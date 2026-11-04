@@ -1,0 +1,3 @@
+{"prepared_workspace": "1001:1001:700"}
+{"user": "0:0", "exit_code": 1, "stdout": "", "stderr": "Could not open input file: /tmp/fixture/run.php\n"}
+{"user": "1001:1001", "exit_code": 0, "stdout": "123", "stderr": ""}

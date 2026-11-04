@@ -1,0 +1,6 @@
+reference	Verify constant compilation fixtures on both PHP widths	﻿2026-11-04T03:28:37.1249964Z ##[group]Run python3 tools/verify_compile_fixtures.py
+reference	Verify constant compilation fixtures on both PHP widths	2026-11-04T03:28:37.1251619Z ^[[36;1mpython3 tools/verify_compile_fixtures.py^[[0m
+reference	Verify constant compilation fixtures on both PHP widths	2026-11-04T03:28:37.1273547Z shell: /usr/bin/bash -e {0}
+reference	Verify constant compilation fixtures on both PHP widths	2026-11-04T03:28:37.1274552Z ##[endgroup]
+reference	Verify constant compilation fixtures on both PHP widths	2026-11-04T03:28:47.7400298Z compile reference failed: Command '['docker', 'run', '--pull=never', '--rm', '--name', 'phego-compile-oracle-f386bd109ab84c1eb12e578af27d0d8c', '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--pids-limit=32', '--memory=256m', '--cpus=1', '--platform', 'linux/386', '-v', '/tmp/phego-compile-oracle-10u5zndo:/w:ro', 'i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049', 'php', '-n', '/w/run.php']' returned non-zero exit status 1.
+reference	Verify constant compilation fixtures on both PHP widths	2026-11-04T03:28:47.7495278Z ##[error]Process completed with exit code 1.
