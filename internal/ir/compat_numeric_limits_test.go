@@ -36,7 +36,11 @@ func TestCompatibilityNumericLimits(t *testing.T) {
 // Resource exhaustion is a host limit, distinct from PHP's CompileError and
 // from a dynamic expression whose evaluation is deferred until execution.
 func TestCompatibilityConstantResourceLimit(t *testing.T) {
-	src := "<?php (!(" + strings.TrimSuffix(strings.Repeat(`"`+strings.Repeat("a", 4096)+`" . `, 128), " . ") + "))::class;"
+	parts := make([]string, 512)
+	for i := range parts {
+		parts[i] = fmt.Sprintf("['k%d'=>%d]", i, i)
+	}
+	src := "<?php (!(" + strings.Join(parts, "+") + "))::class;"
 	_, err := lowerSource(src, 64)
 	var phpError *CompileError
 	if err == nil || errors.As(err, &phpError) || !strings.Contains(err.Error(), "constant evaluation resource limit") {
@@ -46,6 +50,17 @@ func TestCompatibilityConstantResourceLimit(t *testing.T) {
 	_, err = lowerSource(strings.Replace(src, "(!(", "(false && !(", 1), 64)
 	if !errors.As(err, &phpError) || phpError.Message != `Cannot use "::class" on false` {
 		t.Fatalf("short circuit: %v", err)
+	}
+}
+
+// A concatenation chain costs its result length, as in PHP, not the sum of
+// every intermediate string. PHP 8.5.12 folds this 512 KiB chain.
+func TestCompatibilityLongConcatenationFolds(t *testing.T) {
+	src := "<?php (!(" + strings.TrimSuffix(strings.Repeat(`"`+strings.Repeat("a", 4096)+`" . `, 128), " . ") + "))::class;"
+	_, err := lowerSource(src, 64)
+	var phpError *CompileError
+	if !errors.As(err, &phpError) || phpError.Message != `Cannot use "::class" on false` {
+		t.Fatalf("got %T: %v", err, err)
 	}
 }
 

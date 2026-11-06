@@ -2,16 +2,19 @@ package ir
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
 )
 
 // These are host work limits, not PHP diagnostics. Each expression has its own
-// budget, sized from its source graph. No request state is shared or cached.
-const (
-	compileConstMaxWork  = 1 << 20
-	compileConstMaxBytes = 32 << 20
-)
+// budget, linear in its source graph: every evaluated node and memo entry
+// costs work and every operation charges the bytes it creates, so evaluation
+// that PHP performs in linear time fits. No request state is shared or cached.
+func sizedCompileBudget(size, sourceBytes int64) *compileBudget {
+	clamp := func(v int64) int { return int(min(v, int64(math.MaxInt))) }
+	return &compileBudget{work: clamp(8 * (size + (sourceBytes+63)/64)), bytes: clamp(8*sourceBytes + 64*size)}
+}
 
 type constantLimitError struct{ line int }
 
@@ -63,13 +66,12 @@ func (b *compileBudget) depth(depth int) bool {
 	return !b.exhausted
 }
 
-// Scan metadata once; the bounded seen map also handles shared HIR subtrees.
-// Saturate source size before arithmetic. Large existing literals consume no
-// allocation budget until an operation actually creates another payload.
+// Scan metadata once; the seen map also handles shared HIR subtrees. Large
+// existing literals consume no allocation budget until an operation actually
+// creates another payload.
 func newCompileBudget(root *Node) *compileBudget {
-	b := &compileBudget{}
 	seen := make(map[*Node]struct{})
-	edges, sourceBytes := 0, 0
+	var edges, sourceBytes int64
 	stack := []*Node{root}
 	for len(stack) != 0 {
 		i := len(stack) - 1
@@ -82,19 +84,13 @@ func newCompileBudget(root *Node) *compileBudget {
 			continue
 		}
 		seen[n] = struct{}{}
-		if len(seen) > compileConstMaxTreeNodes || len(n.Kids) > compileConstMaxTreeNodes-edges {
-			return &compileBudget{work: compileConstMaxWork, bytes: compileConstMaxBytes}
-		}
-		edges += len(n.Kids)
+		edges += int64(len(n.Kids))
 		if n.Value != nil && n.Value.Kind == LitString {
-			sourceBytes = min(compileConstMaxBytes, sourceBytes+min(compileConstMaxBytes, len(n.Value.Str)))
+			sourceBytes += int64(len(n.Value.Str))
 		}
 		stack = append(stack, n.Kids...)
 	}
-	size := len(seen) + edges
-	b.work = min(compileConstMaxWork, 8*(size+(sourceBytes+63)/64))
-	b.bytes = min(compileConstMaxBytes, 8*sourceBytes+64*size)
-	return b
+	return sizedCompileBudget(int64(len(seen))+edges, sourceBytes)
 }
 
 // Metadata scanning estimates capacity only. An unselected large subtree must
@@ -102,7 +98,7 @@ func newCompileBudget(root *Node) *compileBudget {
 // and depth, including memo hits.
 func newSyntaxCompileBudget(root *frontend.Node) *compileBudget {
 	seen := make(map[*frontend.Node]struct{})
-	edges, sourceBytes := 0, 0
+	var edges, sourceBytes int64
 	stack := []*frontend.Node{root}
 	for len(stack) > 0 {
 		i := len(stack) - 1
@@ -115,15 +111,11 @@ func newSyntaxCompileBudget(root *frontend.Node) *compileBudget {
 			continue
 		}
 		seen[n] = struct{}{}
-		if len(seen) > compileConstMaxTreeNodes || len(n.Children) > compileConstMaxTreeNodes-edges {
-			return &compileBudget{work: compileConstMaxWork, bytes: compileConstMaxBytes}
-		}
-		edges += len(n.Children)
-		sourceBytes = min(compileConstMaxBytes, sourceBytes+min(compileConstMaxBytes, len(n.Text)))
+		edges += int64(len(n.Children))
+		sourceBytes += int64(len(n.Text))
 		stack = append(stack, n.Children...)
 	}
-	size := len(seen) + edges
-	return &compileBudget{work: min(compileConstMaxWork, 8*(size+(sourceBytes+63)/64)), bytes: min(compileConstMaxBytes, 8*sourceBytes+64*size)}
+	return sizedCompileBudget(int64(len(seen))+edges, sourceBytes)
 }
 
 type compileMemoEntry struct {
@@ -146,20 +138,15 @@ func (l *lowerer) evaluateConstant(n *Node) (compileConst, bool) {
 
 // probeConstant answers whether run-time code compiles n to a constant, for
 // the conversions PHP applies to such operands (string conversion of a
-// member or concatenation operand, method name and class checks). These
-// probes never fail compilation: a concatenation or interpolation is a
-// string and needs no evaluation, and an operand beyond its own budget is
-// computed at run time, where the same conversion still happens.
+// member or concatenation operand, method name and class checks). A
+// concatenation or interpolation is a string and needs no evaluation. Other
+// operands share the expression's memo and budget, so repeated probes of
+// nested operands stay linear; exceeding the budget is a host limit.
 func (l *lowerer) probeConstant(n *Node) (compileConst, bool) {
 	if n == nil || n.Op == OpInterp || n.Op == OpBinary && n.Text == "." {
 		return compileConst{}, false
 	}
-	b := newCompileBudget(n)
-	v, known := l.compileConst(n, 0, b)
-	if b.exhausted {
-		return compileConst{}, false
-	}
-	return v, known
+	return l.evaluateConstant(n)
 }
 
 // Completed unknown results are memoized too. Height records the deepest
@@ -176,10 +163,6 @@ func (l *lowerer) compileConst(n *Node, depth int, b *compileBudget) (value comp
 			b.depths[i] = max(b.depths[i], depth+entry.height)
 		}
 		return entry.value, entry.known
-	}
-	if len(b.memo)+len(b.syntax)+len(b.depths) >= compileConstMaxTreeNodes {
-		b.exhausted = true
-		return
 	}
 	if b.memo == nil {
 		b.memo = make(map[*Node]compileMemoEntry)

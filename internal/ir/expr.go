@@ -170,7 +170,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		l.fn.DynamicScope = true
 		nd := &Node{Op: OpVarVar, Line: n.Line, Kids: []*Node{l.expr(c[0])}}
 		// zend_compile_simple_var_no_cv converts a constant name to a string.
-		l.convertName(nd, 0)
+		l.convertName(nd, 0, c[0])
 		l.flag(nd, ctx)
 		return l.seal(nd)
 	case "dim":
@@ -213,7 +213,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			nd.Text = v.Text[1:]
 		} else {
 			nd.Kids[1] = l.expr(v.Children[0])
-			l.convertMemberName(nd)
+			l.convertName(nd, 1, v.Children[0])
 		}
 		l.flag(nd, ctx)
 		return l.seal(nd)
@@ -238,9 +238,19 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
 			}
 			nd.Name = name
-		} else if v, isString, ok := parseTimeValue(cls); ok && isString && specialClass(v) == "" {
-			// A string the parser holds is a fully qualified class name.
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: strings.TrimPrefix(v, "\\")}})
+		} else if v, isString, ok := parseTimeValue(cls); ok && isString {
+			// zend_try_compile_const_expr_resolve_class_name: a string the
+			// parser holds names self, parent or static, which must be valid
+			// here, or is a fully qualified class name.
+			special := specialClass(v)
+			if special == "" {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.fullyQualifiedClass(v)}})
+			}
+			l.ensureClassFetch(special, l.cur)
+			if special == "self" && l.class != nil && !l.class.Anonymous && l.scopeKnown() {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
+			}
+			nd.Name = l.ns.resolveClass(special)
 		} else {
 			nd.Kids[0] = l.expr(cls)
 			if k := l.compileClassKind(nd.Kids[0]); k != "" {
@@ -356,6 +366,11 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		return l.node(OpClone, n.Line, l.expr(c[0]))
 	case "instanceof":
 		nd := &Node{Op: OpInstanceof, Line: n.Line, Kids: []*Node{l.expr(c[0]), nil}}
+		// zend_compile_instanceof folds a constant object operand to false
+		// without compiling the class.
+		if _, known := l.evaluateConstant(nd.Kids[0]); known {
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}})
+		}
 		l.classOperandAt(nd, 1, c[1])
 		return l.seal(nd)
 	case "call":
@@ -377,6 +392,10 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		}
 		return l.seal(nd)
 	case "closure", "arrow_function":
+		if nd, ok := l.constClosures[n]; ok {
+			delete(l.constClosures, n)
+			return nd
+		}
 		return l.closure(n)
 	case "match":
 		return l.match(n)
@@ -503,22 +522,17 @@ func (l *lowerer) memberName(nd *Node, name *frontend.Node) {
 		return
 	}
 	nd.Kids[1] = l.expr(name)
-	l.convertMemberName(nd)
+	l.convertName(nd, 1, name)
 }
 
-// convertMemberName applies the convert_to_string that
-// zend_delayed_compile_prop and zend_compile_static_prop perform on a name
-// compiled to a constant. Only conversions that warn are folded here; a
-// name PHP leaves for execution keeps its expression.
-func (l *lowerer) convertMemberName(nd *Node) {
-	l.convertName(nd, 1)
-}
-
-// convertName folds kid i of nd, a name PHP converts to a string while
-// compiling the fetch, when that conversion warns. A property or static
-// property keeps the result as its literal Text; a variable variable keeps
-// a string literal operand.
-func (l *lowerer) convertName(nd *Node, i int) {
+// convertName applies the convert_to_string that zend_delayed_compile_prop,
+// zend_compile_static_prop, zend_compile_simple_var_no_cv and
+// zend_compile_global_var perform on kid i of nd, the name compiled from
+// source, when it is a constant. Only conversions that warn are folded
+// here; a name PHP leaves for execution keeps its expression. A property
+// or static property keeps the result as its literal Text; a variable
+// variable or global keeps a string literal operand.
+func (l *lowerer) convertName(nd *Node, i int, source *frontend.Node) {
 	v, known := l.probeConstant(nd.Kids[i])
 	if !known {
 		return
@@ -533,9 +547,8 @@ func (l *lowerer) convertName(nd *Node, i int) {
 	default:
 		return
 	}
-	line := l.cur
-	l.diag(line, "Warning", warning)
-	if nd.Op == OpVarVar {
+	l.diag(l.cur, "Warning", warning)
+	if nd.Op == OpVarVar || nd.Op == OpGlobal {
 		nd.Kids[i] = l.seal(&Node{Op: OpLiteral, Line: nd.Kids[i].Line, Value: &Literal{Kind: LitString, Str: text}})
 	} else {
 		nd.Text, nd.Kids[i] = text, nil
@@ -543,7 +556,9 @@ func (l *lowerer) convertName(nd *Node, i int) {
 	if l.nameWarnings == nil {
 		l.nameWarnings = make(map[*Node]nameWarning)
 	}
-	l.nameWarnings[nd] = nameWarning{line, warning}
+	// A second compilation starts at the name's own line
+	// (zend_compile_expr_inner sets CG(zend_lineno) to it).
+	l.nameWarnings[nd] = nameWarning{l.zline(source), warning}
 }
 
 type nameWarning struct {
@@ -591,21 +606,61 @@ func (l *lowerer) classOperandAt(nd *Node, i int, cls *frontend.Node) {
 		nd.Name = l.classRef(cls)
 		return
 	}
-	l.checkStringClassName(cls)
+	parsed := l.checkStringClassName(cls)
 	nd.Kids[i] = l.expr(cls)
 	// zend_compile_class_ref rejects a class expression compiled to a
-	// constant other than a string.
+	// constant other than a string. A constant string names self, parent or
+	// static, which must be valid here, or is a fully qualified name.
 	if k := l.probeClassKind(nd.Kids[i]); k != "" && k != "string" {
 		l.fail(l.cur, "Illegal class name")
+	}
+	if parsed {
+		return
+	}
+	if v, known := l.probeConstant(nd.Kids[i]); known && v.value != nil && v.value.Kind == LitString {
+		if special := specialClass(v.value.Str); special != "" {
+			l.ensureClassFetch(special, l.cur)
+			nd.Name, nd.Kids[i] = l.ns.resolveClass(special), nil
+		} else {
+			l.fullyQualifiedClass(v.value.Str)
+		}
 	}
 }
 
 // checkStringClassName applies zend_resolve_class_name to a string the
-// parser already holds: as a fully qualified name it cannot be self,
-// parent or static.
-func (l *lowerer) checkStringClassName(cls *frontend.Node) {
-	if v, isString, ok := parseTimeValue(cls); ok && isString && specialClass(v) != "" {
+// parser already holds, reporting whether cls is one.
+func (l *lowerer) checkStringClassName(cls *frontend.Node) bool {
+	v, isString, ok := parseTimeValue(cls)
+	if ok && isString {
+		l.fullyQualifiedClass(v)
+	}
+	return ok && isString
+}
+
+// fullyQualifiedClass is zend_resolve_class_name for a string compiled as a
+// fully qualified class name: one leading backslash is removed, and the
+// name cannot be self, parent or static.
+func (l *lowerer) fullyQualifiedClass(v string) string {
+	if specialClass(v) == "" && strings.HasPrefix(v, "\\") {
+		v = v[1:]
+	}
+	if specialClass(v) != "" {
 		l.fail(l.cur, "'\\%s' is an invalid class name", v)
+	}
+	return v
+}
+
+// ensureClassFetch is zend_ensure_valid_class_fetch_type for self, parent or
+// static where the scope is known at compile time.
+func (l *lowerer) ensureClassFetch(special string, line int) {
+	if !l.scopeKnown() {
+		return
+	}
+	if l.class == nil {
+		l.fail(line, "Cannot use \"%s\" when no class scope is active", special)
+	}
+	if special == "parent" && l.class.Parent == nil {
+		l.fail(line, "Cannot use \"parent\" when current class scope has no parent")
 	}
 }
 
@@ -855,7 +910,12 @@ func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 		}
 		l.constants.memo[nd] = compileMemoEntry{value: entry.value, known: true, height: entry.height}
 	} else {
-		l.evaluateConstant(nd)
+		_, entry.known = l.evaluateConstant(nd)
+	}
+	if entry.known {
+		// zend_try_ct_eval_array folds a constant array without compiling
+		// its elements, so the line stays at the array.
+		l.cur = l.zline(n)
 	}
 	return l.seal(nd)
 }
@@ -1310,6 +1370,10 @@ func (l *lowerer) constExpr(n *frontend.Node, dynamic bool) *Node {
 		defer func() { l.constants = nil }()
 	}
 	l.preEvaluateSyntax(n)
+	if l.constClosures == nil {
+		l.constClosures = make(map[*frontend.Node]*Node)
+		defer func() { l.constClosures = nil }()
+	}
 	l.checkConstExpr(n, dynamic)
 	saved := l.inConstExpr
 	line := l.cur
@@ -1457,13 +1521,24 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		return
 	case "class_name":
 		cls := unparen(c[0])
-		if _, isString, ok := parseTimeValue(cls); c[0].Kind != "name" && !(ok && isString) {
+		v, isString, ok := parseTimeValue(cls)
+		if c[0].Kind != "name" && !(ok && isString) {
 			l.fail(n.Line, "(expression)::class cannot be used in constant expressions")
 		}
-		if specialClass(cls.Text) == "static" {
+		special := specialClass(cls.Text)
+		if c[0].Kind != "name" {
+			// zend_try_compile_const_expr_resolve_class_name checks a
+			// parser-held string before zend_compile_const_expr_class_name.
+			if special = specialClass(v); special == "" {
+				l.fullyQualifiedClass(v)
+			} else {
+				l.ensureClassFetch(special, n.Line)
+			}
+		}
+		if special == "static" {
 			l.fail(n.Line, "static::class cannot be used for compile-time class name resolution")
 		}
-		if specialClass(cls.Text) == "parent" && l.class != nil && l.class.Kind != KindTrait && l.class.Parent == nil {
+		if special == "parent" && l.class != nil && l.class.Kind != KindTrait && l.class.Parent == nil {
 			l.fail(n.Line, "Cannot use \"parent\" when current class scope has no parent")
 		}
 		return
@@ -1489,6 +1564,14 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		}
 		if c[3] != nil {
 			l.fail(n.Line, "Cannot use(...) variables in constant expression")
+		}
+		if l.constClosures != nil {
+			// zend_compile_const_expr compiles a closure where it reaches
+			// it, so its body reports before later operands.
+			saved, line := l.inConstExpr, l.cur
+			l.inConstExpr = true
+			l.constClosures[n] = l.closure(n)
+			l.inConstExpr, l.cur = saved, line
 		}
 		return
 	case "call", "static_call":

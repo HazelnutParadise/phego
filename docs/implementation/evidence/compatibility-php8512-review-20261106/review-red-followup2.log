@@ -1,0 +1,179 @@
+# go test (new scale, NaN and fixture tests) against c98cc07, with the new test files and fixture overlaid
+=== RUN   TestConstantEvaluationScalesLinearly
+=== RUN   TestConstantEvaluationScalesLinearly/large_variable_array
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/constant_concat_chain
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 80
+=== RUN   TestConstantEvaluationScalesLinearly/class_constant_concat
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 80
+=== RUN   TestConstantEvaluationScalesLinearly/concat_left_of_and
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 80
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_variables
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_literals
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/array_concat_chain
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/long_add_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_concat_and_add
+    compat_constant_scale_test.go:46: int32: took 19.227828667s
+=== RUN   TestConstantEvaluationScalesLinearly/logical_or
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/large_literal_array
+    compat_constant_scale_test.go:43: int32: ir: constant evaluation resource limit exceeded at line 2
+--- FAIL: TestConstantEvaluationScalesLinearly (19.48s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/large_variable_array (0.11s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/constant_concat_chain (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/class_constant_concat (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/concat_left_of_and (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/logical_and_of_variables (0.01s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/logical_and_of_literals (0.01s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/array_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/long_add_chain_name (0.01s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/alternating_concat_and_add (19.23s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/logical_or (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/large_literal_array (0.10s)
+=== RUN   TestConstantLongChainKeepsNaNWarning
+    compat_constant_scale_test.go:61: got []
+--- FAIL: TestConstantLongChainKeepsNaNWarning (0.20s)
+=== RUN   TestCompatibilityConstantResourceLimit
+--- PASS: TestCompatibilityConstantResourceLimit (0.01s)
+=== RUN   TestCompatibilityLongConcatenationFolds
+    compat_numeric_limits_test.go:63: got *ir.constantLimitError: ir: constant evaluation resource limit exceeded at line 1
+--- FAIL: TestCompatibilityLongConcatenationFolds (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir	21.684s
+FAIL
+
+=== RUN   TestCompatibilityReviewOracle
+    compat_review_oracle_test.go:10: width=32 <?php 
+        var_dump(1 instanceof (null));: got line2 "Illegal class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        var_dump(null instanceof ('self'));: got line2 "'\\self' is an invalid class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        var_dump('a' instanceof ([1]));: got line2 "Illegal class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        var_dump(1 instanceof ($o->{[1]}));: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() { return null instanceof self; }: got line2 "Cannot use \"self\" when no class scope is active"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        ('\self')::f();: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        echo ('\self')::class;: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = ('\self')::C;: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        new ('\parent');: got line0 ""; want line2 "'\\parent' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $x = 1 instanceof
+        ('self');: got line2 "'\\self' is an invalid class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() { return ('self')::class; }: got line0 ""; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { function f() { return ('parent')::class; } }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = ('static')::class; }: got line0 ""; want line2 "static::class cannot be used for compile-time class name resolution"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = ('parent')::class; }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() { ('self' | '')::g(); }: got line0 ""; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        ('\self' | '')::g();: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { function f() { new ('parent' | ''); } }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $o = new stdClass;
+        $o->{[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $o = new stdClass;
+        $o->{[1,
+        2]};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $o = new stdClass;
+        A::${[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        ${[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $o = new stdClass;
+        $o->{[1,
+        2]}();: got line4 "Method name must be a string"; want line3 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        new ([1,
+        2]);: got line3 "Illegal class name"; want line2 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = [static function () { break; }, $y];: got line2 "Constant expression contains invalid operations"; want line2 "'break' not in the 'loop' or 'switch' context"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() { global ${[1]}; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php function f() { return [1] instanceof static; }: got line1 "Cannot use \"static\" when no class scope is active"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php function f() { global ${1e999-1e999}; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        var_dump(1 instanceof (null));: got line2 "Illegal class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        var_dump(null instanceof ('self'));: got line2 "'\\self' is an invalid class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        var_dump('a' instanceof ([1]));: got line2 "Illegal class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        var_dump(1 instanceof ($o->{[1]}));: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        function f() { return null instanceof self; }: got line2 "Cannot use \"self\" when no class scope is active"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        ('\self')::f();: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        echo ('\self')::class;: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        const X = ('\self')::C;: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        new ('\parent');: got line0 ""; want line2 "'\\parent' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        $x = 1 instanceof
+        ('self');: got line2 "'\\self' is an invalid class name"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        function f() { return ('self')::class; }: got line0 ""; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        class A { function f() { return ('parent')::class; } }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        class A { const X = ('static')::class; }: got line0 ""; want line2 "static::class cannot be used for compile-time class name resolution"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        class A { const X = ('parent')::class; }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        function f() { ('self' | '')::g(); }: got line0 ""; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        ('\self' | '')::g();: got line0 ""; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        class A { function f() { new ('parent' | ''); } }: got line0 ""; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        $o = new stdClass;
+        $o->{[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        $o = new stdClass;
+        $o->{[1,
+        2]};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        $o = new stdClass;
+        A::${[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        ${[1] +
+        [2]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php 
+        $o = new stdClass;
+        $o->{[1,
+        2]}();: got line4 "Method name must be a string"; want line3 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        new ([1,
+        2]);: got line3 "Illegal class name"; want line2 "Illegal class name"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        const X = [static function () { break; }, $y];: got line2 "Constant expression contains invalid operations"; want line2 "'break' not in the 'loop' or 'switch' context"
+    compat_review_oracle_test.go:10: width=64 <?php 
+        function f() { global ${[1]}; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php function f() { return [1] instanceof static; }: got line1 "Cannot use \"static\" when no class scope is active"; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php function f() { global ${1e999-1e999}; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: 704 cases, 54 differences
+--- FAIL: TestCompatibilityReviewOracle (0.07s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir	0.292s
+FAIL

@@ -118,6 +118,9 @@ type lowerer struct {
 	namedParamRefs map[*Func]map[string]bool
 	// inConstExpr is set while compiling a constant expression.
 	inConstExpr bool
+	// constClosures holds the closures a constant expression compiled where
+	// zend_compile_const_expr reaches them, before the rest is lowered.
+	constClosures map[*frontend.Node]*Node
 	// seen records the symbols declared so far in the namespace, which a
 	// later import may not shadow, as PHP's seen_symbols.
 	seen   map[string]bool
@@ -744,7 +747,9 @@ func (l *lowerer) globalVar(v *frontend.Node) *Node {
 		return &Node{Op: OpGlobal, Line: v.Line, Var: vr, Text: name}
 	}
 	l.fn.DynamicScope = true
-	return &Node{Op: OpGlobal, Line: v.Line, Kids: []*Node{l.expr(v.Children[0])}}
+	nd := &Node{Op: OpGlobal, Line: v.Line, Kids: []*Node{l.expr(v.Children[0])}}
+	l.convertName(nd, 0, v.Children[0])
+	return nd
 }
 
 func (l *lowerer) staticVar(sv *frontend.Node) *Node {
@@ -955,9 +960,9 @@ func (l *lowerer) functionBody(f *Func, params, ret, body *frontend.Node, uses *
 	restore := l.enterFunc(f)
 	defer restore()
 	// A closure in a constant expression has an ordinary body.
-	savedConst, savedBudget := l.inConstExpr, l.constants
-	l.inConstExpr, l.constants = false, nil
-	defer func() { l.inConstExpr, l.constants = savedConst, savedBudget }()
+	savedConst, savedBudget, savedClosures := l.inConstExpr, l.constants, l.constClosures
+	l.inConstExpr, l.constants, l.constClosures = false, nil, nil
+	defer func() { l.inConstExpr, l.constants, l.constClosures = savedConst, savedBudget, savedClosures }()
 	savedClass := l.class
 	if f.Kind == FuncNamed {
 		l.class = nil

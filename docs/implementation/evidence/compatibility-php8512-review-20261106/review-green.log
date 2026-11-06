@@ -1,8 +1,38 @@
+=== RUN   TestConstantEvaluationScalesLinearly
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_concat_and_add
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_literals
+=== RUN   TestConstantEvaluationScalesLinearly/logical_or
+=== RUN   TestConstantEvaluationScalesLinearly/large_literal_array
+=== RUN   TestConstantEvaluationScalesLinearly/large_variable_array
+=== RUN   TestConstantEvaluationScalesLinearly/constant_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/array_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/class_constant_concat
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_variables
+=== RUN   TestConstantEvaluationScalesLinearly/concat_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/long_add_chain_name
+--- PASS: TestConstantEvaluationScalesLinearly (0.82s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_concat_and_add (0.15s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_literals (0.02s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_or (0.02s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_literal_array (0.32s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_variable_array (0.27s)
+    --- PASS: TestConstantEvaluationScalesLinearly/constant_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/array_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/class_constant_concat (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_variables (0.02s)
+    --- PASS: TestConstantEvaluationScalesLinearly/concat_left_of_and (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/long_add_chain_name (0.01s)
+=== RUN   TestConstantLongChainKeepsNaNWarning
+--- PASS: TestConstantLongChainKeepsNaNWarning (0.01s)
+=== RUN   TestCompatibilityConstantResourceLimit
+--- PASS: TestCompatibilityConstantResourceLimit (0.02s)
+=== RUN   TestCompatibilityLongConcatenationFolds
+--- PASS: TestCompatibilityLongConcatenationFolds (0.00s)
 === RUN   TestCompatibilityReviewOracle
-    compat_review_oracle_test.go:10: 572 cases, 0 differences
---- PASS: TestCompatibilityReviewOracle (0.03s)
+    compat_review_oracle_test.go:10: 704 cases, 0 differences
+--- PASS: TestCompatibilityReviewOracle (0.07s)
 === RUN   TestCompatibilityReviewRuntimeOperands
 --- PASS: TestCompatibilityReviewRuntimeOperands (0.00s)
 PASS
-ok  	github.com/HazelnutParadise/phego/internal/ir	0.099s
-exit_code=0
+ok  	github.com/HazelnutParadise/phego/internal/ir	1.282s
+exit_code=0 seconds=2

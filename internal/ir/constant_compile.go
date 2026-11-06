@@ -8,10 +8,9 @@ import (
 	"github.com/HazelnutParadise/phego/internal/phpnum"
 )
 
-const (
-	compileConstMaxDepth     = 2048
-	compileConstMaxTreeNodes = 1 << 16
-)
+// compileConstMaxDepth bounds recursion of the evaluators. Left-nested
+// operation chains are iterative and do not deepen it.
+const compileConstMaxDepth = 2048
 
 type compileConst struct {
 	value     *Literal
@@ -27,8 +26,8 @@ func (l *lowerer) compileClassKind(n *Node) string {
 	return l.classKind(n, l.evaluateConstant)
 }
 
-// probeClassKind is compileClassKind for a run-time class operand check,
-// which never fails compilation (see probeConstant).
+// probeClassKind is compileClassKind for a run-time class operand check
+// (see probeConstant).
 func (l *lowerer) probeClassKind(n *Node) string {
 	return l.classKind(n, l.probeConstant)
 }
@@ -95,18 +94,86 @@ func (l *lowerer) compileConstValue(n *Node, depth int, budget *compileBudget) (
 		if len(n.Kids) != 2 {
 			return compileConst{}, false
 		}
-		a, ok := l.compileConst(n.Kids[0], depth+1, budget)
-		if !ok {
+		return l.compileLogicalChain(n, depth, budget)
+	case OpBinary:
+		if len(n.Kids) != 2 {
 			return compileConst{}, false
 		}
-		av, ok := a.truth()
-		if !ok {
+		return l.compileBinaryChain(n, depth, budget)
+	}
+	// In particular, do not fold casts or ternaries: their PHP compile-time
+	// behavior is not equivalent to evaluating a scalar expression here.
+	return compileConst{}, false
+}
+
+// compileBinaryChain folds a left-nested chain of binary operations without
+// recursing along it, so a long chain is not limited by evaluation depth.
+// Consecutive concatenations share one builder: each operand is converted
+// and charged once, so the chain costs its result length rather than the sum
+// of every intermediate string. Intermediate results are not memoized; the
+// walk stops at a memoized operand, so repeated probes stay linear.
+func (l *lowerer) compileBinaryChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
+	spine := []*Node{n}
+	leaf, leafDepth := n.Kids[0], depth+1
+	for leaf != nil && leaf.Op == OpBinary && len(leaf.Kids) == 2 {
+		if _, ok := budget.memo[leaf]; ok {
+			// A memoized link evaluated at this frame's depth, as it
+			// would be fresh, so reuse does not deepen the chain.
+			leafDepth = depth
+			break
+		}
+		if !budget.spendWork(1) {
 			return compileConst{}, false
 		}
-		if n.Text == "&&" && !av || n.Text == "||" && av {
-			return scalarConst(&Literal{Kind: LitBool, Bool: av}), true
+		spine = append(spine, leaf)
+		leaf = leaf.Kids[0]
+	}
+	a, ok := l.compileConst(leaf, leafDepth, budget)
+	if !ok {
+		return compileConst{}, false
+	}
+	f := binaryFold{acc: a}
+	for i := len(spine) - 1; i >= 0; i-- {
+		b, ok := l.compileConst(spine[i].Kids[1], depth+1, budget)
+		if !ok || !f.step(spine[i].Text, b, l.unit.Profile.IntWidth, depth, budget) {
+			return compileConst{}, false
 		}
-		b, ok := l.compileConst(n.Kids[1], depth+1, budget)
+	}
+	return f.value(), true
+}
+
+// compileLogicalChain folds a left-nested chain of &&, || and xor
+// iteratively, skipping each right operand its left value short-circuits.
+func (l *lowerer) compileLogicalChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
+	spine := []*Node{n}
+	leaf, leafDepth := n.Kids[0], depth+1
+	for leaf != nil && leaf.Op == OpLogical && len(leaf.Kids) == 2 {
+		if _, ok := budget.memo[leaf]; ok {
+			// A memoized link evaluated at this frame's depth, as it
+			// would be fresh, so reuse does not deepen the chain.
+			leafDepth = depth
+			break
+		}
+		if !budget.spendWork(1) {
+			return compileConst{}, false
+		}
+		spine = append(spine, leaf)
+		leaf = leaf.Kids[0]
+	}
+	a, ok := l.compileConst(leaf, leafDepth, budget)
+	if !ok {
+		return compileConst{}, false
+	}
+	av, ok := a.truth()
+	if !ok {
+		return compileConst{}, false
+	}
+	for i := len(spine) - 1; i >= 0; i-- {
+		op := spine[i].Text
+		if op == "&&" && !av || op == "||" && av {
+			continue
+		}
+		b, ok := l.compileConst(spine[i].Kids[1], depth+1, budget)
 		if !ok {
 			return compileConst{}, false
 		}
@@ -114,31 +181,72 @@ func (l *lowerer) compileConstValue(n *Node, depth int, budget *compileBudget) (
 		if !ok {
 			return compileConst{}, false
 		}
-		switch n.Text {
-		case "&&":
-			return scalarConst(&Literal{Kind: LitBool, Bool: av && bv}), true
-		case "||":
-			return scalarConst(&Literal{Kind: LitBool, Bool: av || bv}), true
-		case "xor":
-			return scalarConst(&Literal{Kind: LitBool, Bool: av != bv}), true
+		if op == "xor" {
+			av = av != bv
+		} else {
+			av = bv
 		}
-	case OpBinary:
-		if len(n.Kids) != 2 {
-			return compileConst{}, false
-		}
-		a, ok := l.compileConst(n.Kids[0], depth+1, budget)
-		if !ok {
-			return compileConst{}, false
-		}
-		b, ok := l.compileConst(n.Kids[1], depth+1, budget)
-		if !ok {
-			return compileConst{}, false
-		}
-		return compileBinaryValues(n.Text, a, b, l.unit.Profile.IntWidth, depth, budget)
 	}
-	// In particular, do not fold casts or ternaries: their PHP compile-time
-	// behavior is not equivalent to evaluating a scalar expression here.
-	return compileConst{}, false
+	return scalarConst(&Literal{Kind: LitBool, Bool: av}), true
+}
+
+// binaryFold is the running value of a left-nested binary chain.
+type binaryFold struct {
+	acc compileConst
+	cat *concatBuilder
+}
+
+// step applies op to the running value and r. On failure the running value
+// is still the chain's longest known prefix.
+func (f *binaryFold) step(op string, r compileConst, width, depth int, budget *compileBudget) bool {
+	if op == "." {
+		if f.cat != nil {
+			return f.cat.add(r, budget)
+		}
+		c := &concatBuilder{className: true}
+		if !c.add(f.acc, budget) || !c.add(r, budget) {
+			return false
+		}
+		f.cat = c
+		return true
+	}
+	acc := f.value()
+	f.acc, f.cat = acc, nil
+	v, ok := compileBinaryValues(op, acc, r, width, depth, budget)
+	if ok {
+		f.acc = v
+	}
+	return ok
+}
+
+func (f *binaryFold) value() compileConst {
+	if f.cat != nil {
+		return f.cat.result()
+	}
+	return f.acc
+}
+
+// concatBuilder accumulates the operands of a constant concatenation.
+type concatBuilder struct {
+	text      strings.Builder
+	className bool
+}
+
+func (c *concatBuilder) add(v compileConst, budget *compileBudget) bool {
+	if v.array || v.value == nil || !budget.scan(v.value) {
+		return false
+	}
+	s, ok := constString(v.value)
+	if !ok || !budget.spendBytes(len(s)) {
+		return false
+	}
+	c.text.WriteString(s)
+	c.className = c.className && v.className
+	return true
+}
+
+func (c *concatBuilder) result() compileConst {
+	return compileConst{value: &Literal{Kind: LitString, Str: c.text.String()}, className: c.className}
 }
 
 func compileUnary(op string, a *Literal, width int, budget *compileBudget) (compileConst, bool) {
