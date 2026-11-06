@@ -980,7 +980,7 @@ func (h *heap) coerceTypedValueAfterCallable(m *methodSpec, called *class, typ s
 	if !strict && v.deref().kind == valueObject && methodTypeHas(typ, "string") {
 		if _, ok := h.resolveMethod(v.deref().object.class, "__toString", nil); ok {
 			s, err := h.toString(v)
-			return str(s), err == nil, err
+			return stringValue(s), err == nil, err
 		}
 	}
 	return value{}, false, nil

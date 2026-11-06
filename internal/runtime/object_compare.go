@@ -37,9 +37,9 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 					return 0, err
 				}
 				if sign > 0 {
-					return h.compareIn(str(text), other, arrays)
+					return h.compareIn(stringValue(text), other, arrays)
 				}
-				return h.compareIn(other, str(text), arrays)
+				return h.compareIn(other, stringValue(text), arrays)
 			}
 			return sign, nil
 		default:
