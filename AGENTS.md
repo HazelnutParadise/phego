@@ -32,6 +32,23 @@ Historical reference engines, application fixtures, and potentially unsafe tests
 
 Run `python3 tools/validate_docs.py` after changing planning records. Product test commands must be added when a runnable engine exists; do not invent passing CI for absent implementation.
 
+## Diagnostics
+
+Phego's own diagnostics follow the rustc style: they are explicit, located and actionable. This covers compiler and verifier errors, configuration and policy errors, CLI and tool output, and messages written for embedding hosts. Each diagnostic carries a stable error code, a one-line message saying what is wrong, the location as `file:line:column`, the relevant source with markers under the exact span, and `note:` and `help:` lines that explain the cause and the fix. For example:
+
+```
+error[PHG0123]: mount path is not absolute
+  --> phego.toml:12:9
+   |
+12 |   path = "app"
+   |          ^^^^^ expected a path starting with "/"
+   |
+   = note: mounts are matched against absolute PHP paths
+   = help: write "/app"
+```
+
+Go error values keep the code, span and notes as structured fields so hosts can render or inspect them; `Error()` stays a single line. Output that PHP defines, such as warnings, fatal errors, exception messages and their line numbers, stays byte-identical to the selected PHP profile. A Rust-style view of PHP diagnostics may only be an explicit opt-in that never changes what PHP code or its users observe by default.
+
 ## Review
 
 Every review must look for approaches that cost the same or less and give a better result, and report each one it finds. Take every such benefit where PHP compatibility does not constrain the internals; it is not a trade-off to weigh. Judge approaches with added cost by the benefit they actually bring. Conventional code is not acceptable just because it works. This never overrides PHP-visible semantics or safety checks.

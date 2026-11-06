@@ -75,6 +75,9 @@ func intValue(v int64, width int) (value, error) {
 // later caller mutation cannot alter stored data.
 func bytesValue(v []byte) value { return value{kind: valueString, text: string(v)} }
 
+// stringValue wraps an immutable Go string as a PHP byte string.
+func stringValue(s string) value { return value{kind: valueString, text: s} }
+
 func (v value) bytesCopy() []byte { return []byte(v.text) }
 
 // deref returns the value seen through a reference.
