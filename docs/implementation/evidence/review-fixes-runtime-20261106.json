@@ -46,6 +46,7 @@
   "source_base": "8a4aed7dfa3391a8c849cbe9212491f44fb1242f",
   "captured_at": "2026-11-06T15:16:25.992728+00:00",
   "source_sha256": {
+    ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
     "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
     "internal/bytecode/limits_review_test.go": "690a128fcafe76701b54660a541f36051f93af204a0ed750c57b5a921925d43a",
@@ -173,6 +174,12 @@
       "command": "python3 tools/validate_docs.py",
       "exit_code": 0,
       "log": "review-fixes-runtime-20261106/docs.log"
+    },
+    {
+      "command": "Check formatting and multi-target build steps extracted from .github/workflows/go.yml, run with bash -e",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/ci-steps.log",
+      "result": "A parse error fails with status 2, an unformatted file fails with status 1 and is listed, a formatted tree passes; the build loop reports every failing target and exits 1."
     }
   ],
   "artifacts": {
