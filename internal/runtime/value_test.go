@@ -35,7 +35,7 @@ func same(t *testing.T, a, b value) bool {
 	return ok
 }
 
-func str(s string) value { return value{kind: valueString, text: s} }
+func str(s string) value { return stringValue(s) }
 
 func num(t *testing.T, i int64) value {
 	t.Helper()

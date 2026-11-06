@@ -751,7 +751,7 @@ func (h *heap) magicProperty(o *object, operation, name string, extra []value) (
 	}
 	o.hooks[key] = true
 	defer delete(o.hooks, key)
-	args := []methodArgument{{value: str(name)}}
+	args := []methodArgument{{value: stringValue(name)}}
 	for _, v := range extra {
 		args = append(args, methodArgument{value: v})
 	}
