@@ -7,7 +7,7 @@ import "testing"
 // member names and parenthesized class operands. The fixture records
 // php -n -l for both integer widths.
 func TestCompatibilityReviewOracle(t *testing.T) {
-	checkCompileOracle(t, "testdata/php8512-review-compile.json.gz", 466)
+	checkCompileOracle(t, "testdata/php8512-review-compile.json.gz", 572)
 }
 
 // php -n -l cannot show what these operands do at run time. The pinned
@@ -67,5 +67,21 @@ func TestCompatibilityReviewRuntimeOperands(t *testing.T) {
 	}
 	if n := lower(t, "A::f();", 64); n.Name == nil || n.Name.Resolved != "A" || n.Kids[0] != nil {
 		t.Errorf("A::f(): got name %v and operand %v", n.Name, n.Kids[0])
+	}
+	// $x instanceof (A) also reads constant A.
+	if n := lower(t, "$x instanceof (A);", 64); n.Op != OpInstanceof || n.Name != nil || n.Kids[1] == nil || n.Kids[1].Op != OpConst {
+		t.Errorf("instanceof (A): got name %v and operand %v", n.Name, n.Kids[1])
+	}
+	// A string the parser holds is a fully qualified class name for ::class.
+	u, err := lowerSource("<?php namespace N; ('\\A')::class;", 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := firstExpr(t, u); n.Op != OpLiteral || n.Value.Str != "A" {
+		t.Errorf("('\\A')::class: got %s %v", n.Op, n.Value)
+	}
+	// ${[1]} converts its constant name while compiling.
+	if n := lower(t, "${[1]};", 64); n.Op != OpVarVar || n.Kids[0].Op != OpLiteral || n.Kids[0].Value.Str != "Array" {
+		t.Errorf("${[1]}: got %s with name %v", n.Op, n.Kids[0])
 	}
 }

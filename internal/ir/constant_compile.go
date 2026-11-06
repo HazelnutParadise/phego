@@ -24,6 +24,16 @@ type compileConst struct {
 // operand. It leaves throwing, diagnostic-producing or dynamic expressions
 // for execution, and does not mutate HIR or depend on an optimization pass.
 func (l *lowerer) compileClassKind(n *Node) string {
+	return l.classKind(n, l.evaluateConstant)
+}
+
+// probeClassKind is compileClassKind for a run-time class operand check,
+// which never fails compilation (see probeConstant).
+func (l *lowerer) probeClassKind(n *Node) string {
+	return l.classKind(n, l.probeConstant)
+}
+
+func (l *lowerer) classKind(n *Node, evaluate func(*Node) (compileConst, bool)) string {
 	// Preserve arbitrarily large direct literal types without traversing or
 	// copying their payload.
 	if v := lit(n); v != nil {
@@ -38,7 +48,7 @@ func (l *lowerer) compileClassKind(n *Node) string {
 		}
 		return typeName(v)
 	}
-	v, ok := l.evaluateConstant(n)
+	v, ok := evaluate(n)
 	if !ok {
 		return ""
 	}

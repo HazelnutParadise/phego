@@ -1,8 +1,8 @@
 === RUN   TestCompatibilityReviewOracle
-    compat_review_oracle_test.go:10: 466 cases, 0 differences
---- PASS: TestCompatibilityReviewOracle (0.01s)
+    compat_review_oracle_test.go:10: 572 cases, 0 differences
+--- PASS: TestCompatibilityReviewOracle (0.03s)
 === RUN   TestCompatibilityReviewRuntimeOperands
 --- PASS: TestCompatibilityReviewRuntimeOperands (0.00s)
 PASS
-ok  	github.com/HazelnutParadise/phego/internal/ir	0.376s
+ok  	github.com/HazelnutParadise/phego/internal/ir	0.099s
 exit_code=0

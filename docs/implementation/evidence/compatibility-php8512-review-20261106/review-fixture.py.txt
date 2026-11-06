@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 
+
 H = "class A { public int $x = 1 { get => %s; } }"
 CASES = {
  "required-arity": [
@@ -260,6 +261,75 @@ CASES["parenthesized-class"] = [
  "const X = ('A')::C;",
  "const X = A::class;",
  "class K { const X = self::class; }",
+]
+_Q60 = "'" + "q" * 60 + "'"
+_Q1000 = "'" + "q" * 1000 + "'"
+CASES["concat-budget"] = [
+ "$x = " + " . ".join([_Q60] * 25) + ";",
+ "$x = " + " . ".join(["'q'"] * 600) + ";",
+ "$x = " + " . ".join([_Q1000] * 12) + ";",
+ "$x = " + " . ".join("$a%d" % i for i in range(2100)) + ";",
+ "$o = new stdClass; $o->{" + " . ".join([_Q60] * 25) + "};",
+ "(" + " . ".join([_Q60] * 25) + ")::f();",
+ "$o = new stdClass; $o->{" + " + ".join("$a%d" % i for i in range(2100)) + "}();",
+ "$x = 'x' . (" + " + ".join("$a%d" % i for i in range(2100)) + ");",
+ "$x = " + " . ".join([_Q60] * 25) + " . (1e999-1e999);",
+]
+CASES["diagnostic-lines"] = [
+ "$o = new stdClass; $o->{\n[1]\n}();",
+ "$o = new stdClass; $o->\n{\n1\n+\n1\n}\n();",
+ "A::{\n1\n+\n1\n}();",
+ "$o = new stdClass; $o->{\n[1]\n} ??= \n1;",
+ "$o = new stdClass; $o->{\n[1]\n}\n->{\n[2]\n} ??= 1;",
+ "${\n[1]\n} ??= \n1;",
+]
+CASES["hook-method-call"] = [
+ "class A { public $x = 1 { get => $this->x(); } }",
+ "class A { public $x = 1 { get => $this->{'x'}(); } }",
+ "class A { public $x = 1 { get => $this?->x(); } }",
+ "class A { public $x = 1 { get => $this->x(...); } }",
+ "class A { public $x = 1 { get => $this->{$this->x}(); } }",
+ "class A { public $x = 1 { get => $this->y($this->x); } }",
+ "class A { public $x = 1 { get => $this->x()->y; } }",
+ "class A { public $x = 1 { get => $this->x[0]; } }",
+]
+CASES["const-closure"] = [
+ "const F = static function () { return 'a' . (1e999-1e999); };",
+ "class K { const F = static function () { return 'a' . (1e999-1e999); }; }",
+ "function f($a = static function () { return 'a' . (1e999-1e999); }) {}",
+ "class K { public $p = static function () { return 'a' . (1e999-1e999); }; }",
+ "const F = static fn() => 'a' . (1e999-1e999);",
+ "const F = static function () { return $o->{[1]}; };",
+]
+CASES["string-class"] = [
+ "namespace N; $x = ('A')::class;",
+ "namespace N; $x = ('a\\\\B')::class;",
+ "namespace N; $x = ('\\\\A')::class;",
+ "('self')::f();",
+ "('Static')::f();",
+ "('parent')::$p;",
+ "new ('self');",
+ "('self')::C;",
+ "$x instanceof ('self');",
+ "const X = ('self')::C;",
+ "class K { const X = ('static')::C; }",
+ "('A' . 'B')::f();",
+]
+CASES["instanceof-paren"] = [
+ "$x instanceof ([1]);",
+ "$x instanceof (null);",
+ "$x instanceof (1+1);",
+ "$x instanceof (A);",
+ "$x instanceof ('A');",
+ "$x instanceof ([...[1]]);",
+]
+CASES["varvar-name"] = [
+ "${[1]};",
+ "${1e999-1e999};",
+ "${[1]} ??= 1;",
+ "${'a' . 'b'};",
+ "${[1]} = 1;",
+ "$$x;",
 ]
 
 

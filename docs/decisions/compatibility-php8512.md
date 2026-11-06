@@ -30,9 +30,11 @@ PHP 對一般運算式與陣列、宣告初值的編譯順序不同。`constant_
 
 NaN 轉成字串時，PHP 8.5.12 會發出 `unexpected NAN value was coerced to string`。這個警告在實際轉換的位置發出。一般運算式的字串串接，會在編譯時把每個常數運算元轉成字串。常數運算式則只在整個串接都能算出時才轉換。memo 讀取值時不發警告，同一個運算元因此只警告一次。
 
-屬性名稱與靜態屬性名稱若能在編譯時算出陣列或 NaN，Phego 會像 PHP 一樣當場轉成 `Array` 或 `NAN` 並發出警告。必須在執行時才能建立的陣列不會折疊，例如 64 位元的 `[9223372036854775807 => 1, 2]` 會在執行時拋出錯誤，`[1.5 => 1]` 與 `[null => 1]` 會在執行時發出 Deprecated。`??=` 會把左邊編譯兩次，所以左邊每個屬性名稱的轉換警告也會出現兩次。方法名稱與類別運算元用同一套編譯期計算，算出非字串常數時分別回報 `Method name must be a string` 與 `Illegal class name`。
+執行期程式碼的這類檢查只判斷運算元是不是常數，不會讓編譯失敗。串接與插值的結果一定是字串，不必計算，所以很長的字串串接不會碰到常數計算上限。超過自身預算的運算元當成執行期才計算，PHP 對它的轉換那時仍會發生。常數運算式與 `::class` 仍要求完整計算，超限時回報宿主資源錯誤。
 
-括號會讓類別位置的名稱變成運算式。`(A)::f()`、`new (A)` 與 `(A)::class` 讀取常數 `A` 的值，不是類別 `A`。常數運算式裡的 `(A)::C` 因此回報 `Dynamic class names are not allowed in compile-time class constant references`，`(A)::class` 回報 `(expression)::class cannot be used in constant expressions`。加了括號的字串字面值，以及剖析時已串接完成的字串，可以當類別名稱，例如 `const X = ('A')::C;`。
+屬性名稱與靜態屬性名稱若能在編譯時算出陣列或 NaN，Phego 會像 PHP 一樣當場轉成 `Array` 或 `NAN` 並發出警告。必須在執行時才能建立的陣列不會折疊，例如 64 位元的 `[9223372036854775807 => 1, 2]` 會在執行時拋出錯誤，`[1.5 => 1]` 與 `[null => 1]` 會在執行時發出 Deprecated。`??=` 會把左邊編譯兩次，所以左邊每個屬性名稱的轉換警告也會出現兩次。可變變數的名稱（`${[1]}`）也一樣轉換。方法名稱與類別運算元用同一套編譯期計算，算出非字串常數時分別回報 `Method name must be a string` 與 `Illegal class name`，行號是名稱運算式最後編譯的那一行。`??=` 第二次的轉換警告沿用第一次的行號。
+
+括號會讓類別位置的名稱變成運算式。`(A)::f()`、`new (A)`、`$x instanceof (A)` 與 `(A)::class` 讀取常數 `A` 的值，不是類別 `A`。剖析時已是字串的類別運算元是完整限定名稱：`('A')::class` 在任何 namespace 都是 `"A"`，`('self')::f()` 回報 `'\self' is an invalid class name`。常數運算式裡的 `(A)::C` 因此回報 `Dynamic class names are not allowed in compile-time class constant references`，`(A)::class` 回報 `(expression)::class cannot be used in constant expressions`。加了括號的字串字面值，以及剖析時已串接完成的字串，可以當類別名稱，例如 `const X = ('A')::C;`。
 
 ## 宣告檢查保留延後繫結
 
@@ -40,7 +42,7 @@ NaN 轉成字串時，PHP 8.5.12 會發出 `unexpected NAN value was coerced to 
 
 檢查包含方法與常數的可見範圍、final／static／abstract、readonly class 的隱含屬性規則，以及 property hook 的型別與缺失實作。hook backing 掃描停在巢狀函式或類別的作用域，只檢查會在原 hook 執行的子運算式。屬性名稱區分大小寫，方法名稱依 PHP 規則比較。
 
-hook 是否使用自己的屬性，依 PHP 剖析完成時的值判斷。`$this->x`、`$this->{'x'}`、`$this->{"x"}`、`$this->{'x' . ''}`、不含插值的 heredoc，以及 `${'this'}->x` 都算 backed。`$this->{(string)'x'}`、`$this->{X}` 與 `$this->{"$x"}` 要到執行時才知道名稱，所以算 virtual。
+hook 是否使用自己的屬性，依 PHP 剖析完成時的值判斷。`$this->x`、`$this->{'x'}`、`$this->{"x"}`、`$this->{'x' . ''}`、不含插值的 heredoc，以及 `${'this'}->x` 都算 backed。`$this->{(string)'x'}`、`$this->{X}` 與 `$this->{"$x"}` 要到執行時才知道名稱，所以算 virtual。`$this->x()` 是方法呼叫，不算使用屬性，但它的物件、名稱運算式與引數仍會檢查。常數運算式裡的 closure 本體照一般程式碼降階。
 
 決定能否提早繫結的 `bindingMethod`，也是回報方法宣告不相容的唯一依據，兩個步驟不會得出不同結論。必填參數數量算到最後一個必填參數，放在必填參數前的預設值也算必填。錯誤訊息只在最後一個必填參數之後顯示預設值。回傳型別裡的 `static` 依 `zend_type_permits_self` 判斷：父型別允許 object，或含有目前類別本身或祖先的具名型別時才相容。純交集型別看每個成員，union 裡的交集不列入。final 類別以自己的名稱取代父類別的 `static` 時，若名稱尚未載入，會延後判斷。
 
@@ -58,16 +60,19 @@ magic method 的回傳型別依 `zend_check_magic_method_return_type` 的型別�
 
 ## 重現與限制
 
-- `python3 tools/verify_compile_fixtures.py` 以固定的 32／64 位元 PHP 8.5.12 映像重新執行 11,228 筆編譯案例，逐項比對層級、訊息、行號與順序。工具不改寫預期結果。
+- `python3 tools/verify_compile_fixtures.py` 以固定的 32／64 位元 PHP 8.5.12 映像重新執行 11,334 筆編譯案例，逐項比對層級、訊息、行號與順序。工具不改寫預期結果。
 - `TestLowerMatchesCompileReference` 對照 5,307 份 php-src 編譯輸入，剩餘 12 項 W-29 缺口維持明列。
 - `TestCompatibility*` 與 `TestConstant*` 保護修正、短路、錯誤順序與資源限制，完整命令及結果見[執行證據](../implementation/evidence/compatibility-php8512-20261104.json)。
-- PR #129 審查後新增的 466 筆編譯案例在 `TestCompatibilityReviewOracle` 比對，`php -l` 看不到的執行期名稱與類別運算元由 `TestCompatibilityReviewRuntimeOperands` 檢查，命令與結果見[審查後執行證據](../implementation/evidence/compatibility-php8512-review-20261106.json)。
+- PR #129 審查後新增的 572 筆編譯案例在 `TestCompatibilityReviewOracle` 比對，`php -l` 看不到的執行期名稱與類別運算元由 `TestCompatibilityReviewRuntimeOperands` 檢查，命令與結果見[審查後執行證據](../implementation/evidence/compatibility-php8512-review-20261106.json)。
 
 下列差異已用固定映像確認，尚未實作，因此不在比對資料內：
 
 - PHP 會在編譯時把 `NAN`、`PHP_INT_MAX` 等內建常數換成值，Phego 仍留到執行時。`[NAN . '']` 因此少了編譯期警告，`$o->{[1, ...[PHP_INT_MAX => 1]]}` 也少了 `Array to string conversion`。這需要依 profile 提供內建常數表。
 - `ArrayObject` 等 SPL 類別還沒有繼承資料，繼承它們的類別不會提早繫結，相關的宣告錯誤要等 W-29。比對資料改用意義相同的使用者類別。
-- 常數運算式裡，PHP 先折疊類別位置的運算式再檢查，所以 `const X = (A::class)::C;` 可以編譯。Phego 仍回報動態類別名稱錯誤。`('static')::C` 應回報 `'\static' is an invalid class name`，Phego 尚未檢查。
+- 常數運算式裡，PHP 先折疊類別位置的運算式再檢查，所以 `const X = (A::class)::C;` 可以編譯。Phego 仍回報動態類別名稱錯誤。內建常數也屬於這種情況，例如 `const X = (PHP_EOL)::C;` 在 PHP 可以編譯，`(null)::C` 回報 `Illegal class name`，同樣需要內建常數表。
+- attribute 引數裡的 closure 目前只檢查常數運算式，本體沒有降階，所以本體內的編譯期警告與錯誤都不會出現，例如 `#[A(static function () { return 'a' . (1e999-1e999); })]` 少了 NaN 警告。
+- 方法相容性錯誤依子類別的方法順序回報，PHP 依父類別的順序，而且屬性錯誤先於方法錯誤。訊息中的出處取最早宣告的祖先，PHP 取最近覆寫的那一層。預設值預覽也還沒照 PHP 截斷長字串。
+- `$a[] ??= 1;` 應回報 `Cannot use [] for reading`。多行 hook 的 `Cannot specify default value for virtual hooked property` 應指向 hook 最後一行。
 
 所有 PHP 參考執行都在固定映像、無網路、唯讀檔案系統、限制記憶體與程序數的容器內完成。預設核心保持純 Go，公開 Go SDK 沒有改名或更換簽章。
 

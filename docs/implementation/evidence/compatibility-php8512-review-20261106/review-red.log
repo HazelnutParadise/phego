@@ -106,6 +106,60 @@
     compat_review_oracle_test.go:10: width=32 <?php function f($a = (A)::C) {}: got line0 ""; want line1 "Dynamic class names are not allowed in compile-time class constant references"
     compat_review_oracle_test.go:10: width=32 <?php function f($a = (A)::class) {}: got line0 ""; want line1 "(expression)::class cannot be used in constant expressions"
     compat_review_oracle_test.go:10: width=32 <?php const X = ('A')::C;: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php $x = 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . (1e999-1e999);: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php $o = new stdClass; $o->{
+        [1]
+        }();: got line0 ""; want line2 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=32 <?php $o = new stdClass; $o->
+        {
+        1
+        +
+        1
+        }
+        ();: got line0 ""; want line5 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=32 <?php A::{
+        1
+        +
+        1
+        }();: got line0 ""; want line4 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=32 <?php $o = new stdClass; $o->{
+        [1]
+        } ??= 
+        1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php $o = new stdClass; $o->{
+        [1]
+        }
+        ->{
+        [2]
+        } ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php ${
+        [1]
+        } ??= 
+        1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php class A { public $x = 1 { get => $this->x(); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=32 <?php class A { public $x = 1 { get => $this?->x(); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=32 <?php class A { public $x = 1 { get => $this->x(...); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=32 <?php class A { public $x = 1 { get => $this->x()->y; } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=32 <?php const F = static function () { return 'a' . (1e999-1e999); };: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php class K { const F = static function () { return 'a' . (1e999-1e999); }; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php function f($a = static function () { return 'a' . (1e999-1e999); }) {}: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php class K { public $p = static function () { return 'a' . (1e999-1e999); }; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php ('self')::f();: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php ('Static')::f();: got line0 ""; want line1 "'\\Static' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php ('parent')::$p;: got line0 ""; want line1 "'\\parent' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php new ('self');: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php ('self')::C;: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php $x instanceof ('self');: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php const X = ('self')::C;: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php class K { const X = ('static')::C; }: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line1 "'\\static' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php $x instanceof ([1]);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php $x instanceof (null);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php $x instanceof (1+1);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php $x instanceof ([...[1]]);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php ${[1]};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php ${1e999-1e999};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php ${[1]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php ${[1]} = 1;: got line0 ""; want line0 ""
     compat_review_oracle_test.go:10: width=64 <?php class A {function f(int $a = null, $b){}} class B extends A {function f(?int $a, $b){}}: got line1 "Declaration of B::f(?int $a, $b) must be compatible with A::f(?int $a, $b)"; want line0 ""
     compat_review_oracle_test.go:10: width=64 <?php class A {function f(int $a = null, $b = 1){}} class B extends A {function f(?int $a, $b){}}: got line1 "Declaration of B::f(?int $a, $b) must be compatible with A::f(?int $a, $b = 1)"; want line1 "Declaration of B::f(?int $a, $b) must be compatible with A::f(?int $a = null, $b = 1)"
     compat_review_oracle_test.go:10: width=64 <?php class A {function f():?self{}} class B extends A {function f():static{}}: got line1 "Declaration of B::f(): static must be compatible with A::f(): ?A"; want line0 ""
@@ -212,8 +266,62 @@
     compat_review_oracle_test.go:10: width=64 <?php function f($a = (A)::C) {}: got line0 ""; want line1 "Dynamic class names are not allowed in compile-time class constant references"
     compat_review_oracle_test.go:10: width=64 <?php function f($a = (A)::class) {}: got line0 ""; want line1 "(expression)::class cannot be used in constant expressions"
     compat_review_oracle_test.go:10: width=64 <?php const X = ('A')::C;: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line0 ""
-    compat_review_oracle_test.go:10: 466 cases, 205 differences
---- FAIL: TestCompatibilityReviewOracle (0.01s)
+    compat_review_oracle_test.go:10: width=64 <?php $x = 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . 'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq' . (1e999-1e999);: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php $o = new stdClass; $o->{
+        [1]
+        }();: got line0 ""; want line2 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=64 <?php $o = new stdClass; $o->
+        {
+        1
+        +
+        1
+        }
+        ();: got line0 ""; want line5 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=64 <?php A::{
+        1
+        +
+        1
+        }();: got line0 ""; want line4 "Method name must be a string"
+    compat_review_oracle_test.go:10: width=64 <?php $o = new stdClass; $o->{
+        [1]
+        } ??= 
+        1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php $o = new stdClass; $o->{
+        [1]
+        }
+        ->{
+        [2]
+        } ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php ${
+        [1]
+        } ??= 
+        1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php class A { public $x = 1 { get => $this->x(); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=64 <?php class A { public $x = 1 { get => $this?->x(); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=64 <?php class A { public $x = 1 { get => $this->x(...); } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=64 <?php class A { public $x = 1 { get => $this->x()->y; } }: got line0 ""; want line1 "Cannot specify default value for virtual hooked property A::$x"
+    compat_review_oracle_test.go:10: width=64 <?php const F = static function () { return 'a' . (1e999-1e999); };: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php class K { const F = static function () { return 'a' . (1e999-1e999); }; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php function f($a = static function () { return 'a' . (1e999-1e999); }) {}: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php class K { public $p = static function () { return 'a' . (1e999-1e999); }; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php ('self')::f();: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php ('Static')::f();: got line0 ""; want line1 "'\\Static' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php ('parent')::$p;: got line0 ""; want line1 "'\\parent' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php new ('self');: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php ('self')::C;: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php $x instanceof ('self');: got line0 ""; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php const X = ('self')::C;: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line1 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php class K { const X = ('static')::C; }: got line1 "Dynamic class names are not allowed in compile-time class constant references"; want line1 "'\\static' is an invalid class name"
+    compat_review_oracle_test.go:10: width=64 <?php $x instanceof ([1]);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=64 <?php $x instanceof (null);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=64 <?php $x instanceof (1+1);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=64 <?php $x instanceof ([...[1]]);: got line0 ""; want line1 "Illegal class name"
+    compat_review_oracle_test.go:10: width=64 <?php ${[1]};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php ${1e999-1e999};: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php ${[1]} ??= 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=64 <?php ${[1]} = 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: 572 cases, 267 differences
+--- FAIL: TestCompatibilityReviewOracle (0.03s)
 === RUN   TestCompatibilityReviewRuntimeOperands
     compat_review_oracle_test.go:46: width=64 $o->{[9223372036854775807 => 1, 2]};: name "Array", expression false; want ""
     compat_review_oracle_test.go:46: width=32 $o->{[9223372036854775807 => 1, 2]};: name "Array", expression false; want ""
@@ -230,8 +338,11 @@
     compat_review_oracle_test.go:65: (A)::C;: got class_const with class name &{0 A  } and operand <nil>; want constant A
     compat_review_oracle_test.go:65: new (A);: got new with class name &{0 A  } and operand <nil>; want constant A
     compat_review_oracle_test.go:65: (A)::class;: got literal with class name <nil> and operand <nil>; want constant A
+    compat_review_oracle_test.go:73: instanceof (A): got name &{0 A  } and operand <nil>
+    compat_review_oracle_test.go:81: ('\A')::class: got class_name <nil>
+    compat_review_oracle_test.go:85: ${[1]}: got var_var with name &{array 1  <nil> <nil> <nil> <nil> <nil> [] [] [0x6ee2e04dc780] 0 pure}
 --- FAIL: TestCompatibilityReviewRuntimeOperands (0.00s)
 FAIL
-FAIL	github.com/HazelnutParadise/phego/internal/ir	0.730s
+FAIL	github.com/HazelnutParadise/phego/internal/ir	0.333s
 FAIL
 exit_code=1

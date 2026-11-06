@@ -530,6 +530,18 @@ func hooksBackProperty(hooks *frontend.Node, name string) bool {
 		if n == nil {
 			return false
 		}
+		// A method call stores its member as a property node; calling
+		// $this->x() does not fetch the property. Its object, name
+		// expression and arguments are still searched.
+		if n.Kind == "method_call" && len(n.Children) > 0 && n.Children[0] != nil &&
+			(n.Children[0].Kind == "prop" || n.Children[0].Kind == "nullsafe_prop") {
+			for _, child := range append(append([]*frontend.Node(nil), n.Children[0].Children...), n.Children[1:]...) {
+				if child != nil && child.Kind != "identifier" && visit(child) {
+					return true
+				}
+			}
+			return false
+		}
 		if n.Kind == "prop" || n.Kind == "nullsafe_prop" {
 			if len(n.Children) > 1 && hookUsesProperty(n.Children[0], n.Children[1], name) {
 				return true

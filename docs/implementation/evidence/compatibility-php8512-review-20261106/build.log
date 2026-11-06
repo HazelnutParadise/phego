@@ -2,4 +2,4 @@
 == linux/386
 == windows/amd64
 == darwin/arm64
-exit_code=0 seconds=7
+exit_code=0 seconds=1

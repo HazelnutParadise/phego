@@ -128,9 +128,9 @@ type lowerer struct {
 	// cur is the line of the expression compiled last, which PHP reports
 	// for errors raised while compiling a construct's later parts.
 	cur int
-	// nameWarnings records member names converted with a compile warning,
-	// which a second compilation of the same target repeats.
-	nameWarnings map[*Node]string
+	// nameWarnings records names converted with a compile warning, which a
+	// second compilation of the same target repeats at the same line.
+	nameWarnings map[*Node]nameWarning
 }
 
 func (l *lowerer) newFunc(kind FuncKind, name string, line int) *Func {
@@ -954,6 +954,10 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 func (l *lowerer) functionBody(f *Func, params, ret, body *frontend.Node, uses *frontend.Node) {
 	restore := l.enterFunc(f)
 	defer restore()
+	// A closure in a constant expression has an ordinary body.
+	savedConst, savedBudget := l.inConstExpr, l.constants
+	l.inConstExpr, l.constants = false, nil
+	defer func() { l.inConstExpr, l.constants = savedConst, savedBudget }()
 	savedClass := l.class
 	if f.Kind == FuncNamed {
 		l.class = nil

@@ -19,20 +19,21 @@
     "T-047",
     "T-048"
   ],
-  "source_base": "ad0512a24678010b61d5cd73547878d0c9004bd1",
-  "captured_at": "2026-11-06T13:26:51.483524+00:00",
+  "source_base": "c94c96fae76f316f443cc8e55ee6234afc6ff412",
+  "captured_at": "2026-11-06T14:49:49.497053+00:00",
   "source_sha256": {
     "internal/ir/class_binding.go": "332e1fcd4c28bed443121f25decc446a4d7e43777b8f9d43a26f842d48d42b09",
     "internal/ir/class_compile.go": "108eb3f86e5d2b5a5aae29be80035819edcd83a21e5c4b4f198fdca01d924a6d",
     "internal/ir/class_link.go": "1520d58d85e14102d0947d7e3e703d3bb5f41e55f99b8be6eebf02485c4b4984",
-    "internal/ir/constant_compile.go": "218c336179614d27fdbba99fb835a0fb03cd5a7b08479c53ac368f8155367923",
+    "internal/ir/constant_compile.go": "4e7999047d72bbf1d37dba41a63a1131f74cadb071f74d59a88f0ce8f4164fa8",
     "internal/ir/constant_syntax.go": "fa402aa5e49e3bfb1dca8de7c6d9de566058a81334111e78435e1e77f48a783a",
-    "internal/ir/decl.go": "65052759dcea854fc66bce9aa4ce47f5ce953b77175570cd8e11ff60a4d9644b",
-    "internal/ir/expr.go": "d6e992c9c95dec5463a98aa2d0f1acb78ff6391f98a84241229712f70dd06884",
+    "internal/ir/decl.go": "e01c1d339804719d2382305ec110221d175c150a266dd906f055fefc25c68efc",
+    "internal/ir/expr.go": "fd893c6e684ab2998505a37cf5ec3440dc3324c3fd3d79263b47fc58fecd374c",
     "internal/ir/hook_backing.go": "15a9a1dc1af10313853914f4fa8ff225ad7be041c506fabbe316ce9189468fa5",
-    "internal/ir/lower.go": "7a9c034f43a15e382710a0925a4ac6888bcae3059ae290683892d55a93f15acb",
-    "internal/ir/compat_review_oracle_test.go": "275600e7390a3efe7a352edc5b6fcb93d38706fbc310a9965098c6b7bd00b9e6",
-    "internal/ir/testdata/php8512-review-compile.json.gz": "fe291b65989c78c87a6d9fc5bcc193b5bc37bb4b4809e624341fab3d80e68eb0",
+    "internal/ir/lower.go": "c3b417ae59800f2d3737f01ef106c829b46e6227b0f17878384d280574191530",
+    "internal/ir/constant_budget.go": "31bba3a27e98f47f15353c1d90ea77cb2cf52b4893be6eec1f9a7660d6eac3e1",
+    "internal/ir/compat_review_oracle_test.go": "933f132e3fdfb0e7d76ed784c55e6dee56a844e222cdbe9cb8da0581df3dcda9",
+    "internal/ir/testdata/php8512-review-compile.json.gz": "96af786c11ff4f000e15498025cba22fd0f8e5e27a22130a136dbb1853b8eb60",
     "tools/verify_compile_fixtures.py": "ab0a7fde1cc0ec8da187366cb2ca20b37a5cf95ae797f67ea0ff812cbb8622b0"
   },
   "environment": {
@@ -55,25 +56,31 @@
       "command": "python3 docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt . <output>",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/review-fixture.log",
-      "result": "Exit code 0 (printed by the shell, not stored in the log). Generated 233 sources per integer width with the linux/386 and linux/amd64 images; the output is byte-identical to the committed fixture."
+      "result": "Exit code 0 (printed by the shell, not stored in the log). Generated 286 sources per integer width with the linux/386 and linux/amd64 images; the output is byte-identical to the committed fixture."
     },
     {
       "command": "go test ./internal/ir -run 'TestCompatibilityReview' -count=1 -v (on 3da26d5 with only the new tests and fixture)",
       "exit_code": 1,
       "log": "compatibility-php8512-review-20261106/review-red.log",
-      "result": "Before the fix: 205 of 466 compile cases differed and every run-time operand case failed."
+      "result": "On 3da26d5, before any review fix: 267 of 572 compile cases differed and every run-time operand case failed."
+    },
+    {
+      "command": "go test ./internal/ir -run 'TestCompatibilityReview' -count=1 -v (on dc2b04f, the first fix commit)",
+      "exit_code": 1,
+      "log": "compatibility-php8512-review-20261106/review-red-followup.log",
+      "result": "An independent review of dc2b04f found a constant evaluation limit on long run-time concatenations and other gaps; the new cases fail there."
     },
     {
       "command": "go test ./internal/ir -run 'TestCompatibilityReview' -count=1 -v",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/review-green.log",
-      "result": "466 cases, 0 differences; run-time operand checks pass."
+      "result": "572 cases, 0 differences; run-time operand checks pass."
     },
     {
       "command": "python3 tools/verify_compile_fixtures.py",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/compile-fixtures.log",
-      "result": "All 11228 committed compile cases reproduced on both integer widths."
+      "result": "All 11334 committed compile cases reproduced on both integer widths."
     },
     {
       "command": "go test ./internal/ir -run '^TestLowerMatchesCompileReference$' -count=1 -v (PHEGO_LEXER_CORPUS from tools/frontend_corpus.py)",
@@ -127,15 +134,15 @@
   "artifacts": {
     "build.log": {
       "path": "compatibility-php8512-review-20261106/build.log",
-      "sha256": "1161e3d2c530b6e6dc401264dde8a48e1065fca7466f78ea463bb4a429266575"
+      "sha256": "90879240e3f8b01a8f7fcec0c48b4854d5ca4b9427eb5acdbd2e3c9d6fcdbfdb"
     },
     "compile-corpus.log": {
       "path": "compatibility-php8512-review-20261106/compile-corpus.log",
-      "sha256": "97968c467dc5840ad768ca601904b22243081d4c4eb9003eda9c7a515d7ebd41"
+      "sha256": "702e51414827c9aed18987e9da563b477218912ef593b860d65e9638a9652f41"
     },
     "compile-fixtures.log": {
       "path": "compatibility-php8512-review-20261106/compile-fixtures.log",
-      "sha256": "e47e818edb2b34e7403a6cf1464fa01db7d37f0dd88d6ca7644bfa24f637a88a"
+      "sha256": "2e28b56b717a5d1ca96bdc319b454579889d033462b31c9cfd24bed3fb3c08f8"
     },
     "docs.log": {
       "path": "compatibility-php8512-review-20261106/docs.log",
@@ -143,7 +150,7 @@
     },
     "go.log": {
       "path": "compatibility-php8512-review-20261106/go.log",
-      "sha256": "6e854f105425b5696173b7e32c8c84128836f9ad03f19fe63a6e4a5b94e339e0"
+      "sha256": "be250e7424f781ee640bc89430cde9efb7bafd0d6c6a96c606a616190e3f5858"
     },
     "gofmt.log": {
       "path": "compatibility-php8512-review-20261106/gofmt.log",
@@ -151,27 +158,31 @@
     },
     "python.log": {
       "path": "compatibility-php8512-review-20261106/python.log",
-      "sha256": "b2957fd4b19a9b1a30a62f21b5a33144e39d60ab980fbc1234980d77e3b0cbfe"
+      "sha256": "6f64286e9ec7f9b3643b493cc114e2bbe70e7c1fc098ad2b3b2eb1fe970a7d2f"
     },
     "race.log": {
       "path": "compatibility-php8512-review-20261106/race.log",
-      "sha256": "cd5da73943484c6d4012444d78c0776903b1717737cc5ecc0beaf28b36dd0f5f"
+      "sha256": "1cbd4205fd16739897a00923965cdad4d518b1661436fb7193a3b54a1a44b2af"
     },
     "review-fixture.log": {
       "path": "compatibility-php8512-review-20261106/review-fixture.log",
-      "sha256": "18927cd5209a469cb88ac24cf9463f4392f9834fc3c82140c89fcd356262ebda"
+      "sha256": "5ae800bf5d814628615925ad4d0d537735e7a23508e3724b305b9bbe6ae89b5c"
     },
     "review-fixture.py.txt": {
       "path": "compatibility-php8512-review-20261106/review-fixture.py.txt",
-      "sha256": "dd73bd54a9820b4546df813b5b51073d3d4c9f4597d6a9345b09b95c22a505b0"
+      "sha256": "61aca2156aa5ce103fc407ed23bac79f39e911df066f8d95739dcc73329c0d14"
     },
     "review-green.log": {
       "path": "compatibility-php8512-review-20261106/review-green.log",
-      "sha256": "97dace5e40b09a548d7cb5ad80a2a152ea5d08d9c8bcc0c4fc2ac75c91b6d97e"
+      "sha256": "8a4f108117ea7c6ae9d993c4e0bafa0231eb6249204aad90de092393759aa502"
+    },
+    "review-red-followup.log": {
+      "path": "compatibility-php8512-review-20261106/review-red-followup.log",
+      "sha256": "6c792d852d1312306b4d6de519be1248243397e2dd9fd40501bc7663d6a159a3"
     },
     "review-red.log": {
       "path": "compatibility-php8512-review-20261106/review-red.log",
-      "sha256": "d6b2ae34f02dc7aba8e5b278a069ff9647803e34971513ff1bd16e8ebc73c4c4"
+      "sha256": "d842a41e851d884a9b42cbfeb572a2fedf8c6547c2c9b84bb8c92aa720a03622"
     },
     "runtime-reference.log": {
       "path": "compatibility-php8512-review-20261106/runtime-reference.log",
@@ -188,13 +199,13 @@
   },
   "results": {
     "review_fixture": {
-      "cases": 466,
-      "per_width": 233,
-      "differences_before": 205,
+      "cases": 572,
+      "per_width": 286,
+      "differences_before": 267,
       "differences_after": 0,
       "fixture": "internal/ir/testdata/php8512-review-compile.json.gz"
     },
-    "compile_reference_cases": 11228,
+    "compile_reference_cases": 11334,
     "compile_corpus": {
       "files": 5307,
       "compile_errors": 647,
@@ -204,7 +215,10 @@
   "limits": [
     "PHP substitutes persistent constants such as NAN and PHP_INT_MAX while compiling; Phego leaves them for execution, so [NAN . ''] lacks its compile warning. Excluded from the fixture and listed in docs/decisions/compatibility-php8512.md.",
     "SPL classes such as ArrayObject have no inheritance metadata before W-29; static covariance cases use equivalent user classes.",
-    "Constant expressions fold a class operand before PHP checks it, so const X = (A::class)::C; compiles in PHP but not in Phego; ('static')::C lacks PHP's invalid class name error."
+    "Constant expressions fold a class operand before PHP checks it, so const X = (A::class)::C; and const X = (PHP_EOL)::C; compile in PHP but not in Phego.",
+    "Closures inside attribute arguments are checked as constant expressions but their bodies are not lowered, so their compile-time diagnostics are missing.",
+    "Inheritance errors follow child method order and name the earliest ancestor; PHP follows parent order, reports properties first and names the nearest override. $a[] ??= 1 and multi-line virtual hook lines also differ."
   ],
-  "review_status": "All nine PR #129 review comments on 3da26d5 were reproduced with the pinned images and fixed with failing-first regression cases."
+  "verification_note": "Red logs fail by design. After the full checks, the unused line parameter of methodName was renamed to _ with no behavior change; gofmt, go vet and go test ./internal/ir were rerun and passed.",
+  "review_status": "All nine PR #129 review comments on 3da26d5 were reproduced with the pinned images and fixed with failing-first regression cases. An independent adversarial review of dc2b04f found one P0 and four P2 regressions plus same-pattern gaps; the regressions and in-scope gaps are fixed with new cases, and the rest are listed in limits."
 }

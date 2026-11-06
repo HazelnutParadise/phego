@@ -144,6 +144,24 @@ func (l *lowerer) evaluateConstant(n *Node) (compileConst, bool) {
 	return v, known
 }
 
+// probeConstant answers whether run-time code compiles n to a constant, for
+// the conversions PHP applies to such operands (string conversion of a
+// member or concatenation operand, method name and class checks). These
+// probes never fail compilation: a concatenation or interpolation is a
+// string and needs no evaluation, and an operand beyond its own budget is
+// computed at run time, where the same conversion still happens.
+func (l *lowerer) probeConstant(n *Node) (compileConst, bool) {
+	if n == nil || n.Op == OpInterp || n.Op == OpBinary && n.Text == "." {
+		return compileConst{}, false
+	}
+	b := newCompileBudget(n)
+	v, known := l.compileConst(n, 0, b)
+	if b.exhausted {
+		return compileConst{}, false
+	}
+	return v, known
+}
+
 // Completed unknown results are memoized too. Height records the deepest
 // evaluated descendant so reusing a shallow result cannot bypass the limit.
 func (l *lowerer) compileConst(n *Node, depth int, b *compileBudget) (value compileConst, known bool) {
