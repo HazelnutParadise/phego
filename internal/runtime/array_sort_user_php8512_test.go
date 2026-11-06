@@ -23,7 +23,7 @@ func TestW12SortUserRetryLiveReference(t *testing.T) {
 				must(t, err)
 				must(t, h.bind(&alias, element))
 				calls := [][2]int64{}
-				must(t, h.sortArrayUserWithDiagnostic(&a, preserve, func(x, y value) (value, error) {
+				must(t, h.sortArrayUserWithDiagnostic(&a, map[bool]string{false: "usort", true: "uasort"}[preserve], preserve, func(x, y value) (value, error) {
 					calls = append(calls, [2]int64{x.integer, y.integer})
 					if len(calls) == 1 {
 						if !inDiagnostic {
@@ -64,7 +64,7 @@ func TestW12SortUserRetryClosedHeap(t *testing.T) {
 			must(t, h.appendValue(&a, h.number(2)))
 			calls, afterClose := 0, 0
 			var returned *object
-			err := h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+			err := h.sortArrayUserWithDiagnostic(&a, "usort", false, func(x, y value) (value, error) {
 				calls++
 				if calls == 1 {
 					return boolValue(false), nil
@@ -101,7 +101,7 @@ func TestW12SortUserRetryCleanupDeprecationState(t *testing.T) {
 	must(t, h.appendValue(&a, h.number(1)))
 	must(t, h.appendValue(&a, h.number(2)))
 	outer := 0
-	must(t, h.sortArrayUser(&a, false, func(x, y value) (value, error) {
+	must(t, h.sortArrayUser(&a, "usort", false, func(x, y value) (value, error) {
 		outer++
 		if outer > 1 {
 			return h.number(x.integer - y.integer), nil
@@ -115,14 +115,14 @@ func TestW12SortUserRetryCleanupDeprecationState(t *testing.T) {
 		must(t, e)
 		must(t, h.bind(&alias, element))
 		calls := 0
-		err := h.sortArrayUser(&inner, false, func(x, y value) (value, error) {
+		err := h.sortArrayUser(&inner, "usort", false, func(x, y value) (value, error) {
 			calls++
 			if calls == 1 {
 				return boolValue(false), nil
 			}
 			must(t, h.appendValue(&nested, h.number(2)))
 			must(t, h.appendValue(&nested, h.number(1)))
-			must(t, h.sortArrayUser(&nested, false, func(x, y value) (value, error) { return h.number(x.integer - y.integer), nil }))
+			must(t, h.sortArrayUser(&nested, "usort", false, func(x, y value) (value, error) { return h.number(x.integer - y.integer), nil }))
 			must(t, h.assign(&alias, h.number(10)))
 			return boolValue(false), nil
 		})
@@ -155,7 +155,7 @@ func TestW12SortUserArgumentCleanupFailure(t *testing.T) {
 			must(t, err)
 			must(t, h.bind(&alias, e))
 			calls, warnings := 0, 0
-			err = h.sortArrayUserWithDiagnostic(&a, false, func(value, value) (value, error) {
+			err = h.sortArrayUserWithDiagnostic(&a, "usort", false, func(value, value) (value, error) {
 				calls++
 				must(t, h.assign(&alias, h.number(10)))
 				switch mode {
@@ -207,7 +207,7 @@ func TestW12SortUserBorrowedArgumentResult(t *testing.T) {
 	must(t, err)
 	must(t, h.bind(&alias, element))
 	warnings := 0
-	must(t, h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+	must(t, h.sortArrayUserWithDiagnostic(&a, "usort", false, func(x, y value) (value, error) {
 		must(t, h.assign(&alias, h.number(10)))
 		return x, nil
 	}, func(int, string) error {
@@ -235,7 +235,7 @@ func TestW12SortUserReferenceBoolean(t *testing.T) {
 	must(t, h.assign(&ret, boolValue(false)))
 	must(t, h.bind(&alias, &ret))
 	calls := [][2]int64{}
-	must(t, h.sortArrayUser(&a, false, func(x, y value) (value, error) {
+	must(t, h.sortArrayUser(&a, "usort", false, func(x, y value) (value, error) {
 		calls = append(calls, [2]int64{x.integer, y.integer})
 		if e := h.assign(&ret, boolValue(x.integer > y.integer)); e != nil {
 			return value{}, e
@@ -260,7 +260,7 @@ func TestW12SortDiagnosticFailure(t *testing.T) {
 			}
 			stop := errors.New("comparison warning failed")
 			calls, warnings := 0, 0
-			err := h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) { calls++; return boolValue(truth), nil }, func(level int, message string) error { warnings++; return stop })
+			err := h.sortArrayUserWithDiagnostic(&a, "usort", false, func(x, y value) (value, error) { calls++; return boolValue(truth), nil }, func(level int, message string) error { warnings++; return stop })
 			if !errors.Is(err, stop) || calls != 1 || warnings != 1 {
 				t.Fatalf("error=%v calls=%d warnings=%d", err, calls, warnings)
 			}
@@ -284,7 +284,7 @@ func TestW12SortUserClosedHeap(t *testing.T) {
 	must(t, h.appendValue(&a, h.number(1)))
 	must(t, h.appendValue(&a, h.number(2)))
 	calls, warnings := 0, 0
-	err := h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+	err := h.sortArrayUserWithDiagnostic(&a, "usort", false, func(x, y value) (value, error) {
 		calls++
 		if e := h.shutdown(&a); e != nil {
 			return value{}, e
@@ -308,7 +308,7 @@ func TestW12SortObjectCoercionDiagnostic(t *testing.T) {
 	calls, warnings := 0, 0
 	stop := errors.New("Object of class stdClass could not be converted to int")
 	objects := []*object{}
-	err := h.sortArrayUserWithDiagnostic(&a, false, func(x, y value) (value, error) {
+	err := h.sortArrayUserWithDiagnostic(&a, "usort", false, func(x, y value) (value, error) {
 		calls++
 		v, e := h.newObject(&class{name: "stdClass"})
 		objects = append(objects, v.object)
@@ -345,10 +345,10 @@ func TestW12SortUserNestedDeprecation(t *testing.T) {
 	must(t, h.appendValue(&inner, h.number(2)))
 	must(t, h.appendValue(&inner, h.number(1)))
 	calls := 0
-	must(t, h.sortArrayUser(&a, false, func(x, y value) (value, error) {
+	must(t, h.sortArrayUser(&a, "usort", false, func(x, y value) (value, error) {
 		calls++
 		if calls == 2 {
-			must(t, h.sortArrayUser(&inner, false, func(x, y value) (value, error) { n, e := h.compare(x, y); return h.number(int64(n)), e }))
+			must(t, h.sortArrayUser(&inner, "usort", false, func(x, y value) (value, error) { n, e := h.compare(x, y); return h.number(int64(n)), e }))
 		}
 		return boolValue(x.integer > y.integer), nil
 	}))
@@ -370,7 +370,7 @@ func TestW12SortStopsHostCalls(t *testing.T) {
 				must(t, h.appendValue(&a, h.number(i)))
 			}
 			calls := 0
-			err := h.sortArray(&a, false, func(x, y value) (int, error) {
+			err := h.sortArray(&a, "usort", false, func(x, y value) (int, error) {
 				calls++
 				if closeHeap {
 					return 0, h.shutdown(&a)
@@ -400,7 +400,7 @@ func TestW12SortUserBooleanAdapter(t *testing.T) {
 		must(t, h.appendValue(&a, h.number(i)))
 	}
 	calls := [][2]int64{}
-	must(t, h.sortArrayUser(&a, false, func(x, y value) (value, error) {
+	must(t, h.sortArrayUser(&a, "usort", false, func(x, y value) (value, error) {
 		calls = append(calls, [2]int64{x.integer, y.integer})
 		return boolValue(x.integer > y.integer), nil
 	}))
@@ -426,7 +426,7 @@ func TestW12SortUserReverseFailure(t *testing.T) {
 	must(t, h.appendValue(&a, h.number(2)))
 	stop := errors.New("reverse comparison failed")
 	calls := 0
-	err := h.sortArrayUser(&a, true, func(x, y value) (value, error) {
+	err := h.sortArrayUser(&a, "uasort", true, func(x, y value) (value, error) {
 		calls++
 		if calls == 2 {
 			return value{}, stop

@@ -116,7 +116,7 @@ func TestExecutionReviewFatalPhaseBoundaries(t *testing.T) {
 				return completion{kind: endFatal, err: errors.New("phase fatal")}
 			}
 			got := x.run(ctx, func(x *execution) completion {
-				if err := x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+				if err := x.startBuffer("{closure:test}", func(x *execution, b []byte) ([]byte, completion) {
 					events = append(events, "flush")
 					v, err := x.object("NewInOutput", func(*execution) completion { events = append(events, "new"); return completion{} })
 					if err != nil {

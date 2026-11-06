@@ -25,7 +25,7 @@ func TestW12SortObservableRegression(t *testing.T) {
 				must(t, h.appendValue(&a, h.number(v)))
 			}
 			calls := [][2]int64{}
-			must(t, h.sortArray(&a, false, func(x, y value) (int, error) {
+			must(t, h.sortArray(&a, "usort", false, func(x, y value) (int, error) {
 				calls = append(calls, [2]int64{x.integer, y.integer})
 				if tc.constant != 0 {
 					return tc.constant, nil
@@ -77,9 +77,9 @@ func TestW12SortKeyLookupDuringComparisons(t *testing.T) {
 			must(t, h.appendValue(&a, w13Str("a")))
 			must(t, h.appendValue(&a, w13Str("c")))
 			if tc.user {
-				must(t, h.sortArray(&a, false, h.compare))
+				must(t, h.sortArray(&a, "usort", false, h.compare))
 			} else {
-				must(t, h.sortArrayRegular(&a, false))
+				must(t, h.sortArrayRegular(&a, "sort", false))
 			}
 			if len(seen) == 0 {
 				t.Fatal("__toString was not called")

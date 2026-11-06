@@ -86,11 +86,13 @@ func replayExecutionOracle(t *testing.T, width int) {
 				must(err)
 				must(x.registerShutdown(func(x *execution) completion { event("shutdown:1"); return x.write([]byte("S")) }))
 				must(x.registerShutdown(func(x *execution) completion { event("shutdown:2"); return completion{} }))
-				must(x.startBuffer(func(_ *execution, b []byte) ([]byte, completion) {
+				// Handler names are PHP's callable names for the fixture closures.
+				handler := func(file string, line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", file, line) }
+				must(x.startBuffer(handler("common", 11), func(_ *execution, b []byte) ([]byte, completion) {
 					event("flush:outer")
 					return []byte("[" + string(b) + "]"), completion{}
 				}))
-				must(x.startBuffer(func(_ *execution, b []byte) ([]byte, completion) {
+				must(x.startBuffer(handler("common", 12), func(_ *execution, b []byte) ([]byte, completion) {
 					event("flush:inner")
 					return []byte("(" + string(b) + ")"), completion{}
 				}))
@@ -133,12 +135,12 @@ func replayExecutionOracle(t *testing.T, width int) {
 						return completion{}
 					}))
 				case "buffer_echo":
-					must(x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+					must(x.startBuffer(handler("buffer_echo", 4), func(x *execution, b []byte) ([]byte, completion) {
 						event("flush:echo")
 						return b, x.write([]byte("discarded"))
 					}))
 				case "buffer_retained":
-					must(x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+					must(x.startBuffer(handler("buffer_retained", 4), func(x *execution, b []byte) ([]byte, completion) {
 						event("flush:retained")
 						v, err := x.object("Tracked", func(x *execution) completion { event("destroy:unexpected-late"); return x.write([]byte("D")) })
 						must(err)
@@ -157,7 +159,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 					})
 					must(err)
 				case "buffer_object", "fatal_buffer_object":
-					must(x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+					must(x.startBuffer(handler(tc.Case, 7), func(x *execution, b []byte) ([]byte, completion) {
 						event("flush:object")
 						v, err := x.object("BufferLocal", func(_ *execution) completion { event("destroy:buffer-local"); return completion{} })
 						must(err)
@@ -165,9 +167,9 @@ func replayExecutionOracle(t *testing.T, width int) {
 						return b, completion{}
 					}))
 				case "buffer_nested_start_shutdown", "buffer_nested_start_flush":
-					must(x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+					must(x.startBuffer(handler(tc.Case, 5), func(x *execution, b []byte) ([]byte, completion) {
 						event("flush:nested")
-						if err := x.startBuffer(nil); err != nil {
+						if err := x.startBuffer("", nil); err != nil {
 							var c completion
 							if !errors.As(err, &c) {
 								t.Fatalf("nested ob_start: %v", err)
@@ -180,13 +182,13 @@ func replayExecutionOracle(t *testing.T, width int) {
 						return c
 					}
 					if tc.Case == "buffer_nested_start_flush" {
-						if c := x.endBuffer(); c.kind != endNormal {
+						if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
 							return c
 						}
 						event("body:after")
 					}
 				case "flush_throw":
-					must(x.startBuffer(func(_ *execution, _ []byte) ([]byte, completion) {
+					must(x.startBuffer(handler("flush_throw", 4), func(_ *execution, _ []byte) ([]byte, completion) {
 						event("flush:throw")
 						return nil, completion{kind: endThrow, err: errors.New("flush failure")}
 					}))
@@ -612,6 +614,25 @@ func replayExecutionOracle(t *testing.T, width int) {
 						want = append(want, "diagnostic:"+level)
 					}
 				}
+			}
+			// Output handler deprecations name the handler and the flushing
+			// context; compare their full text.
+			var wantHandler, gotHandler []string
+			for _, line := range strings.Split(tc.Stderr, "\n") {
+				if message, ok := strings.CutPrefix(line, "Deprecated: "); ok && strings.Contains(message, "user output handler") {
+					if at := strings.LastIndex(message, " in "); at >= 0 {
+						message = message[:at]
+					}
+					wantHandler = append(wantHandler, message)
+				}
+			}
+			for _, d := range result.diagnostics {
+				if d.level == "Deprecated" && strings.Contains(d.message, "user output handler") {
+					gotHandler = append(gotHandler, d.message)
+				}
+			}
+			if strings.Join(gotHandler, "\n") != strings.Join(wantHandler, "\n") {
+				t.Errorf("handler deprecations=%q, oracle=%q", gotHandler, wantHandler)
 			}
 			if strings.Join(events, "\n") != strings.Join(want, "\n") {
 				t.Errorf("events=%v, oracle=%v", events, want)

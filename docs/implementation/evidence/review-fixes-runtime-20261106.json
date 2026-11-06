@@ -1,0 +1,250 @@
+{
+  "scope": "Review fixes on merged W-12, W-13, W-14, W-15, W-16, W-20 and W-45 work; local evidence only, no VM.",
+  "requirements": [
+    "REQ-012",
+    "REQ-016",
+    "REQ-017",
+    "REQ-018",
+    "REQ-019",
+    "REQ-020",
+    "REQ-024",
+    "REQ-025",
+    "REQ-033",
+    "REQ-037",
+    "REQ-040",
+    "REQ-059",
+    "REQ-065"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-031",
+    "T-032",
+    "T-033",
+    "T-034",
+    "T-035",
+    "T-036",
+    "T-037",
+    "T-038",
+    "T-039",
+    "T-040",
+    "T-047",
+    "T-048",
+    "T-049",
+    "T-050",
+    "T-065",
+    "T-066",
+    "T-073",
+    "T-074",
+    "T-079",
+    "T-080",
+    "T-117",
+    "T-118",
+    "T-129",
+    "T-130"
+  ],
+  "source_base": "8a4aed7dfa3391a8c849cbe9212491f44fb1242f",
+  "captured_at": "2026-11-06T15:16:25.992728+00:00",
+  "source_sha256": {
+    "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
+    "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
+    "internal/bytecode/limits_review_test.go": "690a128fcafe76701b54660a541f36051f93af204a0ed750c57b5a921925d43a",
+    "internal/bytecode/verify.go": "60a73228ec3bf37ced5860ac07343ad04567ab5adf906312cdc58be51018c5fa",
+    "internal/ir/ssa/analyze.go": "a6f4b7f7627fb247eab759a985d7f6eb8ba583ac60b8fb6f583fdb3914a9623c",
+    "internal/ir/ssa/ssa_test.go": "99a5c355fae14fc99d977b1ff18c874ce703bee89835f1a706cfd506252c866a",
+    "internal/policy/absolute_review_fixes_test.go": "1f71a7579a79b871d85c37c3f1f5d58a6062776f62b2ada2f40159bf195e73ea",
+    "internal/policy/fifo_review_fixes_test.go": "a2e6a078892c4748cb03139280fad98d7e15d172e1d6960f0429a80cbf118bd6",
+    "internal/policy/files.go": "22b91525df034b13b84f48eae638d0422463a2b9ebccc5cc7bce6b89b67ee52c",
+    "internal/policy/files_root.go": "8cac2da141059af6a8fe84ffc1d4f7e29c99e3ea0f22783f07947503b8a61872",
+    "internal/policy/network_review_fixes_test.go": "94e98909cb9d10065faba23b6eff462f223a53fb9dd082374006e202939a5a6a",
+    "internal/policy/policy.go": "90ee2a6ff19c5ae7f6687d2ec8ac71a6ce25323a915c4f8bfd50cbbd27252f8f",
+    "internal/runtime/array_argument_type_test.go": "ca1c2390a1208de238b74920282f04c6a247f806071c10d6b83c4b4ea4742d6b",
+    "internal/runtime/array_sort_bench_test.go": "e157165d761e3fb57287fa70f5485f8c2e2b5706ae35a4b457b1a80ec0a3c3b0",
+    "internal/runtime/array_sort_php8512_test.go": "ba1b41176dca318863ff3772da00e83a024a6ed9c547a3c438df840aab7799f8",
+    "internal/runtime/array_sort_regression_test.go": "05abe3c16d6fbdecf16621a8c2ab9dd9226f9d6df5cd3822e7cd0cdd880cc0c6",
+    "internal/runtime/array_sort_user_php8512.go": "c1e769d37fc023bee3720a8abd2a9a6021511c22f4e47c0c831a3efc7ebe0e4d",
+    "internal/runtime/array_sort_user_php8512_test.go": "a42dee87fbac5fbd054a7acc9bc19d03791ec5c92514c94eeb301ca6f3ec1376",
+    "internal/runtime/array_w12.go": "ac036c2cc5b3869f5d4d5a83e55f1bd27472b9a97b8cdb335ece5e26c6fc3bf4",
+    "internal/runtime/array_w12_safety_test.go": "9052cd8f59468dead9e7e32a1847ddb34f0d382ae9507e03636bab685b956060",
+    "internal/runtime/array_w12_test.go": "a7f66506d7bd9f75d0a49fc3a48862998c5f990040aa953a5531e63adb6c8ae1",
+    "internal/runtime/execution.go": "b2ab5adf102b306693ecc8d8ae83b78dda9aa443f8e30eafce20d31c10d8f1c5",
+    "internal/runtime/execution_ci_review_test.go": "009311d1efc90fd2da63a6cf5c75085b9949a15c306ba37bf4b48183e0ec4373",
+    "internal/runtime/execution_oracle_test.go": "003ec9b468d5c1f02da515f7adeaba407c21b73af6d7df337b7a691231dd5d94",
+    "internal/runtime/execution_output.go": "c2f02c7705e2b3a2fe0b8e56bf620b3e518b8d1a3e565ddd7fc0400e1eeeca54",
+    "internal/runtime/execution_snapshot_test.go": "a2bbeeca11f1298b3e95cc10b7b17b085f9dc28b650328063f1e7cf21ecf2ea6",
+    "internal/runtime/execution_test.go": "fe46eeccafb091d75846476def5d21039c983ebe2b4217d8309f86c30b62606a",
+    "internal/runtime/object_model_test.go": "4f077ec0f0914c281ba7a4dad6d6960cc9e837a6bfc28fcd168fafa04a6cde79",
+    "internal/runtime/object_review_r14_free_order_test.go": "17ccb6b61c5011edede681de1b4e40fb799d28edccd11b55a5f35fc45ced4d60",
+    "internal/runtime/object_table.go": "b8159df6f1b7a7dcbe8d81d4ed562cae0a285a927499681ec81c61b33bc7f2c7",
+    "internal/runtime/ops_php8512.go": "de6251a3a2086c0f4671fbf620fc136c77565f5cfc3ae1cca3c85cdfe8dd1b84",
+    "internal/runtime/testdata/w13-ref-32.json": "bc6a8a0b4735cfdb1e7f234053841b51fbaaa85642302903029ba79da42516e6",
+    "internal/runtime/testdata/w13-ref-64.json": "a6c3da802dc23b0d89cbf6dc091e99b9f741cd5d1862ddf2eec86f29faef99f1",
+    "internal/runtime/testdata/w13-run-32.json": "58a6196fa8905a3e151f70d5a4ea21ed7bbe138886bc227aea64b45d9db13bee",
+    "internal/runtime/testdata/w13-run-64.json": "7e105562a62a8214bd2517635cced899b7fc014c604498fb5a09bfea94b6fcb4",
+    "tests/lifecycle/w14/buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
+    "tests/lifecycle/w14/buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
+    "tests/lifecycle/w14/reference-32.json": "f6deb89e526f4e74f38830e737db145b21daf43a0beea23e5ecb9f9f1c31df6a",
+    "tests/lifecycle/w14/reference.json": "b52379eae61a2c8d45b5f0f4d91ed9ef47c46869ce5910d99a2666d38f3bdd32",
+    "tests/semantics/w13-objects/matrix.php": "9fc87475e93de5ab002e37c328c873dd49f0bcdf92ff710997bb8382e851a5bc",
+    "tests/semantics/w13-objects/review_r14_free_order.php": "39240d4e7c7e04565a3f9236964f171b392d53cc26c67d7b36efd9cc66032fb6",
+    "tools/test_upstream_diff.py": "1b8bdd79ca945f34d043590405b5f2f19fadf889449b2cca333bf91d7a71da52",
+    "tools/test_upstream_diff_review.py": "3700f5780d8ab900beec1597b8c9c7897c985648c8394226114ea926f422345c",
+    "tools/upstream_diff.py": "7dfedfb76caa827819596057e9979f1cb8aafabc9a563e5213aff7c4ecec03d4",
+    "tools/w03-local-checks.json": "a390c85030a0d2879e6146cf41277a8d8387fce20720f5476768905626cc6b0c"
+  },
+  "environment": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "reference_images": {
+      "linux/arm64": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "linux/386": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "linux/amd64": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f"
+    }
+  },
+  "decisions": [
+    "W-20 character devices: approved by the project owner on 2026-11-06.",
+    "Sort functions take op and output buffers take a handler name and flush context: approved by the project owner on 2026-11-06 after an independent Fable 5.1 consultation."
+  ],
+  "local_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "go test of each new regression on e62c33f (main before the fixes); W-12/W-14 interface tests checked with go vet",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-main.log",
+      "result": "Every new regression fails before the fix; the interface tests fail to compile because op/name parameters do not exist yet."
+    },
+    {
+      "command": "PHP 8.5.12 probes in the arm64, i386 and amd64 images (php/*.php.txt)",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/php-reference.log",
+      "result": "Sort key lookup during comparisons is undefined; TypeError type names; current()/reset() on objects only deprecate; handler deprecation prefixes; frameless calls keep frames."
+    },
+    {
+      "command": "go test ./internal/bytecode -run TestZZMeasureDefaultBudgets -v (bytecode-budgets.go.txt, removed after the run)",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/bytecode-budgets.log",
+      "result": "64 registers: Load needs 106,956,053 work and 152,045,160 bytes; defaults are 134,217,728 and 201,326,592."
+    },
+    {
+      "command": "python3 tools/upstream_update.py pair --lock docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json <8.5.11> <8.5.12>",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/upstream-pair.log",
+      "result": "Both archives match their locked SHA-256; the committed classification equals the pair output; 177 grammar rules."
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/gofmt.log",
+      "result": "No output."
+    },
+    {
+      "command": "CGO_ENABLED=0 go build ./... for linux/amd64, linux/386, windows/amd64, darwin/arm64",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/build.log"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/vet.log"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 ./...",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/go.log"
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/race.log"
+    },
+    {
+      "command": "go test ./internal/bytecode -run '^$' -fuzz '^FuzzLoadRejectsMalformedAndRepairedPayloads$' -fuzztime=30s -parallel=4",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/fuzz.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/python.log",
+      "result": "Ran 540 tests, OK."
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "log": "review-fixes-runtime-20261106/docs.log"
+    }
+  ],
+  "artifacts": {
+    "build.log": {
+      "path": "review-fixes-runtime-20261106/build.log",
+      "sha256": "1b9349d74555f3bfb2e8d5578ffa3e52a2b1f6c6090da6830fb4dd601194dcc8"
+    },
+    "bytecode-budgets.go.txt": {
+      "path": "review-fixes-runtime-20261106/bytecode-budgets.go.txt",
+      "sha256": "9674a696ca37e4e8f4c62d12aa9db6284fc997e54cc7085897daee65b647fbb1"
+    },
+    "bytecode-budgets.log": {
+      "path": "review-fixes-runtime-20261106/bytecode-budgets.log",
+      "sha256": "6170ad1b72afaeed27434d311675d00727050ba635a208ec20f1490c6441ef96"
+    },
+    "fuzz.log": {
+      "path": "review-fixes-runtime-20261106/fuzz.log",
+      "sha256": "92782dafe185b1dce3e9cfe2aef4b25bc2c2603c291a0bf32a013847db20c3b2"
+    },
+    "go.log": {
+      "path": "review-fixes-runtime-20261106/go.log",
+      "sha256": "84a92ad77379bd2d2dae134d35de6911c4404fa8e4118b39d32338fc4e3c1c7f"
+    },
+    "gofmt.log": {
+      "path": "review-fixes-runtime-20261106/gofmt.log",
+      "sha256": "2235fa671f8dcbfa731f9d2d9bd65310375030ca4d1d521dcaac15f27f95c44e"
+    },
+    "php/argument-types.php.txt": {
+      "path": "review-fixes-runtime-20261106/php/argument-types.php.txt",
+      "sha256": "8d48d1960533946deeb3c85e71b285f80a632f2e6ec34a2ff23c65207df542cf"
+    },
+    "php/frameless.php.txt": {
+      "path": "review-fixes-runtime-20261106/php/frameless.php.txt",
+      "sha256": "eb526d7fe4c3b0dfecae2ce145a54f8bb4b33880b1ccae079d28925723db0ddc"
+    },
+    "php/handler-deprecations.php.txt": {
+      "path": "review-fixes-runtime-20261106/php/handler-deprecations.php.txt",
+      "sha256": "9b16f62401ee12be633caf9c91e6ea380e889e0250c3e64a60af21ae1887482f"
+    },
+    "php/pointer-objects.php.txt": {
+      "path": "review-fixes-runtime-20261106/php/pointer-objects.php.txt",
+      "sha256": "1ff86d3ff48db098201f4b4019f04a639e314298c8fee45a6a76b6aae5637dc9"
+    },
+    "php/sort-reentry.php.txt": {
+      "path": "review-fixes-runtime-20261106/php/sort-reentry.php.txt",
+      "sha256": "8affe5500b42008c649ee8b5edc0a62da6db531d25f411de3dbd8db8af931937"
+    },
+    "php-reference.log": {
+      "path": "review-fixes-runtime-20261106/php-reference.log",
+      "sha256": "76f1294907b1edb532f55e994c68a256a8965bf9e85bf628743b4770528f771b"
+    },
+    "race.log": {
+      "path": "review-fixes-runtime-20261106/race.log",
+      "sha256": "9c27a049eb802649d2c261e884523f4a9957755bf36ddf02cabbffacde0c50a7"
+    },
+    "red-main.log": {
+      "path": "review-fixes-runtime-20261106/red-main.log",
+      "sha256": "6553e896557ba8d42c4b42c4c98e1201f3e41e196c5beb4dab246be9434d4e19"
+    },
+    "upstream-pair.log": {
+      "path": "review-fixes-runtime-20261106/upstream-pair.log",
+      "sha256": "fad77bcbbd88b8c93aa45385e0e1bbd5ca3fb70fec589a47223e5119809baac4"
+    },
+    "vet.log": {
+      "path": "review-fixes-runtime-20261106/vet.log",
+      "sha256": "89f25aed4a4b2c04e4f83abb1fb792613835ff684061382f0e6fa27766ecf615"
+    }
+  },
+  "limits": [
+    "PHP 8.5.12 deprecates current(), reset() and the other pointer functions on objects and reads their properties; Phego still throws TypeError (W-13 object property iteration).",
+    "W-12 TypeError type names use zend_zval_value_name only for the sort and pointer functions; five other valueName call sites keep 'resource (closed)' until each message is checked against PHP.",
+    "Output handler names and flush contexts come from the caller; W-17 must pass the active function name, including chunk-size flushes and ob_*clean functions, which also call the handler.",
+    "The verifier's per-edge diagnostics choose a fixed order when several handlers are violated; the old pairwise scan chose by handler index."
+  ]
+}

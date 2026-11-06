@@ -1,0 +1,89 @@
+== go test ./internal/policy (new tests)
+--- FAIL: TestAbsoluteLinkChainParentUsesNewMount (0.01s)
+    absolute_review_fixes_test.go:313: /app/parent: policy: file-read open "/app/sub/../file" refused (outside-root)
+    absolute_review_fixes_test.go:313: /app/deeper: policy: file-read open "/app/sub/../sub/file" refused (outside-root)
+    absolute_review_fixes_test.go:313: /other/torel: policy: file-read open "/app/sub/../file" refused (outside-root)
+    absolute_review_fixes_test.go:313: /app/viaother: policy: file-read open "/app/sub/../file" refused (outside-root)
+--- FAIL: TestRootAllowsCharacterDevices (0.00s)
+    fifo_review_fixes_test.go:60: policy: file-read open "/devices/null" refused (not-granted)
+--- FAIL: TestNetworkZoneAcceptsOnlyVisibleASCII (0.00s)
+    network_review_fixes_test.go:176: host "::1%en0 ": got <nil>, want SpecError for Network[0]
+    network_review_fixes_test.go:176: host "fe80::1% en0": got <nil>, want SpecError for Network[0]
+    network_review_fixes_test.go:176: host "fe80::1%en\t0": got <nil>, want SpecError for Network[0]
+    network_review_fixes_test.go:176: host "fe80::1%en0\n": got <nil>, want SpecError for Network[0]
+    network_review_fixes_test.go:176: host "fe80::1%én0": got <nil>, want SpecError for Network[0]
+    network_review_fixes_test.go:176: host "fe80::1%en\x7f": got <nil>, want SpecError for Network[0]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.970s
+FAIL
+== go test ./internal/ir/ssa
+--- FAIL: TestOutOfRangeIntLiteralIsNotTypedInt (0.00s)
+    ssa_test.go:406: literal 1<<40: type 3, constant false
+    ssa_test.go:408: 1<<40 | 2: specialization 2, constant false
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir/ssa	0.541s
+FAIL
+== go test ./internal/bytecode
+--- FAIL: TestDefaultLimitsAdmitLargestStraightLineImage (0.09s)
+    limits_review_test.go:36: Build: bytecode verification limit exceeded at byte -1, function 0, instruction 800972: invalid register or control flow
+--- FAIL: TestHandlerChecksDoNotScanEveryHandler (0.01s)
+    limits_review_test.go:73: 4096 sibling finally blocks within 1048576 work: bytecode verification limit exceeded at byte -1, function 0, instruction -1: invalid function
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.642s
+FAIL
+== go test ./internal/runtime (W-13 r14)
+        object_model_test.go:1017: r14-free-dynamic
+            Go:  {"result":["declared1","declared2","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["dynamic1","dynamic2","declared1","declared2"],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-subclass
+            Go:  {"result":["declared1","declared2","declared3","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["dynamic1","dynamic2","declared1","declared2","declared3"],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-materialized
+            Go:  {"result":[["declared1","declared2","dynamic1","dynamic2"],["declared1","declared2","dynamic1","dynamic2"]],"diagnostics":[]}
+            PHP: {"result":[["declared1","declared2","dynamic1","dynamic2"],["dynamic1","dynamic2","declared1","declared2"]],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-unset-redeclare
+            Go:  {"result":["declared1","declared1b","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["declared1","dynamic1","dynamic2","declared1b"],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-dynamic
+            Go:  {"result":["declared1","declared2","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["dynamic1","dynamic2","declared1","declared2"],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-subclass
+            Go:  {"result":["declared1","declared2","declared3","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["dynamic1","dynamic2","declared1","declared2","declared3"],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-materialized
+            Go:  {"result":[["declared1","declared2","dynamic1","dynamic2"],["declared1","declared2","dynamic1","dynamic2"]],"diagnostics":[]}
+            PHP: {"result":[["declared1","declared2","dynamic1","dynamic2"],["dynamic1","dynamic2","declared1","declared2"]],"diagnostics":[]}
+        object_model_test.go:1017: r14-free-unset-redeclare
+            Go:  {"result":["declared1","declared1b","dynamic1","dynamic2"],"diagnostics":[]}
+            PHP: {"result":["declared1","dynamic1","dynamic2","declared1b"],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.643s
+FAIL
+== python tools (W-45)
+ERROR: test_only_documented_metadata_tags_are_included_and_metadata_order_is_canonical (tools.test_upstream_diff_review.TestStubMetadata) (tag='@deprecated')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='deprecated function')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='alias')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='implementation alias')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='constant value')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='constant type')
+FAIL: test_behavior_tag_edits_are_reported (tools.test_upstream_diff_review.TestBehaviorTags) (name='file cache')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='ext/opcache/tests/file_cache_error.phpt')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='ext/opcache/tests/gh16979_check_file_cache_function.phpt')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='ext/opcache/zend_file_cache.c')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='ext/opcache/jit/zend_jit.c')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='ext/opcache/tests/jit/add_001.phpt')
+FAIL: test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages (tools.test_upstream_diff_review.TestOpcacheImpact) (path='Zend/Optimizer/sccp.c')
+FAIL: test_comment_edits_report_no_change_but_real_edits_do (tools.test_upstream_diff_review.TestSignatureComments)
+FAIL: test_comment_position_and_line_breaks_do_not_change_signatures (tools.test_upstream_diff_review.TestSignatureComments) (source='<?php function m(/** note */$a, $z = null) {}')
+FAIL: test_comment_position_and_line_breaks_do_not_change_signatures (tools.test_upstream_diff_review.TestSignatureComments) (source='<?php function m( /** note */ $a, $z = null) {}')
+FAIL: test_comment_position_and_line_breaks_do_not_change_signatures (tools.test_upstream_diff_review.TestSignatureComments) (source='<?php function m($a /* note */, $z = null) {}')
+FAIL: test_comment_position_and_line_breaks_do_not_change_signatures (tools.test_upstream_diff_review.TestSignatureComments) (source='<?php function m($a, $z = null/** note */) {}')
+FAIL: test_comment_position_and_line_breaks_do_not_change_signatures (tools.test_upstream_diff_review.TestSignatureComments) (source='<?php function m(\n    /** note */\n    $a,\n    $z = null\n) {}')
+FAIL: test_attributes_are_kept_at_declarations_and_parameters (tools.test_upstream_diff_review.TestStubMetadata)
+Ran 62 tests in 0.560s
+FAILED (failures=19, errors=1)
+== go vet ./internal/runtime with the W-12 argument test (sort functions take op)
+# github.com/HazelnutParadise/phego/internal/runtime
+# [github.com/HazelnutParadise/phego/internal/runtime]
+vet: internal/runtime/array_argument_type_test.go:38:72: too many arguments in call to h.sortArrayRegular
+	have (*value, string, bool)

@@ -56,18 +56,24 @@ func (x *execution) write(data []byte) (c completion) {
 	return x.check()
 }
 
+// flush ends every buffer at request shutdown.
 func (x *execution) flush() completion {
 	for len(x.buffers) > 0 {
-		if c := x.endBuffer(); c.kind != endNormal {
+		if c := x.endBufferIn("PHP Request Shutdown"); c.kind != endNormal {
 			return c
 		}
 	}
 	return completion{}
 }
 
-// endBuffer is ob_end_flush(): the innermost buffer passes through its
-// handler into the next buffer or the writer.
-func (x *execution) endBuffer() completion {
+// endBuffer is ob_end_flush() and its relatives: the innermost buffer passes
+// through its handler into the next buffer or the writer. op names the PHP
+// function whose call flushed it, which handler diagnostics report.
+func (x *execution) endBuffer(op string) completion {
+	return x.endBufferIn(op + "()")
+}
+
+func (x *execution) endBufferIn(origin string) completion {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
@@ -79,7 +85,7 @@ func (x *execution) endBuffer() completion {
 	x.buffers = x.buffers[:i]
 	if b.filter != nil {
 		var c completion
-		b.data, c = x.filter(b.filter, b.data)
+		b.data, c = x.filter(b.filter, origin, b.name, b.data)
 		if c.kind != endNormal {
 			return c
 		}
@@ -87,7 +93,7 @@ func (x *execution) endBuffer() completion {
 	return x.write(b.data)
 }
 
-func (x *execution) filter(fn outputFilter, data []byte) (out []byte, c completion) {
+func (x *execution) filter(fn outputFilter, origin, name string, data []byte) (out []byte, c completion) {
 	x.filtering = true
 	x.handlerOutput = false
 	defer func() { x.filtering = false; x.handlerOutput = false }()
@@ -99,7 +105,7 @@ func (x *execution) filter(fn outputFilter, data []byte) (out []byte, c completi
 		if len(x.diagnostics) >= x.limits.callbacks {
 			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 		} else {
-			x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", "Producing output from user output handler is deprecated"})
+			x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", origin + ": Producing output from user output handler " + name + " is deprecated"})
 		}
 	}
 	if stop := x.check(); stop.kind != endNormal {

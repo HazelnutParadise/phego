@@ -57,6 +57,7 @@ type executionFrame struct{ locals []*value }
 type executionBuffer struct {
 	data   []byte
 	filter outputFilter
+	name   string // PHP's callable name of filter, used in its diagnostics
 }
 type executionDiagnostic struct{ level, message string }
 
@@ -421,9 +422,15 @@ func (x *execution) registerShutdown(fn executionAction) error {
 	x.shutdown = append(x.shutdown, fn)
 	return nil
 }
-func (x *execution) startBuffer(filter outputFilter) error {
+
+// startBuffer is ob_start(). name is PHP's callable name for filter, such as
+// {closure:FILE:LINE}; a buffer without a handler has no name.
+func (x *execution) startBuffer(name string, filter outputFilter) error {
 	if x.closed {
 		return errors.New("execution is closed")
+	}
+	if filter != nil && name == "" {
+		return errors.New("output handler requires its PHP callable name")
 	}
 	if x.filtering {
 		// php_output_lock_error deactivates output first: every buffer is
@@ -435,7 +442,7 @@ func (x *execution) startBuffer(filter outputFilter) error {
 		x.fail(endLimit, errExecutionLimit)
 		return errExecutionLimit
 	}
-	x.buffers = append(x.buffers, executionBuffer{filter: filter})
+	x.buffers = append(x.buffers, executionBuffer{filter: filter, name: name})
 	return nil
 }
 func (x *execution) warning(message string) completion {

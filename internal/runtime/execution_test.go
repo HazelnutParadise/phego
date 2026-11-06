@@ -170,7 +170,7 @@ func TestExecutionCancellationPreservesAcceptedOutputAndStopsPHPCallbacks(t *tes
 			if c := x.write([]byte("accepted")); c.kind != endNormal {
 				return c
 			}
-			if err := x.startBuffer(func(*execution, []byte) ([]byte, completion) { filter++; return nil, completion{} }); err != nil {
+			if err := x.startBuffer("{closure:test}", func(*execution, []byte) ([]byte, completion) { filter++; return nil, completion{} }); err != nil {
 				return completion{kind: endInternal, err: err}
 			}
 			if c := x.write([]byte("buffered")); c.kind != endNormal {
@@ -427,4 +427,55 @@ func TestExecutionLimitsCannotBeSwallowed(t *testing.T) {
 			t.Fatalf("swallowed output limit: %+v", result)
 		}
 	})
+}
+
+// REQ-040; T-079/T-080. PHP names the echoing handler and the flushing
+// context: the calling function, or "PHP Request Shutdown" at shutdown.
+func TestOutputHandlerDeprecationNamesHandlerAndContext(t *testing.T) {
+	r, _ := NewRequest(nil)
+	if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.BeginInit(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Ready(); err != nil {
+		t.Fatal(err)
+	}
+	x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 4096})
+	if err != nil {
+		t.Fatal(err)
+	}
+	echo := func(x *execution, b []byte) ([]byte, completion) { return b, x.write([]byte("discarded")) }
+	cleanup, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	result := x.run(cleanup, func(x *execution) completion {
+		if err := x.startBuffer("named", echo); err != nil {
+			t.Fatal(err)
+		}
+		if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+			return c
+		}
+		if err := x.startBuffer("", echo); err == nil {
+			t.Error("a handler without its PHP name was accepted")
+		}
+		if err := x.startBuffer("", nil); err != nil {
+			t.Error(err)
+		}
+		if err := x.startBuffer("{closure:/app/a.php:4}", echo); err != nil {
+			t.Fatal(err)
+		}
+		return completion{}
+	})
+	var got []string
+	for _, d := range result.diagnostics {
+		got = append(got, d.level+": "+d.message)
+	}
+	want := []string{
+		"Deprecated: ob_end_flush(): Producing output from user output handler named is deprecated",
+		"Deprecated: PHP Request Shutdown: Producing output from user output handler {closure:/app/a.php:4} is deprecated",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("diagnostics=%q, want %q", got, want)
+	}
 }

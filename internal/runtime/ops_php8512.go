@@ -41,6 +41,15 @@ func binopError(op string, a, b value) error {
 	return &Throwable{"TypeError", "Unsupported operand types: " + name(a) + " " + op + " " + name(b)}
 }
 
+// argumentTypeName is the given type of PHP's argument TypeError
+// (zend_zval_value_name): booleans by value, every resource as resource.
+func argumentTypeName(v value) string {
+	if v.deref().kind == valueResource {
+		return "resource"
+	}
+	return valueName(v)
+}
+
 // valueName is PHP's zend_zval_value_name: booleans are spelled by value.
 func valueName(v value) string {
 	if v = v.deref(); v.kind == valueBool {
