@@ -426,6 +426,9 @@ func (x *execution) startBuffer(filter outputFilter) error {
 		return errors.New("execution is closed")
 	}
 	if x.filtering {
+		// php_output_lock_error deactivates output first: every buffer is
+		// discarded without running its handler, and later output is direct.
+		x.buffers = nil
 		return x.fail(endFatal, errors.New("Cannot use output buffering in output buffering display handlers"))
 	}
 	if len(x.buffers) >= x.limits.depth {

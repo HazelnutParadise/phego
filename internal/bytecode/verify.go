@@ -1,7 +1,10 @@
 package bytecode
 
 import (
+	"cmp"
 	"errors"
+	"slices"
+
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
@@ -200,6 +203,10 @@ func verifyFunction(b *budget, image Image, index uint32, f *Function) (Capabili
 	if err := verifyHandlers(b, f); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}
+	handlers, err := newHandlerIndex(b, f)
+	if err != nil {
+		return 0, err
+	}
 	var caps CapabilitySet
 	for pc, in := range f.Code {
 		if err := b.chargeWork(1); err != nil {
@@ -215,21 +222,12 @@ func verifyFunction(b *budget, image Image, index uint32, f *Function) (Capabili
 		}
 		for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 			e := successor(in, uint32(pc), uint32(n), ei)
-			if err := checkEdge(b, f, uint32(pc), e.pc, e.leave); err != nil {
+			if err := handlers.checkEdge(uint32(pc), e.pc, e.leave); err != nil {
 				return 0, functionError(err, int(index), pc)
 			}
 		}
 		if in.Op == OpEndFinally {
-			kind, width := HandlerKind(0), uint64(n)+1
-			for _, h := range f.Handlers {
-				if err := b.chargeWork(1); err != nil {
-					return 0, err
-				}
-				if uint32(pc) >= h.Target && uint32(pc) < h.BodyEnd && uint64(h.BodyEnd-h.Target) < width {
-					kind, width = h.Kind, uint64(h.BodyEnd-h.Target)
-				}
-			}
-			if kind != Finally {
+			if kind, ok := handlers.innermostBody(pc); !ok || kind != Finally {
 				return 0, functionError(invalid("endfinally outside innermost finally body"), int(index), pc)
 			}
 		}
@@ -401,54 +399,178 @@ func verifyHandlers(b *budget, f *Function) error {
 				return invalid("noncanonical handler order")
 			}
 		}
-		for j := 0; j < i; j++ {
-			if err := b.chargeWork(1); err != nil {
-				return err
-			}
-			p := f.Handlers[j]
-			// Two handlers are siblings with disjoint regions, or the whole inner
-			// handler belongs to one region of its outer handler. This permits try /
-			// catch inside finally while excluding cross-scope exception transfers.
-			contains := func(a, z, b, y uint32) bool { return a <= b && y <= z }
-			nested := func(outer, inner Handler) bool {
-				return (contains(outer.Start, outer.End, inner.Start, inner.End) && contains(outer.Start, outer.End, inner.Target, inner.BodyEnd)) ||
-					(contains(outer.Target, outer.BodyEnd, inner.Start, inner.End) && contains(outer.Target, outer.BodyEnd, inner.Target, inner.BodyEnd))
-			}
-			disjoint := func(a, z, b, y uint32) bool { return z <= b || y <= a }
-			siblings := disjoint(h.Start, h.End, p.Start, p.End) && disjoint(h.Start, h.End, p.Target, p.BodyEnd) &&
-				disjoint(h.Target, h.BodyEnd, p.Start, p.End) && disjoint(h.Target, h.BodyEnd, p.Target, p.BodyEnd)
-			if !siblings && !nested(p, h) && !nested(h, p) {
+	}
+	return verifyHandlerNesting(b, f)
+}
+
+// handlerSpan is a protected range or a body of handler h.
+type handlerSpan struct {
+	start, end uint32
+	h          int32
+	body       bool
+}
+
+func sortSpans(spans []handlerSpan) {
+	slices.SortFunc(spans, func(x, y handlerSpan) int {
+		return cmp.Or(cmp.Compare(x.start, y.start), cmp.Compare(y.end, x.end))
+	})
+}
+
+// verifyHandlerNesting requires two handlers to be siblings with disjoint
+// regions, or the whole inner handler to belong to one region of its outer
+// handler. This permits try / catch inside finally while excluding
+// cross-scope exception transfers. Equivalently, all protected ranges and
+// bodies form a laminar family, and a handler's range and body have the same
+// innermost enclosing region. A sorted sweep checks this in O(h log h).
+func verifyHandlerNesting(b *budget, f *Function) error {
+	h := len(f.Handlers)
+	if h == 0 {
+		return nil
+	}
+	if err := b.reserveMul(uint64(h), 2*16+2*4+4); err != nil {
+		return err
+	}
+	if err := b.chargeWork(uint64(2 * h)); err != nil {
+		return err
+	}
+	spans := make([]handlerSpan, 0, 2*h)
+	for i, x := range f.Handlers {
+		spans = append(spans, handlerSpan{x.Start, x.End, int32(i), false}, handlerSpan{x.Target, x.BodyEnd, int32(i), true})
+	}
+	sortSpans(spans)
+	parent := make([]int32, 2*h) // enclosing span index per range (2h) and body (2h+1)
+	open := make([]int32, 0, 2*h)
+	for i, s := range spans {
+		for len(open) > 0 && spans[open[len(open)-1]].end <= s.start {
+			open = open[:len(open)-1]
+		}
+		enclosing := int32(-1)
+		if len(open) > 0 {
+			top := spans[open[len(open)-1]]
+			if s.end > top.end || s.start == top.start && s.end == top.end {
 				return invalid("crossing handler regions")
 			}
+			enclosing = open[len(open)-1]
+		}
+		slot := 2 * int(s.h)
+		if s.body {
+			slot++
+		}
+		parent[slot] = enclosing
+		open = append(open, int32(i))
+	}
+	for i := 0; i < h; i++ {
+		if parent[2*i] != parent[2*i+1] {
+			return invalid("crossing handler regions")
 		}
 	}
 	return nil
 }
 
-func checkEdge(b *budget, f *Function, from, to uint32, leave bool) error {
+// handlerIndex answers the handler questions about one pc in constant time.
+// verifyHandlerNesting has proved the regions laminar, so the regions that
+// contain a pc form a chain and its innermost member decides each question.
+type handlerIndex struct {
+	f *Function
+	// body is the innermost handler whose body contains pc; enter is the
+	// innermost whose protected range contains both pc-1 and pc; finally is
+	// the innermost Finally handler whose protected range contains pc.
+	body, enter, finally []int32
+}
+
+func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
+	n, h := len(f.Code), len(f.Handlers)
+	x := &handlerIndex{f: f}
+	if h == 0 {
+		return x, nil
+	}
+	if err := b.reserveMul(uint64(n), 3*4); err != nil {
+		return nil, err
+	}
+	if err := b.reserveMul(uint64(h), 3*16+4); err != nil {
+		return nil, err
+	}
+	if err := b.chargeWork(3*uint64(n) + 3*uint64(h)); err != nil {
+		return nil, err
+	}
+	var bodies, ranges, finals []handlerSpan
+	for i, k := range f.Handlers {
+		bodies = append(bodies, handlerSpan{k.Target, k.BodyEnd, int32(i), true})
+		ranges = append(ranges, handlerSpan{k.Start, k.End, int32(i), false})
+		if k.Kind == Finally {
+			finals = append(finals, handlerSpan{k.Start, k.End, int32(i), false})
+		}
+	}
+	x.body, _ = innermostSpans(bodies, n, false)
+	_, x.enter = innermostSpans(ranges, n, true)
+	x.finally, _ = innermostSpans(finals, n, false)
+	return x, nil
+}
+
+// innermostSpans sweeps laminar spans once. at[pc] is the handler of the
+// innermost span containing pc; before[pc], when requested, is that of the
+// innermost span containing pc that starts before pc.
+func innermostSpans(spans []handlerSpan, n int, wantBefore bool) (at, before []int32) {
+	sortSpans(spans)
+	at = make([]int32, n)
+	if wantBefore {
+		before = make([]int32, n)
+	}
+	open := make([]handlerSpan, 0, len(spans))
+	next := 0
+	for pc := 0; pc < n; pc++ {
+		for len(open) > 0 && open[len(open)-1].end <= uint32(pc) {
+			open = open[:len(open)-1]
+		}
+		if wantBefore {
+			before[pc] = -1
+			if len(open) > 0 {
+				before[pc] = open[len(open)-1].h
+			}
+		}
+		for next < len(spans) && spans[next].start == uint32(pc) {
+			open = append(open, spans[next])
+			next++
+		}
+		at[pc] = -1
+		if len(open) > 0 {
+			at[pc] = open[len(open)-1].h
+		}
+	}
+	return at, before
+}
+
+func (x *handlerIndex) checkEdge(from, to uint32, leave bool) error {
+	f := x.f
 	if to >= uint32(len(f.Code)) {
 		return invalid("control flow falls off function")
 	}
-	for _, h := range f.Handlers {
-		if err := b.chargeWork(1); err != nil {
-			return err
-		}
-		fromBody, toBody := from >= h.Target && from < h.BodyEnd, to >= h.Target && to < h.BodyEnd
-		if toBody && !fromBody {
-			return invalid("normal control enters handler body")
-		}
-		if fromBody && !toBody && !leave {
-			return invalid("normal control leaves handler body")
-		}
-		fromProtected, toProtected := from >= h.Start && from < h.End, to >= h.Start && to < h.End
-		if !fromProtected && toProtected && to != h.Start {
-			return invalid("control enters protected range after start")
-		}
-		if fromProtected && !toProtected && h.Kind == Finally && !leave {
-			return invalid("control leaves finally range without leave")
-		}
+	if len(f.Handlers) == 0 {
+		return nil
+	}
+	inBody := func(h int32, pc uint32) bool { return pc >= f.Handlers[h].Target && pc < f.Handlers[h].BodyEnd }
+	inRange := func(h int32, pc uint32) bool { return pc >= f.Handlers[h].Start && pc < f.Handlers[h].End }
+	if h := x.body[to]; h >= 0 && !inBody(h, from) {
+		return invalid("normal control enters handler body")
+	}
+	if h := x.body[from]; h >= 0 && !leave && !inBody(h, to) {
+		return invalid("normal control leaves handler body")
+	}
+	if h := x.enter[to]; h >= 0 && !inRange(h, from) {
+		return invalid("control enters protected range after start")
+	}
+	if h := x.finally[from]; h >= 0 && !leave && !inRange(h, to) {
+		return invalid("control leaves finally range without leave")
 	}
 	return nil
+}
+
+// innermostBody is the kind of the innermost handler whose body contains pc.
+func (x *handlerIndex) innermostBody(pc int) (HandlerKind, bool) {
+	if len(x.f.Handlers) == 0 || x.body[pc] < 0 {
+		return 0, false
+	}
+	return x.f.Handlers[x.body[pc]].Kind, true
 }
 
 func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {

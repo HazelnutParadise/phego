@@ -58,24 +58,33 @@ func (x *execution) write(data []byte) (c completion) {
 
 func (x *execution) flush() completion {
 	for len(x.buffers) > 0 {
-		if c := x.check(); c.kind != endNormal {
-			return c
-		}
-		i := len(x.buffers) - 1
-		b := x.buffers[i]
-		x.buffers = x.buffers[:i]
-		if b.filter != nil {
-			var c completion
-			b.data, c = x.filter(b.filter, b.data)
-			if c.kind != endNormal {
-				return c
-			}
-		}
-		if c := x.write(b.data); c.kind != endNormal {
+		if c := x.endBuffer(); c.kind != endNormal {
 			return c
 		}
 	}
 	return completion{}
+}
+
+// endBuffer is ob_end_flush(): the innermost buffer passes through its
+// handler into the next buffer or the writer.
+func (x *execution) endBuffer() completion {
+	if c := x.check(); c.kind != endNormal {
+		return c
+	}
+	if len(x.buffers) == 0 {
+		return completion{}
+	}
+	i := len(x.buffers) - 1
+	b := x.buffers[i]
+	x.buffers = x.buffers[:i]
+	if b.filter != nil {
+		var c completion
+		b.data, c = x.filter(b.filter, b.data)
+		if c.kind != endNormal {
+			return c
+		}
+	}
+	return x.write(b.data)
 }
 
 func (x *execution) filter(fn outputFilter, data []byte) (out []byte, c completion) {

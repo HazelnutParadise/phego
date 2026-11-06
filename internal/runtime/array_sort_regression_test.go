@@ -46,3 +46,53 @@ func TestW12SortObservableRegression(t *testing.T) {
 		})
 	}
 }
+
+// REQ-017; T-033. PHP 8.5.12 sort() keeps elements reachable by iteration
+// during comparisons but not by key: the arm64, i386 and amd64 images report
+// "Undefined array key 1" for $a[1] read from __toString inside sort($a), and
+// count($a) stays 3. usort() compares a private copy, where $a[1] still reads.
+func TestW12SortKeyLookupDuringComparisons(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		user  bool
+		found bool
+	}{
+		{name: "native", user: false, found: false},
+		{name: "user", user: true, found: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := testHeap(t)
+			var a value
+			var seen []bool
+			var counts []int
+			c := w13Build(t, classSpec{name: "W12ReadDuringSort", methods: []methodSpec{{name: "__toString", returnType: "string", call: func(h *heap, _ value, _ []value) (value, error) {
+				_, ok, err := h.getElement(a.deref(), h.number(1))
+				seen = append(seen, ok)
+				counts = append(counts, a.deref().array.count())
+				return w13Str("b"), err
+			}}}})
+			o, err := h.newObject(c)
+			must(t, err)
+			must(t, h.appendValue(&a, o))
+			must(t, h.appendValue(&a, w13Str("a")))
+			must(t, h.appendValue(&a, w13Str("c")))
+			if tc.user {
+				must(t, h.sortArray(&a, false, h.compare))
+			} else {
+				must(t, h.sortArrayRegular(&a, false))
+			}
+			if len(seen) == 0 {
+				t.Fatal("__toString was not called")
+			}
+			for i := range seen {
+				if seen[i] != tc.found || counts[i] != 3 {
+					t.Errorf("comparison %d: key 1 found=%t count=%d; PHP found=%t count=3", i, seen[i], counts[i], tc.found)
+				}
+			}
+			if _, ok, _ := h.getElement(a.deref(), h.number(1)); !ok {
+				t.Error("key 1 missing after sort")
+			}
+			must(t, h.unset(&a))
+		})
+	}
+}

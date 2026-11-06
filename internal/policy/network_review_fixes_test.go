@@ -165,3 +165,20 @@ func TestReviewFixIPv6TrailingZoneDotRemainsDistinct(t *testing.T) {
 		t.Error("different zone was granted")
 	}
 }
+
+// A zone names an interface. Spaces, control bytes and non-ASCII text cannot,
+// so a grant that contains them is a configuration mistake, not a new zone.
+func TestNetworkZoneAcceptsOnlyVisibleASCII(t *testing.T) {
+	for _, host := range []string{"::1%en0 ", "fe80::1% en0", "fe80::1%en\t0", "fe80::1%en0\n", "fe80::1%én0", "fe80::1%en\x7f"} {
+		_, err := New(Spec{Network: []NetworkGrant{{Scheme: "tcp", Host: host, Ports: []int{80}, AllowPrivate: true}}})
+		var se *SpecError
+		if !errors.As(err, &se) || se.Field != "Network[0]" {
+			t.Errorf("host %q: got %v, want SpecError for Network[0]", host, err)
+		}
+	}
+	for _, host := range []string{"fe80::1%En0", "fe80::1%eth0.100", "fe80::1%25", "fe80::1%!~"} {
+		if _, err := New(Spec{Network: []NetworkGrant{{Scheme: "tcp", Host: host, Ports: []int{80}, AllowPrivate: true}}}); err != nil {
+			t.Errorf("host %q: %v", host, err)
+		}
+	}
+}

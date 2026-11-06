@@ -13,8 +13,9 @@ import (
 // contains it. Host directories are opened through os.Root and verified by
 // identity. Absolute symlink targets inside granted directories are remapped
 // to PHP paths; target parent components cannot escape their selected mount.
-// Host directories permit only regular files and directories, not FIFOs or
-// other special files. Host-created hard links still require a trusted layout.
+// Host directories permit regular files, directories and character devices
+// such as /dev/null; FIFOs, sockets and block devices are refused.
+// Host-created hard links still require a trusted layout.
 //
 // flag uses the os.O_* values. Any write, create, append or truncate flag
 // needs a mount granted for writing. The result is an *os.File for a host
@@ -33,6 +34,20 @@ func fileParts(name, boundary string) []filePart {
 		parts = append(parts, filePart{part, boundary})
 	}
 	return parts
+}
+
+// rebaseLinkParts moves the remaining components of an earlier link target to
+// the mount an absolute link resolved into. Their .. now walks that mount's
+// directories, so that mount bounds them; requested components stay free.
+func rebaseLinkParts(parts []filePart, mount string) []filePart {
+	out := make([]filePart, len(parts))
+	for i, part := range parts {
+		if part.boundary != "" {
+			part.boundary = mount
+		}
+		out[i] = part
+	}
+	return out
 }
 
 func partsPath(base string, parts []filePart) string {

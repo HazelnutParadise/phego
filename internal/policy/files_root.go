@@ -115,7 +115,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 				if !ok {
 					return nil, denied("outside-root")
 				}
-				return p.redirectFile(mounted, append(targetParts, pending...), flag, perm, redirects)
+				return p.redirectFile(mounted, append(targetParts, rebaseLinkParts(pending, mounted)...), flag, perm, redirects)
 			}
 			if filepath.VolumeName(target) != "" {
 				return nil, denied("outside-root")
@@ -178,7 +178,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		if !before.Mode().IsRegular() && !before.IsDir() {
+		if !openableMode(before.Mode()) {
 			return nil, denied("not-granted")
 		}
 		// A regular file may be replaced by a FIFO after Lstat. Open without
@@ -192,7 +192,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) || !actual.Mode().IsRegular() && !actual.IsDir() {
+		if !os.SameFile(before, actual) || !openableMode(actual.Mode()) {
 			f.Close()
 			return nil, denied("path-changed")
 		}
@@ -229,7 +229,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		// Exclusive creation cannot follow a final symlink installed after Lstat.
 		return parent.OpenFile(leaf, flag|os.O_EXCL, perm)
 	}
-	if !before.Mode().IsRegular() {
+	if !before.Mode().IsRegular() && !isCharDevice(before.Mode()) {
 		return nil, denied("not-granted")
 	}
 	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)
@@ -255,7 +255,8 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			}
 		}
 	}
-	if flag&os.O_TRUNC != 0 {
+	// open(2) ignores O_TRUNC for a character device, and ftruncate fails.
+	if flag&os.O_TRUNC != 0 && actual.Mode().IsRegular() {
 		if flag&(os.O_WRONLY|os.O_RDWR) == 0 {
 			// Preserve O_RDONLY|O_TRUNC: truncate through a separately verified writer,
 			// while returning the original read-only descriptor.
@@ -279,6 +280,17 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		}
 	}
 	return f, nil
+}
+
+// openableMode admits what PHP opens through a mount: regular files,
+// directories for reading and character devices such as /dev/null. FIFOs,
+// sockets and block devices stay closed; a FIFO open could wait for a peer.
+func openableMode(m fs.FileMode) bool {
+	return m.IsRegular() || m.IsDir() || isCharDevice(m)
+}
+
+func isCharDevice(m fs.FileMode) bool {
+	return m&fs.ModeType == fs.ModeDevice|fs.ModeCharDevice
 }
 
 type fileProtection struct {

@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 46 {
-		t.Fatalf("want 46 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 48 {
+		t.Fatalf("want 48 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -66,7 +66,21 @@ func replayExecutionOracle(t *testing.T, width int) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			var events []string
-			event := func(s string) { events = append(events, s) }
+			// Diagnostics join the event stream at the next event, so their
+			// order relative to destructors, shutdown and flushes is compared.
+			marked := 0
+			markDiagnostics := func() {
+				for ; marked < len(x.diagnostics); marked++ {
+					events = append(events, "diagnostic:"+x.diagnostics[marked].level)
+				}
+			}
+			event := func(s string) { markDiagnostics(); events = append(events, s) }
+			// trigger_error(..., E_USER_ERROR) deprecates its level before the
+			// fatal error; the fixtures use it to reach a fatal from PHP code.
+			userError := func(x *execution, message string) completion {
+				x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead"})
+				return completion{kind: endFatal, err: errors.New(message)}
+			}
 			result := x.run(ctx, func(x *execution) completion {
 				_, err := x.object("Tracked", func(x *execution) completion { event("destroy:global"); return x.write([]byte("D")) })
 				must(err)
@@ -150,6 +164,27 @@ func replayExecutionOracle(t *testing.T, width int) {
 						must(x.local(&v))
 						return b, completion{}
 					}))
+				case "buffer_nested_start_shutdown", "buffer_nested_start_flush":
+					must(x.startBuffer(func(x *execution, b []byte) ([]byte, completion) {
+						event("flush:nested")
+						if err := x.startBuffer(nil); err != nil {
+							var c completion
+							if !errors.As(err, &c) {
+								t.Fatalf("nested ob_start: %v", err)
+							}
+							return b, c
+						}
+						return b, completion{}
+					}))
+					if c := x.write([]byte("body")); c.kind != endNormal {
+						return c
+					}
+					if tc.Case == "buffer_nested_start_flush" {
+						if c := x.endBuffer(); c.kind != endNormal {
+							return c
+						}
+						event("body:after")
+					}
 				case "flush_throw":
 					must(x.startBuffer(func(_ *execution, _ []byte) ([]byte, completion) {
 						event("flush:throw")
@@ -428,7 +463,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 									return completion{kind: endExit, code: 7}
 								case endFatal:
 									event("destroy:fatal")
-									return completion{kind: endFatal, err: errors.New("fatal destructor")}
+									return userError(x, "fatal destructor")
 								default:
 									if strings.HasSuffix(tc.Case, "_caught") {
 										return x.call(func(x *execution) completion {
@@ -492,7 +527,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 							if tc.Case == "array_exit" {
 								return completion{kind: endExit, code: 7}
 							}
-							return completion{kind: endFatal, err: errors.New("array failure")}
+							return userError(x, "array failure")
 						})
 						must(err)
 						second, err := x.object("Tracked", func(x *execution) completion { event("destroy:array-b"); return x.write([]byte("D")) })
@@ -512,7 +547,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 				case "uncaught", "uncaught_shutdown_exit":
 					return completion{kind: endThrow, err: errors.New("body failure")}
 				case "fatal", "fatal_shutdown_exit", "fatal_shutdown_create", "fatal_buffer_object":
-					return completion{kind: endFatal, err: errors.New("body failure")}
+					return userError(x, "body failure")
 				case "exit":
 					return completion{kind: endExit, code: 7}
 				case "die":
@@ -564,10 +599,18 @@ func replayExecutionOracle(t *testing.T, width int) {
 			if string(result.output) != tc.Stdout || result.end.code != tc.ExitCode {
 				t.Errorf("output=%q code=%d, oracle=%q/%d", result.output, result.end.code, tc.Stdout, tc.ExitCode)
 			}
+			markDiagnostics()
 			var want []string
 			for _, line := range strings.Split(tc.Stderr, "\n") {
 				if strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || strings.HasPrefix(line, "caught:") || strings.HasPrefix(line, "previous:") || line == "returned" || strings.HasPrefix(line, "body") {
 					want = append(want, line)
+				}
+				// display_errors=stderr prints each diagnostic as "Level: message";
+				// stack traces and "thrown in" lines continue the previous one.
+				for _, level := range []string{"Fatal error", "Warning", "Deprecated", "Notice"} {
+					if strings.HasPrefix(line, level+": ") {
+						want = append(want, "diagnostic:"+level)
+					}
 				}
 			}
 			if strings.Join(events, "\n") != strings.Join(want, "\n") {

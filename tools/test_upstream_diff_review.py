@@ -115,7 +115,8 @@ class Decorated
                 "property Decorated::$value":
                     f"{self.ATTRIBUTE} public string $value",
                 "method Decorated::set":
-                    f"{self.ATTRIBUTE} public function set( {self.PARAMETER_ATTRIBUTE} "
+                    # Signatures drop the space inside brackets.
+                    f"{self.ATTRIBUTE} public function set({self.PARAMETER_ATTRIBUTE} "
                     "string $value): void",
             },
         )
@@ -128,6 +129,7 @@ class Decorated
             "@strict-properties",
             "@not-serializable",
             "@prefer-ref",
+            "@deprecated",
         )
         source = """<?php
 #if FEATURE
@@ -142,6 +144,7 @@ class Canonical
      * @not-serializable
      * @prefer-ref
      * @return string
+     * @refcount 1
      * @deprecated
      */
     public static function canonical(): void {}
@@ -160,7 +163,7 @@ class Canonical
                 tag_at = signature.index(f"[{tag}]")
                 self.assertLess(signature.index("[if FEATURE]"), tag_at)
                 self.assertLess(tag_at, attribute_at)
-        for ignored in ("@return", "@deprecated"):
+        for ignored in ("@return", "@refcount"):
             self.assertNotIn(f"[{ignored}", signature)
 
     def test_doc_and_attribute_source_order_does_not_change_prefix_order(self):
@@ -331,3 +334,67 @@ int helper(void) { return 1; }
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSignatureComments(unittest.TestCase):
+    """Adding or removing a comment inside a signature is not a change."""
+
+    def test_comment_position_and_line_breaks_do_not_change_signatures(self):
+        plain = upstream_diff.parse_stubs("<?php function m($a, $z = null) {}")
+        for source in (
+            "<?php function m(/** note */$a, $z = null) {}",
+            "<?php function m( /** note */ $a, $z = null) {}",
+            "<?php function m($a /* note */, $z = null) {}",
+            "<?php function m($a, $z = /* note */ null) {}",
+            "<?php function m($a, $z = null/** note */) {}",
+            "<?php function m(\n    /** note */\n    $a,\n    $z = null\n) {}",
+        ):
+            with self.subTest(source=source):
+                self.assertEqual(upstream_diff.parse_stubs(source), plain)
+        self.assertEqual(plain, {"function m": "function m($a, $z = null)"})
+
+    def test_comment_edits_report_no_change_but_real_edits_do(self):
+        old = {"ext/demo/demo.stub.php": "<?php function m(/** first */ $z): int {}"}
+        same = {"ext/demo/demo.stub.php": "<?php function m($z): int {}"}
+        renamed = {"ext/demo/demo.stub.php": "<?php function m($y): int {}"}
+        self.assertEqual(upstream_diff.diff_releases(old, same, VERSION)["stubs"]["changed"], [])
+        changed = upstream_diff.diff_releases(old, renamed, VERSION)["stubs"]["changed"]
+        self.assertEqual([(c["old"], c["new"]) for c in changed], [("function m($z): int", "function m($y): int")])
+
+
+class TestBehaviorTags(unittest.TestCase):
+    """gen_stub.php tags that change generated flags, aliases or constants."""
+
+    def test_behavior_tag_edits_are_reported(self):
+        cases = {
+            "deprecated function": ("function f(): void {}", "/** @deprecated */ function f(): void {}"),
+            "alias": ("/** @alias g */ function f(): void {}", "/** @alias h */ function f(): void {}"),
+            "implementation alias": ("/** @implementation-alias g */ function f(): void {}", "function f(): void {}"),
+            "constant value": ("/**\n * @var int\n * @cvalue E_ERROR\n */\nconst E = UNKNOWN;", "/**\n * @var int\n * @cvalue E_WARNING\n */\nconst E = UNKNOWN;"),
+            "constant type": ("/**\n * @var int\n * @cvalue X\n */\nconst E = UNKNOWN;", "/**\n * @var string\n * @cvalue X\n */\nconst E = UNKNOWN;"),
+            "file cache": ("/** @var int */\nconst E = 1;", "/**\n * @var int\n * @no-file-cache\n */\nconst E = 1;"),
+        }
+        for name, (old, new) in cases.items():
+            with self.subTest(name=name):
+                report = upstream_diff.diff_releases(
+                    {"ext/demo/demo.stub.php": "<?php " + old},
+                    {"ext/demo/demo.stub.php": "<?php " + new},
+                    VERSION,
+                )
+                self.assertEqual(len(report["stubs"]["changed"]), 1, report["stubs"])
+
+
+class TestOpcacheImpact(unittest.TestCase):
+    def test_file_cache_jit_and_optimizer_paths_map_to_their_work_packages(self):
+        for path, expected in {
+            "ext/opcache/tests/file_cache_error.phpt": ["W-23"],
+            "ext/opcache/tests/gh16979_check_file_cache_function.phpt": ["W-23"],
+            "ext/opcache/zend_file_cache.c": ["W-23"],
+            "ext/opcache/jit/zend_jit.c": ["W-47"],
+            "ext/opcache/tests/jit/add_001.phpt": ["W-47"],
+            "Zend/Optimizer/sccp.c": ["W-15"],
+            "ext/opcache/tests/opt/dce_001.phpt": ["W-15"],
+            "Zend/zend_compile.c": ["W-11", "W-17"],
+        }.items():
+            with self.subTest(path=path):
+                self.assertEqual(upstream_diff.impact(path), expected)

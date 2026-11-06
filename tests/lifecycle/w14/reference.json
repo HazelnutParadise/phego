@@ -81,6 +81,20 @@
       "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:echo\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/buffer_echo.php:4} is deprecated in Unknown on line 0\nflush:inner\nflush:outer\n[(BSD)]"
     },
     {
+      "case": "buffer_nested_start_flush",
+      "exit_code": 255,
+      "stdout": "S",
+      "stderr": "flush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nshutdown:1\nshutdown:2\n",
+      "combined": "flush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nshutdown:1\nshutdown:2\nS"
+    },
+    {
+      "case": "buffer_nested_start_shutdown",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n"
+    },
+    {
       "case": "buffer_object",
       "exit_code": 0,
       "stdout": "[(BSD)]",
@@ -364,6 +378,8 @@
     "array_throw_exit_caught.php": "22775eb2098175cc33dd91769e4e802c2cba0722c8ce63f7a4f581d06ca3b623",
     "array_throw_fatal.php": "a41e3e121141556ef61386252c73e3396f7e759532cab0cf3eba20fefcd23e03",
     "buffer_echo.php": "4488a62345db335b415a1bb00c3e6218bf36c099418bd1ea3801e52c25dc8c16",
+    "buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
+    "buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
     "buffer_object.php": "b38844512581c9e2f47e35858e4f8f78f069818d8b0321800219e61fd5a2bf3e",
     "buffer_retained.php": "47dd495bc1be6bf42a05c4c9e46646de715f6a10b82e68a29eb5820c50abf247",
     "caught_then_throw.php": "ff6d55f22074c9791e350c9693a50bb8dda4679b04467ce9c46605ce3497884e",

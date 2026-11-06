@@ -383,3 +383,29 @@ func TestAllPassesDoNotFoldFlaggedOrEffectfulNodes(t *testing.T) {
 		}
 	}
 }
+
+// A 32-bit profile cannot hold an int outside int32. Such a literal in
+// supplied HIR is not proven Int, so it neither folds nor specializes.
+func TestOutOfRangeIntLiteralIsNotTypedInt(t *testing.T) {
+	u, _ := lowerSource(t, "<?php 1 | 2;", 32)
+	var lit *ir.Node
+	walkHIR(u.Main.Body[0], func(n *ir.Node) {
+		if n.Op == ir.OpLiteral && n.Value.Kind == ir.LitInt && n.Value.Int == 1 {
+			lit = n
+		}
+	})
+	lit.Value = &ir.Literal{Kind: ir.LitInt, Int: 1 << 40}
+	p, err := Build(context.Background(), u, Options{Passes: AllPasses, MaxNodes: 10000, MaxDepth: 128, MaxConstantBytes: 1 << 20})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id := ID(1); uint64(id) <= uint64(p.Len()); id++ {
+		v, _ := p.Value(id)
+		switch {
+		case v.HIR == lit && (v.Type == Int || v.IsConstant):
+			t.Errorf("literal 1<<40: type %v, constant %t", v.Type, v.IsConstant)
+		case v.HIR.Op == ir.OpBinary && (v.Specialization != Generic || v.IsConstant):
+			t.Errorf("1<<40 | 2: specialization %v, constant %t", v.Specialization, v.IsConstant)
+		}
+	}
+}
