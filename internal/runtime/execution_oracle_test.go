@@ -616,23 +616,30 @@ func replayExecutionOracle(t *testing.T, width int) {
 				}
 			}
 			// Output handler deprecations name the handler and the flushing
-			// context; compare their full text.
+			// context, and lock errors name the calling function; compare
+			// their full text.
+			handlerMessage := func(level, message string) bool {
+				return level == "Deprecated" && strings.Contains(message, "user output handler") ||
+					level == "Fatal error" && strings.Contains(message, "output buffering display handlers")
+			}
 			var wantHandler, gotHandler []string
 			for _, line := range strings.Split(tc.Stderr, "\n") {
-				if message, ok := strings.CutPrefix(line, "Deprecated: "); ok && strings.Contains(message, "user output handler") {
-					if at := strings.LastIndex(message, " in "); at >= 0 {
-						message = message[:at]
+				for _, level := range []string{"Deprecated", "Fatal error"} {
+					if message, ok := strings.CutPrefix(line, level+": "); ok && handlerMessage(level, message) {
+						if at := strings.LastIndex(message, " in "); at >= 0 {
+							message = message[:at]
+						}
+						wantHandler = append(wantHandler, message)
 					}
-					wantHandler = append(wantHandler, message)
 				}
 			}
 			for _, d := range result.diagnostics {
-				if d.level == "Deprecated" && strings.Contains(d.message, "user output handler") {
+				if handlerMessage(d.level, d.message) {
 					gotHandler = append(gotHandler, d.message)
 				}
 			}
 			if strings.Join(gotHandler, "\n") != strings.Join(wantHandler, "\n") {
-				t.Errorf("handler deprecations=%q, oracle=%q", gotHandler, wantHandler)
+				t.Errorf("handler messages=%q, oracle=%q", gotHandler, wantHandler)
 			}
 			if strings.Join(events, "\n") != strings.Join(want, "\n") {
 				t.Errorf("events=%v, oracle=%v", events, want)

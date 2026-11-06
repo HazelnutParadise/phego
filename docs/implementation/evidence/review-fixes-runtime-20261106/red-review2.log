@@ -1,0 +1,25 @@
+# 87d1d0f with the new tests copied in
+        --- FAIL: TestExecutionOracleReplay/32/buffer_nested_start_shutdown (0.00s)
+            execution_oracle_test.go:642: handler deprecations=["Cannot use output buffering in output buffering display handlers"], oracle=["ob_start(): Cannot use output buffering in output buffering display handlers"]
+--- FAIL: TestOutputLockErrorFromHandlerEndDiscardsBuffers (0.00s)
+    --- FAIL: TestOutputLockErrorFromHandlerEndDiscardsBuffers/ob_start (0.00s)
+        execution_test.go:550: output="[shutdown]" outerRan=false level=0 fatal="Cannot use output buffering in output buffering display handlers", want "ob_start(): Cannot use output buffering in output buffering display handlers"
+    --- FAIL: TestOutputLockErrorFromHandlerEndDiscardsBuffers/ob_end_flush (0.00s)
+        execution_test.go:550: output="<outer:A>B[shutdown]" outerRan=true level=0 fatal="", want "ob_end_flush(): Cannot use output buffering in output buffering display handlers"
+--- FAIL: TestOutputHandlerThrowPassesBufferAndEcho (0.00s)
+    execution_test.go:596: output="caught boom" diagnostics=[{level:Deprecated message:ob_end_flush(): Producing output from user output handler {closure:/w/t.php:2} is deprecated}]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.691s
+FAIL
+--- FAIL: TestVerifyHandlersReportsTheFormerFirstError (0.00s)
+    limits_review_test.go:255: crossing then unknown kind: got invalid bytecode at byte -1, function -1, instruction -1: unknown handler kind, want invalid bytecode at byte -1, function -1, instruction -1: crossing handler regions
+--- FAIL: TestHandlerChecksReserveWhatTheyAllocate (0.01s)
+    limits_review_test.go:310: nesting reserved 180224 bytes, allocated 196608
+    limits_review_test.go:310: index reserved 999424 bytes, allocated 1851040
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.583s
+FAIL
+----------------------------------------------------------------------
+Ran 1 test in 0.175s
+
+FAILED (failures=6)

@@ -353,6 +353,20 @@ class TestSignatureComments(unittest.TestCase):
                 self.assertEqual(upstream_diff.parse_stubs(source), plain)
         self.assertEqual(plain, {"function m": "function m($a, $z = null)"})
 
+    def test_comment_beside_type_and_parameter_markers_does_not_change_signatures(self):
+        plain = upstream_diff.parse_stubs("<?php function m(?int $a, int|string &...$b): int {}")
+        for source in (
+            "<?php function m(?/** c */int $a, int|string &...$b): int {}",
+            "<?php function m(?int $a, int|/** c */string &...$b): int {}",
+            "<?php function m(?int $a, int/** c */|string &...$b): int {}",
+            "<?php function m(?int $a, int|string &/** c */...$b): int {}",
+            "<?php function m(?int $a, int|string &.../** c */$b): int {}",
+            "<?php function m(?int $a, int|string &...$b)/** c */: int {}",
+        ):
+            with self.subTest(source=source):
+                self.assertEqual(upstream_diff.parse_stubs(source), plain)
+        self.assertEqual(plain, {"function m": "function m(?int $a, int|string &...$b): int"})
+
     def test_comment_edits_report_no_change_but_real_edits_do(self):
         old = {"ext/demo/demo.stub.php": "<?php function m(/** first */ $z): int {}"}
         same = {"ext/demo/demo.stub.php": "<?php function m($z): int {}"}

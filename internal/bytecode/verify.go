@@ -374,33 +374,51 @@ func successor(in Instruction, pc, n uint32, which int) edge {
 }
 
 func verifyHandlers(b *budget, f *Function) error {
+	// Handlers are checked in table order, each on its own and then against
+	// the earlier ones: the first handler that fails its own checks bounds
+	// the nesting check, and a crossing among the earlier handlers wins.
+	bad, badErr := len(f.Handlers), error(nil)
 	for i, h := range f.Handlers {
 		if err := b.chargeWork(1); err != nil {
 			return err
 		}
-		if h.Start >= h.End || h.End > uint32(len(f.Code)) || h.Target == 0 || h.Target >= h.BodyEnd || h.BodyEnd > uint32(len(f.Code)) || h.StackDepth != 0 ||
-			(h.Target < h.End && h.BodyEnd > h.Start) {
-			return invalid("invalid handler ranges")
-		}
-		if h.Kind == Catch {
-			if uint64(h.Register) >= uint64(len(f.Registers)) || f.Registers[h.Register] != Value {
-				return invalid("invalid catch register")
-			}
-		} else if h.Kind == Finally {
-			if h.Register != 0 {
-				return invalid("finally has register")
-			}
-		} else {
-			return invalid("unknown handler kind")
-		}
-		if i > 0 {
-			p := f.Handlers[i-1]
-			if h.Start < p.Start || (h.Start == p.Start && h.End >= p.End) {
-				return invalid("noncanonical handler order")
-			}
+		if badErr = checkHandler(f, i, h); badErr != nil {
+			bad = i
+			break
 		}
 	}
-	return verifyHandlerNesting(b, f)
+	earlier := *f
+	earlier.Handlers = f.Handlers[:bad]
+	if err := verifyHandlerNesting(b, &earlier); err != nil {
+		return err
+	}
+	return badErr
+}
+
+// checkHandler validates handler i alone and its order after handler i-1.
+func checkHandler(f *Function, i int, h Handler) error {
+	if h.Start >= h.End || h.End > uint32(len(f.Code)) || h.Target == 0 || h.Target >= h.BodyEnd || h.BodyEnd > uint32(len(f.Code)) || h.StackDepth != 0 ||
+		(h.Target < h.End && h.BodyEnd > h.Start) {
+		return invalid("invalid handler ranges")
+	}
+	if h.Kind == Catch {
+		if uint64(h.Register) >= uint64(len(f.Registers)) || f.Registers[h.Register] != Value {
+			return invalid("invalid catch register")
+		}
+	} else if h.Kind == Finally {
+		if h.Register != 0 {
+			return invalid("finally has register")
+		}
+	} else {
+		return invalid("unknown handler kind")
+	}
+	if i > 0 {
+		p := f.Handlers[i-1]
+		if h.Start < p.Start || (h.Start == p.Start && h.End >= p.End) {
+			return invalid("noncanonical handler order")
+		}
+	}
+	return nil
 }
 
 // handlerSpan is a protected range or a body of handler h.
@@ -427,7 +445,8 @@ func verifyHandlerNesting(b *budget, f *Function) error {
 	if h == 0 {
 		return nil
 	}
-	if err := b.reserveMul(uint64(h), 2*16+2*4+4); err != nil {
+	// 2h spans of 16 bytes, and 2h int32 parents and open entries.
+	if err := b.reserveMul(uint64(h), 2*16+2*4+2*4); err != nil {
 		return err
 	}
 	if err := b.chargeWork(uint64(2 * h)); err != nil {
@@ -484,16 +503,30 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 	if h == 0 {
 		return x, nil
 	}
-	if err := b.reserveMul(uint64(n), 3*4); err != nil {
+	finallies := 0
+	for _, k := range f.Handlers {
+		if k.Kind == Finally {
+			finallies++
+		}
+	}
+	// The index itself (a pointer and three slice headers, within 128
+	// bytes), four int32 arrays per pc (body, the ranges' at and before,
+	// finally), and per span 16 bytes plus a 4-byte open entry.
+	if err := b.reserve(128); err != nil {
 		return nil, err
 	}
-	if err := b.reserveMul(uint64(h), 3*16+4); err != nil {
+	if err := b.reserveMul(uint64(n), 4*4); err != nil {
+		return nil, err
+	}
+	if err := b.reserveMul(uint64(2*h+finallies), 16+4); err != nil {
 		return nil, err
 	}
 	if err := b.chargeWork(3*uint64(n) + 3*uint64(h)); err != nil {
 		return nil, err
 	}
-	var bodies, ranges, finals []handlerSpan
+	bodies := make([]handlerSpan, 0, h)
+	ranges := make([]handlerSpan, 0, h)
+	finals := make([]handlerSpan, 0, finallies)
 	for i, k := range f.Handlers {
 		bodies = append(bodies, handlerSpan{k.Target, k.BodyEnd, int32(i), true})
 		ranges = append(ranges, handlerSpan{k.Start, k.End, int32(i), false})
@@ -516,25 +549,25 @@ func innermostSpans(spans []handlerSpan, n int, wantBefore bool) (at, before []i
 	if wantBefore {
 		before = make([]int32, n)
 	}
-	open := make([]handlerSpan, 0, len(spans))
+	open := make([]int32, 0, len(spans)) // indexes into spans
 	next := 0
 	for pc := 0; pc < n; pc++ {
-		for len(open) > 0 && open[len(open)-1].end <= uint32(pc) {
+		for len(open) > 0 && spans[open[len(open)-1]].end <= uint32(pc) {
 			open = open[:len(open)-1]
 		}
 		if wantBefore {
 			before[pc] = -1
 			if len(open) > 0 {
-				before[pc] = open[len(open)-1].h
+				before[pc] = spans[open[len(open)-1]].h
 			}
 		}
 		for next < len(spans) && spans[next].start == uint32(pc) {
-			open = append(open, spans[next])
+			open = append(open, int32(next))
 			next++
 		}
 		at[pc] = -1
 		if len(open) > 0 {
-			at[pc] = open[len(open)-1].h
+			at[pc] = spans[open[len(open)-1]].h
 		}
 	}
 	return at, before

@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"errors"
 	"fmt"
 	"io"
 )
@@ -14,18 +15,19 @@ func (x *execution) write(data []byte) (c completion) {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	// PHP 8.5.12 discards echo from a user output handler, including echo
-	// from its local destructors, and emits a deprecation afterwards.
-	if x.filtering {
-		x.handlerOutput = x.handlerOutput || len(data) > 0
-		return completion{}
-	}
-	remaining := int64(x.limits.output) - x.accepted
+	remaining := int64(x.limits.output) - x.accepted - int64(len(x.handlerEcho))
 	for _, b := range x.buffers {
 		remaining -= int64(len(b.data))
 	}
 	if int64(len(data)) > remaining {
 		return x.fail(endLimit, errExecutionLimit)
+	}
+	// Echo from a user output handler, including its local destructors, is
+	// kept aside: PHP 8.5.12 drops it when the handler returns and passes it
+	// on with the buffer when the handler throws (see filter).
+	if x.filtering {
+		x.handlerEcho = append(x.handlerEcho, data...)
+		return completion{}
 	}
 	if len(x.buffers) > 0 {
 		b := &x.buffers[len(x.buffers)-1]
@@ -77,6 +79,9 @@ func (x *execution) endBufferIn(origin string) completion {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
+	if x.filtering {
+		return x.outputLockError(origin)
+	}
 	if len(x.buffers) == 0 {
 		return completion{}
 	}
@@ -86,6 +91,14 @@ func (x *execution) endBufferIn(origin string) completion {
 	if b.filter != nil {
 		var c completion
 		b.data, c = x.filter(b.filter, origin, b.name, b.data)
+		if c.kind == endThrow {
+			// The buffer still reaches the next level before the exception
+			// propagates to the caller.
+			if w := x.write(b.data); w.kind != endNormal {
+				return x.replaceOwnedCompletion(c, w)
+			}
+			return c
+		}
 		if c.kind != endNormal {
 			return c
 		}
@@ -93,15 +106,28 @@ func (x *execution) endBufferIn(origin string) completion {
 	return x.write(b.data)
 }
 
+// outputLockError is php_output_lock_error for an output buffer operation
+// inside a handler. Output is deactivated first: every buffer is discarded
+// without running its handler, and later output is direct.
+func (x *execution) outputLockError(origin string) completion {
+	x.buffers = nil
+	return x.fail(endFatal, errors.New(origin+": Cannot use output buffering in output buffering display handlers"))
+}
+
 func (x *execution) filter(fn outputFilter, origin, name string, data []byte) (out []byte, c completion) {
 	x.filtering = true
-	x.handlerOutput = false
-	defer func() { x.filtering = false; x.handlerOutput = false }()
+	x.handlerEcho = nil
+	defer func() { x.filtering = false; x.handlerEcho = nil }()
 	c = x.call(func(x *execution) completion { var next completion; out, next = fn(x, data); return next }, nil)
 	if released := x.releaseReturn(&c); released.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, released)
 	}
-	if x.handlerOutput {
+	if c.kind == endThrow {
+		// php_output_handler_op: a handler that throws passes its buffer,
+		// with its own echo, without the deprecation.
+		return append(append([]byte(nil), data...), x.handlerEcho...), c
+	}
+	if len(x.handlerEcho) > 0 {
 		if len(x.diagnostics) >= x.limits.callbacks {
 			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 		} else {

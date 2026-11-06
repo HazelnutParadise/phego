@@ -5,6 +5,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"fmt"
+	"runtime"
 	"slices"
 	"testing"
 )
@@ -194,5 +196,118 @@ func TestIndexedHandlerChecksMatchPairwiseReference(t *testing.T) {
 	}
 	if accepted < 10000 {
 		t.Fatalf("only %d accepted handler sets exercised", accepted)
+	}
+}
+
+// referenceVerifyHandlers is the former per-handler verifier: each handler's
+// own checks, then crossing against every earlier handler. The indexed
+// verifier must report the same error for any handler table.
+func referenceVerifyHandlers(f *Function) error {
+	for i, h := range f.Handlers {
+		if h.Start >= h.End || h.End > uint32(len(f.Code)) || h.Target == 0 || h.Target >= h.BodyEnd || h.BodyEnd > uint32(len(f.Code)) || h.StackDepth != 0 ||
+			(h.Target < h.End && h.BodyEnd > h.Start) {
+			return invalid("invalid handler ranges")
+		}
+		if h.Kind == Catch {
+			if uint64(h.Register) >= uint64(len(f.Registers)) || f.Registers[h.Register] != Value {
+				return invalid("invalid catch register")
+			}
+		} else if h.Kind == Finally {
+			if h.Register != 0 {
+				return invalid("finally has register")
+			}
+		} else {
+			return invalid("unknown handler kind")
+		}
+		if i > 0 {
+			p := f.Handlers[i-1]
+			if h.Start < p.Start || (h.Start == p.Start && h.End >= p.End) {
+				return invalid("noncanonical handler order")
+			}
+		}
+		if !pairwiseNesting(&Function{Handlers: f.Handlers[:i+1]}) {
+			return invalid("crossing handler regions")
+		}
+	}
+	return nil
+}
+
+func TestVerifyHandlersReportsTheFormerFirstError(t *testing.T) {
+	rng := uint64(0x2545f4914f6cdd1d)
+	next := func(n int) uint32 {
+		rng ^= rng << 13
+		rng ^= rng >> 7
+		rng ^= rng << 17
+		return uint32(rng % uint64(n))
+	}
+	b, err := newBudget(context.Background(), DefaultLimits())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Two crossing handlers followed by one with an unknown kind: the former
+	// verifier reported the crossing first.
+	f := &Function{Code: make([]Instruction, 8), Registers: []RegisterKind{Value}, Handlers: []Handler{
+		{Start: 0, End: 3, Target: 4, BodyEnd: 6, Kind: Catch},
+		{Start: 1, End: 5, Target: 6, BodyEnd: 7, Kind: Catch},
+		{Start: 2, End: 3, Target: 7, BodyEnd: 8, Kind: 9},
+	}}
+	if got, want := verifyHandlers(b, f), referenceVerifyHandlers(f); fmt.Sprint(got) != fmt.Sprint(want) || want == nil {
+		t.Fatalf("crossing then unknown kind: got %v, want %v", got, want)
+	}
+	for round := 0; round < 200000; round++ {
+		n := 2 + int(next(11))
+		f := &Function{Code: make([]Instruction, n), Registers: []RegisterKind{Value, Location}}
+		for k := int(next(5)); k > 0; k-- {
+			h := Handler{Start: next(n), Target: next(n), Kind: Catch + HandlerKind(next(2)), Register: uint32(next(2))}
+			h.End = h.Start + next(n+1-int(h.Start))
+			h.BodyEnd = h.Target + next(n+1-int(h.Target))
+			if next(16) == 0 {
+				h.Kind = HandlerKind(3 + next(3))
+			}
+			f.Handlers = append(f.Handlers, h)
+		}
+		if next(4) != 0 {
+			slices.SortFunc(f.Handlers, func(x, y Handler) int { return cmp.Or(cmp.Compare(x.Start, y.Start), cmp.Compare(y.End, x.End)) })
+		}
+		if got, want := verifyHandlers(b, f), referenceVerifyHandlers(f); fmt.Sprint(got) != fmt.Sprint(want) {
+			t.Fatalf("%+v: got %v, want %v", f.Handlers, got, want)
+		}
+	}
+}
+
+// MaxMemory counts conservative accounted allocations, so the handler index
+// and nesting check reserve at least what they allocate.
+func TestHandlerChecksReserveWhatTheyAllocate(t *testing.T) {
+	const n, h = 1 << 16, 4096
+	f := &Function{Code: make([]Instruction, n), Registers: []RegisterKind{Value}}
+	for i := 0; i < h; i++ {
+		kind := Catch
+		if i%2 == 1 {
+			kind = Finally
+		}
+		start := uint32(8 * i)
+		f.Handlers = append(f.Handlers, Handler{Start: start, End: start + 2, Target: start + 3, BodyEnd: start + 5, Kind: kind})
+	}
+	for _, check := range []struct {
+		name string
+		run  func(*budget) error
+	}{
+		{"nesting", func(b *budget) error { return verifyHandlerNesting(b, f) }},
+		{"index", func(b *budget) error { _, err := newHandlerIndex(b, f); return err }},
+	} {
+		b, err := newBudget(context.Background(), DefaultLimits())
+		if err != nil {
+			t.Fatal(err)
+		}
+		var before, after runtime.MemStats
+		runtime.GC()
+		runtime.ReadMemStats(&before)
+		if err := check.run(b); err != nil {
+			t.Fatal(err)
+		}
+		runtime.ReadMemStats(&after)
+		if allocated := after.TotalAlloc - before.TotalAlloc; b.mem < allocated {
+			t.Errorf("%s reserved %d bytes, allocated %d", check.name, b.mem, allocated)
+		}
 	}
 }

@@ -92,7 +92,8 @@ type execution struct {
 	accepted                  int64
 	diagnostics               []executionDiagnostic
 	started, closed           bool
-	filtering, handlerOutput  bool
+	filtering                 bool
+	handlerEcho               []byte // output a running handler produced
 	destructorStop            bool
 	result                    executionResult
 	stop                      completion
@@ -433,10 +434,7 @@ func (x *execution) startBuffer(name string, filter outputFilter) error {
 		return errors.New("output handler requires its PHP callable name")
 	}
 	if x.filtering {
-		// php_output_lock_error deactivates output first: every buffer is
-		// discarded without running its handler, and later output is direct.
-		x.buffers = nil
-		return x.fail(endFatal, errors.New("Cannot use output buffering in output buffering display handlers"))
+		return x.outputLockError("ob_start()")
 	}
 	if len(x.buffers) >= x.limits.depth {
 		x.fail(endLimit, errExecutionLimit)

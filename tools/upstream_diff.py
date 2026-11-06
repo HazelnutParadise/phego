@@ -331,13 +331,16 @@ def _collapse(text):
     return out.getvalue().strip()
 
 
-_BRACKET_SPACE = re.compile(r"(?<=[(\[]) | (?=[)\],])")
+# Stubs write none of these spaces: inside brackets, before a comma, colon or
+# union bar, and after a nullable mark, union bar, by-reference mark or
+# variadic mark.
+_BRACKET_SPACE = re.compile(r"(?<=[(\[?|&]) |(?<=\.\.\.) | (?=[)\],:|])")
 
 
 def _signature_text(text):
     """Collapse a stub signature and, outside literals and attribute comments,
-    drop the space inside brackets and before commas. A removed comment or a
-    line break then leaves the same text as its absence."""
+    drop the spaces stubs never write (see _BRACKET_SPACE). A removed comment
+    or a line break then leaves the same text as its absence."""
     out = io.StringIO()
     plain = 0
     index = 0

@@ -479,3 +479,120 @@ func TestOutputHandlerDeprecationNamesHandlerAndContext(t *testing.T) {
 		t.Errorf("diagnostics=%q, want %q", got, want)
 	}
 }
+
+// PHP 8.5.12 (arm64 pinned image): ob_end_flush() inside a handler is a lock
+// error like ob_start(). Output is deactivated first, so every buffer is
+// discarded and the outer handler never runs; a shutdown function then sees
+// level 0. The fatal names the calling function.
+func TestOutputLockErrorFromHandlerEndDiscardsBuffers(t *testing.T) {
+	for _, op := range []string{"ob_start", "ob_end_flush"} {
+		t.Run(op, func(t *testing.T) {
+			r, _ := NewRequest(nil)
+			if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+				t.Fatal(err)
+			}
+			if err := r.BeginInit(); err != nil {
+				t.Fatal(err)
+			}
+			if err := r.Ready(); err != nil {
+				t.Fatal(err)
+			}
+			x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 4096})
+			if err != nil {
+				t.Fatal(err)
+			}
+			outerRan := false
+			outer := func(x *execution, b []byte) ([]byte, completion) {
+				outerRan = true
+				return append(append([]byte("<outer:"), b...), '>'), completion{}
+			}
+			inner := func(x *execution, b []byte) ([]byte, completion) {
+				if op == "ob_start" {
+					if err := x.startBuffer("", nil); err != nil {
+						return b, x.check()
+					}
+					return b, completion{}
+				}
+				return b, x.endBuffer(op)
+			}
+			level := -1
+			cleanup, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			result := x.run(cleanup, func(x *execution) completion {
+				if err := x.registerShutdown(func(x *execution) completion {
+					level = len(x.buffers)
+					return x.write([]byte("[shutdown]"))
+				}); err != nil {
+					t.Fatal(err)
+				}
+				if err := x.startBuffer("{closure:outer}", outer); err != nil {
+					t.Fatal(err)
+				}
+				if c := x.write([]byte("A")); c.kind != endNormal {
+					return c
+				}
+				if err := x.startBuffer("{closure:inner}", inner); err != nil {
+					t.Fatal(err)
+				}
+				if c := x.write([]byte("B")); c.kind != endNormal {
+					return c
+				}
+				return x.endBuffer("ob_end_flush")
+			})
+			want := op + "(): Cannot use output buffering in output buffering display handlers"
+			var fatal string
+			for _, d := range result.diagnostics {
+				if d.level == "Fatal error" {
+					fatal = d.message
+				}
+			}
+			if string(result.output) != "[shutdown]" || outerRan || level != 0 || fatal != want {
+				t.Errorf("output=%q outerRan=%v level=%d fatal=%q, want %q", result.output, outerRan, level, fatal, want)
+			}
+		})
+	}
+}
+
+// PHP 8.5.12 (arm64 pinned image): a handler that echoes and then throws
+// leaves its buffer and its own echo to the next level, without the
+// deprecation, and the exception reaches the ob_end_flush() caller. The
+// probe prints "bodyxcaught boom".
+func TestOutputHandlerThrowPassesBufferAndEcho(t *testing.T) {
+	r, _ := NewRequest(nil)
+	if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.BeginInit(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Ready(); err != nil {
+		t.Fatal(err)
+	}
+	x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 4096})
+	if err != nil {
+		t.Fatal(err)
+	}
+	throws := func(x *execution, b []byte) ([]byte, completion) {
+		if c := x.write([]byte("x")); c.kind != endNormal {
+			return nil, c
+		}
+		return nil, completion{kind: endThrow, err: errors.New("boom")}
+	}
+	cleanup, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	result := x.run(cleanup, func(x *execution) completion {
+		if err := x.startBuffer("{closure:/w/t.php:2}", throws); err != nil {
+			t.Fatal(err)
+		}
+		if c := x.write([]byte("body")); c.kind != endNormal {
+			return c
+		}
+		if c := x.endBuffer("ob_end_flush"); c.kind != endThrow {
+			t.Errorf("throw lost: %+v", c)
+		}
+		return x.write([]byte("caught boom"))
+	})
+	if string(result.output) != "bodyxcaught boom" || len(result.diagnostics) != 0 {
+		t.Errorf("output=%q diagnostics=%+v", result.output, result.diagnostics)
+	}
+}
