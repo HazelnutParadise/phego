@@ -817,7 +817,7 @@ func (l *lowerer) literal(n *frontend.Node) *Literal {
 	case frontend.TLNumber, frontend.TDNumber:
 		return numberLiteral(n.Text, n.Token)
 	}
-	return &Literal{Kind: LitString, Str: l.dec.constant(n.Text, n.Line)}
+	return &Literal{Kind: LitString, Str: l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })}
 }
 
 // constantValue returns the literal value of a declare directive.
@@ -885,7 +885,8 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 			text = stripIndentation(text, indent, i == 0, last)
 		}
 		if !nowdoc {
-			text = l.dec.escapes(text, quote, p.Line)
+			raw := text
+			text = l.decodeScanned(p, func(d stringDecoder) string { return d.escapes(raw, quote, p.Line) })
 		}
 		nd.Kids = append(nd.Kids, l.seal(&Node{Op: OpLiteral, Line: p.Line, Value: &Literal{Kind: LitString, Str: text}}))
 	}
@@ -1398,7 +1399,6 @@ func (l *lowerer) constExpr(n *frontend.Node, dynamic bool) *Node {
 		defer func() { l.constants = nil }()
 	}
 	l.preEvaluateSyntax(n)
-	l.constClassNames(n)
 	if l.constClosures == nil {
 		l.constClosures = make(map[*frontend.Node]*Node)
 		defer func() { l.constClosures = nil }()
@@ -1484,37 +1484,6 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 	return l.seal(nd)
 }
 
-// constClassNames applies the class name checks zend_eval_const_expr makes
-// (zend_try_compile_const_expr_resolve_class_name and the class of a class
-// constant) before zend_compile_const_expr checks the operations, so these
-// errors come first. Closure bodies are compiled later.
-func (l *lowerer) constClassNames(n *frontend.Node) {
-	if n == nil || n.Kind == "closure" || n.Kind == "arrow_function" {
-		return
-	}
-	if n.Kind == "class_name" || n.Kind == "class_const" {
-		cls := unparen(n.Children[0])
-		if n.Children[0].Kind == "name" {
-			if special := specialClass(cls.Text); special != "" && n.Kind == "class_name" {
-				l.ensureClassFetch(special, n.Line)
-			}
-		} else if v, isString, ok := parseTimeValue(cls); ok && !isString {
-			l.fail(n.Line, "Illegal class name")
-		} else if ok && n.Kind == "class_const" {
-			l.fullyQualifiedClass(v)
-		} else if ok {
-			if special := specialClass(v); special != "" {
-				l.ensureClassFetch(special, n.Line)
-			} else {
-				l.fullyQualifiedClass(v)
-			}
-		}
-	}
-	for _, c := range n.Children {
-		l.constClassNames(c)
-	}
-}
-
 // constExprKinds are the syntax kinds zend_is_allowed_in_const_expr accepts.
 var constExprKinds = map[string]bool{
 	"literal": true, "binary": true, "unary": true, "cast": true, "ternary": true, "dim": true,
@@ -1547,6 +1516,12 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 			l.fail(n.Line, "Constant expression contains invalid operations")
 		}
 		return
+	}
+	if n.Kind == "new_class" {
+		if !dynamic {
+			l.fail(n.Line, "New expressions are not supported in this context")
+		}
+		l.fail(n.Line, "Cannot use anonymous class in constant expression")
 	}
 	if !constExprKinds[n.Kind] || n.Kind == "binary" && n.Text == "|>" || n.Kind == "unary" && n.Text == "@" {
 		l.fail(n.Line, "Constant expression contains invalid operations")

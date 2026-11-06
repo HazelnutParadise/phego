@@ -159,21 +159,13 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 		if op == "|>" {
 			return syntaxConstEntry{}
 		}
-		if op != "??" {
-			return l.syntaxChain(n, depth)
+		if op == "??" {
+			return l.syntaxRightChain(n, depth)
 		}
-		a := visit(c[0])
-		if a.known {
-			selected := c[0]
-			if !a.value.array && a.value.value.Kind == LitNull {
-				selected = c[1]
-				a = visit(selected)
-			}
-			a.selected = selected
-			return a
+		if op == "**" && rightLink(n, "**") != nil {
+			return l.syntaxRightChain(n, depth)
 		}
-		visit(c[1])
-		return syntaxConstEntry{}
+		return l.syntaxChain(n, depth)
 	case "ternary":
 		return l.syntaxChain(n, depth)
 	case "cast":
@@ -194,16 +186,49 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 			return result(compileConstantDim(a.value, key.value, width, b))
 		}
 	case "class_name":
-		if cls := c[0]; cls.Kind == "name" {
-			if name, ok := l.compileTimeClassName(specialClass(cls.Text)); ok {
+		// zend_try_compile_const_expr_resolve_class_name, at CG(zend_lineno)
+		// while the expression is evaluated.
+		cls := unparen(c[0])
+		if c[0].Kind == "name" {
+			// A fully qualified \self names the same fetch as self.
+			special := specialClass(strings.TrimPrefix(cls.Text, "\\"))
+			if special != "" {
+				l.ensureClassFetch(special, l.cur)
+				if name, ok := l.compileTimeClassName(special); ok {
+					return syntaxScalar(&Literal{Kind: LitString, Str: name})
+				}
+				return syntaxConstEntry{}
+			}
+			name := l.classRef(cls)
+			return syntaxScalar(&Literal{Kind: LitString, Str: name.Resolved})
+		}
+		if v, isString, ok := parseTimeValue(cls); ok {
+			if !isString {
+				l.fail(l.cur, "Illegal class name")
+			}
+			special := specialClass(v)
+			if special == "" {
+				return syntaxScalar(&Literal{Kind: LitString, Str: l.fullyQualifiedClass(v)})
+			}
+			l.ensureClassFetch(special, l.cur)
+			if name, ok := l.compileTimeClassName(special); ok {
 				return syntaxScalar(&Literal{Kind: LitString, Str: name})
 			}
-			if specialClass(cls.Text) == "" {
-				name := l.classRef(cls)
-				return syntaxScalar(&Literal{Kind: LitString, Str: name.Resolved})
+		}
+	case "class_const":
+		// The class of a class constant is resolved as it is evaluated.
+		if cls := unparen(c[0]); c[0].Kind != "name" {
+			if v, isString, ok := parseTimeValue(cls); ok {
+				if !isString {
+					l.fail(l.cur, "Illegal class name")
+				}
+				l.fullyQualifiedClass(v)
 			}
 		}
-	case "class_const", "prop", "nullsafe_prop", "new":
+		for _, child := range c {
+			visit(child)
+		}
+	case "prop", "nullsafe_prop", "new":
 		for _, child := range c {
 			visit(child)
 		}
@@ -367,6 +392,73 @@ func (l *lowerer) syntaxChain(n *frontend.Node, depth int) syntaxConstEntry {
 		return result
 	}
 	return syntaxConstEntry{known: true, value: f.value()}
+}
+
+// rightLink returns n's right operand when it continues a right-associative
+// chain of op (?? or **), or nil.
+func rightLink(n *frontend.Node, op string) *frontend.Node {
+	if n == nil || n.Kind != "binary" || strings.ToLower(n.Text) != op {
+		return nil
+	}
+	if r := unparen(n.Children[1]); r != nil && r.Kind == "binary" && strings.ToLower(r.Text) == op {
+		return r
+	}
+	return nil
+}
+
+// syntaxRightChain folds a right-nested chain of ?? or ** iteratively,
+// visiting the left operands in order as recursive evaluation does. A ??
+// stops at its first constant non-null operand and selects it; a null one
+// selects the rest of the chain.
+func (l *lowerer) syntaxRightChain(n *frontend.Node, depth int) syntaxConstEntry {
+	b := l.constants
+	op := strings.ToLower(n.Text)
+	spine := []*frontend.Node{n}
+	for r := rightLink(n, op); r != nil; r = rightLink(r, op) {
+		if _, ok := b.syntax[r]; ok {
+			break
+		}
+		if !b.spendWork(1) {
+			return syntaxConstEntry{}
+		}
+		spine = append(spine, r)
+	}
+	isNull := func(e syntaxConstEntry) bool {
+		return !e.value.array && e.value.value != nil && e.value.value.Kind == LitNull
+	}
+	lefts := make([]syntaxConstEntry, len(spine))
+	cut := len(spine) // the ?? that selects its left operand, if any
+	for i, nd := range spine {
+		lefts[i] = l.syntaxConstant(nd.Children[0], depth+1)
+		if op == "??" && lefts[i].known && !isNull(lefts[i]) {
+			cut = i
+			break
+		}
+	}
+	var next syntaxConstEntry
+	if cut == len(spine) {
+		next = l.syntaxConstant(spine[len(spine)-1].Children[1], depth+1)
+	}
+	for i := min(cut, len(spine)-1); i >= 0; i-- {
+		nd := spine[i]
+		var e syntaxConstEntry
+		switch {
+		case op == "??" && i == cut:
+			e = lefts[i]
+			e.selected = nd.Children[0]
+		case op == "??" && lefts[i].known:
+			e = next
+			e.selected = nd.Children[1]
+		case op == "**" && lefts[i].known && next.known && !b.exhausted:
+			v, ok := compileBinaryValues(op, lefts[i].value, next.value, l.unit.Profile.IntWidth, depth, b)
+			e = syntaxConstEntry{value: v, known: ok}
+		}
+		if i != 0 && !l.recordSyntax(nd, e, depth) {
+			return syntaxConstEntry{}
+		}
+		next = e
+	}
+	return next
 }
 
 // recordSyntax memoizes an intermediate entry of an iterative chain at the

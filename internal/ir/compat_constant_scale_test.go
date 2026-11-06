@@ -10,7 +10,7 @@ import (
 // PHP 8.5.12 compiles each of these in linear time (php -n -l reports no
 // errors for all of them). Constant evaluation must neither reject them as a
 // host limit nor re-evaluate nested operands for every enclosing probe. On
-// 3da26d5..a828a53 they failed with "constant evaluation resource limit
+// 3da26d5..0ba11a8 they failed with "constant evaluation resource limit
 // exceeded" or took more than 10 s (for example 23 s for the alternating
 // concatenation chain on c98cc07, and 11.7 s for 700 nested closures around
 // a 200,000-element array on a828a53).
@@ -44,6 +44,11 @@ func TestConstantEvaluationScalesLinearly(t *testing.T) {
 		"nested spread":                "$x = " + strings.Repeat("[...", 40) + "[" + join(1000, func(i int) string { return fmt.Sprint(i) }, ",") + "]" + strings.Repeat("]", 40) + ";",
 		"nested closures and array":    "$f = " + strings.Repeat("function () { return ", 700) + "[" + join(200000, func(i int) string { return fmt.Sprint(i) }, ",") + "]" + strings.Repeat("; }", 700) + ";",
 		"parse-time class name concat": "function f() { return (" + join(50000, segment, " . ") + ")::f(); }",
+		"coalesce chain":               "$a = [" + join(3000, variable, " ?? ") + "];",
+		"power chain":                  "$a = [" + join(3000, func(int) string { return "1" }, " ** ") + "];",
+		"many union constants": join(30, func(k int) string {
+			return fmt.Sprintf("const C%d = %s;", k, join(256, func(i int) string { return fmt.Sprintf("['c%d_%d' => 1]", k, i) }, " + "))
+		}, "\n"),
 	}
 	for name, src := range cases {
 		t.Run(name, func(t *testing.T) {

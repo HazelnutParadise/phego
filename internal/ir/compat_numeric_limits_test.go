@@ -38,11 +38,11 @@ func TestCompatibilityNumericLimits(t *testing.T) {
 
 // Resource exhaustion is a host limit, distinct from PHP's CompileError and
 // from a dynamic expression whose evaluation is deferred until execution.
-// PHP 8.5.12 folds this 6,000-term union (php -n -l reports "Cannot use
-// "::class" on false" in 84 ms); its superlinear cost exceeds the unit's
-// shared reserve here.
+// PHP 8.5.12 folds this 2,100-deep right-nested sum (php -n -l reports
+// "Cannot use "::class" on false"); right nesting beyond the evaluation
+// depth is a host limit here.
 func TestCompatibilityConstantResourceLimit(t *testing.T) {
-	src := "<?php (!(" + arrayUnion(6000) + "))::class;"
+	src := "<?php (!(" + strings.Repeat("1 + (", 2100) + "1" + strings.Repeat(")", 2100) + "))::class;"
 	_, err := lowerSource(src, 64)
 	var phpError *CompileError
 	if err == nil || errors.As(err, &phpError) || !strings.Contains(err.Error(), "constant evaluation resource limit") {
@@ -74,12 +74,13 @@ func TestCompatibilityLongConcatenationFolds(t *testing.T) {
 	}
 }
 
-// A 2,050-deep unary chain folds iteratively, and a 512-term union fits in
-// the unit's shared reserve; php -n -l reports these messages.
+// A 2,050-deep unary chain folds iteratively, and a union chain costs its
+// operands' total size; php -n -l reports these messages.
 func TestCompatibilityConstantDeepChainAndUnionFold(t *testing.T) {
 	for expr, want := range map[string]string{
 		strings.Repeat("!", 2050) + "1": `Cannot use "::class" on true`,
 		arrayUnion(512):                 `Cannot use "::class" on array`,
+		"!(" + arrayUnion(6000) + ")":   `Cannot use "::class" on false`,
 	} {
 		_, err := lowerSource("<?php ("+expr+")::class;", 64)
 		var phpError *CompileError

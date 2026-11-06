@@ -31,10 +31,7 @@ func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit,
 	}
 	// PHP scans the whole file before compiling it, so warnings raised while
 	// decoding literals precede compile diagnostics.
-	var scanned []Diagnostic
-	l.dec = stringDecoder{warn: func(line int, msg string) {
-		scanned = append(scanned, Diagnostic{Line: line, Level: "Warning", Message: msg})
-	}}
+
 	defer func() {
 		if r := recover(); r != nil {
 			f, ok := r.(compileFailure)
@@ -55,13 +52,43 @@ func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit,
 	}
 	l.finishFunc(main)
 	main.Strict = l.unit.Strict
-	l.unit.Diagnostics = append(mergeScanned(castDeprecations(tree), scanned), l.unit.Diagnostics...)
+	l.unit.Diagnostics = append(l.scannerDiagnostics(tree), l.unit.Diagnostics...)
 	return l.unit, nil
 }
 
-// castDeprecations lists the deprecations PHP's scanner raises for
-// non-canonical cast names (zend_language_scanner.l), in source order.
-func castDeprecations(tree *frontend.Node) []Diagnostic {
+// castDeprecation is the deprecation PHP's scanner raises for a
+// non-canonical cast name (zend_language_scanner.l), if any.
+func castDeprecation(n *frontend.Node) (Diagnostic, bool) {
+	inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
+	switch inner {
+	case "integer", "boolean", "double", "binary":
+		return Diagnostic{Line: n.Line, Level: "Deprecated",
+			Message: "Non-canonical cast (" + inner + ") is deprecated, use the (" + castNames[inner] + ") cast instead"}, true
+	}
+	return Diagnostic{}, false
+}
+
+// decodeScanned decodes the literal or string part n and keeps its decoding
+// warnings for scannerDiagnostics; decoding n again is silent.
+func (l *lowerer) decodeScanned(n *frontend.Node, decode func(stringDecoder) string) string {
+	if _, done := l.decoded[n]; done {
+		return decode(stringDecoder{})
+	}
+	var warnings []Diagnostic
+	text := decode(stringDecoder{warn: func(line int, msg string) {
+		warnings = append(warnings, Diagnostic{Line: line, Level: "Warning", Message: msg})
+	}})
+	if l.decoded == nil {
+		l.decoded = make(map[*frontend.Node][]Diagnostic)
+	}
+	l.decoded[n] = warnings
+	return text
+}
+
+// scannerDiagnostics lists what PHP's scanner reports before compiling the
+// file, in token order: literal decoding warnings and non-canonical cast
+// deprecations, including those in code compilation never reaches.
+func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
 	var out []Diagnostic
 	var walk func(*frontend.Node)
 	walk = func(n *frontend.Node) {
@@ -69,39 +96,20 @@ func castDeprecations(tree *frontend.Node) []Diagnostic {
 			return
 		}
 		if n.Kind == "cast" {
-			inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
-			switch inner {
-			case "integer", "boolean", "double", "binary":
-				out = append(out, Diagnostic{Line: n.Line, Level: "Deprecated",
-					Message: "Non-canonical cast (" + inner + ") is deprecated, use the (" + castNames[inner] + ") cast instead"})
+			if d, ok := castDeprecation(n); ok {
+				out = append(out, d)
 			}
 		}
+		if n.Kind == "literal" && n.Token == frontend.TConstantEncapsedString {
+			l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })
+		}
+		out = append(out, l.decoded[n]...)
 		for _, c := range n.Children {
 			walk(c)
 		}
 	}
 	walk(tree)
 	return out
-}
-
-// mergeScanned interleaves two lists of scanner diagnostics by line,
-// keeping each list's order.
-func mergeScanned(a, b []Diagnostic) []Diagnostic {
-	if len(a) == 0 {
-		return b
-	}
-	if len(b) == 0 {
-		return a
-	}
-	out := make([]Diagnostic, 0, len(a)+len(b))
-	for len(a) > 0 && len(b) > 0 {
-		if b[0].Line < a[0].Line {
-			out, b = append(out, b[0]), b[1:]
-		} else {
-			out, a = append(out, a[0]), a[1:]
-		}
-	}
-	return append(append(out, a...), b...)
 }
 
 type compileFailure struct{ err error }
@@ -138,7 +146,6 @@ type label struct {
 type lowerer struct {
 	constants *compileBudget // one expression-local memo and work budget
 	unit      *Unit
-	dec       stringDecoder
 	top       []*frontend.Node
 
 	ns *namespace
@@ -164,6 +171,8 @@ type lowerer struct {
 	namedParamRefs map[*Func]map[string]bool
 	// inConstExpr is set while compiling a constant expression.
 	inConstExpr bool
+	// decoded holds each decoded literal or string part's warnings.
+	decoded map[*frontend.Node][]Diagnostic
 	// foldLine is CG(zend_lineno) while constants are folded from syntax.
 	foldLine int
 	// constPool is the unit's shared reserve for constant evaluation.

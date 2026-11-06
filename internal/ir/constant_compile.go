@@ -85,6 +85,9 @@ func (l *lowerer) compileConstValue(n *Node, depth int, budget *compileBudget) (
 		if chainOperand(n) == nil {
 			return compileConst{}, false
 		}
+		if powLink(n) != nil {
+			return l.compilePowChain(n, depth, budget)
+		}
 		return l.compileChain(n, depth, budget)
 	}
 	// In particular, do not fold casts or ternaries: their PHP compile-time
@@ -174,10 +177,58 @@ func (l *lowerer) compileChain(n *Node, depth int, budget *compileBudget) (compi
 	return f.value(), true
 }
 
+// powLink returns n's right operand when it continues a right-associative
+// ** chain, or nil.
+func powLink(n *Node) *Node {
+	if n == nil || n.Op != OpBinary || n.Text != "**" || len(n.Kids) != 2 {
+		return nil
+	}
+	if r := n.Kids[1]; r != nil && r.Op == OpBinary && r.Text == "**" && len(r.Kids) == 2 {
+		return r
+	}
+	return nil
+}
+
+// compilePowChain folds a right-nested ** chain iteratively: the left
+// operands in order, then the innermost right operand, combined inward out.
+func (l *lowerer) compilePowChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
+	spine := []*Node{n}
+	for r := powLink(n); r != nil; r = powLink(r) {
+		if _, ok := budget.memo[r]; ok {
+			break
+		}
+		if !budget.spendWork(1) {
+			return compileConst{}, false
+		}
+		spine = append(spine, r)
+	}
+	lefts := make([]compileConst, len(spine))
+	for i, nd := range spine {
+		v, ok := l.compileConst(nd.Kids[0], depth+1, budget)
+		if !ok {
+			return compileConst{}, false
+		}
+		lefts[i] = v
+	}
+	v, ok := l.compileConst(spine[len(spine)-1].Kids[1], depth+1, budget)
+	if !ok {
+		return compileConst{}, false
+	}
+	for i := len(spine) - 1; i >= 0; i-- {
+		if v, ok = compileBinaryValues("**", lefts[i], v, l.unit.Profile.IntWidth, depth, budget); !ok {
+			return compileConst{}, false
+		}
+	}
+	return v, true
+}
+
 // binaryFold is the running value of a left-nested binary chain.
 type binaryFold struct {
 	acc compileConst
 	cat *concatBuilder
+	// owned marks acc's array as this fold's copy, so a run of unions adds
+	// each operand's new keys in place and costs the operands' total size.
+	owned bool
 }
 
 // step applies op to the running value and r. On failure the running value
@@ -187,6 +238,7 @@ func (f *binaryFold) step(op string, r compileConst, width, depth int, budget *c
 		if f.cat != nil {
 			return f.cat.add(r, budget)
 		}
+		f.owned = false
 		c := &concatBuilder{className: true}
 		if !c.add(f.acc, budget) || !c.add(r, budget) {
 			return false
@@ -196,11 +248,50 @@ func (f *binaryFold) step(op string, r compileConst, width, depth int, budget *c
 	}
 	acc := f.value()
 	f.acc, f.cat = acc, nil
+	if op == "+" && acc.array && r.array && acc.elements != nil && r.elements != nil {
+		return f.union(r.elements, budget)
+	}
+	f.owned = false
 	v, ok := compileBinaryValues(op, acc, r, width, depth, budget)
 	if ok {
 		f.acc = v
 	}
 	return ok
+}
+
+// union is compileArrayUnion on the running array, copying it once per run.
+func (f *binaryFold) union(b *compileArray, budget *compileBudget) bool {
+	if !f.owned {
+		a := f.acc.elements
+		if !budget.spendWork(len(a.entries)) {
+			return false
+		}
+		out := &compileArray{positions: make(map[compileKey]int, len(a.entries)), next: a.next, full: a.full}
+		for _, e := range a.entries {
+			if !budget.spendWork(len(e.key.text) / 64) {
+				return false
+			}
+			if _, exists := out.positions[e.key]; !exists {
+				out.positions[e.key] = len(out.entries)
+				out.entries = append(out.entries, e)
+			}
+		}
+		f.acc, f.owned = compileConst{array: true, elements: out}, true
+	}
+	out := f.acc.elements
+	if !budget.spendWork(len(b.entries)) {
+		return false
+	}
+	for _, e := range b.entries {
+		if !budget.spendWork(len(e.key.text) / 64) {
+			return false
+		}
+		if _, exists := out.positions[e.key]; !exists {
+			out.positions[e.key] = len(out.entries)
+			out.entries = append(out.entries, e)
+		}
+	}
+	return true
 }
 
 func (f *binaryFold) value() compileConst {

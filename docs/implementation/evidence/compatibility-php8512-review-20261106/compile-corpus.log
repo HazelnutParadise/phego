@@ -1,6 +1,6 @@
 === RUN   TestLowerMatchesCompileReference
     corpus_test.go:133: 5307 files lowered, 647 compile errors raised, 48 files with compile warnings
---- PASS: TestLowerMatchesCompileReference (1.75s)
+--- PASS: TestLowerMatchesCompileReference (0.91s)
 PASS
-ok  	github.com/HazelnutParadise/phego/internal/ir	1.844s
-exit_code=0 seconds=2
+ok  	github.com/HazelnutParadise/phego/internal/ir	1.285s
+exit_code=0 seconds=1

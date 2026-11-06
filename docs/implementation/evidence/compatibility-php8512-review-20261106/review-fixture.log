@@ -1,4 +1,4 @@
-PASS collected 434 cases, PHP 8.5.12 int32
-PASS collected 434 cases, PHP 8.5.12 int64
-wrote 868 cases to internal/ir/testdata/php8512-review-compile.json.gz
-exit_code=0 seconds=2
+PASS collected 567 cases, PHP 8.5.12 int32
+PASS collected 567 cases, PHP 8.5.12 int64
+wrote 1134 cases to internal/ir/testdata/php8512-review-compile.json.gz
+exit_code=0 seconds=3

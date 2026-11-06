@@ -1,0 +1,99 @@
+=== RUN   TestConstantEvaluationScalesLinearly
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_variables
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_literals
+=== RUN   TestConstantEvaluationScalesLinearly/constant_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/class_constant_concat
+=== RUN   TestConstantEvaluationScalesLinearly/long_add_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/array_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_logical_and_add
+=== RUN   TestConstantEvaluationScalesLinearly/nested_spread
+=== RUN   TestConstantEvaluationScalesLinearly/nested_closures_and_array
+=== RUN   TestConstantEvaluationScalesLinearly/power_chain
+    compat_constant_scale_test.go:58: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/many_union_constants
+=== RUN   TestConstantEvaluationScalesLinearly/large_literal_array
+=== RUN   TestConstantEvaluationScalesLinearly/concat_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/short_ternary_chain
+=== RUN   TestConstantEvaluationScalesLinearly/parse-time_class_name_concat
+=== RUN   TestConstantEvaluationScalesLinearly/coalesce_chain
+    compat_constant_scale_test.go:58: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/logical_or
+=== RUN   TestConstantEvaluationScalesLinearly/large_variable_array
+=== RUN   TestConstantEvaluationScalesLinearly/union_member_name
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_concat_and_add
+--- FAIL: TestConstantEvaluationScalesLinearly (1.85s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_variables (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_literals (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/constant_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/class_constant_concat (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/long_add_chain_name (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/unary_chain_name (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/unary_chain_left_of_and (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/array_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_logical_and_add (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/nested_spread (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/nested_closures_and_array (0.78s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/power_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/many_union_constants (0.31s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_literal_array (0.18s)
+    --- PASS: TestConstantEvaluationScalesLinearly/concat_left_of_and (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/short_ternary_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/parse-time_class_name_concat (0.24s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/coalesce_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_or (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_variable_array (0.16s)
+    --- PASS: TestConstantEvaluationScalesLinearly/union_member_name (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_concat_and_add (0.07s)
+=== RUN   TestCompatibilityConstantResourceLimit
+--- PASS: TestCompatibilityConstantResourceLimit (0.00s)
+=== RUN   TestCompatibilityConstantDeepChainAndUnionFold
+    compat_numeric_limits_test.go:88: !(['k0'=>0]+['k1'=>1...: got *ir.constantLimitError: ir: constant evaluation resource limit exceeded at line 1, want "Cannot use \"::class\" on false"
+--- FAIL: TestCompatibilityConstantDeepChainAndUnionFold (0.56s)
+=== RUN   TestCompatibilityReviewOracle
+--- FAIL: TestCompatibilityReviewOracle (0.04s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x2 addr=0x10 pc=0x102bbe5e4]
+
+goroutine 82 [running]:
+testing.tRunner.func1.2({0x102e30a20, 0x102e9e8a0})
+	/usr/local/go/src/testing/testing.go:1974 +0x1a0
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1977 +0x318
+panic({0x102e30a20?, 0x102e9e8a0?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/HazelnutParadise/phego/internal/ir.Lower.func2()
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:42 +0x8c
+panic({0x102e30a20?, 0x102e9e8a0?})
+	/usr/local/go/src/runtime/panic.go:860 +0x12c
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).constClassNames(0x7bbb889b3ae8, 0x7bbb88b8ade0)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/expr.go:1497 +0x1c4
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).constClassNames(0x7bbb889b3ae8, 0x7bbb889b3ae8?)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/expr.go:1514 +0x158
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).constClassNames(0x7bbb889b3ae8, 0x7bbb88b8af60?)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/expr.go:1514 +0x158
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).constExpr(0x7bbb889b3ae8, 0x7bbb88b8af60, 0x1)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/expr.go:1401 +0xb4
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).constDecl(0x7bbb889b3ae8, 0x7bbb88b8ac00)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:961 +0x2f8
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).stmt(0x7bbb889b3ae8, 0x7bbb88b8ac00, 0x1)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:610 +0xb94
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).statement(0x7bbb889b3ae8, 0x7bbb88bf24b0?, 0x8?)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:471 +0x28
+github.com/HazelnutParadise/phego/internal/ir.(*lowerer).topStatement(0x7bbb889b3ae8, 0x7bbb88b8ac00)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:301 +0x1d8
+github.com/HazelnutParadise/phego/internal/ir.Lower(0x7bbb88b8b020, {{0x102befd61?, 0x20?}, 0x0?, 0x28?}, {{0x102bf206a?, 0x102e1f520?}})
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower.go:54 +0x3b4
+github.com/HazelnutParadise/phego/internal/ir.lowerSource({0x7bbb88a67410, 0x2c}, 0x20)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/lower_test.go:31 +0xb0
+github.com/HazelnutParadise/phego/internal/ir.checkCompileOracle(0x7bbb8e912008, {0x102c02d20, 0x27}, 0x46e)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/compat_constant_oracle_test.go:52 +0x2d4
+github.com/HazelnutParadise/phego/internal/ir.TestCompatibilityReviewOracle(0x7bbb8e912008?)
+	/private/tmp/claude-501/-Users-timlai--claude-spares-spare-ChuxJm/1de056cf-fd50-403e-8265-11a5dcc9fa6e/scratchpad/pr2-fix3/old/internal/ir/compat_review_oracle_test.go:10 +0x2c
+testing.tRunner(0x7bbb8e912008, 0x102e71bd8)
+	/usr/local/go/src/testing/testing.go:2036 +0xc4
+created by testing.(*T).Run in goroutine 1
+	/usr/local/go/src/testing/testing.go:2101 +0x3a8
+FAIL	github.com/HazelnutParadise/phego/internal/ir	2.999s
+FAIL

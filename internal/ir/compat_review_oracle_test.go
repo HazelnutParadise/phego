@@ -7,7 +7,7 @@ import "testing"
 // member names and parenthesized class operands. The fixture records
 // php -n -l for both integer widths.
 func TestCompatibilityReviewOracle(t *testing.T) {
-	checkCompileOracle(t, "testdata/php8512-review-compile.json.gz", 868)
+	checkCompileOracle(t, "testdata/php8512-review-compile.json.gz", 1134)
 }
 
 // php -n -l cannot show what these operands do at run time. The pinned
