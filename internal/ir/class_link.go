@@ -102,7 +102,9 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 			}
 			l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s) or weaker", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass)
 		}
-		compatible := concreteConstructor || l.methodCompatible(cl, parent, f, base)
+		// The probe that allowed early binding owns the verdict; a member whose
+		// obligation is still unresolved is not reported here.
+		compatible := concreteConstructor || l.bindingMethod(f, base) != bindingIncompatible
 		if !compatible {
 			originClass, originMethod := l.methodOrigin(parent, base.Name)
 			l.fail(f.Line, "Declaration of %s must be compatible with %s", methodSignature(cl.Name, f), methodSignature(originClass.Name, originMethod))
@@ -534,109 +536,20 @@ func sameFuncSignature(a, b *Func) bool {
 	return true
 }
 
-func (l *lowerer) methodCompatible(childClass, parentClass *Class, child, parent *Func) bool {
-	if child.Static != parent.Static {
-		return false
-	}
-	if parent.ByRef && !child.ByRef {
-		return false
-	}
-	childVariadic := len(child.Params) != 0 && child.Params[len(child.Params)-1].Variadic
-	if (len(child.Params) < len(parent.Params) && !childVariadic) || requiredParams(child) > requiredParams(parent) {
-		return false
-	}
-	if !l.returnTypeCovariant(child.Return, parent.Return, childClass, parentClass) {
-		return false
-	}
-	for i, p := range parent.Params {
-		childIndex := i
-		if childIndex >= len(child.Params) {
-			if !childVariadic {
-				return false
-			}
-			childIndex = len(child.Params) - 1
-		}
-		c := child.Params[childIndex]
-		if p.ByRef != c.ByRef {
-			return false
-		}
-		if p.Type != nil && c.Type != nil && !l.parameterTypeCompatible(c.Type.zend, p.Type.zend) {
-			return false
-		}
-		if p.Type == nil && c.Type != nil && c.Type.zend != "mixed" {
-			return false
-		}
-	}
-	return true
-}
-
+// requiredParams is zend_function.required_num_args: an optional parameter
+// before a required one is required too.
 func requiredParams(f *Func) int {
 	n := 0
-	for _, p := range f.Params {
+	for i, p := range f.Params {
 		if p.Default == nil && !p.Variadic {
-			n++
+			n = i + 1
 		}
 	}
 	return n
 }
 
-func (l *lowerer) returnTypeCovariant(child, parent *Type, childClass, parentClass *Class) bool {
-	if parent == nil {
-		return true
-	}
-	if child == nil {
-		return false
-	}
-	return l.returnTypeCompatible(child.zend, parent.zend, childClass, parentClass)
-}
-
 func (l *lowerer) parameterTypeCompatible(child, parent string) bool {
 	return l.bindingType(parent, child) != bindingIncompatible
-}
-
-func (l *lowerer) returnTypeCompatible(child, parent string, childClass, parentClass *Class) bool {
-	if strings.HasPrefix(parent, "?") {
-		parent = strings.TrimPrefix(parent, "?") + "|null"
-	}
-	if strings.HasPrefix(child, "?") {
-		child = strings.TrimPrefix(child, "?") + "|null"
-	}
-	if strings.EqualFold(child, parent) || child == "never" {
-		return true
-	}
-	if strings.EqualFold(parent, "static") {
-		return childClass != nil && hasModifier(childClass.Modifiers, "final") && strings.EqualFold(child, childClass.Name)
-	}
-	if parent == "mixed" {
-		return child != "void"
-	}
-	if child == "static" && (childClass != nil && strings.EqualFold(parent, childClass.Name) || parentClass != nil && strings.EqualFold(parent, parentClass.Name)) {
-		return true
-	}
-	if !l.typesKnown(child, parent) {
-		return true
-	}
-	return l.typeIsSubtype(child, parent)
-}
-
-func (l *lowerer) typeIsSubtype(child, parent string) bool {
-	if strings.EqualFold(child, parent) || strings.EqualFold(parent, "mixed") || strings.EqualFold(child, "never") {
-		return true
-	}
-	childParts, parentParts := typeDNF(child), typeDNF(parent)
-	for _, childClause := range childParts {
-		covered := false
-		for _, parentClause := range parentParts {
-			if l.typeClauseSubtype(childClause, parentClause) || len(childClause) > 1 && len(childClause) == len(parentClause) && l.typeClauseSubtype(parentClause, childClause) {
-				covered = true
-				break
-			}
-		}
-		if !covered {
-			return false
-		}
-	}
-	return true
 }
 
 // typeDNF splits canonical PHP type spellings into unions of intersections.
@@ -707,22 +620,6 @@ func stripTypeParens(t string) string {
 		t = strings.TrimSpace(t[1 : len(t)-1])
 	}
 	return t
-}
-
-func (l *lowerer) typeClauseSubtype(child, parent []string) bool {
-	for _, want := range parent {
-		covered := false
-		for _, got := range child {
-			if l.atomSubtype(got, want) {
-				covered = true
-				break
-			}
-		}
-		if !covered {
-			return false
-		}
-	}
-	return true
 }
 
 func (l *lowerer) atomSubtype(child, parent string) bool {
@@ -813,7 +710,8 @@ func (l *lowerer) typesKnown(a, b string) bool {
 
 func methodSignature(class string, f *Func) string {
 	var params []string
-	for _, p := range f.Params {
+	required := requiredParams(f)
+	for i, p := range f.Params {
 		s := ""
 		if p.Type != nil {
 			s += p.Type.zend + " "
@@ -825,7 +723,9 @@ func methodSignature(class string, f *Func) string {
 			s += "..."
 		}
 		s += "$" + p.Name
-		if p.Default != nil && (p.Type == nil || !p.Type.Implicit) {
+		// zend_get_function_declaration shows defaults only after the last
+		// required parameter.
+		if p.Default != nil && i >= required {
 			s += " = " + literalPreview(p.Default)
 		}
 		params = append(params, s)

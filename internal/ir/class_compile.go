@@ -360,23 +360,7 @@ func (l *lowerer) checkMagicMethod(cl *Class, f *Func) {
 		if hasClassMarker(f.Attributes, "NoDiscard") && want == "void" {
 			l.fail(f.Line, "Method %s::%s cannot be #[\\NoDiscard]", cl.Name, f.Name)
 		}
-		if returnType == "" || strings.EqualFold(returnType, "never") {
-			return
-		}
-		if want == "object" {
-			if !l.typeIsSubtype(returnType, "object") {
-				l.fail(f.Line, "%s: Return type must be %s when declared", display, want)
-			}
-			return
-		}
-		allowed := map[string]bool{strings.ToLower(want): true}
-		if want == "object" {
-			allowed["self"], allowed["static"] = true, true
-			if f.Class != nil {
-				allowed[strings.ToLower(f.Class.Name)] = true
-			}
-		}
-		if !allowed[strings.ToLower(returnType)] {
+		if returnType != "" && !magicReturnAllowed(returnType, want) {
 			l.fail(f.Line, "%s: Return type must be %s when declared", display, want)
 		}
 	}
@@ -430,9 +414,7 @@ func (l *lowerer) checkMagicMethod(cl *Class, f *Func) {
 		checkArgs(0)
 		checkStatic(false)
 		checkPublic()
-		if returnType != "" && !strings.EqualFold(returnType, "never") && !strings.EqualFold(returnType, "array") && !strings.EqualFold(returnType, "?array") && !strings.EqualFold(returnType, "array|null") {
-			l.fail(f.Line, "%s: Return type must be ?array when declared", display)
-		}
+		checkReturn("?array")
 	case "__sleep":
 		checkArgs(0)
 		checkStatic(false)
@@ -499,4 +481,44 @@ func (l *lowerer) verifyHookedProperty(cl *Class, p *Prop, backed bool, line int
 		}
 		l.fail(line, "%s virtual property %s::$%s must not specify asymmetric visibility", prefix, cl.Name, p.Name)
 	}
+}
+
+// magicReturnAllowed mirrors zend_check_magic_method_return_type: never is
+// always legal, every builtin type must be one the method may return, and a
+// class type, including static, is allowed only where an object is required.
+func magicReturnAllowed(declared, required string) bool {
+	allowed := map[string]bool{}
+	for _, clause := range typeDNF(required) {
+		allowed[clause[0]] = true
+	}
+	for _, clause := range typeDNF(declared) {
+		if len(clause) > 1 {
+			if !allowed["object"] {
+				return false
+			}
+			continue
+		}
+		switch atom := strings.TrimPrefix(clause[0], "\\"); atom {
+		case "never":
+			return true
+		case "bool":
+			if !allowed["bool"] {
+				return false
+			}
+		case "true", "false":
+			if !allowed[atom] && !allowed["bool"] {
+				return false
+			}
+		case "null", "int", "float", "string", "array", "object", "callable", "void", "mixed", "iterable":
+			// mixed and iterable add builtin bits no magic method allows alone.
+			if !allowed[atom] || atom == "mixed" || atom == "iterable" {
+				return false
+			}
+		default:
+			if !allowed["object"] {
+				return false
+			}
+		}
+	}
+	return true
 }

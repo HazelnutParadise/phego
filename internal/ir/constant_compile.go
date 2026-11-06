@@ -645,6 +645,14 @@ func compileBinaryValues(op string, a, b compileConst, width, depth int, budget 
 	return v, ok
 }
 
+// compileString reports the conversion zend_compile_binary_op and
+// concat_function perform on a constant concatenation operand.
+func (l *lowerer) compileString(v compileConst) {
+	if v.value != nil && v.value.Kind == LitFloat && math.IsNaN(v.value.Float) {
+		l.diag(l.cur, "Warning", "unexpected NAN value was coerced to string")
+	}
+}
+
 // PHP emits a compile warning only where compilation actually converts a
 // constant to bool. Memoized value inspection alone must not emit it again.
 func (l *lowerer) compileTruth(v compileConst) (bool, bool) {

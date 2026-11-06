@@ -93,7 +93,7 @@ foreach(array_chunk($files,200) as $chunk) {
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture", action="append", type=Path,
-                        help="gzip JSON fixture; repeat to select files (default: both committed fixtures)")
+                        help="gzip JSON fixture; repeat to select files (default: all committed fixtures)")
     parser.add_argument("--width", type=int, choices=(32, 64), action="append",
                         help="reference integer width; repeat to select both (default: both)")
     parser.add_argument("--timeout", type=int, default=180, help="seconds per isolated reference run (default: 180)")
@@ -101,7 +101,8 @@ def main(argv=None):
     if args.timeout <= 0:
         parser.error("--timeout must be positive")
     fixtures = args.fixture or [ROOT / "internal/ir/testdata" / name for name in (
-        "php8512-constant-compile.json.gz", "php8512-syntax-constant-compile.json.gz")]
+        "php8512-constant-compile.json.gz", "php8512-syntax-constant-compile.json.gz",
+        "php8512-review-compile.json.gz")]
     try:
         total = 0
         for fixture in fixtures:

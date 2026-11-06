@@ -199,7 +199,12 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 			return syntaxConstEntry{}
 		}
 		if right.known {
-			return result(compileBinaryValues(op, a.value, right.value, width, depth, b))
+			v, ok := compileBinaryValues(op, a.value, right.value, width, depth, b)
+			if ok && op == "." {
+				l.compileString(a.value)
+				l.compileString(right.value)
+			}
+			return result(v, ok)
 		}
 	case "ternary":
 		a := visit(c[0])
@@ -237,7 +242,7 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 			return result(compileConstantDim(a.value, key.value, width, b))
 		}
 	case "class_name":
-		if cls := unparen(c[0]); cls.Kind == "name" && specialClass(cls.Text) == "" {
+		if cls := c[0]; cls.Kind == "name" && specialClass(cls.Text) == "" {
 			name := l.classRef(cls)
 			return syntaxScalar(&Literal{Kind: LitString, Str: name.Resolved})
 		}

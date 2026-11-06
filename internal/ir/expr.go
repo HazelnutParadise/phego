@@ -1,6 +1,7 @@
 package ir
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -210,6 +211,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			nd.Text = v.Text[1:]
 		} else {
 			nd.Kids[1] = l.expr(v.Children[0])
+			l.convertMemberName(nd)
 		}
 		l.flag(nd, ctx)
 		return l.seal(nd)
@@ -224,7 +226,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		return l.seal(nd)
 	case "class_name":
 		nd := &Node{Op: OpClassName, Line: n.Line, Kids: []*Node{nil}}
-		if cls := unparen(c[0]); cls.Kind == "name" {
+		if cls := c[0]; cls.Kind == "name" {
 			name := l.classRef(cls)
 			if name.Special == "" {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: name.Resolved}})
@@ -237,7 +239,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		} else {
 			nd.Kids[0] = l.expr(cls)
 			if k := l.compileClassKind(nd.Kids[0]); k != "" {
-				if cls.Kind == "literal" && k != "string" {
+				if unparen(cls).Kind == "literal" && k != "string" {
 					l.fail(l.cur, "Illegal class name")
 				}
 				l.fail(l.cur, "Cannot use \"::class\" on %s", k)
@@ -500,22 +502,74 @@ func (l *lowerer) memberName(nd *Node, name *frontend.Node) {
 		return
 	}
 	nd.Kids[1] = l.expr(name)
-	if constKind(nd.Kids[1]) == "array" {
-		l.diag(l.cur, "Warning", "Array to string conversion")
-		nd.Text, nd.Kids[1] = "Array", nil
+	l.convertMemberName(nd)
+}
+
+// convertMemberName applies the convert_to_string that
+// zend_delayed_compile_prop and zend_compile_static_prop perform on a name
+// compiled to a constant. Only conversions that warn are folded here; a
+// name PHP leaves for execution keeps its expression.
+func (l *lowerer) convertMemberName(nd *Node) {
+	v, known := l.evaluateConstant(nd.Kids[1])
+	if !known {
+		return
+	}
+	var text, warning string
+	switch {
+	case v.array:
+		text, warning = "Array", "Array to string conversion"
+	case v.value != nil && v.value.Kind == LitFloat && math.IsNaN(v.value.Float):
+		text, _ = constString(v.value)
+		warning = "unexpected NAN value was coerced to string"
+	default:
+		return
+	}
+	l.diag(l.cur, "Warning", warning)
+	nd.Text, nd.Kids[1] = text, nil
+	if l.nameWarnings == nil {
+		l.nameWarnings = make(map[*Node]string)
+	}
+	l.nameWarnings[nd] = warning
+}
+
+// repeatNameConversions follows zend_compile_assign_coalesce, which compiles
+// its target again after the default value. Memoized operands, including a
+// static property's class, are reused, but every fetch in the target
+// converts its constant member name again.
+func (l *lowerer) repeatNameConversions(n *Node) {
+	var chain []*Node
+walk:
+	for n != nil {
+		switch n.Op {
+		case OpProp, OpNullsafe, OpDim:
+			chain = append(chain, n)
+			n = n.Kids[0]
+		case OpStaticProp:
+			chain = append(chain, n)
+			break walk
+		default:
+			break walk
+		}
+	}
+	for i := len(chain) - 1; i >= 0; i-- {
+		if warning, ok := l.nameWarnings[chain[i]]; ok {
+			l.diag(l.cur, "Warning", warning)
+		}
 	}
 }
 
 // classOperand fills the class of a static access: a resolved name or an
 // expression evaluated at run time.
 func (l *lowerer) classOperand(nd *Node, cls *frontend.Node) {
-	cls = unparen(cls)
+	// Parentheses make a name an expression: (A)::f() reads constant A.
 	if cls.Kind == "name" {
 		nd.Name = l.classRef(cls)
 		return
 	}
 	nd.Kids[0] = l.expr(cls)
-	if k := constKind(nd.Kids[0]); k != "" && k != "string" {
+	// zend_compile_class_ref rejects a class expression compiled to a
+	// constant other than a string.
+	if k := l.compileClassKind(nd.Kids[0]); k != "" && k != "string" {
 		l.fail(l.cur, "Illegal class name")
 	}
 }
@@ -865,7 +919,9 @@ func (l *lowerer) assign(n *frontend.Node) *Node {
 	dst := l.exprCtx(left, ctxWrite)
 	l.markRead(dst)
 	if n.Text == "??=" {
-		return l.seal(&Node{Op: OpCoalesceSet, Line: n.Line, Kids: []*Node{dst, l.expr(right)}})
+		value := l.expr(right)
+		l.repeatNameConversions(dst)
+		return l.seal(&Node{Op: OpCoalesceSet, Line: n.Line, Kids: []*Node{dst, value}})
 	}
 	return l.seal(&Node{Op: OpAssignOp, Line: n.Line, Text: strings.TrimSuffix(n.Text, "="), Kids: []*Node{dst, l.expr(right)}})
 }
@@ -926,7 +982,17 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 	case "<>":
 		op = "!="
 	}
-	return l.seal(&Node{Op: OpBinary, Line: n.Line, Text: op, Kids: []*Node{l.expr(c[0]), l.expr(c[1])}})
+	left, right := l.expr(c[0]), l.expr(c[1])
+	if op == "." && !l.inConstExpr {
+		// zend_compile_binary_op converts each constant operand to a string
+		// at compile time, whether or not the whole expression folds.
+		for _, operand := range []*Node{left, right} {
+			if v, known := l.evaluateConstant(operand); known {
+				l.compileString(v)
+			}
+		}
+	}
+	return l.seal(&Node{Op: OpBinary, Line: n.Line, Text: op, Kids: []*Node{left, right}})
 }
 
 // --- calls ---
@@ -1091,10 +1157,12 @@ func (l *lowerer) methodName(nd *Node, name *frontend.Node, line int) {
 		nd.Text = name.Text
 		return
 	}
-	if lit := unparen(name); lit.Kind == "literal" && lit.Token != frontend.TConstantEncapsedString {
+	nd.Kids[1] = l.expr(name)
+	// zend_compile_method_call and zend_compile_static_call reject a name
+	// compiled to a constant other than a string.
+	if v, known := l.evaluateConstant(nd.Kids[1]); known && (v.array || v.value != nil && v.value.Kind != LitString) {
 		l.fail(line, "Method name must be a string")
 	}
-	nd.Kids[1] = l.expr(name)
 }
 
 func (l *lowerer) staticCall(n *frontend.Node) *Node {
@@ -1337,7 +1405,9 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		if cls.Kind == "array" || cls.Kind == "literal" && cls.Token != frontend.TConstantEncapsedString {
 			l.fail(n.Line, "Class name must be a valid object or a string")
 		}
-		if cls.Kind != "name" {
+		// The class must be a zval: a name, or a string the parser folded.
+		// Parentheses around a name make it a constant fetch.
+		if _, isString, ok := parseTimeValue(cls); c[0].Kind != "name" && !(ok && isString) {
 			l.fail(n.Line, "Dynamic class names are not allowed in compile-time class constant references")
 		}
 		if specialClass(cls.Text) == "static" {
@@ -1349,7 +1419,7 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		return
 	case "class_name":
 		cls := unparen(c[0])
-		if cls.Kind != "name" {
+		if _, isString, ok := parseTimeValue(cls); c[0].Kind != "name" && !(ok && isString) {
 			l.fail(n.Line, "(expression)::class cannot be used in constant expressions")
 		}
 		if specialClass(cls.Text) == "static" {

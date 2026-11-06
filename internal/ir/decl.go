@@ -531,7 +531,7 @@ func hooksBackProperty(hooks *frontend.Node, name string) bool {
 			return false
 		}
 		if n.Kind == "prop" || n.Kind == "nullsafe_prop" {
-			if len(n.Children) > 1 && n.Children[0] != nil && n.Children[0].Kind == "variable" && n.Children[0].Text == "$this" && n.Children[1] != nil && n.Children[1].Text == name {
+			if len(n.Children) > 1 && hookUsesProperty(n.Children[0], n.Children[1], name) {
 				return true
 			}
 		}

@@ -128,6 +128,9 @@ type lowerer struct {
 	// cur is the line of the expression compiled last, which PHP reports
 	// for errors raised while compiling a construct's later parts.
 	cur int
+	// nameWarnings records member names converted with a compile warning,
+	// which a second compilation of the same target repeats.
+	nameWarnings map[*Node]string
 }
 
 func (l *lowerer) newFunc(kind FuncKind, name string, line int) *Func {

@@ -1,6 +1,9 @@
 package ir
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // An unresolved subtype obligation defers the declaration as a whole. It is
 // neither a successful check nor an incompatible declaration.
@@ -203,9 +206,18 @@ func (l *lowerer) bindingType(child, parent string) bindingResult {
 		return bindingCompatible
 	}
 	result := bindingCompatible
+	parentDNF := typeDNF(parent)
 	for _, c := range typeDNF(child) {
+		if len(c) == 1 && c[0] == "static" {
+			// zend_perform_covariant_type_check: static may replace a type
+			// that already accepts the class. That check never loads classes.
+			if !slices.ContainsFunc(parentDNF, func(p []string) bool { return len(p) == 1 && p[0] == "static" }) && !l.permitsSelf(parentDNF) {
+				return bindingIncompatible
+			}
+			continue
+		}
 		union := bindingIncompatible
-		for _, p := range typeDNF(parent) {
+		for _, p := range parentDNF {
 			clause := bindingCompatible
 			for _, want := range p {
 				atom := bindingIncompatible
@@ -245,6 +257,32 @@ func (l *lowerer) bindingType(child, parent string) bindingResult {
 	return result
 }
 
+// permitsSelf is zend_type_permits_self for the class being bound. Its
+// ZEND_TYPE_FOREACH visits the members of a pure intersection but skips an
+// intersection nested in a union.
+func (l *lowerer) permitsSelf(parent [][]string) bool {
+	if l.class == nil {
+		return false
+	}
+	names := parent
+	if len(parent) == 1 {
+		names = nil
+		for _, atom := range parent[0] {
+			names = append(names, []string{atom})
+		}
+	}
+	for _, clause := range names {
+		if len(clause) != 1 {
+			continue
+		}
+		atom := strings.TrimPrefix(clause[0], "\\")
+		if atom == "object" || !scalarTypeAtom(atom) && l.classSubtype(l.class.Name, atom) {
+			return true
+		}
+	}
+	return false
+}
+
 func scalarTypeAtom(s string) bool {
 	switch s {
 	case "mixed", "null", "bool", "true", "false", "int", "float", "string", "array", "object", "void", "never", "callable", "iterable", "static", "self", "parent":
@@ -261,16 +299,24 @@ func (l *lowerer) bindingAtom(child, parent string) bindingResult {
 	if parent == "mixed" && child != "void" {
 		return bindingCompatible
 	}
+	if !scalarTypeAtom(child) && parent == "static" {
+		// zend_is_class_subtype_of_type: only a final class may name itself
+		// in place of static, and an unloaded name leaves that unresolved.
+		if l.class == nil || !hasModifier(l.class.Modifiers, "final") {
+			return bindingIncompatible
+		}
+		if strings.EqualFold(child, l.class.Name) {
+			return bindingCompatible
+		}
+		if !l.typesKnown(child, child) {
+			return bindingUnknown
+		}
+		return bindingIncompatible
+	}
 	if !scalarTypeAtom(child) && (parent == "object" || parent == "callable" || !scalarTypeAtom(parent)) {
 		if !l.typesKnown(child, parent) {
 			return bindingUnknown
 		}
-	}
-	if !scalarTypeAtom(child) && parent == "static" {
-		if l.class != nil && hasModifier(l.class.Modifiers, "final") && strings.EqualFold(child, l.class.Name) {
-			return bindingCompatible
-		}
-		return bindingIncompatible
 	}
 	if l.atomSubtype(child, parent) {
 		return bindingCompatible
