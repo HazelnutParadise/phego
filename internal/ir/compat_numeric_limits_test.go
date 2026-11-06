@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
 func TestCompatibilityNumericLimits(t *testing.T) {
@@ -35,12 +38,11 @@ func TestCompatibilityNumericLimits(t *testing.T) {
 
 // Resource exhaustion is a host limit, distinct from PHP's CompileError and
 // from a dynamic expression whose evaluation is deferred until execution.
+// PHP 8.5.12 folds this 6,000-term union (php -n -l reports "Cannot use
+// "::class" on false" in 84 ms); its superlinear cost exceeds the unit's
+// shared reserve here.
 func TestCompatibilityConstantResourceLimit(t *testing.T) {
-	parts := make([]string, 512)
-	for i := range parts {
-		parts[i] = fmt.Sprintf("['k%d'=>%d]", i, i)
-	}
-	src := "<?php (!(" + strings.Join(parts, "+") + "))::class;"
+	src := "<?php (!(" + arrayUnion(6000) + "))::class;"
 	_, err := lowerSource(src, 64)
 	var phpError *CompileError
 	if err == nil || errors.As(err, &phpError) || !strings.Contains(err.Error(), "constant evaluation resource limit") {
@@ -51,6 +53,14 @@ func TestCompatibilityConstantResourceLimit(t *testing.T) {
 	if !errors.As(err, &phpError) || phpError.Message != `Cannot use "::class" on false` {
 		t.Fatalf("short circuit: %v", err)
 	}
+}
+
+func arrayUnion(n int) string {
+	parts := make([]string, n)
+	for i := range parts {
+		parts[i] = fmt.Sprintf("['k%d'=>%d]", i, i)
+	}
+	return strings.Join(parts, "+")
 }
 
 // A concatenation chain costs its result length, as in PHP, not the sum of
@@ -64,21 +74,34 @@ func TestCompatibilityLongConcatenationFolds(t *testing.T) {
 	}
 }
 
-func TestCompatibilityConstantDepthAndUnionLimits(t *testing.T) {
-	parts := make([]string, 512)
-	for i := range parts {
-		parts[i] = fmt.Sprintf("['k%d'=>%d]", i, i)
-	}
-	for name, expr := range map[string]string{
-		"deep":  strings.Repeat("!", 2050) + "1",
-		"union": strings.Join(parts, "+"),
+// A 2,050-deep unary chain folds iteratively, and a 512-term union fits in
+// the unit's shared reserve; php -n -l reports these messages.
+func TestCompatibilityConstantDeepChainAndUnionFold(t *testing.T) {
+	for expr, want := range map[string]string{
+		strings.Repeat("!", 2050) + "1": `Cannot use "::class" on true`,
+		arrayUnion(512):                 `Cannot use "::class" on array`,
 	} {
-		t.Run(name, func(t *testing.T) {
-			_, err := lowerSource("<?php ("+expr+")::class;", 64)
-			var limit *constantLimitError
-			if !errors.As(err, &limit) {
-				t.Fatalf("expected host resource limit, got %T: %v", err, err)
-			}
-		})
+		_, err := lowerSource("<?php ("+expr+")::class;", 64)
+		var phpError *CompileError
+		if !errors.As(err, &phpError) || phpError.Message != want {
+			t.Errorf("%.20s...: got %T: %v, want %q", expr, err, err, want)
+		}
+	}
+}
+
+// __DIR__ and __FILE__ are as long as the host path; an expression using them
+// is not limited by its own source length.
+func TestConstantMagicPathDrawsOnTheSharedReserve(t *testing.T) {
+	prof, err := profile.Resolve("8.5.12", 64, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := "<?php class A { public string $p = __DIR__ . \"/data\"; }\nconst B = __DIR__ . \"/x\";"
+	tree, err := frontend.Parse([]byte(src), frontend.LexOptions{IntWidth: 64, MaxBytes: len(src) + 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Lower(tree, prof, Options{File: "/" + strings.Repeat("d/", 1024) + "t.php"}); err != nil {
+		t.Fatal(err)
 	}
 }

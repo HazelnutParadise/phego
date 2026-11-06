@@ -78,11 +78,27 @@ func parseTimeValue(n *frontend.Node) (value string, isString, ok bool) {
 		if n.Text != "." || len(n.Children) != 2 {
 			break
 		}
-		a, _, okA := parseTimeValue(n.Children[0])
-		b, _, okB := parseTimeValue(n.Children[1])
-		if okA && okB {
-			return a + b, true, true
+		// Walk the left operands so a long chain costs its length.
+		var rights []*frontend.Node
+		left := n
+		for cur := n; cur != nil && cur.Kind == "binary" && cur.Text == "." && len(cur.Children) == 2; cur = unparen(left) {
+			rights = append(rights, cur.Children[1])
+			left = cur.Children[0]
 		}
+		first, _, ok := parseTimeValue(left)
+		if !ok {
+			break
+		}
+		var b strings.Builder
+		b.WriteString(first)
+		for i := len(rights) - 1; i >= 0; i-- {
+			v, _, ok := parseTimeValue(rights[i])
+			if !ok {
+				return "", false, false
+			}
+			b.WriteString(v)
+		}
+		return b.String(), true, true
 	}
 	return "", false, false
 }

@@ -16,9 +16,13 @@ type syntaxConstEntry struct {
 	known    bool
 	selected *frontend.Node
 	height   int
+	line     int // CG(zend_lineno) when the value was folded
 }
 
 func (l *lowerer) preEvaluateSyntax(n *frontend.Node) syntaxConstEntry {
+	saved := l.foldLine
+	l.foldLine = l.cur
+	defer func() { l.foldLine = saved }()
 	e := l.syntaxConstant(n, 0)
 	if l.constants.exhausted {
 		panic(compileFailure{&constantLimitError{line: n.Line}})
@@ -57,6 +61,7 @@ func (l *lowerer) syntaxConstant(n *frontend.Node, depth int) (entry syntaxConst
 			b.depths[i-1] = max(b.depths[i-1], deepest)
 		}
 		entry.height = deepest - depth
+		entry.line = l.foldLine
 		if completed && !b.exhausted {
 			b.syntax[n] = entry
 		}
@@ -145,20 +150,17 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 		}
 		return result(l.assembleConstantArray(entries, len(c), width, b))
 	case "unary":
-		if n.Text != "!" && n.Text != "~" && n.Text != "+" && n.Text != "-" {
+		if syntaxChainOperand(n) == nil {
 			return syntaxConstEntry{}
 		}
-		return l.syntaxUnary(n, depth)
+		return l.syntaxChain(n, depth)
 	case "binary":
 		op := strings.ToLower(n.Text)
 		if op == "|>" {
 			return syntaxConstEntry{}
 		}
-		if plainSyntaxBinary(n) {
-			return l.syntaxBinaryChain(n, depth)
-		}
-		if logicalSyntaxBinary(n) {
-			return l.syntaxLogicalChain(n, depth)
+		if op != "??" {
+			return l.syntaxChain(n, depth)
 		}
 		a := visit(c[0])
 		if a.known {
@@ -173,23 +175,7 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 		visit(c[1])
 		return syntaxConstEntry{}
 	case "ternary":
-		a := visit(c[0])
-		if a.known {
-			if truth, ok := l.compileTruth(a.value); ok {
-				selected := c[2]
-				if truth {
-					selected = c[1]
-					if selected == nil {
-						selected = c[0]
-					}
-				}
-				e := visit(selected)
-				e.selected = selected
-				return e
-			}
-		}
-		visit(c[1])
-		visit(c[2])
+		return l.syntaxChain(n, depth)
 	case "cast":
 		kind := castNames[strings.ToLower(strings.Trim(n.Text, "() \t"))]
 		if kind == "unset" {
@@ -208,9 +194,14 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 			return result(compileConstantDim(a.value, key.value, width, b))
 		}
 	case "class_name":
-		if cls := c[0]; cls.Kind == "name" && specialClass(cls.Text) == "" {
-			name := l.classRef(cls)
-			return syntaxScalar(&Literal{Kind: LitString, Str: name.Resolved})
+		if cls := c[0]; cls.Kind == "name" {
+			if name, ok := l.compileTimeClassName(specialClass(cls.Text)); ok {
+				return syntaxScalar(&Literal{Kind: LitString, Str: name})
+			}
+			if specialClass(cls.Text) == "" {
+				name := l.classRef(cls)
+				return syntaxScalar(&Literal{Kind: LitString, Str: name.Resolved})
+			}
 		}
 	case "class_const", "prop", "nullsafe_prop", "new":
 		for _, child := range c {
@@ -226,81 +217,41 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 	return syntaxConstEntry{}
 }
 
-// A unary chain is a linear sequence of work, not recursive nesting. Pending
-// entries reserve the same bounded frame slots as recursive evaluation, so a
-// large leaf cannot consume the space needed by the rest of the chain.
-func (l *lowerer) syntaxUnary(n *frontend.Node, depth int) syntaxConstEntry {
-	b := l.constants
-	chain := []*frontend.Node{n}
-	child := unparen(n.Children[0])
-	var value syntaxConstEntry
-	for {
-		if child == nil || child.Kind != "unary" || (child.Text != "!" && child.Text != "~" && child.Text != "+" && child.Text != "-") {
-			value = l.syntaxConstant(child, depth+1)
-			break
-		}
-		if !b.spendWork(1) {
-			return syntaxConstEntry{}
-		}
-		if old, ok := b.syntax[child]; ok {
-			// A cached unary occupies the same iterative frame depth as a
-			// fresh one. Charging depth+1 here would make memo hits stricter.
-			if !b.depth(depth + old.height) {
-				return syntaxConstEntry{}
-			}
-			i := len(b.depths) - 1
-			b.depths[i] = max(b.depths[i], depth+old.height)
-			value = old
-			break
-		}
-		chain = append(chain, child)
-		b.depths = append(b.depths, depth)
-		child = unparen(child.Children[0])
+// syntaxChainOperand returns the operand a constant unary, binary
+// (except ?? and |>), logical or ternary operation is built on, the link
+// syntaxChain follows, or nil for any other node.
+func syntaxChainOperand(n *frontend.Node) *frontend.Node {
+	if n == nil {
+		return nil
 	}
-	for i := len(chain) - 1; i >= 0; i-- {
-		entry := syntaxConstEntry{} // selected belongs to the operand, never this unary.
-		if value.known && !b.exhausted {
-			entry.value, entry.known = compileUnaryValue(chain[i].Text, value.value, l.unit.Profile.IntWidth, b)
+	switch n.Kind {
+	case "unary":
+		switch n.Text {
+		case "!", "~", "+", "-":
+			return n.Children[0]
 		}
-		last := len(b.depths) - 1
-		deepest := b.depths[last]
-		entry.height = deepest - depth
-		if i != 0 {
-			b.depths = b.depths[:last]
-			b.depths[last-1] = max(b.depths[last-1], deepest)
-			if !b.exhausted {
-				b.syntax[chain[i]] = entry
-			}
+	case "binary":
+		if op := strings.ToLower(n.Text); op != "??" && op != "|>" {
+			return n.Children[0]
 		}
-		value = entry
+	case "ternary":
+		return n.Children[0]
 	}
-	return value
+	return nil
 }
 
-// plainSyntaxBinary reports a binary operation that evaluates both operands
-// and combines them, without selection or short circuit.
-func plainSyntaxBinary(n *frontend.Node) bool {
-	if n == nil || n.Kind != "binary" {
-		return false
-	}
-	switch strings.ToLower(n.Text) {
-	case "|>", "??", "&&", "and", "||", "or", "xor":
-		return false
-	}
-	return true
-}
-
-// syntaxBinaryChain folds a left-nested chain of plain binary operations
-// iteratively (see compileBinaryChain), visiting operands in the order
+// syntaxChain folds a chain of operations nested through their first
+// operand iteratively (see compileChain), visiting operands in the order
 // recursive evaluation does. Lowering folds the longest known prefix when a
-// later operand is dynamic, so that prefix and the unknown steps above it
-// keep their entries.
-func (l *lowerer) syntaxBinaryChain(n *frontend.Node, depth int) syntaxConstEntry {
+// later operand is dynamic, so that prefix keeps its value, the unknown
+// steps above it keep their entries, and a ternary keeps its selected
+// branch.
+func (l *lowerer) syntaxChain(n *frontend.Node, depth int) syntaxConstEntry {
 	b := l.constants
 	width := l.unit.Profile.IntWidth
 	spine := []*frontend.Node{n}
-	leaf, leafDepth := unparen(n.Children[0]), depth+1
-	for plainSyntaxBinary(leaf) {
+	leaf, leafDepth := unparen(syntaxChainOperand(n)), depth+1
+	for syntaxChainOperand(leaf) != nil {
 		if _, ok := b.syntax[leaf]; ok {
 			leafDepth = depth // a memoized link stays at this frame's depth
 			break
@@ -309,17 +260,59 @@ func (l *lowerer) syntaxBinaryChain(n *frontend.Node, depth int) syntaxConstEntr
 			return syntaxConstEntry{}
 		}
 		spine = append(spine, leaf)
-		leaf = unparen(leaf.Children[0])
+		leaf = unparen(syntaxChainOperand(leaf))
 	}
 	first := l.syntaxConstant(leaf, leafDepth)
 	known := first.known
 	f := binaryFold{acc: first.value}
+	var result syntaxConstEntry // the root entry when it is not known
 	for i := len(spine) - 1; i >= 0; i-- {
-		op := strings.ToLower(spine[i].Text)
-		right := l.syntaxConstant(spine[i].Children[1], depth+1)
-		if known {
+		nd := spine[i]
+		c := nd.Children
+		op := strings.ToLower(nd.Text)
+		entry := syntaxConstEntry{} // this step's entry when it fails
+		ok := false
+		switch nd.Kind {
+		case "unary":
+			if known && !b.exhausted {
+				var v compileConst
+				if v, ok = compileUnaryValue(nd.Text, f.value(), width, b); ok {
+					f = binaryFold{acc: v}
+				}
+			}
+		case "binary":
+			right := l.syntaxConstant(c[1], depth+1)
+			if !known {
+				break
+			}
+			if op == "&&" || op == "and" || op == "||" || op == "or" || op == "xor" {
+				// Unlike ordinary logical compilation, the constant syntax
+				// pass visits both sides before testing the left operand. A
+				// xor folds only when both sides are constant.
+				if op == "xor" && !right.known {
+					break
+				}
+				av, truthOK := l.compileTruth(f.value())
+				if !truthOK {
+					break
+				}
+				if op != "xor" && av == (op == "||" || op == "or") {
+					f, ok = binaryFold{acc: syntaxScalar(&Literal{Kind: LitBool, Bool: av}).value}, true
+					break
+				}
+				if right.known {
+					if bv, truthOK := l.compileTruth(right.value); truthOK {
+						if op == "xor" {
+							bv = av != bv
+						}
+						f, ok = binaryFold{acc: syntaxScalar(&Literal{Kind: LitBool, Bool: bv}).value}, true
+					}
+				}
+				break
+			}
 			joined, left := f.cat != nil, f.acc
 			if right.known && !b.exhausted && f.step(op, right.value, width, depth, b) {
+				ok = true
 				// concat_function converts each constant operand once.
 				if op == "." {
 					if !joined {
@@ -327,86 +320,53 @@ func (l *lowerer) syntaxBinaryChain(n *frontend.Node, depth int) syntaxConstEntr
 					}
 					l.compileString(right.value)
 				}
-				continue
 			}
-			if i < len(spine)-1 && !l.recordSyntax(spine[i+1], syntaxConstEntry{known: true, value: f.value()}, depth) {
-				return syntaxConstEntry{}
+		case "ternary":
+			if known {
+				v := f.value()
+				if truth, truthOK := l.compileTruth(v); truthOK {
+					selected := c[2]
+					if truth {
+						selected = c[1]
+						if selected == nil {
+							selected = c[0]
+						}
+					}
+					e := syntaxConstEntry{known: true, value: v}
+					if selected != c[0] {
+						e = l.syntaxConstant(selected, depth+1)
+					}
+					e.selected = selected
+					if e.known {
+						f, ok = binaryFold{acc: e.value}, true
+					} else {
+						entry = e
+					}
+					break
+				}
 			}
-			known = false
+			if c[1] != nil {
+				l.syntaxConstant(c[1], depth+1)
+			}
+			l.syntaxConstant(c[2], depth+1)
 		}
-		if i != 0 && !l.recordSyntax(spine[i], syntaxConstEntry{}, depth) {
+		if ok {
+			continue
+		}
+		if known && i < len(spine)-1 && !l.recordSyntax(spine[i+1], syntaxConstEntry{known: true, value: f.value()}, depth) {
+			return syntaxConstEntry{}
+		}
+		known = false
+		if i == 0 {
+			result = entry
+		} else if !l.recordSyntax(nd, entry, depth) {
 			return syntaxConstEntry{}
 		}
 	}
 	if !known {
-		return syntaxConstEntry{}
+		return result
 	}
 	return syntaxConstEntry{known: true, value: f.value()}
-}
-
-func logicalSyntaxBinary(n *frontend.Node) bool {
-	if n == nil || n.Kind != "binary" {
-		return false
-	}
-	switch strings.ToLower(n.Text) {
-	case "&&", "and", "||", "or", "xor":
-		return true
-	}
-	return false
-}
-
-// syntaxLogicalChain folds a left-nested chain of logical operations
-// iteratively. Unlike ordinary logical compilation, the constant syntax pass
-// visits both sides before testing the left operand's truth value.
-func (l *lowerer) syntaxLogicalChain(n *frontend.Node, depth int) syntaxConstEntry {
-	b := l.constants
-	spine := []*frontend.Node{n}
-	leaf, leafDepth := unparen(n.Children[0]), depth+1
-	for logicalSyntaxBinary(leaf) {
-		if _, ok := b.syntax[leaf]; ok {
-			leafDepth = depth // a memoized link stays at this frame's depth
-			break
-		}
-		if !b.spendWork(1) {
-			return syntaxConstEntry{}
-		}
-		spine = append(spine, leaf)
-		leaf = unparen(leaf.Children[0])
-	}
-	value := l.syntaxConstant(leaf, leafDepth)
-	known := value.known
-	for i := len(spine) - 1; i >= 0; i-- {
-		op := strings.ToLower(spine[i].Text)
-		right := l.syntaxConstant(spine[i].Children[1], depth+1)
-		if known {
-			if av, ok := l.compileTruth(value.value); ok {
-				if op != "xor" && av == (op == "||" || op == "or") {
-					value = syntaxScalar(&Literal{Kind: LitBool, Bool: av})
-					continue
-				}
-				if right.known {
-					if bv, ok := l.compileTruth(right.value); ok {
-						if op == "xor" {
-							bv = av != bv
-						}
-						value = syntaxScalar(&Literal{Kind: LitBool, Bool: bv})
-						continue
-					}
-				}
-			}
-			if i < len(spine)-1 && !l.recordSyntax(spine[i+1], syntaxConstEntry{known: true, value: value.value}, depth) {
-				return syntaxConstEntry{}
-			}
-			known = false
-		}
-		if i != 0 && !l.recordSyntax(spine[i], syntaxConstEntry{}, depth) {
-			return syntaxConstEntry{}
-		}
-	}
-	if !known {
-		return syntaxConstEntry{}
-	}
-	return syntaxConstEntry{known: true, value: value.value}
 }
 
 // recordSyntax memoizes an intermediate entry of an iterative chain at the
@@ -420,6 +380,7 @@ func (l *lowerer) recordSyntax(n *frontend.Node, entry syntaxConstEntry, depth i
 	if i := len(b.depths) - 1; i >= 0 {
 		entry.height = b.depths[i] - depth
 	}
+	entry.line = l.foldLine
 	b.syntax[n] = entry
 	return true
 }

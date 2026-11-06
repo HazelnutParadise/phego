@@ -81,44 +81,45 @@ func (l *lowerer) compileConstValue(n *Node, depth int, budget *compileBudget) (
 		return compileConst{value: n.Value, className: n.Value.Kind == LitString || n.Value.Kind == LitInt || n.Value.Kind == LitFloat}, true
 	case OpArray:
 		return l.compileConstArray(n, depth, budget)
-	case OpUnary:
-		if len(n.Kids) != 1 {
+	case OpUnary, OpLogical, OpBinary:
+		if chainOperand(n) == nil {
 			return compileConst{}, false
 		}
-		a, ok := l.compileConst(n.Kids[0], depth+1, budget)
-		if !ok {
-			return compileConst{}, false
-		}
-		return compileUnaryValue(n.Text, a, l.unit.Profile.IntWidth, budget)
-	case OpLogical:
-		if len(n.Kids) != 2 {
-			return compileConst{}, false
-		}
-		return l.compileLogicalChain(n, depth, budget)
-	case OpBinary:
-		if len(n.Kids) != 2 {
-			return compileConst{}, false
-		}
-		return l.compileBinaryChain(n, depth, budget)
+		return l.compileChain(n, depth, budget)
 	}
 	// In particular, do not fold casts or ternaries: their PHP compile-time
 	// behavior is not equivalent to evaluating a scalar expression here.
 	return compileConst{}, false
 }
 
-// compileBinaryChain folds a left-nested chain of binary operations without
-// recursing along it, so a long chain is not limited by evaluation depth.
-// Consecutive concatenations share one builder: each operand is converted
-// and charged once, so the chain costs its result length rather than the sum
-// of every intermediate string. Intermediate results are not memoized; the
-// walk stops at a memoized operand, so repeated probes stay linear.
-func (l *lowerer) compileBinaryChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
+// chainOperand returns the operand a unary, binary or logical operation is
+// built on, the link compileChain follows, or nil for any other node.
+func chainOperand(n *Node) *Node {
+	if n == nil {
+		return nil
+	}
+	switch {
+	case n.Op == OpUnary && len(n.Kids) == 1, (n.Op == OpBinary || n.Op == OpLogical) && len(n.Kids) == 2:
+		return n.Kids[0]
+	}
+	return nil
+}
+
+// compileChain folds a chain of operations nested through their first
+// operand (a unary operand or a left operand) without recursing along it,
+// so a long chain of any mix of these operations is not limited by
+// evaluation depth. Consecutive concatenations share one builder: each
+// operand is converted and charged once, so the chain costs its result
+// length rather than the sum of every intermediate string. Intermediate
+// results are not memoized; the walk stops at a memoized operand, which is
+// evaluated at this frame's depth as it would be fresh, so repeated probes
+// stay linear and reuse does not deepen the chain.
+func (l *lowerer) compileChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
+	width := l.unit.Profile.IntWidth
 	spine := []*Node{n}
-	leaf, leafDepth := n.Kids[0], depth+1
-	for leaf != nil && leaf.Op == OpBinary && len(leaf.Kids) == 2 {
+	leaf, leafDepth := chainOperand(n), depth+1
+	for chainOperand(leaf) != nil {
 		if _, ok := budget.memo[leaf]; ok {
-			// A memoized link evaluated at this frame's depth, as it
-			// would be fresh, so reuse does not deepen the chain.
 			leafDepth = depth
 			break
 		}
@@ -126,7 +127,7 @@ func (l *lowerer) compileBinaryChain(n *Node, depth int, budget *compileBudget) 
 			return compileConst{}, false
 		}
 		spine = append(spine, leaf)
-		leaf = leaf.Kids[0]
+		leaf = chainOperand(leaf)
 	}
 	a, ok := l.compileConst(leaf, leafDepth, budget)
 	if !ok {
@@ -134,60 +135,43 @@ func (l *lowerer) compileBinaryChain(n *Node, depth int, budget *compileBudget) 
 	}
 	f := binaryFold{acc: a}
 	for i := len(spine) - 1; i >= 0; i-- {
-		b, ok := l.compileConst(spine[i].Kids[1], depth+1, budget)
-		if !ok || !f.step(spine[i].Text, b, l.unit.Profile.IntWidth, depth, budget) {
-			return compileConst{}, false
+		nd := spine[i]
+		switch nd.Op {
+		case OpUnary:
+			v, ok := compileUnaryValue(nd.Text, f.value(), width, budget)
+			if !ok {
+				return compileConst{}, false
+			}
+			f = binaryFold{acc: v}
+		case OpBinary:
+			b, ok := l.compileConst(nd.Kids[1], depth+1, budget)
+			if !ok || !f.step(nd.Text, b, width, depth, budget) {
+				return compileConst{}, false
+			}
+		case OpLogical:
+			av, ok := f.value().truth()
+			if !ok {
+				return compileConst{}, false
+			}
+			if nd.Text == "&&" && !av || nd.Text == "||" && av {
+				f = binaryFold{acc: scalarConst(&Literal{Kind: LitBool, Bool: av})}
+				continue
+			}
+			b, ok := l.compileConst(nd.Kids[1], depth+1, budget)
+			if !ok {
+				return compileConst{}, false
+			}
+			bv, ok := b.truth()
+			if !ok {
+				return compileConst{}, false
+			}
+			if nd.Text == "xor" {
+				bv = av != bv
+			}
+			f = binaryFold{acc: scalarConst(&Literal{Kind: LitBool, Bool: bv})}
 		}
 	}
 	return f.value(), true
-}
-
-// compileLogicalChain folds a left-nested chain of &&, || and xor
-// iteratively, skipping each right operand its left value short-circuits.
-func (l *lowerer) compileLogicalChain(n *Node, depth int, budget *compileBudget) (compileConst, bool) {
-	spine := []*Node{n}
-	leaf, leafDepth := n.Kids[0], depth+1
-	for leaf != nil && leaf.Op == OpLogical && len(leaf.Kids) == 2 {
-		if _, ok := budget.memo[leaf]; ok {
-			// A memoized link evaluated at this frame's depth, as it
-			// would be fresh, so reuse does not deepen the chain.
-			leafDepth = depth
-			break
-		}
-		if !budget.spendWork(1) {
-			return compileConst{}, false
-		}
-		spine = append(spine, leaf)
-		leaf = leaf.Kids[0]
-	}
-	a, ok := l.compileConst(leaf, leafDepth, budget)
-	if !ok {
-		return compileConst{}, false
-	}
-	av, ok := a.truth()
-	if !ok {
-		return compileConst{}, false
-	}
-	for i := len(spine) - 1; i >= 0; i-- {
-		op := spine[i].Text
-		if op == "&&" && !av || op == "||" && av {
-			continue
-		}
-		b, ok := l.compileConst(spine[i].Kids[1], depth+1, budget)
-		if !ok {
-			return compileConst{}, false
-		}
-		bv, ok := b.truth()
-		if !ok {
-			return compileConst{}, false
-		}
-		if op == "xor" {
-			av = av != bv
-		} else {
-			av = bv
-		}
-	}
-	return scalarConst(&Literal{Kind: LitBool, Bool: av}), true
 }
 
 // binaryFold is the running value of a left-nested binary chain.
@@ -269,7 +253,7 @@ func compileUnary(op string, a *Literal, width int, budget *compileBudget) (comp
 			}
 		}
 		if a.Kind == LitString {
-			if !budget.scan(a) || len(a.Str) > budget.bytes/2 || !budget.spendBytes(2*len(a.Str)) {
+			if !budget.scan(a) || !budget.spendBytes(2*len(a.Str)) {
 				budget.exhausted = true
 				return compileConst{}, false
 			}
@@ -376,7 +360,7 @@ func compileBinary(op string, a, b *Literal, width int, budget *compileBudget) (
 		if op == "|" && len(b.Str) > length {
 			length = len(b.Str)
 		}
-		if length > budget.bytes/2 || !budget.spendBytes(2*length) {
+		if length < 0 || !budget.spendBytes(2*length) {
 			budget.exhausted = true
 			return compileConst{}, false
 		}

@@ -2,7 +2,7 @@ PASS php8512-constant-compile.json.gz: 4681 cases, PHP 8.5.12 int32
 PASS php8512-constant-compile.json.gz: 4681 cases, PHP 8.5.12 int64
 PASS php8512-syntax-constant-compile.json.gz: 700 cases, PHP 8.5.12 int32
 PASS php8512-syntax-constant-compile.json.gz: 700 cases, PHP 8.5.12 int64
-PASS php8512-review-compile.json.gz: 352 cases, PHP 8.5.12 int32
-PASS php8512-review-compile.json.gz: 352 cases, PHP 8.5.12 int64
-PASS 11466 reference cases; compilation evidence only
-exit_code=0 seconds=420
+PASS php8512-review-compile.json.gz: 434 cases, PHP 8.5.12 int32
+PASS php8512-review-compile.json.gz: 434 cases, PHP 8.5.12 int64
+PASS 11630 reference cases; compilation evidence only
+exit_code=0 seconds=44

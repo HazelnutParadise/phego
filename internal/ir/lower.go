@@ -24,9 +24,10 @@ func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit,
 		return nil, fmt.Errorf("ir: Lower needs a file syntax tree")
 	}
 	l := &lowerer{
-		unit: &Unit{File: opts.File, Profile: prof},
-		ns:   newNamespace(""),
-		top:  tree.Children,
+		unit:      &Unit{File: opts.File, Profile: prof},
+		ns:        newNamespace(""),
+		top:       tree.Children,
+		constPool: newCompilePool(),
 	}
 	// PHP scans the whole file before compiling it, so warnings raised while
 	// decoding literals precede compile diagnostics.
@@ -54,8 +55,53 @@ func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit,
 	}
 	l.finishFunc(main)
 	main.Strict = l.unit.Strict
-	l.unit.Diagnostics = append(scanned, l.unit.Diagnostics...)
+	l.unit.Diagnostics = append(mergeScanned(castDeprecations(tree), scanned), l.unit.Diagnostics...)
 	return l.unit, nil
+}
+
+// castDeprecations lists the deprecations PHP's scanner raises for
+// non-canonical cast names (zend_language_scanner.l), in source order.
+func castDeprecations(tree *frontend.Node) []Diagnostic {
+	var out []Diagnostic
+	var walk func(*frontend.Node)
+	walk = func(n *frontend.Node) {
+		if n == nil {
+			return
+		}
+		if n.Kind == "cast" {
+			inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
+			switch inner {
+			case "integer", "boolean", "double", "binary":
+				out = append(out, Diagnostic{Line: n.Line, Level: "Deprecated",
+					Message: "Non-canonical cast (" + inner + ") is deprecated, use the (" + castNames[inner] + ") cast instead"})
+			}
+		}
+		for _, c := range n.Children {
+			walk(c)
+		}
+	}
+	walk(tree)
+	return out
+}
+
+// mergeScanned interleaves two lists of scanner diagnostics by line,
+// keeping each list's order.
+func mergeScanned(a, b []Diagnostic) []Diagnostic {
+	if len(a) == 0 {
+		return b
+	}
+	if len(b) == 0 {
+		return a
+	}
+	out := make([]Diagnostic, 0, len(a)+len(b))
+	for len(a) > 0 && len(b) > 0 {
+		if b[0].Line < a[0].Line {
+			out, b = append(out, b[0]), b[1:]
+		} else {
+			out, a = append(out, a[0]), a[1:]
+		}
+	}
+	return append(append(out, a...), b...)
 }
 
 type compileFailure struct{ err error }
@@ -118,6 +164,10 @@ type lowerer struct {
 	namedParamRefs map[*Func]map[string]bool
 	// inConstExpr is set while compiling a constant expression.
 	inConstExpr bool
+	// foldLine is CG(zend_lineno) while constants are folded from syntax.
+	foldLine int
+	// constPool is the unit's shared reserve for constant evaluation.
+	constPool *compileBudget
 	// constClosures holds the closures a constant expression compiled where
 	// zend_compile_const_expr reaches them, before the rest is lowered.
 	constClosures map[*frontend.Node]*Node
@@ -768,7 +818,7 @@ func (l *lowerer) staticVar(sv *frontend.Node) *Node {
 	n := &Node{Op: OpStatic, Line: sv.Line, Text: name, Var: l.variable(name, VarStatic|VarRef|VarWritten)}
 	if init := sv.Children[1]; init != nil {
 		saved := l.constants
-		l.constants = newSyntaxCompileBudget(init)
+		l.constants = l.syntaxBudget(init)
 		defer func() { l.constants = saved }()
 		l.preEvaluateSyntax(init)
 		n.Kids = []*Node{l.expr(init)}

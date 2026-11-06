@@ -10,7 +10,19 @@ import (
 // These are host work limits, not PHP diagnostics. Each expression has its own
 // budget, linear in its source graph: every evaluated node and memo entry
 // costs work and every operation charges the bytes it creates, so evaluation
-// that PHP performs in linear time fits. No request state is shared or cached.
+// that PHP performs in linear time fits. Beyond it, an expression draws on a
+// pool shared by the whole unit, which bounds the total for operations whose
+// PHP cost is superlinear, such as long array unions or nested spreads. No
+// request state is shared or cached.
+const (
+	compilePoolWork  = 1 << 22
+	compilePoolBytes = 64 << 20
+)
+
+func newCompilePool() *compileBudget {
+	return &compileBudget{work: compilePoolWork, bytes: compilePoolBytes}
+}
+
 func sizedCompileBudget(size, sourceBytes int64) *compileBudget {
 	clamp := func(v int64) int { return int(min(v, int64(math.MaxInt))) }
 	return &compileBudget{work: clamp(8 * (size + (sourceBytes+63)/64)), bytes: clamp(8*sourceBytes + 64*size)}
@@ -25,27 +37,39 @@ func (e *constantLimitError) Error() string {
 type compileBudget struct {
 	work, bytes int
 	exhausted   bool
+	pool        *compileBudget // the unit's shared reserve, if any
 	memo        map[*Node]compileMemoEntry
 	syntax      map[*frontend.Node]syntaxConstEntry
 	depths      []int
 }
 
 func (b *compileBudget) spendWork(n int) bool {
-	if b.exhausted || n < 0 || n > b.work {
-		b.exhausted = true
-		return false
-	}
-	b.work -= n
-	return true
+	return b.spend(n, &b.work, func(p *compileBudget) *int { return &p.work })
 }
 
 func (b *compileBudget) spendBytes(n int) bool {
-	if b.exhausted || n < 0 || n > b.bytes {
+	return b.spend(n, &b.bytes, func(p *compileBudget) *int { return &p.bytes })
+}
+
+// spend takes n from own, then the shortfall from the pool.
+func (b *compileBudget) spend(n int, own *int, pooled func(*compileBudget) *int) bool {
+	if b.exhausted || n < 0 {
 		b.exhausted = true
 		return false
 	}
-	b.bytes -= n
-	return true
+	if n <= *own {
+		*own -= n
+		return true
+	}
+	if b.pool != nil {
+		if rest := pooled(b.pool); n-*own <= *rest {
+			*rest -= n - *own
+			*own = 0
+			return true
+		}
+	}
+	b.exhausted = true
+	return false
 }
 
 // scan accounts for numeric parsing/comparison and hashing without allocating
@@ -113,9 +137,30 @@ func newSyntaxCompileBudget(root *frontend.Node) *compileBudget {
 		seen[n] = struct{}{}
 		edges += int64(len(n.Children))
 		sourceBytes += int64(len(n.Text))
+		if n != root && ownBudget(n) {
+			continue
+		}
 		stack = append(stack, n.Children...)
 	}
 	return sizedCompileBudget(int64(len(seen))+edges, sourceBytes)
+}
+
+// ownBudget reports a node whose body functionBody lowers with a fresh
+// budget, so an enclosing expression's budget need not cover it; scanning
+// it again for every enclosing level would cost depth × size.
+func ownBudget(n *frontend.Node) bool {
+	switch n.Kind {
+	case "closure", "arrow_function", "function":
+		return true
+	}
+	return false
+}
+
+// syntaxBudget is the budget of an expression evaluated from syntax.
+func (l *lowerer) syntaxBudget(root *frontend.Node) *compileBudget {
+	b := newSyntaxCompileBudget(root)
+	b.pool = l.constPool
+	return b
 }
 
 type compileMemoEntry struct {
@@ -128,6 +173,7 @@ func (l *lowerer) evaluateConstant(n *Node) (compileConst, bool) {
 	b := l.constants
 	if b == nil {
 		b = newCompileBudget(n)
+		b.pool = l.constPool
 	}
 	v, known := l.compileConst(n, 0, b)
 	if b.exhausted {

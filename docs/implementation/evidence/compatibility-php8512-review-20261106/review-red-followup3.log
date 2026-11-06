@@ -1,0 +1,152 @@
+=== RUN   TestConstantEvaluationScalesLinearly
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_concat_and_add
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_literals
+=== RUN   TestConstantEvaluationScalesLinearly/constant_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/long_add_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_logical_and_add
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/nested_closures_and_array
+    compat_constant_scale_test.go:56: int32: took 15.07193975s
+=== RUN   TestConstantEvaluationScalesLinearly/large_variable_array
+=== RUN   TestConstantEvaluationScalesLinearly/nested_spread
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_variables
+=== RUN   TestConstantEvaluationScalesLinearly/logical_or
+=== RUN   TestConstantEvaluationScalesLinearly/large_literal_array
+=== RUN   TestConstantEvaluationScalesLinearly/concat_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_name
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/array_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/class_constant_concat
+=== RUN   TestConstantEvaluationScalesLinearly/short_ternary_chain
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_left_of_and
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/union_member_name
+    compat_constant_scale_test.go:53: int32: ir: constant evaluation resource limit exceeded at line 2
+=== RUN   TestConstantEvaluationScalesLinearly/parse-time_class_name_concat
+    compat_constant_scale_test.go:56: int64: took 10.14064375s
+--- FAIL: TestConstantEvaluationScalesLinearly (34.61s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_concat_and_add (0.07s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_literals (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/constant_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/long_add_chain_name (0.01s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/alternating_logical_and_add (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/nested_closures_and_array (15.07s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_variable_array (0.14s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/nested_spread (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_variables (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_or (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_literal_array (0.14s)
+    --- PASS: TestConstantEvaluationScalesLinearly/concat_left_of_and (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/unary_chain_name (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/array_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/class_constant_concat (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/short_ternary_chain (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/unary_chain_left_of_and (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/union_member_name (0.00s)
+    --- FAIL: TestConstantEvaluationScalesLinearly/parse-time_class_name_concat (19.13s)
+=== RUN   TestCompatibilityConstantResourceLimit
+--- PASS: TestCompatibilityConstantResourceLimit (0.14s)
+=== RUN   TestCompatibilityLongConcatenationFolds
+--- PASS: TestCompatibilityLongConcatenationFolds (0.01s)
+=== RUN   TestCompatibilityConstantDeepChainAndUnionFold
+    compat_numeric_limits_test.go:87: !!!!!!!!!!!!!!!!!!!!...: got *ir.constantLimitError: ir: constant evaluation resource limit exceeded at line 1, want "Cannot use \"::class\" on true"
+    compat_numeric_limits_test.go:87: ['k0'=>0]+['k1'=>1]+...: got *ir.constantLimitError: ir: constant evaluation resource limit exceeded at line 1, want "Cannot use \"::class\" on array"
+--- FAIL: TestCompatibilityConstantDeepChainAndUnionFold (0.05s)
+=== RUN   TestConstantMagicPathDrawsOnTheSharedReserve
+    compat_numeric_limits_test.go:105: ir: constant evaluation resource limit exceeded at line 1
+--- FAIL: TestConstantMagicPathDrawsOnTheSharedReserve (0.00s)
+=== RUN   TestCompatibilityReviewOracle
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $o = new stdClass;
+        $o->{[1]} = 1;
+        $x = (integer) 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = [static function () { $o = new stdClass; $o->{[1]} = 1; }, (integer) 1];: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A {}
+        class B extends A {
+            function f($o) { return parent::class instanceof $o->{[1]}; }
+        }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $c = new class {
+            function f($o) { return self::class instanceof $o->{[1]}; }
+        };: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A {}
+        class B extends A {
+            function f($o) { return ('parent')::class instanceof $o->{[1]}; }
+        }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = (integer) 1;: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $a = [(integer) 1];: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f($x = (boolean) 1) {}: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() { static $s = (double) 1; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const C = [(binary) 'x']; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() {
+            return ('self' . null)::g();
+        }: got line0 ""; want line3 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A {
+            function f() { return new ('parent' . null); }
+        }: got line0 ""; want line3 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f($x) {
+            return $x instanceof ('static' . null);
+        }: got line0 ""; want line3 "Cannot use \"static\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() {
+            return ('\\self' . null)::g();
+        }: got line0 ""; want line3 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f() {
+            return (__NAMESPACE__ . 'self')::g();
+        }: got line0 ""; want line3 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = (1)::class;: got line2 "(expression)::class cannot be used in constant expressions"; want line2 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = (1)::C;: got line2 "Class name must be a valid object or a string"; want line2 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f($a = [static function () { break; }, ('self')::class]) {}: got line2 "'break' not in the 'loop' or 'switch' context"; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = [static function () { break; }, ('\\self')::C];: got line2 "'break' not in the 'loop' or 'switch' context"; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = [static function () { break; }, ('parent')::class]; }: got line2 "'break' not in the 'loop' or 'switch' context"; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f($a = (1.5)::class) {}: got line2 "(expression)::class cannot be used in constant expressions"; want line2 "Illegal class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        const X = [$y, ('\\self')::C];: got line2 "Constant expression contains invalid operations"; want line2 "'\\self' is an invalid class name"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        function f($a = [$y, ('self')::class]) {}: got line2 "Constant expression contains invalid operations"; want line2 "Cannot use \"self\" when no class scope is active"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = [$y, ('parent')::class]; }: got line2 "Constant expression contains invalid operations"; want line2 "Cannot use \"parent\" when current class scope has no parent"
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = self::class . (1e999-1e999); }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { const X = [self::class . (1e999-1e999)]; }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class B {}
+        class A extends B { const X = parent::class . (1e999-1e999); }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        class A { public $p = self::class . (1e999-1e999); }: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $x = [$y
+         . (1e999-1e999)
+         . 'a'];: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $x = [1,
+          $y
+          . (1e999-1e999)];: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: width=32 <?php 
+        $x = [(1e999-1e999) xor $y];: got line0 ""; want line0 ""
+    compat_review_oracle_test.go:10: ir: constant evaluation resource limit exceeded at line 1
+--- FAIL: TestCompatibilityReviewOracle (0.03s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir	35.393s
+FAIL

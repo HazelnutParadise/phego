@@ -19,25 +19,25 @@
     "T-047",
     "T-048"
   ],
-  "source_base": "c98cc076666da32dca6dbd15dace4e8059a3fa99",
-  "captured_at": "2026-11-06T17:23:42.718612+00:00",
+  "source_base": "a828a5350825763970060d83cbeaff982e7c8dfc",
+  "captured_at": "2026-11-06T18:24:38.606892+00:00",
   "source_sha256": {
-    "docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt": "c4744173f34da8b22e977c2516c5297912fa346a84445681207376c27dbb45f0",
+    "docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt": "cbc6852e3f5a23642923e7c06b3679aadd126bb3e6ebbe68268ea787a5abff3c",
     "internal/ir/class_binding.go": "332e1fcd4c28bed443121f25decc446a4d7e43777b8f9d43a26f842d48d42b09",
     "internal/ir/class_compile.go": "108eb3f86e5d2b5a5aae29be80035819edcd83a21e5c4b4f198fdca01d924a6d",
     "internal/ir/class_link.go": "1520d58d85e14102d0947d7e3e703d3bb5f41e55f99b8be6eebf02485c4b4984",
-    "internal/ir/compat_constant_scale_test.go": "dca9b89533055778f5334b6c142bc1dc9c672e465ac44828f79990c00d5d1442",
-    "internal/ir/compat_numeric_limits_test.go": "fd57ed1f82fe5b68350130c35239aa2ec8d24e885473fc55bf5463055f1e2dda",
-    "internal/ir/compat_review_oracle_test.go": "73c935c7c71832e6ce14fbc8f8bba6250d22f91ddb6d8a434f0272bd22bc2313",
-    "internal/ir/constant_budget.go": "f5a96d847dab4f15da44a632a0ddd1bed4898d0e993d8f5fc0171ae925a80845",
+    "internal/ir/compat_constant_scale_test.go": "8161d630a4cd7df538ec7f2abac4f54709bf789274d2f6707492522b15cc438b",
+    "internal/ir/compat_numeric_limits_test.go": "a8353da5f0fac74191a52e637f6986d9902765ecece60e5bbf9a6c42e0fbdf62",
+    "internal/ir/compat_review_oracle_test.go": "7f7caec47c424529d4c2f8c4907c42eac659cd6defbe2ab45431a1ccce5fc6f8",
+    "internal/ir/constant_budget.go": "5a57a180c96a1edc47deafbeb0f71c5c01aaa0d26b70e03616914ef468766a61",
     "internal/ir/constant_budget_test.go": "7d59ca854d236225314aad0c7e8f4dd2ed07ffd047405066d75cc78daea9a51e",
-    "internal/ir/constant_compile.go": "f738ca6515131f59ad752c03804d96429772b8b1b25a2fdff4e261fb7e242f55",
-    "internal/ir/constant_syntax.go": "f11ae760a07b3ac39f15b2eba653e7bd31d5bcecbcb158dc92b0ce352796df8f",
+    "internal/ir/constant_compile.go": "96724881dd19720adb1c1e5b26e0863258125b9b91790c1352816e2340928d85",
+    "internal/ir/constant_syntax.go": "9fe6610eebec538a3199b0ab85185fbe2a0d71192707f6059304066827baf333",
     "internal/ir/decl.go": "e01c1d339804719d2382305ec110221d175c150a266dd906f055fefc25c68efc",
-    "internal/ir/expr.go": "311fb2521c305eea5176c7a6f54dbc710e4881f095bdc8012f38b4e52328d116",
-    "internal/ir/hook_backing.go": "15a9a1dc1af10313853914f4fa8ff225ad7be041c506fabbe316ce9189468fa5",
-    "internal/ir/lower.go": "9294d61f9ce4a2308f195bdfd55a00767e873e365d2addd8e634edb63d1b1cb1",
-    "internal/ir/testdata/php8512-review-compile.json.gz": "326e318de3892ab72e4db09df27052847e670784dc9bb1d83eb5aa62452f572e",
+    "internal/ir/expr.go": "461979fa36a169a6eb89a9efc7685a72ae226eb9d50ba9d35ed504fc2614119c",
+    "internal/ir/hook_backing.go": "bb62bea470c1c183914378634a7afddd52801799a40d752849f7618c4bd3bd20",
+    "internal/ir/lower.go": "dc2205d9add1b94163af2ee4555337ba9bfe613930519f57d2a928a4e9aad5fc",
+    "internal/ir/testdata/php8512-review-compile.json.gz": "8ff1ad65f56b484f8281a8ab9e016a00428b47c8bb1bed6e55a035e7a511f545",
     "tools/verify_compile_fixtures.py": "ab0a7fde1cc0ec8da187366cb2ca20b37a5cf95ae797f67ea0ff812cbb8622b0"
   },
   "environment": {
@@ -60,7 +60,7 @@
       "command": "python3 docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt . <output>",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/review-fixture.log",
-      "result": "Exit code 0 (stored in the log). Generated 352 sources per integer width with the linux/386 and linux/amd64 images, including the follow-up review group."
+      "result": "Exit code 0 (stored in the log). Generated 434 sources per integer width with the linux/386 and linux/amd64 images, including the two follow-up review groups."
     },
     {
       "command": "go test ./internal/ir -run 'TestCompatibilityReview' -count=1 -v (on 3da26d5 with only the new tests and fixture)",
@@ -81,16 +81,22 @@
       "result": "An independent review of c98cc07 found eleven issues. There, 54 of 704 compile cases differ, 10 of 11 scaling cases fail with a constant evaluation limit or take 19 s, and the NaN warning and long concatenation tests fail."
     },
     {
-      "command": "go test ./internal/ir -run 'TestCompatibilityReview|TestConstantEvaluationScalesLinearly|TestConstantLongChainKeepsNaNWarning|TestCompatibilityLongConcatenationFolds|TestCompatibilityConstantResourceLimit' -count=1 -v",
+      "command": "go test ./internal/ir (the new review oracle, scaling, fold, limit and magic path tests) on a828a53, with the new test files and fixture copied in",
+      "exit_code": 1,
+      "log": "compatibility-php8512-review-20261106/review-red-followup3.log",
+      "result": "A second independent review of a828a53 found fourteen issues. There, 31 of 868 compile cases differ, 8 of 19 scaling cases fail with a constant evaluation limit or take 15-19 s, and the deep chain, union and long __DIR__ tests fail."
+    },
+    {
+      "command": "go test ./internal/ir -run 'TestCompatibilityReview|TestConstantEvaluationScalesLinearly|TestConstantLongChainKeepsNaNWarning|TestCompatibilityLongConcatenationFolds|TestCompatibilityConstantResourceLimit|TestCompatibilityConstantDeepChainAndUnionFold|TestConstantMagicPathDrawsOnTheSharedReserve' -count=1 -v",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/review-green.log",
-      "result": "704 cases, 0 differences; run-time operand, linear scaling, NaN warning and limit tests pass."
+      "result": "868 cases, 0 differences; run-time operand, scaling, NaN warning, fold and limit tests pass."
     },
     {
       "command": "python3 tools/verify_compile_fixtures.py",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/compile-fixtures.log",
-      "result": "All 11466 committed compile cases reproduced on both integer widths."
+      "result": "All 11630 committed compile cases reproduced on both integer widths."
     },
     {
       "command": "go test ./internal/ir -run '^TestLowerMatchesCompileReference$' -count=1 -v (PHEGO_LEXER_CORPUS from tools/frontend_corpus.py)",
@@ -144,15 +150,15 @@
   "artifacts": {
     "build.log": {
       "path": "compatibility-php8512-review-20261106/build.log",
-      "sha256": "90879240e3f8b01a8f7fcec0c48b4854d5ca4b9427eb5acdbd2e3c9d6fcdbfdb"
+      "sha256": "dd42bfe11a185a3864d7369849ecd6c113f69556a95e8c26a72f85eb8d2526a4"
     },
     "compile-corpus.log": {
       "path": "compatibility-php8512-review-20261106/compile-corpus.log",
-      "sha256": "7f08e12fd319775ee6c4dbc6c6e3dbca36187651eb7ae33d8497dc81acc28290"
+      "sha256": "e664fe2f3cc5a6a31289012507a676b545dd2154dc4e88748f4929d67dfc7495"
     },
     "compile-fixtures.log": {
       "path": "compatibility-php8512-review-20261106/compile-fixtures.log",
-      "sha256": "1d6e3f0f1cd79b7599a193d6acebc62f9f0b1aba943b10f65e1352537a288724"
+      "sha256": "8d38e017f86900a500a3fd146e332cc6ddf7ccc2cfd416556fddefdb0605a749"
     },
     "docs.log": {
       "path": "compatibility-php8512-review-20261106/docs.log",
@@ -160,7 +166,7 @@
     },
     "go.log": {
       "path": "compatibility-php8512-review-20261106/go.log",
-      "sha256": "9e4c59564aeb46b376eb78f5dac617a8b9143a8e4394fda52197245f52bc3606"
+      "sha256": "57451942aceb7241ad14a3601aad55fc99af857236e5e04ea05999f05355bdc4"
     },
     "gofmt.log": {
       "path": "compatibility-php8512-review-20261106/gofmt.log",
@@ -168,23 +174,23 @@
     },
     "python.log": {
       "path": "compatibility-php8512-review-20261106/python.log",
-      "sha256": "bce029271d1e74652ef5d977be864689b36b8a0dafdcb41bedb33e41800541d4"
+      "sha256": "cf94449092c3f33fc2f4504901c9ffe3327fcc108329a88985e8b795fc979a7f"
     },
     "race.log": {
       "path": "compatibility-php8512-review-20261106/race.log",
-      "sha256": "809cbd6e58f00b54568204870106b5a097a831aabacd2669ffa05764ac2e6f8f"
+      "sha256": "ffd91aeacc96b7026b8886ad11e98dd11d369fd3330696a5d0108244a0ef62c8"
     },
     "review-fixture.log": {
       "path": "compatibility-php8512-review-20261106/review-fixture.log",
-      "sha256": "36f6b4e5c00279389b9b46e2ded37b4bf398f4c8c7374638dd6db5385c9bdceb"
+      "sha256": "c5c952063c9e9e09efd3f89295e1bb661c76159d775d02f9bb094ab7d6fdabed"
     },
     "review-fixture.py.txt": {
       "path": "compatibility-php8512-review-20261106/review-fixture.py.txt",
-      "sha256": "c4744173f34da8b22e977c2516c5297912fa346a84445681207376c27dbb45f0"
+      "sha256": "cbc6852e3f5a23642923e7c06b3679aadd126bb3e6ebbe68268ea787a5abff3c"
     },
     "review-green.log": {
       "path": "compatibility-php8512-review-20261106/review-green.log",
-      "sha256": "d7eea0cb9c185cfa86bf0318cb3c1b0b075dc2820c8410c38412eadca3717087"
+      "sha256": "fcc92377758d680aef320e1d4fa66cf0ce04b00a8b53c52b9027a05aa914e792"
     },
     "review-red-followup.log": {
       "path": "compatibility-php8512-review-20261106/review-red-followup.log",
@@ -193,6 +199,10 @@
     "review-red-followup2.log": {
       "path": "compatibility-php8512-review-20261106/review-red-followup2.log",
       "sha256": "a1a1bc639d7117cf462a2f3fb4673bcfe7d0ffadd381def154ea3df869a4c7bf"
+    },
+    "review-red-followup3.log": {
+      "path": "compatibility-php8512-review-20261106/review-red-followup3.log",
+      "sha256": "7129906fe85a4fe48bbd111c54145361cdf4effe027d7d0754dad22c2f251599"
     },
     "review-red.log": {
       "path": "compatibility-php8512-review-20261106/review-red.log",
@@ -208,19 +218,20 @@
     },
     "vet.log": {
       "path": "compatibility-php8512-review-20261106/vet.log",
-      "sha256": "89f25aed4a4b2c04e4f83abb1fb792613835ff684061382f0e6fa27766ecf615"
+      "sha256": "fb4f522463f7ea747c25a74abd20c7fc9b3a05886eafccd76d8814b67f4d7578"
     }
   },
   "results": {
     "review_fixture": {
-      "cases": 704,
-      "per_width": 352,
+      "cases": 868,
+      "per_width": 434,
       "differences_before_review": 267,
       "differences_on_c98cc07": 54,
+      "differences_on_a828a53": 31,
       "differences_after": 0,
       "fixture": "internal/ir/testdata/php8512-review-compile.json.gz"
     },
-    "compile_reference_cases": 11466,
+    "compile_reference_cases": 11630,
     "compile_corpus": {
       "files": 5307,
       "compile_errors": 647,
@@ -234,8 +245,10 @@
     "Closures inside attribute arguments are checked as constant expressions but their bodies are not lowered, so their compile-time diagnostics are missing.",
     "Inheritance errors follow child method order and name the earliest ancestor; PHP follows parent order, reports properties first and names the nearest override. $a[] ??= 1 and multi-line virtual hook lines also differ.",
     "Lower returns only the CompileError on a compile failure, so warnings PHP prints before the fatal error are not available to the caller; W-17 decides the error display path.",
-    "A right-nested constant expression deeper than 2,048 levels still reports a host resource limit; PHP compiles it."
+    "A right-nested constant expression deeper than 2,048 levels, or a superlinear operation beyond the unit's shared reserve such as a 6,000-term array union, reports a host resource limit; PHP compiles it.",
+    "PHP substitutes class constants while compiling (zend_try_ct_eval_class_const); Phego leaves them for execution, so $o->{self::K} with const K = [1] lacks its Array to string conversion warning.",
+    "Constant expression contains invalid operations uses the offending node's line; PHP uses the current compile line, which differs for multi-line expressions (main shares this)."
   ],
   "verification_note": "Red logs fail by design.",
-  "review_status": "All nine PR #129 review comments on 3da26d5 were reproduced with the pinned images and fixed with failing-first regression cases. Independent adversarial reviews of dc2b04f and c98cc07 found regressions and same-pattern gaps, including constant evaluation that rejected long concatenations, 3,000-term logical chains and 70,000-element arrays and probes that took quadratic time; these are fixed with new cases, and the rest are listed in limits."
+  "review_status": "All nine PR #129 review comments on 3da26d5 were reproduced with the pinned images and fixed with failing-first regression cases. Independent adversarial reviews of dc2b04f, c98cc07 and a828a53 found regressions against main and same-pattern gaps, including constant evaluation that rejected long concatenations, long or mixed operation chains and large arrays, lost the non-canonical cast deprecation, and took quadratic time; these are fixed with new cases, and differences that main shares or that need new features are listed in limits."
 }

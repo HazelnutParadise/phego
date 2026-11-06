@@ -152,12 +152,16 @@ func (l *lowerer) node(op Op, line int, kids ...*Node) *Node {
 
 func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 	if l.constants == nil {
-		l.constants = newSyntaxCompileBudget(n)
+		l.constants = l.syntaxBudget(n)
 		defer func() { l.constants = nil }()
 	}
 	n = l.selectedSyntax(n)
 	l.cur = l.zline(n)
 	if entry := l.constants.syntax[n]; entry.known && (ctx == ctxRead || ctx == ctxQuiet) && n.Kind != "array" {
+		// A folded value carries the line where PHP folded it.
+		if entry.line != 0 {
+			l.cur = entry.line
+		}
 		return l.constantValueNode(entry.value, n.Line, 0)
 	}
 	c := n.Children
@@ -233,9 +237,8 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			if name.Special == "" {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: name.Resolved}})
 			}
-			// An anonymous class's real name is only known at run time.
-			if name.Special == "self" && l.class != nil && !l.class.Anonymous && l.scopeKnown() {
-				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
+			if folded, ok := l.compileTimeClassName(name.Special); ok {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: folded}})
 			}
 			nd.Name = name
 		} else if v, isString, ok := parseTimeValue(cls); ok && isString {
@@ -247,8 +250,8 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.fullyQualifiedClass(v)}})
 			}
 			l.ensureClassFetch(special, l.cur)
-			if special == "self" && l.class != nil && !l.class.Anonymous && l.scopeKnown() {
-				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
+			if folded, ok := l.compileTimeClassName(special); ok {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: folded}})
 			}
 			nd.Name = l.ns.resolveClass(special)
 		} else {
@@ -367,8 +370,10 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 	case "instanceof":
 		nd := &Node{Op: OpInstanceof, Line: n.Line, Kids: []*Node{l.expr(c[0]), nil}}
 		// zend_compile_instanceof folds a constant object operand to false
-		// without compiling the class.
-		if _, known := l.evaluateConstant(nd.Kids[0]); known {
+		// without compiling the class. self::class and parent::class are
+		// constants where the scope is known, even when Phego cannot spell
+		// an anonymous class's name.
+		if _, known := l.evaluateConstant(nd.Kids[0]); known || l.constantClassName(nd.Kids[0]) {
 			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}})
 		}
 		l.classOperandAt(nd, 1, c[1])
@@ -617,7 +622,7 @@ func (l *lowerer) classOperandAt(nd *Node, i int, cls *frontend.Node) {
 	if parsed {
 		return
 	}
-	if v, known := l.probeConstant(nd.Kids[i]); known && v.value != nil && v.value.Kind == LitString {
+	if v, known := l.evaluateConstant(nd.Kids[i]); known && v.value != nil && v.value.Kind == LitString {
 		if special := specialClass(v.value.Str); special != "" {
 			l.ensureClassFetch(special, l.cur)
 			nd.Name, nd.Kids[i] = l.ns.resolveClass(special), nil
@@ -648,6 +653,31 @@ func (l *lowerer) fullyQualifiedClass(v string) string {
 		l.fail(l.cur, "'\\%s' is an invalid class name", v)
 	}
 	return v
+}
+
+// compileTimeClassName is the name zend_try_compile_const_expr_resolve_class_name
+// folds self or parent to where the scope is known. An anonymous class's
+// real name is only known at run time.
+func (l *lowerer) compileTimeClassName(special string) (string, bool) {
+	if l.class == nil || !l.scopeKnown() {
+		return "", false
+	}
+	switch {
+	case special == "self" && !l.class.Anonymous:
+		return l.class.Name, true
+	case special == "parent" && l.class.Parent != nil:
+		return l.class.Parent.Resolved, true
+	}
+	return "", false
+}
+
+// constantClassName reports self::class or parent::class where PHP folds it
+// to a constant (see compileTimeClassName).
+func (l *lowerer) constantClassName(n *Node) bool {
+	if n == nil || n.Op != OpClassName || n.Name == nil || l.class == nil || !l.scopeKnown() {
+		return false
+	}
+	return n.Name.Special == "self" || n.Name.Special == "parent" && l.class.Parent != nil
 }
 
 // ensureClassFetch is zend_ensure_valid_class_fetch_type for self, parent or
@@ -1033,8 +1063,6 @@ func (l *lowerer) cast(n *frontend.Node) *Node {
 	switch inner {
 	case "unset":
 		l.fail(n.Line, "The (unset) cast is no longer supported")
-	case "integer", "boolean", "double", "binary":
-		l.diag(n.Line, "Deprecated", "Non-canonical cast ("+inner+") is deprecated, use the ("+target+") cast instead")
 	}
 	return l.seal(&Node{Op: OpCast, Line: n.Line, Text: target, Kids: []*Node{l.expr(n.Children[0])}})
 }
@@ -1366,10 +1394,11 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 // parameter defaults and global constants.
 func (l *lowerer) constExpr(n *frontend.Node, dynamic bool) *Node {
 	if l.constants == nil {
-		l.constants = newSyntaxCompileBudget(n)
+		l.constants = l.syntaxBudget(n)
 		defer func() { l.constants = nil }()
 	}
 	l.preEvaluateSyntax(n)
+	l.constClassNames(n)
 	if l.constClosures == nil {
 		l.constClosures = make(map[*frontend.Node]*Node)
 		defer func() { l.constClosures = nil }()
@@ -1455,6 +1484,37 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 	return l.seal(nd)
 }
 
+// constClassNames applies the class name checks zend_eval_const_expr makes
+// (zend_try_compile_const_expr_resolve_class_name and the class of a class
+// constant) before zend_compile_const_expr checks the operations, so these
+// errors come first. Closure bodies are compiled later.
+func (l *lowerer) constClassNames(n *frontend.Node) {
+	if n == nil || n.Kind == "closure" || n.Kind == "arrow_function" {
+		return
+	}
+	if n.Kind == "class_name" || n.Kind == "class_const" {
+		cls := unparen(n.Children[0])
+		if n.Children[0].Kind == "name" {
+			if special := specialClass(cls.Text); special != "" && n.Kind == "class_name" {
+				l.ensureClassFetch(special, n.Line)
+			}
+		} else if v, isString, ok := parseTimeValue(cls); ok && !isString {
+			l.fail(n.Line, "Illegal class name")
+		} else if ok && n.Kind == "class_const" {
+			l.fullyQualifiedClass(v)
+		} else if ok {
+			if special := specialClass(v); special != "" {
+				l.ensureClassFetch(special, n.Line)
+			} else {
+				l.fullyQualifiedClass(v)
+			}
+		}
+	}
+	for _, c := range n.Children {
+		l.constClassNames(c)
+	}
+}
+
 // constExprKinds are the syntax kinds zend_is_allowed_in_const_expr accepts.
 var constExprKinds = map[string]bool{
 	"literal": true, "binary": true, "unary": true, "cast": true, "ternary": true, "dim": true,
@@ -1469,7 +1529,7 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		return
 	}
 	if l.constants == nil {
-		l.constants = newSyntaxCompileBudget(n)
+		l.constants = l.syntaxBudget(n)
 		defer func() { l.constants = nil }()
 	}
 	if l.preEvaluateSyntax(n).known {
