@@ -1,0 +1,8 @@
+warning[PHG0202]: handler regions cross
+ --> a.php:3:1
+  |
+2 | try {
+  |     - starts inside this one
+3 | foo(); }
+  | ^^^ this region
+  |       - ends here

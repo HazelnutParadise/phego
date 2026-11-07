@@ -1,0 +1,5 @@
+[1;31merror[PHG0125][0m[1m: unexpected end[0m
+ [1;34m--> [0my.php:1:4
+ [1;34m |[0m
+[1;34m1 |[0m abc
+ [1;34m |[0m    [1;31m^ expected more here[0m

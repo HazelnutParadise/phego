@@ -224,6 +224,10 @@ type Error struct {
 	Offset       int
 	Function, PC int
 	Detail       string
+	// Source and Pos locate the failing instruction in PHP source when Build
+	// knows it; Pos is zero otherwise. Error() does not include them.
+	Source string
+	Pos    Position
 }
 
 func (e *Error) Error() string {
@@ -233,7 +237,8 @@ func (e *Error) Unwrap() error { return e.Kind }
 
 // Build validates the full image before publishing an immutable program.
 func Build(ctx context.Context, image Image, opts Options) (*Program, error) {
-	return build(ctx, image, opts)
+	p, err := build(ctx, image, opts)
+	return p, locate(image, err)
 }
 
 // Load treats all bytes as untrusted and never publishes a partial program.

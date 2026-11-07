@@ -1,0 +1,5 @@
+[1;31merror[PHG0130][0m[1m: unknown opcode[0m
+ [1;34m--> [0ma.php:2:1
+ [1;34m |[0m
+[1;34m2 |[0m echo 1;
+ [1;34m |[0m [1;31m^^^^ this instruction[0m

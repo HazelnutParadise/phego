@@ -1,0 +1,8 @@
+error[PHG0123]: mount path is not absolute
+ --> phego.toml:4:10
+  |
+4 |   path = "app"
+  |          ^^^^^ expected a path starting with "/"
+  |
+  = note: mounts are matched against absolute PHP paths
+  = help: write "/app"
