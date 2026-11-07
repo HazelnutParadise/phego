@@ -1,0 +1,14 @@
+ok  	github.com/HazelnutParadise/phego	0.686s
+ok  	github.com/HazelnutParadise/phego/diag	0.243s
+ok  	github.com/HazelnutParadise/phego/diag/codes	0.275s
+?   	github.com/HazelnutParadise/phego/diag/codes/gen	[no test files]
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	2.718s
+ok  	github.com/HazelnutParadise/phego/internal/compat	0.258s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	0.818s
+ok  	github.com/HazelnutParadise/phego/internal/ir	2.519s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	0.270s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.266s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	0.548s
+ok  	github.com/HazelnutParadise/phego/internal/profile	0.312s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	11.911s
+exit 0

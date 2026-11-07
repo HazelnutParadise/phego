@@ -15,8 +15,19 @@ func (x *execution) write(data []byte) (c completion) {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	if x.filtering && len(x.buffers) > 0 {
-		x.buffers[len(x.buffers)-1].produced = true
+	return x.writeTo(len(x.buffers)-1, data)
+}
+
+// writeTo writes into buffer top, or straight to the writer when top < 0.
+// It is php_output_op: a write while a handler runs marks the buffer that
+// receives it as having produced output, which is how a displayed
+// diagnostic that skipped a disabled handler flags the next one.
+func (x *execution) writeTo(top int, data []byte) (c completion) {
+	if x.closed {
+		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
+	}
+	if (x.filtering || x.outputRunning) && top >= 0 {
+		x.buffers[top].produced = true
 	}
 	// A running handler's buffer stays on the stack, so its input and its
 	// echo both count here.
@@ -27,8 +38,8 @@ func (x *execution) write(data []byte) (c completion) {
 	if int64(len(data)) > remaining {
 		return x.fail(endLimit, errExecutionLimit)
 	}
-	if len(x.buffers) > 0 {
-		b := &x.buffers[len(x.buffers)-1]
+	if top >= 0 {
+		b := &x.buffers[top]
 		b.data = append(b.data, data...)
 		return completion{}
 	}
@@ -104,8 +115,11 @@ func (x *execution) endBufferIn(origin string) completion {
 		if origin == requestShutdown {
 			// Without a PHP frame the throw or exit bails out of
 			// php_output_end_all, and php_output_deactivate discards every
-			// buffer: nothing is printed and outer handlers never run.
+			// buffer: nothing is printed and outer handlers never run. The
+			// uncaught error was displayed into the running handler's buffer,
+			// so its displayed text is discarded with it.
 			x.buffers = nil
+			x.errors.discardNext = c.kind == endThrow
 			return c
 		}
 		// From PHP code the handler's result reaches the next level before
@@ -184,10 +198,8 @@ func (x *execution) filter(origin string) (out []byte, c completion) {
 		fallthrough
 	case endNormal, endReturn:
 		if returned && x.buffers[i].produced {
-			if len(x.diagnostics) >= x.limits.callbacks {
-				c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
-			} else {
-				x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", origin + ": Producing output from user output handler " + name + " is deprecated"})
+			if r := x.report("Deprecated", origin+": Producing output from user output handler "+name+" is deprecated", true); r.kind != endNormal {
+				c = x.replaceOwnedCompletion(c, r)
 			}
 		}
 	}
