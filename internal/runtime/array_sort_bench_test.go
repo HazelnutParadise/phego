@@ -39,3 +39,30 @@ func BenchmarkW12Sorting(b *testing.B) {
 		})
 	}
 }
+
+// BenchmarkW12SortingEqual sorts values that all compare equal, so every
+// comparison falls back to the original positions.
+func BenchmarkW12SortingEqual(b *testing.B) {
+	h := benchHeap(b)
+	var source value
+	for i := 0; i < 1024; i++ {
+		if e := h.appendValue(&source, h.number(7)); e != nil {
+			b.Fatal(e)
+		}
+	}
+	defer h.unset(&source)
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var a value
+		if e := h.assign(&a, source); e != nil {
+			b.Fatal(e)
+		}
+		if e := h.sortArray(&a, "sort", false, func(x, y value) (int, error) { return 0, nil }); e != nil {
+			b.Fatal(e)
+		}
+		if e := h.unset(&a); e != nil {
+			b.Fatal(e)
+		}
+	}
+}
