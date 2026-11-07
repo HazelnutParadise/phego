@@ -48,3 +48,51 @@ func BenchmarkOutputWrite(b *testing.B) {
 		})
 	}
 }
+
+// BenchmarkExecutionCall measures PHP calls that each register two locals,
+// nested three deep, as user functions do.
+func BenchmarkExecutionCall(b *testing.B) {
+	r, _ := NewRequest(nil)
+	if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+		b.Fatal(err)
+	}
+	if err := r.BeginInit(); err != nil {
+		b.Fatal(err)
+	}
+	if err := r.Ready(); err != nil {
+		b.Fatal(err)
+	}
+	x, err := newExecution(context.Background(), r, 64, nil, executionLimits{64, 1 << 62, 1 << 20})
+	if err != nil {
+		b.Fatal(err)
+	}
+	cleanup, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	var call func(x *execution, depth int) completion
+	call = func(x *execution, depth int) completion {
+		return x.call(func(x *execution) completion {
+			var a, c value
+			if err := x.local(&a); err != nil {
+				b.Fatal(err)
+			}
+			if err := x.local(&c); err != nil {
+				b.Fatal(err)
+			}
+			if depth > 0 {
+				return call(x, depth-1)
+			}
+			return completion{}
+		}, nil)
+	}
+	x.run(cleanup, func(x *execution) completion {
+		b.ReportAllocs()
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			if c := call(x, 2); c.kind != endNormal {
+				b.Fatal(c)
+			}
+		}
+		b.StopTimer()
+		return completion{}
+	})
+}
