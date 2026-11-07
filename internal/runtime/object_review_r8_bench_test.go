@@ -74,8 +74,8 @@ func BenchmarkW13RollbackSources(b *testing.B) {
 				if err := h.unset(&owner); err != nil {
 					b.Fatal(err)
 				}
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
-					b.Fatalf("benchmark fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
+					b.Fatalf("benchmark fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 				}
 			})
 		}

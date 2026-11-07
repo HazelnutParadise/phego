@@ -32,7 +32,7 @@ func TestW13R13ResourceCloseReentry(t *testing.T) {
 			for _, action := range []ownerAction{keepAlias, dropReacquire, dropOnly} {
 				for _, outcome := range []string{"success", "error", "panic", "panic-reentry"} {
 					t.Run(fmt.Sprintf("%d/%s/%s/%s", width, mode, action, outcome), func(t *testing.T) {
-						h, err := newHeap(width)
+						h, err := referenceHeap(width)
 						must(t, err)
 						ctx := context.Background()
 						hostFailure := errors.New("host close failure")

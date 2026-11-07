@@ -49,7 +49,8 @@ func (x *execution) destruct() completion {
 	x.heap.noHandleReuse = true
 	// The bound is checked again as destructors may create more objects.
 	for id := uint64(1); id <= x.heap.nextHandle; id++ {
-		o, ok := x.heap.live[id]
+		o := x.heap.liveObject(id)
+		ok := o != nil
 		if !ok || o.destructorCalled {
 			continue
 		}

@@ -189,12 +189,14 @@ func (h *heap) compareObjectPropertyValues(left, right *value, arrays map[*phpAr
 	}
 }
 
-// These two pinned PHP 8.5.12 profiles evaluate the property-table operands
-// in different orders. This is evidence for these image profiles, not a rule
-// for every target sharing their integer width.
+// The pinned PHP 8.5.12 images evaluate the two property-table operands of
+// zend_std_compare_objects in different orders, as their C compilers order
+// call arguments: arm64 initializes the left lazy object first, while 386
+// and amd64 initialize the right one first. The architecture decides, not
+// the integer width; each order is evidence for its image profile only.
 func (h *heap) comparisonPropertiesPHP8512(left, right *object) (*object, *object, error) {
 	first, second := &left, &right
-	if h.width == 32 {
+	if h.arch != "arm64" {
 		first, second = second, first
 	}
 	var err error

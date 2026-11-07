@@ -375,8 +375,8 @@ func TestCycleCollectionRunsDestructors(t *testing.T) {
 	s.echo("after unset")
 	n, err := s.h.collectCycles()
 	must(t, err)
-	if n != 2 || len(s.h.live) != 0 {
-		t.Fatalf("collected %d, live %d", n, len(s.h.live))
+	if n != 2 || s.h.liveObjects != 0 {
+		t.Fatalf("collected %d, live %d", n, s.h.liveObjects)
 	}
 	expectOutput(t, s.out, "after unset", "destruct a", "destruct b")
 }
@@ -523,7 +523,7 @@ func TestDestructorErrorIsReportedAfterCleanup(t *testing.T) {
 	if err := h.unset(&v); !errors.Is(err, boom) {
 		t.Fatalf("error = %v", err)
 	}
-	if !outer.object.freed || !inner.object.freed || len(h.live) != 0 {
+	if !outer.object.freed || !inner.object.freed || h.liveObjects != 0 {
 		t.Fatal("failed destructor left objects alive")
 	}
 }
@@ -665,8 +665,8 @@ func TestCycleMembersFreedByDestructorsAreNotCounted(t *testing.T) {
 	must(t, s.h.unset(&b))
 	n, err := s.h.collectCycles()
 	must(t, err)
-	if n != 1 || len(s.h.live) != 0 || len(s.out) != 2 {
-		t.Fatalf("collected %d, live %d, output %v", n, len(s.h.live), s.out)
+	if n != 1 || s.h.liveObjects != 0 || len(s.out) != 2 {
+		t.Fatalf("collected %d, live %d, output %v", n, s.h.liveObjects, s.out)
 	}
 }
 

@@ -105,7 +105,7 @@ func w13R10ProxyControlCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&childCell))
 		must(t, h.unset(&parentCell))
 		must(t, h.shutdown(&value{}))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("proxy control retained request values")
 		}
 	}()
@@ -156,7 +156,7 @@ func TestW13R10ProxyControls(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R10ProxyControlNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R10ProxyControlCase(t, h, name))
 			})
@@ -182,7 +182,7 @@ func w13R10StaticGuardCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.assign(&owner, w13Instantiate(t, h, c)))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("static guard control retained values")
 		}
 	}()

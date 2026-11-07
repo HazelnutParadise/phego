@@ -1,0 +1,12 @@
+# go test -race -count=1 -timeout 30m -p 1 ./... ; packages run one at a time because internal/ir's wall-clock scale bounds (2 s and 10 s, unchanged by this PR) fail under -race when packages run in parallel on a loaded host
+ok  	github.com/HazelnutParadise/phego	1.964s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	32.260s
+ok  	github.com/HazelnutParadise/phego/internal/compat	1.554s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	7.000s
+ok  	github.com/HazelnutParadise/phego/internal/ir	14.169s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.539s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	1.526s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	2.236s
+ok  	github.com/HazelnutParadise/phego/internal/profile	2.020s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	170.515s
+exit_code=0 seconds=237

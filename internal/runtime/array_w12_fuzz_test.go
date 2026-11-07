@@ -152,7 +152,7 @@ func runW12ArraySequence(t *testing.T, width int, data []byte) {
 	if len(data) > 1024 {
 		data = data[:1024]
 	}
-	h, err := newHeap(width)
+	h, err := referenceHeap(width)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -226,7 +226,7 @@ func TestW12ArrayStructureDeterministicProperties(t *testing.T) {
 func TestW12ArrayNextIndexBoundaries(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(map[int]string{32: "32-bit", 64: "64-bit"}[width], func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -272,7 +272,7 @@ func TestW12ArrayNextIndexBoundaries(t *testing.T) {
 func TestW12CopyMutationPreservesSourceAndRepresentation(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(map[int]string{32: "32-bit", 64: "64-bit"}[width], func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -9,7 +9,7 @@ import (
 // compatibility pass for the native conditional-body diagnostic.
 func TestW13PendingArgumentDestructorSafety(t *testing.T) {
 	for _, width := range []int{32, 64} {
-		h, err := newHeap(width)
+		h, err := referenceHeap(width)
 		must(t, err)
 		events := []string{}
 		var source, receiver value
@@ -43,8 +43,8 @@ func TestW13PendingArgumentDestructorSafety(t *testing.T) {
 		must(t, h.unset(&receiver))
 		globals := value{}
 		must(t, h.shutdown(&globals))
-		if len(h.live) != 0 {
-			t.Fatal("request retained objects", len(h.live))
+		if h.liveObjects != 0 {
+			t.Fatal("request retained objects", h.liveObjects)
 		}
 	}
 }

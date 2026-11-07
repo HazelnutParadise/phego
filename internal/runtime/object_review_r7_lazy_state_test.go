@@ -18,7 +18,7 @@ func TestW13R7RawControls(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7RawControlNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R7RawControlCase(t, h, name))
 			})
@@ -38,7 +38,7 @@ func w13R7RawControlCase(t *testing.T, h *heap, name string) w13Case {
 	var owner value
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("raw control retained request values")
 		}
 	}()
@@ -161,7 +161,7 @@ func w13R7RawReceiverRebindCase(t *testing.T, h *heap) w13Case {
 		must(t, h.unset(&sourceOwner))
 		must(t, h.unset(&alias))
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("receiver-rebind fixture retained values")
 		}
 	}()
@@ -188,7 +188,7 @@ func w13R7RawShadowCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.assign(&owner, o))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("shadow raw fixture retained values")
 		}
 	}()
@@ -207,7 +207,7 @@ func w13R7RawShadowCase(t *testing.T, h *heap, name string) w13Case {
 func TestW13R7LazyPropertyState(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7LazyStateNames() {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			got, err := json.Marshal(w13R7LazyStateCase(t, h, name).Result)
 			must(t, err)
@@ -243,7 +243,7 @@ func w13R7LazyStateCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.assign(&owner, o))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("lazy state fixture retained request values")
 		}
 	}()

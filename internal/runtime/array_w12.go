@@ -245,11 +245,13 @@ func (h *heap) sortArrayWithPolicy(slot *value, op string, preserveKeys bool, co
 	var failure error
 	// REQ-017; T-033/T-034. PHP's stable fallback follows original live
 	// positions, even while an exception suppresses further user calls.
-	original := make(map[*bucket]int, len(a.buckets))
-	for i, b := range a.buckets {
-		original[b] = i
-	}
+	// ord[i] is the original position of the value now at i; it moves with
+	// the value, as Zend's Z_EXTRA does.
 	buckets := a.buckets
+	ord := make([]int32, len(buckets))
+	for i := range ord {
+		ord[i] = int32(i)
+	}
 	php8512Sort(len(buckets), func(i, j int) int {
 		x, y := buckets[i], buckets[j]
 		n := 0
@@ -266,14 +268,15 @@ func (h *heap) sortArrayWithPolicy(slot *value, op string, preserveKeys bool, co
 		if n != 0 {
 			return n
 		}
-		return compareInts(int64(original[x]), int64(original[y]))
+		return compareInts(int64(ord[i]), int64(ord[j]))
 	}, func(i, j int) {
 		// A renumbering sort moves only the values (zend_hash_bucket_renum_swap),
 		// so keys stay at their positions while comparisons observe the array;
 		// a key-preserving sort moves keys with values (zend_hash_bucket_swap).
-		// The bucket, with its stable ordinal and element locations, travels
-		// with the value either way.
+		// The bucket, with its element locations, and its ordinal travel with
+		// the value either way.
 		buckets[i], buckets[j] = buckets[j], buckets[i]
+		ord[i], ord[j] = ord[j], ord[i]
 		if !preserveKeys {
 			buckets[i].key, buckets[j].key = buckets[j].key, buckets[i].key
 		}

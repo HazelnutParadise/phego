@@ -1,0 +1,16 @@
+fuzz: elapsed: 0s, gathering baseline coverage: 0/55 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 55/55 completed, now fuzzing with 4 workers
+fuzz: elapsed: 3s, execs: 64541 (21502/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 6s, execs: 199786 (45098/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 9s, execs: 338221 (46146/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 12s, execs: 466367 (42713/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 15s, execs: 466367 (0/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 18s, execs: 538292 (23970/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 21s, execs: 602760 (21493/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 24s, execs: 602760 (0/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 27s, execs: 668557 (21932/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 30s, execs: 729984 (20477/sec), new interesting: 0 (total: 55)
+fuzz: elapsed: 31s, execs: 729984 (0/sec), new interesting: 0 (total: 55)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	31.913s
+exit_code=0 seconds=35

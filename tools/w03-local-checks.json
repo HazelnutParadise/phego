@@ -521,6 +521,7 @@
     "test_w03_snapshot_batch.SnapshotBatchTests.test_rejects_oversized_blob_without_partial_success",
     "test_w03_snapshot_batch.SnapshotBatchTests.test_sigterm_during_live_batch_stream_reaps_git_and_cancels_snapshot",
     "test_w03_snapshot_batch.SnapshotBatchTests.test_snapshots_selected_commit_not_worktree_or_later_commit",
+    "test_w13_reference.ReferenceRunnerTest.test_amd64_profile_has_its_own_image_and_files",
     "test_w13_reference.ReferenceRunnerTest.test_isolated_cases_preserve_observations",
     "test_w13_reference.ReferenceRunnerTest.test_php_stderr_rejected",
     "test_w13_reference.ReferenceRunnerTest.test_pinned_widths_and_isolation",

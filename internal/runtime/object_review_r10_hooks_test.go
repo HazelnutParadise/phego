@@ -12,7 +12,7 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 				for _, ownedRHS := range []bool{false, true} {
 					for _, outMode := range []string{"null", "receiver", "rhs"} {
 						t.Run(fmt.Sprintf("%d/receiver=%t/rhs=%s/rhsOwned=%t/out=%s", width, ownedReceiver, rhsMode, ownedRHS, outMode), func(t *testing.T) {
-							h, err := newHeap(width)
+							h, err := referenceHeap(width)
 							must(t, err)
 							c := w13Build(t, classSpec{name: "W13R10HookOwners", properties: []propertySpec{{name: "x"}}})
 							p := &c.schema.props[0]
@@ -112,8 +112,8 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 								must(t, h.unset(&ref))
 								must(t, h.unset(&cell))
 							}
-							if len(h.live) != 0 || len(h.typedSources) != 0 {
-								t.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+							if h.liveObjects != 0 || len(h.typedSources) != 0 {
+								t.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 							}
 						})
 					}
@@ -126,7 +126,7 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 func TestW13R10HookCleanupOrder(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			var events []string
 			child := w13Build(t, classSpec{name: "W13R10HookCleanupChild", destructor: func(*heap, value) error {
@@ -152,8 +152,8 @@ func TestW13R10HookCleanupOrder(t *testing.T) {
 			if fmt.Sprint(events) != "[rhs receiver]" {
 				t.Fatalf("cleanup order=%v", events)
 			}
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				t.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				t.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}
@@ -229,8 +229,8 @@ func BenchmarkW13PropertyHookHolds(b *testing.B) {
 			if err = h.unset(&auxOwner); err != nil {
 				b.Fatal(err)
 			}
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				b.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				b.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}

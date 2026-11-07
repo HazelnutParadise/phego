@@ -200,8 +200,8 @@ func (f *w13R6Fixture) cleanup() {
 	for i := len(f.owners) - 1; i >= 0; i-- {
 		must(f.t, f.h.unset(f.owners[i]))
 	}
-	if len(f.h.live) != 0 || len(f.h.typedSources) != 0 {
-		f.t.Fatalf("reference fixture retained objects=%d sources=%d", len(f.h.live), len(f.h.typedSources))
+	if f.h.liveObjects != 0 || len(f.h.typedSources) != 0 {
+		f.t.Fatalf("reference fixture retained objects=%d sources=%d", f.h.liveObjects, len(f.h.typedSources))
 	}
 }
 

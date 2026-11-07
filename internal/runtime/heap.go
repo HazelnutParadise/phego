@@ -3,6 +3,7 @@ package runtime
 import (
 	"errors"
 	"fmt"
+	goruntime "runtime"
 	"slices"
 )
 
@@ -48,10 +49,14 @@ type weakMap struct {
 // concurrent use; an Execution must not share it with another request.
 type heap struct {
 	width         int
+	arch          string // guest architecture of the PHP profile (see newHeapFor)
 	nextHandle    uint64
 	freeHandles   []uint64
 	noHandleReuse bool
-	live          map[uint64]*object
+	objects       []*object         // the object store, indexed by handle; nil when free
+	bucketSpare   []bucket          // unused slots of the current bucket chunk (see newBucket)
+	bucketChunks  int               // bucket chunks made, which sizes the next one
+	liveObjects   int               // non-nil entries of objects
 	roots         map[gcNode]uint64 // possible cycle roots with buffering order
 	rootSlots     []gcNode
 	freeRootSlots []int
@@ -78,11 +83,34 @@ type heap struct {
 	currentCalledScope    *class
 }
 
+// newHeap uses the guest architecture PHP 8.5.12 would run as on this host:
+// amd64 on an amd64 host and arm64 otherwise for 64 bits, 386 for 32 bits.
+// Only lazy-operand comparison order differs between them.
 func newHeap(width int) (*heap, error) {
+	arch := "arm64"
+	switch {
+	case width == 32:
+		arch = "386"
+	case goruntime.GOARCH == "amd64":
+		arch = "amd64"
+	}
+	return newHeapFor(width, arch)
+}
+
+// newHeapFor makes a heap for a PHP profile of integer width and guest
+// architecture. The width alone does not fix every PHP-visible order: PHP
+// 8.5.12 built for amd64 evaluates some C call arguments in the opposite
+// order from arm64 (see comparisonPropertiesPHP8512).
+func newHeapFor(width int, arch string) (*heap, error) {
 	if width != 32 && width != 64 {
 		return nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64 bits", width)
 	}
-	return &heap{width: width, live: make(map[uint64]*object), roots: make(map[gcNode]uint64), nextResource: 4}, nil
+	switch {
+	case width == 64 && (arch == "arm64" || arch == "amd64"), width == 32 && arch == "386":
+	default:
+		return nil, fmt.Errorf("no PHP 8.5.12 reference profile for %d-bit %s", width, arch)
+	}
+	return &heap{width: width, arch: arch, roots: make(map[gcNode]uint64), nextResource: 4}, nil
 }
 
 // Temporaries returned by constructors start with no owner. assign, bind, and
@@ -138,13 +166,34 @@ func (h *heap) newObjectShell(c *class) (value, error) {
 	o := &storage.object
 	*o = object{owner: h, handle: handle, class: c, props: &storage.properties}
 	o.props.initializeLayout(layout)
-	h.live[handle] = o
+	if handle >= uint64(len(h.objects)) {
+		h.objects = append(h.objects, make([]*object, handle+1-uint64(len(h.objects)))...)
+	}
+	h.objects[handle] = o
+	h.liveObjects++
 	return value{kind: valueObject, object: o}, nil
+}
+
+// liveObject is the object stored at handle, or nil. Handles from another
+// heap, freed handles and handles past the store are not live here.
+func (h *heap) liveObject(handle uint64) *object {
+	if handle < uint64(len(h.objects)) {
+		return h.objects[handle]
+	}
+	return nil
+}
+
+// dropObject removes o from the object store.
+func (h *heap) dropObject(o *object) {
+	if h.liveObject(o.handle) == o {
+		h.objects[o.handle] = nil
+		h.liveObjects--
+	}
 }
 
 func (h *heap) discard(v value) error {
 	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
-		v.object.freed && h.live[v.object.handle] != v.object {
+		v.object.freed && h.liveObject(v.object.handle) != v.object {
 		if v.object.refcount > 0 {
 			return h.release(v)
 		}
@@ -191,7 +240,7 @@ func retain(v value) {
 // Destructor errors are returned after cleanup of the released value finishes.
 func (h *heap) release(v value) error {
 	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
-		v.object.freed && h.live[v.object.handle] != v.object {
+		v.object.freed && h.liveObject(v.object.handle) != v.object {
 		if v.object.refcount <= 0 {
 			return fmt.Errorf("released object has no owned reference")
 		}
@@ -291,7 +340,11 @@ func (h *heap) freeArray(a *phpArray) error {
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
-		first = h.mergeObjectErrors(first, h.release(b.val))
+		v := b.val
+		// Chunks are shared, so a live neighbour would otherwise keep the
+		// freed value reachable by the Go collector.
+		*b = bucket{}
+		first = h.mergeObjectErrors(first, h.release(v))
 	}
 	for it := range a.cursors {
 		delete(it.arrays, a)
@@ -327,7 +380,7 @@ func (h *heap) freeObject(o *object) error {
 	}
 	o.freed = true
 	h.dropRoot(o)
-	delete(h.live, o.handle)
+	h.dropObject(o)
 	var first error
 	if o.weak != nil {
 		o.weak.target = nil
@@ -598,9 +651,9 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 				dup.pointer = len(dup.buckets)
 			}
 			dup.index[b.key] = len(dup.buckets)
-			dup.buckets = append(dup.buckets, &bucket{key: b.key, val: v})
+			dup.buckets = append(dup.buckets, dup.newBucket(b.key, v))
 		} else {
-			dup.buckets[pos-1] = &bucket{key: b.key, val: v}
+			dup.buckets[pos-1] = dup.newBucket(b.key, v)
 		}
 		dup.live++
 	}
@@ -845,10 +898,13 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 		if !ok {
 			return nil
 		}
+		// FE_FETCH_RW stores the key before the reference assignment, whose
+		// release may run a destructor that removes and clears this bucket.
+		k := b.key
 		if err := h.bindForeachItem(item, &b.val); err != nil {
 			return err
 		}
-		if err := fn(b.key); err != nil {
+		if err := fn(k); err != nil {
 			return err
 		}
 	}
@@ -1191,7 +1247,7 @@ func (h *heap) collectCyclePass() (int, error, bool) {
 		case *object:
 			freed++
 			x.freed, x.destructorCalled = true, true
-			delete(h.live, x.handle)
+			h.dropObject(x)
 			if x.weak != nil {
 				x.weak.target, x.weak = nil, nil
 			}
@@ -1240,7 +1296,9 @@ func (h *heap) freeGarbage(a *phpArray, dead map[gcNode]bool) error {
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
-		if err := h.releaseOutside(b.val, dead); err != nil && first == nil {
+		v := b.val
+		*b = bucket{} // as in freeArray: chunks are shared
+		if err := h.releaseOutside(v, dead); err != nil && first == nil {
 			first = err
 		}
 	}
@@ -1308,8 +1366,8 @@ func (h *heap) shutdown(globals *value) error {
 	h.noHandleReuse = true
 	// The object-store walk reads its growing top each step.
 	for id := uint64(1); id <= h.nextHandle; id++ {
-		o, ok := h.live[id]
-		if !ok || o.destructorCalled {
+		o := h.liveObject(id)
+		if o == nil || o.destructorCalled {
 			continue
 		}
 		o.destructorCalled = true
@@ -1320,13 +1378,17 @@ func (h *heap) shutdown(globals *value) error {
 		}
 	}
 	h.closed = true
-	for _, o := range h.live {
+	for _, o := range h.objects {
+		if o == nil {
+			continue
+		}
 		o.freed = true
 		if o.weak != nil {
 			o.weak.target, o.weak = nil, nil
 		}
 	}
-	h.live, h.roots, h.freeHandles = nil, nil, nil
+	h.objects, h.liveObjects, h.roots, h.freeHandles = nil, 0, nil, nil
+	h.bucketSpare = nil
 	h.rootSlots, h.freeRootSlots = nil, nil
 	h.enums, h.typedSources = nil, nil
 	h.classStatics = nil

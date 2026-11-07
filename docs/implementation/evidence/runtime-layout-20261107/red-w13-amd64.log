@@ -1,0 +1,9 @@
+# 81f9ac8 with the amd64 W-13 profile test and the width-based comparison order (before the fix)
+--- FAIL: TestW13PHP8512Objects (1.56s)
+    --- FAIL: TestW13PHP8512Objects/amd64 (0.46s)
+        object_model_test.go:1030: compare-lazy-operand-owners
+            Go:  {"result":[false,["init:A","init:B","dtor:A","dtor:B"]],"diagnostics":[]}
+            PHP: {"result":[false,["init:B","init:A","dtor:A","dtor:B"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	2.175s
+FAIL

@@ -11,7 +11,7 @@ import (
 func TestW13PendingReferenceCloneSafety(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			var owner, alias, clone, rhs value
 			c := w13Build(t, classSpec{name: "H5", properties: []propertySpec{{name: "a", typeName: "string", hasDefault: true, initial: []byte("old")}}})
@@ -45,8 +45,8 @@ func TestW13PendingReferenceCloneSafety(t *testing.T) {
 			must(t, h.unset(&clone))
 			globals := value{}
 			must(t, h.shutdown(&globals))
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				t.Fatal("retained objects/sources", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				t.Fatal("retained objects/sources", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}

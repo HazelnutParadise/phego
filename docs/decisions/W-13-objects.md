@@ -86,7 +86,7 @@ hook、lazy initializer 與正式類別 destructor 接到 W-14 的 frame／compl
 
 hook bypass 只看目前 PHP frame 的 receiver 與 property prototype。heap 保存一份目前 hook 狀態，真正呼叫函式時保存、清空，返回時還原。這省去每物件的 property-hook map 與 hook stack，也能讓 getter 經 helper 再讀同一屬性時重新進入 getter。父類別非 private 屬性的 override 保留 prototype identity。proxy hook 存取自己的 backing instance 時也視為相同 receiver。一般 finally 沿用原 frame，不另外清空狀態。
 
-不同原始類別的物件比較直接回傳不可比較，不初始化 lazy object。需要比較內容時，先持有左右 operands，清理按左、右次序進行。兩個指定映像對 lazy properties 的初始化次序不同，arm64 是左、右，i386 是右、左。`comparisonPropertiesPHP8512` 明確實作這兩個固定 profile 的結果，不能把整數寬度當成所有其他平台的行為證據。上游 [zend_object_handlers.c:2352](https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_object_handlers.c#L2352) 在同一個 C 呼叫求值兩個 properties 引數，原生 fixture 的雙寬度結果位於 `review.php`。
+不同原始類別的物件比較直接回傳不可比較，不初始化 lazy object。需要比較內容時，先持有左右 operands，清理按左、右次序進行。指定映像對 lazy properties 的初始化次序不同：arm64 是左、右，i386 與 amd64 都是右、左。差異來自 C 編譯器對呼叫參數的求值順序，和整數寬度無關，所以 profile 以（整數寬度、架構）區分，`comparisonPropertiesPHP8512` 依 heap 的架構選擇次序（`newHeapFor`）。每個次序只是對應映像的證據，不能推到其他平台。上游 [zend_object_handlers.c:2352](https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_object_handlers.c#L2352) 在同一個 C 呼叫求值兩個 properties 引數，原生 fixture 的雙寬度結果位於 `review.php`。
 
 類別登錄先驗證完整 parent chain，再發布到當次請求的登錄表。失敗不留下 child，重試也不能繞過 parent 同名衝突。已發布的不可變 descriptor 可以使用同指標快速返回，不需要複製整張登錄表、鎖或 rollback log。
 

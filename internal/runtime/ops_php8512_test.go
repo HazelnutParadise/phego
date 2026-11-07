@@ -254,7 +254,7 @@ func TestPHP8512OperatorsMatchReference(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprintf("int%d", width), func(t *testing.T) {
 			ref := loadOpsReference(t, width)
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -343,7 +343,7 @@ func TestPHP8512NumericStringsMatchReference(t *testing.T) {
 				t.Fatal(err)
 			}
 			dec := json.NewDecoder(z)
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			if err != nil {
 				t.Fatal(err)
 			}

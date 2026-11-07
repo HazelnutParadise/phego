@@ -157,7 +157,7 @@ func TestW13ShutdownHandleReuse(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13ShutdownCaseNames() {
 			t.Run(fmt.Sprintf("%d/%s/execution", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				got := w13RunShutdownCase(t, h, name)
 				if got.Result != expected[name] {
@@ -166,7 +166,7 @@ func TestW13ShutdownHandleReuse(t *testing.T) {
 				w13AssertOracleCase(t, width, name, got)
 			})
 			t.Run(fmt.Sprintf("%d/%s/heap-shutdown", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				got := w13RunShutdownHeapCase(t, h, name)
 				if got.Result != expected[name] {

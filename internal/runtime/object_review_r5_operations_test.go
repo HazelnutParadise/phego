@@ -28,8 +28,8 @@ func w13R5OperationCase(t *testing.T, h *heap, name string) w13Case {
 			must(t, h.unset(&owners[i]))
 		}
 		cleaned = true
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("R5 case retained objects=%d sources=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("R5 case retained objects=%d sources=%d", h.liveObjects, len(h.typedSources))
 		}
 	}
 	defer func() {

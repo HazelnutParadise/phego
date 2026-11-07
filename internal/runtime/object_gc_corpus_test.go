@@ -109,7 +109,7 @@ func TestW13GCCorpus(t *testing.T) {
 		for i := 1; i <= 64; i++ {
 			name := fmt.Sprintf("gc-sequence-%d", i)
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				got := w13RunGCCorpusCase(t, h, name)
 				gotJSON, err := json.Marshal(got)

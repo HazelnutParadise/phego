@@ -46,7 +46,7 @@ func TestW13NestedRequestOwnership(t *testing.T) {
 			if destination.kind != valueUndefined {
 				t.Fatal("rejected write changed destination")
 			}
-			if foreign.object.freed || second.live[victim.object.handle] != victim.object || victim.object.freed {
+			if foreign.object.freed || second.liveObject(victim.object.handle) != victim.object || victim.object.freed {
 				t.Fatal("ownership check damaged a request")
 			}
 		})
@@ -89,7 +89,7 @@ func TestW13ForeignDestinationOwnership(t *testing.T) {
 			if err == nil {
 				t.Fatal("foreign request operation accepted", operation)
 			}
-			if owner.kind != valueObject || owner.object != foreign.object || foreign.object.freed || first.live[foreign.object.handle] != foreign.object {
+			if owner.kind != valueObject || owner.object != foreign.object || foreign.object.freed || first.liveObject(foreign.object.handle) != foreign.object {
 				t.Fatal("rejection mutated the foreign request")
 			}
 		})
