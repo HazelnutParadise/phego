@@ -1,0 +1,2 @@
+[1;31merror[PHG0201][0m[1m: register read before definition[0m
+ [1;34m--> [0mapp.php:12:3

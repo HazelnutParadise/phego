@@ -1,0 +1,5 @@
+error[PHG0124]: bad value
+ --> x.php:1:4
+  |
+1 |     é值值x
+  |      ^^^^ here

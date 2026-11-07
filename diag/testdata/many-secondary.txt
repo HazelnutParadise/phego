@@ -1,0 +1,24 @@
+error[PHG0129]: too many
+ --> m.php:1:1
+  |
+1 | x
+  | ^
+2 | yyyyyyyyyyyyyyyyyyyy
+  | -
+  |  -
+  |   -
+  |    -
+  |     -
+  |      -
+  |       -
+  |        -
+  |         -
+  |          -
+  |           -
+  |            -
+  |             -
+  |              -
+  |               -
+  |                -
+  |
+  = note: 4 more related locations omitted

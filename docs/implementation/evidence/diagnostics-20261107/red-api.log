@@ -1,0 +1,7 @@
+# github.com/HazelnutParadise/phego [github.com/HazelnutParadise/phego.test]
+./diagnostics_test.go:58:10: ce.Code undefined (type *ConfigError has no field or method Code)
+./diagnostics_test.go:59:42: ce.Code undefined (type *ConfigError has no field or method Code)
+./diagnostics_test.go:61:13: undefined: Diagnose
+# github.com/HazelnutParadise/phego/internal/bytecode [github.com/HazelnutParadise/phego/internal/bytecode.test]
+internal/bytecode/diagnostic_test.go:26:12: undefined: Diagnose
+internal/bytecode/diagnostic_test.go:31:14: undefined: Diagnose

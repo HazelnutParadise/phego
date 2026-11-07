@@ -1,0 +1,10 @@
+error[PHG0203]: duplicate function name
+ --> b.php:1:10
+  |
+1 | function f() {}
+  |          ^ second definition
+  |
+ ::: a.php:1:10
+  |
+1 | function f() {}
+  |          - first definition

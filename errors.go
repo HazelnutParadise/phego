@@ -3,6 +3,9 @@ package phego
 import (
 	"errors"
 	"fmt"
+
+	"github.com/HazelnutParadise/phego/diag"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 // ErrEngineClosed is returned by work started after Engine.Close.
@@ -53,13 +56,56 @@ type UnsupportedError struct {
 
 func (e *UnsupportedError) Error() string { return "phego: unsupported: " + e.Feature }
 
-// ConfigError reports an invalid Config, option, or host function.
+// ConfigError reports an invalid Config, option, or host function. Code is
+// the stable diagnostic code (docs/diagnostics/codes.md). Errors built by
+// host code may leave it empty and then report PHG1000; a code that is not
+// in the table is kept, with PHG1000's note and help.
 type ConfigError struct {
 	Field  string
 	Reason string
+	Code   diag.Code
 }
 
 func (e *ConfigError) Error() string { return "phego: invalid " + e.Field + ": " + e.Reason }
+
+// Diagnostic describes the error in rustc style for diag.Render. The primary
+// span names the Config field or run option, since Go configuration has no
+// source file; Error() stays the one-line form.
+func (e *ConfigError) Diagnostic() diag.Diagnostic {
+	code := e.Code
+	entry, ok := codes.Lookup(code)
+	if !ok {
+		entry, _ = codes.Lookup(codes.ConfigOther)
+		if code == "" {
+			code = codes.ConfigOther
+		}
+	}
+	return diag.Diagnostic{
+		Code:    code,
+		Message: "invalid " + e.Field + ": " + e.Reason,
+		Primary: diag.Span{File: e.Field},
+		Notes:   []string{entry.Note},
+		Help:    []string{entry.Help},
+	}
+}
+
+// Diagnoser is implemented by Phego errors that can describe themselves as a
+// structured diagnostic.
+type Diagnoser interface {
+	Diagnostic() diag.Diagnostic
+}
+
+// Diagnose returns the structured diagnostic of the first error in err's
+// chain that implements Diagnoser. It reports false for nil and for errors
+// without one, such as context cancellation. PHP-level failures keep PHP's
+// own messages and are reported through PHPError, not here.
+func Diagnose(err error) (diag.Diagnostic, bool) {
+	var d Diagnoser
+	if errors.As(err, &d) {
+		return d.Diagnostic(), true
+	}
+	return diag.Diagnostic{}, false
+}
 
 // LimitError reports input rejected by a configured limit before it was
 // processed.

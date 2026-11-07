@@ -1,0 +1,2 @@
+error[PHG0201]: register read before definition
+ --> app.php:12:3

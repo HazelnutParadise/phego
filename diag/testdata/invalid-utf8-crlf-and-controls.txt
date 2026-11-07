@@ -1,0 +1,5 @@
+error[PHG0127]: bad�[31m byte
+ --> z.php:2:3
+  |
+2 | a�b�[2Jc
+  |   ^ �here

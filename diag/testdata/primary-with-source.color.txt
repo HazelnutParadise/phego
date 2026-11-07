@@ -1,0 +1,8 @@
+[1;31merror[PHG0123][0m[1m: mount path is not absolute[0m
+ [1;34m--> [0mphego.toml:4:10
+ [1;34m |[0m
+[1;34m4 |[0m   path = "app"
+ [1;34m |[0m          [1;31m^^^^^ expected a path starting with "/"[0m
+ [1;34m |[0m
+ [1;34m = [0m[1mnote[0m: mounts are matched against absolute PHP paths
+ [1;34m = [0m[1mhelp[0m: write "/app"
