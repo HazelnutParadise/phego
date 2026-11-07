@@ -1,11 +1,11 @@
-ok  	github.com/HazelnutParadise/phego	0.490s
-ok  	github.com/HazelnutParadise/phego/internal/bytecode	7.499s
-ok  	github.com/HazelnutParadise/phego/internal/compat	0.600s
-ok  	github.com/HazelnutParadise/phego/internal/frontend	2.426s
-ok  	github.com/HazelnutParadise/phego/internal/ir	7.491s
-ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	0.980s
-ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.830s [no tests to run]
-ok  	github.com/HazelnutParadise/phego/internal/policy	0.834s
-ok  	github.com/HazelnutParadise/phego/internal/profile	0.715s
-ok  	github.com/HazelnutParadise/phego/internal/runtime	26.605s
-exit_code=0 seconds=28
+ok  	github.com/HazelnutParadise/phego	0.788s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	2.302s
+ok  	github.com/HazelnutParadise/phego/internal/compat	0.871s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	1.422s
+ok  	github.com/HazelnutParadise/phego/internal/ir	2.670s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	0.484s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.832s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	0.967s
+ok  	github.com/HazelnutParadise/phego/internal/profile	0.261s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	9.878s
+exit_code=0 seconds=12
