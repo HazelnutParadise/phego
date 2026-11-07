@@ -85,7 +85,7 @@ func TestW13ZeroLazyInitializerOwnership(t *testing.T) {
 	if err == nil {
 		t.Fatal("zero-property optimization accepted a foreign initializer")
 	}
-	if len(local.live) != 0 || initializer.object.owner != foreign || initializer.object.freed {
+	if local.liveObjects != 0 || initializer.object.owner != foreign || initializer.object.freed {
 		t.Fatal("rejected initializer changed request state")
 	}
 }

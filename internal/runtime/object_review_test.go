@@ -21,7 +21,7 @@ func TestW13LazyRollbackConsecutiveSafety(t *testing.T) {
 	}
 	globals := nullValue()
 	must(t, h.shutdown(&globals))
-	if len(h.live) != 0 {
+	if h.liveObjects != 0 {
 		t.Fatal("request retained live objects after shutdown")
 	}
 }
@@ -329,7 +329,7 @@ func TestW13ReviewRegressions(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13ReviewNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13ReviewCase(t, h, name))
 			})

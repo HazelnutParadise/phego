@@ -24,7 +24,7 @@ func TestW13R10PropertyAliasStrictness(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R10AliasNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R10AliasCase(t, h, name))
 			})
@@ -67,8 +67,8 @@ func w13R10AliasCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&owner))
 		must(t, h.shutdown(&value{}))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("R10 alias fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("R10 alias fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 

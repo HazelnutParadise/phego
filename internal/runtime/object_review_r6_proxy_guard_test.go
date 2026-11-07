@@ -96,7 +96,7 @@ func w13R6ProxyGuardCase(t *testing.T, h *heap, name string) w13Case {
 	defer func() {
 		must(t, h.unset(&proxyOwner))
 		must(t, h.unset(&targetOwner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("proxy guard fixture retained request values")
 		}
 	}()

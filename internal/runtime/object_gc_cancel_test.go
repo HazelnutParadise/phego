@@ -52,12 +52,12 @@ func TestW13LargeGraphCancellation(t *testing.T) {
 	if !errors.Is(err, context.Canceled) || checks != 3 {
 		t.Fatal(checks, err)
 	}
-	if len(h.live) != len(owners) {
+	if h.liveObjects != len(owners) {
 		t.Fatal("cancelled tracing freed partial graph")
 	}
 	n, err := h.collectCycles()
 	must(t, err)
-	if n != len(owners) || len(h.live) != 0 {
-		t.Fatal(n, len(h.live))
+	if n != len(owners) || h.liveObjects != 0 {
+		t.Fatal(n, h.liveObjects)
 	}
 }

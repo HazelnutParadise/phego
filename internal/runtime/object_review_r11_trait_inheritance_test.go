@@ -28,7 +28,7 @@ func w13R11TraitInheritanceCase(t *testing.T, h *heap, name string) w13Case {
 			must(t, h.unset(&owners[i]))
 		}
 		must(t, h.shutdown(&value{}))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("trait inheritance retained request state")
 		}
 	}()
@@ -129,7 +129,7 @@ func TestW13R11TraitInheritance(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R11TraitInheritanceNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R11TraitInheritanceCase(t, h, name))
 			})

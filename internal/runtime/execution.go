@@ -88,7 +88,7 @@ type execution struct {
 	globals         value
 	limits          executionLimits
 	writer          io.Writer
-	frames          []*executionFrame
+	frames          []executionFrame // by value; a depth reuses its locals storage
 	shutdown        []executionAction
 	buffers         []executionBuffer
 	output          []byte
@@ -184,7 +184,10 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	if !stopsUserCode(c) {
 		// Output handlers may create and destroy new locals, but must not
 		// restart a failed destructor pass on surviving old objects.
-		for _, o := range x.heap.live {
+		for _, o := range x.heap.objects {
+			if o == nil {
+				continue
+			}
 			o.destructorCalled = true
 		}
 		x.destructorStop = false
@@ -196,7 +199,10 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	// Output callbacks still need a live heap. Objects retained by those
 	// callbacks get storage release, not a second shutdown destructor pass.
 	x.destructorStop = true
-	for _, o := range x.heap.live {
+	for _, o := range x.heap.objects {
+		if o == nil {
+			continue
+		}
 		o.destructorCalled = true
 	}
 	if err := x.heap.shutdown(&x.globals); err != nil {
@@ -247,8 +253,13 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	x.heap.currentHook = activePropertyHook{}
 	x.heap.currentCalledScope = called
 	defer func() { x.heap.currentHook, x.heap.currentCalledScope = previousHook, previousScope }()
-	f := &executionFrame{}
-	x.frames = append(x.frames, f)
+	// Nested calls may grow x.frames, so the frame is addressed by depth.
+	d := len(x.frames)
+	if d < cap(x.frames) {
+		x.frames = x.frames[:d+1]
+	} else {
+		x.frames = append(x.frames, executionFrame{})
+	}
 	enclosingPending := x.phaseCompletion
 	c := ownReturn(x.invoke(body))
 	if stop := x.check(); stop.kind != endNormal {
@@ -273,9 +284,9 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 		}
 	}
 	if c.kind == endNormal || c.kind == endReturn || c.kind == endThrow || c.kind == endExit {
-		for i := 0; i < len(f.locals); i++ {
+		for i := 0; i < len(x.frames[d].locals); i++ {
 			before := x.serial
-			if err := x.heap.unset(f.locals[i]); err != nil {
+			if err := x.heap.unset(x.frames[d].locals[i]); err != nil {
 				var next completion
 				if errors.As(err, &next) {
 					c = x.replaceOwnedCompletion(c, next)
@@ -297,7 +308,10 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	if stop := x.check(); stop.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, stop)
 	}
-	x.frames = x.frames[:len(x.frames)-1]
+	locals := x.frames[d].locals
+	clear(locals)
+	x.frames[d].locals = locals[:0]
+	x.frames = x.frames[:d]
 	return c
 }
 
@@ -413,7 +427,7 @@ func (x *execution) local(slot *value) error {
 		}
 	}
 	retain(*slot)
-	f := x.frames[len(x.frames)-1]
+	f := &x.frames[len(x.frames)-1]
 	f.locals = append(f.locals, slot)
 	return nil
 }
@@ -562,7 +576,10 @@ func (x *execution) markFatal(c completion) completion {
 	if x.phaseFatal.kind == endNormal {
 		x.phaseFatal = c
 	}
-	for _, o := range x.heap.live {
+	for _, o := range x.heap.objects {
+		if o == nil {
+			continue
+		}
 		o.destructorCalled = true
 	}
 	return x.phaseFatal

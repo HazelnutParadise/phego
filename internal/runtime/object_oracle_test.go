@@ -37,3 +37,12 @@ func w13AssertOracleCase(t *testing.T, width int, name string, got w13Case) {
 		t.Fatalf("%s\nGo: %s\nPHP: %s", name, a, b)
 	}
 }
+
+// referenceHeap uses the architecture the committed per-width references were
+// generated on (arm64 for 64 bits, 386 for 32), independent of the test host.
+func referenceHeap(width int) (*heap, error) {
+	if width == 32 {
+		return newHeapFor(32, "386")
+	}
+	return newHeapFor(64, "arm64")
+}

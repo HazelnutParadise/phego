@@ -150,8 +150,8 @@ func w13R11EnumCase(t *testing.T, h *heap, name string) w13Case {
 	}
 	w13Must(t, "unset left owner", h.unset(&leftOwner))
 	w13Must(t, "shutdown enum comparison heap", h.shutdown(&value{}))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("enum comparison cleanup retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("enum comparison cleanup retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return observed
 }
@@ -160,7 +160,7 @@ func TestW13R11EnumScalarComparison(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R11EnumNames() {
 			t.Run(name+"/"+strconv.Itoa(width), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R11EnumCase(t, h, name))
 			})

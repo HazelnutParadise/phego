@@ -258,8 +258,14 @@ func (m *w12Machine) run(ops []any, iteration int) error {
 func (m *w12Machine) emit(v value) { m.events = append(m.events, []any{"value", w12Encode(v)}) }
 
 func TestW12PHP8512Arrays(t *testing.T) {
-	for _, width := range []int{32, 64} {
-		t.Run(strconv.Itoa(width), func(t *testing.T) {
+	// amd64 runs on the 64-bit reference: CI regenerates PHP 8.5.12 on
+	// native amd64 and requires byte-identical output before this test.
+	for _, profile := range []struct {
+		name, arch string
+		width      int
+	}{{"32", "386", 32}, {"64", "arm64", 64}, {"amd64", "amd64", 64}} {
+		width := profile.width
+		t.Run(profile.name, func(t *testing.T) {
 			dir := os.Getenv("PHEGO_W12_REFERENCE")
 			if dir == "" {
 				dir = "testdata"
@@ -285,7 +291,7 @@ func TestW12PHP8512Arrays(t *testing.T) {
 			}
 			for _, c := range ref.Cases {
 				t.Run(c.Name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := newHeapFor(width, profile.arch)
 					if err != nil {
 						t.Fatal(err)
 					}

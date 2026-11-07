@@ -155,8 +155,8 @@ func w13R11TraitCase(t *testing.T, h *heap, name string) w13Case {
 	if e := h.shutdown(&value{}); e != nil {
 		t.Fatalf("shutdown: %v", e)
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("retained objects/sources: %d/%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("retained objects/sources: %d/%d", h.liveObjects, len(h.typedSources))
 	}
 	return observed
 }
@@ -187,7 +187,7 @@ func TestW13R11TraitProperties(t *testing.T) {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
 			for _, name := range w13R11TraitNames() {
 				t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					w13Must(t, "newHeap", err)
 					w13AssertOracleCase(t, width, name, w13R11TraitCase(t, h, name))
 				})

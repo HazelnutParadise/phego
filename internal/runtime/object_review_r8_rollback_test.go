@@ -63,8 +63,8 @@ func w13R8Case(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&temp))
 		must(t, h.unset(&alias))
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("R8 rollback fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("R8 rollback fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 
@@ -115,7 +115,7 @@ func TestW13R8PHP8512Regression(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R8Names() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R8Case(t, h, name))
 			})

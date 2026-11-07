@@ -9,7 +9,7 @@ import (
 // tests/semantics/w13-objects/matrix.php on both pinned PHP 8.5.12 widths.
 func TestW13TypedReferenceSources(t *testing.T) {
 	for _, width := range []int{32, 64} {
-		h, _ := newHeap(width)
+		h, _ := referenceHeap(width)
 		c, err := buildClass(classSpec{name: "W13Base", properties: []propertySpec{{name: "i", typeName: "int"}}})
 		if err != nil {
 			t.Fatal(err)

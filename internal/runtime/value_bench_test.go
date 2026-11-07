@@ -1,6 +1,9 @@
 package runtime
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // These benchmarks measure the candidate model's allocation, copy, reference,
 // destruction, and cycle-collection costs. They are model measurements, not
@@ -24,6 +27,27 @@ func BenchmarkPackedAppend1K(b *testing.B) {
 				b.Fatal(err)
 			}
 		}
+	}
+}
+
+// BenchmarkPackedAppendSmall builds the short arrays PHP code creates most.
+func BenchmarkPackedAppendSmall(b *testing.B) {
+	for _, n := range []int64{3, 8, 20} {
+		b.Run(fmt.Sprint(n), func(b *testing.B) {
+			h := benchHeap(b)
+			b.ReportAllocs()
+			for b.Loop() {
+				var arr value
+				for i := int64(0); i < n; i++ {
+					if err := h.appendValue(&arr, value{kind: valueInt, integer: i}); err != nil {
+						b.Fatal(err)
+					}
+				}
+				if err := h.unset(&arr); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
 

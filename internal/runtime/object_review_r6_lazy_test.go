@@ -235,8 +235,8 @@ func w13R6LazyCase(t *testing.T, h *heap, name string) w13Case {
 	for _, owner := range owners {
 		must(t, h.unset(owner))
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("lazy case retained objects=%d typed sources=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("lazy case retained objects=%d typed sources=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: diagnostics}
 }
@@ -245,7 +245,7 @@ func TestW13R6LazyUnset(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R6LazyNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R6LazyCase(t, h, name))
 			})
