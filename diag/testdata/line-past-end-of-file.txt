@@ -1,0 +1,2 @@
+error[PHG0126]: position outside source
+ --> y.php:9:1

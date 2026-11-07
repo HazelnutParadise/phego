@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/HazelnutParadise/phego/diag/codes"
 	"io"
 	"io/fs"
 	"math"
@@ -140,7 +141,7 @@ type Engine struct {
 }
 
 // errZeroEngine rejects use of an Engine not created by NewEngine.
-var errZeroEngine = &ConfigError{Field: "Engine", Reason: "was not created by NewEngine"}
+var errZeroEngine = &ConfigError{Code: codes.EngineZero, Field: "Engine", Reason: "was not created by NewEngine"}
 
 // NewEngine validates cfg and returns an engine whose settings cannot change.
 func NewEngine(cfg Config) (*Engine, error) {
@@ -157,16 +158,16 @@ func NewEngine(cfg Config) (*Engine, error) {
 		case pe.Status == profile.NotImplemented:
 			return nil, &UnsupportedError{Feature: "PHP release " + cfg.Release}
 		case pe.Status == profile.Unrecorded:
-			return nil, &ConfigError{Field: "Release", Reason: pe.Reason}
+			return nil, &ConfigError{Code: codes.ConfigRelease, Field: "Release", Reason: pe.Reason}
 		}
-		return nil, &ConfigError{Field: "IntSize", Reason: fmt.Sprintf("%d is not 32 or 64", cfg.IntSize)}
+		return nil, &ConfigError{Code: codes.ConfigIntSize, Field: "IntSize", Reason: fmt.Sprintf("%d is not 32 or 64", cfg.IntSize)}
 	}
 	if err != nil {
 		return nil, err
 	}
 	for name, v := range map[string]*int{"MaxSourceBytes": &cfg.MaxSourceBytes, "OutputLimit": &cfg.OutputLimit} {
 		if *v < 0 {
-			return nil, &ConfigError{Field: name, Reason: "must not be negative"}
+			return nil, &ConfigError{Code: codes.ConfigNegative, Field: name, Reason: "must not be negative"}
 		}
 	}
 	if cfg.MaxSourceBytes == 0 {
@@ -177,22 +178,22 @@ func NewEngine(cfg Config) (*Engine, error) {
 		field := fmt.Sprintf("HostFunctions[%d]", i)
 		switch {
 		case !isPHPFunctionName(f.Name):
-			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("name %q is not a PHP function name", f.Name)}
+			return nil, &ConfigError{Code: codes.HostFuncName, Field: field, Reason: fmt.Sprintf("name %q is not a PHP function name", f.Name)}
 		case f.Func == nil:
-			return nil, &ConfigError{Field: field, Reason: "Func is nil"}
+			return nil, &ConfigError{Code: codes.HostFuncNil, Field: field, Reason: "Func is nil"}
 		case f.MinArgs < 0 || (f.MaxArgs != -1 && f.MaxArgs < f.MinArgs):
-			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("invalid argument range %d..%d", f.MinArgs, f.MaxArgs)}
+			return nil, &ConfigError{Code: codes.HostFuncArgs, Field: field, Reason: fmt.Sprintf("invalid argument range %d..%d", f.MinArgs, f.MaxArgs)}
 		}
 		seenCap := map[string]bool{}
 		for _, c := range f.Capabilities {
 			if c == "" || seenCap[c] {
-				return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("capability %q is empty or repeated", c)}
+				return nil, &ConfigError{Code: codes.HostFuncCapability, Field: field, Reason: fmt.Sprintf("capability %q is empty or repeated", c)}
 			}
 			seenCap[c] = true
 		}
 		key := asciiLower(f.Name)
 		if _, dup := host[key]; dup {
-			return nil, &ConfigError{Field: field, Reason: fmt.Sprintf("duplicate function name %q (PHP names are case-insensitive)", f.Name)}
+			return nil, &ConfigError{Code: codes.HostFuncDuplicate, Field: field, Reason: fmt.Sprintf("duplicate function name %q (PHP names are case-insensitive)", f.Name)}
 		}
 		f.Capabilities = append([]string(nil), f.Capabilities...)
 		host[key] = f
@@ -319,7 +320,7 @@ type runConfig struct {
 func WithOutput(w io.Writer) RunOption {
 	return func(c *runConfig) error {
 		if w == nil {
-			return &ConfigError{Field: "WithOutput", Reason: "writer is nil"}
+			return &ConfigError{Code: codes.RunOutputNil, Field: "WithOutput", Reason: "writer is nil"}
 		}
 		c.output = w
 		return nil
@@ -331,7 +332,7 @@ func WithOutput(w io.Writer) RunOption {
 func WithGlobal(name string, v Value) RunOption {
 	return func(c *runConfig) error {
 		if !isPHPLabel(name) || name == "this" {
-			return &ConfigError{Field: "WithGlobal", Reason: fmt.Sprintf("%q is not a PHP variable name", name)}
+			return &ConfigError{Code: codes.RunGlobalName, Field: "WithGlobal", Reason: fmt.Sprintf("%q is not a PHP variable name", name)}
 		}
 		if c.inputs == nil {
 			c.inputs = map[string]Value{}
@@ -353,16 +354,16 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 	}
 	defer e.runs.Done()
 	if program == nil || program.engine != e {
-		return &Result{Status: StatusFailed}, &ConfigError{Field: "program", Reason: "was not compiled by this engine"}
+		return &Result{Status: StatusFailed}, &ConfigError{Code: codes.ProgramForeign, Field: "program", Reason: "was not compiled by this engine"}
 	}
 	if program.profile != e.profile {
-		return &Result{Status: StatusFailed}, &ConfigError{Field: "program",
+		return &Result{Status: StatusFailed}, &ConfigError{Code: codes.ProgramProfile, Field: "program",
 			Reason: "was compiled for " + program.profile.String() + ", not " + e.profile.String()}
 	}
 	var rc runConfig
 	for _, opt := range opts {
 		if opt == nil {
-			return &Result{Status: StatusFailed}, &ConfigError{Field: "RunOption", Reason: "is nil"}
+			return &Result{Status: StatusFailed}, &ConfigError{Code: codes.RunOptionNil, Field: "RunOption", Reason: "is nil"}
 		}
 		if err := opt(&rc); err != nil {
 			return &Result{Status: StatusFailed}, err

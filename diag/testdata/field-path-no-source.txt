@@ -1,0 +1,4 @@
+error[PHG0101]: Limits.Output must not be negative
+ --> Limits.Output
+  = note: got -1
+  = help: use 0 for the default

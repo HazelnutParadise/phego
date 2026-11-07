@@ -1,0 +1,2 @@
+[1;31merror[PHG0126][0m[1m: position outside source[0m
+ [1;34m--> [0my.php:9:1

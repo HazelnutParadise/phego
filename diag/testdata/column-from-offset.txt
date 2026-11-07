@@ -1,0 +1,5 @@
+error[PHG0130]: unknown opcode
+ --> a.php:2:1
+  |
+2 | echo 1;
+  | ^^^^ this instruction

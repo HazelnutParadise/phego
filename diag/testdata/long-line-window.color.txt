@@ -1,0 +1,5 @@
+[1;31merror[PHG0128][0m[1m: value too long[0m
+ [1;34m--> [0ml.php:1:301
+ [1;34m |[0m
+[1;34m1 |[0m ...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXYZbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...
+ [1;34m |[0m                                            [1;31m^^^ here[0m

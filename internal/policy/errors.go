@@ -1,11 +1,16 @@
 package policy
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/HazelnutParadise/phego/diag"
+)
 
 // SpecError reports an invalid capability or limit specification.
 type SpecError struct {
 	Field  string
 	Reason string
+	Code   diag.Code // zero for errors the public Config validation rules out
 }
 
 func (e *SpecError) Error() string { return "policy: invalid " + e.Field + ": " + e.Reason }
