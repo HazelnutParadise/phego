@@ -52,6 +52,8 @@ type heap struct {
 	freeHandles   []uint64
 	noHandleReuse bool
 	objects       []*object         // the object store, indexed by handle; nil when free
+	bucketSpare   []bucket          // unused slots of the current bucket chunk (see newBucket)
+	bucketChunks  int               // bucket chunks made, which sizes the next one
 	liveObjects   int               // non-nil entries of objects
 	roots         map[gcNode]uint64 // possible cycle roots with buffering order
 	rootSlots     []gcNode
@@ -620,9 +622,9 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 				dup.pointer = len(dup.buckets)
 			}
 			dup.index[b.key] = len(dup.buckets)
-			dup.buckets = append(dup.buckets, &bucket{key: b.key, val: v})
+			dup.buckets = append(dup.buckets, dup.newBucket(b.key, v))
 		} else {
-			dup.buckets[pos-1] = &bucket{key: b.key, val: v}
+			dup.buckets[pos-1] = dup.newBucket(b.key, v)
 		}
 		dup.live++
 	}
@@ -1352,6 +1354,7 @@ func (h *heap) shutdown(globals *value) error {
 		}
 	}
 	h.objects, h.liveObjects, h.roots, h.freeHandles = nil, 0, nil, nil
+	h.bucketSpare = nil
 	h.rootSlots, h.freeRootSlots = nil, nil
 	h.enums, h.typedSources = nil, nil
 	h.classStatics = nil
