@@ -192,7 +192,7 @@ func (a *phpArray) insert(k arrayKey, v value, width int) *bucket {
 			}
 		}
 	}
-	b := &bucket{key: k, val: v}
+	b := a.newBucket(k, v)
 	if a.packed() {
 		oldUsed := len(a.buckets)
 		for len(a.buckets) <= int(k.integer) {
@@ -221,6 +221,42 @@ func (a *phpArray) insert(k arrayKey, v value, width int) *bucket {
 		}
 	}
 	return b
+}
+
+// newBucket places a bucket in its heap's current bucket chunk instead of
+// allocating each one, as Zend's allocator serves buckets from fixed-size
+// bins. The heap belongs to one request, so the chunk needs no lock and
+// lives no longer than the request. Buckets never move, so element
+// locations stay valid; a removed bucket is cleared and its slot is not
+// reused, and a chunk is freed with its last live bucket, so a live bucket
+// keeps at most 20 dead ones. An array without a heap allocates directly.
+func (a *phpArray) newBucket(k arrayKey, v value) *bucket {
+	h := a.owner
+	if h == nil {
+		return &bucket{key: k, val: v}
+	}
+	if len(h.bucketSpare) == 0 {
+		h.bucketSpare = make([]bucket, bucketChunk(h.bucketChunks))
+		h.bucketChunks++
+	}
+	b := &h.bucketSpare[0]
+	h.bucketSpare = h.bucketSpare[1:]
+	b.key, b.val = k, v
+	return b
+}
+
+// bucketChunk sizes a heap's chunks: 5, then 13, then 21 buckets. Each fills
+// a Go size class: 5 buckets (480 bytes) need no malloc header, and 13 and 21
+// buckets with their 8-byte header fill 1280 and 2048 bytes. A small request
+// does not pay for a large first chunk.
+func bucketChunk(made int) int {
+	switch made {
+	case 0:
+		return 5
+	case 1:
+		return 13
+	}
+	return 21
 }
 
 func maxInt(width int) int64 {
@@ -252,6 +288,8 @@ func (a *phpArray) remove(k arrayKey) (value, bool) {
 	}
 	old := a.buckets[i].val
 	oldUsed := len(a.buckets)
+	// The slot is never reused; clearing it lets its chunk hold no values.
+	*a.buckets[i] = bucket{}
 	a.buckets[i] = nil
 	if !a.packed() {
 		delete(a.index, k)

@@ -69,8 +69,8 @@ func w13R7Case(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&payloadOwner))
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("defaults case retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("defaults case retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 	initial := w13Int(42)
@@ -129,7 +129,7 @@ func TestW13R7PHP8512Regression(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7Names() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R7Case(t, h, name))
 			})
@@ -140,7 +140,7 @@ func TestW13R7PHP8512Regression(t *testing.T) {
 func TestW13R7FreshDefaults(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			c := w13Build(t, classSpec{name: "W13R7Fresh", properties: []propertySpec{{name: "i", typeName: "int", hasDefault: true, initial: int64(2)}, {name: "n", typeName: "?int", hasDefault: true, initial: nil}, {name: "a", typeName: "array", hasDefault: true, initial: []SnapshotEntry{{Key: int64(0), Value: int64(1)}}}, {name: "u", typeName: "int"}}})
 			o := w13Instantiate(t, h, c)
@@ -148,7 +148,7 @@ func TestW13R7FreshDefaults(t *testing.T) {
 			must(t, h.assign(&owner, o))
 			defer func() {
 				must(t, h.unset(&owner))
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
 					t.Fatal("fresh defaults retained values")
 				}
 			}()

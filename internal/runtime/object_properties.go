@@ -168,7 +168,7 @@ func readonlyObjectPropertyWriteError(o *object, p *propertyInfo, slot *value) e
 }
 
 func (h *heap) revalidatePropertyReceiver(o *object, p *propertyInfo) error {
-	if o == nil || o.owner != h || o.freed || h.live[o.handle] != o {
+	if o == nil || o.owner != h || o.freed || h.liveObject(o.handle) != o {
 		return &Throwable{"Error", "Object was released while assigning to property " + p.label()}
 	}
 	return nil

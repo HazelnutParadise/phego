@@ -215,8 +215,8 @@ func w13R12SetterCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.unset(&receiverOwner))
 	var globals value
 	must(t, h.shutdown(&globals))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("setter fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("setter fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }
@@ -225,7 +225,7 @@ func TestW13R12SetterParameters(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R12SetterNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R12SetterCase(t, h, name))
 			})
@@ -255,7 +255,7 @@ func TestW13R12SetterMetadataIsolation(t *testing.T) {
 			wg.Add(1)
 			go func(width int) {
 				defer wg.Done()
-				h, e := newHeap(width)
+				h, e := referenceHeap(width)
 				if e != nil {
 					t.Error(e)
 					return
@@ -281,8 +281,8 @@ func TestW13R12SetterMetadataIsolation(t *testing.T) {
 				if e := h.shutdown(&globals); e != nil {
 					t.Error(e)
 				}
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
-					t.Errorf("width %d retained values: live=%d typed=%d", width, len(h.live), len(h.typedSources))
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
+					t.Errorf("width %d retained values: live=%d typed=%d", width, h.liveObjects, len(h.typedSources))
 				}
 			}(width)
 		}
@@ -361,8 +361,8 @@ func w13R12HeldReceiverCase(t *testing.T, h *heap) w13Case {
 	if err := h.shutdown(&globals); err != nil {
 		t.Fatal(err)
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("held setter retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("held setter retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: []any{attempt, eventSnapshot}, Diagnostics: w13Diagnostics(h)}
 }

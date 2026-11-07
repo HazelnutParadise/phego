@@ -14,7 +14,7 @@ SPEC = importlib.util.spec_from_file_location("w13_reference", Path(__file__).re
 
 
 class ReferenceRunnerTest(unittest.TestCase):
-    def run_oracle(self, directory, width=64, stderr=b"", pull=False):
+    def run_oracle(self, directory, width=64, stderr=b"", pull=False, arch=None):
         module = importlib.util.module_from_spec(SPEC)
         SPEC.loader.exec_module(module)
         responses = [subprocess.CompletedProcess([], int(pull), b"", b"")]
@@ -26,7 +26,8 @@ class ReferenceRunnerTest(unittest.TestCase):
         for kind in ("declared", "dynamic"):
             data={"php":"8.5.12","int_size":width//8,"cases":{"lazy-rollback-write-"+kind:{"result":["isolated",kind],"diagnostics":[]}}}
             responses.append(subprocess.CompletedProcess([],0,json.dumps(data).encode(),b""))
-        with patch.object(sys, "argv", ["reference.py", "--width", str(width), "--output-dir", directory]), \
+        argv = ["reference.py", "--width", str(width), "--output-dir", directory] + (["--arch", arch] if arch else [])
+        with patch.object(sys, "argv", argv), \
              patch.object(module.subprocess, "run", side_effect=responses) as run, \
              contextlib.redirect_stdout(io.StringIO()):
             module.main()
@@ -45,6 +46,19 @@ class ReferenceRunnerTest(unittest.TestCase):
                 data = json.loads((Path(directory) / f"w13-run-{width}.json").read_text())
                 self.assertEqual(data["integer_width"], width)
                 self.assertEqual(data["stderr"], "")
+
+    def test_amd64_profile_has_its_own_image_and_files(self):
+        # REQ-018/020; T-035/036. amd64 shares arm64's width but not its C
+        # argument evaluation order, so it is a separate profile.
+        with tempfile.TemporaryDirectory() as directory:
+            calls = self.run_oracle(directory, 64, arch="amd64")
+            command = calls[-1].args[0]
+            self.assertEqual(command[command.index("--platform") + 1], "linux/amd64")
+            self.assertIn("php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f", command)
+            data = json.loads((Path(directory) / "w13-run-64-amd64.json").read_text())
+            self.assertEqual((data["integer_width"], data["architecture"], data["output"]), (64, "amd64", "w13-ref-64-amd64.json"))
+            self.assertTrue((Path(directory) / "w13-ref-64-amd64.json").exists())
+            self.assertFalse((Path(directory) / "w13-ref-64.json").exists())
 
     def test_pull_stderr_is_separate(self):
         with tempfile.TemporaryDirectory() as directory:

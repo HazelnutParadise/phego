@@ -84,8 +84,8 @@ func w13R13GraphCaseWithClasses(t *testing.T, h *heap, name string, g w13R13Grap
 	if err := h.shutdown(&value{}); err != nil {
 		t.Fatalf("shutdown: %v", err)
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("retained objects/sources: %d/%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("retained objects/sources: %d/%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: diagnostics}
 }
@@ -126,7 +126,7 @@ func w13R13DeepGraphCase(t *testing.T, h *heap, name string) w13Case {
 	diagnostics := w13Diagnostics(h)
 	must(t, h.unset(&owner))
 	must(t, h.shutdown(&value{}))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
 		t.Fatal("deep graph retained request values")
 	}
 	return w13Case{Result: result, Diagnostics: diagnostics}
@@ -138,7 +138,7 @@ func TestW13R13InterfaceGraph(t *testing.T) {
 			graph := w13R13GraphClasses(t)
 			for _, name := range w13R13GraphNames() {
 				t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					w13Must(t, "newHeap", err)
 					w13AssertOracleCase(t, width, name, w13R13GraphCaseWithClasses(t, h, name, graph))
 				})
@@ -195,7 +195,7 @@ func TestW13R13GetterFastPathAllocations(t *testing.T) {
 			raw            value
 		}{{"untyped", "", w13Int(1)}, {"mixed", "mixed", w13Int(1)}, {"typed", "int", w13Int(1)}, {"coerced", "int", w13Str("1")}} {
 			t.Run(fmt.Sprintf("%d/%s", width, sample.name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				w13Must(t, "newHeap", err)
 				c := w13Build(t, classSpec{name: "W13R13Getter", properties: []propertySpec{{name: "x", typeName: sample.typeName, hasDefault: true, initial: int64(1), get: func(*heap, value, value) (value, error) { return sample.raw, nil }}}})
 				obj := w13Instantiate(t, h, c)
@@ -211,8 +211,8 @@ func TestW13R13GetterFastPathAllocations(t *testing.T) {
 					t.Fatalf("getter allocations=%g, want 0", allocs)
 				}
 				w13Must(t, "release getter receiver", h.unset(&owner))
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
-					t.Fatalf("retained objects/sources: %d/%d", len(h.live), len(h.typedSources))
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
+					t.Fatalf("retained objects/sources: %d/%d", h.liveObjects, len(h.typedSources))
 				}
 			})
 		}

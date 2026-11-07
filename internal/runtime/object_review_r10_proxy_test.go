@@ -31,7 +31,7 @@ func TestW13R10ProxyMetadata(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R10ProxyNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R10ProxyCase(t, h, name))
 			})
@@ -93,8 +93,8 @@ func w13R10ProxyCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&proxyOwner))
 		must(t, h.unset(&backingOwner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatal("proxy fixture retained request values", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatal("proxy fixture retained request values", h.liveObjects, len(h.typedSources))
 		}
 	}()
 	if warm {

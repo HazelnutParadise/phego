@@ -65,8 +65,8 @@ func w13R5LifetimeCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.unset(&rhs))
 	must(t, h.unset(&alias))
 	must(t, h.unset(&owner))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatal("live objects", len(h.live), "typed sources", len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatal("live objects", h.liveObjects, "typed sources", len(h.typedSources))
 	}
 	return w13Case{Result: observation, Diagnostics: w13Diagnostics(h)}
 }
@@ -88,8 +88,8 @@ func w13R5UncoercibleCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.unset(&input))
 	must(t, h.unset(&alias))
 	must(t, h.unset(&owner))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatal("live objects", len(h.live), "typed sources", len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatal("live objects", h.liveObjects, "typed sources", len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }
@@ -120,8 +120,8 @@ func w13R5RelativeTypeCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.unset(&alias))
 	must(t, h.unset(&target))
 	must(t, h.unset(&owner))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatal("live objects", len(h.live), "typed sources", len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatal("live objects", h.liveObjects, "typed sources", len(h.typedSources))
 	}
 	return w13Case{Result: observed, Diagnostics: w13Diagnostics(h)}
 }
@@ -179,8 +179,8 @@ func w13R5SourceIdentityCase(t *testing.T, h *heap, name string) w13Case {
 	for _, owner := range []*value{&alias, &rhs, &std, &source, &destination} {
 		must(t, h.unset(owner))
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatal("retained objects/sources", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatal("retained objects/sources", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }

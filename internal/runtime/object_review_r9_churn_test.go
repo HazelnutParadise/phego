@@ -23,8 +23,8 @@ func w13R9Case(t *testing.T, h *heap, name string) w13Case {
 	defer func() {
 		w13Must(t, "unset alias", h.unset(&alias))
 		w13Must(t, "unset owner", h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("R9 fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("R9 fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 	w13Must(t, "set anchor", h.setProperty(o, "anchor", w13Int(1)))
@@ -58,7 +58,7 @@ func TestW13R9PHP8512Regression(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R9Names() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				w13Must(t, "newHeap", err)
 				w13AssertOracleCase(t, width, name, w13R9Case(t, h, name))
 			})

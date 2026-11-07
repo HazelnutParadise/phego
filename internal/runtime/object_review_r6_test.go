@@ -38,7 +38,7 @@ func TestW13R6PHP8512Regression(t *testing.T) {
 					if !ok {
 						t.Fatalf("missing reference case %q", name)
 					}
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					must(t, err)
 					got := w13RunCase(t, h, nil, name)
 					gotJSON, err := json.Marshal(got)

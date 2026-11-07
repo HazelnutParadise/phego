@@ -56,7 +56,7 @@ func TestW13R11TraitIgnoredUntypedInitial(t *testing.T) {
 	b := w13Build(t, classSpec{name: "W13R11IgnoredInitialB", isTrait: true, properties: []propertySpec{{name: "x", hasDefault: true}}})
 	c := w13Build(t, classSpec{name: "W13R11IgnoredInitialConsumer", traits: []*class{a, b}})
 	for _, width := range []int{32, 64} {
-		h, err := newHeap(width)
+		h, err := referenceHeap(width)
 		must(t, err)
 		obj := w13Instantiate(t, h, c)
 		got, err := h.readObject(obj, "x", nil)

@@ -110,7 +110,7 @@ func (h *heap) pendingValues(values ...value) ([]gcNode, error) {
 }
 
 func (h *heap) validateObject(o *object) error {
-	if o == nil || o.owner != h || o.freed || h.live[o.handle] != o {
+	if o == nil || o.owner != h || o.freed || h.liveObject(o.handle) != o {
 		return fmt.Errorf("object belongs to another or closed request")
 	}
 	return nil

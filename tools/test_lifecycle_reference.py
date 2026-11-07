@@ -108,7 +108,7 @@ class LifecycleReferenceTests(unittest.TestCase):
         wide = json.loads(oracle.EXPECTED.read_text())
         narrow = json.loads((oracle.FIXTURES / 'reference-32.json').read_text())
         self.assertEqual(narrow['int_size'], 4)
-        self.assertEqual(narrow['image'], oracle.IMAGES[32][1])
+        self.assertEqual(narrow['image'], oracle.IMAGES[(32, '386')][1])
         self.assertEqual(narrow['inputs_sha256'], wide['inputs_sha256'])
         self.assertEqual(narrow['cases'], wide['cases'])
 
@@ -117,22 +117,30 @@ class LifecycleReferenceTests(unittest.TestCase):
             fixtures = Path(directory)
             wide = fixtures / 'reference.json'
             narrow = fixtures / 'reference-32.json'
+            amd64 = fixtures / 'reference-amd64.json'
             payload = {'cases': []}
             original = json.dumps(payload).encode()
-            wide.write_bytes(original)
-            narrow.write_bytes(original)
+            for path in (wide, narrow, amd64):
+                path.write_bytes(original)
             with patch.object(oracle, 'EXPECTED', wide), patch.object(oracle, 'FIXTURES', fixtures), \
                     contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-                for width, path in [(64, wide), (32, narrow)]:
+                # REQ-040; T-079/T-080. amd64 shares arm64's width but is its
+                # own profile with its own record.
+                for argv, width, arch, path in [(['--width', '64'], 64, None, wide), (['--width', '32'], 32, None, narrow),
+                                                (['--width', '64', '--arch', 'amd64'], 64, 'amd64', amd64)]:
                     with patch.object(oracle, 'collect', return_value=payload) as collect:
-                        self.assertEqual(oracle.main(['--width', str(width)]), 0)
-                        collect.assert_called_once_with(width)
-                    def changed(_):
+                        self.assertEqual(oracle.main(argv), 0)
+                        collect.assert_called_once_with(width, arch)
+                    def changed(*_):
                         path.write_bytes(b'concurrent edit')
                         return payload
                     with patch.object(oracle, 'collect', side_effect=changed):
-                        self.assertEqual(oracle.main(['--width', str(width), '--write']), 1)
+                        self.assertEqual(oracle.main(argv + ['--write']), 1)
                         self.assertEqual(path.read_bytes(), b'concurrent edit')
+                    path.write_bytes(original)
+                with self.assertRaises(SystemExit) as invalid:
+                    oracle.main(['--width', '32', '--arch', 'amd64'])
+                self.assertEqual(invalid.exception.code, 2)
                 with self.assertRaises(SystemExit) as invalid:
                     oracle.main(['--width', '16'])
                 self.assertEqual(invalid.exception.code, 2)

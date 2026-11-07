@@ -236,8 +236,8 @@ func BenchmarkW13ChurnObjectWork(b *testing.B) {
 				if err := h.unset(&owner); err != nil {
 					b.Fatal(err)
 				}
-				if len(h.live) != 0 {
-					b.Fatal("retained objects", len(h.live))
+				if h.liveObjects != 0 {
+					b.Fatal("retained objects", h.liveObjects)
 				}
 			})
 		}
@@ -257,8 +257,8 @@ func TestW13R9ComparisonCursorProtection(t *testing.T) {
 		must(t, h.unset(&left))
 		must(t, h.unset(&right))
 		must(t, h.unset(&held))
-		if len(h.live) != 0 {
-			t.Fatal("retained objects", len(h.live))
+		if h.liveObjects != 0 {
+			t.Fatal("retained objects", h.liveObjects)
 		}
 	}()
 	for range 15 {
@@ -321,8 +321,8 @@ func TestW13R9RollbackCursorTransfer(t *testing.T) {
 	must(t, h.assign(&owner, w13Instantiate(t, h, c)))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 {
-			t.Fatal("retained objects", len(h.live))
+		if h.liveObjects != 0 {
+			t.Fatal("retained objects", h.liveObjects)
 		}
 	}()
 	p := owner.object.props

@@ -956,9 +956,22 @@ func w13CaseNames() []string {
 	}...)
 }
 
+// w13Profiles are the pinned PHP 8.5.12 images. Profiles are (integer width,
+// architecture): amd64 shares arm64's width but not its C argument
+// evaluation order, which lazy object comparison exposes.
+var w13Profiles = []struct {
+	name, arch, reference string
+	width                 int
+}{
+	{"32", "386", "w13-ref-32.json", 32},
+	{"64", "arm64", "w13-ref-64.json", 64},
+	{"amd64", "amd64", "w13-ref-64-amd64.json", 64},
+}
+
 func TestW13PHP8512Objects(t *testing.T) {
-	for _, width := range []int{32, 64} {
-		t.Run(strconv.Itoa(width), func(t *testing.T) {
+	for _, profile := range w13Profiles {
+		width := profile.width
+		t.Run(profile.name, func(t *testing.T) {
 			events := []string{}
 			fixtures := w13BuildFixtures(t, &events)
 			observed := map[string]w13Case{}
@@ -966,8 +979,8 @@ func TestW13PHP8512Objects(t *testing.T) {
 			for _, name := range w13CaseNames() {
 				name := name
 				if !t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
-					w13Must(t, "newHeap", err)
+					h, err := newHeapFor(width, profile.arch)
+					w13Must(t, "newHeapFor", err)
 					observed[name] = w13RunCase(t, h, fixtures, name)
 				}) {
 					allRan = false
@@ -981,7 +994,7 @@ func TestW13PHP8512Objects(t *testing.T) {
 			if dir == "" {
 				dir = "testdata"
 			}
-			data, err := os.ReadFile(filepath.Join(dir, fmt.Sprintf("w13-ref-%d.json", width)))
+			data, err := os.ReadFile(filepath.Join(dir, profile.reference))
 			w13Must(t, "read reference", err)
 			var reference struct {
 				PHP     string             `json:"php"`
