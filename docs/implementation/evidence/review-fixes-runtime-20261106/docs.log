@@ -8,7 +8,7 @@
     "work_packages": 60,
     "decisions": 28,
     "sources": 57,
-    "local_markdown_links": 506,
+    "local_markdown_links": 526,
     "checks": 34,
     "catalogs": {
       "php-history-policy.json": 7,
@@ -19,4 +19,4 @@
   "product_test_status": "not_run",
   "errors": []
 }
-exit_code=0
+exit_code=0 seconds=0

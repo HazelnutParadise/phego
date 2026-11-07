@@ -1,16 +1,16 @@
-fuzz: elapsed: 0s, gathering baseline coverage: 0/44 completed
-fuzz: elapsed: 0s, gathering baseline coverage: 44/44 completed, now fuzzing with 4 workers
-fuzz: elapsed: 3s, execs: 351992 (117248/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 6s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 9s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 12s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 15s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 18s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 21s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 24s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 27s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 30s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
-fuzz: elapsed: 31s, execs: 351992 (0/sec), new interesting: 2 (total: 46)
+fuzz: elapsed: 0s, gathering baseline coverage: 0/46 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 46/46 completed, now fuzzing with 4 workers
+fuzz: elapsed: 3s, execs: 184143 (61363/sec), new interesting: 1 (total: 47)
+fuzz: elapsed: 6s, execs: 250191 (22017/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 9s, execs: 330169 (26631/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 12s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 15s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 18s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 21s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 24s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 27s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 30s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 31s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
 PASS
-ok  	github.com/HazelnutParadise/phego/internal/bytecode	32.168s
-exit_code=0 seconds=33
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	31.295s
+exit_code=0 seconds=32

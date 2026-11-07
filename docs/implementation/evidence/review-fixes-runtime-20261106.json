@@ -43,45 +43,50 @@
     "T-129",
     "T-130"
   ],
-  "source_base": "8a4aed7dfa3391a8c849cbe9212491f44fb1242f",
-  "captured_at": "2026-11-06T15:16:25.992728+00:00",
+  "source_base": "62b7877a3393b8da714d47847297860e3645323d",
+  "captured_at": "2026-11-07T02:09:09.206923+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
+    "engine.go": "23d30d59879d21b4cdb935bb50bc21c11d364c7cfec6526cdc5c4fba8f7d4f6c",
     "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
-    "internal/bytecode/limits_review_test.go": "690a128fcafe76701b54660a541f36051f93af204a0ed750c57b5a921925d43a",
-    "internal/bytecode/verify.go": "60a73228ec3bf37ced5860ac07343ad04567ab5adf906312cdc58be51018c5fa",
+    "internal/bytecode/limits_review_test.go": "c2b640c052007d787f853ff2dc9d11f24509e91b8d16c99db840ef0302b70c0f",
+    "internal/bytecode/verify.go": "46092180fdb60ee3e70fc7a9abc292f1b8d9db4911c09795135ee0271f6dc8aa",
     "internal/ir/ssa/analyze.go": "a6f4b7f7627fb247eab759a985d7f6eb8ba583ac60b8fb6f583fdb3914a9623c",
     "internal/ir/ssa/ssa_test.go": "99a5c355fae14fc99d977b1ff18c874ce703bee89835f1a706cfd506252c866a",
     "internal/policy/absolute_review_fixes_test.go": "1f71a7579a79b871d85c37c3f1f5d58a6062776f62b2ada2f40159bf195e73ea",
-    "internal/policy/fifo_review_fixes_test.go": "a2e6a078892c4748cb03139280fad98d7e15d172e1d6960f0429a80cbf118bd6",
+    "internal/policy/fifo_review_fixes_test.go": "317fb21cb8440eeb5a351755bc27a6ca65533cf4a93d2024d2ff9b3f3a5b6018",
     "internal/policy/files.go": "22b91525df034b13b84f48eae638d0422463a2b9ebccc5cc7bce6b89b67ee52c",
-    "internal/policy/files_root.go": "8cac2da141059af6a8fe84ffc1d4f7e29c99e3ea0f22783f07947503b8a61872",
+    "internal/policy/files_open_other.go": "85b4fe3336e6f4d23e4d811f161e471f8189545b4f7bc4e677c4709214afdc53",
+    "internal/policy/files_open_unix.go": "a6483360e70a9453bad41d1b1a5e3b89181128a63903070558fadda1efe0d9fa",
+    "internal/policy/files_root.go": "2046485beead920ff7f5a4bcbfcf9c68922fe64cd536f9e287f06254cf7fc8e2",
     "internal/policy/network_review_fixes_test.go": "94e98909cb9d10065faba23b6eff462f223a53fb9dd082374006e202939a5a6a",
     "internal/policy/policy.go": "90ee2a6ff19c5ae7f6687d2ec8ac71a6ce25323a915c4f8bfd50cbbd27252f8f",
     "internal/runtime/array_argument_type_test.go": "ca1c2390a1208de238b74920282f04c6a247f806071c10d6b83c4b4ea4742d6b",
     "internal/runtime/array_sort_bench_test.go": "e157165d761e3fb57287fa70f5485f8c2e2b5706ae35a4b457b1a80ec0a3c3b0",
+    "internal/runtime/array_sort_php8512.go": "0cf9f31627eb1fed62de764fa676bee4180a6c4918e5f7053f172633f16f0de0",
     "internal/runtime/array_sort_php8512_test.go": "ba1b41176dca318863ff3772da00e83a024a6ed9c547a3c438df840aab7799f8",
-    "internal/runtime/array_sort_regression_test.go": "05abe3c16d6fbdecf16621a8c2ab9dd9226f9d6df5cd3822e7cd0cdd880cc0c6",
+    "internal/runtime/array_sort_regression_test.go": "78715bcd1039189037fff8e1ab78d651400bab0b534ee8e5770980aabb81082e",
     "internal/runtime/array_sort_user_php8512.go": "c1e769d37fc023bee3720a8abd2a9a6021511c22f4e47c0c831a3efc7ebe0e4d",
     "internal/runtime/array_sort_user_php8512_test.go": "a42dee87fbac5fbd054a7acc9bc19d03791ec5c92514c94eeb301ca6f3ec1376",
-    "internal/runtime/array_w12.go": "ac036c2cc5b3869f5d4d5a83e55f1bd27472b9a97b8cdb335ece5e26c6fc3bf4",
+    "internal/runtime/array_w12.go": "6c10f89dd27d1198d4a3cb446d2e75ca56fe7006cd244f48697a27f448655352",
     "internal/runtime/array_w12_safety_test.go": "9052cd8f59468dead9e7e32a1847ddb34f0d382ae9507e03636bab685b956060",
     "internal/runtime/array_w12_test.go": "a7f66506d7bd9f75d0a49fc3a48862998c5f990040aa953a5531e63adb6c8ae1",
-    "internal/runtime/execution.go": "b2ab5adf102b306693ecc8d8ae83b78dda9aa443f8e30eafce20d31c10d8f1c5",
+    "internal/runtime/execution.go": "10fe8d93bf2a87ae254672f5f2bd16f21274f4b585ab84533649640c652a5faf",
     "internal/runtime/execution_ci_review_test.go": "009311d1efc90fd2da63a6cf5c75085b9949a15c306ba37bf4b48183e0ec4373",
-    "internal/runtime/execution_oracle_test.go": "003ec9b468d5c1f02da515f7adeaba407c21b73af6d7df337b7a691231dd5d94",
-    "internal/runtime/execution_output.go": "c2f02c7705e2b3a2fe0b8e56bf620b3e518b8d1a3e565ddd7fc0400e1eeeca54",
+    "internal/runtime/execution_oracle_test.go": "b5fa554aaec18a34e39861242b5a73f39362000665d8c45fb34bec6885780ee9",
+    "internal/runtime/execution_output.go": "f8ab0f983674aa85cb57dc78092b72e27e678922b374faa9b3f7fed73789f29f",
     "internal/runtime/execution_snapshot_test.go": "a2bbeeca11f1298b3e95cc10b7b17b085f9dc28b650328063f1e7cf21ecf2ea6",
-    "internal/runtime/execution_test.go": "fe46eeccafb091d75846476def5d21039c983ebe2b4217d8309f86c30b62606a",
+    "internal/runtime/execution_test.go": "ebb57666996265d4f2e66cce19abfc2a63756e9086950337b6618001be0ce7f5",
     "internal/runtime/object_model_test.go": "4f077ec0f0914c281ba7a4dad6d6960cc9e837a6bfc28fcd168fafa04a6cde79",
     "internal/runtime/object_review_r14_free_order_test.go": "17ccb6b61c5011edede681de1b4e40fb799d28edccd11b55a5f35fc45ced4d60",
     "internal/runtime/object_table.go": "b8159df6f1b7a7dcbe8d81d4ed562cae0a285a927499681ec81c61b33bc7f2c7",
-    "internal/runtime/ops_php8512.go": "de6251a3a2086c0f4671fbf620fc136c77565f5cfc3ae1cca3c85cdfe8dd1b84",
+    "internal/runtime/ops_php8512.go": "cf53a6f62884559a90cbdd73be53c50e58aa56d8de7f39c714e6243c2f82c679",
     "internal/runtime/testdata/w13-ref-32.json": "bc6a8a0b4735cfdb1e7f234053841b51fbaaa85642302903029ba79da42516e6",
     "internal/runtime/testdata/w13-ref-64.json": "a6c3da802dc23b0d89cbf6dc091e99b9f741cd5d1862ddf2eec86f29faef99f1",
     "internal/runtime/testdata/w13-run-32.json": "58a6196fa8905a3e151f70d5a4ea21ed7bbe138886bc227aea64b45d9db13bee",
     "internal/runtime/testdata/w13-run-64.json": "7e105562a62a8214bd2517635cced899b7fc014c604498fb5a09bfea94b6fcb4",
+    "policy_review_test.go": "7d70fa571880ca00bca377d360b5f2aaed9a75ca1b3e9f8d8a1d736ea5fdae5a",
     "tests/lifecycle/w14/buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
     "tests/lifecycle/w14/buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
     "tests/lifecycle/w14/reference-32.json": "f6deb89e526f4e74f38830e737db145b21daf43a0beea23e5ecb9f9f1c31df6a",
@@ -89,9 +94,9 @@
     "tests/semantics/w13-objects/matrix.php": "9fc87475e93de5ab002e37c328c873dd49f0bcdf92ff710997bb8382e851a5bc",
     "tests/semantics/w13-objects/review_r14_free_order.php": "39240d4e7c7e04565a3f9236964f171b392d53cc26c67d7b36efd9cc66032fb6",
     "tools/test_upstream_diff.py": "1b8bdd79ca945f34d043590405b5f2f19fadf889449b2cca333bf91d7a71da52",
-    "tools/test_upstream_diff_review.py": "3700f5780d8ab900beec1597b8c9c7897c985648c8394226114ea926f422345c",
-    "tools/upstream_diff.py": "7dfedfb76caa827819596057e9979f1cb8aafabc9a563e5213aff7c4ecec03d4",
-    "tools/w03-local-checks.json": "a390c85030a0d2879e6146cf41277a8d8387fce20720f5476768905626cc6b0c"
+    "tools/test_upstream_diff_review.py": "1839eebf1b2f38b21a82b1e5be0ea890b2826d63c1b2da5adb29eb5942ca8daf",
+    "tools/upstream_diff.py": "b512a80c93ea91cc6ebaaa181b77da65c4e106de763c9767ae4b0cc496c6870e",
+    "tools/w03-local-checks.json": "bac501ee2cfe9921227f21949767add95f4a705f07c5096dbb7e2a467870f035"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",
@@ -103,8 +108,9 @@
     }
   },
   "decisions": [
-    "W-20 character devices: approved by the project owner on 2026-11-06.",
-    "Sort functions take op and output buffers take a handler name and flush context: approved by the project owner on 2026-11-06 after an independent Fable 5.1 consultation."
+    "W-20 character devices: opening character devices approved by the project owner on 2026-11-06; narrowed on 2026-11-07, with the owner's approval, to the host's null, zero, full, random and urandom devices matched by device number.",
+    "Sort functions take op and output buffers take a handler name and flush context: approved by the project owner on 2026-11-06 after an independent Fable 5.1 consultation.",
+    "php8512Sort orders positions through compare(i, j) and swap(i, j) callbacks: approved by the project owner on 2026-11-07 after an independent Fable 5.1 consultation."
   ],
   "local_status": "pass",
   "product_test_status": "not_run",
@@ -180,12 +186,24 @@
       "exit_code": 0,
       "log": "review-fixes-runtime-20261106/ci-steps.log",
       "result": "A parse error fails with status 2, an unformatted file fails with status 1 and is listed, a formatted tree passes; the build loop reports every failing target and exits 1."
+    },
+    {
+      "command": "go test of the review-2 regressions on 87d1d0f (before the fixes in 4828c13)",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review2.log",
+      "result": "Each new W-14, W-16 and W-45 test fails before its fix."
+    },
+    {
+      "command": "go test of the W-12 index sort and W-20 device allowlist tests on 4828c13",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review3.log",
+      "result": "sort() shows 1=a,0=S,2=c during comparisons; a non-allowlisted character device opens; RunFile on a device is not StatusPolicyDenied."
     }
   ],
   "artifacts": {
     "build.log": {
       "path": "review-fixes-runtime-20261106/build.log",
-      "sha256": "1b9349d74555f3bfb2e8d5578ffa3e52a2b1f6c6090da6830fb4dd601194dcc8"
+      "sha256": "4868412442141f483b4cfe57871bb0afb13851d8ff6bd58e043401e5d1e051bb"
     },
     "bytecode-budgets.go.txt": {
       "path": "review-fixes-runtime-20261106/bytecode-budgets.go.txt",
@@ -195,13 +213,21 @@
       "path": "review-fixes-runtime-20261106/bytecode-budgets.log",
       "sha256": "6170ad1b72afaeed27434d311675d00727050ba635a208ec20f1490c6441ef96"
     },
+    "ci-steps.log": {
+      "path": "review-fixes-runtime-20261106/ci-steps.log",
+      "sha256": "174dc25059dd944be8ce54f224514d777e9f7691a02afb1a79d46a0f1aa07690"
+    },
+    "docs.log": {
+      "path": "review-fixes-runtime-20261106/docs.log",
+      "sha256": "2c316c407c653cfdf49183dd70ebf460f30eaec47731a0b50f38528fdd489128"
+    },
     "fuzz.log": {
       "path": "review-fixes-runtime-20261106/fuzz.log",
-      "sha256": "92782dafe185b1dce3e9cfe2aef4b25bc2c2603c291a0bf32a013847db20c3b2"
+      "sha256": "c38806ac3b93553607fd12f268e102703cafcf68a2466c384317db02d3751b07"
     },
     "go.log": {
       "path": "review-fixes-runtime-20261106/go.log",
-      "sha256": "84a92ad77379bd2d2dae134d35de6911c4404fa8e4118b39d32338fc4e3c1c7f"
+      "sha256": "692ea1d94d98d6f7dd4eb88b237ff3591443e67df7ca4ec6ca4614553a00b259"
     },
     "gofmt.log": {
       "path": "review-fixes-runtime-20261106/gofmt.log",
@@ -231,13 +257,29 @@
       "path": "review-fixes-runtime-20261106/php-reference.log",
       "sha256": "76f1294907b1edb532f55e994c68a256a8965bf9e85bf628743b4770528f771b"
     },
+    "python.log": {
+      "path": "review-fixes-runtime-20261106/python.log",
+      "sha256": "2d68f2e996f931dac0b294c54242a6d20cf315598f2de37777e7d41ec4d7dff4"
+    },
     "race.log": {
       "path": "review-fixes-runtime-20261106/race.log",
-      "sha256": "9c27a049eb802649d2c261e884523f4a9957755bf36ddf02cabbffacde0c50a7"
+      "sha256": "f47a4bdcadccec70a411ca8c13cedc0c8fee0c31df46f49208b00a3baea960bc"
     },
     "red-main.log": {
       "path": "review-fixes-runtime-20261106/red-main.log",
       "sha256": "6553e896557ba8d42c4b42c4c98e1201f3e41e196c5beb4dab246be9434d4e19"
+    },
+    "red-review2.log": {
+      "path": "review-fixes-runtime-20261106/red-review2.log",
+      "sha256": "a23dc29e9448076500ef0dedbad3b2f0c2c126c44f98b38bf5e0db49cbec1458"
+    },
+    "red-review3.log": {
+      "path": "review-fixes-runtime-20261106/red-review3.log",
+      "sha256": "772ca3c2dc079314a99f6cbc8b44207c3506af2391cb9fb4c23a534822d94c74"
+    },
+    "upstream-pair-spacing.log": {
+      "path": "review-fixes-runtime-20261106/upstream-pair-spacing.log",
+      "sha256": "8ac2bea002941847f719598da8d9366d90e47d02fcc321bae657d53a9baea301"
     },
     "upstream-pair.log": {
       "path": "review-fixes-runtime-20261106/upstream-pair.log",
@@ -251,7 +293,6 @@
   "limits": [
     "PHP 8.5.12 deprecates current(), reset() and the other pointer functions on objects and reads their properties; Phego still throws TypeError (W-13 object property iteration).",
     "W-12 TypeError type names use zend_zval_value_name only for the sort and pointer functions; five other valueName call sites keep 'resource (closed)' until each message is checked against PHP.",
-    "Output handler names and flush contexts come from the caller; W-17 must pass the active function name, including chunk-size flushes and ob_*clean functions, which also call the handler.",
-    "The verifier's per-edge diagnostics choose a fixed order when several handlers are violated; the old pairwise scan chose by handler index."
+    "Output handler names and flush contexts come from the caller; W-17 must pass the active function name, including chunk-size flushes and ob_*clean functions, which also call the handler."
   ]
 }
