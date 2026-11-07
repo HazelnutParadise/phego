@@ -1,0 +1,22 @@
+package main
+
+import (
+	"fmt"
+	"syscall"
+)
+
+func mask(fd int) string {
+	kq, err := syscall.Kqueue()
+	if err != nil {
+		return err.Error()
+	}
+	defer syscall.Close(kq)
+	var ch [1]syscall.Kevent_t
+	syscall.SetKevent(&ch[0], fd, syscall.EVFILT_READ, syscall.EV_ADD)
+	ev := make([]syscall.Kevent_t, 1)
+	n, err := syscall.Kevent(kq, ch[:], ev, &syscall.Timespec{})
+	if n == 0 {
+		return fmt.Sprintf("mask none(%v)", err)
+	}
+	return fmt.Sprintf("mask data=%d eof=%v flags=%#x", ev[0].Data, ev[0].Flags&syscall.EV_EOF != 0, ev[0].Flags)
+}

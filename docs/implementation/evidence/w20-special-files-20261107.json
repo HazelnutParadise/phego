@@ -1,0 +1,176 @@
+{
+  "scope": "W-20 Root mounts open FIFOs, sockets and devices as PHP 8.5.12 does, with waits bounded by the OpenFile context; local evidence only, no VM.",
+  "requirements": [
+    "REQ-033",
+    "REQ-037",
+    "REQ-059"
+  ],
+  "tests": [
+    "T-065",
+    "T-066",
+    "T-073",
+    "T-074"
+  ],
+  "source_base": "51887857e1eb0f1cfeff3e1e3ff35ce7bfde580e",
+  "captured_at": "2026-11-07T10:42:20.362544+00:00",
+  "source_sha256": {
+    "engine.go": "665c89896bcaaba1996fc67867cfb04a14800bf5d674752f9c1546578333c1c5",
+    "policy.go": "05f011f44b4ae607ea96752de6226670870545186d486a42ec914601bc49ba81",
+    "policy_review_test.go": "934c37596f8878fbf6c5ada857dea695c7af5c51f69450b2705e01f9a98cd883",
+    "runfile_fifo_review_fixes_test.go": "8f8077ddf436cb7c83e062ab17591d7404eb6b1cbf01dd51735e5bd6b5468b9a",
+    "runfile_cancel_unix_test.go": "428402095d29ccb9907c1e79ad6cf290b006191cdf80a37338b44278e5191473",
+    "probe_open_other_test.go": "89b258dd3c3b57bafbe0599516c6fbacd6062b906b9fe558c77470584d07cf0c",
+    "internal/policy/files.go": "cfd55e88f8f096d4832ab5a3fa8aeb824cd52a961feaf2530535def9962ef666",
+    "internal/policy/files_root.go": "e623cb96784bd64641ba2ad739f49b05b01e79a9767b9857931745e17d834f4b",
+    "internal/policy/special_unix.go": "8466d0bf5febbe6dcb27c04a1c1a29ea8d0a3d1120bcf56bdb07ad2308b331eb",
+    "internal/policy/special_linux.go": "d08373bf43a873f45925c35e752c4e9a39925e50b8f085c95282aac14afa353a",
+    "internal/policy/special_bsd.go": "fc0d5a3357a1bf49f03fd553f7e56a2138a670f32c93853f873ab407cced3e79",
+    "internal/policy/special_other.go": "17d5b044aec66c2ccc1c5262f3c886787952606f57ce4c297e603ee8574189b5",
+    "internal/policy/special_files_test.go": "26c1e6860482b97a6197dde863a367237e5f9fdb64c106646524f6ac8c11a07d",
+    "internal/policy/special_report_windows_test.go": "99d0119e69fad925ecdd7c5791e4617a99a203ef41a895b5ca5bbb5f17708b04",
+    "internal/policy/absolute_review_fixes_test.go": "c6ef5482bbd835c99b7bb21ebb8b4363b5dbc1548a5f6f0edb7623444a7e5265",
+    "internal/policy/overlap_test.go": "a00bccced0ae81b28c7166802d99e4f0904917fe0694575c9ea02eaba6f1c996",
+    "internal/policy/policy_test.go": "5c4b688624b03a71c01fe58b32b1fe018317138553ad99c75a13d97d39b457a4",
+    "internal/policy/review_test.go": "0f5173b446d1faa0f13e5ab66726fb83780bb0e185038ce3bad20713d64e0e5e",
+    "tests/policy/special-files/probe.sh": "7e4e9613fa37f849a434eaa0b49f136980f267a956a47140954352c3a198453f",
+    "tests/policy/special-files/probe.php": "2351554308d121482a94f3bce2e33d728da14fa61a070fdb0063fa36743765e8",
+    "tests/policy/special-files/probe-windows.ps1": "e3893641c35abe5d2f464acf8498d07d5bfbd88f11e2055fc47a2ada3a22ae88",
+    ".github/workflows/special-files.yml": "fc6bd3b3559c815ad6ceab797a35e6097437c72767a35698e66c3cbef6dc515c",
+    "docs/implementation/W-20.md": "7a5bc429825e43961f821db3efee478a15f69d79081878f9e5f680d045381377"
+  },
+  "environment": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "host": "macOS 27.0.1 arm64",
+    "reference_images": {
+      "linux/arm64": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "linux/386": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "linux/amd64": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f"
+    },
+    "containers": "docker run --rm --network none --read-only, tmpfs work directory, probe scripts and test binaries mounted read-only"
+  },
+  "decisions": [
+    "Policy.OpenFile takes a context first; it bounds the open and every later wait on the returned file. Decided by the implementing agent after an independent Fable 5.1 consultation, under the owner's 2026-11-07 rule that PHP-visible behaviour matches PHP 8.5.12 and internals use the best Go design.",
+    "Adopted from the consultation: wrapper errors name the PHP path; one private epoll per FIFO wait on Linux.",
+    "Root opens every device node as PHP does instead of the five-device allowlist the consultation suggested keeping: approved by the project owner on 2026-11-07. Capability, identity, hard-link and OS permission checks stay in force, and FileGrant.Root documents that every node under the mount is reachable.",
+    "O_RDONLY with O_CREAT or O_TRUNC on a directory reports EISDIR, following Linux open(2); macOS would open the directory for O_CREAT. PHP fopen modes never use these combinations."
+  ],
+  "local_status": "partial",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "tests/policy/special-files/probe.sh in the arm64, amd64 and i386 images (read-only, no network, tmpfs work directory)",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/php/arm64.log",
+      "result": "Same semantics on all three images (amd64.log, i386.log differ only in emulated start-up time). fopen(FIFO,'r') returns when a writer opens, before it writes; w/a/c wait for a reader; r+ returns at once; x reports File exists; EPIPE gives a Notice; include FIFO waits, then warns 'Failed to open stream: Success'; /dev/tty and sockets fail with 'No such device or address'; directories opened for writing fail with 'Is a directory'."
+    },
+    {
+      "command": "php/devices-linux.sh with a dev tmpfs and the loop-device cgroup rule (arm64)",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/php/arm64-devices.log",
+      "result": "A relocated null device and a loop block device open and read; a device outside the cgroup reports 'Operation not permitted'; php and include on a FIFO without a writer wait (timeout exit 124)."
+    },
+    {
+      "command": "Go syscall probes of FIFO and pty readiness (go-probe/*.go.txt) on darwin/arm64 and in the linux/arm64 image",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/go-probe/kernel-semantics.log",
+      "result": "Both kernels: nonblocking read returns 0 with no writer and EAGAIN with an idle writer; Linux reports a writer that left as EPOLLHUP, macOS reports nothing. Linux FIFOs and both kernels' ptmx accept deadlines; darwin FIFOs do not."
+    },
+    {
+      "command": "go test of the new policy regressions on a3dd3ac's internal/policy (the call helper adapted to the old OpenFile signature)",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-policy-darwin-arm64.log",
+      "result": "Every new regression fails before the change; TestRootAllowsCharacterDevices and TestRootFIFOSwapStaysBounded are invariants and pass. red-policy-linux-arm64.log repeats this in the linux/arm64 image, where TestRootFIFOReadSeesWriterThatLeft also runs and fails."
+    },
+    {
+      "command": "go test of the RunFile regressions on 7b82315 sources",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-runfile-darwin-arm64.log",
+      "result": "TestRunFileFIFORunsWriterSource, TestRunFileFIFOCancelReleasesAdmission, TestRunFileSocketFailsLikeKernel and TestRunFileReadsDevicesLikePHP fail before the change on darwin and in the linux/arm64 image (red-runfile-linux-arm64.log)."
+    },
+    {
+      "command": "go test -overlay with the wrapper's PHP-path rewrite removed",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-error-path.log",
+      "result": "EPIPE and ESPIPE errors carried the host temporary directory before the rewrite."
+    },
+    {
+      "command": "go test -overlay with the alias checks moved back after the open",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-alias-order.log",
+      "result": "TestRootRefusedFIFOAliasIsNotOpened fails: the refused open released the waiting FIFO writer."
+    }
+  ],
+  "artifacts": {
+    "go-probe/fifo.go.txt": {
+      "path": "w20-special-files-20261107/go-probe/fifo.go.txt",
+      "sha256": "e1bcb7ffc11ef8d82b1d19bbf332b76af9bf73fdff4a2ae169e6db4a6776d13b"
+    },
+    "go-probe/fifo_mask_darwin.go.txt": {
+      "path": "w20-special-files-20261107/go-probe/fifo_mask_darwin.go.txt",
+      "sha256": "e71e075d2c7c16683a6dedbdd5bfb07a2bc5f14e96d62373446348dbdc446847"
+    },
+    "go-probe/fifo_mask_linux.go.txt": {
+      "path": "w20-special-files-20261107/go-probe/fifo_mask_linux.go.txt",
+      "sha256": "8afa25c8bbfcaddd4bcb79704b8e9e219029b0e007a8caf4e2adff8b95169759"
+    },
+    "go-probe/kernel-semantics.log": {
+      "path": "w20-special-files-20261107/go-probe/kernel-semantics.log",
+      "sha256": "02e8d0d29520cc854ae51c3e677c823e431120c37313cb86a10ecfdef9bd3b61"
+    },
+    "go-probe/pty.go.txt": {
+      "path": "w20-special-files-20261107/go-probe/pty.go.txt",
+      "sha256": "ced2fc39f2e7041dfdc726a4d7390c86e4b5d578ebc1cff693b7a78818ee6c1e"
+    },
+    "php/amd64.log": {
+      "path": "w20-special-files-20261107/php/amd64.log",
+      "sha256": "f95f17db121602cc556c9e91923a32de78bbbf695d0b147c5f8d03a58d297843"
+    },
+    "php/arm64-devices.log": {
+      "path": "w20-special-files-20261107/php/arm64-devices.log",
+      "sha256": "59a3c081303945754ab3de3b7afb03969f6fa46bb82d4e4def02369f47180e5c"
+    },
+    "php/arm64.log": {
+      "path": "w20-special-files-20261107/php/arm64.log",
+      "sha256": "775292ae1abb57f568a8ecb2dad0ce633b81167cdd5d9fb86cba247307b15134"
+    },
+    "php/devices-linux.sh": {
+      "path": "w20-special-files-20261107/php/devices-linux.sh",
+      "sha256": "24586731231b4d6562218e92c6662c20614a6e60fcb8fcf8289a2d66da8b82fc"
+    },
+    "php/i386.log": {
+      "path": "w20-special-files-20261107/php/i386.log",
+      "sha256": "835c00e0d0763422ec50c6dc00d25bfd86ed0b77ed7487d6828d20c953279e20"
+    },
+    "red-alias-order.log": {
+      "path": "w20-special-files-20261107/red-alias-order.log",
+      "sha256": "3e5ebff3d06107cfbca71e7e11170da2308d02a3b4817180e31c05ad3bac7d5f"
+    },
+    "red-error-path.log": {
+      "path": "w20-special-files-20261107/red-error-path.log",
+      "sha256": "c1d8a5d251d2d904ec3d7cafed20cdd895d430c45d8ff4cb2a11f630b79011df"
+    },
+    "red-policy-darwin-arm64.log": {
+      "path": "w20-special-files-20261107/red-policy-darwin-arm64.log",
+      "sha256": "1c60474bce84c1a3265e9a59538bddb4bbfe2feae7e49dcd8c0cbc52e0224da1"
+    },
+    "red-policy-linux-arm64.log": {
+      "path": "w20-special-files-20261107/red-policy-linux-arm64.log",
+      "sha256": "4c8a51a9d217e2cdbc5fc771b61896d381a05e59dd95e059be794b4f26ceec3d"
+    },
+    "red-runfile-darwin-arm64.log": {
+      "path": "w20-special-files-20261107/red-runfile-darwin-arm64.log",
+      "sha256": "5b51986e07b54bb19c4b71d3bdfa0390b37a99a64f2dd577c4715ddfd35ebfc5"
+    },
+    "red-runfile-linux-arm64.log": {
+      "path": "w20-special-files-20261107/red-runfile-linux-arm64.log",
+      "sha256": "9eecae506465685db61ac32a6ee9afbb55e95d20c49241199c5bc6ad7926d3bf"
+    }
+  },
+  "limits": [
+    "A FIFO open returns up to about 10 ms after its peer arrives: the kernel gives no event when a writer connects without writing, so the open probes between pauses.",
+    "On macOS and the BSDs a writer that opens and closes a FIFO without writing between two probes is not seen; the open keeps waiting for a writer or the context.",
+    "Reads of regular files and directories, and calls into a trusted fs.FS, are not interrupted by the context.",
+    "PHP's include and fopen messages for these files are produced by W-17 and W-18 from OpenFile's result; no PHP code runs here yet.",
+    "Windows is cross-compiled only; os.Root refuses Windows device names, so no FIFO or device reaches the wait code there."
+  ]
+}

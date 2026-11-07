@@ -1,0 +1,36 @@
+    special_files_test.go:126: FIFO open without a writer returned without waiting: policy: file-read open "/app/pipe" refused (not-granted)
+--- FAIL: TestRootFIFOReadOpensWhenWriterArrives (0.00s)
+    special_files_test.go:159: open writer: device not configured
+--- FAIL: TestRootFIFOReadKeepsEarlyData (5.00s)
+    special_files_test.go:179: only Linux reports a FIFO writer that left without data; see W-20.md
+--- SKIP: TestRootFIFOReadSeesWriterThatLeft (0.00s)
+    special_files_test.go:203: FIFO open without a peer returned without waiting: policy: file-read open "/app/pipe" refused (not-granted)
+--- FAIL: TestRootFIFOOpenEndsWithContext (0.00s)
+    special_files_test.go:232: open writer: device not configured
+--- FAIL: TestRootFIFOReadEndsWithContext (5.00s)
+    special_files_test.go:258: FIFO write open without a reader returned without waiting: policy: file-write open "/app/pipe" refused (not-granted)
+--- FAIL: TestRootFIFOWriteWaitsForReader (0.00s)
+    special_files_test.go:293: policy: file-write open "/app/pipe" refused (not-granted)
+--- FAIL: TestRootFIFOReadWriteOpensAtOnce (0.00s)
+    special_files_test.go:369: /app/s flag 0x0: policy refusal policy: file-read open "/app/s" refused (not-granted), kernel says operation not supported on socket
+    special_files_test.go:369: /app/s flag 0x1: policy refusal policy: file-write open "/app/s" refused (not-granted), kernel says operation not supported on socket
+    special_files_test.go:369: /app/d flag 0x1: policy refusal policy: file-write open "/app/d" refused (not-granted), kernel says is a directory
+    special_files_test.go:369: /app/d flag 0x2: policy refusal policy: file-write open "/app/d" refused (not-granted), kernel says is a directory
+    special_files_test.go:369: /app/d flag 0x209: policy refusal policy: file-write open "/app/d" refused (not-granted), kernel says is a directory
+    special_files_test.go:369: /app/d flag 0x601: policy refusal policy: file-write open "/app/d" refused (not-granted), kernel says is a directory
+    special_files_test.go:369: /devices/tty flag 0x0: policy refusal policy: file-read open "/devices/tty" refused (not-granted), kernel says device not configured
+    special_files_test.go:369: /devices/tty flag 0x1: policy refusal policy: file-write open "/devices/tty" refused (not-granted), kernel says device not configured
+    special_files_test.go:369: /devices/apfs-raw-device.2.0 flag 0x0: policy refusal policy: file-read open "/devices/apfs-raw-device.2.0" refused (not-granted), kernel says permission denied
+--- FAIL: TestRootOpenMatchesKernelForSpecialFiles (0.00s)
+--- PASS: TestRootAllowsCharacterDevices (0.00s)
+    special_files_test.go:430: flag 0x400: policy: file-write open "/app/d" refused (not-granted), want EISDIR on the PHP path
+    special_files_test.go:430: flag 0x200: policy: file-write open "/app/d" refused (not-granted), want EISDIR on the PHP path
+--- FAIL: TestRootDirectoryTruncateOrCreateIsEISDIR (0.00s)
+    special_files_test.go:446: policy: file-write open "/devices/ptmx" refused (not-granted)
+--- FAIL: TestRootDeviceReadEndsWithContext (0.00s)
+    special_files_test.go:466: open writer: device not configured
+--- FAIL: TestRootSpecialFileCloseEndsRead (5.00s)
+--- PASS: TestRootFIFOSwapStaysBounded (0.03s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	15.584s
+FAIL

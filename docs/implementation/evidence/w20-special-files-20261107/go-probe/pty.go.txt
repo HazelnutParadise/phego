@@ -1,0 +1,23 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"syscall"
+	"time"
+)
+
+func main() {
+	f, err := os.OpenFile("/dev/ptmx", os.O_RDWR|syscall.O_NONBLOCK, 0)
+	fmt.Println("open ptmx:", err)
+	if err != nil {
+		return
+	}
+	fmt.Println("deadline:", f.SetReadDeadline(time.Now().Add(300*time.Millisecond)))
+	t := time.Now()
+	n, err := f.Read(make([]byte, 10))
+	fmt.Printf("read n=%d err=%v after %v\n", n, err, time.Since(t).Round(10*time.Millisecond))
+	b := make([]byte, 10)
+	n, err = syscall.Read(int(f.Fd()), b)
+	fmt.Printf("raw read n=%d err=%v\n", n, err)
+}
