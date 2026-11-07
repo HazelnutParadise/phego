@@ -87,8 +87,10 @@ def _watch_record(version, digest, *, suffix="1", announcement_sha="e"):
 
 def _snapshot(series, *, news_sha="f"):
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "news_sha256": news_sha * 64,
+        "news": [{"id": "2026-11-05-1", "time": "2026-11-05T21:12:54+00:00",
+                  "title": "PHP 8.6.0 RC5 available for testing", "sha256": "d" * 64}],
         "series": series,
     }
 
@@ -381,6 +383,23 @@ class TestUpstreamUpdateObserveChanges(unittest.TestCase):
         self.assertEqual(result["comparisons"], [])
         self.assertEqual(result["status"], "pending_review")
         self.assertEqual(result["compatibility"], "not_assessed")
+
+    def test_news_only_change_reports_entries_without_archive_loads(self):
+        records = {"8.5": _watch_record(OLD_VERSION, "a" * 64)}
+        old = _snapshot(records)
+        new = _snapshot(records, news_sha="b")
+        new["news"] = [{"id": "2026-11-06-1", "time": "2026-11-06T10:00:00+00:00",
+                        "title": "PHP 8.6.0 RC6 available for testing", "sha256": "c" * 64}] + old["news"]
+        calls = []
+
+        result = upstream_update.observe_changes(old, new, calls.append)
+
+        self.assertEqual(calls, [])
+        self.assertEqual(result["comparisons"], [])
+        self.assertEqual(result["metadata"]["status"], "pending_review")
+        self.assertEqual(result["metadata"]["news_added"], ["2026-11-06-1"])
+        self.assertEqual(result["metadata"]["news_removed"], [])
+        self.assertEqual(result["status"], "pending_review")
 
     def test_changed_release_loads_exact_old_and_new_identities(self):
         old_archive, new_archive, old_release, new_release = _pair_archives()
