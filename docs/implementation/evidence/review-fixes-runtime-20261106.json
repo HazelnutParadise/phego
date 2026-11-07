@@ -43,15 +43,18 @@
     "T-129",
     "T-130"
   ],
-  "source_base": "a3dd3ac577fa3e17c8ceb0db77387faed478cb4f",
-  "captured_at": "2026-11-07T03:52:18.159660+00:00",
+  "source_base": "9ae9e1e9f5de5fc4bf8b2ae474203b85d14b5ab5",
+  "captured_at": "2026-11-07T05:18:55.241576+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
-    "engine.go": "744ed38b032e0a064994295a8d08eef126c4d85ac610a8dd8a0e46afa40f199c",
+    "engine.go": "8989ae6d6f32c8892c4323368a556a6294a09ce8d002c65fada559bf6720cfc5",
+    "engine_read_other.go": "124247d71a79e67b332b7d6c3fc677ff2d8310a9f9d562abdcaac043d4dba185",
+    "engine_read_unix.go": "b6c551ddd1f7f6a82347bd1c5507c3cc239094acb0d028a2510bb84ffde69733",
+    "engine_test.go": "0d9ec8e35414ae410c95fc9ac5768f37774bead63c30068329c7b6eabcb8ef6b",
     "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
     "internal/bytecode/limits_review_test.go": "c2b640c052007d787f853ff2dc9d11f24509e91b8d16c99db840ef0302b70c0f",
-    "internal/bytecode/verify.go": "5e9d459e1f31eea283e7d7c37cdb544192c245d5b8af04a93b464c9918f6e3c2",
+    "internal/bytecode/verify.go": "225a570566c7a01263cb1b769dcb264710210934fcc2423f788c4a9f2b10f480",
     "internal/ir/ssa/analyze.go": "a6f4b7f7627fb247eab759a985d7f6eb8ba583ac60b8fb6f583fdb3914a9623c",
     "internal/ir/ssa/ssa_test.go": "99a5c355fae14fc99d977b1ff18c874ce703bee89835f1a706cfd506252c866a",
     "internal/policy/absolute_review_fixes_test.go": "1f71a7579a79b871d85c37c3f1f5d58a6062776f62b2ada2f40159bf195e73ea",
@@ -73,12 +76,12 @@
     "internal/runtime/array_w12.go": "6c10f89dd27d1198d4a3cb446d2e75ca56fe7006cd244f48697a27f448655352",
     "internal/runtime/array_w12_safety_test.go": "9052cd8f59468dead9e7e32a1847ddb34f0d382ae9507e03636bab685b956060",
     "internal/runtime/array_w12_test.go": "a7f66506d7bd9f75d0a49fc3a48862998c5f990040aa953a5531e63adb6c8ae1",
-    "internal/runtime/execution.go": "fdc68cd3c628305f1a6dc178504f79e0d215eb9f8d8ee1a7e2b955ecb85c0902",
+    "internal/runtime/execution.go": "50421bacd8f04c5d1718a922f55f09e41dd254b361d13b6a91c915a41f43096a",
     "internal/runtime/execution_ci_review_test.go": "009311d1efc90fd2da63a6cf5c75085b9949a15c306ba37bf4b48183e0ec4373",
-    "internal/runtime/execution_oracle_test.go": "b2dbcf3f0b0fac70bb4580c90fc100c433f6341ecee93ea1225715c434b765a3",
-    "internal/runtime/execution_output.go": "4aeb8c2b86f3cc1c0931149cf08b34feb88826867565e75585116201b9646876",
+    "internal/runtime/execution_oracle_test.go": "05c407be196db9f2828def72093f1dfdc5f9db2101d45ffd4ecd3cd5e5e6078f",
+    "internal/runtime/execution_output.go": "88bf1d9e1fd0ceca8fccc4eef4a4d11cbe429011bb0bffcf7314af346c445be3",
     "internal/runtime/execution_snapshot_test.go": "a2bbeeca11f1298b3e95cc10b7b17b085f9dc28b650328063f1e7cf21ecf2ea6",
-    "internal/runtime/execution_test.go": "eb83af4b10ee6044e9e3c7f3f9468a031d4428722d3d899e9b6c61bdf032027d",
+    "internal/runtime/execution_test.go": "7b88869686aba2e24e4f5f8932c5e65940e3ed62478a72a6d66cf46b1bfeff14",
     "internal/runtime/object_model_test.go": "4f077ec0f0914c281ba7a4dad6d6960cc9e837a6bfc28fcd168fafa04a6cde79",
     "internal/runtime/object_review_r14_free_order_test.go": "17ccb6b61c5011edede681de1b4e40fb799d28edccd11b55a5f35fc45ced4d60",
     "internal/runtime/object_table.go": "b8159df6f1b7a7dcbe8d81d4ed562cae0a285a927499681ec81c61b33bc7f2c7",
@@ -87,14 +90,23 @@
     "internal/runtime/testdata/w13-ref-64.json": "a6c3da802dc23b0d89cbf6dc091e99b9f741cd5d1862ddf2eec86f29faef99f1",
     "internal/runtime/testdata/w13-run-32.json": "58a6196fa8905a3e151f70d5a4ea21ed7bbe138886bc227aea64b45d9db13bee",
     "internal/runtime/testdata/w13-run-64.json": "7e105562a62a8214bd2517635cced899b7fc014c604498fb5a09bfea94b6fcb4",
+    "policy.go": "39fb599707e49e514c01fe83471c8d45ff13472fe25ac6eb1894cb0b1d7bb405",
     "policy_review_test.go": "7d29781feb3aee90776e1c78cdaed56f2ace4e70f3630e99fd4fd13b20c09f9d",
+    "runfile_cancel_unix_test.go": "428402095d29ccb9907c1e79ad6cf290b006191cdf80a37338b44278e5191473",
+    "runfile_review_fixes_test.go": "df758e08e7b15295286470429919b9668aed8a75c970fdb6a7aac8463992cd0a",
     "tests/lifecycle/w14/buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
     "tests/lifecycle/w14/buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
-    "tests/lifecycle/w14/reference-32.json": "b633ecba34e7620ad9c59b7a1540350dc5471a6e3f8244de5f6cf8c3287d8e1c",
-    "tests/lifecycle/w14/reference.json": "328b8fb43176e1124a825f87e34a8f34276a7c5e4475b8801c1124b4b49bfbaa",
+    "tests/lifecycle/w14/reference-32.json": "400b48f095287eb6f02a92d85205ac4ca104afca3e1b1cb4f8847adc95ffda71",
+    "tests/lifecycle/w14/reference.json": "4e446835e83323aa4e35bf0a6179e98e58e48c392333456c8455bcd1ecfc061f",
     "tests/lifecycle/w14/solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
     "tests/lifecycle/w14/solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "tests/lifecycle/w14/solo_handler_fatal.php": "a4c92e76e303c340d7eb57cb14bc111a2a1994a87b42d4f0ff5e231bdbe06f41",
+    "tests/lifecycle/w14/solo_printf_empty.php": "06492454682c86837e67e2c51635357bf415c0c8a60dd916857abde56bd82f78",
+    "tests/lifecycle/w14/solo_return_dtor_exit.php": "5a7afa30c6ede78ca28c2a843cf27e618858781272721555730fc146db7bf557",
+    "tests/lifecycle/w14/solo_return_dtor_fatal.php": "d5a19699e54a33f6aa28b509ed5450ec9a2123c230f927aaf1d0dde2db2a0d3d",
+    "tests/lifecycle/w14/solo_return_dtor_throw.php": "2c4997aff0dc7e419a2153a4d0c95dee4bf7f15683b0a1390739ba151ca89b01",
     "tests/lifecycle/w14/solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
+    "tests/lifecycle/w14/solo_shutdown_return_dtor_exit.php": "9798b511edc5e603b41069ce6cc8755b5973d83d8dbbe42913680a6bb5caef1e",
     "tests/lifecycle/w14/solo_shutdown_throw.php": "99cbe67362e47138ed8b33690e087e7d088c9b36dc4a2db1b0646c135b613af3",
     "tests/semantics/w13-objects/matrix.php": "9fc87475e93de5ab002e37c328c873dd49f0bcdf92ff710997bb8382e851a5bc",
     "tests/semantics/w13-objects/review_r14_free_order.php": "39240d4e7c7e04565a3f9236964f171b392d53cc26c67d7b36efd9cc66032fb6",
@@ -211,12 +223,24 @@
       "exit_code": null,
       "log": "review-fixes-runtime-20261106/red-review4.log",
       "result": "A throwing only handler at shutdown prints bodyx (PHP prints nothing); exit in a handler drops the buffer; lock errors and limits add the deprecation; the held buffer is not counted; RunFile refuses devices and directories that php path runs."
+    },
+    {
+      "command": "go test of the review-5 tests on 063aebe: return-then-destructor solo fixtures, the handler level, the RunFile FIFO context and MaxSourceBytes=MaxInt",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review5.log",
+      "result": "A destructor throw or exit after the handler returned prints the buffer instead of the returned string and drops the deprecation; the handler sees level 0; a FIFO read ignores ctx; MaxSourceBytes=MaxInt reads nothing."
+    },
+    {
+      "command": "go test of the review-6 tests on 7b82315: a cancelled FIFO read left behind, a fatal error inside a handler, and a zero-length write",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review6.log",
+      "result": "Cancelled FIFO reads leave goroutines that take the next script (darwin); a handler fatal pops its buffer and the outer handler runs; printf(\"\") gets no deprecation."
     }
   ],
   "artifacts": {
     "build.log": {
       "path": "review-fixes-runtime-20261106/build.log",
-      "sha256": "90879240e3f8b01a8f7fcec0c48b4854d5ca4b9427eb5acdbd2e3c9d6fcdbfdb"
+      "sha256": "dd42bfe11a185a3864d7369849ecd6c113f69556a95e8c26a72f85eb8d2526a4"
     },
     "bytecode-budgets.go.txt": {
       "path": "review-fixes-runtime-20261106/bytecode-budgets.go.txt",
@@ -236,11 +260,11 @@
     },
     "fuzz.log": {
       "path": "review-fixes-runtime-20261106/fuzz.log",
-      "sha256": "7e4e046534fa406ee919086f0523ef66288f90d8eb553e53ec6fea082931cfad"
+      "sha256": "4587cb87dba8e2774ca274ea81cbcb8a188c5d1334cdabbf076ab4464fd6b244"
     },
     "go.log": {
       "path": "review-fixes-runtime-20261106/go.log",
-      "sha256": "fa195c355da2b0fe97c592597a323b306607baf5491b8728ef09cb5cb548e5c7"
+      "sha256": "4547b5cd8d64a3f8b9e89bc3977a16c8d98cf40fa323d81b4cf573912417c5f0"
     },
     "gofmt.log": {
       "path": "review-fixes-runtime-20261106/gofmt.log",
@@ -272,11 +296,11 @@
     },
     "python.log": {
       "path": "review-fixes-runtime-20261106/python.log",
-      "sha256": "e771d45ba79024f79bdc7a653c6119a876501c5ba6e337dc063ad8d7df0b7f45"
+      "sha256": "25eacb2a178bdfd3acf02d95b68cff4d358b90d36db5c10616c872b06464194e"
     },
     "race.log": {
       "path": "review-fixes-runtime-20261106/race.log",
-      "sha256": "add007e873d7c526ef57e8c8b16f5b617c9e881c99ef37e6b7887bb5e4333075"
+      "sha256": "a2b21598f9711d1cdb03276941cbdcab7e78cb694cfa78c91d5f3725717f8f82"
     },
     "red-main.log": {
       "path": "review-fixes-runtime-20261106/red-main.log",
@@ -294,6 +318,14 @@
       "path": "review-fixes-runtime-20261106/red-review4.log",
       "sha256": "9baae93397bf135429449571457b1cf4d911a7e7fd4615dcc6b7727f46bd7d9d"
     },
+    "red-review5.log": {
+      "path": "review-fixes-runtime-20261106/red-review5.log",
+      "sha256": "b9dfa7179c9e0c90787421a89df2ace8896efaac712bda4b9eca13a4352802cd"
+    },
+    "red-review6.log": {
+      "path": "review-fixes-runtime-20261106/red-review6.log",
+      "sha256": "76a8e4c9bee7dfc3430471886d16641b077ce9423acd5d01211e0c3266a47b48"
+    },
     "upstream-pair-spacing.log": {
       "path": "review-fixes-runtime-20261106/upstream-pair-spacing.log",
       "sha256": "8ac2bea002941847f719598da8d9366d90e47d02fcc321bae657d53a9baea301"
@@ -304,7 +336,7 @@
     },
     "vet.log": {
       "path": "review-fixes-runtime-20261106/vet.log",
-      "sha256": "89f25aed4a4b2c04e4f83abb1fb792613835ff684061382f0e6fa27766ecf615"
+      "sha256": "fb4f522463f7ea747c25a74abd20c7fc9b3a05886eafccd76d8814b67f4d7578"
     }
   },
   "limits": [

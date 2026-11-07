@@ -1,0 +1,37 @@
+# 063aebe with the return-then-destructor solo fixtures (before the fix)
+--- FAIL: TestExecutionOracleReplay (0.01s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.01s)
+        --- FAIL: TestExecutionOracleReplay/64/solo_return_dtor_exit (0.00s)
+            execution_oracle_test.go:606: output="<bodyxS>" code=4, oracle="<RS>"/4
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local shutdown:solo flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated shutdown:solo flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/solo_return_dtor_throw (0.00s)
+            execution_oracle_test.go:606: output="<bodyxcaught:dtor|after>" code=0, oracle="<Rcaught:dtor|after>"/0
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local caught flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated caught flush:outer]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/solo_return_dtor_exit (0.00s)
+            execution_oracle_test.go:606: output="<bodyxS>" code=4, oracle="<RS>"/4
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local shutdown:solo flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated shutdown:solo flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/solo_return_dtor_throw (0.00s)
+            execution_oracle_test.go:606: output="<bodyxcaught:dtor|after>" code=0, oracle="<Rcaught:dtor|after>"/0
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local caught flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated caught flush:outer]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.376s
+FAIL
+
+# 063aebe with TestOutputHandlerRunsOnItsOwnLevel (before the fix)
+    execution_test.go:664: level in handler=0, want 1
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.543s
+
+# 063aebe with the RunFile FIFO cancellation and MaxSourceBytes tests (before the fix)
+--- FAIL: TestRunFileUsesGrantedFilesOnly (0.00s)
+    engine_test.go:150: parse error through RunFile with MaxSourceBytes=MaxInt: phego: unsupported: PHP execution
+--- FAIL: TestRunFileFIFOReadEndsWithContext (5.00s)
+    runfile_cancel_unix_test.go:50: legacy=false: RunFile kept waiting for the FIFO writer after its context ended
+FAIL
+FAIL	github.com/HazelnutParadise/phego	5.557s
+FAIL

@@ -510,12 +510,17 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 		}
 	}
 	// The index itself (a pointer and three slice headers, within 128
-	// bytes), three int32 arrays per pc (body, enter, finally), and per
-	// span 16 bytes plus a 4-byte open entry.
+	// bytes), an int32 array per pc for body and enter, and for finally
+	// only when there is one, and per span 16 bytes plus a 4-byte open
+	// entry.
+	arrays := uint64(2)
+	if finallies > 0 {
+		arrays++
+	}
 	if err := b.reserve(128); err != nil {
 		return nil, err
 	}
-	if err := b.reserveMul(uint64(n), 3*4); err != nil {
+	if err := b.reserveMul(uint64(n), arrays*4); err != nil {
 		return nil, err
 	}
 	if err := b.reserveMul(uint64(2*h+finallies), 16+4); err != nil {
@@ -536,7 +541,9 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 	}
 	x.body = innermostSpans(bodies, n, false)
 	x.enter = innermostSpans(ranges, n, true)
-	x.finally = innermostSpans(finals, n, false)
+	if finallies > 0 {
+		x.finally = innermostSpans(finals, n, false)
+	}
 	return x, nil
 }
 
@@ -590,6 +597,9 @@ func (x *handlerIndex) checkEdge(from, to uint32, leave bool) error {
 	}
 	if h := x.enter[to]; h >= 0 && !inRange(h, from) {
 		return invalid("control enters protected range after start")
+	}
+	if x.finally == nil {
+		return nil // no finally range to leave
 	}
 	if h := x.finally[from]; h >= 0 && !leave && !inRange(h, to) {
 		return invalid("control leaves finally range without leave")

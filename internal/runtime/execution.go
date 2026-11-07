@@ -58,6 +58,9 @@ type executionBuffer struct {
 	data   []byte
 	filter outputFilter
 	name   string // PHP's callable name of filter, used in its diagnostics
+	// produced records any write while filter runs, even of no bytes, as
+	// PHP's PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT does.
+	produced bool
 }
 type executionDiagnostic struct{ level, message string }
 
@@ -78,23 +81,24 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // input; actions and output writers must cooperate with cancellation. Cleanup
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
-	ctx                       context.Context
-	cleanupContext            context.Context
-	request                   *Request
-	heap                      *heap
-	globals                   value
-	limits                    executionLimits
-	writer                    io.Writer
-	frames                    []executionFrame // by value; a depth reuses its locals storage
-	shutdown                  []executionAction
-	buffers                   []executionBuffer
-	output                    []byte
-	accepted                  int64
-	diagnostics               []executionDiagnostic
-	started, closed           bool
-	filtering                 bool
-	handlerEcho               []byte // output a running handler produced
-	filterHeld                int64  // size of the buffer a running handler filters
+	ctx             context.Context
+	cleanupContext  context.Context
+	request         *Request
+	heap            *heap
+	globals         value
+	limits          executionLimits
+	writer          io.Writer
+	frames          []executionFrame // by value; a depth reuses its locals storage
+	shutdown        []executionAction
+	buffers         []executionBuffer
+	output          []byte
+	accepted        int64
+	diagnostics     []executionDiagnostic
+	started, closed bool
+	filtering       bool
+	// outputRunning is PHP's OG(running) left set by a fatal error inside a
+	// handler, which bails out before the handler's buffer leaves the stack.
+	outputRunning             bool
 	destructorStop            bool
 	result                    executionResult
 	stop                      completion
@@ -448,7 +452,7 @@ func (x *execution) startBuffer(name string, filter outputFilter) error {
 	if filter != nil && name == "" {
 		return errors.New("output handler requires its PHP callable name")
 	}
-	if x.filtering {
+	if x.filtering || x.outputRunning {
 		return x.outputLockError("ob_start()")
 	}
 	if len(x.buffers) >= x.limits.depth {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
+	"os"
 	"strings"
 	"sync"
 
@@ -391,8 +393,10 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 // Config.Files when used alone, then compiles and runs it, as php path does:
 // a device or FIFO the backend opens is read as the script, a directory runs
 // as an empty script, and a socket cannot be opened. Reading stops at
-// MaxSourceBytes. Host directory mounts keep FIFOs, sockets, block devices
-// and unlisted character devices closed (see FileGrant.Root).
+// MaxSourceBytes, and a FIFO or device read ends when ctx does; opening a
+// FIFO through an fs.FS or Files is the host's code and may wait for a
+// writer. Host directory mounts keep FIFOs, sockets, block devices and
+// unlisted character devices closed (see FileGrant.Root).
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -448,7 +452,10 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		return &Result{Status: StatusFailed}, &fs.PathError{Op: "open", Path: path, Err: fs.ErrInvalid}
 	case mode.IsDir():
 	default:
-		data, err = io.ReadAll(io.LimitReader(f, int64(e.cfg.MaxSourceBytes)+1))
+		data, err = e.readSource(ctx, f, info)
+		if ctx.Err() != nil && err != nil {
+			return &Result{Status: StatusCancelled}, ctx.Err()
+		}
 		if err != nil {
 			return &Result{Status: StatusFailed}, err
 		}
@@ -458,6 +465,9 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	}
 	program, err := e.Compile(ctx, path, string(data))
 	if err != nil {
+		if ctx.Err() != nil {
+			return &Result{Status: StatusCancelled}, ctx.Err()
+		}
 		return &Result{Status: StatusFailed}, err
 	}
 	return e.run(ctx, program, true, opts...)
@@ -503,4 +513,20 @@ func Run(ctx context.Context, source string, opts ...RunOption) (*Result, error)
 		return &Result{Status: StatusFailed}, err
 	}
 	return e.Run(ctx, program, opts...)
+}
+
+// readSource reads one byte past MaxSourceBytes, so a larger source is
+// detected. A FIFO or device can block, as php path waits for a FIFO's
+// writer; a host file of that kind is read so that ending ctx ends the read
+// (see readHostFile). Any other fs.File is the host's trusted code and is
+// read as it is.
+func (e *Engine) readSource(ctx context.Context, f fs.File, info fs.FileInfo) ([]byte, error) {
+	limit := int64(e.cfg.MaxSourceBytes)
+	if limit < math.MaxInt64 {
+		limit++
+	}
+	if hf, ok := f.(*os.File); ok && !info.Mode().IsRegular() {
+		return readHostFile(ctx, hf, limit)
+	}
+	return io.ReadAll(io.LimitReader(f, limit))
 }
