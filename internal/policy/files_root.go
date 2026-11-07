@@ -175,7 +175,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		if !req.admitsRead(before) {
+		if !openable(before) {
 			return nil, denied("not-granted")
 		}
 		// A regular file may be replaced by a FIFO after Lstat. Open without
@@ -189,7 +189,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) || !req.admitsRead(actual) {
+		if !os.SameFile(before, actual) || !openable(actual) {
 			f.Close()
 			return nil, denied("path-changed")
 		}
@@ -226,7 +226,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		// Exclusive creation cannot follow a final symlink installed after Lstat.
 		return parent.OpenFile(leaf, flag|os.O_EXCL, perm)
 	}
-	if !before.Mode().IsRegular() && !(req.devices && isCharDevice(before.Mode()) && listedCharDevice(before)) {
+	if !before.Mode().IsRegular() && !(isCharDevice(before.Mode()) && listedCharDevice(before)) {
 		return nil, denied("not-granted")
 	}
 	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)

@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"testing/fstest"
@@ -200,43 +201,45 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 	}
 }
 
-// A script must be a regular file, with the results main had before
-// character devices became readable: under a Root mount the policy refuses
-// a device by its PHP path, including through an absolute link from another
-// mount; an fs.FS mount or a standalone Files reports the device, like a
-// directory, as a non-regular file.
-func TestRunFileRefusesDevices(t *testing.T) {
+// php /dev/null (PHP 8.5.12 CLI) runs an empty script, php /tmp runs a
+// directory as one, and php /dev/zero reads until the memory limit. RunFile
+// reads what the policy opens the same way, bounded by MaxSourceBytes; a
+// device the policy keeps closed stays a policy refusal on its PHP path.
+func TestRunFileReadsDevicesLikePHP(t *testing.T) {
 	app := t.TempDir()
 	if err := os.Symlink("/dev/null", filepath.Join(app, "null.php")); err != nil {
 		t.Fatal(err)
 	}
 	device := fstest.MapFS{"x.php": {Mode: fs.ModeDevice | fs.ModeCharDevice}}
-	root := Config{Policy: Policy{Files: []FileGrant{{Path: "/devices", Root: "/dev"}, {Path: "/app", Root: app}}}}
+	root := Config{MaxSourceBytes: 64, Policy: Policy{Files: []FileGrant{{Path: "/devices", Root: "/dev"}, {Path: "/app", Root: app}}}}
 	for _, tc := range []struct {
-		name   string
-		cfg    Config
-		path   string
-		target string // the PolicyError target, or "" for StatusFailed
+		name, path string
+		cfg        Config
+		want       string // "compiled", "source limit" or a refused PHP path
 	}{
-		{"root device", root, "/devices/null", "/devices/null"},
-		{"root link to device", root, "/app/null.php", "/devices/null"},
-		{"root directory", root, "/devices", ""},
-		{"fs mount device", Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: device}}}}, "/x.php", ""},
-		{"standalone files device", Config{Files: device}, "x.php", ""},
+		{"root null", "/devices/null", root, "compiled"},
+		{"root link to null", "/app/null.php", root, "compiled"},
+		{"root directory", "/devices", root, "compiled"},
+		{"root zero", "/devices/zero", root, "source limit"},
+		{"root unlisted device", "/devices/tty", root, "/devices/tty"},
+		{"fs mount device", "/x.php", Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: device}}}}, "compiled"},
+		{"standalone files device", "x.php", Config{Files: device}, "compiled"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			res, err := newPolicyEngine(t, tc.cfg).RunFile(context.Background(), tc.path)
-			if tc.target != "" {
-				var pe *PolicyError
-				if res == nil || res.Status != StatusPolicyDenied || !errors.As(err, &pe) ||
-					*pe != (PolicyError{Capability: CapabilityFileRead, Op: "open", Target: tc.target, Rule: RuleNotGranted}) {
-					t.Fatalf("RunFile(%s) = %+v, %#v; want StatusPolicyDenied not-granted on %s", tc.path, res, err, tc.target)
-				}
-				return
+			if _, err := os.Stat(strings.Replace(tc.path, "/devices", "/dev", 1)); strings.HasPrefix(tc.path, "/devices/") && err != nil {
+				t.Skip(err)
 			}
-			var pathErr *fs.PathError
-			if res == nil || res.Status != StatusFailed || !errors.As(err, &pathErr) || !errors.Is(err, fs.ErrInvalid) {
-				t.Fatalf("RunFile(%s) = %+v, %#v; want StatusFailed with an fs.ErrInvalid path error", tc.path, res, err)
+			res, err := newPolicyEngine(t, tc.cfg).RunFile(context.Background(), tc.path)
+			var unsupported *UnsupportedError
+			var limit *LimitError
+			var pe *PolicyError
+			switch {
+			case tc.want == "compiled" && errors.As(err, &unsupported) && unsupported.Feature == "PHP execution":
+			case tc.want == "source limit" && errors.As(err, &limit) && limit.Limit == "source size":
+			case strings.HasPrefix(tc.want, "/") && res != nil && res.Status == StatusPolicyDenied && errors.As(err, &pe) &&
+				*pe == (PolicyError{Capability: CapabilityFileRead, Op: "open", Target: tc.want, Rule: RuleNotGranted}):
+			default:
+				t.Fatalf("RunFile(%s) = %+v, %#v; want %s", tc.path, res, err, tc.want)
 			}
 		})
 	}

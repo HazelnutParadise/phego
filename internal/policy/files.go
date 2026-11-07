@@ -23,15 +23,7 @@ import (
 // needs a mount granted for writing. The result is an *os.File for a host
 // directory and the file system's own file for an fs.FS mount.
 func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, error) {
-	return p.openFile(name, openRequest{flag: flag, perm: perm, devices: true})
-}
-
-// OpenSource opens name for reading as a script's source. It differs from
-// OpenFile only on host directories, which admit regular files and
-// directories but refuse every device by its PHP path before opening it.
-// PHP's own stream opens, including include, use OpenFile.
-func (p *Policy) OpenSource(name string) (fs.File, error) {
-	return p.openFile(name, openRequest{flag: os.O_RDONLY})
+	return p.openFile(name, openRequest{flag: flag, perm: perm})
 }
 
 // openRequest is one open as it follows redirects between mounts.
@@ -39,9 +31,6 @@ type openRequest struct {
 	flag      int
 	perm      fs.FileMode
 	redirects int
-	// devices admits the host's listed character devices on host
-	// directories. The zero value is the stricter source rule.
-	devices bool
 }
 
 func (r openRequest) kind() Kind {
@@ -57,14 +46,13 @@ func (r openRequest) next() openRequest {
 	return r
 }
 
-// admitsRead reports what a host directory opens for reading: regular
-// files, directories and, for devices, the listed character devices.
-// FIFOs, sockets, block devices and other character devices stay closed: a
-// FIFO or terminal read could wait for a peer, and some devices act when
-// opened.
-func (r openRequest) admitsRead(fi fs.FileInfo) bool {
+// openable reports what a host directory opens for reading: regular files,
+// directories and the listed character devices. FIFOs, sockets, block
+// devices and other character devices stay closed: a FIFO or terminal read
+// could wait for a peer, and some devices act when opened.
+func openable(fi fs.FileInfo) bool {
 	m := fi.Mode()
-	return m.IsRegular() || m.IsDir() || r.devices && isCharDevice(m) && listedCharDevice(fi)
+	return m.IsRegular() || m.IsDir() || isCharDevice(m) && listedCharDevice(fi)
 }
 
 // filePart retains the root boundary of a symlink target through mount changes.
