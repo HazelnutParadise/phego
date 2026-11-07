@@ -192,8 +192,8 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         old = self._observe_home(_home(NEWS_ARTICLES, banner="banner A"))
         same = self._observe_home(_home(NEWS_ARTICLES, banner="banner B"))
         self.assertEqual(uw.compare(old, same)["status"], "unchanged")
-        outside = _home(NEWS_ARTICLES).replace(b"Older News Entries", b"Older news")
-        changed = uw.compare(old, self._observe_home(outside))
+        spaced = _home([article + "\n" for article in NEWS_ARTICLES])
+        changed = uw.compare(old, self._observe_home(spaced))
         self.assertEqual(changed["status"], "pending_review")
         self.assertEqual([entry["field"] for entry in changed["changes"]], ["news_sha256"])
         self.assertEqual((changed["news_added"], changed["news_removed"], changed["news_changed"]), ([], [], []))
@@ -259,11 +259,28 @@ class TestUpstreamWatchObserve(unittest.TestCase):
             "stray close": [good, "</article>"] + NEWS_ARTICLES[1:],
             "duplicate id": [good, good] + NEWS_ARTICLES[1:],
             "too many": [_article(f"2026-01-01-{n}", f"News {n}") for n in range(1, uw.MAX_NEWS + 2)],
+            "impossible date": [_article("2026-02-30-1", "Leap")] + NEWS_ARTICLES[1:],
+            "format character in title": [good.replace("News 2026-10-30-1", "News &#x202E;1")] + NEWS_ARTICLES[1:],
         }
         for name, articles in variants.items():
             with self.subTest(name):
                 with self.assertRaises(ValueError):
                     self._observe_home(_home(articles))
+        # An entry in other markup before the first or after the last article,
+        # or any change to the frame, must fail rather than be skipped.
+        page = _home(NEWS_ARTICLES)
+        frames = {
+            "entry before first": page.replace(b"<div class='home-content'>",
+                                               b"<div class='home-content'><div class=\"newsentry\"><h2>Security notice</h2></div>"),
+            "uppercase entry after last": page.replace(b'<p class="archive">',
+                                                      b'<ARTICLE class="newsentry">x</ARTICLE><p class="archive">'),
+            "frame text": page.replace(b"Older News Entries", b"Older news"),
+            "missing frame": page.replace(b"<div class='home-content'>", b""),
+        }
+        for name, home in frames.items():
+            with self.subTest(name):
+                with self.assertRaises(ValueError):
+                    self._observe_home(home)
         with self.assertRaises(ValueError):
             self._observe_home(_home(NEWS_ARTICLES).replace(b"News 2026-10-30-1", b"News \xff"))
 
@@ -534,6 +551,10 @@ class TestUpstreamWatchCompare(unittest.TestCase):
             "bad digest": [dict(entry, sha256="F" * 64)],
             "padded title": [dict(entry, title=" News")],
             "control title": [dict(entry, title="News\nline")],
+            "c1 control title": [dict(entry, title="News\x85line")],
+            "bidi title": [dict(entry, title="News\u202eline")],
+            "impossible id date": [dict(entry, id="2026-99-99-1")],
+            "impossible time": [dict(entry, time="2026-11-05T25:00:00+00:00")],
             "too many": [dict(entry, id=f"2026-01-01-{n}") for n in range(1, uw.MAX_NEWS + 2)],
         }
         for name, news in variants.items():

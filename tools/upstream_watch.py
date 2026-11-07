@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Observe official PHP release metadata and compare candidate changes."""
 import argparse
+import datetime
 import hashlib
 import html
 import json
 import os
 import re
 import sys
+import unicodedata
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -30,6 +32,13 @@ NEWS_ID = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,3}\Z")
 NEWS_TIME = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:Z|[+-][0-9]{2}:[0-9]{2})\Z")
 ARTICLE_OPEN = b'<article class="newsentry">'
 ARTICLE_CLOSE = b"</article>"
+ANY_ARTICLE_OPEN = re.compile(rb"<article", re.IGNORECASE)
+ANY_ARTICLE_CLOSE = re.compile(rb"</article", re.IGNORECASE)
+# The homepage frame around the entries, as php.net renders it (2026-11-07).
+# Content outside the articles must be exactly this, so an entry in any other
+# markup fails instead of being skipped.
+NEWS_FRAME_START = b'<section id="layout-content">\n<div class=\'home-content\'>'
+NEWS_FRAME_END = b'<p class="archive"><a href="/archive/">Older News Entries</a></p></div>'
 # The homepage header of one entry, as php.net renders it. Anything else fails.
 ARTICLE_HEADER = re.compile(
     rb'<article class="newsentry">\s*<header class="title">\s*'
@@ -81,8 +90,13 @@ def _news_entry(entry):
         raise ValueError("invalid news entry id")
     if not isinstance(entry["time"], str) or not NEWS_TIME.fullmatch(entry["time"]):
         raise ValueError("invalid news entry time")
+    try:
+        datetime.date.fromisoformat(entry["id"][:10])
+        datetime.datetime.fromisoformat(entry["time"].replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("invalid news entry date") from exc
     title = entry["title"]
-    if not isinstance(title, str) or not title or len(title) > MAX_TITLE or title != title.strip() or any(ord(c) < 32 or ord(c) == 127 for c in title):
+    if not isinstance(title, str) or not title or len(title) > MAX_TITLE or title != title.strip() or any(unicodedata.category(c) in ("Cc", "Cf") for c in title):
         raise ValueError("invalid news entry title")
     if not isinstance(entry["sha256"], str) or not SHA64.fullmatch(entry["sha256"]):
         raise ValueError("invalid news entry digest")
@@ -101,35 +115,49 @@ def _news_list(news):
 def _news(content):
     """Split the homepage content section into its news entries, in page order.
 
-    Every article must have the homepage entry markup and nothing but
-    whitespace may sit between two articles; otherwise this fails rather than
-    returning a partial or empty list.
+    Every article must have the homepage entry markup, nothing but whitespace
+    may sit between two articles, and the rest of the section must be the
+    fixed homepage frame; otherwise this fails rather than returning a partial
+    or empty list.
     """
-    total = content.count(b"<article")
-    if total == 0 or total != content.count(ARTICLE_OPEN) or content.count(b"</article") != content.count(ARTICLE_CLOSE):
-        raise ValueError("unexpected news article markup")
+    total = len(ANY_ARTICLE_OPEN.findall(content))
+    if total == 0:
+        raise ValueError("no news articles in homepage content")
+    if total != content.count(ARTICLE_OPEN) or len(ANY_ARTICLE_CLOSE.findall(content)) != content.count(ARTICLE_CLOSE):
+        raise ValueError("news article tag is not the homepage entry markup")
+    first = content.find(ARTICLE_OPEN)
+    if content[:first].rstrip() != NEWS_FRAME_START:
+        raise ValueError("unexpected markup before the first news article")
     entries = []
-    start = content.find(ARTICLE_OPEN)
+    start = first
     while start >= 0:
+        position = "news article %d at byte %d" % (len(entries) + 1, start)
         end = content.find(ARTICLE_CLOSE, start)
         if end < 0:
-            raise ValueError("unterminated news article")
+            raise ValueError(position + " is not terminated")
         end += len(ARTICLE_CLOSE)
         article = content[start:end]
+        if len(ANY_ARTICLE_OPEN.findall(article)) != 1:
+            raise ValueError(position + " contains another article")
         match = ARTICLE_HEADER.match(article)
-        if article.count(b"<article") != 1 or match is None:
-            raise ValueError("unexpected news article markup")
+        if match is None:
+            raise ValueError(position + " header does not match the homepage entry markup")
         time, year, anchor, ident, title = (part.decode("utf-8") for part in match.groups())
         if anchor != ident or ident[:4] != year:
-            raise ValueError("news article link does not match its id")
-        entries.append(_news_entry({"id": ident, "time": time, "title": html.unescape(title).strip(),
-                                    "sha256": hashlib.sha256(article).hexdigest()}))
+            raise ValueError(position + " link does not match its id")
+        try:
+            entries.append(_news_entry({"id": ident, "time": time, "title": html.unescape(title).strip(),
+                                        "sha256": hashlib.sha256(article).hexdigest()}))
+        except ValueError as exc:
+            raise ValueError(position + ": " + str(exc)) from exc
         following = content.find(ARTICLE_OPEN, end)
         if following >= 0 and content[end:following].strip():
-            raise ValueError("unexpected markup between news articles")
+            raise ValueError("unexpected markup after " + position)
+        if following < 0 and content[end:].strip() != NEWS_FRAME_END:
+            raise ValueError("unexpected markup after the last news article")
         start = following
-    if len(entries) != total or content.count(ARTICLE_CLOSE) != total:
-        raise ValueError("unexpected news article markup")
+    if len(entries) != total:
+        raise ValueError("news article count does not match the parsed entries")
     return _news_list(entries)
 
 

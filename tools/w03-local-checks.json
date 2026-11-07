@@ -425,6 +425,7 @@
     "test_upstream_update.TestUpstreamUpdateObserveChanges.test_changed_release_loads_exact_old_and_new_identities",
     "test_upstream_update.TestUpstreamUpdateObserveChanges.test_loader_exception_blocks_one_series_without_discarding_another",
     "test_upstream_update.TestUpstreamUpdateObserveChanges.test_metadata_only_changes_are_visible_without_archive_loads",
+    "test_upstream_update.TestUpstreamUpdateObserveChanges.test_news_only_change_reports_entries_without_archive_loads",
     "test_upstream_update.TestUpstreamUpdateObserveChanges.test_unchanged_snapshots_do_not_load_archives",
     "test_upstream_update_io.UpdateBoundaryTests.test_both_hashes_are_verified_before_either_archive_is_decoded",
     "test_upstream_update_io.UpdateBoundaryTests.test_chunk_size_slow_drip_obeys_total_deadline",
