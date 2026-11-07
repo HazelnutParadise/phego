@@ -12,7 +12,7 @@
     "T-074"
   ],
   "source_base": "51887857e1eb0f1cfeff3e1e3ff35ce7bfde580e",
-  "captured_at": "2026-11-07T11:31:23.416036+00:00",
+  "captured_at": "2026-11-07T11:34:39.936949+00:00",
   "source_sha256": {
     "engine.go": "665c89896bcaaba1996fc67867cfb04a14800bf5d674752f9c1546578333c1c5",
     "policy.go": "05f011f44b4ae607ea96752de6226670870545186d486a42ec914601bc49ba81",
@@ -100,6 +100,12 @@
       "result": "TestRootRefusedFIFOAliasIsNotOpened fails: the refused open released the waiting FIFO writer."
     },
     {
+      "command": "CGO_ENABLED=0 cross-compiled policy and root test binaries run in the arm64, amd64 and i386 images",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/linux-images.log",
+      "result": "All tests pass on the three Linux kernels; only the two existing case-insensitive-volume tests skip."
+    },
+    {
       "command": ".github/workflows/special-files.yml run 42365853229 on a059e00, macOS 15 arm64: locked PHP 8.5.12 built from source, probe.sh, then go test -run 'TestRoot|TestRunFile' ./internal/policy .",
       "exit_code": 0,
       "log": "w20-special-files-20261107/ci/macos-15/php-probe.log",
@@ -122,6 +128,12 @@
       "exit_code": 0,
       "log": "w20-special-files-20261107/ci/checks.txt",
       "result": "All 47 checks succeed, including Go checks (ubuntu go test, race, vet), the Linux reference workflows and the new macOS and Windows jobs."
+    },
+    {
+      "command": "CGO_ENABLED=0 cross-compiled policy and root test binaries at a059e00 run in the arm64, amd64 and i386 images",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/linux-images.log",
+      "result": "Every test passes on the three Linux kernels; only the two existing case-insensitive-volume tests skip."
     },
     {
       "command": "gofmt -l .",
@@ -203,7 +215,7 @@
     },
     "ci/windows-2025/os.txt": {
       "path": "w20-special-files-20261107/ci/windows-2025/os.txt",
-      "sha256": "5ad411c6f644b9af8a70751f32ae5513483d74eb1340c2badc5686ca36daac1b"
+      "sha256": "c4683cd47b45891283648f4867d9b2e99988db4f83f1575b8dab4d8ee7b68c5f"
     },
     "ci/windows-2025/phego-report.log": {
       "path": "w20-special-files-20261107/ci/windows-2025/phego-report.log",
@@ -211,11 +223,11 @@
     },
     "ci/windows-2025/php-probe.log": {
       "path": "w20-special-files-20261107/ci/windows-2025/php-probe.log",
-      "sha256": "a12442a8e574959eb130034a525d0377c5b6ae9eb365039c854554cadefc0027"
+      "sha256": "6d46a4fc3f525db596030c55bffbde32f6a5f9508c82e13c4e367d548167c2d3"
     },
     "ci/windows-2025/php-version.txt": {
       "path": "w20-special-files-20261107/ci/windows-2025/php-version.txt",
-      "sha256": "f063e7903715baacc3f714589158e54848ebbb91b0c702b47fecb53e6e7ac0f2"
+      "sha256": "298fab8730d44a671f5b955b90cdd3a66858d899209e49272ba1e123856f60ce"
     },
     "docs.log": {
       "path": "w20-special-files-20261107/docs.log",
@@ -248,6 +260,10 @@
     "gofmt.log": {
       "path": "w20-special-files-20261107/gofmt.log",
       "sha256": "af0f5167053b838b0bab7717e58f0c6fbc519203653497bed95a3d0287d2bd30"
+    },
+    "linux-images.log": {
+      "path": "w20-special-files-20261107/linux-images.log",
+      "sha256": "0916f942d104f6747904878b4e1d77a087ece33d2eb7c8766d9d95b0cf4f2b9d"
     },
     "php/amd64.log": {
       "path": "w20-special-files-20261107/php/amd64.log",
