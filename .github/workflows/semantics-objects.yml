@@ -50,7 +50,7 @@ jobs:
         env:
           CGO_ENABLED: '0'
           PHEGO_W13_REFERENCE: ${{ runner.temp }}/w13-reference
-        run: go test -count=1 -run '^TestW13PHP8512Objects/${{ matrix.profile }}$' -v ./internal/runtime
+        run: go test -count=1 -run '^TestW13PHP8512Objects$/^${{ matrix.profile }}$' -v ./internal/runtime
       - uses: actions/upload-artifact@v4
         if: always()
         with:

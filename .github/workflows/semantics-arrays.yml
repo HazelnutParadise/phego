@@ -44,7 +44,7 @@ jobs:
       - name: Compare with Go runtime
         env:
           PHEGO_W12_REFERENCE: ${{ matrix.arch != 'amd64' && format('{0}/w12-reference', runner.temp) || '' }}
-        run: go test -run '^TestW12PHP8512Arrays/${{ matrix.profile }}$' -v ./internal/runtime
+        run: go test -run '^TestW12PHP8512Arrays$/^${{ matrix.profile }}$' -v ./internal/runtime
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -43,4 +43,4 @@ jobs:
       - name: Replay lifecycle actions with the matching guest width
         env:
           CGO_ENABLED: '0'
-        run: go test -count=1 -run '^TestExecutionOracleReplay/${{ matrix.profile }}$' -v ./internal/runtime
+        run: go test -count=1 -run '^TestExecutionOracleReplay$/^${{ matrix.profile }}$' -v ./internal/runtime
