@@ -64,7 +64,7 @@ func TestWindowsSpecialFileReport(t *testing.T) {
 		open("fopen <work>\\NUL "+c.mode, "/app/NUL", c.flag)
 	}
 	open("fopen <work>\\sub\\CON w", "/app/sub/CON", modes[1].flag)
-	for _, c := range modes[:4] {
+	for _, c := range modes {
 		open("fopen dir "+c.mode, "/app/d", c.flag)
 	}
 	for _, c := range modes[:2] {

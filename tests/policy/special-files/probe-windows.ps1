@@ -56,7 +56,7 @@ foreach ($mode in 'w', 'r+', 'a', 'x') {
 Run 'fopen <work>\sub\CON w' @($Probe, 'w', (Join-Path $Work 'sub\CON'), 'write')
 Run 'include <work>\NUL' @($Probe, 'include', (Join-Path $Work 'NUL'))
 Run 'php <work>\NUL' @((Join-Path $Work 'NUL'))
-foreach ($mode in 'r', 'w', 'r+', 'a') {
+foreach ($mode in 'r', 'w', 'r+', 'a', 'x') {
     Run "fopen dir $mode" @($Probe, $mode, (Join-Path $Work 'd'))
 }
 Run 'php dir' @((Join-Path $Work 'd'))

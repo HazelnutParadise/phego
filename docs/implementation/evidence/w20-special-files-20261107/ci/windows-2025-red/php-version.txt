@@ -1,0 +1,5 @@
+PHP 8.5.12 (cli) (built: Oct 26 2026 09:51:07) (NTS Visual C++ 2022 x64)
+Copyright (c) The PHP Group
+Built by The PHP Group
+Zend Engine v4.5.12, Copyright (c) Zend Technologies
+    with Zend OPcache v8.5.12, Copyright (c), by Zend Technologies

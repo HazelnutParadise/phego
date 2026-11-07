@@ -79,6 +79,10 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		} else {
 			st, e = parent.Lstat(component)
 		}
+		reserved := reservedDeviceName(component, e)
+		if reserved {
+			e = reservedNameError(name)
+		}
 		if errors.Is(e, fs.ErrNotExist) && p.mountAncestor(currentName) {
 			if len(stack) >= 256 {
 				return nil, denied("protection-check-limit")
@@ -88,7 +92,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			continue
 		}
 		if e != nil {
-			if parent != nil && len(pending) == 0 && errors.Is(e, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
+			if parent != nil && !reserved && len(pending) == 0 && errors.Is(e, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
 				leaf = component
 				break
 			}
@@ -155,6 +159,9 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		names = append(names, component)
 	}
 	if leaf == "" {
+		if err := directoryOpenError(name); err != nil && stack[len(stack)-1].root != nil && (kind == FileRead || grant.Write) {
+			return nil, err
+		}
 		if kind == FileRead && stack[len(stack)-1].root != nil {
 			return stack[len(stack)-1].root.Open(".")
 		}
@@ -173,6 +180,11 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	}
 	if before != nil && flag&(os.O_CREATE|os.O_EXCL) == os.O_CREATE|os.O_EXCL {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
+	}
+	if before != nil && before.IsDir() {
+		if err := directoryOpenError(name); err != nil {
+			return nil, err
+		}
 	}
 	if kind == FileRead {
 		// Opening a FIFO or device already acts on it, so aliases are checked

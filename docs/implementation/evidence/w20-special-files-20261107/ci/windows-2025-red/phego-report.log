@@ -1,0 +1,48 @@
+== fopen <work>\NUL r
+error *policy.PolicyError: policy: file-read open "/app/NUL" refused (outside-root)
+== fopen <work>\nul r
+error *policy.PolicyError: policy: file-read open "/app/nul" refused (outside-root)
+== fopen <work>\NUL.txt r
+error *fs.PathError: statat NUL.txt: The system cannot find the file specified.
+== fopen <work>\sub\NUL r
+error *policy.PolicyError: policy: file-read open "/app/sub/NUL" refused (outside-root)
+== fopen <work>\CON r
+error *policy.PolicyError: policy: file-read open "/app/CON" refused (outside-root)
+== fopen <work>\COM1 r
+error *policy.PolicyError: policy: file-read open "/app/COM1" refused (outside-root)
+== fopen <work>\CONIN$ r
+error *policy.PolicyError: policy: file-read open "/app/CONIN$" refused (outside-root)
+== fopen <work>\CONOUT$ r
+error *policy.PolicyError: policy: file-read open "/app/CONOUT$" refused (outside-root)
+== fopen <work>\LPT1 r
+error *policy.PolicyError: policy: file-read open "/app/LPT1" refused (outside-root)
+== fopen <work>\NUL\x r
+error *policy.PolicyError: policy: file-read open "/app/NUL/x" refused (outside-root)
+== fopen <work>\NUL w
+error *policy.PolicyError: policy: file-write open "/app/NUL" refused (outside-root)
+== fopen <work>\NUL r+
+error *policy.PolicyError: policy: file-write open "/app/NUL" refused (outside-root)
+== fopen <work>\NUL a
+error *policy.PolicyError: policy: file-write open "/app/NUL" refused (outside-root)
+== fopen <work>\NUL x
+error *policy.PolicyError: policy: file-write open "/app/NUL" refused (outside-root)
+== fopen <work>\sub\CON w
+error *policy.PolicyError: policy: file-write open "/app/sub/CON" refused (outside-root)
+== fopen dir r
+opened mode=drwxrwxrwx stat-error=<nil>
+read "" read C:\Users\RUNNER~1\AppData\Local\Temp\TestWindowsSpecialFileReport2973898945\001\d: Incorrect function.
+== fopen dir w
+error *fs.PathError: openat d: is a directory
+== fopen dir r+
+error *fs.PathError: openat d: is a directory
+== fopen dir a
+error *fs.PathError: openat d: is a directory
+== fopen <work> r
+opened mode=drwxrwxrwx stat-error=<nil>
+read "" read C:\Users\RUNNER~1\AppData\Local\Temp\TestWindowsSpecialFileReport2973898945\001\.: Incorrect function.
+== fopen <work> w
+error *fs.PathError: open /app: invalid argument
+== fopen <work>\ads:s r
+error *policy.PolicyError: policy: file-read open "/app/ads:s" refused (outside-root)
+== fopen <work>\ads:s w
+error *policy.PolicyError: policy: file-write open "/app/ads:s" refused (outside-root)
