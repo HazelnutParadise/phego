@@ -50,7 +50,9 @@ type FileGrant struct {
 	// not leave their selected mount. Every file in it opens as PHP's open(2)
 	// opens it, under the host process's own permissions: a FIFO waits for its
 	// peer, a device acts as it does for PHP, and a socket does not open.
-	// Grant a directory holding only what PHP may use, for example a
+	// On Windows, as for PHP's CreateFile, a reserved device name such as
+	// NUL or COM1 is missing in every directory and a directory does not
+	// open. Grant a directory holding only what PHP may use, for example a
 	// directory with a few device nodes rather than /dev. The host must
 	// control the layout, including existing hard links.
 	Root string
