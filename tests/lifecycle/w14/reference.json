@@ -333,11 +333,32 @@
       "combined": "flush:lock\nFatal error: ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\nshutdown:solo\n[S]"
     },
     {
+      "case": "solo_return_dtor_exit",
+      "exit_code": 4,
+      "stdout": "<RS>",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n<RS>"
+    },
+    {
+      "case": "solo_return_dtor_throw",
+      "exit_code": 0,
+      "stdout": "<Rcaught:dtor|after>",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\ncaught\nflush:outer\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\ncaught\nflush:outer\n<Rcaught:dtor|after>"
+    },
+    {
       "case": "solo_shutdown_exit",
       "exit_code": 3,
       "stdout": "",
       "stderr": "flush:exit\n",
       "combined": "flush:exit\n"
+    },
+    {
+      "case": "solo_shutdown_return_dtor_exit",
+      "exit_code": 4,
+      "stdout": "",
+      "stderr": "flush:inner\ndestroy:local\n",
+      "combined": "flush:inner\ndestroy:local\n"
     },
     {
       "case": "solo_shutdown_throw",
@@ -444,7 +465,10 @@
     "shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
     "solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
     "solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "solo_return_dtor_exit.php": "5a7afa30c6ede78ca28c2a843cf27e618858781272721555730fc146db7bf557",
+    "solo_return_dtor_throw.php": "2c4997aff0dc7e419a2153a4d0c95dee4bf7f15683b0a1390739ba151ca89b01",
     "solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
+    "solo_shutdown_return_dtor_exit.php": "9798b511edc5e603b41069ce6cc8755b5973d83d8dbbe42913680a6bb5caef1e",
     "solo_shutdown_throw.php": "99cbe67362e47138ed8b33690e087e7d088c9b36dc4a2db1b0646c135b613af3",
     "uncaught.php": "ac1040cfe0c54d7603c2f2c0eea6104cbef05d3a1048756d4e0e3dbb72e528f5",
     "uncaught_shutdown_exit.php": "2d3cf1489a2b8093db3e7a10b63fe7722667b9c1c605e726eed24e437760231d",

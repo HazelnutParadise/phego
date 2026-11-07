@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"strings"
 	"sync"
 
@@ -391,8 +392,9 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 // Config.Files when used alone, then compiles and runs it, as php path does:
 // a device or FIFO the backend opens is read as the script, a directory runs
 // as an empty script, and a socket cannot be opened. Reading stops at
-// MaxSourceBytes. Host directory mounts keep FIFOs, sockets, block devices
-// and unlisted character devices closed (see FileGrant.Root).
+// MaxSourceBytes, and a FIFO or device read ends when ctx does. Host
+// directory mounts keep FIFOs, sockets, block devices and unlisted
+// character devices closed (see FileGrant.Root).
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -435,7 +437,8 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
-	defer f.Close()
+	closeFile := sync.OnceValue(f.Close)
+	defer closeFile()
 	info, err := f.Stat()
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -448,7 +451,10 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		return &Result{Status: StatusFailed}, &fs.PathError{Op: "open", Path: path, Err: fs.ErrInvalid}
 	case mode.IsDir():
 	default:
-		data, err = io.ReadAll(io.LimitReader(f, int64(e.cfg.MaxSourceBytes)+1))
+		data, err = e.readSource(ctx, f, info, closeFile)
+		if ctx.Err() != nil && err != nil {
+			return &Result{Status: StatusCancelled}, ctx.Err()
+		}
 		if err != nil {
 			return &Result{Status: StatusFailed}, err
 		}
@@ -503,4 +509,36 @@ func Run(ctx context.Context, source string, opts ...RunOption) (*Result, error)
 		return &Result{Status: StatusFailed}, err
 	}
 	return e.Run(ctx, program, opts...)
+}
+
+// readSource reads one byte past MaxSourceBytes, so a larger source is
+// detected. A FIFO or device can block, as php path waits for a FIFO's
+// writer, so its read runs apart and ending ctx returns at once: closing the
+// file ends a read waiting in the runtime poller, and where Go cannot poll
+// the file (FIFOs on darwin, Go issue 24164) the read ends when the file is
+// next readable. closeFile is the caller's once-only Close.
+func (e *Engine) readSource(ctx context.Context, f fs.File, info fs.FileInfo, closeFile func() error) ([]byte, error) {
+	limit := int64(e.cfg.MaxSourceBytes)
+	if limit < math.MaxInt64 {
+		limit++
+	}
+	if info.Mode().IsRegular() {
+		return io.ReadAll(io.LimitReader(f, limit))
+	}
+	type read struct {
+		data []byte
+		err  error
+	}
+	done := make(chan read, 1)
+	go func() {
+		data, err := io.ReadAll(io.LimitReader(f, limit))
+		done <- read{data, err}
+	}()
+	select {
+	case r := <-done:
+		return r.data, r.err
+	case <-ctx.Done():
+		closeFile()
+		return nil, ctx.Err()
+	}
 }

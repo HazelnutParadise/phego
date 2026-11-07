@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 52 {
-		t.Fatalf("want 52 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 55 {
+		t.Fatalf("want 55 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -86,7 +86,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 				handler := func(file string, line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", file, line) }
 				// solo_ fixtures do not require common.php.
 				if strings.HasPrefix(tc.Case, "solo_") {
-					return replaySoloOutputCase(t, x, tc.Case, event, handler(tc.Case, 6), handler(tc.Case, 7))
+					return replaySoloOutputCase(t, x, tc.Case, event)
 				}
 				_, err := x.object("Tracked", func(x *execution) completion { event("destroy:global"); return x.write([]byte("D")) })
 				must(err)
@@ -655,72 +655,102 @@ func replayExecutionOracle(t *testing.T, width int) {
 	}
 }
 
-// replaySoloOutputCase replays the solo_ fixtures, which set up their own
-// shutdown function and buffers. The handler under test is declared after
-// an optional shutdown function and outer buffer, one line each from line 6.
-func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(string), line6, line7 string) completion {
+// soloCases describes the solo_ fixtures, which set up their own shutdown
+// function and buffers: the line of each closure (0 when absent) and what
+// the handler under test does after it echoes "x".
+var soloCases = map[string]struct {
+	shutdown, outer, inner int
+	shutdownOut            string
+	event                  string
+	end                    string // "throw", "exit", "lock", "dtor-throw" or "dtor-exit"
+	flush                  bool   // main calls ob_end_flush()
+}{
+	"solo_shutdown_throw":            {0, 0, 6, "", "flush:throw", "throw", false},
+	"solo_shutdown_exit":             {0, 6, 7, "", "flush:exit", "exit", false},
+	"solo_end_exit":                  {6, 7, 8, "S", "flush:exit", "exit", true},
+	"solo_end_lock_echo":             {6, 0, 7, "[S]", "flush:lock", "lock", true},
+	"solo_return_dtor_throw":         {0, 7, 8, "", "flush:inner", "dtor-throw", true},
+	"solo_return_dtor_exit":          {7, 8, 9, "S", "flush:inner", "dtor-exit", true},
+	"solo_shutdown_return_dtor_exit": {0, 6, 7, "", "flush:inner", "dtor-exit", false},
+}
+
+// replaySoloOutputCase replays one solo_ fixture.
+func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(string)) completion {
 	t.Helper()
+	tc, ok := soloCases[name]
+	if !ok {
+		t.Fatalf("unknown solo fixture %s", name)
+	}
 	must := func(err error) {
 		t.Helper()
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
-	outer, inner := line6, line7
-	if name == "solo_end_exit" || name == "solo_end_lock_echo" {
+	handler := func(line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", name, line) }
+	if tc.shutdown != 0 {
 		must(x.registerShutdown(func(x *execution) completion {
 			event("shutdown:solo")
-			if name == "solo_end_lock_echo" {
-				return x.write([]byte("[S]"))
-			}
-			return x.write([]byte("S"))
+			return x.write([]byte(tc.shutdownOut))
 		}))
-		outer, inner = line7, strings.Replace(line7, ":7}", ":8}", 1)
 	}
-	switch name {
-	case "solo_shutdown_throw":
-		inner = outer // the only buffer, declared on line 6
-	case "solo_end_lock_echo":
-		inner = outer
-	default:
-		must(x.startBuffer(outer, func(_ *execution, b []byte) ([]byte, completion) {
+	if tc.outer != 0 {
+		must(x.startBuffer(handler(tc.outer), func(_ *execution, b []byte) ([]byte, completion) {
 			event("flush:outer")
+			if tc.end == "dtor-throw" || tc.end == "dtor-exit" {
+				return []byte("<" + string(b) + ">"), completion{}
+			}
 			return []byte("[" + string(b) + "]"), completion{}
 		}))
 	}
-	must(x.startBuffer(inner, func(x *execution, b []byte) ([]byte, completion) {
-		switch name {
-		case "solo_shutdown_throw":
-			event("flush:throw")
-		case "solo_end_lock_echo":
-			event("flush:lock")
-		default:
-			event("flush:exit")
+	must(x.startBuffer(handler(tc.inner), func(x *execution, b []byte) ([]byte, completion) {
+		event(tc.event)
+		switch tc.end {
+		case "dtor-throw", "dtor-exit":
+			// The local's destructor runs as the handler's frame unwinds,
+			// after the handler returned "R".
+			v, err := x.object("T", func(_ *execution) completion {
+				event("destroy:local")
+				if tc.end == "dtor-throw" {
+					return completion{kind: endThrow, err: errors.New("dtor")}
+				}
+				return completion{kind: endExit, code: 4}
+			})
+			must(err)
+			must(x.local(&v))
 		}
 		if c := x.write([]byte("x")); c.kind != endNormal {
 			return nil, c
 		}
-		switch name {
-		case "solo_shutdown_throw":
+		switch tc.end {
+		case "throw":
 			return nil, completion{kind: endThrow, err: errors.New("Uncaught Exception: boom")}
-		case "solo_end_lock_echo":
+		case "exit":
+			return nil, completion{kind: endExit, code: 3}
+		case "lock":
 			if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
 				return nil, c
 			}
 			return b, completion{}
 		}
-		return nil, completion{kind: endExit, code: 3}
+		return []byte("R"), completion{}
 	}))
-	if c := x.write([]byte("body")); c.kind != endNormal {
+	if c := x.write([]byte("body")); c.kind != endNormal || !tc.flush {
 		return c
 	}
-	if name == "solo_end_exit" || name == "solo_end_lock_echo" {
-		if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+	c := x.endBuffer("ob_end_flush")
+	if tc.end == "dtor-throw" && c.kind == endThrow {
+		event("caught")
+		if c := x.write([]byte("caught:dtor")); c.kind != endNormal {
 			return c
 		}
-		if name == "solo_end_exit" {
-			return x.write([]byte("after"))
-		}
+		return x.write([]byte("|after"))
+	}
+	if c.kind != endNormal {
+		return c
+	}
+	if name == "solo_end_exit" {
+		return x.write([]byte("after"))
 	}
 	return completion{}
 }

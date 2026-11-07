@@ -645,3 +645,40 @@ func TestOutputHandlerEchoCountsFilteredBuffer(t *testing.T) {
 		}
 	}
 }
+
+// PHP 8.5.12 reports ob_get_level() == 1 inside the only buffer's handler:
+// the running buffer stays on the stack until its handler returns.
+func TestOutputHandlerRunsOnItsOwnLevel(t *testing.T) {
+	r, _ := NewRequest(nil)
+	if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.BeginInit(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Ready(); err != nil {
+		t.Fatal(err)
+	}
+	x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 4096})
+	if err != nil {
+		t.Fatal(err)
+	}
+	level := -1
+	cleanup, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	result := x.run(cleanup, func(x *execution) completion {
+		if err := x.startBuffer("{closure:/w/t.php:2}", func(x *execution, b []byte) ([]byte, completion) {
+			level = len(x.buffers)
+			return b, completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		if c := x.write([]byte("body")); c.kind != endNormal {
+			return c
+		}
+		return x.endBuffer("ob_end_flush")
+	})
+	if level != 1 || string(result.output) != "body" {
+		t.Errorf("level in handler=%d output=%q, want 1 and body", level, result.output)
+	}
+}

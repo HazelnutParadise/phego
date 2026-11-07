@@ -15,20 +15,14 @@ func (x *execution) write(data []byte) (c completion) {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	// A running handler's input buffer is still held while it echoes.
-	remaining := int64(x.limits.output) - x.accepted - x.filterHeld - int64(len(x.handlerEcho))
+	// A running handler's buffer stays on the stack, so its input and its
+	// echo both count here.
+	remaining := int64(x.limits.output) - x.accepted
 	for _, b := range x.buffers {
 		remaining -= int64(len(b.data))
 	}
 	if int64(len(data)) > remaining {
 		return x.fail(endLimit, errExecutionLimit)
-	}
-	// Echo from a user output handler, including its local destructors, is
-	// kept aside: PHP 8.5.12 drops it when the handler returns and passes it
-	// on with the buffer when the handler throws (see filter).
-	if x.filtering {
-		x.handlerEcho = append(x.handlerEcho, data...)
-		return completion{}
 	}
 	if len(x.buffers) > 0 {
 		b := &x.buffers[len(x.buffers)-1]
@@ -91,32 +85,35 @@ func (x *execution) endBufferIn(origin string) completion {
 		return completion{}
 	}
 	i := len(x.buffers) - 1
-	b := x.buffers[i]
-	x.buffers = x.buffers[:i]
-	if b.filter != nil {
-		var c completion
-		b.data, c = x.filter(b.filter, origin, b.name, b.data)
-		if c.kind == endThrow || c.kind == endExit {
-			if origin == requestShutdown {
-				// Without a PHP frame the throw or exit bails out of
-				// php_output_end_all, and php_output_deactivate discards
-				// every buffer: nothing is printed and outer handlers
-				// never run.
-				x.buffers = nil
-				return c
-			}
-			// From PHP code the buffer, with the handler's echo, reaches
-			// the next level before the throw or exit propagates.
-			if w := x.write(b.data); w.kind != endNormal {
-				return x.replaceOwnedCompletion(c, w)
-			}
-			return c
-		}
-		if c.kind != endNormal {
-			return c
-		}
+	if x.buffers[i].filter == nil {
+		data := x.buffers[i].data
+		x.buffers = x.buffers[:i]
+		return x.write(data)
 	}
-	return x.write(b.data)
+	out, c := x.filter(origin)
+	if len(x.buffers) <= i {
+		return c // the handler hit the lock error, which discarded every buffer
+	}
+	x.buffers = x.buffers[:i]
+	if c.kind == endThrow || c.kind == endExit {
+		if origin == requestShutdown {
+			// Without a PHP frame the throw or exit bails out of
+			// php_output_end_all, and php_output_deactivate discards every
+			// buffer: nothing is printed and outer handlers never run.
+			x.buffers = nil
+			return c
+		}
+		// From PHP code the handler's result reaches the next level before
+		// the throw or exit propagates.
+		if w := x.write(out); w.kind != endNormal {
+			return x.replaceOwnedCompletion(c, w)
+		}
+		return c
+	}
+	if c.kind != endNormal {
+		return c
+	}
+	return x.write(out)
 }
 
 // outputLockError is php_output_lock_error for an output buffer operation
@@ -127,28 +124,58 @@ func (x *execution) outputLockError(origin string) completion {
 	return x.fail(endFatal, errors.New(origin+": Cannot use output buffering in output buffering display handlers"))
 }
 
-func (x *execution) filter(fn outputFilter, origin, name string, data []byte) (out []byte, c completion) {
+// filter runs the innermost buffer's handler on the buffer's data. As in
+// PHP, the buffer stays on the stack while its handler runs: ob_get_level()
+// counts it, and the handler's echo, including from its locals' destructors,
+// is appended to it and counts against the output limit. It returns what
+// reaches the next level:
+//   - the handler's returned string, when it returned, even if a local's
+//     destructor then throws or exits (main/output.c keeps retval);
+//   - the buffer with the handler's echo, when the handler itself throws or
+//     exits and so leaves no return value.
+//
+// The handler-output deprecation needs a returned value; a fatal error or a
+// host stop never returns, and at request shutdown a destructor's throw or
+// exit bails out first.
+func (x *execution) filter(origin string) (out []byte, c completion) {
+	i := len(x.buffers) - 1
+	fn, name := x.buffers[i].filter, x.buffers[i].name
+	n := len(x.buffers[i].data)
+	data := x.buffers[i].data[:n:n] // the handler's appends cannot reach its echo
 	x.filtering = true
-	x.filterHeld = int64(len(data))
-	x.handlerEcho = nil
-	defer func() { x.filtering = false; x.filterHeld = 0; x.handlerEcho = nil }()
-	c = x.call(func(x *execution) completion { var next completion; out, next = fn(x, data); return next }, nil)
+	defer func() { x.filtering = false }()
+	returned := false
+	c = x.call(func(x *execution) completion {
+		var next completion
+		out, next = fn(x, data)
+		returned = next.kind == endNormal || next.kind == endReturn
+		return next
+	}, nil)
 	if released := x.releaseReturn(&c); released.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, released)
 	}
-	if c.kind == endThrow || c.kind == endExit {
-		// php_output_handler_op: a handler that throws or exits leaves no
-		// return value, so it passes its buffer, with its own echo,
-		// without the deprecation.
-		return append(append([]byte(nil), data...), x.handlerEcho...), c
+	if len(x.buffers) <= i {
+		return nil, c
 	}
-	// The deprecation needs a returned value; a fatal error or a host stop
-	// inside the handler never returns.
-	if (c.kind == endNormal || c.kind == endReturn) && len(x.handlerEcho) > 0 {
-		if len(x.diagnostics) >= x.limits.callbacks {
-			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
-		} else {
-			x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", origin + ": Producing output from user output handler " + name + " is deprecated"})
+	held := x.buffers[i].data
+	if !returned && (c.kind == endThrow || c.kind == endExit) {
+		return held, c
+	}
+	// At request shutdown a destructor's throw or exit bails out inside
+	// zend_call_function, before main/output.c reaches the deprecation.
+	switch c.kind {
+	case endThrow, endExit:
+		if origin == requestShutdown {
+			break
+		}
+		fallthrough
+	case endNormal, endReturn:
+		if returned && len(held) > n {
+			if len(x.diagnostics) >= x.limits.callbacks {
+				c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
+			} else {
+				x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", origin + ": Producing output from user output handler " + name + " is deprecated"})
+			}
 		}
 	}
 	if stop := x.check(); stop.kind != endNormal {
