@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Observe official PHP release metadata and compare candidate changes."""
 import argparse
+import datetime
 import hashlib
+import html
 import json
 import os
 import re
 import sys
+import unicodedata
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -21,6 +24,28 @@ VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+\Z")
 SHA40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA64 = re.compile(r"[0-9a-f]{64}\Z")
 FIELDS = {"version", "tag", "tag_object", "commit", "sha256", "announcement", "announcement_sha256", "release_tags"}
+SNAPSHOT_SCHEMA = 3
+MAX_NEWS = 100
+MAX_TITLE = 500
+NEWS_FIELDS = {"id", "time", "title", "sha256"}
+NEWS_ID = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,3}\Z")
+NEWS_TIME = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:Z|[+-][0-9]{2}:[0-9]{2})\Z")
+ARTICLE_OPEN = b'<article class="newsentry">'
+ARTICLE_CLOSE = b"</article>"
+ANY_ARTICLE_OPEN = re.compile(rb"<article", re.IGNORECASE)
+ANY_ARTICLE_CLOSE = re.compile(rb"</article", re.IGNORECASE)
+# The homepage frame around the entries, as php.net renders it (2026-11-07).
+# Content outside the articles must be exactly this, so an entry in any other
+# markup fails instead of being skipped.
+NEWS_FRAME_START = b'<section id="layout-content">\n<div class=\'home-content\'>'
+NEWS_FRAME_END = b'<p class="archive"><a href="/archive/">Older News Entries</a></p></div>'
+# The homepage header of one entry, as php.net renders it. Anything else fails.
+ARTICLE_HEADER = re.compile(
+    rb'<article class="newsentry">\s*<header class="title">\s*'
+    rb'<time datetime="([^"<>]+)">[^<>]*</time>\s*'
+    rb'<h2 class="newstitle">\s*'
+    rb'<a href="https://www\.php\.net/archive/([0-9]{4})\.php#([^"<>]+)" id="([^"<>]+)">([^<>]*)</a>\s*'
+    rb'</h2>\s*</header>\s*<div class="newscontent">')
 
 
 def _unique_pairs(pairs):
@@ -58,6 +83,84 @@ def _content(body):
     return body[left:right]
 
 
+def _news_entry(entry):
+    if not isinstance(entry, dict) or set(entry) != NEWS_FIELDS:
+        raise ValueError("invalid news entry fields")
+    if not isinstance(entry["id"], str) or not NEWS_ID.fullmatch(entry["id"]):
+        raise ValueError("invalid news entry id")
+    if not isinstance(entry["time"], str) or not NEWS_TIME.fullmatch(entry["time"]):
+        raise ValueError("invalid news entry time")
+    try:
+        datetime.date.fromisoformat(entry["id"][:10])
+        datetime.datetime.fromisoformat(entry["time"].replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("invalid news entry date") from exc
+    title = entry["title"]
+    if not isinstance(title, str) or not title or len(title) > MAX_TITLE or title != title.strip() or any(unicodedata.category(c) in ("Cc", "Cf") for c in title):
+        raise ValueError("invalid news entry title")
+    if not isinstance(entry["sha256"], str) or not SHA64.fullmatch(entry["sha256"]):
+        raise ValueError("invalid news entry digest")
+    return entry
+
+
+def _news_list(news):
+    if not isinstance(news, list) or not 0 < len(news) <= MAX_NEWS:
+        raise ValueError("invalid news list")
+    ids = [_news_entry(entry)["id"] for entry in news]
+    if len(ids) != len(set(ids)):
+        raise ValueError("duplicate news entry id")
+    return news
+
+
+def _news(content):
+    """Split the homepage content section into its news entries, in page order.
+
+    Every article must have the homepage entry markup, nothing but whitespace
+    may sit between two articles, and the rest of the section must be the
+    fixed homepage frame; otherwise this fails rather than returning a partial
+    or empty list.
+    """
+    total = len(ANY_ARTICLE_OPEN.findall(content))
+    if total == 0:
+        raise ValueError("no news articles in homepage content")
+    if total != content.count(ARTICLE_OPEN) or len(ANY_ARTICLE_CLOSE.findall(content)) != content.count(ARTICLE_CLOSE):
+        raise ValueError("news article tag is not the homepage entry markup")
+    first = content.find(ARTICLE_OPEN)
+    if content[:first].rstrip() != NEWS_FRAME_START:
+        raise ValueError("unexpected markup before the first news article")
+    entries = []
+    start = first
+    while start >= 0:
+        position = "news article %d at byte %d" % (len(entries) + 1, start)
+        end = content.find(ARTICLE_CLOSE, start)
+        if end < 0:
+            raise ValueError(position + " is not terminated")
+        end += len(ARTICLE_CLOSE)
+        article = content[start:end]
+        if len(ANY_ARTICLE_OPEN.findall(article)) != 1:
+            raise ValueError(position + " contains another article")
+        match = ARTICLE_HEADER.match(article)
+        if match is None:
+            raise ValueError(position + " header does not match the homepage entry markup")
+        time, year, anchor, ident, title = (part.decode("utf-8") for part in match.groups())
+        if anchor != ident or ident[:4] != year:
+            raise ValueError(position + " link does not match its id")
+        try:
+            entries.append(_news_entry({"id": ident, "time": time, "title": html.unescape(title).strip(),
+                                        "sha256": hashlib.sha256(article).hexdigest()}))
+        except ValueError as exc:
+            raise ValueError(position + ": " + str(exc)) from exc
+        following = content.find(ARTICLE_OPEN, end)
+        if following >= 0 and content[end:following].strip():
+            raise ValueError("unexpected markup after " + position)
+        if following < 0 and content[end:].strip() != NEWS_FRAME_END:
+            raise ValueError("unexpected markup after the last news article")
+        start = following
+    if len(entries) != total:
+        raise ValueError("news article count does not match the parsed entries")
+    return _news_list(entries)
+
+
 def _record(series, record):
     if not isinstance(series, str) or not SERIES.fullmatch(series):
         raise ValueError("invalid release series")
@@ -83,11 +186,12 @@ def _record(series, record):
 
 
 def _snapshot(snapshot):
-    if not isinstance(snapshot, dict) or set(snapshot) != {"schema_version", "series", "news_sha256"} or type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != 2:
+    if not isinstance(snapshot, dict) or set(snapshot) != {"schema_version", "series", "news_sha256", "news"} or type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != SNAPSHOT_SCHEMA:
         raise ValueError("invalid snapshot schema")
     news_digest = snapshot["news_sha256"]
     if not isinstance(news_digest, str) or not SHA64.fullmatch(news_digest):
         raise ValueError("invalid news digest")
+    _news_list(snapshot["news"])
     series = snapshot["series"]
     if not isinstance(series, dict) or not 0 < len(series) <= MAX_SERIES:
         raise ValueError("invalid series collection")
@@ -114,7 +218,9 @@ def observe(fetch):
             supported.add(series)
     if not 0 < len(supported) <= MAX_SERIES:
         raise ValueError("invalid supported release count")
-    news_digest = hashlib.sha256(_content(fetch(PHP + "/"))).hexdigest()
+    home = _content(fetch(PHP + "/"))
+    news_digest = hashlib.sha256(home).hexdigest()
+    news = _news(home)
     records = {}
     for series in sorted(supported):
         releases = _json(fetch, PHP + "/releases/index.php?json&version=" + series + "&max=1")
@@ -156,7 +262,7 @@ def observe(fetch):
                   "commit": commit, "sha256": matches[0]["sha256"], "announcement": announcement_url,
                   "announcement_sha256": hashlib.sha256(notice_body).hexdigest(), "release_tags": sorted(tags)}
         records[series] = _record(series, record)
-    return {"schema_version": 2, "news_sha256": news_digest, "series": records}
+    return {"schema_version": SNAPSHOT_SCHEMA, "news_sha256": news_digest, "news": news, "series": records}
 
 
 def compare(old, new):
@@ -170,10 +276,19 @@ def compare(old, new):
         for field in sorted(FIELDS):
             if before[series][field] != after[series][field]:
                 changes.append({"series": series, "field": field, "old": before[series][field], "new": after[series][field]})
+    old_news = {entry["id"]: entry for entry in old["news"]}
+    new_news = {entry["id"]: entry for entry in new["news"]}
+    removed = [entry["id"] for entry in old["news"] if entry["id"] not in new_news]
+    added = [entry["id"] for entry in new["news"] if entry["id"] not in old_news]
+    edited = [entry["id"] for entry in new["news"] if entry["id"] in old_news and old_news[entry["id"]] != entry]
+    for ident in removed + added + edited:
+        changes.append({"series": "global", "field": "news", "id": ident, "old": old_news.get(ident), "new": new_news.get(ident)})
+    # The digest also covers page order and markup outside the articles.
     if old["news_sha256"] != new["news_sha256"]:
         changes.append({"series": "global", "field": "news_sha256", "old": old["news_sha256"], "new": new["news_sha256"]})
-    return {"schema_version": 1, "status": "pending_review" if changes else "unchanged",
-            "compatibility": "not_assessed", "changes": changes}
+    return {"schema_version": 2, "status": "pending_review" if changes else "unchanged",
+            "compatibility": "not_assessed", "news_added": added, "news_removed": removed,
+            "news_changed": edited, "changes": changes}
 
 
 class _SameHostRedirect(urllib.request.HTTPRedirectHandler):
