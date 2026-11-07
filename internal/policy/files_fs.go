@@ -12,11 +12,8 @@ import (
 
 // openFSFile interprets the virtual components before entering a trusted FS.
 // Crossing its mount root preserves the unprocessed suffix for the next backend.
-func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
-	kind := FileRead
-	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
-		kind = FileWrite
-	}
+func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, req openRequest) (fs.File, error) {
+	kind := req.kind()
 	denied := func(rule string) error { return &PolicyError{Kind: kind, Op: "open", Target: name, Rule: rule} }
 	var names []string
 	links := 0
@@ -38,7 +35,7 @@ func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, fl
 				if grant.Path == "/" {
 					continue
 				}
-				return p.redirectFile(path.Dir(grant.Path), pending, flag, perm, redirects)
+				return p.redirectFile(path.Dir(grant.Path), pending, req)
 			}
 			names = names[:len(names)-1]
 			if len(names) < syntheticDepth {
@@ -51,7 +48,7 @@ func (p *Policy) openFSFile(grant FileGrant, pending []filePart, name string, fl
 		current := path.Join(grant.Path, lookup)
 		for _, mounted := range p.files {
 			if mounted.Path != grant.Path && mounted.Path == current {
-				return p.redirectFile(current, pending, flag, perm, redirects)
+				return p.redirectFile(current, pending, req)
 			}
 		}
 		// An FS may accept aliases such as a different case spelling. When

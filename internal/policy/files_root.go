@@ -15,13 +15,10 @@ import (
 // File authorization follows the resolved directory handles, not the spelling
 // of the path. Host code owns the mount layout; PHP cannot rename directories
 // or create links through this API.
-func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart, name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
-	kind := FileRead
-	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
-		kind = FileWrite
-	}
+func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart, name string, req openRequest) (fs.File, error) {
+	flag, perm, kind := req.flag, req.perm, req.kind()
 	denied := func(rule string) error { return &PolicyError{Kind: kind, Op: "open", Target: name, Rule: rule} }
-	if redirects >= 40 {
+	if req.redirects >= 40 {
 		return nil, denied("path-changed")
 	}
 	type frame struct {
@@ -59,7 +56,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 				if grant.Path == "/" {
 					continue
 				}
-				return p.redirectFile(path.Dir(grant.Path), pending, flag, perm, redirects)
+				return p.redirectFile(path.Dir(grant.Path), pending, req)
 			}
 			if stack[len(stack)-1].root != nil {
 				stack[len(stack)-1].root.Close()
@@ -71,7 +68,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		currentName := path.Join(grant.Path, path.Join(append(append([]string(nil), names...), component)...))
 		for _, mounted := range p.files {
 			if mounted.Path != grant.Path && mounted.Path == currentName {
-				return p.redirectFile(mounted.Path, pending, flag, perm, redirects)
+				return p.redirectFile(mounted.Path, pending, req)
 			}
 		}
 		parent := stack[len(stack)-1].root
@@ -115,7 +112,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 				if !ok {
 					return nil, denied("outside-root")
 				}
-				return p.redirectFile(mounted, append(targetParts, rebaseLinkParts(pending, mounted)...), flag, perm, redirects)
+				return p.redirectFile(mounted, append(targetParts, rebaseLinkParts(pending, mounted)...), req)
 			}
 			if filepath.VolumeName(target) != "" {
 				return nil, denied("outside-root")
@@ -130,7 +127,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 				return nil, e
 			}
 			if mounted != "" {
-				return p.redirectFile(mounted, pending, flag, perm, redirects)
+				return p.redirectFile(mounted, pending, req)
 			}
 		}
 		if len(pending) == 0 {
@@ -169,7 +166,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, err
 	}
 	if selected.Path != grant.Path {
-		return p.openFile(resolved, flag, perm, redirects+1)
+		return p.openFile(resolved, req.next())
 	}
 	if kind == FileWrite && !grant.Write {
 		return nil, denied("not-granted")
@@ -178,7 +175,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		if !openable(before) {
+		if !req.admitsRead(before) {
 			return nil, denied("not-granted")
 		}
 		// A regular file may be replaced by a FIFO after Lstat. Open without
@@ -192,7 +189,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) || !openable(actual) {
+		if !os.SameFile(before, actual) || !req.admitsRead(actual) {
 			f.Close()
 			return nil, denied("path-changed")
 		}
@@ -229,7 +226,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		// Exclusive creation cannot follow a final symlink installed after Lstat.
 		return parent.OpenFile(leaf, flag|os.O_EXCL, perm)
 	}
-	if !before.Mode().IsRegular() && !(isCharDevice(before.Mode()) && listedCharDevice(before)) {
+	if !before.Mode().IsRegular() && !(req.devices && isCharDevice(before.Mode()) && listedCharDevice(before)) {
 		return nil, denied("not-granted")
 	}
 	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)
@@ -280,15 +277,6 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		}
 	}
 	return f, nil
-}
-
-// openable admits what PHP opens through a mount: regular files, directories
-// for reading and the listed character devices such as /dev/null. FIFOs,
-// sockets, block devices and other character devices stay closed: a FIFO or
-// terminal read could wait for a peer, and some devices act when opened.
-func openable(fi fs.FileInfo) bool {
-	m := fi.Mode()
-	return m.IsRegular() || m.IsDir() || isCharDevice(m) && listedCharDevice(fi)
 }
 
 func isCharDevice(m fs.FileMode) bool {

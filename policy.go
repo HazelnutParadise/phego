@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/policy"
@@ -264,9 +263,11 @@ func (e *Engine) admit(ctx context.Context) (func(), error) {
 	return release, nil
 }
 
-// openFile opens a PHP path through the policy for reading.
-func (e *Engine) openFile(path string) (fs.File, error) {
-	f, err := e.policy.policy.OpenFile(path, os.O_RDONLY, 0)
+// openSource opens a script's PHP path through the policy. Host
+// directories refuse devices as policy errors; RunFile reports any other
+// non-regular file itself.
+func (e *Engine) openSource(path string) (fs.File, error) {
+	f, err := e.policy.policy.OpenSource(path)
 	if err != nil {
 		return nil, publicError(err)
 	}

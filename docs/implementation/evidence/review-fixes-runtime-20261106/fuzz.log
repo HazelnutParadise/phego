@@ -1,16 +1,16 @@
-fuzz: elapsed: 0s, gathering baseline coverage: 0/46 completed
-fuzz: elapsed: 0s, gathering baseline coverage: 46/46 completed, now fuzzing with 4 workers
-fuzz: elapsed: 3s, execs: 184143 (61363/sec), new interesting: 1 (total: 47)
-fuzz: elapsed: 6s, execs: 250191 (22017/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 9s, execs: 330169 (26631/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 12s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 15s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 18s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 21s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 24s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 27s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 30s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
-fuzz: elapsed: 31s, execs: 330169 (0/sec), new interesting: 2 (total: 48)
+fuzz: elapsed: 0s, gathering baseline coverage: 0/48 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 48/48 completed, now fuzzing with 4 workers
+fuzz: elapsed: 3s, execs: 164033 (54668/sec), new interesting: 0 (total: 48)
+fuzz: elapsed: 6s, execs: 424233 (86709/sec), new interesting: 2 (total: 50)
+fuzz: elapsed: 9s, execs: 486510 (20761/sec), new interesting: 2 (total: 50)
+fuzz: elapsed: 12s, execs: 587994 (33833/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 15s, execs: 599206 (3737/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 18s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 21s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 24s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 27s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 30s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
+fuzz: elapsed: 31s, execs: 599206 (0/sec), new interesting: 3 (total: 51)
 PASS
-ok  	github.com/HazelnutParadise/phego/internal/bytecode	31.295s
-exit_code=0 seconds=32
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	31.599s
+exit_code=0 seconds=33

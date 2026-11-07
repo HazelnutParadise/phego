@@ -255,3 +255,25 @@ func TestRootOpensOnlyListedCharacterDevices(t *testing.T) {
 		}
 	}
 }
+
+// OpenSource opens a script's source: like OpenFile, but a host directory
+// admits only regular files and directories, so a listed device that
+// OpenFile opens is refused before it is opened.
+func TestOpenSourceRefusesListedDevices(t *testing.T) {
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev"}}})
+	f, err := p.OpenFile("/devices/null", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatalf("OpenFile(/devices/null): %v", err)
+	}
+	f.Close()
+	_, err = p.OpenSource("/devices/null")
+	var pe *PolicyError
+	if !errors.As(err, &pe) || *pe != (PolicyError{Kind: FileRead, Op: "open", Target: "/devices/null", Rule: "not-granted"}) {
+		t.Fatalf("OpenSource(/devices/null) = %#v, want not-granted", err)
+	}
+	d, err := p.OpenSource("/devices")
+	if err != nil {
+		t.Fatalf("OpenSource(/devices): %v", err)
+	}
+	d.Close()
+}

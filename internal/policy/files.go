@@ -23,7 +23,48 @@ import (
 // needs a mount granted for writing. The result is an *os.File for a host
 // directory and the file system's own file for an fs.FS mount.
 func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, error) {
-	return p.openFile(name, flag, perm, 0)
+	return p.openFile(name, openRequest{flag: flag, perm: perm, devices: true})
+}
+
+// OpenSource opens name for reading as a script's source. It differs from
+// OpenFile only on host directories, which admit regular files and
+// directories but refuse every device by its PHP path before opening it.
+// PHP's own stream opens, including include, use OpenFile.
+func (p *Policy) OpenSource(name string) (fs.File, error) {
+	return p.openFile(name, openRequest{flag: os.O_RDONLY})
+}
+
+// openRequest is one open as it follows redirects between mounts.
+type openRequest struct {
+	flag      int
+	perm      fs.FileMode
+	redirects int
+	// devices admits the host's listed character devices on host
+	// directories. The zero value is the stricter source rule.
+	devices bool
+}
+
+func (r openRequest) kind() Kind {
+	if r.flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
+		return FileWrite
+	}
+	return FileRead
+}
+
+// next is the request after one more redirect.
+func (r openRequest) next() openRequest {
+	r.redirects++
+	return r
+}
+
+// admitsRead reports what a host directory opens for reading: regular
+// files, directories and, for devices, the listed character devices.
+// FIFOs, sockets, block devices and other character devices stay closed: a
+// FIFO or terminal read could wait for a peer, and some devices act when
+// opened.
+func (r openRequest) admitsRead(fi fs.FileInfo) bool {
+	m := fi.Mode()
+	return m.IsRegular() || m.IsDir() || r.devices && isCharDevice(m) && listedCharDevice(fi)
 }
 
 // filePart retains the root boundary of a symlink target through mount changes.
@@ -64,26 +105,19 @@ func linkParentAllowed(boundary, current string) bool {
 	return boundary == "" || current != boundary && strings.HasPrefix(current, strings.TrimSuffix(boundary, "/")+"/")
 }
 
-func (p *Policy) openFile(name string, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
+func (p *Policy) openFile(name string, req openRequest) (fs.File, error) {
 	if !path.IsAbs(name) || strings.ContainsRune(name, 0) {
-		kind := FileRead
-		if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
-			kind = FileWrite
-		}
-		return nil, &PolicyError{Kind: kind, Op: "open", Target: name, Rule: "not-absolute"}
+		return nil, &PolicyError{Kind: req.kind(), Op: "open", Target: name, Rule: "not-absolute"}
 	}
-	return p.openFileParts(fileParts(virtualPath(name), ""), flag, perm, redirects)
+	return p.openFileParts(fileParts(virtualPath(name), ""), req)
 }
 
-func (p *Policy) redirectFile(base string, pending []filePart, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
-	return p.openFileParts(append(fileParts(base, ""), pending...), flag, perm, redirects+1)
+func (p *Policy) redirectFile(base string, pending []filePart, req openRequest) (fs.File, error) {
+	return p.openFileParts(append(fileParts(base, ""), pending...), req.next())
 }
 
-func (p *Policy) openFileParts(parts []filePart, flag int, perm fs.FileMode, redirects int) (fs.File, error) {
-	kind, op := FileRead, "open"
-	if flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
-		kind = FileWrite
-	}
+func (p *Policy) openFileParts(parts []filePart, req openRequest) (fs.File, error) {
+	kind, op := req.kind(), "open"
 	// Internal redirects preserve symlink provenance rather than cleaning .. away.
 	var normalized []filePart
 	for _, part := range parts {
@@ -100,7 +134,7 @@ func (p *Policy) openFileParts(parts []filePart, flag int, perm fs.FileMode, red
 	}
 	parts = normalized
 	name := partsPath("/", parts)
-	if redirects >= 40 {
+	if req.redirects >= 40 {
 		return nil, &PolicyError{Kind: kind, Op: op, Target: name, Rule: "path-changed"}
 	}
 	grant, _, err := p.fileGrant(kind, op, name)
@@ -116,14 +150,14 @@ func (p *Policy) openFileParts(parts []filePart, flag int, perm fs.FileMode, red
 		pending = []filePart{{name: "."}}
 	}
 	if grant.FS != nil {
-		return p.openFSFile(grant, pending, name, flag, perm, redirects)
+		return p.openFSFile(grant, pending, name, req)
 	}
 	root, err := os.OpenRoot(grant.Dir)
 	if err != nil {
 		return nil, err
 	}
 	defer root.Close()
-	f, err := p.openRootFile(root, grant, pending, name, flag, perm, redirects)
+	f, err := p.openRootFile(root, grant, pending, name, req)
 	if err != nil {
 		if rootEscapeError(err) {
 			return nil, &PolicyError{Kind: kind, Op: op, Target: name, Rule: "outside-root"}

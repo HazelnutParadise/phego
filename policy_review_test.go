@@ -200,13 +200,44 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 	}
 }
 
-// A script must be a regular file. A device under a Root mount stays a
-// policy refusal, as before character devices became readable.
+// A script must be a regular file, with the results main had before
+// character devices became readable: under a Root mount the policy refuses
+// a device by its PHP path, including through an absolute link from another
+// mount; an fs.FS mount or a standalone Files reports the device, like a
+// directory, as a non-regular file.
 func TestRunFileRefusesDevices(t *testing.T) {
-	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/devices", Root: "/dev"}}}})
-	res, err := e.RunFile(context.Background(), "/devices/null")
-	var pe *PolicyError
-	if res == nil || res.Status != StatusPolicyDenied || !errors.As(err, &pe) || pe.Rule != RuleNotGranted {
-		t.Fatalf("RunFile(/devices/null) = %+v, %v; want StatusPolicyDenied not-granted", res, err)
+	app := t.TempDir()
+	if err := os.Symlink("/dev/null", filepath.Join(app, "null.php")); err != nil {
+		t.Fatal(err)
+	}
+	device := fstest.MapFS{"x.php": {Mode: fs.ModeDevice | fs.ModeCharDevice}}
+	root := Config{Policy: Policy{Files: []FileGrant{{Path: "/devices", Root: "/dev"}, {Path: "/app", Root: app}}}}
+	for _, tc := range []struct {
+		name   string
+		cfg    Config
+		path   string
+		target string // the PolicyError target, or "" for StatusFailed
+	}{
+		{"root device", root, "/devices/null", "/devices/null"},
+		{"root link to device", root, "/app/null.php", "/devices/null"},
+		{"root directory", root, "/devices", ""},
+		{"fs mount device", Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: device}}}}, "/x.php", ""},
+		{"standalone files device", Config{Files: device}, "x.php", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			res, err := newPolicyEngine(t, tc.cfg).RunFile(context.Background(), tc.path)
+			if tc.target != "" {
+				var pe *PolicyError
+				if res == nil || res.Status != StatusPolicyDenied || !errors.As(err, &pe) ||
+					*pe != (PolicyError{Capability: CapabilityFileRead, Op: "open", Target: tc.target, Rule: RuleNotGranted}) {
+					t.Fatalf("RunFile(%s) = %+v, %#v; want StatusPolicyDenied not-granted on %s", tc.path, res, err, tc.target)
+				}
+				return
+			}
+			var pathErr *fs.PathError
+			if res == nil || res.Status != StatusFailed || !errors.As(err, &pathErr) || !errors.Is(err, fs.ErrInvalid) {
+				t.Fatalf("RunFile(%s) = %+v, %#v; want StatusFailed with an fs.ErrInvalid path error", tc.path, res, err)
+			}
+		})
 	}
 }

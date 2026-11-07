@@ -32,3 +32,16 @@
 FAIL
 FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.111s
 FAIL
+
+# 50f1c4a+main with the new RunFile and OpenSource tests (before the fix)
+--- FAIL: TestRunFileRefusesDevices (0.00s)
+    --- FAIL: TestRunFileRefusesDevices/root_link_to_device (0.00s)
+        policy_review_test.go:233: RunFile(/app/null.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/app/null.php", Rule:"not-granted"}; want StatusPolicyDenied not-granted on /devices/null
+    --- FAIL: TestRunFileRefusesDevices/fs_mount_device (0.00s)
+        policy_review_test.go:239: RunFile(/x.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/x.php", Rule:"not-granted"}; want StatusFailed with an fs.ErrInvalid path error
+    --- FAIL: TestRunFileRefusesDevices/standalone_files_device (0.00s)
+        policy_review_test.go:239: RunFile(x.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"x.php", Rule:"not-granted"}; want StatusFailed with an fs.ErrInvalid path error
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.958s
+FAIL
+vet: internal/policy/fifo_review_fixes_test.go:269:13: p.OpenSource undefined (type *Policy has no field or method OpenSource)
