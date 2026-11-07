@@ -4,25 +4,36 @@ package runtime
 // REQ-017; T-033/T-034. See third_party/php-sort/UPSTREAM.json and
 // THIRD_PARTY_NOTICES.md for pinned source, Zend 2.00 and libc++ notices.
 // This derived implementation is not covered solely by the root MIT grant.
-func php8512Sort(items []*bucket, compare func(*bucket, *bucket) int) {
-	for len(items) > 16 {
-		n := len(items)
+// It sorts positions 0..n-1 through compare and swap, as zend_sort does
+// through its cmp and swp callbacks; the caller decides what a swap moves.
+func php8512Sort(n int, compare func(i, j int) int, swap func(i, j int)) {
+	php8512Sorter{compare, swap}.sort(0, n)
+}
+
+type php8512Sorter struct {
+	compare func(i, j int) int
+	swap    func(i, j int)
+}
+
+// sort orders the n positions starting at base.
+func (s php8512Sorter) sort(base, n int) {
+	for n > 16 {
 		middle := n >> 1
 		if n>>10 != 0 {
 			delta := middle >> 1
-			php8512Sort5(items, 0, delta, middle, middle+delta, n-1, compare)
+			s.sort5(base, 0, delta, middle, middle+delta, n-1)
 		} else {
-			php8512Sort3(items, 0, middle, n-1, compare)
+			s.sort3(base, 0, middle, n-1)
 		}
 
-		php8512Swap(items, 1, middle)
+		s.swap(base+1, base+middle)
 		pivot := 1
 		i := pivot + 1
 		j := n - 1
 
 	partition:
 		for {
-			for compare(items[pivot], items[i]) > 0 {
+			for s.compare(base+pivot, base+i) > 0 {
 				i++
 				if i == j {
 					break partition
@@ -32,13 +43,13 @@ func php8512Sort(items []*bucket, compare func(*bucket, *bucket) int) {
 			if j == i {
 				break
 			}
-			for compare(items[j], items[pivot]) > 0 {
+			for s.compare(base+j, base+pivot) > 0 {
 				j--
 				if j == i {
 					break partition
 				}
 			}
-			php8512Swap(items, i, j)
+			s.swap(base+i, base+j)
 			i++
 			if i == j {
 				break
@@ -46,67 +57,66 @@ func php8512Sort(items []*bucket, compare func(*bucket, *bucket) int) {
 		}
 
 		pivot = i - 1
-		php8512Swap(items, 1, pivot)
+		s.swap(base+1, base+pivot)
 		right := i
 		rightCount := n - right
 		if pivot < rightCount {
-			php8512Sort(items[:pivot], compare)
-			items = items[right:]
+			s.sort(base, pivot)
+			base, n = base+right, rightCount
 		} else {
-			php8512Sort(items[right:], compare)
-			items = items[:pivot]
+			s.sort(base+right, rightCount)
+			n = pivot
 		}
 	}
 
-	php8512InsertSort(items, compare)
+	s.insertSort(base, n)
 }
 
-func php8512InsertSort(items []*bucket, compare func(*bucket, *bucket) int) {
-	switch len(items) {
+func (s php8512Sorter) insertSort(base, n int) {
+	switch n {
 	case 0, 1:
 		return
 	case 2:
-		php8512Sort2(items, 0, 1, compare)
+		s.sort2(base, 0, 1)
 		return
 	case 3:
-		php8512Sort3(items, 0, 1, 2, compare)
+		s.sort3(base, 0, 1, 2)
 		return
 	case 4:
-		php8512Sort4(items, 0, 1, 2, 3, compare)
+		s.sort4(base, 0, 1, 2, 3)
 		return
 	case 5:
-		php8512Sort5(items, 0, 1, 2, 3, 4, compare)
+		s.sort5(base, 0, 1, 2, 3, 4)
 		return
 	}
 
-	n := len(items)
 	for i := 1; i < 6; i++ {
 		j := i - 1
-		if compare(items[j], items[i]) <= 0 {
+		if s.compare(base+j, base+i) <= 0 {
 			continue
 		}
 		for j != 0 {
 			j--
-			if compare(items[j], items[i]) <= 0 {
+			if s.compare(base+j, base+i) <= 0 {
 				j++
 				break
 			}
 		}
 		for k := i; k > j; k-- {
-			php8512Swap(items, k, k-1)
+			s.swap(base+k, base+k-1)
 		}
 	}
 
 	for i := 6; i < n; i++ {
 		j := i - 1
-		if compare(items[j], items[i]) <= 0 {
+		if s.compare(base+j, base+i) <= 0 {
 			continue
 		}
 		for {
 			j -= 2
-			if compare(items[j], items[i]) <= 0 {
+			if s.compare(base+j, base+i) <= 0 {
 				j++
-				if compare(items[j], items[i]) <= 0 {
+				if s.compare(base+j, base+i) <= 0 {
 					j++
 				}
 				break
@@ -117,74 +127,70 @@ func php8512InsertSort(items []*bucket, compare func(*bucket, *bucket) int) {
 			if j == 1 {
 				j--
 				// Keep Zend's reversed comparison at the left boundary.
-				if compare(items[i], items[j]) > 0 {
+				if s.compare(base+i, base+j) > 0 {
 					j++
 				}
 				break
 			}
 		}
 		for k := i; k > j; k-- {
-			php8512Swap(items, k, k-1)
+			s.swap(base+k, base+k-1)
 		}
 	}
 }
 
-func php8512Sort2(items []*bucket, a, b int, compare func(*bucket, *bucket) int) {
-	if compare(items[a], items[b]) > 0 {
-		php8512Swap(items, a, b)
+func (s php8512Sorter) sort2(base, a, b int) {
+	if s.compare(base+a, base+b) > 0 {
+		s.swap(base+a, base+b)
 	}
 }
 
-func php8512Sort3(items []*bucket, a, b, c int, compare func(*bucket, *bucket) int) {
-	if compare(items[a], items[b]) <= 0 {
-		if compare(items[b], items[c]) <= 0 {
+func (s php8512Sorter) sort3(base, a, b, c int) {
+	if s.compare(base+a, base+b) <= 0 {
+		if s.compare(base+b, base+c) <= 0 {
 			return
 		}
-		php8512Swap(items, b, c)
-		if compare(items[a], items[b]) > 0 {
-			php8512Swap(items, a, b)
+		s.swap(base+b, base+c)
+		if s.compare(base+a, base+b) > 0 {
+			s.swap(base+a, base+b)
 		}
 		return
 	}
-	if compare(items[c], items[b]) <= 0 {
-		php8512Swap(items, a, c)
+	if s.compare(base+c, base+b) <= 0 {
+		s.swap(base+a, base+c)
 		return
 	}
-	php8512Swap(items, a, b)
-	if compare(items[b], items[c]) > 0 {
-		php8512Swap(items, b, c)
+	s.swap(base+a, base+b)
+	if s.compare(base+b, base+c) > 0 {
+		s.swap(base+b, base+c)
 	}
 }
 
-func php8512Sort4(items []*bucket, a, b, c, d int, compare func(*bucket, *bucket) int) {
-	php8512Sort3(items, a, b, c, compare)
-	if compare(items[c], items[d]) > 0 {
-		php8512Swap(items, c, d)
-		if compare(items[b], items[c]) > 0 {
-			php8512Swap(items, b, c)
-			if compare(items[a], items[b]) > 0 {
-				php8512Swap(items, a, b)
+func (s php8512Sorter) sort4(base, a, b, c, d int) {
+	s.sort3(base, a, b, c)
+	if s.compare(base+c, base+d) > 0 {
+		s.swap(base+c, base+d)
+		if s.compare(base+b, base+c) > 0 {
+			s.swap(base+b, base+c)
+			if s.compare(base+a, base+b) > 0 {
+				s.swap(base+a, base+b)
 			}
 		}
 	}
 }
 
-func php8512Sort5(items []*bucket, a, b, c, d, e int, compare func(*bucket, *bucket) int) {
-	php8512Sort4(items, a, b, c, d, compare)
-	if compare(items[d], items[e]) > 0 {
-		php8512Swap(items, d, e)
-		if compare(items[c], items[d]) > 0 {
-			php8512Swap(items, c, d)
-			if compare(items[b], items[c]) > 0 {
-				php8512Swap(items, b, c)
-				if compare(items[a], items[b]) > 0 {
-					php8512Swap(items, a, b)
+func (s php8512Sorter) sort5(base, a, b, c, d, e int) {
+	s.sort4(base, a, b, c, d)
+	if s.compare(base+d, base+e) > 0 {
+		s.swap(base+d, base+e)
+		if s.compare(base+c, base+d) > 0 {
+			s.swap(base+c, base+d)
+			if s.compare(base+b, base+c) > 0 {
+				s.swap(base+b, base+c)
+				if s.compare(base+a, base+b) > 0 {
+					s.swap(base+a, base+b)
 				}
 			}
 		}
 	}
-}
-
-func php8512Swap(items []*bucket, a, b int) {
-	items[a], items[b] = items[b], items[a]
 }

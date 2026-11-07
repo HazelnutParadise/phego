@@ -106,6 +106,7 @@ require __DIR__.'/review_r12_references.php';
 require __DIR__.'/review_r12_setters.php';
 require __DIR__.'/review_r12_setter_holds.php';
 require __DIR__.'/review_r13_graph.php';
+require __DIR__.'/review_r14_free_order.php';
 require __DIR__.'/review_r11_traits.php';
 require __DIR__.'/review_r11_trait_inheritance.php';
 require __DIR__.'/review_r11_callable.php';

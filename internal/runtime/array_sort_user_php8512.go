@@ -3,15 +3,15 @@ package runtime
 // User comparison adapter derived from PHP 8.5.12 ext/standard/array.c.
 // PHP License 3.01; see third_party/php-sort/PHP-LICENSE and UPSTREAM.json.
 // REQ-017; T-033/T-034. W-17's PHP call dispatcher supplies call's values.
-func (h *heap) sortArrayUser(slot *value, preserveKeys bool, call func(value, value) (value, error)) error {
-	return h.sortArrayUserWithDiagnostic(slot, preserveKeys, call, func(level int, message string) error { h.warn(level, message); return nil })
+func (h *heap) sortArrayUser(slot *value, op string, preserveKeys bool, call func(value, value) (value, error)) error {
+	return h.sortArrayUserWithDiagnostic(slot, op, preserveKeys, call, func(level int, message string) error { h.warn(level, message); return nil })
 }
 
 // W-17 supplies PHP error-handler dispatch through diagnose. A thrown handler
 // may preserve a valid true comparison but suppress a false reverse retry.
-func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call func(value, value) (value, error), diagnose func(int, string) error) error {
+func (h *heap) sortArrayUserWithDiagnostic(slot *value, op string, preserveKeys bool, call func(value, value) (value, error), diagnose func(int, string) error) error {
 	h.sortCompareDeprecated = false
-	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (n int, err error) {
+	return h.sortArrayWithPolicy(slot, op, preserveKeys, func(a, b *value) (n int, err error) {
 		result, callErr, cleanupErr := h.sortUserCall(a, b, call)
 		defer func(held value) {
 			if e := h.release(held); err == nil {
@@ -34,11 +34,7 @@ func (h *heap) sortArrayUserWithDiagnostic(slot *value, preserveKeys bool, call 
 		v := result
 		if v.kind == valueBool {
 			if !h.sortCompareDeprecated {
-				name := "usort"
-				if preserveKeys {
-					name = "uasort"
-				}
-				diagnosticErr := diagnose(levelDeprecated, name+"(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero")
+				diagnosticErr := diagnose(levelDeprecated, op+"(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero")
 				h.sortCompareDeprecated = true
 				if diagnosticErr == nil && h.closed {
 					diagnosticErr = ErrHeapClosed

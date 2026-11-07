@@ -96,7 +96,7 @@ func TestW12SortOwnsCallbackArguments(t *testing.T) {
 	must(t, err)
 	must(t, h.bind(p, &external))
 	must(t, h.appendValue(&a, num(t, 1)))
-	err = h.sortArray(&a, true, func(x, y value) (int, error) {
+	err = h.sortArray(&a, "uasort", true, func(x, y value) (int, error) {
 		must(t, h.assign(&external, nullValue()))
 		for _, v := range []value{x, y} {
 			if v.kind == valueObject && v.object.freed {

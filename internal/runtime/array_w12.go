@@ -40,7 +40,7 @@ func (h *heap) arrayPointer(slot *value, op string) (value, error) {
 	}
 	v := slot.deref()
 	if v.kind != valueArray {
-		return value{}, &Throwable{"TypeError", op + "(): Argument #1 ($array) must be of type array, " + typeName(v) + " given"}
+		return value{}, &Throwable{"TypeError", op + "(): Argument #1 ($array) must be of type array, " + argumentTypeName(v) + " given"}
 	}
 	a := v.array
 	if op != "current" && op != "key" {
@@ -141,16 +141,16 @@ func (h *heap) foreachValue(arr value, item *value, fn func(arrayKey) error) (er
 // Callback mutations of the input are overwritten, as in PHP's usort/uasort.
 // REQ-016/017; T-031/032/033/034. Comparator is trusted runtime code and must
 // propagate cancellation/errors; no comparator is called after an error.
-func (h *heap) sortArray(slot *value, preserveKeys bool, compare func(value, value) (int, error)) (err error) {
-	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (int, error) {
+func (h *heap) sortArray(slot *value, op string, preserveKeys bool, compare func(value, value) (int, error)) (err error) {
+	return h.sortArrayWithPolicy(slot, op, preserveKeys, func(a, b *value) (int, error) {
 		return h.sortCompareValues(a, b, compare)
 	}, true)
 }
 
 // SORT_REGULAR shares the PHP schedule, but native comparisons are not user
 // calls suppressed by a pending callback exception. W-13 owns object handlers.
-func (h *heap) sortArrayRegular(slot *value, preserveKeys bool) error {
-	return h.sortArrayWithPolicy(slot, preserveKeys, func(a, b *value) (int, error) {
+func (h *heap) sortArrayRegular(slot *value, op string, preserveKeys bool) error {
+	return h.sortArrayWithPolicy(slot, op, preserveKeys, func(a, b *value) (int, error) {
 		return h.sortCompareValues(a, b, h.compare)
 	}, false)
 }
@@ -174,7 +174,8 @@ func (h *heap) sortCompareValues(a, b *value, compare func(value, value) (int, e
 	return n, err
 }
 
-func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(*value, *value) (int, error), stopUserCalls bool) (err error) {
+// op is the PHP function name used in its diagnostics.
+func (h *heap) sortArrayWithPolicy(slot *value, op string, preserveKeys bool, compare func(*value, *value) (int, error), stopUserCalls bool) (err error) {
 	if h.closed {
 		return ErrHeapClosed
 	}
@@ -183,7 +184,7 @@ func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(
 	}
 	v := slot.deref()
 	if v.kind != valueArray {
-		return &Throwable{"TypeError", "array sort requires an array"}
+		return &Throwable{"TypeError", op + "(): Argument #1 ($array) must be of type array, " + argumentTypeName(v) + " given"}
 	}
 	// Sorting an empty array preserves its next append index. Retain the
 	// argument location for nonempty input, as a by-reference call does: the
@@ -248,7 +249,9 @@ func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(
 	for i, b := range a.buckets {
 		original[b] = i
 	}
-	php8512Sort(a.buckets, func(x, y *bucket) int {
+	buckets := a.buckets
+	php8512Sort(len(buckets), func(i, j int) int {
+		x, y := buckets[i], buckets[j]
 		n := 0
 		if failure == nil && h.closed {
 			failure = ErrHeapClosed
@@ -264,6 +267,16 @@ func (h *heap) sortArrayWithPolicy(slot *value, preserveKeys bool, compare func(
 			return n
 		}
 		return compareInts(int64(original[x]), int64(original[y]))
+	}, func(i, j int) {
+		// A renumbering sort moves only the values (zend_hash_bucket_renum_swap),
+		// so keys stay at their positions while comparisons observe the array;
+		// a key-preserving sort moves keys with values (zend_hash_bucket_swap).
+		// The bucket, with its stable ordinal and element locations, travels
+		// with the value either way.
+		buckets[i], buckets[j] = buckets[j], buckets[i]
+		if !preserveKeys {
+			buckets[i].key, buckets[j].key = buckets[j].key, buckets[i].key
+		}
 	})
 	a.pointer = 0
 	if preserveKeys {

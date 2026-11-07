@@ -92,7 +92,7 @@ class C { public const X = 1/** @virtual */+2; }
         })
 
     def test_ignored_doc_comments_do_not_consume_tokens(self):
-        source = '<?php\n/** plain */ /** @var ignored */ function f(): void {}\n'
+        source = '<?php\n/** plain */ /** @refcount 1 */ function f(): void {}\n'
         with mock.patch.object(upstream_diff, 'MAX_STUB_TOKENS', 9):
             self.assertEqual(upstream_diff.parse_stubs(source),
                              {'function f': 'function f(): void'})
@@ -230,11 +230,11 @@ const IN_NS = 2;
 namespace Foo;
 
 /** Function doc. */
-/** @cvalue X */
+/** @link https://www.php.net/f */
 function f(int $a): void {}
 
 // line comment
-/** @var int */
+/** @undocumentable */
 class K
 {
     /* block comment */
@@ -245,7 +245,7 @@ class K
     public function m(): void {}
 }
 
-/** @alias ignored */ function g(): void {}
+/** @frameless-function {"arity": 0} */ function g(): void {}
 """
         without_metadata = """<?php
 namespace Foo;

@@ -1,0 +1,8 @@
+8.5.11 d9be75c08e8c316f4c8f4194d8fbe1750a15f6a6d9d4e3fe72082abeeb800360
+8.5.12 08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209
+committed classification equals pair output: True
+source_verification: sha256_verified
+affected_work_packages: ['W-11', 'W-15', 'W-17', 'W-23', 'W-25', 'W-28', 'W-29', 'W-30', 'W-31', 'W-32', 'W-33', 'W-35', 'W-47', 'W-52', 'unmapped']
+stubs: {'added': 6, 'changed': 0, 'removed': 1}
+8.5.12 grammar rules: 177
+exit_code=0

@@ -1,0 +1,13 @@
+# Check formatting step, extracted from .github/workflows/go.yml, run with bash -e
+a.go:2:8: expected ')', found 'EOF'
+parse-error exit_code=2
+not gofmt-formatted:
+a.go
+unformatted exit_code=1
+formatted exit_code=0
+# Build step, extracted from go.yml, run with bash -e on this tree
+targets exit_code=0
+# Same loop with an unsupported target inserted first
+go: unsupported GOOS/GOARCH pair plan9/bogus
+::error::build failed for plan9/bogus
+with-bogus exit_code=1

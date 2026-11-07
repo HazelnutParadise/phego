@@ -1,0 +1,9 @@
+<?php
+$r = fopen('php://memory', 'r'); $c = fopen('php://memory', 'r'); fclose($c);
+foreach (['sort', 'ksort', 'usort', 'uksort', 'current'] as $f) {
+  foreach ([true, false, $r, $c, new stdClass, new class {}] as $v) {
+    try { $f === 'usort' || $f === 'uksort' ? $f($v, fn() => 0) : ($f === 'current' ? @current($v) : $f($v)); echo "$f: no error\n"; }
+    catch (TypeError $e) { echo $e->getMessage(), "\n"; }
+  }
+}
+$a = [3, 1]; uksort($a, fn($x, $y) => $x > $y);

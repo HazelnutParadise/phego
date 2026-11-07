@@ -51,7 +51,7 @@ func TestExecutionOutputFilterExpansionIsBounded(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	got := x.run(ctx, func(x *execution) completion {
-		if err := x.startBuffer(func(_ *execution, b []byte) ([]byte, completion) { return append(b, b...), completion{} }); err != nil {
+		if err := x.startBuffer("{closure:test}", func(_ *execution, b []byte) ([]byte, completion) { return append(b, b...), completion{} }); err != nil {
 			t.Fatal(err)
 		}
 		return x.write([]byte("ab"))

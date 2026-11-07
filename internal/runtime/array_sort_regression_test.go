@@ -1,7 +1,9 @@
 package runtime
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -25,7 +27,7 @@ func TestW12SortObservableRegression(t *testing.T) {
 				must(t, h.appendValue(&a, h.number(v)))
 			}
 			calls := [][2]int64{}
-			must(t, h.sortArray(&a, false, func(x, y value) (int, error) {
+			must(t, h.sortArray(&a, "usort", false, func(x, y value) (int, error) {
 				calls = append(calls, [2]int64{x.integer, y.integer})
 				if tc.constant != 0 {
 					return tc.constant, nil
@@ -41,6 +43,107 @@ func TestW12SortObservableRegression(t *testing.T) {
 			}
 			if tc.calls != nil && !reflect.DeepEqual(calls, tc.calls) {
 				t.Errorf("calls %v, PHP %v", calls, tc.calls)
+			}
+			must(t, h.unset(&a))
+		})
+	}
+}
+
+// REQ-017; T-033. PHP 8.5.12 sort() keeps elements reachable by iteration
+// during comparisons but not by key: the arm64, i386 and amd64 images report
+// "Undefined array key 1" for $a[1] read from __toString inside sort($a), and
+// count($a) stays 3. usort() compares a private copy, where $a[1] still reads.
+func TestW12SortKeyLookupDuringComparisons(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		user  bool
+		found bool
+	}{
+		{name: "native", user: false, found: false},
+		{name: "user", user: true, found: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := testHeap(t)
+			var a value
+			var seen []bool
+			var counts []int
+			c := w13Build(t, classSpec{name: "W12ReadDuringSort", methods: []methodSpec{{name: "__toString", returnType: "string", call: func(h *heap, _ value, _ []value) (value, error) {
+				_, ok, err := h.getElement(a.deref(), h.number(1))
+				seen = append(seen, ok)
+				counts = append(counts, a.deref().array.count())
+				return w13Str("b"), err
+			}}}})
+			o, err := h.newObject(c)
+			must(t, err)
+			must(t, h.appendValue(&a, o))
+			must(t, h.appendValue(&a, w13Str("a")))
+			must(t, h.appendValue(&a, w13Str("c")))
+			if tc.user {
+				must(t, h.sortArray(&a, "usort", false, h.compare))
+			} else {
+				must(t, h.sortArrayRegular(&a, "sort", false))
+			}
+			if len(seen) == 0 {
+				t.Fatal("__toString was not called")
+			}
+			for i := range seen {
+				if seen[i] != tc.found || counts[i] != 3 {
+					t.Errorf("comparison %d: key 1 found=%t count=%d; PHP found=%t count=3", i, seen[i], counts[i], tc.found)
+				}
+			}
+			if _, ok, _ := h.getElement(a.deref(), h.number(1)); !ok {
+				t.Error("key 1 missing after sort")
+			}
+			must(t, h.unset(&a))
+		})
+	}
+}
+
+// PHP 8.5.12 (pinned arm64 image, sort-foreach probe): sort() swaps only the
+// values while comparing (zend_hash_bucket_renum_swap), so a foreach from
+// __toString sees the keys in place; asort() swaps keys with values.
+func TestW12SortIterationDuringComparisons(t *testing.T) {
+	for _, tc := range []struct {
+		op           string
+		preserveKeys bool
+		want         []string
+	}{
+		{"sort", false, []string{"0=S,1=a,2=c", "0=a,1=S,2=c"}},
+		{"asort", true, []string{"0=S,1=a,2=c", "1=a,0=S,2=c"}},
+	} {
+		t.Run(tc.op, func(t *testing.T) {
+			h := testHeap(t)
+			var a value
+			var seen []string
+			c := w13Build(t, classSpec{name: "W12IterateDuringSort", methods: []methodSpec{{name: "__toString", returnType: "string", call: func(h *heap, _ value, _ []value) (value, error) {
+				var item value
+				var parts []string
+				err := h.foreachValue(a.deref(), &item, func(k arrayKey) error {
+					v := "S"
+					if item.deref().kind == valueString {
+						v = item.deref().text
+					}
+					key := fmt.Sprint(k.integer)
+					if k.isString {
+						key = k.text
+					}
+					parts = append(parts, key+"="+v)
+					return nil
+				})
+				seen = append(seen, strings.Join(parts, ","))
+				if e := h.unset(&item); err == nil {
+					err = e
+				}
+				return w13Str("b"), err
+			}}}})
+			o, err := h.newObject(c)
+			must(t, err)
+			must(t, h.appendValue(&a, o))
+			must(t, h.appendValue(&a, w13Str("a")))
+			must(t, h.appendValue(&a, w13Str("c")))
+			must(t, h.sortArrayRegular(&a, tc.op, tc.preserveKeys))
+			if len(seen) < 2 || seen[0] != tc.want[0] || seen[1] != tc.want[1] {
+				t.Errorf("iterations during comparisons = %q, PHP %q", seen, tc.want)
 			}
 			must(t, h.unset(&a))
 		})

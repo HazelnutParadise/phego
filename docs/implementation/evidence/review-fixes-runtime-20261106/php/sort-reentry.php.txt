@@ -1,0 +1,15 @@
+<?php
+class S { function __construct(public $v) {} function __toString(): string {
+  global $a;
+  echo "count=", count($a), " ";
+  $x = $a[1];
+  echo "direct=", is_object($x) ? "S" : var_export($x, true), " ";
+  echo "globals=", var_export(isset($GLOBALS['a'][1]), true), " ";
+  foreach ($a as $k => $v) { echo "[$k]"; }
+  echo "\n";
+  return $this->v; } }
+$a = [new S('b'), 'a', 'c'];
+sort($a);
+echo json_encode(array_map('strval', $a)), "\n";
+$a = [new S('b'), 'a', 'c'];
+usort($a, function ($x, $y) { global $a; echo "usort sees ", var_export(isset($a[1]), true), " count=", count($a), "\n"; return strcmp((string)$x, (string)$y); });
