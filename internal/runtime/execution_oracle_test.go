@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -38,11 +39,10 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 		IntSize    int    `json:"int_size"`
 		PHPVersion string `json:"php_version"`
 		OS         string `json:"os"`
-		Cases      []struct {
-			Case           string
-			ExitCode       int `json:"exit_code"`
-			Stdout, Stderr string
-		}
+		// Each case also carries Display: the same fixture with
+		// display_errors=1 and log_errors=1, displayed errors on stdout and
+		// the log on stderr.
+		Cases []lifecycleCase
 	}
 	if err := json.Unmarshal(data, &oracle); err != nil {
 		t.Fatal(err)
@@ -50,10 +50,51 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 58 {
-		t.Fatalf("want 58 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 60 {
+		t.Fatalf("want 60 cases, got %d", len(oracle.Cases))
 	}
-	for _, tc := range oracle.Cases {
+	for _, display := range []bool{false, true} {
+		mode := "stderr"
+		if display {
+			mode = "display"
+		}
+		t.Run(mode, func(t *testing.T) { replayExecutionOracleMode(t, width, arch, display, oracle.Cases) })
+	}
+}
+
+type lifecycleCase = struct {
+	Case           string
+	ExitCode       int `json:"exit_code"`
+	Stdout, Stderr string
+	Display        struct {
+		ExitCode       int `json:"exit_code"`
+		Stdout, Stderr string
+	}
+}
+
+// lifecycleEvent reports whether a stderr line is a fixture event rather
+// than part of a diagnostic.
+func lifecycleEvent(line string) bool {
+	return strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || strings.HasPrefix(line, "caught:") || strings.HasPrefix(line, "previous:") || line == "returned" || strings.HasPrefix(line, "body")
+}
+
+// logEntries splits a display-mode stderr into its log entries: each
+// "PHP Level:  text" line plus its continuation lines (stack traces).
+func logEntries(stderr string) (levels, texts []string) {
+	for _, line := range strings.Split(stderr, "\n") {
+		if level, rest, ok := strings.Cut(strings.TrimPrefix(line, "PHP "), ":  "); ok && strings.HasPrefix(line, "PHP ") {
+			levels, texts = append(levels, level), append(texts, rest)
+			continue
+		}
+		if len(texts) > 0 && line != "" && !lifecycleEvent(line) {
+			texts[len(texts)-1] += "\n" + line
+		}
+	}
+	return levels, texts
+}
+
+func replayExecutionOracleMode(t *testing.T, width int, arch string, display bool, cases []lifecycleCase) {
+	for _, tc := range cases {
 		t.Run(tc.Case, func(t *testing.T) {
 			r, _ := NewRequest(nil)
 			must := func(err error) {
@@ -68,6 +109,29 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 			x, err := newExecution(context.Background(), r, width, nil, executionLimits{32, 64, 4096})
 			must(err)
 			x.heap.arch = arch
+			wantOut, wantCode, stderr, prefix := tc.Stdout, tc.ExitCode, tc.Stderr, ""
+			shownCount := func() int { return 0 }
+			if display {
+				wantOut, wantCode, stderr, prefix = tc.Display.Stdout, tc.Display.ExitCode, tc.Display.Stderr, "PHP "
+				// The VM supplies PHP's location and stack trace; the replay
+				// takes them from the log copy, in order, and checks that each
+				// displayed diagnostic is the one PHP raised there.
+				levels, texts := logEntries(tc.Display.Stderr)
+				shown := 0
+				shownCount = func() int { return shown }
+				x.errors = errorChannels{display: true, log: true, text: func(level, message string) string {
+					if shown >= len(levels) {
+						t.Errorf("extra displayed %s: %s", level, message)
+						return ""
+					}
+					i := shown
+					shown++
+					if levels[i] != level || !strings.Contains(texts[i], message) {
+						t.Errorf("displayed %d is %s: %q, PHP logged %s: %q", i, level, message, levels[i], texts[i])
+					}
+					return "\n" + level + ": " + texts[i] + "\n"
+				}}
+			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			var events []string
@@ -83,7 +147,7 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 			// trigger_error(..., E_USER_ERROR) deprecates its level before the
 			// fatal error; the fixtures use it to reach a fatal from PHP code.
 			userError := func(x *execution, message string) completion {
-				x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead"})
+				x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
 				return completion{kind: endFatal, err: errors.New(message)}
 			}
 			result := x.run(ctx, func(x *execution) completion {
@@ -607,19 +671,28 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 				}
 				return completion{}
 			})
-			if string(result.output) != tc.Stdout || result.end.code != tc.ExitCode {
-				t.Errorf("output=%q code=%d, oracle=%q/%d", result.output, result.end.code, tc.Stdout, tc.ExitCode)
+			if display {
+				if levels, _ := logEntries(tc.Display.Stderr); len(levels) != shownCount() {
+					t.Errorf("displayed %d diagnostics, PHP logged %d", shownCount(), len(levels))
+				}
+			}
+			if string(result.output) != wantOut || result.end.code != wantCode {
+				t.Errorf("output=%q code=%d, oracle=%q/%d", result.output, result.end.code, wantOut, wantCode)
 			}
 			markDiagnostics()
 			var want []string
-			for _, line := range strings.Split(tc.Stderr, "\n") {
-				if strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || strings.HasPrefix(line, "caught:") || strings.HasPrefix(line, "previous:") || line == "returned" || strings.HasPrefix(line, "body") {
+			sep := ": "
+			if display {
+				sep = ":  "
+			}
+			for _, line := range strings.Split(stderr, "\n") {
+				if lifecycleEvent(line) {
 					want = append(want, line)
 				}
 				// display_errors=stderr prints each diagnostic as "Level: message";
 				// stack traces and "thrown in" lines continue the previous one.
 				for _, level := range []string{"Fatal error", "Warning", "Deprecated", "Notice"} {
-					if strings.HasPrefix(line, level+": ") {
+					if strings.HasPrefix(line, prefix+level+sep) {
 						want = append(want, "diagnostic:"+level)
 					}
 				}
@@ -632,9 +705,9 @@ func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 					level == "Fatal error" && strings.Contains(message, "output buffering display handlers")
 			}
 			var wantHandler, gotHandler []string
-			for _, line := range strings.Split(tc.Stderr, "\n") {
+			for _, line := range strings.Split(stderr, "\n") {
 				for _, level := range []string{"Deprecated", "Fatal error"} {
-					if message, ok := strings.CutPrefix(line, level+": "); ok && handlerMessage(level, message) {
+					if message, ok := strings.CutPrefix(line, prefix+level+sep); ok && handlerMessage(level, message) {
 						if at := strings.LastIndex(message, " in "); at >= 0 {
 							message = message[:at]
 						}
@@ -685,6 +758,10 @@ var soloCases = map[string]struct {
 // replaySoloOutputCase replays one solo_ fixture.
 func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(string)) completion {
 	t.Helper()
+	switch name {
+	case "solo_display_upper", "solo_display_handler":
+		return replayDisplayCase(t, x, name)
+	}
 	tc, ok := soloCases[name]
 	if !ok {
 		t.Fatalf("unknown solo fixture %s", name)
@@ -698,7 +775,7 @@ func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(st
 	handler := func(line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", name, line) }
 	// trigger_error(..., E_USER_ERROR) deprecates its level before the fatal.
 	userError := func(x *execution) completion {
-		x.diagnostics = append(x.diagnostics, executionDiagnostic{"Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead"})
+		x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
 		return completion{kind: endFatal, err: errors.New("boom")}
 	}
 	fatal := tc.end == "fatal" || tc.end == "dtor-fatal"
@@ -788,4 +865,55 @@ func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(st
 		return x.write([]byte("|after"))
 	}
 	return completion{}
+}
+
+// replayDisplayCase replays the solo_display_ fixtures, which exercise
+// displayed errors passing through output handlers.
+func replayDisplayCase(t *testing.T, x *execution, name string) completion {
+	t.Helper()
+	handler := func(line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", name, line) }
+	steps := func(cs ...func() completion) completion {
+		for _, c := range cs {
+			if r := c(); r.kind != endNormal {
+				return r
+			}
+		}
+		return completion{}
+	}
+	write := func(s string) func() completion { return func() completion { return x.write([]byte(s)) } }
+	warn := func(m string) func() completion { return func() completion { return x.warning(m) } }
+	switch name {
+	case "solo_display_upper":
+		if err := x.startBuffer(handler(5), func(_ *execution, b []byte) ([]byte, completion) {
+			return bytes.ToUpper(b), completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		if c := steps(write("body\n"), warn("first warning"), write("after\n"), warn("last warning")); c.kind != endNormal {
+			return c
+		}
+		x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
+		return completion{kind: endFatal, err: errors.New("boom")}
+	default: // solo_display_handler
+		if err := x.startBuffer(handler(4), func(x *execution, b []byte) ([]byte, completion) {
+			if c := x.warning("inside handler"); c.kind != endNormal {
+				return nil, c
+			}
+			return []byte("[" + string(b) + "]"), completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		if c := steps(write("body"), func() completion { return x.endBuffer("ob_end_flush") }, write("|")); c.kind != endNormal {
+			return c
+		}
+		if err := x.startBuffer(handler(11), func(x *execution, b []byte) ([]byte, completion) {
+			if c := x.write([]byte("x")); c.kind != endNormal {
+				return nil, c
+			}
+			return b, completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		return x.write([]byte("tail"))
+	}
 }

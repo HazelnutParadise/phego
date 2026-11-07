@@ -1,0 +1,10 @@
+main BenchmarkOutputWrite/1-8 60.17  BenchmarkOutputWrite/8-8 91.25  
+pr BenchmarkOutputWrite/1-8 52.20  BenchmarkOutputWrite/8-8 128.9  
+main BenchmarkOutputWrite/1-8 74.59  BenchmarkOutputWrite/8-8 97.54  
+pr BenchmarkOutputWrite/1-8 54.14  BenchmarkOutputWrite/8-8 120.0  
+main BenchmarkOutputWrite/1-8 47.95  BenchmarkOutputWrite/8-8 93.42  
+pr BenchmarkOutputWrite/1-8 57.37  BenchmarkOutputWrite/8-8 84.45  
+main BenchmarkOutputWrite/1-8 59.00  BenchmarkOutputWrite/8-8 74.63  
+pr BenchmarkOutputWrite/1-8 52.23  BenchmarkOutputWrite/8-8 83.60  
+main BenchmarkOutputWrite/1-8 55.82  BenchmarkOutputWrite/8-8 82.58  
+pr BenchmarkOutputWrite/1-8 51.70  BenchmarkOutputWrite/8-8 95.16  

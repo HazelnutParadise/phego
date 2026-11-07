@@ -81,19 +81,24 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // input; actions and output writers must cooperate with cancellation. Cleanup
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
-	ctx             context.Context
-	cleanupContext  context.Context
-	request         *Request
-	heap            *heap
-	globals         value
-	limits          executionLimits
-	writer          io.Writer
-	frames          []executionFrame // by value; a depth reuses its locals storage
-	shutdown        []executionAction
-	buffers         []executionBuffer
-	output          []byte
-	accepted        int64
-	diagnostics     []executionDiagnostic
+	ctx            context.Context
+	cleanupContext context.Context
+	request        *Request
+	heap           *heap
+	globals        value
+	limits         executionLimits
+	writer         io.Writer
+	frames         []executionFrame // by value; a depth reuses its locals storage
+	shutdown       []executionAction
+	buffers        []executionBuffer
+	output         []byte
+	accepted       int64
+	diagnostics    []executionDiagnostic
+	// errors routes each PHP diagnostic as display_errors and log_errors do:
+	// displayed text goes through write(), so output buffers and their
+	// handlers see it; the log copy is kept in diagnostics.
+	errors          errorChannels
+	reported        int // diagnostics raised, against limits.callbacks
 	started, closed bool
 	filtering       bool
 	// outputRunning is PHP's OG(running) left set by a fatal error inside a
@@ -119,7 +124,7 @@ func newExecution(ctx context.Context, request *Request, width int, writer io.Wr
 	if err != nil {
 		return nil, err
 	}
-	x := &execution{ctx: ctx, request: request, heap: h, globals: nullValue(), writer: writer, limits: limits}
+	x := &execution{ctx: ctx, request: request, heap: h, globals: nullValue(), writer: writer, limits: limits, errors: errorChannels{log: true}}
 	h.execution = x
 	return x, nil
 }
@@ -195,6 +200,11 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 			c = x.replaceOwnedCompletion(c, next)
 			x.recordEnd(c)
 		}
+	}
+	// Displaying the last fatal is the final write. If it failed, that
+	// writer failure or limit is the host's result, as for any other output.
+	if x.stop.kind != endNormal && x.stop.kind != c.kind {
+		c = x.replaceOwnedCompletion(c, x.stop)
 	}
 	// Output callbacks still need a live heap. Objects retained by those
 	// callbacks get storage release, not a second shutdown destructor pass.
@@ -466,11 +476,45 @@ func (x *execution) warning(message string) completion {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	if len(x.diagnostics) >= x.limits.callbacks {
+	return x.report("Warning", message, false)
+}
+
+// errorChannels is display_errors and log_errors. text formats a displayed
+// diagnostic; the VM supplies PHP's location and stack trace, and without it
+// the location is PHP's "Unknown" line 0.
+type errorChannels struct {
+	display, log bool
+	text         func(level, message string) string
+}
+
+// report raises one PHP diagnostic, as php_error_cb does: the log copy is
+// recorded, and with display_errors the text is written through the output
+// layer. skipRunning is the handler-output deprecation, raised while the
+// running handler is disabled, so its text bypasses that handler's buffer.
+func (x *execution) report(level, message string, skipRunning bool) completion {
+	// The cap counts every diagnostic, displayed or logged.
+	if x.reported >= x.limits.callbacks {
 		return x.fail(endLimit, errExecutionLimit)
 	}
-	x.diagnostics = append(x.diagnostics, executionDiagnostic{"Warning", message})
-	return completion{}
+	x.reported++
+	if x.errors.log {
+		x.diagnostics = append(x.diagnostics, executionDiagnostic{level, message})
+	}
+	if !x.errors.display {
+		return completion{}
+	}
+	text := "\n" + level + ": " + message + " in Unknown on line 0\n"
+	if x.errors.text != nil {
+		text = x.errors.text(level, message)
+	}
+	return x.writeTo(len(x.buffers)-1-boolInt(skipRunning && x.filtering), []byte(text))
+}
+
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 // object creates an object using the existing W-06 logical lifetime model.
@@ -590,7 +634,9 @@ func (x *execution) recordEnd(c completion) {
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
 	x.phaseCompletion = completion{}
-	if (c.kind == endThrow || c.kind == endFatal) && len(x.diagnostics) < x.limits.callbacks {
-		x.diagnostics = append(x.diagnostics, executionDiagnostic{"Fatal error", c.Error()})
+	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.limits.callbacks {
+		// The phase already ended; a failed display write is recorded as
+		// the execution's stop like any other output failure.
+		x.report("Fatal error", c.Error(), false)
 	}
 }
