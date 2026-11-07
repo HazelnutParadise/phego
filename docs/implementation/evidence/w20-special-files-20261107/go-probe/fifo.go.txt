@@ -1,0 +1,65 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"syscall"
+	"time"
+)
+
+func read1(fd int) string {
+	b := make([]byte, 1)
+	n, err := syscall.Read(fd, b)
+	return fmt.Sprintf("read n=%d err=%v", n, err)
+}
+
+func main() {
+	dir, _ := os.MkdirTemp("", "fp")
+	defer os.RemoveAll(dir)
+	p := filepath.Join(dir, "f")
+	if err := syscall.Mkfifo(p, 0o600); err != nil {
+		panic(err)
+	}
+	fd, err := syscall.Open(p, syscall.O_RDONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("no writer ever:", mask(fd), read1(fd))
+	w, err := syscall.Open(p, syscall.O_WRONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	fmt.Println("writer open err:", err)
+	fmt.Println("writer idle:", mask(fd), read1(fd))
+	syscall.Write(w, []byte("xy"))
+	fmt.Println("writer wrote 2:", mask(fd), read1(fd))
+	fmt.Println("after 1 consumed:", mask(fd), read1(fd))
+	syscall.Close(w)
+	time.Sleep(10 * time.Millisecond)
+	fmt.Println("writer closed:", mask(fd), read1(fd))
+	// second reader opened after the writer left
+	fd2, _ := syscall.Open(p, syscall.O_RDONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	fmt.Println("fresh reader after writer left:", mask(fd2), read1(fd2))
+	// writer comes and goes while reader fd2 waits
+	w2, _ := syscall.Open(p, syscall.O_WRONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	syscall.Close(w2)
+	fmt.Println("fresh reader, writer came and went:", mask(fd2), read1(fd2))
+	// write side: no reader
+	syscall.Close(fd)
+	syscall.Close(fd2)
+	_, err = syscall.Open(p, syscall.O_WRONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	fmt.Println("write open no reader:", err)
+	// O_RDWR
+	rw, err := syscall.Open(p, syscall.O_RDWR|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	fmt.Println("rdwr open:", err)
+	syscall.Close(rw)
+	// Go os.File pollability
+	f, _ := os.OpenFile(p, os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	fmt.Println("os.File deadline:", f.SetReadDeadline(time.Now().Add(time.Second)))
+	f.Close()
+	t, err := os.OpenFile("/dev/tty", os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	fmt.Println("tty open:", err)
+	if err == nil {
+		fmt.Println("tty deadline:", t.SetReadDeadline(time.Now().Add(time.Second)))
+	}
+	z, _ := os.OpenFile("/dev/zero", os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	fmt.Println("zero deadline:", z.SetReadDeadline(time.Now().Add(time.Second)))
+}

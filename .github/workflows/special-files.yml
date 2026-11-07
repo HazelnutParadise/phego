@@ -1,0 +1,141 @@
+name: Special files on macOS and Windows
+
+# Compares Root mounts with PHP 8.5.12 on the same system (W-20): FIFOs,
+# devices, sockets and directories behave as the host kernel makes them
+# behave for PHP. Linux is compared in the pinned Docker images instead.
+on:
+  push:
+    paths:
+      - '.github/workflows/special-files.yml'
+      - 'tests/policy/special-files/**'
+      - 'internal/policy/**'
+      - 'engine.go'
+      - 'policy.go'
+      - 'runfile_fifo_review_fixes_test.go'
+      - 'policy_review_test.go'
+  pull_request:
+    paths:
+      - '.github/workflows/special-files.yml'
+      - 'tests/policy/special-files/**'
+      - 'internal/policy/**'
+      - 'engine.go'
+      - 'policy.go'
+      - 'runfile_fifo_review_fixes_test.go'
+      - 'policy_review_test.go'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Build the locked PHP 8.5.12 source
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence"
+          python3 - <<'PY'
+          import json
+          php = json.load(open("compat.lock.json"))["php"]
+          assert php["version"] == "8.5.12"
+          assert php["archive_url"] == "https://www.php.net/distributions/php-8.5.12.tar.xz"
+          assert php["archive_sha256"] == "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
+          PY
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 \
+            https://www.php.net/distributions/php-8.5.12.tar.xz -o "$RUNNER_TEMP/php.tar.xz"
+          printf '%s  %s\n' 08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209 "$RUNNER_TEMP/php.tar.xz" | shasum -a 256 -c -
+          mkdir "$RUNNER_TEMP/php-src"
+          tar -xJf "$RUNNER_TEMP/php.tar.xz" -C "$RUNNER_TEMP/php-src" --strip-components 1
+          cd "$RUNNER_TEMP/php-src"
+          if ! ./configure --disable-all --enable-cli --without-pear > "$RUNNER_TEMP/evidence/configure.log" 2>&1; then
+            tail -60 "$RUNNER_TEMP/evidence/configure.log"; exit 1
+          fi
+          if ! make -j"$(sysctl -n hw.ncpu)" > "$RUNNER_TEMP/evidence/make.log" 2>&1; then
+            tail -60 "$RUNNER_TEMP/evidence/make.log"; exit 1
+          fi
+          sapi/cli/php -n -v | tee "$RUNNER_TEMP/evidence/php-version.txt"
+          sw_vers | tee "$RUNNER_TEMP/evidence/os.txt"
+          uname -a | tee -a "$RUNNER_TEMP/evidence/os.txt"
+      - name: Probe PHP
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d /tmp/phego-sf.XXXXXX)
+          bash tests/policy/special-files/probe.sh "$RUNNER_TEMP/php-src/sapi/cli/php" "$work" "$PWD/tests/policy/special-files/probe.php" \
+            | tee "$RUNNER_TEMP/evidence/php-probe.log"
+      - name: Run Phego's special-file tests on this system
+        run: |
+          set -euo pipefail
+          CGO_ENABLED=0 go test -count=1 -v -run 'TestRoot|TestRunFile' ./internal/policy . 2>&1 \
+            | tee "$RUNNER_TEMP/evidence/phego-tests.log"
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: special-files-${{ matrix.runner }}
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
+
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Download and verify the official PHP 8.5.12 build
+        # Digest from https://windows.php.net/downloads/releases/sha256sum.txt
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = Join-Path $env:RUNNER_TEMP 'evidence'
+          New-Item -ItemType Directory -Path $evidence | Out-Null
+          $zip = Join-Path $env:RUNNER_TEMP 'php.zip'
+          & curl.exe --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 `
+            'https://windows.php.net/downloads/releases/php-8.5.12-1-nts-Win32-vs17-x64.zip' -o $zip
+          if ($LASTEXITCODE -ne 0) { throw 'PHP download failed' }
+          $digest = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
+          if ($digest -ne '2a36a2edcb7a5b9252f638fd5e4cf84d7f6e066092654220dc0b63e5cf4e9723') { throw "PHP digest mismatch: $digest" }
+          Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $env:RUNNER_TEMP 'php')
+          & (Join-Path $env:RUNNER_TEMP 'php\php.exe') -n -v | Tee-Object (Join-Path $evidence 'php-version.txt')
+          Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, OSArchitecture | Format-List | Out-File (Join-Path $evidence 'os.txt')
+      - name: Probe PHP
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = Join-Path $env:RUNNER_TEMP 'evidence'
+          $work = Join-Path $env:RUNNER_TEMP 'special-files'
+          New-Item -ItemType Directory -Path $work | Out-Null
+          & ./tests/policy/special-files/probe-windows.ps1 -Php (Join-Path $env:RUNNER_TEMP 'php\php.exe') -Work $work `
+            -Probe (Resolve-Path tests/policy/special-files/probe.php).Path | Tee-Object (Join-Path $evidence 'php-probe.log')
+      - name: Report Phego's Root results for the same cases
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:CGO_ENABLED = '0'
+          $env:PHEGO_SPECIAL_FILE_REPORT = Join-Path $env:RUNNER_TEMP 'evidence\phego-report.log'
+          go test -count=1 -v -run TestWindowsSpecialFileReport ./internal/policy
+          if ($LASTEXITCODE -ne 0) { throw 'Phego report failed' }
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: special-files-windows-2025
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: error

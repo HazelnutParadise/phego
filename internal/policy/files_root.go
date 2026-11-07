@@ -175,11 +175,14 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		if !openable(before) {
-			return nil, denied("not-granted")
+		// Opening a FIFO or device already acts on it, so aliases are checked
+		// on the Lstat result first; the identity check below ties the opened
+		// object to it. The open never waits, even if a FIFO replaced the node.
+		if !before.IsDir() && !singleLink(before) {
+			if err := p.hiddenReadAlias(root, grant, before, name); err != nil {
+				return nil, err
+			}
 		}
-		// A regular file may be replaced by a FIFO after Lstat. Open without
-		// waiting for a peer, then verify the actual object before returning it.
 		f, err := stack[len(stack)-1].root.OpenFile(leaf, flag|nonblockOpenFlag, perm)
 		if err != nil {
 			return nil, err
@@ -189,17 +192,11 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) || !openable(actual) {
+		if !os.SameFile(before, actual) {
 			f.Close()
 			return nil, denied("path-changed")
 		}
-		if actual.Mode().IsRegular() && !singleLink(actual) {
-			if err := p.hiddenReadAlias(root, grant, actual, name); err != nil {
-				f.Close()
-				return nil, err
-			}
-		}
-		return f, nil
+		return wrapSpecial(req.ctx, f, actual, name, flag)
 	}
 	protections, err := p.fileProtections(root, grant)
 	if err != nil {
@@ -226,10 +223,22 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		// Exclusive creation cannot follow a final symlink installed after Lstat.
 		return parent.OpenFile(leaf, flag|os.O_EXCL, perm)
 	}
-	if !before.Mode().IsRegular() && !(isCharDevice(before.Mode()) && listedCharDevice(before)) {
-		return nil, denied("not-granted")
+	// As for reads, protected aliases are refused before the open can act
+	// on a FIFO or device, and the identity check below ties the result to
+	// the checked node.
+	if !singleLink(before) {
+		for _, protection := range protections {
+			protected, e := protection.contains(before, name)
+			if e != nil {
+				return nil, e
+			}
+			if protected {
+				return nil, denied("not-granted")
+			}
+		}
 	}
-	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)
+	// O_TRUNC waits until the regular file is verified below.
+	f, err := openWriting(req.ctx, parent, leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm, before, name)
 	if err != nil {
 		return nil, err
 	}
@@ -241,18 +250,12 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	if !os.SameFile(before, actual) {
 		return fail(denied("path-changed"))
 	}
-	if !singleLink(actual) {
-		for _, protection := range protections {
-			protected, e := protection.contains(actual, name)
-			if e != nil {
-				return fail(e)
-			}
-			if protected {
-				return fail(denied("not-granted"))
-			}
+	if actual.IsDir() && flag&(os.O_CREATE|os.O_TRUNC) != 0 {
+		if err := directoryOpenResult(parent, leaf, actual, flag, name); err != nil {
+			return fail(err)
 		}
 	}
-	// open(2) ignores O_TRUNC for a character device, and ftruncate fails.
+	// open(2) ignores O_TRUNC for a FIFO or device, and ftruncate fails.
 	if flag&os.O_TRUNC != 0 && actual.Mode().IsRegular() {
 		if flag&(os.O_WRONLY|os.O_RDWR) == 0 {
 			// Preserve O_RDONLY|O_TRUNC: truncate through a separately verified writer,
@@ -276,11 +279,36 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			return fail(err)
 		}
 	}
-	return f, nil
+	return wrapSpecial(req.ctx, f, actual, name, flag)
 }
 
-func isCharDevice(m fs.FileMode) bool {
-	return m&fs.ModeType == fs.ModeDevice|fs.ModeCharDevice
+// directoryOpenResult reports what the system's open(2) does with flag on a
+// verified directory. The first open strips O_CREAT and O_TRUNC so that a
+// node swapped after Lstat is never created or truncated; opening "." of the
+// directory itself carries them safely. Linux refuses both on a directory
+// opened read-only, and macOS refuses only O_TRUNC.
+func directoryOpenResult(parent *os.Root, leaf string, want fs.FileInfo, flag int, name string) error {
+	dir, err := parent.OpenRoot(leaf)
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+	st, err := dir.Stat(".")
+	if err != nil {
+		return err
+	}
+	if !os.SameFile(want, st) {
+		return &PolicyError{Kind: FileWrite, Op: "open", Target: name, Rule: "path-changed"}
+	}
+	f, err := dir.OpenFile(".", flag&^os.O_EXCL|nonblockOpenFlag, 0)
+	if err != nil {
+		var pe *fs.PathError
+		if errors.As(err, &pe) {
+			return &fs.PathError{Op: "open", Path: name, Err: pe.Err}
+		}
+		return err
+	}
+	return f.Close()
 }
 
 type fileProtection struct {

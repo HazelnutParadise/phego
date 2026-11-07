@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -13,21 +14,33 @@ import (
 // contains it. Host directories are opened through os.Root and verified by
 // identity. Absolute symlink targets inside granted directories are remapped
 // to PHP paths; target parent components cannot escape their selected mount.
-// Host directories permit regular files, directories and the host's null,
-// zero, full, random and urandom character devices, identified by device
-// number; FIFOs, sockets, block devices and other character devices are
-// refused.
 // Host-created hard links still require a trusted layout.
 //
+// A host directory opens every file type the way PHP's open(2) does and
+// returns the kernel's error when that fails: a socket, or a terminal with
+// no controlling tty, does not open, and a directory does not open for
+// writing. A FIFO waits for its peer as PHP does. Opened only for reading,
+// it waits until a writer opens it; opened only for writing, until a reader
+// does. Reads and writes of a FIFO or device wait like blocking I/O.
+//
+// ctx bounds the open and every later wait on the returned file. When ctx
+// ends, a waiting open, Read or Write returns an *fs.PathError with the PHP
+// path and context.Cause(ctx), and later reads and writes fail the same way.
+// Reads of regular files and directories wait for no peer and are not
+// interrupted; calls into a trusted fs.FS are host code and are not either.
+//
 // flag uses the os.O_* values. Any write, create, append or truncate flag
-// needs a mount granted for writing. The result is an *os.File for a host
-// directory and the file system's own file for an fs.FS mount.
-func (p *Policy) OpenFile(name string, flag int, perm fs.FileMode) (fs.File, error) {
-	return p.openFile(name, openRequest{flag: flag, perm: perm})
+// needs a mount granted for writing. On a host directory the result is an
+// *os.File for a regular file or directory and a file with Read, Write,
+// Seek, Stat and Close for a FIFO or device; an fs.FS mount returns its own
+// file.
+func (p *Policy) OpenFile(ctx context.Context, name string, flag int, perm fs.FileMode) (fs.File, error) {
+	return p.openFile(name, openRequest{ctx: ctx, flag: flag, perm: perm})
 }
 
 // openRequest is one open as it follows redirects between mounts.
 type openRequest struct {
+	ctx       context.Context
 	flag      int
 	perm      fs.FileMode
 	redirects int
@@ -44,15 +57,6 @@ func (r openRequest) kind() Kind {
 func (r openRequest) next() openRequest {
 	r.redirects++
 	return r
-}
-
-// openable reports what a host directory opens for reading: regular files,
-// directories and the listed character devices. FIFOs, sockets, block
-// devices and other character devices stay closed: a FIFO or terminal read
-// could wait for a peer, and some devices act when opened.
-func openable(fi fs.FileInfo) bool {
-	m := fi.Mode()
-	return m.IsRegular() || m.IsDir() || isCharDevice(m) && listedCharDevice(fi)
 }
 
 // filePart retains the root boundary of a symlink target through mount changes.
@@ -149,6 +153,12 @@ func (p *Policy) openFileParts(parts []filePart, req openRequest) (fs.File, erro
 	if err != nil {
 		if rootEscapeError(err) {
 			return nil, &PolicyError{Kind: kind, Op: op, Target: name, Rule: "outside-root"}
+		}
+		// os.Root names the failing component relative to a directory handle;
+		// report the PHP path that was opened, as PHP's warning does.
+		var pe *fs.PathError
+		if errors.As(err, &pe) {
+			return nil, &fs.PathError{Op: "open", Path: name, Err: pe.Err}
 		}
 		return nil, err
 	}

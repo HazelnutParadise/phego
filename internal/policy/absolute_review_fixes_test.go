@@ -47,7 +47,7 @@ func TestReviewFixAbsoluteSymlinkMounts(t *testing.T) {
 			if err := os.Symlink(c.target, filepath.Join(base, "app", c.name)); err != nil {
 				t.Fatal(err)
 			}
-			f, err := p.OpenFile("/app/"+c.name, os.O_RDONLY, 0)
+			f, err := p.OpenFile(t.Context(), "/app/"+c.name, os.O_RDONLY, 0)
 			if c.rule != "" {
 				if f != nil {
 					f.Close()
@@ -65,7 +65,7 @@ func TestReviewFixAbsoluteSymlinkMounts(t *testing.T) {
 			}
 		})
 	}
-	f, err := p.OpenFile("/app/cross", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/app/cross", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -97,7 +97,7 @@ func TestReviewFixAbsoluteSymlinkSwapDoesNotLeak(t *testing.T) {
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: base + "/app"}}})
 	// A successful stable read prevents this race test from passing by denying everything.
-	f, err := p.OpenFile("/app/link", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/link", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestReviewFixAbsoluteSymlinkSwapDoesNotLeak(t *testing.T) {
 		}
 	}()
 	for i := 0; i < 500; i++ {
-		f, err := p.OpenFile("/app/link", os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), "/app/link", os.O_RDONLY, 0)
 		if err != nil {
 			continue
 		}
@@ -165,7 +165,7 @@ func TestReviewFixAbsoluteLinkPreservesTrailingSeparator(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: dir}}})
-	f, err := p.OpenFile("/app/link", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/link", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
@@ -187,7 +187,7 @@ func TestReviewFixRootHardlinkLimitation(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: root}}})
-	f, err := p.OpenFile("/app/alias", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/alias", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +230,7 @@ func TestReviewFixAbsoluteLinkUsesConfiguredRootAlias(t *testing.T) {
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: alias, Write: true}, {Path: "/locked", Dir: real + "/sub"}}})
 	for n, want := range map[string]string{"same": "file", "child": "sub/file"} {
-		f, err := p.OpenFile("/app/"+n, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), "/app/"+n, os.O_RDONLY, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -240,12 +240,12 @@ func TestReviewFixAbsoluteLinkUsesConfiguredRootAlias(t *testing.T) {
 			t.Fatalf("got %q %v", b, err)
 		}
 	}
-	f, err := p.OpenFile("/app/escape", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/escape", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
 	wantPolicyError(t, err, "outside-root")
-	f, err = p.OpenFile("/app/child", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err = p.OpenFile(t.Context(), "/app/child", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -298,7 +298,7 @@ func TestAbsoluteLinkChainParentUsesNewMount(t *testing.T) {
 		{"/app/return", "", "outside-root"},
 		{"/app/rel", "", "outside-root"},
 	} {
-		f, err := p.OpenFile(c.name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), c.name, os.O_RDONLY, 0)
 		if c.rule != "" {
 			if f != nil {
 				f.Close()

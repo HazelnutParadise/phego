@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 	"testing/fstest"
+	"time"
 )
 
 type reviewCountingFS struct {
@@ -202,9 +203,10 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 }
 
 // php /dev/null (PHP 8.5.12 CLI) runs an empty script, php /tmp runs a
-// directory as one, and php /dev/zero reads until the memory limit. RunFile
-// reads what the policy opens the same way, bounded by MaxSourceBytes; a
-// device the policy keeps closed stays a policy refusal on its PHP path.
+// directory as one, php /dev/zero reads until the memory limit, and php
+// /dev/tty without a terminal prints "Could not open input file". RunFile
+// reads what the policy opens the same way, bounded by MaxSourceBytes, and a
+// device read that waits for input ends with the context.
 func TestRunFileReadsDevicesLikePHP(t *testing.T) {
 	app := t.TempDir()
 	if err := os.Symlink("/dev/null", filepath.Join(app, "null.php")); err != nil {
@@ -215,13 +217,14 @@ func TestRunFileReadsDevicesLikePHP(t *testing.T) {
 	for _, tc := range []struct {
 		name, path string
 		cfg        Config
-		want       string // "compiled", "source limit" or a refused PHP path
+		want       string // "compiled", "source limit", "cancelled" or "kernel"
 	}{
 		{"root null", "/devices/null", root, "compiled"},
 		{"root link to null", "/app/null.php", root, "compiled"},
 		{"root directory", "/devices", root, "compiled"},
 		{"root zero", "/devices/zero", root, "source limit"},
-		{"root unlisted device", "/devices/tty", root, "/devices/tty"},
+		{"root terminal", "/devices/tty", root, "kernel"},
+		{"root pseudo-terminal master", "/devices/ptmx", root, "cancelled"},
 		{"fs mount device", "/x.php", Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: device}}}}, "compiled"},
 		{"standalone files device", "x.php", Config{Files: device}, "compiled"},
 	} {
@@ -229,15 +232,25 @@ func TestRunFileReadsDevicesLikePHP(t *testing.T) {
 			if _, err := os.Stat(strings.Replace(tc.path, "/devices", "/dev", 1)); strings.HasPrefix(tc.path, "/devices/") && err != nil {
 				t.Skip(err)
 			}
-			res, err := newPolicyEngine(t, tc.cfg).RunFile(context.Background(), tc.path)
+			want := tc.want
+			var kernel error
+			if want == "kernel" {
+				// The terminal opens only with a controlling tty, whose read waits.
+				if kernel = probeOpen(strings.Replace(tc.path, "/devices", "/dev", 1)); kernel == nil {
+					want = "cancelled"
+				}
+			}
+			ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
+			defer cancel()
+			res, err := newPolicyEngine(t, tc.cfg).RunFile(ctx, tc.path)
 			var unsupported *UnsupportedError
 			var limit *LimitError
 			var pe *PolicyError
 			switch {
-			case tc.want == "compiled" && errors.As(err, &unsupported) && unsupported.Feature == "PHP execution":
-			case tc.want == "source limit" && errors.As(err, &limit) && limit.Limit == "source size":
-			case strings.HasPrefix(tc.want, "/") && res != nil && res.Status == StatusPolicyDenied && errors.As(err, &pe) &&
-				*pe == (PolicyError{Capability: CapabilityFileRead, Op: "open", Target: tc.want, Rule: RuleNotGranted}):
+			case want == "compiled" && errors.As(err, &unsupported) && unsupported.Feature == "PHP execution":
+			case want == "source limit" && errors.As(err, &limit) && limit.Limit == "source size":
+			case want == "cancelled" && res != nil && res.Status == StatusCancelled && errors.Is(err, context.DeadlineExceeded):
+			case want == "kernel" && res != nil && res.Status == StatusFailed && !errors.As(err, &pe) && errors.Is(err, kernel):
 			default:
 				t.Fatalf("RunFile(%s) = %+v, %#v; want %s", tc.path, res, err, tc.want)
 			}

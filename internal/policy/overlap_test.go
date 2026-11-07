@@ -28,13 +28,13 @@ func TestOverlappingMountsProtectAliases(t *testing.T) {
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", Dir: filepath.Join(root, "protected")}}})
 			for _, flag := range []int{os.O_WRONLY, os.O_RDWR, os.O_WRONLY | os.O_TRUNC, os.O_CREATE | os.O_WRONLY, os.O_WRONLY | os.O_APPEND} {
-				f, err := p.OpenFile("/alias/file", flag, 0600)
+				f, err := p.OpenFile(t.Context(), "/alias/file", flag, 0600)
 				if f != nil {
 					f.Close()
 				}
 				wantPolicyError(t, err, "not-granted")
 			}
-			f, err := p.OpenFile("/alias/new", os.O_CREATE|os.O_WRONLY, 0600)
+			f, err := p.OpenFile(t.Context(), "/alias/new", os.O_CREATE|os.O_WRONLY, 0600)
 			if f != nil {
 				f.Close()
 			}
@@ -64,7 +64,7 @@ func TestOverlappingMountsPreserveWritableAliases(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", Dir: filepath.Join(root, "protected")}}})
-	f, err := p.OpenFile("/alias/file", os.O_RDWR|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias/file", os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestOverlappingPhysicalRootsProtectDifferentVirtualAliases(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: root, Write: true}, {Path: "/secret", Dir: protected}}})
-	f, err := p.OpenFile("/app/data/file", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/app/data/file", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -118,7 +118,7 @@ func TestOverlappingMountsProtectHardLinkAliases(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", Dir: protected}}})
-	f, err := p.OpenFile("/alias", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -147,7 +147,7 @@ func TestOverlappingMountsProtectFinalSymlinkAndHiddenFS(t *testing.T) {
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", FS: fstest.MapFS{}}}})
 	for _, name := range []string{"/alias", "/hard"} {
-		f, err := p.OpenFile(name, os.O_WRONLY|os.O_TRUNC, 0600)
+		f, err := p.OpenFile(t.Context(), name, os.O_WRONLY|os.O_TRUNC, 0600)
 		if f != nil {
 			f.Close()
 		}
@@ -175,7 +175,7 @@ func TestOverlappingMountsAllowWritableOverride(t *testing.T) {
 				t.Fatal(err)
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", Dir: protected}, {Path: "/protected/uploads", Dir: uploads, Write: true}}})
-			f, err := p.OpenFile("/alias/new", os.O_WRONLY|os.O_CREATE, 0600)
+			f, err := p.OpenFile(t.Context(), "/alias/new", os.O_WRONLY|os.O_CREATE, 0600)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -205,7 +205,7 @@ func TestOverlappingMountsAllowUnprotectedHardLinks(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/protected", Dir: filepath.Join(root, "protected")}}})
-	f, err := p.OpenFile("/alias", os.O_RDONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias", os.O_RDONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +251,7 @@ func TestOverlappingMountsSymlinkReplacement(t *testing.T) {
 		done <- nil
 	}()
 	for i := 0; i < 500; i++ {
-		f, _ := p.OpenFile("/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
+		f, _ := p.OpenFile(t.Context(), "/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
 		if f != nil {
 			f.Close()
 		}
@@ -276,7 +276,7 @@ func TestOverlappingPhysicalRootsProtectWritableDescendantAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/protected", Dir: root}, {Path: "/alias", Dir: child, Write: true}}})
-	f, err := p.OpenFile("/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -305,7 +305,7 @@ func TestOverlappingPhysicalRootsCaseInsensitiveAncestor(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/protected", Dir: root}, {Path: "/alias", Dir: lower, Write: true}}})
-	f, err := p.OpenFile("/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias/file", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -333,7 +333,7 @@ func TestOverlappingMountsRematchReadAliases(t *testing.T) {
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{"visible.php": {Data: []byte("visible")}}}}})
 	for _, name := range []string{"/protected/hidden.php", "/alias.php", "/alias/hidden.php"} {
-		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 		if f != nil {
 			f.Close()
 		}
@@ -341,7 +341,7 @@ func TestOverlappingMountsRematchReadAliases(t *testing.T) {
 			t.Fatalf("read hidden file through %q", name)
 		}
 	}
-	f, err := p.OpenFile("/alias/visible.php", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/alias/visible.php", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -367,14 +367,14 @@ func TestOverlappingMountsRematchCaseInsensitiveReadAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{"visible.php": {Data: []byte("visible")}}}}})
-	f, err := p.OpenFile("/Protected/hidden.php", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/Protected/hidden.php", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
 	if err == nil {
 		t.Fatal("case alias read hidden parent file")
 	}
-	f, err = p.OpenFile("/Protected/visible.php", os.O_RDONLY, 0)
+	f, err = p.OpenFile(t.Context(), "/Protected/visible.php", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -399,7 +399,7 @@ func TestOverlappingMountsDoNotReadHiddenHardLink(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/protected", FS: fstest.MapFS{}}}})
-	f, err := p.OpenFile("/alias", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/alias", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
@@ -429,7 +429,7 @@ func TestOverlappingMountsPreserveReadableHardLinks(t *testing.T) {
 			mount.Dir = protected
 		}
 		p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, mount}})
-		f, err := p.OpenFile("/alias", os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), "/alias", os.O_RDONLY, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -460,7 +460,7 @@ func TestRootPathsResolveSymlinksBeforeParentComponents(t *testing.T) {
 		if truncate {
 			flags = os.O_WRONLY | os.O_TRUNC
 		}
-		f, err := p.OpenFile("/link/../file", flags, 0600)
+		f, err := p.OpenFile(t.Context(), "/link/../file", flags, 0600)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -493,7 +493,7 @@ func TestRootPathsDoNotTreatFilesAsDirectories(t *testing.T) {
 				t.Fatal(err)
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}}})
-			f, err := p.OpenFile(name, os.O_WRONLY|os.O_TRUNC, 0600)
+			f, err := p.OpenFile(t.Context(), name, os.O_WRONLY|os.O_TRUNC, 0600)
 			if f != nil {
 				f.Close()
 			}
@@ -515,7 +515,7 @@ func TestRootPathsTraverseVirtualMountParents(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: app}, {Path: "/other", Dir: other, Write: true}}})
-	f, err := p.OpenFile("/app/../other/file", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/../other/file", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -524,7 +524,7 @@ func TestRootPathsTraverseVirtualMountParents(t *testing.T) {
 	if err != nil || string(b) != "other" {
 		t.Fatalf("virtual parent read=%q %v", b, err)
 	}
-	f, err = p.OpenFile("/app/../other/file", os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err = p.OpenFile(t.Context(), "/app/../other/file", os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -541,7 +541,7 @@ func TestRootPathsResolveIntoVirtualMountWithoutHostDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/virtual", FS: fstest.MapFS{"file": {Data: []byte("mounted")}}}}})
-	f, err := p.OpenFile("/alias/file", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/alias/file", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -572,7 +572,7 @@ func TestFSParentPreservesUnresolvedRootPath(t *testing.T) {
 			if truncate {
 				flag = os.O_WRONLY | os.O_TRUNC
 			}
-			f, err := p.OpenFile("/app/../other/link/../file", flag, 0600)
+			f, err := p.OpenFile(t.Context(), "/app/../other/link/../file", flag, 0600)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -594,7 +594,7 @@ func TestFSParentPreservesUnresolvedRootPath(t *testing.T) {
 func TestFSParentRequiresExistingDirectory(t *testing.T) {
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", FS: fstest.MapFS{"file": {Data: []byte("file")}, "other": {Data: []byte("other")}, "dir/x": {Data: []byte("x")}}}}})
 	for _, name := range []string{"/app/file/../other", "/app/missing/../other"} {
-		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 		if f != nil {
 			f.Close()
 		}
@@ -602,7 +602,7 @@ func TestFSParentRequiresExistingDirectory(t *testing.T) {
 			t.Errorf("invalid directory path read through %q", name)
 		}
 	}
-	f, err := p.OpenFile("/app/dir/../other", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/dir/../other", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -616,7 +616,7 @@ func TestRootPathsResolveNestedVirtualAncestors(t *testing.T) {
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/virtual/deep", FS: fstest.MapFS{"file": {Data: []byte("mounted")}}}}})
 	for _, name := range []string{"/virtual/deep/file", "/alias/file"} {
-		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 		if err != nil {
 			t.Errorf("read %q: %v", name, err)
 			continue
@@ -632,7 +632,7 @@ func TestRootPathsResolveNestedVirtualAncestors(t *testing.T) {
 func TestVirtualMountAncestorsDoNotCreateHostFiles(t *testing.T) {
 	root := t.TempDir()
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/virtual/deep", FS: fstest.MapFS{}}}})
-	f, err := p.OpenFile("/virtual/ghost", os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := p.OpenFile(t.Context(), "/virtual/ghost", os.O_WRONLY|os.O_CREATE, 0600)
 	if f != nil {
 		f.Close()
 	}
@@ -644,7 +644,7 @@ func TestVirtualMountAncestorsDoNotCreateHostFiles(t *testing.T) {
 func TestFSPathsResolveSymlinksBeforeParentComponents(t *testing.T) {
 	source := fstest.MapFS{"file": {Data: []byte("root")}, "sub/file": {Data: []byte("sub")}, "sub/deep/empty": {}, "link": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", FS: source}}})
-	f, err := p.OpenFile("/app/link/../file", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/app/link/../file", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -674,7 +674,7 @@ func TestReadOnlyParentsResolveWritableChildAliases(t *testing.T) {
 				writable = t.TempDir()
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root}, {Path: "/data", Dir: writable, Write: true}}})
-			f, err := p.OpenFile("/alias/file", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+			f, err := p.OpenFile(t.Context(), "/alias/file", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -693,7 +693,7 @@ func TestReadOnlyParentsResolveWritableChildAliases(t *testing.T) {
 					t.Fatalf("hidden backing changed: %q %v", b, err)
 				}
 			}
-			f, err = p.OpenFile("/ungranted", os.O_CREATE|os.O_WRONLY, 0600)
+			f, err = p.OpenFile(t.Context(), "/ungranted", os.O_CREATE|os.O_WRONLY, 0600)
 			if f != nil {
 				f.Close()
 			}
@@ -701,7 +701,7 @@ func TestReadOnlyParentsResolveWritableChildAliases(t *testing.T) {
 		})
 	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: fstest.MapFS{"alias": {Mode: os.ModeSymlink, Data: []byte("data")}}}, {Path: "/data", Dir: t.TempDir(), Write: true}}})
-	f, err := p.OpenFile("/alias/new", os.O_CREATE|os.O_WRONLY, 0600)
+	f, err := p.OpenFile(t.Context(), "/alias/new", os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -734,7 +734,7 @@ func TestFSMountsRejectUnlistedCaseAliases(t *testing.T) {
 	backing := foldingFS{fstest.MapFS{"protected/hidden": {Data: []byte("secret")}, "public/file": {Data: []byte("public")}}}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}}})
 	for _, name := range []string{"/Protected/hidden", "/PROTECTED/hidden"} {
-		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 		if f != nil {
 			f.Close()
 		}
@@ -742,7 +742,7 @@ func TestFSMountsRejectUnlistedCaseAliases(t *testing.T) {
 			t.Fatalf("read hidden data via %s", name)
 		}
 	}
-	f, err := p.OpenFile("/public/file", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/public/file", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -752,7 +752,7 @@ func TestFSMountsRejectUnlistedCaseAliases(t *testing.T) {
 func TestFSMountsRequireBoundedDirectoryEnumeration(t *testing.T) {
 	backing := opaqueFS{fstest.MapFS{"public": {Data: []byte("ok")}}}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}}})
-	f, err := p.OpenFile("/public", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/public", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
@@ -760,7 +760,7 @@ func TestFSMountsRequireBoundedDirectoryEnumeration(t *testing.T) {
 		t.Fatal("unverifiable FS accepted beside shadow mount")
 	}
 	p = mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}}})
-	f, err = p.OpenFile("/public", os.O_RDONLY, 0)
+	f, err = p.OpenFile(t.Context(), "/public", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -770,14 +770,14 @@ func TestFSMountsRequireBoundedDirectoryEnumeration(t *testing.T) {
 func TestFSVirtualAncestorsDoNotEnableCaseAliases(t *testing.T) {
 	backing := foldingFS{fstest.MapFS{"protected/hidden": {Data: []byte("secret")}}}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: backing}, {Path: "/protected", FS: fstest.MapFS{}}, {Path: "/Protected/deep", FS: fstest.MapFS{"file": {Data: []byte("ok")}}}}})
-	f, err := p.OpenFile("/Protected/hidden", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/Protected/hidden", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
 	if err == nil {
 		t.Fatal("virtual ancestor enabled hidden case alias")
 	}
-	f, err = p.OpenFile("/Protected/deep/file", os.O_RDONLY, 0)
+	f, err = p.OpenFile(t.Context(), "/Protected/deep/file", os.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -806,7 +806,7 @@ func TestSymlinkTargetsResolveNestedLinksBeforeParents(t *testing.T) {
 				grant.FS = fstest.MapFS{"sub/deep": {Mode: fs.ModeDir}, "file": {Data: []byte("root")}, "deep": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}, "link": {Mode: os.ModeSymlink, Data: []byte("deep/../../file")}, "escape": {Mode: os.ModeSymlink, Data: []byte("../file")}}
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{grant, {Path: "/", FS: fstest.MapFS{"file": {Data: []byte("outside")}}}}})
-			f, err := p.OpenFile("/app/link", os.O_RDONLY, 0)
+			f, err := p.OpenFile(t.Context(), "/app/link", os.O_RDONLY, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -815,7 +815,7 @@ func TestSymlinkTargetsResolveNestedLinksBeforeParents(t *testing.T) {
 			if err != nil || string(b) != "root" {
 				t.Fatalf("nested target=%q %v", b, err)
 			}
-			f, err = p.OpenFile("/app/escape", os.O_RDONLY, 0)
+			f, err = p.OpenFile(t.Context(), "/app/escape", os.O_RDONLY, 0)
 			if f != nil {
 				f.Close()
 			}
@@ -846,14 +846,14 @@ func TestShadowedEscapingSymlinkDoesNotBlockOtherDirectories(t *testing.T) {
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, {Path: "/shadow", Dir: outside}}})
 	for _, name := range []string{"/data/file", "/data/hard"} {
 		for _, flag := range []int{os.O_RDONLY, os.O_WRONLY} {
-			f, err := p.OpenFile(name, flag, 0600)
+			f, err := p.OpenFile(t.Context(), name, flag, 0600)
 			if err != nil {
 				t.Fatalf("%s flag%d: %v", name, flag, err)
 			}
 			f.Close()
 		}
 	}
-	f, err := p.OpenFile("/escape/file", os.O_RDONLY, 0)
+	f, err := p.OpenFile(t.Context(), "/escape/file", os.O_RDONLY, 0)
 	if f != nil {
 		f.Close()
 	}
@@ -884,7 +884,7 @@ func TestOverlappingFSRejectsUnresolvableSymlinks(t *testing.T) {
 	defer r.Close()
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: struct{ fs.FS }{r.FS()}}, {Path: "/protected", FS: fstest.MapFS{}}}})
 	for _, name := range []string{"/alias", "/public/alias"} {
-		f, err := p.OpenFile(name, os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 		if f != nil {
 			f.Close()
 		}
@@ -916,7 +916,7 @@ func TestSymlinkBoundariesSurviveMountRemapping(t *testing.T) {
 				source.FS = fstest.MapFS{"deep": {Mode: os.ModeSymlink, Data: []byte("sub/deep")}, "good": {Mode: os.ModeSymlink, Data: []byte("deep/../../file")}, "bad": {Mode: os.ModeSymlink, Data: []byte("sub/../../file")}, "file": {Data: []byte("inside")}}
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", FS: fstest.MapFS{"file": {Data: []byte("outside")}}}, source, child}})
-			f, err := p.OpenFile("/app/good", os.O_RDONLY, 0)
+			f, err := p.OpenFile(t.Context(), "/app/good", os.O_RDONLY, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -925,12 +925,12 @@ func TestSymlinkBoundariesSurviveMountRemapping(t *testing.T) {
 			if err != nil || string(b) != "inside" {
 				t.Fatalf("remapped target=%q %v", b, err)
 			}
-			f, err = p.OpenFile("/app/bad", os.O_RDONLY, 0)
+			f, err = p.OpenFile(t.Context(), "/app/bad", os.O_RDONLY, 0)
 			if f != nil {
 				f.Close()
 			}
 			wantPolicyError(t, err, "outside-root")
-			f, err = p.OpenFile("/app/sub/../../file", os.O_RDONLY, 0)
+			f, err = p.OpenFile(t.Context(), "/app/sub/../../file", os.O_RDONLY, 0)
 			if err != nil {
 				t.Fatal(err)
 			}

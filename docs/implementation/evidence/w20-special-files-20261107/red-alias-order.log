@@ -1,0 +1,5 @@
+    special_files_test.go:519: write=false: the refused open released the FIFO peer
+--- FAIL: TestRootRefusedFIFOAliasIsNotOpened (0.05s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.650s
+FAIL

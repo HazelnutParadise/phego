@@ -1,0 +1,18 @@
+    policy_review_test.go:255: RunFile(/devices/tty) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/devices/tty", Rule:"not-granted"}; want kernel
+    policy_review_test.go:255: RunFile(/devices/ptmx) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/devices/ptmx", Rule:"not-granted"}; want cancelled
+--- FAIL: TestRunFileReadsDevicesLikePHP (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_null (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_link_to_null (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_directory (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_zero (0.00s)
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_terminal (0.00s)
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_pseudo-terminal_master (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/fs_mount_device (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/standalone_files_device (0.00s)
+    runfile_fifo_review_fixes_test.go:62: RunFile returned without a writer: &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, phego: file-read open "/app/pipe.php" refused (not-granted)
+--- FAIL: TestRunFileFIFORunsWriterSource (0.00s)
+    runfile_fifo_review_fixes_test.go:103: RunFile = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, phego: file-read open "/app/pipe.php" refused (not-granted); want StatusCancelled
+--- FAIL: TestRunFileFIFOCancelReleasesAdmission (0.00s)
+    runfile_fifo_review_fixes_test.go:139: RunFile = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, phego: file-read open "/app/s.php" refused (not-granted); want StatusFailed with no such device or address
+--- FAIL: TestRunFileSocketFailsLikeKernel (0.00s)
+FAIL
