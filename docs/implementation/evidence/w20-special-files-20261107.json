@@ -12,7 +12,7 @@
     "T-074"
   ],
   "source_base": "51887857e1eb0f1cfeff3e1e3ff35ce7bfde580e",
-  "captured_at": "2026-11-07T10:42:20.362544+00:00",
+  "captured_at": "2026-11-07T11:31:23.416036+00:00",
   "source_sha256": {
     "engine.go": "665c89896bcaaba1996fc67867cfb04a14800bf5d674752f9c1546578333c1c5",
     "policy.go": "05f011f44b4ae607ea96752de6226670870545186d486a42ec914601bc49ba81",
@@ -36,7 +36,7 @@
     "tests/policy/special-files/probe.php": "2351554308d121482a94f3bce2e33d728da14fa61a070fdb0063fa36743765e8",
     "tests/policy/special-files/probe-windows.ps1": "e3893641c35abe5d2f464acf8498d07d5bfbd88f11e2055fc47a2ada3a22ae88",
     ".github/workflows/special-files.yml": "fc6bd3b3559c815ad6ceab797a35e6097437c72767a35698e66c3cbef6dc515c",
-    "docs/implementation/W-20.md": "7a5bc429825e43961f821db3efee478a15f69d79081878f9e5f680d045381377"
+    "docs/implementation/W-20.md": "95d6b5d13cc52591a30b8c919cf7531f7308b212bfe86bcb365e1951d7079d8b"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",
@@ -54,7 +54,7 @@
     "Root opens every device node as PHP does instead of the five-device allowlist the consultation suggested keeping: approved by the project owner on 2026-11-07. Capability, identity, hard-link and OS permission checks stay in force, and FileGrant.Root documents that every node under the mount is reachable.",
     "O_RDONLY with O_CREAT or O_TRUNC on a directory reports EISDIR, following Linux open(2); macOS would open the directory for O_CREAT. PHP fopen modes never use these combinations."
   ],
-  "local_status": "partial",
+  "local_status": "pass",
   "product_test_status": "not_run",
   "commands": [
     {
@@ -98,9 +98,129 @@
       "exit_code": 1,
       "log": "w20-special-files-20261107/red-alias-order.log",
       "result": "TestRootRefusedFIFOAliasIsNotOpened fails: the refused open released the waiting FIFO writer."
+    },
+    {
+      "command": ".github/workflows/special-files.yml run 42365853229 on a059e00, macOS 15 arm64: locked PHP 8.5.12 built from source, probe.sh, then go test -run 'TestRoot|TestRunFile' ./internal/policy .",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/ci/macos-15/php-probe.log",
+      "result": "PHP's FIFO semantics match the Linux images, including fopen returning when a writer opens and closes without data; only libc message texts differ (Device not configured, Operation not supported on socket, Undefined error: 0). Phego's tests pass on the runner (ci/macos-15/phego-tests.log); TestRootFIFOReadSeesWriterThatLeft skips, the recorded macOS limit."
+    },
+    {
+      "command": "the same job on macOS 15 Intel",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/ci/macos-15-intel/php-probe.log",
+      "result": "Identical to arm64 apart from temporary paths; Phego's tests pass (ci/macos-15-intel/phego-tests.log)."
+    },
+    {
+      "command": "the same run on Windows Server 2025: official php-8.5.12-1-nts-Win32-vs17-x64.zip, probe-windows.ps1, then TestWindowsSpecialFileReport",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/ci/windows-2025/php-probe.log",
+      "result": "PHP opens bare NUL, but <dir>\\NUL, CON, COM1 and CONIN$ report 'No such file or directory', and directories opened with r, w, r+ or a report 'Permission denied'. Root refuses the reserved names as outside-root, opens a directory read-only and reports 'is a directory' for write modes (ci/windows-2025/phego-report.log): recorded in W-20.md as a follow-up."
+    },
+    {
+      "command": "GitHub checks of PR #136 at a059e00",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/ci/checks.txt",
+      "result": "All 47 checks succeed, including Go checks (ubuntu go test, race, vet), the Linux reference workflows and the new macOS and Windows jobs."
+    },
+    {
+      "command": "gofmt -l .",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/gofmt.log",
+      "result": "No output."
+    },
+    {
+      "command": "CGO_ENABLED=0 go build ./... for the host and linux/386, windows/amd64, darwin/arm64, linux/amd64, linux/arm64, freebsd/amd64",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/build.log",
+      "result": "Every target builds."
+    },
+    {
+      "command": "go vet ./... for the host and linux/amd64, linux/386, windows/amd64, freebsd/amd64",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/vet.log",
+      "result": "No findings except linux/386: internal/runtime/execution_output_bench_test.go:25 uses 1 << 40 as an int, which overflows on 32-bit. That file comes from main (81f9ac8) and this change does not touch internal/runtime; CI vets only the host platform."
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 ./...",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/go.log",
+      "result": "Every package passes."
+    },
+    {
+      "command": "go test -race -count=1 ./...",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/race.log",
+      "result": "Every package passes without race reports."
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "log": "w20-special-files-20261107/docs.log",
+      "result": "All documentation checks pass."
     }
   ],
   "artifacts": {
+    "build.log": {
+      "path": "w20-special-files-20261107/build.log",
+      "sha256": "bfe58779d0e1758453cab8c53acb0e8443aae64fc2d32741889529a1ed340c87"
+    },
+    "ci/checks.txt": {
+      "path": "w20-special-files-20261107/ci/checks.txt",
+      "sha256": "5f14bc3f92c86ef44672eb9cf9a4de60edb0ef7e1f84dc91a4b314413f56716d"
+    },
+    "ci/macos-15/os.txt": {
+      "path": "w20-special-files-20261107/ci/macos-15/os.txt",
+      "sha256": "2eb6ce6b9a95abe5d97bdd43a552509ce71ce9b4095b0053d0472027f8f77964"
+    },
+    "ci/macos-15/phego-tests.log": {
+      "path": "w20-special-files-20261107/ci/macos-15/phego-tests.log",
+      "sha256": "a7f0768837fdffd5a0c74122298bc4a23a1c82f011853c0dc465138ce5f4aa9f"
+    },
+    "ci/macos-15/php-probe.log": {
+      "path": "w20-special-files-20261107/ci/macos-15/php-probe.log",
+      "sha256": "4355d183e800f12f460d1e39379abaadcb4f86d3ba92bf1123878d1b1274090d"
+    },
+    "ci/macos-15/php-version.txt": {
+      "path": "w20-special-files-20261107/ci/macos-15/php-version.txt",
+      "sha256": "fb144432676e6131fa4de04dad54d68136d903ead89c377bf7c70d5d616e0bc7"
+    },
+    "ci/macos-15-intel/os.txt": {
+      "path": "w20-special-files-20261107/ci/macos-15-intel/os.txt",
+      "sha256": "2d4873c2e7e62ee02dddf365d68d58f886defc5d9697457a96e15f89d03ab78d"
+    },
+    "ci/macos-15-intel/phego-tests.log": {
+      "path": "w20-special-files-20261107/ci/macos-15-intel/phego-tests.log",
+      "sha256": "b5d40055323989692b3c0965950eb37a8c3014c06bf603681c827ff7cedc1b3c"
+    },
+    "ci/macos-15-intel/php-probe.log": {
+      "path": "w20-special-files-20261107/ci/macos-15-intel/php-probe.log",
+      "sha256": "0bfe1927d3fab43cfa21e94876b1cb0bcf280548cda4cd67522fc3290d69df56"
+    },
+    "ci/macos-15-intel/php-version.txt": {
+      "path": "w20-special-files-20261107/ci/macos-15-intel/php-version.txt",
+      "sha256": "e6450989c3b0be788874467d1380c4b1a2a0d9eb4eb633357905ac320d8a2bad"
+    },
+    "ci/windows-2025/os.txt": {
+      "path": "w20-special-files-20261107/ci/windows-2025/os.txt",
+      "sha256": "5ad411c6f644b9af8a70751f32ae5513483d74eb1340c2badc5686ca36daac1b"
+    },
+    "ci/windows-2025/phego-report.log": {
+      "path": "w20-special-files-20261107/ci/windows-2025/phego-report.log",
+      "sha256": "d3b6ddd2002bc6383c4f36ad12cc5147dc0a4efb9d3ac58dd57dfd63180c8f19"
+    },
+    "ci/windows-2025/php-probe.log": {
+      "path": "w20-special-files-20261107/ci/windows-2025/php-probe.log",
+      "sha256": "a12442a8e574959eb130034a525d0377c5b6ae9eb365039c854554cadefc0027"
+    },
+    "ci/windows-2025/php-version.txt": {
+      "path": "w20-special-files-20261107/ci/windows-2025/php-version.txt",
+      "sha256": "f063e7903715baacc3f714589158e54848ebbb91b0c702b47fecb53e6e7ac0f2"
+    },
+    "docs.log": {
+      "path": "w20-special-files-20261107/docs.log",
+      "sha256": "69089b78942db26fe46627930c9c273346f33e9b8230a92f6d3ba2adf4ea9452"
+    },
     "go-probe/fifo.go.txt": {
       "path": "w20-special-files-20261107/go-probe/fifo.go.txt",
       "sha256": "e1bcb7ffc11ef8d82b1d19bbf332b76af9bf73fdff4a2ae169e6db4a6776d13b"
@@ -121,6 +241,14 @@
       "path": "w20-special-files-20261107/go-probe/pty.go.txt",
       "sha256": "ced2fc39f2e7041dfdc726a4d7390c86e4b5d578ebc1cff693b7a78818ee6c1e"
     },
+    "go.log": {
+      "path": "w20-special-files-20261107/go.log",
+      "sha256": "9405bd27e2edc6a27079fc81c9b9db8f2bf63c8a293f463c45640c65e396634f"
+    },
+    "gofmt.log": {
+      "path": "w20-special-files-20261107/gofmt.log",
+      "sha256": "af0f5167053b838b0bab7717e58f0c6fbc519203653497bed95a3d0287d2bd30"
+    },
     "php/amd64.log": {
       "path": "w20-special-files-20261107/php/amd64.log",
       "sha256": "f95f17db121602cc556c9e91923a32de78bbbf695d0b147c5f8d03a58d297843"
@@ -140,6 +268,10 @@
     "php/i386.log": {
       "path": "w20-special-files-20261107/php/i386.log",
       "sha256": "835c00e0d0763422ec50c6dc00d25bfd86ed0b77ed7487d6828d20c953279e20"
+    },
+    "race.log": {
+      "path": "w20-special-files-20261107/race.log",
+      "sha256": "f11a26290d0a4838eeb3c9680a60bf35aea2d84841fcce6aa1dc07930a206ebf"
     },
     "red-alias-order.log": {
       "path": "w20-special-files-20261107/red-alias-order.log",
@@ -164,6 +296,10 @@
     "red-runfile-linux-arm64.log": {
       "path": "w20-special-files-20261107/red-runfile-linux-arm64.log",
       "sha256": "9eecae506465685db61ac32a6ee9afbb55e95d20c49241199c5bc6ad7926d3bf"
+    },
+    "vet.log": {
+      "path": "w20-special-files-20261107/vet.log",
+      "sha256": "09891c50d4ca9eb575f054a91fb6b4e2a9f70941a878e6e9ef401f7c0f0bfe07"
     }
   },
   "limits": [
@@ -171,6 +307,7 @@
     "On macOS and the BSDs a writer that opens and closes a FIFO without writing between two probes is not seen; the open keeps waiting for a writer or the context.",
     "Reads of regular files and directories, and calls into a trusted fs.FS, are not interrupted by the context.",
     "PHP's include and fopen messages for these files are produced by W-17 and W-18 from OpenFile's result; no PHP code runs here yet.",
-    "Windows is cross-compiled only; os.Root refuses Windows device names, so no FIFO or device reaches the wait code there."
+    "Windows: os.Root refuses reserved device names under a mount (PHP reports them as missing files) and directories open differently from PHP ('Permission denied' in PHP); follow-up work, outside the FIFO and device waits.",
+    "linux/386 go vet fails on internal/runtime/execution_output_bench_test.go from main, independent of this change."
   ]
 }

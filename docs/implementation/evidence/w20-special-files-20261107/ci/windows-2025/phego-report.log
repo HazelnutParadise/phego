@@ -1,0 +1,25 @@
+== fopen <work>\NUL r
+error *policy.PolicyError: policy: file-read open "/app/NUL" refused (outside-root)
+== fopen <work>\nul r
+error *policy.PolicyError: policy: file-read open "/app/nul" refused (outside-root)
+== fopen <work>\NUL.txt r
+error *fs.PathError: statat NUL.txt: The system cannot find the file specified.
+== fopen <work>\sub\NUL r
+error *policy.PolicyError: policy: file-read open "/app/sub/NUL" refused (outside-root)
+== fopen <work>\CON r
+error *policy.PolicyError: policy: file-read open "/app/CON" refused (outside-root)
+== fopen <work>\COM1 r
+error *policy.PolicyError: policy: file-read open "/app/COM1" refused (outside-root)
+== fopen <work>\CONIN$ r
+error *policy.PolicyError: policy: file-read open "/app/CONIN$" refused (outside-root)
+== fopen <work>\NUL w
+error *policy.PolicyError: policy: file-write open "/app/NUL" refused (outside-root)
+== fopen dir r
+opened mode=drwxrwxrwx stat-error=<nil>
+read "" read C:\Users\RUNNER~1\AppData\Local\Temp\TestWindowsSpecialFileReport2747378356\001\d: Incorrect function.
+== fopen dir w
+error *fs.PathError: openat d: is a directory
+== fopen dir r+
+error *fs.PathError: openat d: is a directory
+== fopen dir a
+error *fs.PathError: openat d: is a directory

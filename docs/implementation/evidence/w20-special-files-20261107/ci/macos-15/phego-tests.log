@@ -1,0 +1,83 @@
+=== RUN   TestRootPathsResolveSymlinksBeforeParentComponents
+--- PASS: TestRootPathsResolveSymlinksBeforeParentComponents (0.00s)
+=== RUN   TestRootPathsDoNotTreatFilesAsDirectories
+=== RUN   TestRootPathsDoNotTreatFilesAsDirectories//file/.
+=== RUN   TestRootPathsDoNotTreatFilesAsDirectories//file/
+=== RUN   TestRootPathsDoNotTreatFilesAsDirectories//missing/../file
+--- PASS: TestRootPathsDoNotTreatFilesAsDirectories (0.00s)
+    --- PASS: TestRootPathsDoNotTreatFilesAsDirectories//file/. (0.00s)
+    --- PASS: TestRootPathsDoNotTreatFilesAsDirectories//file/ (0.00s)
+    --- PASS: TestRootPathsDoNotTreatFilesAsDirectories//missing/../file (0.00s)
+=== RUN   TestRootPathsTraverseVirtualMountParents
+--- PASS: TestRootPathsTraverseVirtualMountParents (0.00s)
+=== RUN   TestRootPathsResolveIntoVirtualMountWithoutHostDirectory
+--- PASS: TestRootPathsResolveIntoVirtualMountWithoutHostDirectory (0.00s)
+=== RUN   TestRootPathsResolveNestedVirtualAncestors
+--- PASS: TestRootPathsResolveNestedVirtualAncestors (0.00s)
+=== RUN   TestRootFIFOReadOpensWhenWriterArrives
+--- PASS: TestRootFIFOReadOpensWhenWriterArrives (0.42s)
+=== RUN   TestRootFIFOReadKeepsEarlyData
+--- PASS: TestRootFIFOReadKeepsEarlyData (0.00s)
+=== RUN   TestRootFIFOReadSeesWriterThatLeft
+    special_files_test.go:179: only Linux reports a FIFO writer that left without data; see W-20.md
+--- SKIP: TestRootFIFOReadSeesWriterThatLeft (0.00s)
+=== RUN   TestRootFIFOOpenEndsWithContext
+--- PASS: TestRootFIFOOpenEndsWithContext (0.45s)
+=== RUN   TestRootFIFOReadEndsWithContext
+--- PASS: TestRootFIFOReadEndsWithContext (0.11s)
+=== RUN   TestRootFIFOWriteWaitsForReader
+--- PASS: TestRootFIFOWriteWaitsForReader (0.62s)
+=== RUN   TestRootFIFOReadWriteOpensAtOnce
+--- PASS: TestRootFIFOReadWriteOpensAtOnce (0.00s)
+=== RUN   TestRootOpenMatchesKernelForSpecialFiles
+--- PASS: TestRootOpenMatchesKernelForSpecialFiles (0.00s)
+=== RUN   TestRootAllowsCharacterDevices
+--- PASS: TestRootAllowsCharacterDevices (0.00s)
+=== RUN   TestRootDeviceReadEndsWithContext
+--- PASS: TestRootDeviceReadEndsWithContext (0.10s)
+=== RUN   TestRootSpecialFileCloseEndsRead
+--- PASS: TestRootSpecialFileCloseEndsRead (0.12s)
+=== RUN   TestRootRefusedFIFOAliasIsNotOpened
+--- PASS: TestRootRefusedFIFOAliasIsNotOpened (0.31s)
+=== RUN   TestRootFIFOSwapStaysBounded
+--- PASS: TestRootFIFOSwapStaysBounded (0.66s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/policy	2.824s
+=== RUN   TestRunFileUsesGrantedFilesOnly
+--- PASS: TestRunFileUsesGrantedFilesOnly (0.00s)
+=== RUN   TestRunFileChecksStateBeforeTouchingFiles
+--- PASS: TestRunFileChecksStateBeforeTouchingFiles (0.00s)
+=== RUN   TestRunFileReadsDevicesLikePHP
+=== RUN   TestRunFileReadsDevicesLikePHP/root_null
+=== RUN   TestRunFileReadsDevicesLikePHP/root_link_to_null
+=== RUN   TestRunFileReadsDevicesLikePHP/root_directory
+=== RUN   TestRunFileReadsDevicesLikePHP/root_zero
+=== RUN   TestRunFileReadsDevicesLikePHP/root_terminal
+=== RUN   TestRunFileReadsDevicesLikePHP/root_pseudo-terminal_master
+=== RUN   TestRunFileReadsDevicesLikePHP/fs_mount_device
+=== RUN   TestRunFileReadsDevicesLikePHP/standalone_files_device
+--- PASS: TestRunFileReadsDevicesLikePHP (0.31s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_null (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_link_to_null (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_directory (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_zero (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_terminal (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/root_pseudo-terminal_master (0.30s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/fs_mount_device (0.00s)
+    --- PASS: TestRunFileReadsDevicesLikePHP/standalone_files_device (0.00s)
+=== RUN   TestRunFileDeniedWithoutPolicy
+--- PASS: TestRunFileDeniedWithoutPolicy (0.00s)
+=== RUN   TestRunFileLegacyFilesCompatibility
+--- PASS: TestRunFileLegacyFilesCompatibility (0.00s)
+=== RUN   TestRunFileFIFOReadEndsWithContext
+--- PASS: TestRunFileFIFOReadEndsWithContext (0.20s)
+=== RUN   TestRunFileCancelledFIFOReadLeavesNoReader
+--- PASS: TestRunFileCancelledFIFOReadLeavesNoReader (0.17s)
+=== RUN   TestRunFileFIFORunsWriterSource
+--- PASS: TestRunFileFIFORunsWriterSource (0.21s)
+=== RUN   TestRunFileFIFOCancelReleasesAdmission
+--- PASS: TestRunFileFIFOCancelReleasesAdmission (0.10s)
+=== RUN   TestRunFileSocketFailsLikeKernel
+--- PASS: TestRunFileSocketFailsLikeKernel (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego	1.004s
