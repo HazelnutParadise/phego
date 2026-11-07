@@ -18,7 +18,7 @@ func TestW13R7RawControls(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7RawControlNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R7RawControlCase(t, h, name))
 			})
@@ -207,7 +207,7 @@ func w13R7RawShadowCase(t *testing.T, h *heap, name string) w13Case {
 func TestW13R7LazyPropertyState(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7LazyStateNames() {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			got, err := json.Marshal(w13R7LazyStateCase(t, h, name).Result)
 			must(t, err)

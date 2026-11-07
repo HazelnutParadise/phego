@@ -160,7 +160,7 @@ func TestW13R11EnumScalarComparison(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R11EnumNames() {
 			t.Run(name+"/"+strconv.Itoa(width), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R11EnumCase(t, h, name))
 			})

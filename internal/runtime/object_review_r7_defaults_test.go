@@ -129,7 +129,7 @@ func TestW13R7PHP8512Regression(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R7Names() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R7Case(t, h, name))
 			})
@@ -140,7 +140,7 @@ func TestW13R7PHP8512Regression(t *testing.T) {
 func TestW13R7FreshDefaults(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			c := w13Build(t, classSpec{name: "W13R7Fresh", properties: []propertySpec{{name: "i", typeName: "int", hasDefault: true, initial: int64(2)}, {name: "n", typeName: "?int", hasDefault: true, initial: nil}, {name: "a", typeName: "array", hasDefault: true, initial: []SnapshotEntry{{Key: int64(0), Value: int64(1)}}}, {name: "u", typeName: "int"}}})
 			o := w13Instantiate(t, h, c)

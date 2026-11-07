@@ -9,7 +9,7 @@ import (
 func TestW13R11ClassRegistration(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			chain := w13R11ClassChain(t, 64)
 			for i, c := range chain {

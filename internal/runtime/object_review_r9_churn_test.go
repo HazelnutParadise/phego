@@ -58,7 +58,7 @@ func TestW13R9PHP8512Regression(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R9Names() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				w13Must(t, "newHeap", err)
 				w13AssertOracleCase(t, width, name, w13R9Case(t, h, name))
 			})

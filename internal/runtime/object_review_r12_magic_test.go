@@ -187,7 +187,7 @@ func TestW13R12MagicHandlers(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R12MagicNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R12MagicCase(t, h, name))
 			})

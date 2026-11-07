@@ -12,7 +12,7 @@ func TestW13R10ComparisonHoldOwners(t *testing.T) {
 		for _, ownedLeft := range []bool{false, true} {
 			for _, ownedRight := range []bool{false, true} {
 				t.Run(fmt.Sprintf("%d/%t/%t", width, ownedLeft, ownedRight), func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					must(t, err)
 					c := w13Build(t, classSpec{name: "W13R10Owners", properties: []propertySpec{{name: "x", typeName: "int", hasDefault: true, initial: int64(1)}}})
 					left, right := w13Instantiate(t, h, c), w13Instantiate(t, h, c)

@@ -138,7 +138,7 @@ func TestW13R13InterfaceGraph(t *testing.T) {
 			graph := w13R13GraphClasses(t)
 			for _, name := range w13R13GraphNames() {
 				t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					w13Must(t, "newHeap", err)
 					w13AssertOracleCase(t, width, name, w13R13GraphCaseWithClasses(t, h, name, graph))
 				})
@@ -195,7 +195,7 @@ func TestW13R13GetterFastPathAllocations(t *testing.T) {
 			raw            value
 		}{{"untyped", "", w13Int(1)}, {"mixed", "mixed", w13Int(1)}, {"typed", "int", w13Int(1)}, {"coerced", "int", w13Str("1")}} {
 			t.Run(fmt.Sprintf("%d/%s", width, sample.name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				w13Must(t, "newHeap", err)
 				c := w13Build(t, classSpec{name: "W13R13Getter", properties: []propertySpec{{name: "x", typeName: sample.typeName, hasDefault: true, initial: int64(1), get: func(*heap, value, value) (value, error) { return sample.raw, nil }}}})
 				obj := w13Instantiate(t, h, c)

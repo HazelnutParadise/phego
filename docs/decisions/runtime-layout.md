@@ -20,7 +20,7 @@
 
 - Go 1.22 起，大於 512 bytes 且含指標的物件會多一個 8 bytes 的配置標頭。bucket 是 96 bytes，所以 8 個（768 bytes）實際占 896 的級距，16 個（1,536 bytes）占 1,792。選用的 5、13、21 個分別是 480、1,280（含標頭）與 2,048 bytes（含標頭），都剛好填滿級距。
 - heap 只屬於一個請求，所以塊不需要鎖，最多活到請求結束。bucket 配置後不會移動，元素位置維持有效。
-- 移除的 bucket 會清空，位置不重複使用；塊在最後一個存活的 bucket 釋放後才會被回收，所以一個存活的 bucket 最多讓 20 個已移除的 bucket 留在記憶體中。
+- 移除的 bucket，以及釋放陣列（含循環回收）時的每個 bucket，都會清空，位置不重複使用。塊由不同陣列共用，不清空的話，同一塊裡還活著的 bucket 會讓已釋放的值一直留在 Go 記憶體中（審查實測：交錯建立 200 個 1 MiB 的暫存陣列，修正前留住 201.6 MiB）。foreach by-reference 在綁定元素前先取出鍵，和 PHP 的 FE_FETCH_RW 相同，因為綁定時執行的解構子可能移除並清空目前的 bucket。塊在最後一個存活的 bucket 釋放後才會被回收，所以一個存活的 bucket 最多讓 20 個已移除的 bucket 留在記憶體中。
 - 第一個塊只有 5 個 bucket，小請求不需要先付出大塊的成本。
 
 ## amd64 參考
@@ -28,7 +28,8 @@
 64 位元原本只對照 arm64。在 linux/amd64 的 PHP 8.5.12 固定映像上重新產生四套參考後，只有 W-13 的 `compare-lazy-operand-owners` 不同：amd64 和 i386 一樣先初始化右邊的 lazy object，arm64 先初始化左邊（[amd64-reference](../implementation/evidence/runtime-layout-20261107/amd64-reference.txt)）。W-12、W-14、W-15 的輸出和 arm64 逐位元組相同。
 
 - 參考 profile 改為（整數寬度、架構）。`newHeap(width)` 照舊使用該寬度的參考架構（64 位元為 arm64、32 位元為 386），`newHeapFor(width, arch)` 指定架構；沒有固定映像的組合會回報錯誤。
-- W-13 另存 `w13-ref-64-amd64.json`，W-14 另存 `reference-amd64.json`（58 案和 arm64 相同，只有映像紀錄不同）。W-12、W-15 的 amd64 工作在原生 x86-64 runner 重新產生參考，先要求和 64 位元參考逐位元組相同，再用 amd64 profile 執行 Go 對照。
+- W-13 另存 `w13-ref-64-amd64.json`，W-14 另存 `reference-amd64.json`（58 案和 arm64 相同，只有映像紀錄不同）。W-12、W-15 的 amd64 工作在原生 x86-64 runner 重新產生參考，先要求和 64 位元參考逐位元組相同，再執行 Go 對照：W-12 明確指定 amd64 profile，W-15 透過下一點的主機預設取得 amd64 profile。
+- 一般執行（`newExecution`）建立的 64 位元 heap 依主機架構選 profile：amd64 主機用 amd64，其他用 arm64，32 位元用 386。嵌入 Phego 的程式在哪個平台跑，lazy 比較的初始化順序就和該平台的 PHP 8.5.12 相同。和已提交參考比對的測試則固定使用產生參考的架構（`referenceHeap`），不受測試主機影響。
 - 產生工具新增 `--arch`；預設架構維持原本的檔名，其他架構的檔名加上架構後綴。
 
 ## 後續

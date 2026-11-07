@@ -3,6 +3,7 @@ package runtime
 import (
 	"errors"
 	"fmt"
+	goruntime "runtime"
 	"slices"
 )
 
@@ -82,12 +83,16 @@ type heap struct {
 	currentCalledScope    *class
 }
 
-// newHeap uses the reference architecture of the integer width: arm64 for
-// 64 bits and 386 for 32 bits, the pinned PHP 8.5.12 reference images.
+// newHeap uses the guest architecture PHP 8.5.12 would run as on this host:
+// amd64 on an amd64 host and arm64 otherwise for 64 bits, 386 for 32 bits.
+// Only lazy-operand comparison order differs between them.
 func newHeap(width int) (*heap, error) {
 	arch := "arm64"
-	if width == 32 {
+	switch {
+	case width == 32:
 		arch = "386"
+	case goruntime.GOARCH == "amd64":
+		arch = "amd64"
 	}
 	return newHeapFor(width, arch)
 }
@@ -335,7 +340,11 @@ func (h *heap) freeArray(a *phpArray) error {
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
-		first = h.mergeObjectErrors(first, h.release(b.val))
+		v := b.val
+		// Chunks are shared, so a live neighbour would otherwise keep the
+		// freed value reachable by the Go collector.
+		*b = bucket{}
+		first = h.mergeObjectErrors(first, h.release(v))
 	}
 	for it := range a.cursors {
 		delete(it.arrays, a)
@@ -889,10 +898,13 @@ func (h *heap) foreachRef(arr, item *value, fn func(key arrayKey) error) (err er
 		if !ok {
 			return nil
 		}
+		// FE_FETCH_RW stores the key before the reference assignment, whose
+		// release may run a destructor that removes and clears this bucket.
+		k := b.key
 		if err := h.bindForeachItem(item, &b.val); err != nil {
 			return err
 		}
-		if err := fn(b.key); err != nil {
+		if err := fn(k); err != nil {
 			return err
 		}
 	}
@@ -1284,7 +1296,9 @@ func (h *heap) freeGarbage(a *phpArray, dead map[gcNode]bool) error {
 	var first error
 	pos := 0
 	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
-		if err := h.releaseOutside(b.val, dead); err != nil && first == nil {
+		v := b.val
+		*b = bucket{} // as in freeArray: chunks are shared
+		if err := h.releaseOutside(v, dead); err != nil && first == nil {
 			first = err
 		}
 	}

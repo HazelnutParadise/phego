@@ -187,7 +187,7 @@ func TestW13R11TraitProperties(t *testing.T) {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
 			for _, name := range w13R11TraitNames() {
 				t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					w13Must(t, "newHeap", err)
 					w13AssertOracleCase(t, width, name, w13R11TraitCase(t, h, name))
 				})

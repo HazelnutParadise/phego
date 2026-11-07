@@ -15,7 +15,7 @@ func TestW13ExplicitResourceCloseAfterCancellation(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, mode := range []string{"valid", "canceled-cleanup", "foreign", "kind", "generation", "closed", "heap-closed", "nil", "panic", "callback-error", "reentry"} {
 			t.Run(fmt.Sprintf("%d/%s", width, mode), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				operation, cancelOperation := context.WithCancel(context.Background())
 				defer cancelOperation()
@@ -69,7 +69,7 @@ func TestW13ExplicitResourceCloseAfterCancellation(t *testing.T) {
 				receiver := h
 				switch mode {
 				case "foreign":
-					receiver, err = newHeap(width)
+					receiver, err = referenceHeap(width)
 					must(t, err)
 				case "kind":
 					kind = "database"

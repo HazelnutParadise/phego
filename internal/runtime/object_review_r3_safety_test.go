@@ -9,7 +9,7 @@ import (
 // compatibility pass for the native conditional-body diagnostic.
 func TestW13PendingArgumentDestructorSafety(t *testing.T) {
 	for _, width := range []int{32, 64} {
-		h, err := newHeap(width)
+		h, err := referenceHeap(width)
 		must(t, err)
 		events := []string{}
 		var source, receiver value

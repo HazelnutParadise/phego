@@ -321,7 +321,7 @@ func TestW13ProxyObservations(t *testing.T) {
 		t.Run(strconv.Itoa(width), func(t *testing.T) {
 			for _, name := range w13ProxyCaseNames() {
 				t.Run(name, func(t *testing.T) {
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					w13Must(t, "newHeap", err)
 					w13AssertOracleCase(t, width, name, w13RunProxyCase(t, h, name))
 				})

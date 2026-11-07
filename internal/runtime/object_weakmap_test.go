@@ -125,7 +125,7 @@ func w13WeakMapReferenceCase(t *testing.T, h *heap) w13Case {
 
 func TestW13WeakMapReferenceClone(t *testing.T) {
 	for _, width := range []int{32, 64} {
-		h, err := newHeap(width)
+		h, err := referenceHeap(width)
 		must(t, err)
 		w13AssertOracleCase(t, width, "weak-map-reference-clone", w13WeakMapReferenceCase(t, h))
 	}

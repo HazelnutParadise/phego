@@ -12,7 +12,7 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 				for _, ownedRHS := range []bool{false, true} {
 					for _, outMode := range []string{"null", "receiver", "rhs"} {
 						t.Run(fmt.Sprintf("%d/receiver=%t/rhs=%s/rhsOwned=%t/out=%s", width, ownedReceiver, rhsMode, ownedRHS, outMode), func(t *testing.T) {
-							h, err := newHeap(width)
+							h, err := referenceHeap(width)
 							must(t, err)
 							c := w13Build(t, classSpec{name: "W13R10HookOwners", properties: []propertySpec{{name: "x"}}})
 							p := &c.schema.props[0]
@@ -126,7 +126,7 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 func TestW13R10HookCleanupOrder(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			var events []string
 			child := w13Build(t, classSpec{name: "W13R10HookCleanupChild", destructor: func(*heap, value) error {

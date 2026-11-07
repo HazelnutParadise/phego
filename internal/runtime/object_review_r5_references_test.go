@@ -341,7 +341,7 @@ func TestW13R5PHP8512Regression(t *testing.T) {
 					if !ok {
 						t.Fatalf("missing case %q in reference", name)
 					}
-					h, err := newHeap(width)
+					h, err := referenceHeap(width)
 					if err != nil {
 						t.Fatal(err)
 					}

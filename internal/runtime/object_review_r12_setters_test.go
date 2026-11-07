@@ -225,7 +225,7 @@ func TestW13R12SetterParameters(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		for _, name := range w13R12SetterNames() {
 			t.Run(fmt.Sprintf("%d/%s", width, name), func(t *testing.T) {
-				h, err := newHeap(width)
+				h, err := referenceHeap(width)
 				must(t, err)
 				w13AssertOracleCase(t, width, name, w13R12SetterCase(t, h, name))
 			})
@@ -255,7 +255,7 @@ func TestW13R12SetterMetadataIsolation(t *testing.T) {
 			wg.Add(1)
 			go func(width int) {
 				defer wg.Done()
-				h, e := newHeap(width)
+				h, e := referenceHeap(width)
 				if e != nil {
 					t.Error(e)
 					return

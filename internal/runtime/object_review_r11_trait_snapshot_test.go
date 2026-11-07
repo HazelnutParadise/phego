@@ -28,7 +28,7 @@ func TestW13R11TraitDefaultIsolation(t *testing.T) {
 	for _, width := range []int{32, 64} {
 		t.Run(fmt.Sprint(width), func(t *testing.T) {
 			t.Parallel()
-			h, err := newHeap(width)
+			h, err := referenceHeap(width)
 			must(t, err)
 			x, y := w13Instantiate(t, h, a), w13Instantiate(t, h, b)
 			left, right := x.object.props.slot("x"), y.object.props.slot("x")
