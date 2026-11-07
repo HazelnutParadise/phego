@@ -94,6 +94,7 @@ type execution struct {
 	started, closed           bool
 	filtering                 bool
 	handlerEcho               []byte // output a running handler produced
+	filterHeld                int64  // size of the buffer a running handler filters
 	destructorStop            bool
 	result                    executionResult
 	stop                      completion

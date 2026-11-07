@@ -46,8 +46,8 @@ func replayExecutionOracle(t *testing.T, width int) {
 	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
 		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
 	}
-	if len(oracle.Cases) != 48 {
-		t.Fatalf("want 48 cases, got %d", len(oracle.Cases))
+	if len(oracle.Cases) != 52 {
+		t.Fatalf("want 52 cases, got %d", len(oracle.Cases))
 	}
 	for _, tc := range oracle.Cases {
 		t.Run(tc.Case, func(t *testing.T) {
@@ -82,12 +82,16 @@ func replayExecutionOracle(t *testing.T, width int) {
 				return completion{kind: endFatal, err: errors.New(message)}
 			}
 			result := x.run(ctx, func(x *execution) completion {
+				// Handler names are PHP's callable names for the fixture closures.
+				handler := func(file string, line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", file, line) }
+				// solo_ fixtures do not require common.php.
+				if strings.HasPrefix(tc.Case, "solo_") {
+					return replaySoloOutputCase(t, x, tc.Case, event, handler(tc.Case, 6), handler(tc.Case, 7))
+				}
 				_, err := x.object("Tracked", func(x *execution) completion { event("destroy:global"); return x.write([]byte("D")) })
 				must(err)
 				must(x.registerShutdown(func(x *execution) completion { event("shutdown:1"); return x.write([]byte("S")) }))
 				must(x.registerShutdown(func(x *execution) completion { event("shutdown:2"); return completion{} }))
-				// Handler names are PHP's callable names for the fixture closures.
-				handler := func(file string, line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", file, line) }
 				must(x.startBuffer(handler("common", 11), func(_ *execution, b []byte) ([]byte, completion) {
 					event("flush:outer")
 					return []byte("[" + string(b) + "]"), completion{}
@@ -649,4 +653,74 @@ func replayExecutionOracle(t *testing.T, width int) {
 			}
 		})
 	}
+}
+
+// replaySoloOutputCase replays the solo_ fixtures, which set up their own
+// shutdown function and buffers. The handler under test is declared after
+// an optional shutdown function and outer buffer, one line each from line 6.
+func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(string), line6, line7 string) completion {
+	t.Helper()
+	must := func(err error) {
+		t.Helper()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	outer, inner := line6, line7
+	if name == "solo_end_exit" || name == "solo_end_lock_echo" {
+		must(x.registerShutdown(func(x *execution) completion {
+			event("shutdown:solo")
+			if name == "solo_end_lock_echo" {
+				return x.write([]byte("[S]"))
+			}
+			return x.write([]byte("S"))
+		}))
+		outer, inner = line7, strings.Replace(line7, ":7}", ":8}", 1)
+	}
+	switch name {
+	case "solo_shutdown_throw":
+		inner = outer // the only buffer, declared on line 6
+	case "solo_end_lock_echo":
+		inner = outer
+	default:
+		must(x.startBuffer(outer, func(_ *execution, b []byte) ([]byte, completion) {
+			event("flush:outer")
+			return []byte("[" + string(b) + "]"), completion{}
+		}))
+	}
+	must(x.startBuffer(inner, func(x *execution, b []byte) ([]byte, completion) {
+		switch name {
+		case "solo_shutdown_throw":
+			event("flush:throw")
+		case "solo_end_lock_echo":
+			event("flush:lock")
+		default:
+			event("flush:exit")
+		}
+		if c := x.write([]byte("x")); c.kind != endNormal {
+			return nil, c
+		}
+		switch name {
+		case "solo_shutdown_throw":
+			return nil, completion{kind: endThrow, err: errors.New("Uncaught Exception: boom")}
+		case "solo_end_lock_echo":
+			if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+				return nil, c
+			}
+			return b, completion{}
+		}
+		return nil, completion{kind: endExit, code: 3}
+	}))
+	if c := x.write([]byte("body")); c.kind != endNormal {
+		return c
+	}
+	if name == "solo_end_exit" || name == "solo_end_lock_echo" {
+		if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+			return c
+		}
+		if name == "solo_end_exit" {
+			return x.write([]byte("after"))
+		}
+	}
+	return completion{}
 }

@@ -596,3 +596,52 @@ func TestOutputHandlerThrowPassesBufferAndEcho(t *testing.T) {
 		t.Errorf("output=%q diagnostics=%+v", result.output, result.diagnostics)
 	}
 }
+
+// While a handler runs, the buffer it filters is still held, so the
+// handler's own echo counts against the output limit together with it. A
+// handler stopped by the limit never returns, so it gets no handler-output
+// deprecation (PHP emits it only for a returned value).
+func TestOutputHandlerEchoCountsFilteredBuffer(t *testing.T) {
+	r, _ := NewRequest(nil)
+	if err := r.Admit(func(context.Context) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.BeginInit(); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Ready(); err != nil {
+		t.Fatal(err)
+	}
+	x, err := newExecution(context.Background(), r, 64, nil, executionLimits{32, 64, 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The first echo fits beside the held 9-byte buffer; the second does not.
+	echoes := func(x *execution, b []byte) ([]byte, completion) {
+		for _, s := range []string{"1", "23456789"} {
+			if c := x.write([]byte(s)); c.kind != endNormal {
+				return nil, c
+			}
+		}
+		return []byte("ok"), completion{}
+	}
+	cleanup, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	result := x.run(cleanup, func(x *execution) completion {
+		if err := x.startBuffer("{closure:/w/t.php:2}", echoes); err != nil {
+			t.Fatal(err)
+		}
+		if c := x.write([]byte("abcdefghi")); c.kind != endNormal {
+			return c
+		}
+		return x.endBuffer("ob_end_flush")
+	})
+	if result.end.kind != endLimit || len(result.output) != 0 {
+		t.Errorf("end=%+v output=%q, want the output limit with nothing written", result.end, result.output)
+	}
+	for _, d := range result.diagnostics {
+		if d.level == "Deprecated" {
+			t.Errorf("unexpected deprecation for a handler stopped by the limit: %+v", d)
+		}
+	}
+}

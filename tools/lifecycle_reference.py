@@ -40,7 +40,9 @@ def collect(width=64):
                '--mount', f'type=bind,src={FIXTURES},dst=/fixtures,readonly',
                image, 'php', '-n', '/fixtures/reference.php']
     try:
-        result = subprocess.run(command, capture_output=True, timeout=60, check=True)
+        # i386 under emulation on an arm64 host needs more than a minute for
+        # the 52 fixtures; native runners finish in seconds.
+        result = subprocess.run(command, capture_output=True, timeout=300, check=True)
     finally:
         # Killing the Docker client alone does not terminate its container.
         removed = subprocess.run(['docker', 'rm', '-f', name], capture_output=True, timeout=15)

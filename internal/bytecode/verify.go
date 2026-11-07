@@ -510,12 +510,12 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 		}
 	}
 	// The index itself (a pointer and three slice headers, within 128
-	// bytes), four int32 arrays per pc (body, the ranges' at and before,
-	// finally), and per span 16 bytes plus a 4-byte open entry.
+	// bytes), three int32 arrays per pc (body, enter, finally), and per
+	// span 16 bytes plus a 4-byte open entry.
 	if err := b.reserve(128); err != nil {
 		return nil, err
 	}
-	if err := b.reserveMul(uint64(n), 4*4); err != nil {
+	if err := b.reserveMul(uint64(n), 3*4); err != nil {
 		return nil, err
 	}
 	if err := b.reserveMul(uint64(2*h+finallies), 16+4); err != nil {
@@ -534,43 +534,42 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 			finals = append(finals, handlerSpan{k.Start, k.End, int32(i), false})
 		}
 	}
-	x.body, _ = innermostSpans(bodies, n, false)
-	_, x.enter = innermostSpans(ranges, n, true)
-	x.finally, _ = innermostSpans(finals, n, false)
+	x.body = innermostSpans(bodies, n, false)
+	x.enter = innermostSpans(ranges, n, true)
+	x.finally = innermostSpans(finals, n, false)
 	return x, nil
 }
 
-// innermostSpans sweeps laminar spans once. at[pc] is the handler of the
-// innermost span containing pc; before[pc], when requested, is that of the
-// innermost span containing pc that starts before pc.
-func innermostSpans(spans []handlerSpan, n int, wantBefore bool) (at, before []int32) {
+// innermostSpans sweeps laminar spans once. out[pc] is the handler of the
+// innermost span containing pc, or, with before, of the innermost span
+// containing pc that starts before pc; -1 when there is none.
+func innermostSpans(spans []handlerSpan, n int, before bool) []int32 {
 	sortSpans(spans)
-	at = make([]int32, n)
-	if wantBefore {
-		before = make([]int32, n)
-	}
+	out := make([]int32, n)
 	open := make([]int32, 0, len(spans)) // indexes into spans
+	innermost := func() int32 {
+		if len(open) == 0 {
+			return -1
+		}
+		return spans[open[len(open)-1]].h
+	}
 	next := 0
 	for pc := 0; pc < n; pc++ {
 		for len(open) > 0 && spans[open[len(open)-1]].end <= uint32(pc) {
 			open = open[:len(open)-1]
 		}
-		if wantBefore {
-			before[pc] = -1
-			if len(open) > 0 {
-				before[pc] = spans[open[len(open)-1]].h
-			}
+		if before {
+			out[pc] = innermost()
 		}
 		for next < len(spans) && spans[next].start == uint32(pc) {
 			open = append(open, int32(next))
 			next++
 		}
-		at[pc] = -1
-		if len(open) > 0 {
-			at[pc] = spans[open[len(open)-1]].h
+		if !before {
+			out[pc] = innermost()
 		}
 	}
-	return at, before
+	return out
 }
 
 func (x *handlerIndex) checkEdge(from, to uint32, leave bool) error {

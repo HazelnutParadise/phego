@@ -15,7 +15,8 @@ func (x *execution) write(data []byte) (c completion) {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	remaining := int64(x.limits.output) - x.accepted - int64(len(x.handlerEcho))
+	// A running handler's input buffer is still held while it echoes.
+	remaining := int64(x.limits.output) - x.accepted - x.filterHeld - int64(len(x.handlerEcho))
 	for _, b := range x.buffers {
 		remaining -= int64(len(b.data))
 	}
@@ -58,10 +59,14 @@ func (x *execution) write(data []byte) (c completion) {
 	return x.check()
 }
 
+// requestShutdown is the origin of the flush at request shutdown, which runs
+// handlers without a PHP frame.
+const requestShutdown = "PHP Request Shutdown"
+
 // flush ends every buffer at request shutdown.
 func (x *execution) flush() completion {
 	for len(x.buffers) > 0 {
-		if c := x.endBufferIn("PHP Request Shutdown"); c.kind != endNormal {
+		if c := x.endBufferIn(requestShutdown); c.kind != endNormal {
 			return c
 		}
 	}
@@ -91,9 +96,17 @@ func (x *execution) endBufferIn(origin string) completion {
 	if b.filter != nil {
 		var c completion
 		b.data, c = x.filter(b.filter, origin, b.name, b.data)
-		if c.kind == endThrow {
-			// The buffer still reaches the next level before the exception
-			// propagates to the caller.
+		if c.kind == endThrow || c.kind == endExit {
+			if origin == requestShutdown {
+				// Without a PHP frame the throw or exit bails out of
+				// php_output_end_all, and php_output_deactivate discards
+				// every buffer: nothing is printed and outer handlers
+				// never run.
+				x.buffers = nil
+				return c
+			}
+			// From PHP code the buffer, with the handler's echo, reaches
+			// the next level before the throw or exit propagates.
 			if w := x.write(b.data); w.kind != endNormal {
 				return x.replaceOwnedCompletion(c, w)
 			}
@@ -116,18 +129,22 @@ func (x *execution) outputLockError(origin string) completion {
 
 func (x *execution) filter(fn outputFilter, origin, name string, data []byte) (out []byte, c completion) {
 	x.filtering = true
+	x.filterHeld = int64(len(data))
 	x.handlerEcho = nil
-	defer func() { x.filtering = false; x.handlerEcho = nil }()
+	defer func() { x.filtering = false; x.filterHeld = 0; x.handlerEcho = nil }()
 	c = x.call(func(x *execution) completion { var next completion; out, next = fn(x, data); return next }, nil)
 	if released := x.releaseReturn(&c); released.kind != endNormal {
 		c = x.replaceOwnedCompletion(c, released)
 	}
-	if c.kind == endThrow {
-		// php_output_handler_op: a handler that throws passes its buffer,
-		// with its own echo, without the deprecation.
+	if c.kind == endThrow || c.kind == endExit {
+		// php_output_handler_op: a handler that throws or exits leaves no
+		// return value, so it passes its buffer, with its own echo,
+		// without the deprecation.
 		return append(append([]byte(nil), data...), x.handlerEcho...), c
 	}
-	if len(x.handlerEcho) > 0 {
+	// The deprecation needs a returned value; a fatal error or a host stop
+	// inside the handler never returns.
+	if (c.kind == endNormal || c.kind == endReturn) && len(x.handlerEcho) > 0 {
 		if len(x.diagnostics) >= x.limits.callbacks {
 			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 		} else {

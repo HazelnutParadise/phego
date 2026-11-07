@@ -13,8 +13,10 @@ import (
 // contains it. Host directories are opened through os.Root and verified by
 // identity. Absolute symlink targets inside granted directories are remapped
 // to PHP paths; target parent components cannot escape their selected mount.
-// Host directories permit regular files, directories and character devices
-// such as /dev/null; FIFOs, sockets and block devices are refused.
+// Host directories permit regular files, directories and the host's null,
+// zero, full, random and urandom character devices, identified by device
+// number; FIFOs, sockets, block devices and other character devices are
+// refused.
 // Host-created hard links still require a trusted layout.
 //
 // flag uses the os.O_* values. Any write, create, append or truncate flag
