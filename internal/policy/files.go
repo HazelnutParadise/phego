@@ -154,6 +154,12 @@ func (p *Policy) openFileParts(parts []filePart, req openRequest) (fs.File, erro
 		if rootEscapeError(err) {
 			return nil, &PolicyError{Kind: kind, Op: op, Target: name, Rule: "outside-root"}
 		}
+		// os.Root names the failing component relative to a directory handle;
+		// report the PHP path that was opened, as PHP's warning does.
+		var pe *fs.PathError
+		if errors.As(err, &pe) {
+			return nil, &fs.PathError{Op: "open", Path: name, Err: pe.Err}
+		}
 		return nil, err
 	}
 	return f, nil

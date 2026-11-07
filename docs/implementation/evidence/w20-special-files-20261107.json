@@ -12,21 +12,22 @@
     "T-074"
   ],
   "source_base": "51887857e1eb0f1cfeff3e1e3ff35ce7bfde580e",
-  "captured_at": "2026-11-07T11:34:39.936949+00:00",
+  "captured_at": "2026-11-07T12:30:56.495804+00:00",
   "source_sha256": {
-    "engine.go": "665c89896bcaaba1996fc67867cfb04a14800bf5d674752f9c1546578333c1c5",
-    "policy.go": "05f011f44b4ae607ea96752de6226670870545186d486a42ec914601bc49ba81",
+    "engine.go": "108d32af04ac8cee165c2a8f6a43ca1cef7eebbcd169827fb8516195e6ff0512",
+    "policy.go": "f1790a93cf66ce8c058e48eb8c142e88f9e4119da0d42a5f3067847356a77498",
     "policy_review_test.go": "934c37596f8878fbf6c5ada857dea695c7af5c51f69450b2705e01f9a98cd883",
-    "runfile_fifo_review_fixes_test.go": "8f8077ddf436cb7c83e062ab17591d7404eb6b1cbf01dd51735e5bd6b5468b9a",
+    "runfile_fifo_review_fixes_test.go": "cee71d16e8853a2ce63854214ceb42fae9c60dc8ffd3e909bea5e9fd6714c844",
     "runfile_cancel_unix_test.go": "428402095d29ccb9907c1e79ad6cf290b006191cdf80a37338b44278e5191473",
     "probe_open_other_test.go": "89b258dd3c3b57bafbe0599516c6fbacd6062b906b9fe558c77470584d07cf0c",
-    "internal/policy/files.go": "cfd55e88f8f096d4832ab5a3fa8aeb824cd52a961feaf2530535def9962ef666",
+    "internal/policy/files.go": "8753d5d3d5bbfcedfdb7c449ccb6fc1bc12f3975f0728ed4fe752f1e68fb4dcf",
     "internal/policy/files_root.go": "e623cb96784bd64641ba2ad739f49b05b01e79a9767b9857931745e17d834f4b",
-    "internal/policy/special_unix.go": "8466d0bf5febbe6dcb27c04a1c1a29ea8d0a3d1120bcf56bdb07ad2308b331eb",
-    "internal/policy/special_linux.go": "d08373bf43a873f45925c35e752c4e9a39925e50b8f085c95282aac14afa353a",
-    "internal/policy/special_bsd.go": "fc0d5a3357a1bf49f03fd553f7e56a2138a670f32c93853f873ab407cced3e79",
+    "internal/policy/special_unix.go": "d582f813c694cdc3a77aef81534a279371039e898b59b0832c9b24148f6c2d22",
+    "internal/policy/special_linux.go": "459bb21c807d693d4d30103c5ac8bce4e233dcd6b58c2a9725b7ee3157ddfaa6",
+    "internal/policy/special_bsd.go": "fb9ba390e39ea84b737140438203a13b5d6aa647d96bd0d76e40d2e2d3304464",
+    "internal/policy/special_probe_other.go": "74a838117c2f3ba6f20a5a4f394e14166d3b60364680e7c66ec089e64fbdb7a6",
     "internal/policy/special_other.go": "17d5b044aec66c2ccc1c5262f3c886787952606f57ce4c297e603ee8574189b5",
-    "internal/policy/special_files_test.go": "26c1e6860482b97a6197dde863a367237e5f9fdb64c106646524f6ac8c11a07d",
+    "internal/policy/special_files_test.go": "56084dcb2bcc699f7321f770ad7f12e668260efac9cfe1c2051bb66747e6dcae",
     "internal/policy/special_report_windows_test.go": "99d0119e69fad925ecdd7c5791e4617a99a203ef41a895b5ca5bbb5f17708b04",
     "internal/policy/absolute_review_fixes_test.go": "c6ef5482bbd835c99b7bb21ebb8b4363b5dbc1548a5f6f0edb7623444a7e5265",
     "internal/policy/overlap_test.go": "a00bccced0ae81b28c7166802d99e4f0904917fe0694575c9ea02eaba6f1c996",
@@ -36,7 +37,7 @@
     "tests/policy/special-files/probe.php": "2351554308d121482a94f3bce2e33d728da14fa61a070fdb0063fa36743765e8",
     "tests/policy/special-files/probe-windows.ps1": "e3893641c35abe5d2f464acf8498d07d5bfbd88f11e2055fc47a2ada3a22ae88",
     ".github/workflows/special-files.yml": "fc6bd3b3559c815ad6ceab797a35e6097437c72767a35698e66c3cbef6dc515c",
-    "docs/implementation/W-20.md": "95d6b5d13cc52591a30b8c919cf7531f7308b212bfe86bcb365e1951d7079d8b"
+    "docs/implementation/W-20.md": "184239d0f82eab35a3dd9d1fac271776e1ba78a8c5713abf01ab6822e181aa9b"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",
@@ -130,10 +131,22 @@
       "result": "All 47 checks succeed, including Go checks (ubuntu go test, race, vet), the Linux reference workflows and the new macOS and Windows jobs."
     },
     {
-      "command": "CGO_ENABLED=0 cross-compiled policy and root test binaries at a059e00 run in the arm64, amd64 and i386 images",
+      "command": "CGO_ENABLED=0 cross-compiled policy and root test binaries with the review fixes run in the arm64, amd64 and i386 images",
       "exit_code": 0,
       "log": "w20-special-files-20261107/linux-images.log",
       "result": "Every test passes on the three Linux kernels; only the two existing case-insensitive-volume tests skip."
+    },
+    {
+      "command": "go test of TestRootFIFOOpenLeavesDataToOtherReaders before the review fix (independent Claude Opus review of 25b71c6)",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-review-consume.log",
+      "result": "The open's one-byte probe took a byte from a FIFO that another reader held, so that reader got 'bc'. The fix asks a private epoll (Linux) or kqueue (macOS, BSD) for data first and reads only when there is none."
+    },
+    {
+      "command": "go test -overlay with the previous files.go and engine.go",
+      "exit_code": 1,
+      "log": "w20-special-files-20261107/red-review-php-path.log",
+      "result": "Kernel open errors carried os.Root's relative name ('openat s'); red-review-cause.log shows RunFile dropping the host's cancel cause during the read."
     },
     {
       "command": "gofmt -l .",
@@ -263,7 +276,7 @@
     },
     "linux-images.log": {
       "path": "w20-special-files-20261107/linux-images.log",
-      "sha256": "0916f942d104f6747904878b4e1d77a087ece33d2eb7c8766d9d95b0cf4f2b9d"
+      "sha256": "2033e129f000420fcc2ed7e0357995733ad1ee3f3d055888641fd96552a97600"
     },
     "php/amd64.log": {
       "path": "w20-special-files-20261107/php/amd64.log",
@@ -304,6 +317,18 @@
     "red-policy-linux-arm64.log": {
       "path": "w20-special-files-20261107/red-policy-linux-arm64.log",
       "sha256": "4c8a51a9d217e2cdbc5fc771b61896d381a05e59dd95e059be794b4f26ceec3d"
+    },
+    "red-review-cause.log": {
+      "path": "w20-special-files-20261107/red-review-cause.log",
+      "sha256": "95448bd8b5d402a704f4a2281ef9e67319ec59e37012a70e12b3de73846c0724"
+    },
+    "red-review-consume.log": {
+      "path": "w20-special-files-20261107/red-review-consume.log",
+      "sha256": "648ece09eb9dac55ad341afaf1e7abcf7dafcf965e66933b884141b8e7dc150c"
+    },
+    "red-review-php-path.log": {
+      "path": "w20-special-files-20261107/red-review-php-path.log",
+      "sha256": "82d7a87d2de5b435adaadd631546f01f979daa20421605ca822f5305efce7aed"
     },
     "red-runfile-darwin-arm64.log": {
       "path": "w20-special-files-20261107/red-runfile-darwin-arm64.log",

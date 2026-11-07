@@ -170,21 +170,23 @@ func ReadHostFile(ctx context.Context, f *os.File, name string, limit int64) ([]
 
 // awaitWriter returns when PHP's blocking open(2) of a FIFO for reading
 // would: once a writer is connected, data is waiting, or a writer came and
-// left. A connected writer shows as EAGAIN from a one-byte read; a byte that
-// read returns is kept for the first Read.
+// left. Data and a departed writer come from fifoProbe without reading. A
+// connected writer shows as EAGAIN from a one-byte read, made only when the
+// probe saw no data; a byte that arrives in between is kept for the first
+// Read.
 func (s *specialFile) awaitWriter() error {
 	rc, err := s.file.SyscallConn()
 	if err != nil {
 		return err
 	}
-	var hangup *hangupProbe
-	if err := rc.Control(func(fd uintptr) { hangup, err = newHangupProbe(int(fd)) }); err != nil {
+	var probe *fifoProbe
+	if err := rc.Control(func(fd uintptr) { probe, err = newFIFOProbe(int(fd)) }); err != nil {
 		return s.ioError("open", err)
 	}
 	if err != nil {
 		return &fs.PathError{Op: "open", Path: s.name, Err: err}
 	}
-	defer hangup.close()
+	defer probe.close()
 	d := firstPause
 	for {
 		if s.ctx.Err() != nil {
@@ -192,30 +194,40 @@ func (s *specialFile) awaitWriter() error {
 		}
 		var b [1]byte
 		var n int
-		var rerr error
-		var left bool
+		var ready bool
+		var perr error
 		err := rc.Read(func(fd uintptr) bool {
+			var data, hangup bool
+			if data, hangup, perr = probe.state(); perr != nil || data || hangup {
+				ready = data || hangup
+				return true
+			}
 			for {
-				n, rerr = syscall.Read(int(fd), b[:])
-				if rerr != syscall.EINTR {
+				n, perr = syscall.Read(int(fd), b[:])
+				if perr != syscall.EINTR {
 					break
 				}
 			}
-			if n == 0 && rerr == nil {
-				left, rerr = hangup.hungUp()
+			switch {
+			case n > 0 || perr == syscall.EAGAIN:
+				ready, perr = true, nil
+			case n == 0 && perr == nil:
+				// The writer may have come and gone since the probe.
+				data, hangup, perr = probe.state()
+				ready = data || hangup
 			}
 			return true
 		})
 		switch {
 		case err != nil:
 			return s.ioError("open", err)
+		case perr != nil:
+			return &fs.PathError{Op: "open", Path: s.name, Err: perr}
 		case n > 0:
 			s.pending = append(s.pending, b[0])
 			return nil
-		case rerr == syscall.EAGAIN || left:
+		case ready:
 			return nil
-		case rerr != nil:
-			return &fs.PathError{Op: "open", Path: s.name, Err: rerr}
 		}
 		if pause(s.ctx, &d) != nil {
 			return s.cancelled("open")
