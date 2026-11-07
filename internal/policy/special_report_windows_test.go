@@ -47,16 +47,31 @@ func TestWindowsSpecialFileReport(t *testing.T) {
 			fmt.Fprintf(&report, "read %q %v\n", b, err)
 		}
 	}
-	for _, name := range []string{"NUL", "nul", "NUL.txt", "sub/NUL", "CON", "COM1", "CONIN$"} {
-		open("fopen <work>\\"+strings.ReplaceAll(name, "/", "\\")+" r", "/app/"+name, os.O_RDONLY)
-	}
-	open("fopen <work>\\NUL w", "/app/NUL", os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
-	for _, c := range []struct {
+	modes := []struct {
 		mode string
 		flag int
-	}{{"r", os.O_RDONLY}, {"w", os.O_WRONLY | os.O_CREATE | os.O_TRUNC}, {"r+", os.O_RDWR}, {"a", os.O_WRONLY | os.O_CREATE | os.O_APPEND}} {
+	}{
+		{"r", os.O_RDONLY},
+		{"w", os.O_WRONLY | os.O_CREATE | os.O_TRUNC},
+		{"r+", os.O_RDWR},
+		{"a", os.O_WRONLY | os.O_CREATE | os.O_APPEND},
+		{"x", os.O_WRONLY | os.O_CREATE | os.O_EXCL},
+	}
+	for _, name := range []string{"NUL", "nul", "NUL.txt", "sub/NUL", "CON", "COM1", "CONIN$", "CONOUT$", "LPT1", "NUL/x"} {
+		open("fopen <work>\\"+strings.ReplaceAll(name, "/", "\\")+" r", "/app/"+name, os.O_RDONLY)
+	}
+	for _, c := range modes[1:] {
+		open("fopen <work>\\NUL "+c.mode, "/app/NUL", c.flag)
+	}
+	open("fopen <work>\\sub\\CON w", "/app/sub/CON", modes[1].flag)
+	for _, c := range modes {
 		open("fopen dir "+c.mode, "/app/d", c.flag)
 	}
+	for _, c := range modes[:2] {
+		open("fopen <work> "+c.mode, "/app", c.flag)
+	}
+	open("fopen <work>\\ads:s r", "/app/ads:s", os.O_RDONLY)
+	open("fopen <work>\\ads:s w", "/app/ads:s", modes[1].flag)
 	if err := os.WriteFile(out, []byte(report.String()), 0o600); err != nil {
 		t.Fatal(err)
 	}

@@ -19,7 +19,10 @@ import (
 // A host directory opens every file type the way PHP's open(2) does and
 // returns the kernel's error when that fails: a socket, or a terminal with
 // no controlling tty, does not open, and a directory does not open for
-// writing. A FIFO waits for its peer as PHP does. Opened only for reading,
+// writing. On Windows a host directory opens as PHP's CreateFile opens
+// it: a reserved device name such as NUL, CON or COM1 is missing in every
+// directory and opens no device, and a directory fails with access denied
+// in every mode. A FIFO waits for its peer as PHP does. Opened only for reading,
 // it waits until a writer opens it; opened only for writing, until a reader
 // does. Reads and writes of a FIFO or device wait like blocking I/O.
 //
@@ -31,7 +34,7 @@ import (
 //
 // flag uses the os.O_* values. Any write, create, append or truncate flag
 // needs a mount granted for writing. On a host directory the result is an
-// *os.File for a regular file or directory and a file with Read, Write,
+// *os.File for a regular file or a directory and a file with Read, Write,
 // Seek, Stat and Close for a FIFO or device; an fs.FS mount returns its own
 // file.
 func (p *Policy) OpenFile(ctx context.Context, name string, flag int, perm fs.FileMode) (fs.File, error) {
