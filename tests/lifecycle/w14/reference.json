@@ -333,11 +333,32 @@
       "combined": "flush:lock\nFatal error: ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\nshutdown:solo\n[S]"
     },
     {
+      "case": "solo_handler_fatal",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "flush:inner\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_handler_fatal.php on line 8\nFatal error: boom in /fixtures/solo_handler_fatal.php on line 8\nStack trace:\n#0 /fixtures/solo_handler_fatal.php(8): trigger_error('boom', 256)\n#1 [internal function]: {closure:/fixtures/solo_handler_fatal.php:8}('body', 9)\n#2 /fixtures/solo_handler_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "combined": "flush:inner\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_handler_fatal.php on line 8\nFatal error: boom in /fixtures/solo_handler_fatal.php on line 8\nStack trace:\n#0 /fixtures/solo_handler_fatal.php(8): trigger_error('boom', 256)\n#1 [internal function]: {closure:/fixtures/solo_handler_fatal.php:8}('body', 9)\n#2 /fixtures/solo_handler_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n"
+    },
+    {
+      "case": "solo_printf_empty",
+      "exit_code": 0,
+      "stdout": "R",
+      "stderr": "flush:inner\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\n",
+      "combined": "flush:inner\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\nR"
+    },
+    {
       "case": "solo_return_dtor_exit",
       "exit_code": 4,
       "stdout": "<RS>",
       "stderr": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n",
       "combined": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n<RS>"
+    },
+    {
+      "case": "solo_return_dtor_fatal",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_return_dtor_fatal.php on line 5\nFatal error: boom in /fixtures/solo_return_dtor_fatal.php on line 5\nStack trace:\n#0 /fixtures/solo_return_dtor_fatal.php(5): trigger_error('boom', 256)\n#1 [internal function]: T->__destruct()\n#2 /fixtures/solo_return_dtor_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_return_dtor_fatal.php on line 5\nFatal error: boom in /fixtures/solo_return_dtor_fatal.php on line 5\nStack trace:\n#0 /fixtures/solo_return_dtor_fatal.php(5): trigger_error('boom', 256)\n#1 [internal function]: T->__destruct()\n#2 /fixtures/solo_return_dtor_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n"
     },
     {
       "case": "solo_return_dtor_throw",
@@ -465,7 +486,10 @@
     "shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
     "solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
     "solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "solo_handler_fatal.php": "a4c92e76e303c340d7eb57cb14bc111a2a1994a87b42d4f0ff5e231bdbe06f41",
+    "solo_printf_empty.php": "06492454682c86837e67e2c51635357bf415c0c8a60dd916857abde56bd82f78",
     "solo_return_dtor_exit.php": "5a7afa30c6ede78ca28c2a843cf27e618858781272721555730fc146db7bf557",
+    "solo_return_dtor_fatal.php": "d5a19699e54a33f6aa28b509ed5450ec9a2123c230f927aaf1d0dde2db2a0d3d",
     "solo_return_dtor_throw.php": "2c4997aff0dc7e419a2153a4d0c95dee4bf7f15683b0a1390739ba151ca89b01",
     "solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
     "solo_shutdown_return_dtor_exit.php": "9798b511edc5e603b41069ce6cc8755b5973d83d8dbbe42913680a6bb5caef1e",

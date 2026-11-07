@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"testing"
 	"time"
@@ -57,5 +58,53 @@ func TestRunFileFIFOReadEndsWithContext(t *testing.T) {
 		if a := e.policy.admission; a != nil && a.Active() != 0 {
 			t.Errorf("legacy=%v: admission slot leaked", legacy)
 		}
+	}
+}
+
+// A cancelled FIFO read must not keep reading: the next RunFile on the same
+// FIFO gets the whole script the writer sends, here a parse error, and no
+// reader goroutine is left behind.
+func TestRunFileCancelledFIFOReadLeavesNoReader(t *testing.T) {
+	dir := t.TempDir()
+	fifo := filepath.Join(dir, "pipe.php")
+	if err := syscall.Mkfifo(fifo, 0o600); err != nil {
+		t.Skip(err)
+	}
+	writer, err := os.OpenFile(fifo, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer writer.Close()
+	e := newPolicyEngine(t, Config{MaxActive: 1, Policy: Policy{Files: []FileGrant{{Path: "/app", FS: os.DirFS(dir)}}}})
+	before := runtime.NumGoroutine()
+	for i := 0; i < 3; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+		if res, err := e.RunFile(ctx, "/app/pipe.php"); res == nil || res.Status != StatusCancelled {
+			t.Fatalf("cancelled read %d: %+v, %v", i, res, err)
+		}
+		cancel()
+	}
+	time.Sleep(50 * time.Millisecond)
+	if n := runtime.NumGoroutine(); n > before {
+		t.Errorf("goroutines %d after cancelled reads, %d before", n, before)
+	}
+	done := make(chan error, 1)
+	go func() {
+		_, err := e.RunFile(context.Background(), "/app/pipe.php")
+		done <- err
+	}()
+	time.Sleep(50 * time.Millisecond)
+	if _, err := writer.Write([]byte("<?php if (")); err != nil {
+		t.Fatal(err)
+	}
+	writer.Close()
+	select {
+	case err := <-done:
+		var pe *PHPError
+		if !errors.As(err, &pe) {
+			t.Errorf("second RunFile = %v, want the parse error of the whole script", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("second RunFile did not finish after the writer closed")
 	}
 }

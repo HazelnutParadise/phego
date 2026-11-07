@@ -15,6 +15,9 @@ func (x *execution) write(data []byte) (c completion) {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
+	if x.filtering && len(x.buffers) > 0 {
+		x.buffers[len(x.buffers)-1].produced = true
+	}
 	// A running handler's buffer stays on the stack, so its input and its
 	// echo both count here.
 	remaining := int64(x.limits.output) - x.accepted
@@ -78,7 +81,7 @@ func (x *execution) endBufferIn(origin string) completion {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	if x.filtering {
+	if x.filtering || x.outputRunning {
 		return x.outputLockError(origin)
 	}
 	if len(x.buffers) == 0 {
@@ -91,8 +94,10 @@ func (x *execution) endBufferIn(origin string) completion {
 		return x.write(data)
 	}
 	out, c := x.filter(origin)
-	if len(x.buffers) <= i {
-		return c // the handler hit the lock error, which discarded every buffer
+	if len(x.buffers) <= i || x.outputRunning {
+		// The lock error discarded every buffer, or a fatal error left this
+		// one running on the stack.
+		return c
 	}
 	x.buffers = x.buffers[:i]
 	if c.kind == endThrow || c.kind == endExit {
@@ -157,6 +162,14 @@ func (x *execution) filter(origin string) (out []byte, c completion) {
 	if len(x.buffers) <= i {
 		return nil, c
 	}
+	if c.kind == endFatal {
+		// The fatal error bails out of php_output_handler_op, so the buffer
+		// stays on the stack with OG(running) set: shutdown functions still
+		// count it, and the next buffer operation, including the
+		// request-shutdown flush, is the output lock error.
+		x.outputRunning = true
+		return nil, c
+	}
 	held := x.buffers[i].data
 	if !returned && (c.kind == endThrow || c.kind == endExit) {
 		return held, c
@@ -170,7 +183,7 @@ func (x *execution) filter(origin string) (out []byte, c completion) {
 		}
 		fallthrough
 	case endNormal, endReturn:
-		if returned && len(held) > n {
+		if returned && x.buffers[i].produced {
 			if len(x.diagnostics) >= x.limits.callbacks {
 				c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
 			} else {
