@@ -243,38 +243,6 @@ func canonicalNaN(enc string) string {
 	return enc
 }
 
-// ulpDistance returns how many float64 steps separate two finite float
-// encodings, or -1 when either is not a finite float.
-func ulpDistance(a, b string) int64 {
-	decode := func(enc string) (float64, bool) {
-		raw, err := hex.DecodeString(strings.TrimPrefix(enc, "d:"))
-		if !strings.HasPrefix(enc, "d:") || err != nil || len(raw) != 8 {
-			return 0, false
-		}
-		f := math.Float64frombits(binary.BigEndian.Uint64(raw))
-		return f, !math.IsNaN(f) && !math.IsInf(f, 0)
-	}
-	x, okx := decode(a)
-	y, oky := decode(b)
-	if !okx || !oky || math.Signbit(x) != math.Signbit(y) {
-		return -1
-	}
-	d := int64(math.Float64bits(x)) - int64(math.Float64bits(y))
-	if d < 0 {
-		d = -d
-	}
-	return d
-}
-
-// i386PowDifferences is the number of 32-bit ** results that differ from
-// PHP 8.5.12 by at most 64 units in the last place. The linux/386 PHP build
-// calls glibc's i386 pow, which computes with x87 instructions; Phego
-// reproduces the arm64 glibc pow, which matches the 64-bit reference exactly.
-// The i386 reference is byte-identical whether it runs
-// natively on x86-64 or under QEMU, so this is a real libm difference of the
-// 32-bit profile, recorded as a known gap in docs/implementation/W-10.md.
-const i386PowDifferences = 51
-
 func sameRun(a, b opsReferenceRun) bool {
 	return canonicalNaN(a.R) == canonicalNaN(b.R) && slices.Equal(a.E, b.E) && slices.EqualFunc(a.D, b.D, func(x, y [2]any) bool { return x == y })
 }
@@ -313,7 +281,6 @@ func TestPHP8512OperatorsMatchReference(t *testing.T) {
 				}
 			}
 			n := len(operands)
-			powDiffs := 0
 			for op, runs := range ref.Binary {
 				for idx, want := range runs {
 					h.diagnostics = nil
@@ -323,10 +290,6 @@ func TestPHP8512OperatorsMatchReference(t *testing.T) {
 						checked++
 						continue
 					}
-					if d := ulpDistance(want.R, got.R); width == 32 && op == "**" && d > 0 && d <= 64 && len(want.D) == len(got.D) {
-						powDiffs++
-						continue
-					}
 					report(fmt.Sprintf("%s %s %s", ref.Operands[idx/n], op, ref.Operands[idx%n]), want, got)
 					checked++
 				}
@@ -334,10 +297,7 @@ func TestPHP8512OperatorsMatchReference(t *testing.T) {
 			if failures > 0 {
 				t.Fatalf("%d cases differ from PHP 8.5.12", failures)
 			}
-			if want := map[int]int{32: i386PowDifferences, 64: 0}[width]; powDiffs != want {
-				t.Fatalf("%d ** results are within 64 ULP of the i386 libm result, want exactly %d", powDiffs, want)
-			}
-			t.Logf("%d cases match PHP 8.5.12; %d ** results differ from the i386 libm result by at most 64 ULP", checked, powDiffs)
+			t.Logf("%d cases match PHP 8.5.12", checked)
 		})
 	}
 }

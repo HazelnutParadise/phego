@@ -1,0 +1,114 @@
+--- FAIL: TestCompatibilitySyntaxConstants (0.00s)
+    --- FAIL: TestCompatibilitySyntaxConstants/array-and-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-and-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Cannot use "::class" on array, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-and-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-and-scalar (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-and-scalar (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Cannot use "::class" on array, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-and-scalar (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-or-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-or-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Cannot use "::class" on array, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-or-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unknown-binary (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unknown-call-skipped (0.00s)
+        compat_syntax_constants_test.go:141: int32: Constant expression contains invalid operations
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unknown-call-unset (0.00s)
+        compat_syntax_constants_test.go:141: int32: Constant expression contains invalid operations
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unknown-unset (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unknown-ternary (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-known-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-known-ternary (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Only arrays and Traversables can be unpacked, int given, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/const-known-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-false-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-false-ternary (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Only arrays and Traversables can be unpacked, int given, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/const-false-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-ternary-dynamic (0.00s)
+        compat_syntax_constants_test.go:141: int32: The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-ternary-dynamic (0.00s)
+        compat_syntax_constants_test.go:141: int32: The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/array-short-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-short-ternary (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Only arrays and Traversables can be unpacked, int given, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/const-short-ternary (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-coalesce (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-coalesce (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Only arrays and Traversables can be unpacked, int given, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/const-coalesce (0.00s)
+        compat_syntax_constants_test.go:141: int32: Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-coalesce-unknown (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-bool (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-int (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-double (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-string (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-null-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-array-int (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-array-bool (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-dim-array (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-dim-array-nested (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-dim-string (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-dim-string-num (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/array-value-before-key (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Illegal offset type, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-value-before-key (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Illegal offset type, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-value-before-key (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Illegal offset type, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-dynamic-array-before-key (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 Illegal offset type
+    --- FAIL: TestCompatibilitySyntaxConstants/array-unselected-cast (0.00s)
+        compat_syntax_constants_test.go:141: int32: The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-unselected-cast (0.00s)
+        compat_syntax_constants_test.go:147: int32: got The (unset) cast is no longer supported, want line1 Cannot use "::class" on array
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unselected-cast (0.00s)
+        compat_syntax_constants_test.go:141: int32: Constant expression contains invalid operations
+    --- FAIL: TestCompatibilitySyntaxConstants/array-unselected-new (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-unselected-new (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Cannot use "::class" on array, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-unselected-new (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/const-prop-child (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 Only arrays and Traversables can be unpacked, int given
+    --- FAIL: TestCompatibilitySyntaxConstants/array-cast-hidden (0.00s)
+        compat_syntax_constants_test.go:147: int32: got <nil>, want line1 The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/array-class-cast-hidden (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Cannot use "::class" on array, want line1 The (unset) cast is no longer supported
+    --- FAIL: TestCompatibilitySyntaxConstants/const-cast-hidden (0.00s)
+        compat_syntax_constants_test.go:147: int32: got Constant expression contains invalid operations, want line1 The (unset) cast is no longer supported
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir	0.316s
+FAIL

@@ -1,0 +1,12 @@
+=== RUN   TestCompatibilityReviewOracle
+    compat_review_oracle_test.go:10: ir: constant evaluation resource limit exceeded at line 1
+--- FAIL: TestCompatibilityReviewOracle (0.01s)
+=== RUN   TestCompatibilityReviewRuntimeOperands
+    compat_review_oracle_test.go:73: instanceof (A): got name &{0 A  } and operand <nil>
+    compat_review_oracle_test.go:81: ('\A')::class: got class_name <nil>
+    compat_review_oracle_test.go:85: ${[1]}: got var_var with name &{array 1  <nil> <nil> <nil> <nil> <nil> [] [] [0x2f011f195220] 0 pure}
+--- FAIL: TestCompatibilityReviewRuntimeOperands (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/ir	0.602s
+FAIL
+exit_code=1

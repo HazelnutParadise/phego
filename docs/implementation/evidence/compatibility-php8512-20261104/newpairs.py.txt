@@ -1,0 +1,23 @@
+import math,random,struct,json
+from pathlib import Path
+s=Path('/tmp/phego-compat-pow-research');r=random.Random(20261104)
+H=lambda f:struct.pack('>d',f).hex()
+out=[];labels=[]
+def add(x,y,label):out.append(H(x)+' '+H(y));labels.append(label)
+for j in range(60000):
+ k=j%6
+ if k==0:
+  x=math.nextafter(1.,math.inf) if j%3==0 else math.nextafter(1.,0.) if j%3==1 else struct.unpack('>d',(0x3ff0000000000000+r.randint(-2000000,2000000)).to_bytes(8,'big'))[0]
+  y=r.uniform(-1e18,1e18);lab='near1'
+ elif k==1:
+  x=math.ldexp(r.uniform(.5,1),r.randint(-1073,1024));y=r.choice([1023.,1024.,1025.,-1023.,-1024.,-1025.,.5,1.5,-.5,-1.5,r.uniform(-1100,1100)]);lab='exp-boundary'
+ elif k==2:
+  x=math.ldexp(r.uniform(.5,1),r.randint(1,1023));l=math.log2(x);y=r.choice([1024.,-1074.,-1075.,-1022.])/l;y=math.nextafter(y,r.choice([math.inf,-math.inf])) if j%3 else y;lab='range-boundary'
+ elif k==3:
+  x=struct.unpack('>d',r.randint(1,0x10000000000000).to_bytes(8,'big'))[0];y=r.uniform(-2,2);lab='subnormal'
+ elif k==4:
+  x=-math.ldexp(r.uniform(.5,1),r.randint(-20,20));y=r.choice([float(r.randint(-1100,1100)),math.nextafter(float(r.randint(-1100,1100)),math.inf)]);lab='negative'
+ else:
+  x=r.choice([.71,1.29,1.,2.,.5,4.]);x=math.nextafter(x,r.choice([math.inf,-math.inf]));y=r.choice([r.uniform(-1100,1100),float(r.randint(-1100,1100))]);lab='log-branch'
+ add(x,y,lab)
+(s/'newpairs.txt').write_text('\n'.join(out)+'\n');(s/'newlabels.json').write_text(json.dumps(labels))

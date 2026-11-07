@@ -3,6 +3,8 @@ package runtime
 import (
 	"math"
 	"strconv"
+
+	"github.com/HazelnutParadise/phego/internal/phpnum"
 )
 
 // PHP diagnostic levels raised by modeled operations.
@@ -391,49 +393,24 @@ func (h *heap) safePow(base, exp float64) float64 {
 	if base == 0 && exp < 0 {
 		h.warn(levelDeprecated, "Power of base 0 and negative exponent is deprecated")
 	}
+	if h.width == 32 {
+		return i386Pow(base, exp)
+	}
 	return glibcPow(base, exp)
 }
 
 // mulExact multiplies within the platform integer range.
-func (h *heap) mulExact(a, b int64) (int64, bool) {
-	p := a * b
-	if a != 0 && (p/a != b || (a == -1 && b == math.MinInt64) || (b == -1 && a == math.MinInt64)) {
-		return 0, false
-	}
-	return p, h.inRange(p)
-}
+func (h *heap) mulExact(a, b int64) (int64, bool) { return phpnum.MulExact(a, b, h.width) }
 
-// intPow is PHP's integer exponentiation by squaring, which switches to float
-// arithmetic at the first overflowing step.
 func (h *heap) intPow(base, exp int64) value {
-	if exp < 0 {
-		return floatValue(h.safePow(float64(base), float64(exp)))
+	if base == 0 && exp < 0 {
+		h.warn(levelDeprecated, "Power of base 0 and negative exponent is deprecated")
 	}
-	if exp == 0 {
-		return h.number(1)
+	i, f, isInt := phpnum.IntPow(base, exp, h.width)
+	if isInt {
+		return h.number(i)
 	}
-	if base == 0 {
-		return h.number(0)
-	}
-	l1, l2, i := int64(1), base, exp
-	for i >= 1 {
-		if i%2 != 0 {
-			i--
-			p, ok := h.mulExact(l1, l2)
-			if !ok {
-				return floatValue(float64(l1) * float64(l2) * h.safePow(float64(l2), float64(i)))
-			}
-			l1 = p
-		} else {
-			i /= 2
-			p, ok := h.mulExact(l2, l2)
-			if !ok {
-				return floatValue(float64(l1) * h.safePow(float64(l2)*float64(l2), float64(i)))
-			}
-			l2 = p
-		}
-	}
-	return h.number(l1)
+	return floatValue(f)
 }
 
 func (h *heap) intOperands(op string, a, b value) (int64, int64, error) {
@@ -632,80 +609,14 @@ func (h *heap) compareFloatToString(f float64, s string) int {
 	return byteCompare(str, s)
 }
 
-// smartStringCompare compares two strings numerically when both are numeric
-// and bytewise otherwise.
+// smartStringCompare and smartStringEqual share PHP numeric-string rules
+// with compile-time expression checks.
 func (h *heap) smartStringCompare(a, b string) int {
-	x := php8512NumericString(a, h.width, false)
-	y := php8512NumericString(b, h.width, false)
-	if x.kind == notNumeric || y.kind == notNumeric || h.sameOverflow(x, y) {
-		return byteCompare(a, b)
-	}
-	if x.kind == numericFloat || y.kind == numericFloat {
-		d1, d2 := x.floating, y.floating
-		switch {
-		case x.kind != numericFloat:
-			if y.overflow != 0 {
-				return -y.overflow
-			}
-			d1 = float64(x.integer)
-		case y.kind != numericFloat:
-			if x.overflow != 0 {
-				return x.overflow
-			}
-			d2 = float64(y.integer)
-		case d1 == d2 && (math.IsInf(d1, 0) || math.IsNaN(d1)):
-			return byteCompare(a, b)
-		}
-		d := d1 - d2
-		switch {
-		case d > 0:
-			return 1
-		case d < 0:
-			return -1
-		}
-		return 0
-	}
-	return compareInts(x.integer, y.integer)
+	return phpnum.CompareStrings(a, b, h.width)
 }
 
-// smartStringEqual is the == fast path for two strings.
 func (h *heap) smartStringEqual(a, b string) bool {
-	x := php8512NumericString(a, h.width, false)
-	y := php8512NumericString(b, h.width, false)
-	if x.kind == notNumeric || y.kind == notNumeric || h.sameOverflow(x, y) {
-		return a == b
-	}
-	if x.kind == numericFloat || y.kind == numericFloat {
-		d1, d2 := x.floating, y.floating
-		switch {
-		case x.kind != numericFloat:
-			if y.overflow != 0 {
-				return false
-			}
-			d1 = float64(x.integer)
-		case y.kind != numericFloat:
-			if x.overflow != 0 {
-				return false
-			}
-			d2 = float64(y.integer)
-		case d1 == d2 && (math.IsInf(d1, 0) || math.IsNaN(d1)):
-			return a == b
-		}
-		return d1 == d2
-	}
-	return x.integer == y.integer
-}
-
-// sameOverflow reports two integer strings that overflowed to the same side
-// with equal float values, which PHP then compares as strings.
-func (h *heap) sameOverflow(x, y numericString) bool {
-	if x.overflow == 0 || x.overflow != y.overflow || x.floating-y.floating != 0 {
-		return false
-	}
-	if h.width == 32 {
-		return (x.overflow == 1 && x.floating > 9007199254740991) || (x.overflow == -1 && x.floating < -9007199254740991)
-	}
-	return true
+	return phpnum.EqualStrings(a, b, h.width)
 }
 
 // silentNumber is the silent scalar-to-number conversion used by comparison.

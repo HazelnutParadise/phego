@@ -1,0 +1,31 @@
+"""Reproduce Linux DAC checks without granting container capabilities."""
+import json
+import subprocess
+import uuid
+
+image = 'i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049'
+name = 'phego-private-mount-' + uuid.uuid4().hex
+command = ['docker', 'run', '-d', '--rm', '--name', name, '--user', '1001:1001',
+           '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges',
+           '--pids-limit=16', '--memory=128m', '--platform', 'linux/386',
+           '--tmpfs', '/tmp:rw,noexec,nosuid,size=1m', image, 'sh', '-c',
+           'mkdir -m 700 /tmp/fixture && printf "<?php echo 123;" > /tmp/fixture/run.php && sleep 60']
+subprocess.run(command, check=True, capture_output=True, timeout=30)
+try:
+    prepared = subprocess.run(['docker', 'exec', '--user', '1001:1001', name, 'sh', '-c',
+                               'for i in $(seq 1 50); do if test -f /tmp/fixture/run.php; then stat -c "%u:%g:%a" /tmp/fixture; exit; fi; sleep 0.1; done; exit 1'],
+                              check=True, capture_output=True, text=True, timeout=15)
+    assert prepared.stdout == '1001:1001:700\n'
+    print(json.dumps({'prepared_workspace': prepared.stdout.strip()}))
+    for user, expected in [('0:0', 1), ('1001:1001', 0)]:
+        result = subprocess.run(['docker', 'exec', '--user', user, name,
+                                 'php', '-n', '/tmp/fixture/run.php'],
+                                capture_output=True, text=True, timeout=15)
+        print(json.dumps({'user': user, 'exit_code': result.returncode,
+                          'stdout': result.stdout, 'stderr': result.stderr}))
+        assert result.returncode == expected
+        assert result.stdout == ('123' if expected == 0 else '')
+        if expected:
+            assert 'Could not open input file' in result.stderr
+finally:
+    subprocess.run(['docker', 'rm', '-f', name], check=True, capture_output=True, timeout=15)

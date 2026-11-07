@@ -1,0 +1,70 @@
+--- FAIL: TestPHP8512EncodingLiterals (0.06s)
+    --- FAIL: TestPHP8512EncodingLiterals/parentheses/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/parentheses/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/parentheses/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/integer/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/integer/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/integer/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/concat/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/concat/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/concat/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/numeric-concat/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/numeric-concat/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/numeric-concat/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/nested-concat/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/nested-concat/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/nested-concat/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:4, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 5 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/empty-heredoc/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/empty-heredoc/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/empty-heredoc/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:3, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 4 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/nowdoc/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/nowdoc/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/nowdoc/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:4, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 5 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/empty-nowdoc/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/empty-nowdoc/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/empty-nowdoc/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:3, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 4 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc-concat/short (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc-concat/replay (0.00s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/heredoc-concat/exhaustion (0.00s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:4, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 5 compile=false: memory exhausted
+    --- FAIL: TestPHP8512EncodingLiterals/long-concat/short (0.01s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/long-concat/replay (0.01s)
+        encoding_test.go:62: int32: wanted a parsed tree, got Encoding must be a literal
+    --- FAIL: TestPHP8512EncodingLiterals/long-concat/exhaustion (0.01s)
+        encoding_test.go:74: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=false: memory exhausted
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/frontend	1.043s
+FAIL

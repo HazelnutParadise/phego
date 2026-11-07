@@ -23,9 +23,9 @@ import (
 // concern and are skipped here.
 //
 // Every file PHP compiles must lower, and every compile error must be
-// reported with PHP's message and line. Errors owned by later work packages
-// (the object model, attributes, the built-in function table) are counted
-// by gapPrefix; the test fails when their number changes.
+// reported with PHP's message and line. Remaining built-in declaration gaps
+// owned by W-29 are matched by exact filename and diagnostic; the test fails
+// when an unlisted difference appears or a listed gap stops reproducing.
 func TestLowerMatchesCompileReference(t *testing.T) {
 	dir := os.Getenv("PHEGO_LEXER_CORPUS")
 	if dir == "" {
@@ -99,6 +99,9 @@ func TestLowerMatchesCompileReference(t *testing.T) {
 			if strings.Join(want, "\n") != strings.Join(got, "\n") {
 				if g := diagnosticGap(name, want); g != "" {
 					gaps[g]++
+					if os.Getenv("PHEGO_IR_GAPS") != "" {
+						t.Logf("diagnostic gap %s: got %q want %q", name, got, want)
+					}
 				} else {
 					diags = append(diags, fmt.Sprintf("%s:\n  got  %q\n  want %q", name, got, want))
 				}
@@ -111,6 +114,9 @@ func TestLowerMatchesCompileReference(t *testing.T) {
 			msg := fatal[1].(string)
 			if prefix := gapPrefix(name, msg); prefix != "" {
 				gaps[prefix]++
+				if os.Getenv("PHEGO_IR_GAPS") != "" {
+					t.Logf("missing %s:%v: %s", name, fatal[2], msg)
+				}
 			} else {
 				missing = append(missing, fmt.Sprintf("%s:%v: %s", name, fatal[2], msg))
 			}

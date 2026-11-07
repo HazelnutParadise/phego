@@ -17,22 +17,21 @@ type Options struct {
 
 // Lower compiles a syntax tree produced by frontend.Parse for the same
 // profile. A fatal compile error is returned as *CompileError with the line
-// PHP reports; compile warnings are recorded in Unit.Diagnostics.
+// PHP reports; compile warnings are recorded in Unit.Diagnostics. Host resource
+// limits return a separate error and are never classified as PHP diagnostics.
 func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit, err error) {
 	if tree == nil || tree.Kind != "file" {
 		return nil, fmt.Errorf("ir: Lower needs a file syntax tree")
 	}
 	l := &lowerer{
-		unit: &Unit{File: opts.File, Profile: prof},
-		ns:   newNamespace(""),
-		top:  tree.Children,
+		unit:      &Unit{File: opts.File, Profile: prof},
+		ns:        newNamespace(""),
+		top:       tree.Children,
+		constPool: newCompilePool(),
 	}
 	// PHP scans the whole file before compiling it, so warnings raised while
 	// decoding literals precede compile diagnostics.
-	var scanned []Diagnostic
-	l.dec = stringDecoder{warn: func(line int, msg string) {
-		scanned = append(scanned, Diagnostic{Line: line, Level: "Warning", Message: msg})
-	}}
+
 	defer func() {
 		if r := recover(); r != nil {
 			f, ok := r.(compileFailure)
@@ -45,17 +44,75 @@ func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit,
 	main := l.newFunc(FuncMain, "", 1)
 	l.unit.Main = main
 	l.fn = main
-	l.hoisted = map[string]int{}
+	l.hoisted = map[string]*Func{}
+	l.boundClasses = map[string]*Class{}
+	l.attributeClasses = map[string]int{}
 	for _, s := range tree.Children {
 		main.Body = appendNode(main.Body, l.topStatement(s))
 	}
 	l.finishFunc(main)
 	main.Strict = l.unit.Strict
-	l.unit.Diagnostics = append(scanned, l.unit.Diagnostics...)
+	l.unit.Diagnostics = append(l.scannerDiagnostics(tree), l.unit.Diagnostics...)
 	return l.unit, nil
 }
 
-type compileFailure struct{ err *CompileError }
+// castDeprecation is the deprecation PHP's scanner raises for a
+// non-canonical cast name (zend_language_scanner.l), if any.
+func castDeprecation(n *frontend.Node) (Diagnostic, bool) {
+	inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
+	switch inner {
+	case "integer", "boolean", "double", "binary":
+		return Diagnostic{Line: n.Line, Level: "Deprecated",
+			Message: "Non-canonical cast (" + inner + ") is deprecated, use the (" + castNames[inner] + ") cast instead"}, true
+	}
+	return Diagnostic{}, false
+}
+
+// decodeScanned decodes the literal or string part n and keeps its decoding
+// warnings for scannerDiagnostics; decoding n again is silent.
+func (l *lowerer) decodeScanned(n *frontend.Node, decode func(stringDecoder) string) string {
+	if _, done := l.decoded[n]; done {
+		return decode(stringDecoder{})
+	}
+	var warnings []Diagnostic
+	text := decode(stringDecoder{warn: func(line int, msg string) {
+		warnings = append(warnings, Diagnostic{Line: line, Level: "Warning", Message: msg})
+	}})
+	if l.decoded == nil {
+		l.decoded = make(map[*frontend.Node][]Diagnostic)
+	}
+	l.decoded[n] = warnings
+	return text
+}
+
+// scannerDiagnostics lists what PHP's scanner reports before compiling the
+// file, in token order: literal decoding warnings and non-canonical cast
+// deprecations, including those in code compilation never reaches.
+func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
+	var out []Diagnostic
+	var walk func(*frontend.Node)
+	walk = func(n *frontend.Node) {
+		if n == nil {
+			return
+		}
+		if n.Kind == "cast" {
+			if d, ok := castDeprecation(n); ok {
+				out = append(out, d)
+			}
+		}
+		if n.Kind == "literal" && n.Token == frontend.TConstantEncapsedString {
+			l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })
+		}
+		out = append(out, l.decoded[n]...)
+		for _, c := range n.Children {
+			walk(c)
+		}
+	}
+	walk(tree)
+	return out
+}
+
+type compileFailure struct{ err error }
 
 func (l *lowerer) fail(line int, format string, args ...any) {
 	panic(compileFailure{&CompileError{Line: line, Message: fmt.Sprintf(format, args...)}})
@@ -87,9 +144,9 @@ type label struct {
 // lowerer holds compile state. Per-function state is saved and restored
 // around nested functions.
 type lowerer struct {
-	unit *Unit
-	dec  stringDecoder
-	top  []*frontend.Node
+	constants *compileBudget // one expression-local memo and work budget
+	unit      *Unit
+	top       []*frontend.Node
 
 	ns *namespace
 	// unbracketed is set after an unbracketed namespace declaration, while
@@ -105,9 +162,24 @@ type lowerer struct {
 	jumps   []jump
 	labels  map[string]label
 	// hoisted records top-level functions by lower-case name.
-	hoisted map[string]int
+	hoisted map[string]*Func
+	// boundClasses contains only unconditional declarations already compiled
+	// in this file; later and conditional declarations are not linked early.
+	boundClasses     map[string]*Class
+	attributeClasses map[string]int
+	// namedParamRefs is built lazily for calls with named arguments.
+	namedParamRefs map[*Func]map[string]bool
 	// inConstExpr is set while compiling a constant expression.
 	inConstExpr bool
+	// decoded holds each decoded literal or string part's warnings.
+	decoded map[*frontend.Node][]Diagnostic
+	// foldLine is CG(zend_lineno) while constants are folded from syntax.
+	foldLine int
+	// constPool is the unit's shared reserve for constant evaluation.
+	constPool *compileBudget
+	// constClosures holds the closures a constant expression compiled where
+	// zend_compile_const_expr reaches them, before the rest is lowered.
+	constClosures map[*frontend.Node]*Node
 	// seen records the symbols declared so far in the namespace, which a
 	// later import may not shadow, as PHP's seen_symbols.
 	seen   map[string]bool
@@ -118,6 +190,9 @@ type lowerer struct {
 	// cur is the line of the expression compiled last, which PHP reports
 	// for errors raised while compiling a construct's later parts.
 	cur int
+	// nameWarnings records names converted with a compile warning, which a
+	// second compilation of the same target repeats at the same line.
+	nameWarnings map[*Node]nameWarning
 }
 
 func (l *lowerer) newFunc(kind FuncKind, name string, line int) *Func {
@@ -209,6 +284,8 @@ func appendNode(list []*Node, n *Node) []*Node {
 
 func (l *lowerer) topStatement(s *frontend.Node) *Node {
 	switch s.Kind {
+	case "empty":
+		return nil
 	case "namespace":
 		return l.namespaceDecl(s)
 	case "use":
@@ -241,14 +318,14 @@ func (l *lowerer) verifyNamespace(s *frontend.Node) {
 	}
 }
 
-// isFirstStatement mirrors zend_is_first_statement with nop statements
-// allowed: only declare statements may precede s.
-func (l *lowerer) isFirstStatement(s *frontend.Node) bool {
+// isFirstStatement permits preceding declarations. Namespace and strict_types
+// also permit empty statements; an encoding declaration does not.
+func (l *lowerer) isFirstStatement(s *frontend.Node, allowEmpty bool) bool {
 	for _, t := range l.top {
 		if t == s {
 			return true
 		}
-		if t.Kind != "declare" {
+		if t.Kind != "declare" && !(allowEmpty && t.Kind == "empty") {
 			return false
 		}
 	}
@@ -268,7 +345,7 @@ func (l *lowerer) namespaceDecl(s *frontend.Node) *Node {
 		l.fail(s.Line, "Namespace declarations cannot be nested")
 	}
 	first := (!bracketed && !l.unbracketed) || (bracketed && !l.bracketed)
-	if first && !l.isFirstStatement(s) {
+	if first && !l.isFirstStatement(s, true) {
 		l.fail(s.Line, "Namespace declaration statement has to be the very first statement or after any declare call in the script")
 	}
 	nsName := ""
@@ -399,6 +476,7 @@ func lineOf(n *frontend.Node) int {
 }
 
 func (l *lowerer) statement(s *frontend.Node, top bool) *Node {
+	l.cur = s.Line
 	n := l.stmt(s, top)
 	if n != nil {
 		l.seal(n)
@@ -431,6 +509,8 @@ func (l *lowerer) seal(n *Node) *Node {
 func (l *lowerer) stmt(s *frontend.Node, top bool) *Node {
 	c := s.Children
 	switch s.Kind {
+	case "empty":
+		return nil
 	case "expr":
 		return &Node{Op: OpExpr, Line: s.Line, Kids: []*Node{l.expr(c[0])}}
 	case "void":
@@ -533,6 +613,7 @@ func (l *lowerer) stmt(s *frontend.Node, top bool) *Node {
 		return &Node{Op: OpFuncDecl, Line: s.Line, Func: f}
 	case "class", "interface", "trait", "enum":
 		cl := l.classDecl(s, false)
+		l.bindClass(cl, top)
 		return &Node{Op: OpClass, Line: s.Line, Class: cl}
 	case "const":
 		return l.constDecl(s)
@@ -725,10 +806,13 @@ func (l *lowerer) globalVar(v *frontend.Node) *Node {
 		return &Node{Op: OpGlobal, Line: v.Line, Var: vr, Text: name}
 	}
 	l.fn.DynamicScope = true
-	return &Node{Op: OpGlobal, Line: v.Line, Kids: []*Node{l.expr(v.Children[0])}}
+	nd := &Node{Op: OpGlobal, Line: v.Line, Kids: []*Node{l.expr(v.Children[0])}}
+	l.convertName(nd, 0, v.Children[0])
+	return nd
 }
 
 func (l *lowerer) staticVar(sv *frontend.Node) *Node {
+	l.cur = sv.Children[0].Line
 	name := sv.Children[0].Text[1:]
 	if name == "this" {
 		l.fail(sv.Line, "Cannot use $this as static variable")
@@ -742,6 +826,10 @@ func (l *lowerer) staticVar(sv *frontend.Node) *Node {
 	l.fn.statics[name] = true
 	n := &Node{Op: OpStatic, Line: sv.Line, Text: name, Var: l.variable(name, VarStatic|VarRef|VarWritten)}
 	if init := sv.Children[1]; init != nil {
+		saved := l.constants
+		l.constants = l.syntaxBudget(init)
+		defer func() { l.constants = saved }()
+		l.preEvaluateSyntax(init)
 		n.Kids = []*Node{l.expr(init)}
 	}
 	return n
@@ -763,12 +851,12 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		switch strings.ToLower(name) {
 		case "ticks":
 		case "encoding":
-			if !l.isFirstStatement(s) {
+			if !l.isFirstStatement(s, false) {
 				l.fail(s.Line, "Encoding declaration pragma must be the very first statement in the script")
 			}
 			l.diag(s.Line, "Warning", "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings")
 		case "strict_types":
-			if !l.isFirstStatement(s) {
+			if !l.isFirstStatement(s, true) {
 				l.fail(s.Line, "strict_types declaration must be the very first statement in the script")
 			}
 			if body != nil {
@@ -846,6 +934,26 @@ func (l *lowerer) try(s *frontend.Node) *Node {
 
 func (l *lowerer) constDecl(s *frontend.Node) *Node {
 	b := &Node{Op: OpBlock, Line: s.Line}
+	var attrs *frontend.Node
+	for _, item := range s.Children {
+		if item != nil && item.Kind == "attributes" {
+			attrs = item
+			break
+		}
+	}
+	items := 0
+	for _, item := range s.Children {
+		if item != nil && item.Kind == "const_item" {
+			if items == 0 {
+				l.cur = item.Children[0].Line
+			}
+			items++
+		}
+	}
+	if attrs != nil && items > 1 {
+		l.fail(s.Line, "Cannot apply attributes to multiple constants at once")
+	}
+	l.checkAttributes(attrs, "constant", s.Line)
 	for _, item := range s.Children {
 		if item == nil || item.Kind != "const_item" {
 			continue // attributes
@@ -872,6 +980,7 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 	short := c[1].Text
 	full := l.ns.prefix(short)
 	f := l.newFunc(FuncNamed, full, s.Line)
+	f.Attributes = l.checkAttributes(c[0], "function", s.Line)
 	f.ByRef = s.Text == "&"
 	lower := strings.ToLower(short)
 	switch lower {
@@ -892,9 +1001,15 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 	if f.Hoisted {
 		key := strings.ToLower(full)
 		if prev, dup := l.hoisted[key]; dup {
-			l.fail(s.Line, "Cannot redeclare function %s() (previously declared in %s:%d)", full, l.unit.File, prev)
+			l.fail(s.Line, "Cannot redeclare function %s() (previously declared in %s:%d)", full, l.unit.File, prev.Line)
 		}
-		l.hoisted[key] = s.Line
+		l.hoisted[key] = f
+	}
+	if hasClassMarker(f.Attributes, "NoDiscard") && f.Return != nil && (strings.EqualFold(f.Return.zend, "void") || strings.EqualFold(f.Return.zend, "never")) {
+		if strings.EqualFold(f.Return.zend, "void") {
+			l.fail(f.Line, "A void function does not return a value, but #[\\NoDiscard] requires a return value")
+		}
+		l.fail(f.Line, "A never returning function does not return a value, but #[\\NoDiscard] requires a return value")
 	}
 	return f
 }
@@ -903,12 +1018,17 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 func (l *lowerer) functionBody(f *Func, params, ret, body *frontend.Node, uses *frontend.Node) {
 	restore := l.enterFunc(f)
 	defer restore()
+	// A closure in a constant expression has an ordinary body.
+	savedConst, savedBudget, savedClosures := l.inConstExpr, l.constants, l.constClosures
+	l.inConstExpr, l.constants, l.constClosures = false, nil, nil
+	defer func() { l.inConstExpr, l.constants, l.constClosures = savedConst, savedBudget, savedClosures }()
 	savedClass := l.class
 	if f.Kind == FuncNamed {
 		l.class = nil
 	}
 	defer func() { l.class = savedClass }()
 	f.Class = l.class
+	f.HasBody = body != nil
 	if ret != nil {
 		f.Return = l.typeOf(ret, false)
 		if f.Return.String == "void" && f.ByRef {
@@ -993,9 +1113,17 @@ func (l *lowerer) params(f *Func, list *frontend.Node) {
 	}
 	for i, p := range list.Children {
 		attrs, mods, typ, v, def := p.Children[0], p.Children[1], p.Children[2], p.Children[3], p.Children[4]
-		_ = attrs
+		l.cur = v.Line
+		if typ != nil {
+			l.cur = l.zline(typ)
+		}
 		name := v.Text[1:]
 		param := &Param{Name: name, Line: p.Line, ByRef: strings.Contains(p.Text, "&"), Variadic: strings.Contains(p.Text, "...")}
+		attributeTarget := "parameter"
+		if mods != nil && len(mods.Children) > 0 || p.Children[5] != nil {
+			attributeTarget = "promoted parameter"
+		}
+		param.Attributes = l.checkAttributes(attrs, attributeTarget, p.Line)
 		if isSuperGlobal(name) {
 			l.fail(p.Line, "Cannot re-assign auto-global variable %s", name)
 		}

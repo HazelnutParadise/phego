@@ -535,7 +535,10 @@ func (p *parser) arrayLiteral(open, close Kind, kind string) *Node {
 	defer func() { p.inTarget = saved }()
 	for !p.at(close) {
 		if p.at(',') {
-			p.next()
+			comma := p.next()
+			if len(n.Children) == 0 {
+				n.LeadingEmptyLine = comma.Line
+			}
 			n.Children = append(n.Children, nil)
 			continue
 		}

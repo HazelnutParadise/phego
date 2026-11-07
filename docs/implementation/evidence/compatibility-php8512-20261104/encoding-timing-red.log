@@ -1,0 +1,8 @@
+--- FAIL: TestPHP8512EncodingDirectiveTiming (0.00s)
+    --- FAIL: TestPHP8512EncodingDirectiveTiming/later-syntax-error/ (0.00s)
+        encoding_timing_test.go:24: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 2 compile=false: syntax error, unexpected token ")"
+    --- FAIL: TestPHP8512EncodingDirectiveTiming/later-newline/ (0.00s)
+        encoding_timing_test.go:24: int32: got &frontend.SyntaxError{Line:2, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 3 compile=true: Encoding must be a literal
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/frontend	0.607s
+FAIL

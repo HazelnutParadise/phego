@@ -111,18 +111,19 @@ const (
 
 // Node is one HIR operation. Which fields are set depends on Op.
 type Node struct {
-	Op      Op
-	Line    int
-	Text    string
-	Value   *Literal
-	Name    *Name
-	Var     *Var
-	Func    *Func
-	Class   *Class
-	Args    []*Arg
-	Kids    []*Node
-	Flags   NodeFlag
-	Effects Effect // effects of this node, including its operands
+	Op         Op
+	Line       int
+	Text       string
+	Value      *Literal
+	Name       *Name
+	Var        *Var
+	Func       *Func
+	Class      *Class
+	Attributes []Attribute
+	Args       []*Arg
+	Kids       []*Node
+	Flags      NodeFlag
+	Effects    Effect // effects of this node, including its operands
 }
 
 // NodeFlag records how a node is used.
@@ -240,8 +241,9 @@ type Param struct {
 	ByRef    bool
 	Variadic bool
 	// Promoted holds the modifiers of a promoted constructor parameter.
-	Promoted []string
-	Var      *Var
+	Promoted   []string
+	Attributes []Attribute
+	Var        *Var
 }
 
 // Capture is a variable a closure takes from its defining scope.
@@ -264,6 +266,7 @@ type Func struct {
 	Params    []*Param
 	Return    *Type
 	ByRef     bool // returns by reference
+	HasBody   bool
 	Static    bool // static method or static closure
 	Generator bool
 	Variadic  bool // the last parameter is variadic
@@ -271,9 +274,10 @@ type Func struct {
 	// calls this function makes and its own return-value coercion.
 	Strict bool
 	// Hoisted marks a top-level named function, declared before the file runs.
-	Hoisted   bool
-	Modifiers []string
-	Captures  []*Capture
+	Hoisted    bool
+	Modifiers  []string
+	Attributes []Attribute
+	Captures   []*Capture
 	// Vars lists the function's variables in order of first appearance.
 	Vars []*Var
 	// DynamicScope marks code that may read or write local variables by a
@@ -326,13 +330,24 @@ type Class struct {
 	Interfaces []*Name
 	Traits     []*Name
 	// TraitRules are the adaptations of the trait uses, in source order.
-	TraitRules []*TraitRule
-	Backing    *Type
-	Consts     []*ClassConst
-	Props      []*Prop
-	Cases      []*ClassConst
-	Methods    []*Func
-	Anonymous  bool
+	TraitRules       []*TraitRule
+	Backing          *Type
+	Consts           []*ClassConst
+	Props            []*Prop
+	Cases            []*ClassConst
+	Methods          []*Func
+	Anonymous        bool
+	Attributes       []Attribute
+	AttributeTargets int
+	IsAttribute      bool
+}
+
+// Attribute retains source metadata without keeping compiled argument graphs.
+// Empty argument names represent positional arguments.
+type Attribute struct {
+	Name      *Name
+	Line      int
+	Arguments []string
 }
 
 // TraitRule is one trait adaptation: "T::m insteadof U, V" or
@@ -351,21 +366,28 @@ type TraitRule struct {
 
 // ClassConst is a class constant or enum case.
 type ClassConst struct {
-	Name      string
-	Line      int
-	Modifiers []string
-	Type      *Type
-	Value     *Node
+	Name       string
+	Line       int
+	Modifiers  []string
+	Type       *Type
+	Value      *Node
+	Attributes []Attribute
+	Class      *Class
 }
 
 // Prop is a declared property.
 type Prop struct {
-	Name      string
-	Line      int
-	Modifiers []string
-	Type      *Type
-	Default   *Node
-	Hooks     []*Func
+	Name       string
+	Line       int
+	Modifiers  []string
+	Type       *Type
+	Default    *Node
+	Hooks      []*Func
+	HasHooks   bool
+	Backed     bool
+	Promoted   bool
+	Attributes []Attribute
+	Class      *Class
 }
 
 // Diagnostic is a compile-time warning or deprecation PHP reports without

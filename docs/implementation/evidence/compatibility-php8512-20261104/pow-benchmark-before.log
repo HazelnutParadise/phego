@@ -1,0 +1,26 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/phpnum
+cpu: Apple M3
+BenchmarkPow/i386/integer-8         	  236683	       444.8 ns/op	     712 B/op	      19 allocs/op
+BenchmarkPow/i386/integer-8         	  352534	       349.9 ns/op	     712 B/op	      19 allocs/op
+BenchmarkPow/i386/integer-8         	  354373	       350.9 ns/op	     712 B/op	      19 allocs/op
+BenchmarkPow/i386/integer-8         	  352702	       352.5 ns/op	     712 B/op	      19 allocs/op
+BenchmarkPow/i386/integer-8         	  353677	       356.1 ns/op	     712 B/op	      19 allocs/op
+BenchmarkPow/i386/fractional-8      	    2085	     55496 ns/op	   84411 B/op	    1418 allocs/op
+BenchmarkPow/i386/fractional-8      	    2187	     55076 ns/op	   84391 B/op	    1418 allocs/op
+BenchmarkPow/i386/fractional-8      	    2168	     59951 ns/op	   84390 B/op	    1418 allocs/op
+BenchmarkPow/i386/fractional-8      	    2224	     52727 ns/op	   84389 B/op	    1418 allocs/op
+BenchmarkPow/i386/fractional-8      	    2319	     52440 ns/op	   84390 B/op	    1418 allocs/op
+BenchmarkPow/i386/large-8           	    2353	     52995 ns/op	   86631 B/op	    1425 allocs/op
+BenchmarkPow/i386/large-8           	    2250	     52913 ns/op	   86631 B/op	    1425 allocs/op
+BenchmarkPow/i386/large-8           	    2248	     52516 ns/op	   86634 B/op	    1425 allocs/op
+BenchmarkPow/i386/large-8           	    2338	     52947 ns/op	   86630 B/op	    1425 allocs/op
+BenchmarkPow/i386/large-8           	    2280	     52646 ns/op	   86630 B/op	    1425 allocs/op
+BenchmarkPow/amd64/fractional-8     	18686131	         6.420 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPow/amd64/fractional-8     	18582201	         6.427 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPow/amd64/fractional-8     	18646688	         6.416 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPow/amd64/fractional-8     	18637035	         6.422 ns/op	       0 B/op	       0 allocs/op
+BenchmarkPow/amd64/fractional-8     	18739264	         6.432 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	2.965s

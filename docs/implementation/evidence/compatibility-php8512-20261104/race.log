@@ -1,0 +1,14 @@
+ok  	github.com/HazelnutParadise/phego	1.620s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/compat	1.555s
+--- FAIL: TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically (0.28s)
+    heredoc_nested_test.go:136: nested heredoc after quoted text scales superlinearly: 1000=4.78225ms 10000=262.785416ms
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/frontend	7.201s
+ok  	github.com/HazelnutParadise/phego/internal/ir	5.124s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	2.539s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	(cached) [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	(cached)
+ok  	github.com/HazelnutParadise/phego/internal/profile	3.665s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	128.162s
+FAIL

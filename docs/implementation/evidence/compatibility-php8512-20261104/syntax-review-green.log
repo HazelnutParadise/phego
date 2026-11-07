@@ -1,0 +1,5 @@
+=== RUN   TestFinalSyntaxReview
+    zz_final_syntax_review_test.go:15: 84 cases x2, 0 differences
+--- PASS: TestFinalSyntaxReview (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/ir	0.563s
