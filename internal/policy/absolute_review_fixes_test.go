@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -249,4 +250,73 @@ func TestReviewFixAbsoluteLinkUsesConfiguredRootAlias(t *testing.T) {
 		f.Close()
 	}
 	wantPolicyError(t, err, "not-granted")
+}
+
+// A link target's .. follows the directory the previous component resolved
+// to. After an absolute link moves resolution into another mount, the
+// remaining components are bounded by that mount instead of the first one.
+func TestAbsoluteLinkChainParentUsesNewMount(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink fixtures require Unix privileges; Windows compilation is checked separately")
+	}
+	base, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, n := range []string{"app/sub", "other", "outside"} {
+		if err := os.MkdirAll(filepath.Join(base, n), 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, n := range []string{"app/file", "app/sub/file", "other/file", "outside/file"} {
+		if err := os.WriteFile(filepath.Join(base, n), []byte(n), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	links := map[string]string{
+		"other/toapp":  base + "/app/sub",
+		"app/parent":   base + "/other/toapp/../file",
+		"app/deeper":   base + "/other/toapp/../sub/file",
+		"app/escape":   base + "/other/toapp/../../outside/file",
+		"app/return":   base + "/other/toapp/../../app/file",
+		"app/rel":      "../other/toapp/../file",
+		"other/torel":  "toapp/../file",
+		"app/viaother": base + "/other/torel",
+	}
+	for name, target := range links {
+		if err := os.Symlink(target, filepath.Join(base, name)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: filepath.Join(base, "app")}, {Path: "/other", Dir: filepath.Join(base, "other")}}})
+	for _, c := range []struct{ name, want, rule string }{
+		{"/app/parent", "app/file", ""},
+		{"/app/deeper", "app/sub/file", ""},
+		{"/other/torel", "app/file", ""},
+		{"/app/viaother", "app/file", ""},
+		{"/app/escape", "", "outside-root"},
+		{"/app/return", "", "outside-root"},
+		{"/app/rel", "", "outside-root"},
+	} {
+		f, err := p.OpenFile(c.name, os.O_RDONLY, 0)
+		if c.rule != "" {
+			if f != nil {
+				f.Close()
+			}
+			var pe *PolicyError
+			if !errors.As(err, &pe) || pe.Rule != c.rule {
+				t.Errorf("%s: got %v, want rule %q", c.name, err, c.rule)
+			}
+			continue
+		}
+		if err != nil {
+			t.Errorf("%s: %v", c.name, err)
+			continue
+		}
+		b, err := io.ReadAll(f)
+		f.Close()
+		if err != nil || string(b) != c.want {
+			t.Errorf("%s: read %q, %v; want %q", c.name, b, err, c.want)
+		}
+	}
 }

@@ -33,7 +33,7 @@ func (m *w12Machine) sortRecursive(op []any) (err error) {
 	if err = m.h.bind(e, slot); err != nil {
 		return err
 	}
-	if err = m.h.sortArrayRegular(slot, op[2] == "asort"); err != nil {
+	if err = m.h.sortArrayRegular(slot, op[2].(string), op[2] == "asort"); err != nil {
 		return err
 	}
 	for _, b := range slot.deref().array.buckets {
@@ -86,7 +86,7 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 
 	calls := int64(0)
 	if !userCallback {
-		return m.h.sortArrayRegular(m.slot(op[1]), function == "asort")
+		return m.h.sortArrayRegular(m.slot(op[1]), function, function == "asort")
 	}
 	var ret, alias value
 	if mode == "boolref" {
@@ -129,7 +129,7 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 				if err := m.h.appendValue(&inner, w12Int(1)); err != nil {
 					return value{}, err
 				}
-				err := m.h.sortArrayUser(&inner, false, func(x, y value) (value, error) { n, e := m.h.compare(x, y); return w12Int(int64(n)), e })
+				err := m.h.sortArrayUser(&inner, "usort", false, func(x, y value) (value, error) { n, e := m.h.compare(x, y); return w12Int(int64(n)), e })
 				if e := m.h.unset(&inner); err == nil {
 					err = e
 				}
@@ -186,16 +186,16 @@ func (m *w12Machine) sortTrace(op []any) (err error) {
 		}
 	}
 	if mode == "booldiagmutate" {
-		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function == "uasort", callback, func(level int, message string) error {
+		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function, function == "uasort", callback, func(level int, message string) error {
 			m.events = append(m.events, []any{"diagnostic", level, message})
 			return m.h.assign(m.slot("r"), w12Int(10))
 		})
 	}
 	if mode == "boolwarntrue" || mode == "boolwarnfalse" || mode == "objectwarn" || mode == "floatwarn" {
-		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function == "uasort", callback, func(level int, message string) error {
+		return m.h.sortArrayUserWithDiagnostic(m.slot(op[1]), function, function == "uasort", callback, func(level int, message string) error {
 			m.events = append(m.events, []any{"diagnostic", level, message})
 			return &Throwable{"Exception", "comparison warning failed"}
 		})
 	}
-	return m.h.sortArrayUser(m.slot(op[1]), function == "uasort", callback)
+	return m.h.sortArrayUser(m.slot(op[1]), function, function == "uasort", callback)
 }

@@ -1,0 +1,52 @@
+// Temporary measurement run as internal/bytecode/zz_measure_test.go and then
+// removed; it reuses straightLine from limits_review_test.go. It binary-searches
+// the smallest MaxWork and MaxMemory that admit the largest straight-line image.
+package bytecode
+
+import (
+	"context"
+	"crypto/sha256"
+	"testing"
+)
+
+func TestZZMeasureDefaultBudgets(t *testing.T) {
+	for _, regs := range []int{64, 4096} {
+		img := straightLine(int(DefaultLimits().MaxInstructions), regs)
+		big := DefaultLimits()
+		big.MaxWork, big.MaxMemory = 1<<40, 1<<40
+		p, err := Build(context.Background(), img, Options{Limits: big, Supported: AllCapabilities})
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := p.Encode(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		need := func(load, memory bool) uint64 {
+			lo, hi := uint64(1), uint64(1<<40)
+			for lo < hi {
+				mid := lo + (hi-lo)/2
+				l := big
+				if memory {
+					l.MaxMemory = mid
+				} else {
+					l.MaxWork = mid
+				}
+				var err error
+				if load {
+					_, err = Load(context.Background(), data, LoadOptions{Options: Options{Limits: l, Supported: AllCapabilities}, Expected: img.Identity, TrustedDigest: sha256.Sum256(data)})
+				} else {
+					_, err = Build(context.Background(), img, Options{Limits: l, Supported: AllCapabilities})
+				}
+				if err == nil {
+					hi = mid
+				} else {
+					lo = mid + 1
+				}
+			}
+			return lo
+		}
+		t.Logf("registers=%d instructions=%d bytes=%d build_work=%d load_work=%d build_memory=%d load_memory=%d defaults_work=%d defaults_memory=%d",
+			regs, len(img.Functions[0].Code), len(data), need(false, false), need(true, false), need(false, true), need(true, true), DefaultLimits().MaxWork, DefaultLimits().MaxMemory)
+	}
+}

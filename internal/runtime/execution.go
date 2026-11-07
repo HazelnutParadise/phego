@@ -57,6 +57,10 @@ type executionFrame struct{ locals []*value }
 type executionBuffer struct {
 	data   []byte
 	filter outputFilter
+	name   string // PHP's callable name of filter, used in its diagnostics
+	// produced records any write while filter runs, even of no bytes, as
+	// PHP's PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT does.
+	produced bool
 }
 type executionDiagnostic struct{ level, message string }
 
@@ -77,21 +81,24 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // input; actions and output writers must cooperate with cancellation. Cleanup
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
-	ctx                       context.Context
-	cleanupContext            context.Context
-	request                   *Request
-	heap                      *heap
-	globals                   value
-	limits                    executionLimits
-	writer                    io.Writer
-	frames                    []*executionFrame
-	shutdown                  []executionAction
-	buffers                   []executionBuffer
-	output                    []byte
-	accepted                  int64
-	diagnostics               []executionDiagnostic
-	started, closed           bool
-	filtering, handlerOutput  bool
+	ctx             context.Context
+	cleanupContext  context.Context
+	request         *Request
+	heap            *heap
+	globals         value
+	limits          executionLimits
+	writer          io.Writer
+	frames          []*executionFrame
+	shutdown        []executionAction
+	buffers         []executionBuffer
+	output          []byte
+	accepted        int64
+	diagnostics     []executionDiagnostic
+	started, closed bool
+	filtering       bool
+	// outputRunning is PHP's OG(running) left set by a fatal error inside a
+	// handler, which bails out before the handler's buffer leaves the stack.
+	outputRunning             bool
 	destructorStop            bool
 	result                    executionResult
 	stop                      completion
@@ -421,18 +428,24 @@ func (x *execution) registerShutdown(fn executionAction) error {
 	x.shutdown = append(x.shutdown, fn)
 	return nil
 }
-func (x *execution) startBuffer(filter outputFilter) error {
+
+// startBuffer is ob_start(). name is PHP's callable name for filter, such as
+// {closure:FILE:LINE}; a buffer without a handler has no name.
+func (x *execution) startBuffer(name string, filter outputFilter) error {
 	if x.closed {
 		return errors.New("execution is closed")
 	}
-	if x.filtering {
-		return x.fail(endFatal, errors.New("Cannot use output buffering in output buffering display handlers"))
+	if filter != nil && name == "" {
+		return errors.New("output handler requires its PHP callable name")
+	}
+	if x.filtering || x.outputRunning {
+		return x.outputLockError("ob_start()")
 	}
 	if len(x.buffers) >= x.limits.depth {
 		x.fail(endLimit, errExecutionLimit)
 		return errExecutionLimit
 	}
-	x.buffers = append(x.buffers, executionBuffer{filter: filter})
+	x.buffers = append(x.buffers, executionBuffer{filter: filter, name: name})
 	return nil
 }
 func (x *execution) warning(message string) completion {

@@ -230,8 +230,23 @@ func (p *propertyTable) endIteration(previous bool) {
 	}
 }
 
+// each visits declared slots, then dynamic properties, in PHP's property
+// table order for iteration, conversion and comparison.
 func (p *propertyTable) each(visit func(string, *value)) {
 	defer p.endIteration(p.beginIteration())
+	p.eachDeclared(visit)
+	p.eachDynamic(visit)
+}
+
+// eachForFree follows zend_object_std_dtor: the property hash, whose dynamic
+// entries keep insertion order, is destroyed before the declared slots.
+func (p *propertyTable) eachForFree(visit func(string, *value)) {
+	defer p.endIteration(p.beginIteration())
+	p.eachDynamic(visit)
+	p.eachDeclared(visit)
+}
+
+func (p *propertyTable) eachDeclared(visit func(string, *value)) {
 	if p.layout != nil {
 		for i, name := range p.layout.names {
 			if v := &p.declared[i]; v.kind != valueUndefined {
@@ -239,6 +254,9 @@ func (p *propertyTable) each(visit func(string, *value)) {
 			}
 		}
 	}
+}
+
+func (p *propertyTable) eachDynamic(visit func(string, *value)) {
 	// Re-read used and next after each callback so reentrant appends are visited.
 	for block := p.head; block != nil; block = block.next {
 		for i := 0; i < block.used; i++ {
@@ -263,7 +281,7 @@ func (h *heap) freePropertyTable(table *propertyTable, dead map[gcNode]bool, det
 	var first error
 	for {
 		found := false
-		table.each(func(_ string, slot *value) {
+		table.eachForFree(func(_ string, slot *value) {
 			found = true
 			if detach {
 				h.detachPropertySource(slot)

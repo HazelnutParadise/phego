@@ -195,7 +195,7 @@ func (m *w12Machine) run(ops []any, iteration int) error {
 			err = m.sortRecursive(o)
 		case "sort":
 			once := false
-			err = m.h.sortArray(m.slot(o[1]), o[2] == "uasort", func(a, b value) (int, error) {
+			err = m.h.sortArray(m.slot(o[1]), o[2].(string), o[2] == "uasort", func(a, b value) (int, error) {
 				if o[3] == "unset" && !once {
 					once = true
 					if err := m.h.unset(m.slot(o[1])); err != nil {

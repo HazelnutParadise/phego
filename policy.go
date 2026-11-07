@@ -45,8 +45,10 @@ type FileGrant struct {
 	Path string
 	// Root is a host directory opened through os.Root. Absolute symbolic links
 	// may target another granted Root; parent components in link targets may
-	// not leave their selected mount. Only regular files and directories are
-	// supported. The host must control the layout, including existing hard links.
+	// not leave their selected mount. Regular files, directories and the host's
+	// null, zero, full, random and urandom character devices are supported;
+	// other special files are refused. The host must control the layout,
+	// including existing hard links.
 	Root string
 	// FS is a trusted host implementation of a read-only source, for example
 	// an embed.FS. It must confine reads to the authorized data and must not

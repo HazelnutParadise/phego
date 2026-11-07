@@ -23,7 +23,12 @@ func (s *reviewNonregularFS) Open(string) (fs.File, error) {
 }
 func (f *reviewNonregularFile) Read(b []byte) (int, error) { f.owner.reads++; return f.File.Read(b) }
 func (f *reviewNonregularFile) Close() error               { f.owner.closes++; return f.File.Close() }
-func TestReviewFixRunFileRejectsNonregularBeforeRead(t *testing.T) {
+
+// php file.php (PHP 8.5.12 CLI) runs whatever the path opens: a FIFO or a
+// device is read as the script, a directory runs as an empty script, and a
+// socket cannot be opened. RunFile matches that for any backend, and closes
+// the file and its admission slot either way.
+func TestReviewFixRunFileReadsNonregularLikePHP(t *testing.T) {
 	for _, mode := range []fs.FileMode{fs.ModeNamedPipe, fs.ModeDevice, fs.ModeSocket, fs.ModeDir} {
 		for _, legacy := range []bool{false, true} {
 			s := &reviewNonregularFS{mode: mode}
@@ -37,10 +42,12 @@ func TestReviewFixRunFileRejectsNonregularBeforeRead(t *testing.T) {
 			}
 			e := newPolicyEngine(t, cfg)
 			_, err := e.RunFile(context.Background(), name)
-			if err == nil {
-				t.Error("nonregular source accepted")
+			var unsupported *UnsupportedError
+			wantReads, compiled := mode != fs.ModeSocket && mode != fs.ModeDir, mode != fs.ModeSocket
+			if compiled != errors.As(err, &unsupported) {
+				t.Errorf("mode=%v legacy=%v: error %v, want compiled=%v", mode, legacy, err, compiled)
 			}
-			if s.reads != 0 || s.closes != 1 {
+			if (s.reads != 0) != wantReads || s.closes != 1 {
 				t.Errorf("mode=%v legacy=%v reads=%d closes=%d error=%v", mode, legacy, s.reads, s.closes, err)
 			}
 			if e.policy.admission.Active() != 0 {

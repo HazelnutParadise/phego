@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"math"
 	"strings"
 	"sync"
 	"testing"
@@ -142,6 +143,11 @@ func TestRunFileUsesGrantedFilesOnly(t *testing.T) {
 	}
 	if _, err := e.RunFile(context.Background(), "missing.php"); err == nil {
 		t.Fatal("missing file accepted")
+	}
+	// The largest MaxSourceBytes still reads the whole source.
+	e, _ = NewEngine(Config{Files: files, MaxSourceBytes: math.MaxInt})
+	if _, err := e.RunFile(context.Background(), "bad.php"); !errors.As(err, &pe) {
+		t.Fatalf("parse error through RunFile with MaxSourceBytes=MaxInt: %v", err)
 	}
 }
 

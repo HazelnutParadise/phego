@@ -34,8 +34,14 @@ type Limits struct {
 	MaxFunctions, MaxInstructions, MaxConstants, MaxRegisters, MaxLocals, MaxStack, MaxHandlers, MaxSources uint32
 }
 
+// DefaultLimits admits, through Build and Load, an image that reaches
+// MaxInstructions with straight-line code over a 64-register frame. Such an
+// image needs about 107 million work units and 145 MiB of accounted memory to
+// load. Wider frames, deep argument stacks and many handlers draw on the
+// same MaxWork and MaxMemory budgets, so images combining several maxima
+// can still return ErrLimit.
 func DefaultLimits() Limits {
-	return Limits{64 << 20, 128 << 20, 32 << 20, 4096, 1 << 20, 1 << 18, 4096, 65536, 4096, 65536, 65536}
+	return Limits{64 << 20, 192 << 20, 128 << 20, 4096, 1 << 20, 1 << 18, 4096, 65536, 4096, 65536, 65536}
 }
 
 type RegisterKind uint8

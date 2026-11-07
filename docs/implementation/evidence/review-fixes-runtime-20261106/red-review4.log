@@ -1,0 +1,76 @@
+# 6e36b2c with the new W-14 solo fixtures, oracle replay and limit test (before the fixes)
+--- FAIL: TestExecutionOracleReplay (0.00s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/solo_end_exit (0.00s)
+            execution_oracle_test.go:606: output="[S]" code=3, oracle="[bodyxS]"/3
+            execution_oracle_test.go:646: handler messages=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_end_exit.php:8} is deprecated"], oracle=[]
+            execution_oracle_test.go:649: events=[flush:exit diagnostic:Deprecated shutdown:solo flush:outer], oracle=[flush:exit shutdown:solo flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/solo_end_lock_echo (0.00s)
+            execution_oracle_test.go:646: handler messages=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_end_lock_echo.php:7} is deprecated" "ob_end_flush(): Cannot use output buffering in output buffering display handlers"], oracle=["ob_end_flush(): Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:lock diagnostic:Deprecated diagnostic:Fatal error shutdown:solo], oracle=[flush:lock diagnostic:Fatal error shutdown:solo]
+        --- FAIL: TestExecutionOracleReplay/64/solo_shutdown_exit (0.00s)
+            execution_oracle_test.go:646: handler messages=["PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_shutdown_exit.php:7} is deprecated"], oracle=[]
+            execution_oracle_test.go:649: events=[flush:exit diagnostic:Deprecated], oracle=[flush:exit]
+        --- FAIL: TestExecutionOracleReplay/64/solo_shutdown_throw (0.00s)
+            execution_oracle_test.go:606: output="bodyx" code=255, oracle=""/255
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/solo_end_exit (0.00s)
+            execution_oracle_test.go:606: output="[S]" code=3, oracle="[bodyxS]"/3
+            execution_oracle_test.go:646: handler messages=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_end_exit.php:8} is deprecated"], oracle=[]
+            execution_oracle_test.go:649: events=[flush:exit diagnostic:Deprecated shutdown:solo flush:outer], oracle=[flush:exit shutdown:solo flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/solo_end_lock_echo (0.00s)
+            execution_oracle_test.go:646: handler messages=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_end_lock_echo.php:7} is deprecated" "ob_end_flush(): Cannot use output buffering in output buffering display handlers"], oracle=["ob_end_flush(): Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:lock diagnostic:Deprecated diagnostic:Fatal error shutdown:solo], oracle=[flush:lock diagnostic:Fatal error shutdown:solo]
+        --- FAIL: TestExecutionOracleReplay/32/solo_shutdown_exit (0.00s)
+            execution_oracle_test.go:646: handler messages=["PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_shutdown_exit.php:7} is deprecated"], oracle=[]
+            execution_oracle_test.go:649: events=[flush:exit diagnostic:Deprecated], oracle=[flush:exit]
+        --- FAIL: TestExecutionOracleReplay/32/solo_shutdown_throw (0.00s)
+            execution_oracle_test.go:606: output="bodyx" code=255, oracle=""/255
+--- FAIL: TestOutputHandlerEchoCountsFilteredBuffer (0.00s)
+    execution_test.go:640: end=PHP execution stopped output="ok", want the output limit with nothing written
+    execution_test.go:644: unexpected deprecation for a handler stopped by the limit: {level:Deprecated message:ob_end_flush(): Producing output from user output handler {closure:/w/t.php:2} is deprecated}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.111s
+FAIL
+
+# 50f1c4a+main with the new RunFile and OpenSource tests (before the fix)
+--- FAIL: TestRunFileRefusesDevices (0.00s)
+    --- FAIL: TestRunFileRefusesDevices/root_link_to_device (0.00s)
+        policy_review_test.go:233: RunFile(/app/null.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/app/null.php", Rule:"not-granted"}; want StatusPolicyDenied not-granted on /devices/null
+    --- FAIL: TestRunFileRefusesDevices/fs_mount_device (0.00s)
+        policy_review_test.go:239: RunFile(/x.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/x.php", Rule:"not-granted"}; want StatusFailed with an fs.ErrInvalid path error
+    --- FAIL: TestRunFileRefusesDevices/standalone_files_device (0.00s)
+        policy_review_test.go:239: RunFile(x.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"x.php", Rule:"not-granted"}; want StatusFailed with an fs.ErrInvalid path error
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.958s
+FAIL
+vet: internal/policy/fifo_review_fixes_test.go:269:13: p.OpenSource undefined (type *Policy has no field or method OpenSource)
+
+# 8ea2b76 with the PHP-aligned RunFile tests (before the change)
+--- FAIL: TestRunFileReadsDevicesLikePHP (0.00s)
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_null (0.00s)
+        policy_review_test.go:242: RunFile(/devices/null) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/devices/null", Rule:"not-granted"}; want compiled
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_link_to_null (0.00s)
+        policy_review_test.go:242: RunFile(/app/null.php) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/devices/null", Rule:"not-granted"}; want compiled
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_directory (0.00s)
+        policy_review_test.go:242: RunFile(/devices) = &{Status:0 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &fs.PathError{Op:"read", Path:"/devices", Err:(*errors.errorString)(0x10139d440)}; want compiled
+    --- FAIL: TestRunFileReadsDevicesLikePHP/root_zero (0.00s)
+        policy_review_test.go:242: RunFile(/devices/zero) = &{Status:4 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &phego.PolicyError{Capability:"file-read", Op:"open", Target:"/devices/zero", Rule:"not-granted"}; want source limit
+    --- FAIL: TestRunFileReadsDevicesLikePHP/fs_mount_device (0.00s)
+        policy_review_test.go:242: RunFile(/x.php) = &{Status:0 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &fs.PathError{Op:"read", Path:"/x.php", Err:(*errors.errorString)(0x10139d440)}; want compiled
+    --- FAIL: TestRunFileReadsDevicesLikePHP/standalone_files_device (0.00s)
+        policy_review_test.go:242: RunFile(x.php) = &{Status:0 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, &fs.PathError{Op:"read", Path:"x.php", Err:(*errors.errorString)(0x10139d440)}; want compiled
+--- FAIL: TestReviewFixRunFileReadsNonregularLikePHP (0.00s)
+    runfile_review_fixes_test.go:47: mode=p--------- legacy=false: error read /app/file: invalid argument, want compiled=true
+    runfile_review_fixes_test.go:50: mode=p--------- legacy=false reads=0 closes=1 error=read /app/file: invalid argument
+    runfile_review_fixes_test.go:47: mode=p--------- legacy=true: error read file: invalid argument, want compiled=true
+    runfile_review_fixes_test.go:50: mode=p--------- legacy=true reads=0 closes=1 error=read file: invalid argument
+    runfile_review_fixes_test.go:47: mode=D--------- legacy=false: error read /app/file: invalid argument, want compiled=true
+    runfile_review_fixes_test.go:50: mode=D--------- legacy=false reads=0 closes=1 error=read /app/file: invalid argument
+    runfile_review_fixes_test.go:47: mode=D--------- legacy=true: error read file: invalid argument, want compiled=true
+    runfile_review_fixes_test.go:50: mode=D--------- legacy=true reads=0 closes=1 error=read file: invalid argument
+    runfile_review_fixes_test.go:47: mode=d--------- legacy=false: error read /app/file: invalid argument, want compiled=true
+    runfile_review_fixes_test.go:47: mode=d--------- legacy=true: error read file: invalid argument, want compiled=true
+FAIL
+FAIL	github.com/HazelnutParadise/phego	1.145s
+FAIL

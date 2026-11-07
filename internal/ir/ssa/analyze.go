@@ -36,11 +36,10 @@ func (b *builder) analyze(d *definition, extra ir.Effect) {
 	a, c := b.operand(d, 0), b.operand(d, 1)
 	switch n.Op {
 	case ir.OpLiteral:
-		if n.Value != nil && literalType(n.Value.Kind) != Unknown {
+		// An int the profile cannot represent is neither typed nor folded.
+		if n.Value != nil && literalType(n.Value.Kind) != Unknown && (n.Value.Kind != ir.LitInt || b.inRange(n.Value.Int)) {
 			v.Type = literalType(n.Value.Kind)
-			if n.Value.Kind != ir.LitInt || b.inRange(n.Value.Int) {
-				v.Constant, v.IsConstant = *n.Value, n.Flags == 0 && kids == 0 && args == 0 && v.Effects.PHP == 0
-			}
+			v.Constant, v.IsConstant = *n.Value, n.Flags == 0 && kids == 0 && args == 0 && v.Effects.PHP == 0
 		}
 	case ir.OpIsset, ir.OpEmpty, ir.OpLogical, ir.OpInstanceof:
 		v.Type = Bool

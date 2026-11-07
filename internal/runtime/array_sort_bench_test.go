@@ -28,7 +28,7 @@ func BenchmarkW12Sorting(b *testing.B) {
 				if e := h.assign(&a, source); e != nil {
 					b.Fatal(e)
 				}
-				if e := h.sortArray(&a, false, func(x, y value) (int, error) { calls++; return h.compare(x, y) }); e != nil {
+				if e := h.sortArray(&a, "usort", false, func(x, y value) (int, error) { calls++; return h.compare(x, y) }); e != nil {
 					b.Fatal(e)
 				}
 				if e := h.unset(&a); e != nil {

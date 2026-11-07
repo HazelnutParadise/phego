@@ -15412,6 +15412,58 @@
       "result": false,
       "diagnostics": []
     },
+    "r14-free-declared": {
+      "result": [
+        "declared1",
+        "declared2"
+      ],
+      "diagnostics": []
+    },
+    "r14-free-dynamic": {
+      "result": [
+        "dynamic1",
+        "dynamic2",
+        "declared1",
+        "declared2"
+      ],
+      "diagnostics": []
+    },
+    "r14-free-subclass": {
+      "result": [
+        "dynamic1",
+        "dynamic2",
+        "declared1",
+        "declared2",
+        "declared3"
+      ],
+      "diagnostics": []
+    },
+    "r14-free-materialized": {
+      "result": [
+        [
+          "declared1",
+          "declared2",
+          "dynamic1",
+          "dynamic2"
+        ],
+        [
+          "dynamic1",
+          "dynamic2",
+          "declared1",
+          "declared2"
+        ]
+      ],
+      "diagnostics": []
+    },
+    "r14-free-unset-redeclare": {
+      "result": [
+        "declared1",
+        "dynamic1",
+        "dynamic2",
+        "declared1b"
+      ],
+      "diagnostics": []
+    },
     "r11-trait-private-int-normal": {
       "result": [
         [

@@ -1,0 +1,7 @@
+<?php
+function named($s) { echo 'x'; return $s; }
+foreach (['ob_end_flush', 'ob_get_flush', 'ob_end_clean', 'ob_get_clean'] as $f) {
+  ob_start('named'); echo "body"; $f();
+}
+ob_start(function ($s) { echo 'y'; return $s; });
+echo "end";

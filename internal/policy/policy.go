@@ -184,6 +184,10 @@ func New(spec Spec) (*Policy, error) {
 			return nil, &SpecError{Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}
 		}
 		if a, err := netip.ParseAddr(g.Host); err == nil {
+			// netip accepts any zone text; an interface name is visible ASCII.
+			if !visibleASCII(a.Zone()) {
+				return nil, &SpecError{Field: field, Reason: fmt.Sprintf("host %q has an IPv6 zone that is not visible ASCII", g.Host)}
+			}
 			g.Host = a.String()
 		} else {
 			// Only DNS names have a trailing root dot. IP zone names are opaque.
@@ -313,4 +317,13 @@ func validDNSHost(host string) bool {
 		}
 	}
 	return nonNumeric
+}
+
+func visibleASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] < '!' || s[i] > '~' {
+			return false
+		}
+	}
+	return true
 }

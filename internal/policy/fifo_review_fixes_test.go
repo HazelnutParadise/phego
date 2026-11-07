@@ -4,6 +4,8 @@ package policy
 
 import (
 	"errors"
+	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -49,13 +51,78 @@ func TestReviewFixFIFOOpenDoesNotBlock(t *testing.T) {
 	}
 }
 
-func TestReviewFixRootRejectsDeviceFiles(t *testing.T) {
-	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev"}}})
+// PHP reads and writes character devices such as /dev/null and /dev/urandom.
+// They open without waiting, so a granted device behaves like PHP's.
+func TestRootAllowsCharacterDevices(t *testing.T) {
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev", Write: true}}})
 	f, err := p.OpenFile("/devices/null", os.O_RDONLY, 0)
-	if f != nil {
-		f.Close()
+	if err != nil {
+		t.Fatal(err)
 	}
-	wantPolicyError(t, err, "not-granted")
+	if n, err := f.Read(make([]byte, 8)); n != 0 || err != io.EOF {
+		t.Fatalf("read /dev/null: %d, %v", n, err)
+	}
+	f.Close()
+	f, err = p.OpenFile("/devices/urandom", os.O_RDONLY, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n, err := io.ReadFull(f, make([]byte, 16)); n != 16 || err != nil {
+		t.Fatalf("read /dev/urandom: %d, %v", n, err)
+	}
+	f.Close()
+	// fopen('/dev/null', 'w') opens with O_CREAT|O_TRUNC; devices ignore O_TRUNC.
+	f, err = p.OpenFile("/devices/null", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, ok := f.(io.Writer)
+	if !ok {
+		t.Fatalf("%T is not writable", f)
+	}
+	if n, err := w.Write([]byte("discarded")); n != 9 || err != nil {
+		t.Fatalf("write /dev/null: %d, %v", n, err)
+	}
+	f.Close()
+}
+
+func TestRootRejectsSocketsAndBlockDevices(t *testing.T) {
+	// Unix socket paths are short on Darwin; t.TempDir may exceed the limit.
+	dir, err := os.MkdirTemp("/tmp", "phego-sock")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	l, err := net.Listen("unix", filepath.Join(dir, "s"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: dir, Write: true}}})
+	for _, flag := range []int{os.O_RDONLY, os.O_WRONLY} {
+		f, err := p.OpenFile("/app/s", flag, 0)
+		if f != nil {
+			f.Close()
+		}
+		wantPolicyError(t, err, "not-granted")
+	}
+	entries, err := os.ReadDir("/dev")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range entries {
+		if e.Type()&os.ModeDevice == 0 || e.Type()&os.ModeCharDevice != 0 {
+			continue
+		}
+		p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev"}}})
+		f, err := p.OpenFile("/devices/"+e.Name(), os.O_RDONLY, 0)
+		if f != nil {
+			f.Close()
+		}
+		wantPolicyError(t, err, "not-granted")
+		return
+	}
+	t.Log("no block device in /dev; socket rejection checked")
 }
 
 // Keep permanent links to both inodes so a timed-out old implementation can
@@ -152,5 +219,39 @@ func TestReviewFixFIFOSwapDoesNotBlock(t *testing.T) {
 	case err := <-swapError:
 		t.Fatal(err)
 	default:
+	}
+}
+
+// Character devices are opened only when they are, by device number, the
+// host's null, zero, full, random or urandom. A terminal or pseudo-terminal
+// master blocks a read even with O_NONBLOCK under Go's poller, and other
+// devices may have side effects when opened (for example a watchdog).
+func TestRootOpensOnlyListedCharacterDevices(t *testing.T) {
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev", Write: true}}})
+	for _, name := range []string{"zero", "random", "full"} {
+		if _, err := os.Stat("/dev/" + name); err != nil {
+			continue // /dev/full is Linux only
+		}
+		f, err := p.OpenFile("/devices/"+name, os.O_RDONLY, 0)
+		if err != nil {
+			t.Errorf("%s: %v", name, err)
+			continue
+		}
+		f.Close()
+	}
+	for _, name := range []string{"tty", "ptmx"} {
+		if _, err := os.Stat("/dev/" + name); err != nil {
+			continue
+		}
+		for _, flag := range []int{os.O_RDONLY, os.O_RDWR} {
+			f, err := p.OpenFile("/devices/"+name, flag, 0)
+			var pe *PolicyError
+			if !errors.As(err, &pe) || pe.Rule != "not-granted" {
+				if f != nil {
+					f.Close()
+				}
+				t.Errorf("%s flag %d: %v, want not-granted", name, flag, err)
+			}
+		}
 	}
 }

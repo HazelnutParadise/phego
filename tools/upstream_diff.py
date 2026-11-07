@@ -52,6 +52,13 @@ PATH_IMPACT = {
     "ext/mysqli/": ["W-31"],
     "ext/mysqlnd/": ["W-31"],
     "ext/opcache/": ["W-15"],
+    # The file cache persists compiled scripts (W-23); JIT is W-47.
+    "ext/opcache/zend_file_cache.": ["W-23"],
+    "ext/opcache/tests/file_cache_": ["W-23"],
+    "ext/opcache/tests/gh16979_check_file_cache_function": ["W-23"],
+    "ext/opcache/jit/": ["W-47"],
+    "ext/opcache/tests/jit/": ["W-47"],
+    "Zend/Optimizer/": ["W-15"],
     "ext/openssl/": ["W-32"],
     "ext/curl/": ["W-32"],
     "ext/dom/": ["W-33"],
@@ -74,9 +81,14 @@ NEWS_IMPACT = {
 _STUB_MODIFIERS = frozenset({
     "public", "protected", "private", "static", "final", "abstract", "readonly", "var",
 })
+# build/gen_stub.php tags that change generated arginfo, flags or constant
+# registration. Documentation-only tags (@param, @return, @link,
+# @undocumentable) and optimizer-only tags (@refcount, @compile-time-eval,
+# @frameless-function) are not PHP-visible; see docs/implementation/W-45.md.
 _STUB_DOC_TAGS = frozenset({
     "tentative-return-type", "readonly", "virtual", "strict-properties",
-    "not-serializable", "prefer-ref",
+    "not-serializable", "prefer-ref", "deprecated", "alias",
+    "implementation-alias", "cvalue", "var", "no-file-cache",
 })
 _CLASS_KEYWORDS = frozenset({"class", "interface", "trait", "enum"})
 _HEREDOC = re.compile(r"<<<[ \t]*([\"']?)([A-Za-z_\x80-\uffff][A-Za-z0-9_\x80-\uffff]*)\1\r?\n")
@@ -319,6 +331,39 @@ def _collapse(text):
     return out.getvalue().strip()
 
 
+# Stubs write none of these spaces: inside brackets, before a comma, colon or
+# union bar, and after a nullable mark, union bar, by-reference mark or
+# variadic mark.
+_BRACKET_SPACE = re.compile(r"(?<=[(\[?|&]) |(?<=\.\.\.) | (?=[)\],:|])")
+
+
+def _signature_text(text):
+    """Collapse a stub signature and, outside literals and attribute comments,
+    drop the spaces stubs never write (see _BRACKET_SPACE). A removed comment
+    or a line break then leaves the same text as its absence."""
+    out = io.StringIO()
+    plain = 0
+    index = 0
+    text = _collapse(text)
+    while index < len(text):
+        end = None
+        if text[index] in "'\"":
+            end = _skip_quoted(text, index)
+        elif text.startswith("<<<", index):
+            end = _skip_heredoc(text, index)
+        elif text.startswith("/*", index):
+            # Comments survive only inside attribute source; keep them verbatim.
+            end = _skip_block_comment(text, index)
+        if end is None:
+            index += 1
+            continue
+        out.write(_BRACKET_SPACE.sub("", text[plain:index]))
+        out.write(text[index:end])
+        plain = index = end
+    out.write(_BRACKET_SPACE.sub("", text[plain:]))
+    return out.getvalue()
+
+
 def _qualify(namespace, name):
     if name.startswith("\\"):
         return name[1:]
@@ -369,7 +414,7 @@ def _prefix_before(tokens, cleaned, start, end):
         parts.append(_source_without_docs(
             tokens, cleaned, core_start, end, tokens[core_start][2], tokens[end][2]
         ))
-    return _collapse(" ".join(parts))
+    return _signature_text(" ".join(parts))
 
 
 def _source_without_docs(tokens, cleaned, start, end, start_pos, end_pos):
@@ -390,7 +435,7 @@ def _signature(tokens, cleaned, declaration, keyword, terminator):
     body = _source_without_docs(
         tokens, cleaned, keyword, terminator, tokens[keyword][2], tokens[terminator][2]
     )
-    return _collapse(prefix + " " + body)
+    return _signature_text(prefix + " " + body)
 
 
 def _statement_start(tokens, index):
@@ -572,7 +617,7 @@ def parse_stubs(text):
                         tokens, cleaned, item[0], item[-1] + 1,
                         tokens[item[0]][2], tokens[item[-1]][3]
                     )
-                    signature = _collapse(
+                    signature = _signature_text(
                         header + " " + body
                     )
                     record(f"property {class_now()}::${tokens[name_at + 1][1]}", signature)
@@ -738,7 +783,7 @@ def parse_stubs(text):
                     tokens, cleaned, name_at, item[-1] + 1,
                     tokens[name_at][2], tokens[item[-1]][3]
                 )
-                signature = _collapse(header + " " + body)
+                signature = _signature_text(header + " " + body)
                 current_class = class_now()
                 if current_class is not None:
                     record(f"const {current_class}::{tokens[name_at][1]}", signature)
