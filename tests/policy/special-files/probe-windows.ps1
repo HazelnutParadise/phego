@@ -47,14 +47,23 @@ Run 'fopen NUL w' @($Probe, 'w', 'NUL', 'write')
 Run 'file_get_contents NUL' @($Probe, 'fgc', 'NUL')
 Run 'include NUL' @($Probe, 'include', 'NUL')
 Run 'php NUL' @('NUL')
-foreach ($name in 'NUL', 'nul', 'NUL.txt', 'sub\NUL', 'CON', 'COM1', 'CONIN$') {
+foreach ($name in 'NUL', 'nul', 'NUL.txt', 'sub\NUL', 'CON', 'COM1', 'CONIN$', 'CONOUT$', 'LPT1', 'NUL\x') {
     Run "fopen <work>\$name r" @($Probe, 'r', (Join-Path $Work $name), 'read')
 }
-Run 'fopen <work>\NUL w' @($Probe, 'w', (Join-Path $Work 'NUL'), 'write')
+foreach ($mode in 'w', 'r+', 'a', 'x') {
+    Run "fopen <work>\NUL $mode" @($Probe, $mode, (Join-Path $Work 'NUL'), 'write')
+}
+Run 'fopen <work>\sub\CON w' @($Probe, 'w', (Join-Path $Work 'sub\CON'), 'write')
 Run 'include <work>\NUL' @($Probe, 'include', (Join-Path $Work 'NUL'))
 Run 'php <work>\NUL' @((Join-Path $Work 'NUL'))
 foreach ($mode in 'r', 'w', 'r+', 'a') {
     Run "fopen dir $mode" @($Probe, $mode, (Join-Path $Work 'd'))
 }
 Run 'php dir' @((Join-Path $Work 'd'))
+foreach ($mode in 'r', 'w') {
+    Run "fopen <work> $mode" @($Probe, $mode, $Work)
+}
+# Alternate data streams: Root mounts refuse any name with a colon.
+Run 'fopen <work>\ads:s r' @($Probe, 'r', (Join-Path $Work 'ads:s'), 'read')
+Run 'fopen <work>\ads:s w' @($Probe, 'w', (Join-Path $Work 'ads:s'), 'write')
 Run 'fopen missing named pipe r' @($Probe, 'r', '\\.\pipe\phego-missing')

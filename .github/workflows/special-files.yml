@@ -132,6 +132,12 @@ jobs:
           $env:PHEGO_SPECIAL_FILE_REPORT = Join-Path $env:RUNNER_TEMP 'evidence\phego-report.log'
           go test -count=1 -v -run TestWindowsSpecialFileReport ./internal/policy
           if ($LASTEXITCODE -ne 0) { throw 'Phego report failed' }
+      - name: Run Phego's Windows special-file tests
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:CGO_ENABLED = '0'
+          go test -count=1 -v -run 'TestRootWindows' ./internal/policy 2>&1 | Tee-Object (Join-Path $env:RUNNER_TEMP 'evidence\phego-tests.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Phego Windows tests failed' }
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
