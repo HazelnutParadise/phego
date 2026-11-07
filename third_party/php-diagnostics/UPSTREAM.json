@@ -1,0 +1,53 @@
+{
+  "version": "PHP 8.5.12",
+  "commit": "136e049ac10b032c83018e65b63b6df858943750",
+  "files": {
+    "Zend/zend_language_parser.y": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_language_parser.y",
+      "sha256": "f108f2c2ff4c98c68b6478e7fbdebc16d8afb8bbbc3ae6079e5b285b448dac0c"
+    },
+    "Zend/zend_language_scanner.l": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/zend_language_scanner.l",
+      "sha256": "8dfed84b0f6cabe73f004ea00c69614ea84542130a9b97e7699f801ef7ce7403"
+    },
+    "Zend/LICENSE": {
+      "url": "https://github.com/php/php-src/blob/136e049ac10b032c83018e65b63b6df858943750/Zend/LICENSE",
+      "sha256": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b"
+    },
+    "Zend/zend_language_parser.c": {
+      "archive_url": "https://www.php.net/distributions/php-8.5.12.tar.xz",
+      "archive_sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+      "sha256": "502e67f51b0e51828ead82fe228ee5d550d5d3e7e05cc11119df40df1a7ceda3",
+      "generator": "GNU Bison 3.8.2"
+    }
+  },
+  "requirements": [
+    "REQ-010",
+    "REQ-011",
+    "REQ-012"
+  ],
+  "tests": [
+    "T-019",
+    "T-020",
+    "T-021",
+    "T-022",
+    "T-023",
+    "T-024"
+  ],
+  "scope": {
+    "internal/frontend/php8512_diagnostics.bin": "Grammar-derived action, reduction, transition, token-name and diagnostic-action metadata for error reporting and bounded grammar-depth checks.",
+    "internal/frontend/diagnostics_generated.go": "Offsets and dimensions of the immutable grammar data.",
+    "internal/frontend/diagnostics.go": "Independent bounded Go diagnostic recognizer with PHP token display and bracket rules."
+  },
+  "licenses": [
+    "Zend Engine License 2.00"
+  ],
+  "modifications": [
+    "Convert Bison displacement tables to sorted sparse rows; no C parser skeleton, AST builder, Zend allocator or execution engine is included.",
+    "Retain the designated operands for identifier and modifier diagnostics, halt behavior, and encoding-action markers.",
+    "The Go parser retains its own AST construction; larger inputs first replay the grammar to preserve PHP stack exhaustion and error order. The runtime does not use these tables."
+  ],
+  "distribution_notices": {
+    "../php-sort/Zend-LICENSE": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b"
+  }
+}

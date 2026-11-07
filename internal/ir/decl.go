@@ -307,10 +307,13 @@ func (l *lowerer) typeClass(t *frontend.Node) *Name {
 
 var classKinds = map[string]ClassKind{"class": KindClass, "interface": KindInterface, "trait": KindTrait, "enum": KindEnum}
 
-// classDecl lowers a class-like declaration. Member and inheritance rules
-// are the object model's; HIR keeps names, members and their code.
+// classDecl lowers a class-like declaration and checks its own members.
+// bindClass checks inheritance when the dependencies are available.
 func (l *lowerer) classDecl(s *frontend.Node, anonymous bool) *Class {
 	c := s.Children
+	if l.class != nil && !anonymous {
+		l.fail(s.Line, "Class declarations may not be nested")
+	}
 	cl := &Class{Line: s.Line, Anonymous: anonymous}
 	var extends, implements, members, mods *frontend.Node
 	if anonymous {
@@ -359,17 +362,30 @@ func (l *lowerer) classDecl(s *frontend.Node, anonymous bool) *Class {
 		}
 	}
 	l.class = cl
+	cl.Attributes = l.checkAttributes(c[0], "class", s.Line)
 	if !anonymous {
 		l.unit.Classes = append(l.unit.Classes, cl)
 	}
 	for _, m := range members.Children {
 		l.member(cl, m)
 	}
+	l.checkClass(cl, s)
+	if hasClassMarker(cl.Attributes, "Attribute") {
+		cl.IsAttribute = true
+		cl.AttributeTargets = attributeClassTargets(c[0])
+	}
 	return cl
 }
 
-// declName resolves a parent or interface name, which may not be self,
-// parent or static.
+func hasClassMarker(attrs []Attribute, want string) bool {
+	for _, a := range attrs {
+		if a.Name != nil && globalAttributeName(a.Name.Resolved) == strings.ToLower(want) {
+			return true
+		}
+	}
+	return false
+}
+
 func (l *lowerer) declName(n *frontend.Node, kind string) *Name {
 	name := l.ns.resolveClass(n.Text)
 	if name.Special != "" {
@@ -399,22 +415,31 @@ func hasModifier(mods []string, want string) bool {
 }
 
 func (l *lowerer) member(cl *Class, m *frontend.Node) {
+	l.cur = m.Line
 	c := m.Children
 	switch m.Kind {
 	case "trait_use":
+		if cl.Kind == KindInterface {
+			trait := c[0].Children[0].Text
+			l.fail(m.Line, "Cannot use traits inside of interfaces. %s is used in %s", trait, cl.Name)
+		}
 		for _, n := range c[0].Children {
-			cl.Traits = append(cl.Traits, l.ns.resolveClass(n.Text))
+			cl.Traits = append(cl.Traits, l.declName(n, "trait"))
 		}
 		if len(c) > 1 && c[1] != nil {
 			for _, a := range c[1].Children {
 				ref := a.Children[0]
-				rule := &TraitRule{Line: a.Line, Method: ref.Children[1].Text}
+				rule := &TraitRule{Line: m.Line, Method: ref.Children[1].Text}
 				if ref.Children[0] != nil {
-					rule.Trait = l.ns.resolveClass(ref.Children[0].Text)
+					name := *ref.Children[0]
+					name.Line = m.Line
+					rule.Trait = l.declName(&name, "trait")
 				}
 				if a.Kind == "insteadof" {
 					for _, n := range a.Children[1].Children {
-						rule.Insteadof = append(rule.Insteadof, l.ns.resolveClass(n.Text))
+						name := *n
+						name.Line = m.Line
+						rule.Insteadof = append(rule.Insteadof, l.declName(&name, "trait"))
 					}
 				} else {
 					if a.Children[1] != nil {
@@ -428,22 +453,33 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 			}
 		}
 	case "class_const":
+		l.cur = c[3].Children[0].Line
 		mods := modifierList(c[1])
+		attrs := l.checkAttributes(c[0], "class constant", m.Line)
 		var typ *Type
 		if c[2] != nil {
 			typ = l.typeOf(c[2], false)
 		}
 		for _, item := range c[3:] {
-			cl.Consts = append(cl.Consts, &ClassConst{Name: item.Children[0].Text, Line: item.Line, Modifiers: mods, Type: typ, Value: l.constExpr(item.Children[1], false)})
+			cl.Consts = append(cl.Consts, &ClassConst{Name: item.Children[0].Text, Line: item.Line, Modifiers: mods, Type: typ, Value: l.constExpr(item.Children[1], false), Attributes: attrs, Class: cl})
 		}
 	case "enum_case":
-		cc := &ClassConst{Name: c[1].Text, Line: m.Line}
+		if cl.Kind != KindEnum {
+			l.fail(m.Line, "Case can only be used in enums")
+		}
+		cc := &ClassConst{Name: c[1].Text, Line: m.Line, Attributes: l.checkAttributes(c[0], "class constant", m.Line), Class: cl}
 		if c[2] != nil {
 			cc.Value = l.constExpr(c[2], false)
 		}
 		cl.Cases = append(cl.Cases, cc)
 	case "method":
-		f := l.newFunc(FuncMethod, c[2].Text, m.Line)
+		line := m.FunctionLine
+		if line == 0 {
+			line = m.Line
+		}
+		l.cur = line
+		f := l.newFunc(FuncMethod, c[2].Text, line)
+		f.Attributes = l.checkAttributes(c[0], "method", line)
 		f.Modifiers = modifierList(c[1])
 		f.Static = hasModifier(f.Modifiers, "static")
 		f.ByRef = m.Text == "&"
@@ -457,7 +493,12 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 		}
 		l.promotedHooks(cl, c[3])
 	case "property":
+		l.cur = c[3].Children[0].Line
+		if c[2] != nil {
+			l.cur = l.zline(c[2])
+		}
 		mods := modifierList(c[1])
+		attrs := l.checkAttributes(c[0], "property", c[3].Children[0].Line)
 		var typ *Type
 		if c[2] != nil {
 			typ = l.typeOf(c[2], false)
@@ -468,7 +509,7 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 			hooks, items = last, items[:len(items)-1]
 		}
 		for _, item := range items {
-			p := &Prop{Name: item.Children[0].Text[1:], Line: item.Line, Modifiers: mods, Type: typ}
+			p := &Prop{Name: item.Children[0].Text[1:], Line: m.Line, Modifiers: mods, Type: typ, HasHooks: hooks != nil, Backed: hooksBackProperty(hooks, item.Children[0].Text[1:]), Attributes: attrs, Class: cl}
 			if d := item.Children[1]; d != nil {
 				p.Default = l.constExpr(d, false)
 			}
@@ -480,14 +521,75 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 	}
 }
 
+func hooksBackProperty(hooks *frontend.Node, name string) bool {
+	if hooks == nil {
+		return false
+	}
+	var visit func(*frontend.Node) bool
+	visit = func(n *frontend.Node) bool {
+		if n == nil {
+			return false
+		}
+		// A method call stores its member as a property node; calling
+		// $this->x() does not fetch the property. Its object, name
+		// expression and arguments are still searched.
+		if n.Kind == "method_call" && len(n.Children) > 0 && n.Children[0] != nil &&
+			(n.Children[0].Kind == "prop" || n.Children[0].Kind == "nullsafe_prop") {
+			for _, child := range append(append([]*frontend.Node(nil), n.Children[0].Children...), n.Children[1:]...) {
+				if child != nil && child.Kind != "identifier" && visit(child) {
+					return true
+				}
+			}
+			return false
+		}
+		if n.Kind == "prop" || n.Kind == "nullsafe_prop" {
+			if len(n.Children) > 1 && hookUsesProperty(n.Children[0], n.Children[1], name) {
+				return true
+			}
+		}
+		switch n.Kind {
+		case "closure", "arrow_function", "function", "class", "interface", "trait", "enum":
+			return false
+		case "new_class":
+			if len(n.Children) > 2 {
+				return visit(n.Children[2])
+			}
+			return false
+		}
+		for _, child := range n.Children {
+			if visit(child) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, h := range hooks.Children {
+		// A short setter writes its expression into the property's storage.
+		if strings.EqualFold(h.Children[2].Text, "set") && h.Children[4] != nil && h.Children[4].Kind != "block" {
+			return true
+		}
+		if len(h.Children) > 4 && visit(h.Children[4]) {
+			return true
+		}
+	}
+	return false
+}
+
 // promotedHooks compiles the hooks of promoted constructor properties.
 func (l *lowerer) promotedHooks(cl *Class, params *frontend.Node) {
-	for _, p := range params.Children {
-		if hooks := p.Children[5]; hooks != nil {
-			prop := &Prop{Name: p.Children[3].Text[1:], Line: p.Line, Modifiers: modifierList(p.Children[1])}
-			prop.Hooks = l.hooks(prop.Name, hooks)
-			cl.Props = append(cl.Props, prop)
+	method := cl.Methods[len(cl.Methods)-1]
+	for i, p := range params.Children {
+		mods, hooks := p.Children[1], p.Children[5]
+		if (mods == nil || len(mods.Children) == 0) && hooks == nil {
+			continue
 		}
+		name := p.Children[3].Text[1:]
+		param := method.Params[i]
+		prop := &Prop{Name: name, Line: p.Line, Modifiers: param.Promoted, Type: param.Type, Default: param.Default, HasHooks: hooks != nil, Backed: hooksBackProperty(hooks, name), Promoted: true, Attributes: param.Attributes, Class: cl}
+		if hooks != nil {
+			prop.Hooks = l.hooks(prop.Name, hooks)
+		}
+		cl.Props = append(cl.Props, prop)
 	}
 }
 
@@ -496,12 +598,19 @@ func (l *lowerer) hooks(prop string, list *frontend.Node) []*Func {
 	for _, h := range list.Children {
 		hc := h.Children
 		name := strings.ToLower(hc[2].Text)
-		f := l.newFunc(FuncHook, "$"+prop+"::"+name, h.Line)
+		f := l.newFunc(FuncHook, "$"+prop+"::"+name, hc[2].Line)
+		f.Attributes = l.checkAttributes(hc[0], "property hook", hc[2].Line)
 		f.property = prop
 		f.ByRef = h.Text == "&"
 		f.Modifiers = modifierList(hc[1])
 		f.Class = l.class
 		params := hc[3]
+		if name == "get" && params != nil {
+			l.fail(hc[2].Line, "get hook of property %s::$%s must not have a parameter list", l.class.Name, prop)
+		}
+		if name == "set" && params != nil && len(params.Children) != 1 {
+			l.fail(hc[2].Line, "set hook of property %s::$%s must accept exactly one parameters", l.class.Name, prop)
+		}
 		if params == nil {
 			params = &frontend.Node{Kind: "params", Line: h.Line}
 		}

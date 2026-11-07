@@ -1,0 +1,23 @@
+--- FAIL: TestPHP8512NestingBoundaries (0.08s)
+    --- FAIL: TestPHP8512NestingBoundaries/parentheses/9994 (0.01s)
+        nesting_test.go:31: int32: accepted source did not produce a tree: memory exhausted
+    --- FAIL: TestPHP8512NestingBoundaries/parentheses/9995 (0.01s)
+        nesting_test.go:31: int32: accepted source did not produce a tree: memory exhausted
+    --- FAIL: TestPHP8512NestingBoundaries/unary/9997 (0.00s)
+        nesting_test.go:37: int32: expected PHP parser exhaustion on line 2: <nil>
+    --- FAIL: TestPHP8512NestingBoundaries/if/2500 (0.00s)
+        nesting_test.go:37: int32: expected PHP parser exhaustion on line 2: <nil>
+    --- FAIL: TestPHP8512NestingBoundaries/closures/769 (0.00s)
+        nesting_test.go:37: int32: expected PHP parser exhaustion on line 2: <nil>
+    --- FAIL: TestPHP8512NestingBoundaries/mixed/834 (0.00s)
+        nesting_test.go:37: int32: expected PHP parser exhaustion on line 2: <nil>
+--- FAIL: TestPHP8512NestingErrorPriority (0.01s)
+    --- FAIL: TestPHP8512NestingErrorPriority/valid-encoding (0.00s)
+        nesting_test.go:63: int32: got <nil>, want line 3 compile=false: memory exhausted
+    --- FAIL: TestPHP8512NestingErrorPriority/encoding-after (0.00s)
+        nesting_test.go:63: int32: got &frontend.SyntaxError{Line:3, Message:"Encoding must be a literal", Compile:true, CallerLocation:false}, want line 2 compile=false: memory exhausted
+    --- FAIL: TestPHP8512NestingErrorPriority/modifier-after (0.00s)
+        nesting_test.go:63: int32: got &frontend.SyntaxError{Line:3, Message:"Multiple access type modifiers are not allowed", Compile:true, CallerLocation:false}, want line 2 compile=false: memory exhausted
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/frontend	1.025s
+FAIL

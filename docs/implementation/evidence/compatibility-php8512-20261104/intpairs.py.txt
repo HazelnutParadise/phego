@@ -1,0 +1,6 @@
+import random
+from pathlib import Path
+s=Path('/tmp/phego-compat-pow-research');r=random.Random(11042026);out=[]
+for j in range(20000):
+ b=r.randint(-128,128) if j%2 else r.randint(-2147483648,2147483647);e=r.randint(-128,128) if j%2 else r.randint(2,12);out.append(f'{b} {e}')
+(s/'intpairs.txt').write_text('\n'.join(out)+'\n')

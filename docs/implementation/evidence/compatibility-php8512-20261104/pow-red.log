@@ -1,0 +1,143 @@
+--- FAIL: TestPHP8512OperatorsMatchReference (0.07s)
+    --- FAIL: TestPHP8512OperatorsMatchReference/int32 (0.04s)
+        ops_php8512_test.go:269: i:7 ** i:-7
+              php:   result="d:3eb45f3b3bb08298" throw=[] diagnostics=[]
+              phego: result="d:3eb45f3b3bb0829a" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:7 ** d:3ff8000000000000
+              php:   result="d:4032852fb49899ce" throw=[] diagnostics=[]
+              phego: result="d:4032852fb49899cd" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:7 ** d:bff8000000000000
+              php:   result="d:3faba539079b6473" throw=[] diagnostics=[]
+              phego: result="d:3faba539079b6475" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:7 ** s:312e35
+              php:   result="d:4032852fb49899ce" throw=[] diagnostics=[]
+              phego: result="d:4032852fb49899cd" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:-7 ** i:-7
+              php:   result="d:beb45f3b3bb08298" throw=[] diagnostics=[]
+              phego: result="d:beb45f3b3bb0829a" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:63 ** i:-7
+              php:   result="d:3d51dd5d973790b1" throw=[] diagnostics=[]
+              phego: result="d:3d51dd5d973790b3" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:63 ** i:64
+              php:   result="d:57d75bf07046ee47" throw=[] diagnostics=[]
+              phego: result="d:57d75bf07046ee48" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:63 ** d:3fe0000000000000
+              php:   result="d:401fbfbf7ebc7560" throw=[] diagnostics=[]
+              phego: result="d:401fbfbf7ebc755f" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:63 ** s:2e35
+              php:   result="d:401fbfbf7ebc7560" throw=[] diagnostics=[]
+              phego: result="d:401fbfbf7ebc755f" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:2147483647 ** d:3ff8000000000000
+              php:   result="d:42d6a09e663b59e8" throw=[] diagnostics=[]
+              phego: result="d:42d6a09e663b59f1" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:2147483647 ** d:bff8000000000000
+              php:   result="d:3d06a09e66c31db1" throw=[] diagnostics=[]
+              phego: result="d:3d06a09e66c31da8" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: i:2147483647 ** s:312e35
+              php:   result="d:42d6a09e663b59e8" throw=[] diagnostics=[]
+              phego: result="d:42d6a09e663b59f1" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** i:7
+              php:   result="d:3e7ad7f29abcaf4e" throw=[] diagnostics=[]
+              phego: result="d:3e7ad7f29abcaf4b" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** i:-7
+              php:   result="d:416312d000000000" throw=[] diagnostics=[]
+              phego: result="d:416312cffffffffe" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** i:63
+              php:   result="d:32da53fc9631d13f" throw=[] diagnostics=[]
+              phego: result="d:32da53fc9631d126" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** i:64
+              php:   result="d:32a50ffd44f4a766" throw=[] diagnostics=[]
+              phego: result="d:32a50ffd44f4a752" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** d:3ff8000000000000
+              php:   result="d:3fa030dc4ea03a72" throw=[] diagnostics=[]
+              phego: result="d:3fa030dc4ea03a73" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** d:bff8000000000000
+              php:   result="d:403f9f6e4990f227" throw=[] diagnostics=[]
+              phego: result="d:403f9f6e4990f226" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3fb999999999999a ** s:312e35
+              php:   result="d:3fa030dc4ea03a72" throw=[] diagnostics=[]
+              phego: result="d:3fa030dc4ea03a73" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3ff8000000000000 ** i:-7
+              php:   result="d:3fadf75680feb65e" throw=[] diagnostics=[]
+              phego: result="d:3fadf75680feb65f" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3ff8000000000000 ** d:3ff8000000000000
+              php:   result="d:3ffd64d51e0db1c5" throw=[] diagnostics=[]
+              phego: result="d:3ffd64d51e0db1c6" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3ff8000000000000 ** s:312e35
+              php:   result="d:3ffd64d51e0db1c5" throw=[] diagnostics=[]
+              phego: result="d:3ffd64d51e0db1c6" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:3ff8000000000000 ** s:316533
+              php:   result="d:647f2dd011353698" throw=[] diagnostics=[]
+              phego: result="d:647f2dd011353699" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:bff8000000000000 ** i:-7
+              php:   result="d:bfadf75680feb65e" throw=[] diagnostics=[]
+              phego: result="d:bfadf75680feb65f" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:bff8000000000000 ** s:316533
+              php:   result="d:647f2dd011353698" throw=[] diagnostics=[]
+              phego: result="d:647f2dd011353699" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4008000000000000 ** i:-7
+              php:   result="d:3f3df75680feb65e" throw=[] diagnostics=[]
+              phego: result="d:3f3df75680feb65f" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4008000000000000 ** d:3ff8000000000000
+              php:   result="d:4014c8dc2e42397f" throw=[] diagnostics=[]
+              phego: result="d:4014c8dc2e423980" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4008000000000000 ** s:312e35
+              php:   result="d:4014c8dc2e42397f" throw=[] diagnostics=[]
+              phego: result="d:4014c8dc2e423980" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** i:7
+              php:   result="d:5d00cb70d24b7378" throw=[] diagnostics=[]
+              phego: result="d:5d00cb70d24b7379" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** i:-7
+              php:   result="d:22de7c5f127bd87b" throw=[] diagnostics=[]
+              phego: result="d:22de7c5f127bd87e" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** d:3fb999999999999a
+              php:   result="d:4059000000000003" throw=[] diagnostics=[]
+              phego: result="d:4059000000000002" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** d:3fe0000000000000
+              php:   result="d:4202a05f20000004" throw=[] diagnostics=[]
+              phego: result="d:4202a05f20000000" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** d:3ff8000000000000
+              php:   result="d:46293e5939a08cd6" throw=[] diagnostics=[]
+              phego: result="d:46293e5939a08cea" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** d:bff8000000000000
+              php:   result="d:39b4484bfeebc2b0" throw=[] diagnostics=[]
+              phego: result="d:39b4484bfeebc2a0" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** s:312e35
+              php:   result="d:46293e5939a08cd6" throw=[] diagnostics=[]
+              phego: result="d:46293e5939a08cea" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:4415af1d78b58c40 ** s:2e35
+              php:   result="d:4202a05f20000004" throw=[] diagnostics=[]
+              phego: result="d:4202a05f20000000" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:54b249ad2594c37d ** d:3fb999999999999a
+              php:   result="d:4202a05f20000004" throw=[] diagnostics=[]
+              phego: result="d:4202a05f20000007" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:54b249ad2594c37d ** d:3fe0000000000000
+              php:   result="d:4a511b0ec57e64c2" throw=[] diagnostics=[]
+              phego: result="d:4a511b0ec57e649a" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:54b249ad2594c37d ** d:3ff8000000000000
+              php:   result="d:5f138d352e5096cd" throw=[] diagnostics=[]
+              phego: result="d:5f138d352e5096af" throw=[] diagnostics=[]
+        ops_php8512_test.go:269: d:54b249ad2594c37d ** d:bff8000000000000
+              php:   result="d:20ca2fe76a3f944c" throw=[] diagnostics=[]
+              phego: result="d:20ca2fe76a3f9475" throw=[] diagnostics=[]
+        ops_php8512_test.go:298: 51 cases differ from PHP 8.5.12
+--- FAIL: TestI386PowMatchesPHP (0.02s)
+    pow_i386_test.go:31: 3ff000000004b7a7 ** c244c9da7a7e66c8: got 3ed3e6d6f199f602 want 3ed3e6d6f199f606
+    pow_i386_test.go:31: 3fefffffff93f061 ** 425ad57c3dad5280: got 1f40e02ced9ee5e3 want 1f40e02ced9ee5ca
+    pow_i386_test.go:31: 411d25d3328c9d0a ** bfe0000000000000: got 3f57b56c39528324 want 3f57b56c39528322
+    pow_i386_test.go:31: 3ff00000001fa505 ** 426467998e1049de: got 5d0b56b430cedd8a want 5d0b56b430cedd1f
+    pow_i386_test.go:31: 3ff0000000366a5f ** c26a2e62dd619e6a: got 0000500b8948dd7e want 0000500b8948dd83
+    pow_i386_test.go:31: 40425244c682cf1e ** 4043439bd7f12802: got 4c7204ffe6003559 want 4c7204ffe600356d
+    pow_i386_test.go:31: 3ff8dd3439e9425a ** 408e7c1e5b38a558: got 66b56328d15e495d want 66b56328d15e4936
+    pow_i386_test.go:31: 4128326dfc94dff6 ** bfe0000000000000: got 3f52665c98ddc9fc want 3f52665c98ddc9fd
+    pow_i386_test.go:31: 3fefffffffbfd6cd ** c20ce533fe92b180: got 4095d384c3a0c2c2 want 4095d384c3a0c2c4
+    pow_i386_test.go:31: 4029d9f499bbe4b4 ** c01aba49d4e1de00: got 3e6419e699ee8288 want 3e6419e699ee8282
+    pow_i386_test.go:36: 15613 of 30000 results differ
+--- FAIL: TestI386PowArithmeticOrder (0.00s)
+    pow_i386_test.go:51: 7 ** -7: got 3eb45f3b3bb0829a want 3eb45f3b3bb08298
+    pow_i386_test.go:51: 1e+20 ** 0.5: got 4202a05f20000000 want 4202a05f20000004
+    pow_i386_test.go:51: 1e+100 ** -1.5: got 20ca2fe76a3f9475 want 20ca2fe76a3f944c
+    pow_i386_test.go:51: 63 ** 64: got 57d75bf07046ee48 want 57d75bf07046ee47
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.688s
+FAIL

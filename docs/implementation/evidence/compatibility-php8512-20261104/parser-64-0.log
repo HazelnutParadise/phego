@@ -1,0 +1,5 @@
+=== RUN   TestParseMatchesReferenceCorpus
+    parser_corpus_test.go:151: 5449 of 5449 files agree; map[error->error (caller location):1 error->error (same line):111 ok->ok (same line):5307 other->error (same line):30]
+--- PASS: TestParseMatchesReferenceCorpus (0.45s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/frontend	0.846s

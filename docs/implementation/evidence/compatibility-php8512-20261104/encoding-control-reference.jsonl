@@ -1,0 +1,1 @@
+{"name":"body-next-line","source":"<?php\ndeclare(encoding=1+1)\n;","reference":["CompileError",2,"Encoding must be a literal"]}

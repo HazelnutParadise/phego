@@ -1,6 +1,7 @@
 package ir
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -150,8 +151,19 @@ func (l *lowerer) node(op Op, line int, kids ...*Node) *Node {
 }
 
 func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
-	n = unparen(n)
+	if l.constants == nil {
+		l.constants = l.syntaxBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	n = l.selectedSyntax(n)
 	l.cur = l.zline(n)
+	if entry := l.constants.syntax[n]; entry.known && (ctx == ctxRead || ctx == ctxQuiet) && n.Kind != "array" {
+		// A folded value carries the line where PHP folded it.
+		if entry.line != 0 {
+			l.cur = entry.line
+		}
+		return l.constantValueNode(entry.value, n.Line, 0)
+	}
 	c := n.Children
 	switch n.Kind {
 	case "literal":
@@ -161,6 +173,8 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 	case "variable_variable":
 		l.fn.DynamicScope = true
 		nd := &Node{Op: OpVarVar, Line: n.Line, Kids: []*Node{l.expr(c[0])}}
+		// zend_compile_simple_var_no_cv converts a constant name to a string.
+		l.convertName(nd, 0, c[0])
 		l.flag(nd, ctx)
 		return l.seal(nd)
 	case "dim":
@@ -203,6 +217,7 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 			nd.Text = v.Text[1:]
 		} else {
 			nd.Kids[1] = l.expr(v.Children[0])
+			l.convertName(nd, 1, v.Children[0])
 		}
 		l.flag(nd, ctx)
 		return l.seal(nd)
@@ -217,20 +232,32 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		return l.seal(nd)
 	case "class_name":
 		nd := &Node{Op: OpClassName, Line: n.Line, Kids: []*Node{nil}}
-		if cls := unparen(c[0]); cls.Kind == "name" {
+		if cls := c[0]; cls.Kind == "name" {
 			name := l.classRef(cls)
 			if name.Special == "" {
 				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: name.Resolved}})
 			}
-			// An anonymous class's real name is only known at run time.
-			if name.Special == "self" && l.class != nil && !l.class.Anonymous && l.scopeKnown() {
-				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.class.Name}})
+			if folded, ok := l.compileTimeClassName(name.Special); ok {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: folded}})
 			}
 			nd.Name = name
+		} else if v, isString, ok := parseTimeValue(cls); ok && isString {
+			// zend_try_compile_const_expr_resolve_class_name: a string the
+			// parser holds names self, parent or static, which must be valid
+			// here, or is a fully qualified class name.
+			special := specialClass(v)
+			if special == "" {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: l.fullyQualifiedClass(v)}})
+			}
+			l.ensureClassFetch(special, l.cur)
+			if folded, ok := l.compileTimeClassName(special); ok {
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: folded}})
+			}
+			nd.Name = l.ns.resolveClass(special)
 		} else {
 			nd.Kids[0] = l.expr(cls)
-			if k := constKind(nd.Kids[0]); k != "" {
-				if nd.Kids[0].Op == OpLiteral && k != "string" {
+			if k := l.compileClassKind(nd.Kids[0]); k != "" {
+				if unparen(cls).Kind == "literal" && k != "string" {
 					l.fail(l.cur, "Illegal class name")
 				}
 				l.fail(l.cur, "Cannot use \"::class\" on %s", k)
@@ -342,11 +369,14 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		return l.node(OpClone, n.Line, l.expr(c[0]))
 	case "instanceof":
 		nd := &Node{Op: OpInstanceof, Line: n.Line, Kids: []*Node{l.expr(c[0]), nil}}
-		if cls := unparen(c[1]); cls.Kind == "name" {
-			nd.Name = l.classRef(cls)
-		} else {
-			nd.Kids[1] = l.expr(cls)
+		// zend_compile_instanceof folds a constant object operand to false
+		// without compiling the class. self::class and parent::class are
+		// constants where the scope is known, even when Phego cannot spell
+		// an anonymous class's name.
+		if _, known := l.evaluateConstant(nd.Kids[0]); known || l.constantClassName(nd.Kids[0]) {
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}})
 		}
+		l.classOperandAt(nd, 1, c[1])
 		return l.seal(nd)
 	case "call":
 		return l.call(n)
@@ -367,6 +397,10 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		}
 		return l.seal(nd)
 	case "closure", "arrow_function":
+		if nd, ok := l.constClosures[n]; ok {
+			delete(l.constClosures, n)
+			return nd
+		}
 		return l.closure(n)
 	case "match":
 		return l.match(n)
@@ -493,19 +527,170 @@ func (l *lowerer) memberName(nd *Node, name *frontend.Node) {
 		return
 	}
 	nd.Kids[1] = l.expr(name)
+	l.convertName(nd, 1, name)
+}
+
+// convertName applies the convert_to_string that zend_delayed_compile_prop,
+// zend_compile_static_prop, zend_compile_simple_var_no_cv and
+// zend_compile_global_var perform on kid i of nd, the name compiled from
+// source, when it is a constant. Only conversions that warn are folded
+// here; a name PHP leaves for execution keeps its expression. A property
+// or static property keeps the result as its literal Text; a variable
+// variable or global keeps a string literal operand.
+func (l *lowerer) convertName(nd *Node, i int, source *frontend.Node) {
+	v, known := l.probeConstant(nd.Kids[i])
+	if !known {
+		return
+	}
+	var text, warning string
+	switch {
+	case v.array:
+		text, warning = "Array", "Array to string conversion"
+	case v.value != nil && v.value.Kind == LitFloat && math.IsNaN(v.value.Float):
+		text, _ = constString(v.value)
+		warning = "unexpected NAN value was coerced to string"
+	default:
+		return
+	}
+	l.diag(l.cur, "Warning", warning)
+	if nd.Op == OpVarVar || nd.Op == OpGlobal {
+		nd.Kids[i] = l.seal(&Node{Op: OpLiteral, Line: nd.Kids[i].Line, Value: &Literal{Kind: LitString, Str: text}})
+	} else {
+		nd.Text, nd.Kids[i] = text, nil
+	}
+	if l.nameWarnings == nil {
+		l.nameWarnings = make(map[*Node]nameWarning)
+	}
+	// A second compilation starts at the name's own line
+	// (zend_compile_expr_inner sets CG(zend_lineno) to it).
+	l.nameWarnings[nd] = nameWarning{l.zline(source), warning}
+}
+
+type nameWarning struct {
+	line    int
+	message string
+}
+
+// repeatNameConversions follows zend_compile_assign_coalesce, which compiles
+// its target again after the default value. Memoized operands, including a
+// static property's class, are reused, but every fetch in the target
+// converts its constant member name again.
+func (l *lowerer) repeatNameConversions(n *Node) {
+	var chain []*Node
+walk:
+	for n != nil {
+		switch n.Op {
+		case OpProp, OpNullsafe, OpDim:
+			chain = append(chain, n)
+			n = n.Kids[0]
+		case OpStaticProp, OpVarVar:
+			chain = append(chain, n)
+			break walk
+		default:
+			break walk
+		}
+	}
+	for i := len(chain) - 1; i >= 0; i-- {
+		if w, ok := l.nameWarnings[chain[i]]; ok {
+			l.diag(w.line, "Warning", w.message)
+		}
+	}
 }
 
 // classOperand fills the class of a static access: a resolved name or an
 // expression evaluated at run time.
 func (l *lowerer) classOperand(nd *Node, cls *frontend.Node) {
-	cls = unparen(cls)
+	l.classOperandAt(nd, 0, cls)
+}
+
+// classOperandAt lowers the class of a static access, new or instanceof into
+// nd.Name or nd.Kids[i], as zend_compile_class_ref does.
+func (l *lowerer) classOperandAt(nd *Node, i int, cls *frontend.Node) {
+	// Parentheses make a name an expression: (A)::f() reads constant A.
 	if cls.Kind == "name" {
 		nd.Name = l.classRef(cls)
 		return
 	}
-	nd.Kids[0] = l.expr(cls)
-	if k := constKind(nd.Kids[0]); k != "" && k != "string" {
+	parsed := l.checkStringClassName(cls)
+	nd.Kids[i] = l.expr(cls)
+	// zend_compile_class_ref rejects a class expression compiled to a
+	// constant other than a string. A constant string names self, parent or
+	// static, which must be valid here, or is a fully qualified name.
+	if k := l.probeClassKind(nd.Kids[i]); k != "" && k != "string" {
 		l.fail(l.cur, "Illegal class name")
+	}
+	if parsed {
+		return
+	}
+	if v, known := l.evaluateConstant(nd.Kids[i]); known && v.value != nil && v.value.Kind == LitString {
+		if special := specialClass(v.value.Str); special != "" {
+			l.ensureClassFetch(special, l.cur)
+			nd.Name, nd.Kids[i] = l.ns.resolveClass(special), nil
+		} else {
+			l.fullyQualifiedClass(v.value.Str)
+		}
+	}
+}
+
+// checkStringClassName applies zend_resolve_class_name to a string the
+// parser already holds, reporting whether cls is one.
+func (l *lowerer) checkStringClassName(cls *frontend.Node) bool {
+	v, isString, ok := parseTimeValue(cls)
+	if ok && isString {
+		l.fullyQualifiedClass(v)
+	}
+	return ok && isString
+}
+
+// fullyQualifiedClass is zend_resolve_class_name for a string compiled as a
+// fully qualified class name: one leading backslash is removed, and the
+// name cannot be self, parent or static.
+func (l *lowerer) fullyQualifiedClass(v string) string {
+	if specialClass(v) == "" && strings.HasPrefix(v, "\\") {
+		v = v[1:]
+	}
+	if specialClass(v) != "" {
+		l.fail(l.cur, "'\\%s' is an invalid class name", v)
+	}
+	return v
+}
+
+// compileTimeClassName is the name zend_try_compile_const_expr_resolve_class_name
+// folds self or parent to where the scope is known. An anonymous class's
+// real name is only known at run time.
+func (l *lowerer) compileTimeClassName(special string) (string, bool) {
+	if l.class == nil || !l.scopeKnown() {
+		return "", false
+	}
+	switch {
+	case special == "self" && !l.class.Anonymous:
+		return l.class.Name, true
+	case special == "parent" && l.class.Parent != nil:
+		return l.class.Parent.Resolved, true
+	}
+	return "", false
+}
+
+// constantClassName reports self::class or parent::class where PHP folds it
+// to a constant (see compileTimeClassName).
+func (l *lowerer) constantClassName(n *Node) bool {
+	if n == nil || n.Op != OpClassName || n.Name == nil || l.class == nil || !l.scopeKnown() {
+		return false
+	}
+	return n.Name.Special == "self" || n.Name.Special == "parent" && l.class.Parent != nil
+}
+
+// ensureClassFetch is zend_ensure_valid_class_fetch_type for self, parent or
+// static where the scope is known at compile time.
+func (l *lowerer) ensureClassFetch(special string, line int) {
+	if !l.scopeKnown() {
+		return
+	}
+	if l.class == nil {
+		l.fail(line, "Cannot use \"%s\" when no class scope is active", special)
+	}
+	if special == "parent" && l.class.Parent == nil {
+		l.fail(line, "Cannot use \"parent\" when current class scope has no parent")
 	}
 }
 
@@ -632,7 +817,7 @@ func (l *lowerer) literal(n *frontend.Node) *Literal {
 	case frontend.TLNumber, frontend.TDNumber:
 		return numberLiteral(n.Text, n.Token)
 	}
-	return &Literal{Kind: LitString, Str: l.dec.constant(n.Text, n.Line)}
+	return &Literal{Kind: LitString, Str: l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })}
 }
 
 // constantValue returns the literal value of a declare directive.
@@ -700,7 +885,8 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 			text = stripIndentation(text, indent, i == 0, last)
 		}
 		if !nowdoc {
-			text = l.dec.escapes(text, quote, p.Line)
+			raw := text
+			text = l.decodeScanned(p, func(d stringDecoder) string { return d.escapes(raw, quote, p.Line) })
 		}
 		nd.Kids = append(nd.Kids, l.seal(&Node{Op: OpLiteral, Line: p.Line, Value: &Literal{Kind: LitString, Str: text}}))
 	}
@@ -722,6 +908,7 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 }
 
 func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
+	entry := l.preEvaluateSyntax(n)
 	nd := &Node{Op: OpArray, Line: n.Line}
 	for _, item := range n.Children {
 		if item == nil {
@@ -729,9 +916,6 @@ func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 		}
 		if item.Kind == "spread" {
 			v := l.expr(item.Children[0])
-			if lv := lit(v); lv != nil {
-				l.fail(l.cur, "Only arrays and Traversables can be unpacked, %s given", typeName(lv))
-			}
 			nd.Kids = append(nd.Kids, l.node(OpSpread, item.Line, v))
 			continue
 		}
@@ -750,6 +934,19 @@ func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 			it.Kids = []*Node{key, l.expr(v)}
 		}
 		nd.Kids = append(nd.Kids, l.seal(it))
+	}
+	if entry.known {
+		if l.constants.memo == nil {
+			l.constants.memo = make(map[*Node]compileMemoEntry)
+		}
+		l.constants.memo[nd] = compileMemoEntry{value: entry.value, known: true, height: entry.height}
+	} else {
+		_, entry.known = l.evaluateConstant(nd)
+	}
+	if entry.known {
+		// zend_try_ct_eval_array folds a constant array without compiling
+		// its elements, so the line stays at the array.
+		l.cur = l.zline(n)
 	}
 	return l.seal(nd)
 }
@@ -848,7 +1045,9 @@ func (l *lowerer) assign(n *frontend.Node) *Node {
 	dst := l.exprCtx(left, ctxWrite)
 	l.markRead(dst)
 	if n.Text == "??=" {
-		return l.seal(&Node{Op: OpCoalesceSet, Line: n.Line, Kids: []*Node{dst, l.expr(right)}})
+		value := l.expr(right)
+		l.repeatNameConversions(dst)
+		return l.seal(&Node{Op: OpCoalesceSet, Line: n.Line, Kids: []*Node{dst, value}})
 	}
 	return l.seal(&Node{Op: OpAssignOp, Line: n.Line, Text: strings.TrimSuffix(n.Text, "="), Kids: []*Node{dst, l.expr(right)}})
 }
@@ -865,8 +1064,6 @@ func (l *lowerer) cast(n *frontend.Node) *Node {
 	switch inner {
 	case "unset":
 		l.fail(n.Line, "The (unset) cast is no longer supported")
-	case "integer", "boolean", "double", "binary":
-		l.diag(n.Line, "Deprecated", "Non-canonical cast ("+inner+") is deprecated, use the ("+target+") cast instead")
 	}
 	return l.seal(&Node{Op: OpCast, Line: n.Line, Text: target, Kids: []*Node{l.expr(n.Children[0])}})
 }
@@ -885,12 +1082,23 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 			op = "||"
 		}
 		left := l.expr(c[0])
-		if v := lit(left); v != nil && op != "xor" && truthy(v) == (op == "||") {
-			// PHP decides the result from a constant left operand and does
-			// not compile the right operand at all.
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: op == "||"}})
+		v, known := l.evaluateConstant(left)
+		if known && op != "xor" {
+			if value, ok := l.compileTruth(v); ok && value == (op == "||") {
+				l.compileTruth(v) // PHP performs a second conversion for the result.
+				return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: value}})
+			}
 		}
-		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, l.expr(c[1])}})
+		right := l.expr(c[1])
+		if known {
+			if rv, rknown := l.evaluateConstant(right); rknown {
+				if op == "xor" {
+					l.compileTruth(v)
+				}
+				l.compileTruth(rv)
+			}
+		}
+		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, right}})
 	case "|>":
 		if c[1].Kind == "arrow_function" {
 			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
@@ -898,7 +1106,17 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 	case "<>":
 		op = "!="
 	}
-	return l.seal(&Node{Op: OpBinary, Line: n.Line, Text: op, Kids: []*Node{l.expr(c[0]), l.expr(c[1])}})
+	left, right := l.expr(c[0]), l.expr(c[1])
+	if op == "." && !l.inConstExpr {
+		// zend_compile_binary_op converts each constant operand to a string
+		// at compile time, whether or not the whole expression folds.
+		for _, operand := range []*Node{left, right} {
+			if v, known := l.probeConstant(operand); known {
+				l.compileString(v)
+			}
+		}
+	}
+	return l.seal(&Node{Op: OpBinary, Line: n.Line, Text: op, Kids: []*Node{left, right}})
 }
 
 // --- calls ---
@@ -906,6 +1124,10 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 // args lowers an argument list, checking the ordering rules of
 // zend_compile_args. A nil result with callable set marks f(...).
 func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
+	return l.argsFor(n, line, nil)
+}
+
+func (l *lowerer) argsFor(n *frontend.Node, line int, callee *Func) []*Arg {
 	var out []*Arg
 	named, unpacked := false, false
 	for _, a := range n.Children {
@@ -931,7 +1153,8 @@ func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
 				l.fail(l.cur, "Cannot use positional argument after named argument")
 			}
 		}
-		if !arg.Spread && isVariableLike(v) && !isThis(unparen(v)) {
+		byValue := !unpacked && l.knownValueArgument(callee, arg.Name, len(out))
+		if !arg.Spread && !byValue && isVariableLike(v) && !isThis(unparen(v)) {
 			arg.MayRef = true
 			arg.Value = l.sendVar(unparen(v))
 		} else {
@@ -941,6 +1164,39 @@ func (l *lowerer) args(n *frontend.Node, line int) []*Arg {
 	}
 	_ = line
 	return out
+}
+
+// Only completed, unconditional declarations can determine argument modes.
+// Unknown names and arguments following unpacking remain runtime decisions.
+func (l *lowerer) knownValueArgument(f *Func, name string, position int) bool {
+	if f == nil {
+		return false
+	}
+	if name != "" {
+		if l.namedParamRefs == nil {
+			l.namedParamRefs = make(map[*Func]map[string]bool)
+		}
+		m := l.namedParamRefs[f]
+		if m == nil {
+			m = make(map[string]bool, len(f.Params))
+			for _, p := range f.Params {
+				m[p.Name] = p.ByRef
+			}
+			l.namedParamRefs[f] = m
+		}
+		byRef, known := m[name]
+		return known && !byRef
+	}
+	if position < len(f.Params) {
+		return !f.Params[position].ByRef
+	}
+	if len(f.Params) != 0 {
+		last := f.Params[len(f.Params)-1]
+		if last.Variadic {
+			return !last.ByRef
+		}
+	}
+	return true
 }
 
 // sendVar lowers a variable argument whose passing mode depends on the
@@ -989,7 +1245,11 @@ func (l *lowerer) call(n *frontend.Node) *Node {
 	if argList.Kind == "callable_args" {
 		return l.node(OpCallable, n.Line, l.seal(nd))
 	}
-	nd.Args = l.args(argList, n.Line)
+	var known *Func
+	if nd.Name != nil {
+		known = l.hoisted[strings.ToLower(nd.Name.Resolved)]
+	}
+	nd.Args = l.argsFor(argList, n.Line, known)
 	return l.seal(nd)
 }
 
@@ -1016,15 +1276,17 @@ func (l *lowerer) methodCall(n *frontend.Node) *Node {
 	return l.seal(nd)
 }
 
-func (l *lowerer) methodName(nd *Node, name *frontend.Node, line int) {
+func (l *lowerer) methodName(nd *Node, name *frontend.Node, _ int) {
 	if name.Kind == "identifier" {
 		nd.Text = name.Text
 		return
 	}
-	if lit := unparen(name); lit.Kind == "literal" && lit.Token != frontend.TConstantEncapsedString {
-		l.fail(line, "Method name must be a string")
-	}
 	nd.Kids[1] = l.expr(name)
+	// zend_compile_method_call and zend_compile_static_call reject a name
+	// compiled to a constant other than a string.
+	if v, known := l.probeConstant(nd.Kids[1]); known && (v.array || v.value != nil && v.value.Kind != LitString) {
+		l.fail(l.cur, "Method name must be a string")
+	}
 }
 
 func (l *lowerer) staticCall(n *frontend.Node) *Node {
@@ -1132,10 +1394,22 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 // it is a constant expression. dynamic allows new and object casts, as in
 // parameter defaults and global constants.
 func (l *lowerer) constExpr(n *frontend.Node, dynamic bool) *Node {
+	if l.constants == nil {
+		l.constants = l.syntaxBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	l.preEvaluateSyntax(n)
+	if l.constClosures == nil {
+		l.constClosures = make(map[*frontend.Node]*Node)
+		defer func() { l.constClosures = nil }()
+	}
 	l.checkConstExpr(n, dynamic)
 	saved := l.inConstExpr
+	line := l.cur
 	l.inConstExpr = true
-	defer func() { l.inConstExpr = saved }()
+	// Lowering the value builds HIR, while PHP keeps the enclosing declaration
+	// location when it evaluates successive constant initializers.
+	defer func() { l.inConstExpr, l.cur = saved, line }()
 	return l.expr(n)
 }
 
@@ -1163,9 +1437,25 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 		return nil
 	}
 	sp := ref.Children[0]
-	if sp.Kind != "static_prop" || sp.Children[0].Kind != "name" || specialClass(sp.Children[0].Text) != "parent" ||
-		sp.Children[1].Kind != "variable" {
+	if sp.Kind != "static_prop" || sp.Children[0].Kind != "name" || specialClass(sp.Children[0].Text) != "parent" {
 		return nil
+	}
+	var prop string
+	if p := sp.Children[1]; p.Kind == "variable" {
+		prop = p.Text[1:]
+	} else {
+		if len(p.Children) != 1 || unparen(p.Children[0]).Kind != "literal" {
+			return nil
+		}
+		v := l.expr(p.Children[0])
+		var ok bool
+		if v.Value == nil {
+			return nil
+		}
+		prop, ok = constString(v.Value)
+		if !ok {
+			return nil
+		}
 	}
 	method := strings.ToLower(ref.Children[1].Text)
 	if method != "get" && method != "set" {
@@ -1177,7 +1467,7 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 	if n.Children[1].Kind == "callable_args" {
 		l.fail(n.Line, "Cannot create Closure for parent property hook call")
 	}
-	prop, hook := sp.Children[1].Text[1:], ref.Children[1].Text
+	hook := ref.Children[1].Text
 	f := l.fn
 	if f.Kind != FuncHook {
 		l.fail(n.Line, "Must not use parent::$%s::%s() outside a property hook", prop, hook)
@@ -1204,10 +1494,17 @@ var constExprKinds = map[string]bool{
 
 // checkConstExpr validates a constant expression as zend_compile_const_expr.
 func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
-	n = unparen(n)
 	if n == nil {
 		return
 	}
+	if l.constants == nil {
+		l.constants = l.syntaxBudget(n)
+		defer func() { l.constants = nil }()
+	}
+	if l.preEvaluateSyntax(n).known {
+		return
+	}
+	n = l.selectedSyntax(n)
 	switch n.Kind {
 	case "interpolated", "heredoc":
 		for _, p := range n.Children {
@@ -1220,18 +1517,35 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		}
 		return
 	}
+	if n.Kind == "new_class" {
+		if !dynamic {
+			l.fail(n.Line, "New expressions are not supported in this context")
+		}
+		l.fail(n.Line, "Cannot use anonymous class in constant expression")
+	}
 	if !constExprKinds[n.Kind] || n.Kind == "binary" && n.Text == "|>" || n.Kind == "unary" && n.Text == "@" {
 		l.fail(n.Line, "Constant expression contains invalid operations")
 	}
 	c := n.Children
 	switch n.Kind {
+	case "array":
+		for _, item := range c {
+			if item == nil {
+				l.fail(n.Line, "Cannot use empty array elements in arrays")
+			}
+		}
 	case "class_const":
 		cls := unparen(c[0])
 		if cls.Kind == "array" || cls.Kind == "literal" && cls.Token != frontend.TConstantEncapsedString {
 			l.fail(n.Line, "Class name must be a valid object or a string")
 		}
-		if cls.Kind != "name" {
+		// The class must be a zval: a name, or a string the parser folded.
+		// Parentheses around a name make it a constant fetch.
+		if _, isString, ok := parseTimeValue(cls); c[0].Kind != "name" && !(ok && isString) {
 			l.fail(n.Line, "Dynamic class names are not allowed in compile-time class constant references")
+		}
+		if c[0].Kind != "name" {
+			l.checkStringClassName(cls)
 		}
 		if specialClass(cls.Text) == "static" {
 			l.fail(n.Line, "\"static::\" is not allowed in compile-time constants")
@@ -1242,13 +1556,24 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		return
 	case "class_name":
 		cls := unparen(c[0])
-		if cls.Kind != "name" {
+		v, isString, ok := parseTimeValue(cls)
+		if c[0].Kind != "name" && !(ok && isString) {
 			l.fail(n.Line, "(expression)::class cannot be used in constant expressions")
 		}
-		if specialClass(cls.Text) == "static" {
+		special := specialClass(cls.Text)
+		if c[0].Kind != "name" {
+			// zend_try_compile_const_expr_resolve_class_name checks a
+			// parser-held string before zend_compile_const_expr_class_name.
+			if special = specialClass(v); special == "" {
+				l.fullyQualifiedClass(v)
+			} else {
+				l.ensureClassFetch(special, n.Line)
+			}
+		}
+		if special == "static" {
 			l.fail(n.Line, "static::class cannot be used for compile-time class name resolution")
 		}
-		if specialClass(cls.Text) == "parent" && l.class != nil && l.class.Kind != KindTrait && l.class.Parent == nil {
+		if special == "parent" && l.class != nil && l.class.Kind != KindTrait && l.class.Parent == nil {
 			l.fail(n.Line, "Cannot use \"parent\" when current class scope has no parent")
 		}
 		return
@@ -1274,6 +1599,14 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		}
 		if c[3] != nil {
 			l.fail(n.Line, "Cannot use(...) variables in constant expression")
+		}
+		if l.constClosures != nil {
+			// zend_compile_const_expr compiles a closure where it reaches
+			// it, so its body reports before later operands.
+			saved, line := l.inConstExpr, l.cur
+			l.inConstExpr = true
+			l.constClosures[n] = l.closure(n)
+			l.inConstExpr, l.cur = saved, line
 		}
 		return
 	case "call", "static_call":
@@ -1356,7 +1689,12 @@ func (l *lowerer) zline(n *frontend.Node) int {
 			break
 		}
 		spine = append(spine, cur)
-		next := zlineStep(unparen(cur))
+		plain := unparen(cur)
+		if plain.LeadingEmptyLine != 0 {
+			line = plain.LeadingEmptyLine
+			break
+		}
+		next := zlineStep(plain)
 		if next == nil {
 			line = unparen(cur).Line
 			break
@@ -1385,6 +1723,8 @@ func zlineStep(n *frontend.Node) *frontend.Node {
 		return nil
 	case "yield":
 		return n.Children[1]
+	case "item":
+		return n.Children[1]
 	}
 	if len(n.Children) == 0 {
 		return nil
@@ -1395,6 +1735,9 @@ func zlineStep(n *frontend.Node) *frontend.Node {
 func zline(n *frontend.Node) int {
 	for {
 		n = unparen(n)
+		if n.LeadingEmptyLine != 0 {
+			return n.LeadingEmptyLine
+		}
 		switch n.Kind {
 		case "closure", "arrow_function", "function", "class", "interface", "trait", "enum", "new_class",
 			"literal", "variable", "name", "magic_const", "interpolated", "heredoc", "match":
@@ -1412,6 +1755,9 @@ func zline(n *frontend.Node) int {
 				continue
 			}
 			return n.Line
+		case "item":
+			n = n.Children[1]
+			continue
 		}
 		if len(n.Children) == 0 || n.Children[0] == nil {
 			return n.Line

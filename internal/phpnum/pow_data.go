@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 // See third_party/optimized-routines/LICENSE.
 
-package runtime
+package phpnum
 
 const (
 	powLn2hi     = 0x1.62e42fefa3800p-1

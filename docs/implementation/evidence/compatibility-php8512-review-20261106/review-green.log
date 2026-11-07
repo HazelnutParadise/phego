@@ -1,0 +1,64 @@
+=== RUN   TestConstantEvaluationScalesLinearly
+=== RUN   TestConstantEvaluationScalesLinearly/large_variable_array
+=== RUN   TestConstantEvaluationScalesLinearly/long_add_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_name
+=== RUN   TestConstantEvaluationScalesLinearly/union_member_name
+=== RUN   TestConstantEvaluationScalesLinearly/parse-time_class_name_concat
+=== RUN   TestConstantEvaluationScalesLinearly/large_literal_array
+=== RUN   TestConstantEvaluationScalesLinearly/array_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/concat_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/short_ternary_chain
+=== RUN   TestConstantEvaluationScalesLinearly/unary_chain_left_of_and
+=== RUN   TestConstantEvaluationScalesLinearly/nested_closures_and_array
+=== RUN   TestConstantEvaluationScalesLinearly/coalesce_chain
+=== RUN   TestConstantEvaluationScalesLinearly/many_union_constants
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_concat_and_add
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_variables
+=== RUN   TestConstantEvaluationScalesLinearly/logical_and_of_literals
+=== RUN   TestConstantEvaluationScalesLinearly/nested_spread
+=== RUN   TestConstantEvaluationScalesLinearly/logical_or
+=== RUN   TestConstantEvaluationScalesLinearly/constant_concat_chain
+=== RUN   TestConstantEvaluationScalesLinearly/class_constant_concat
+=== RUN   TestConstantEvaluationScalesLinearly/alternating_logical_and_add
+=== RUN   TestConstantEvaluationScalesLinearly/power_chain
+--- PASS: TestConstantEvaluationScalesLinearly (1.25s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_variable_array (0.14s)
+    --- PASS: TestConstantEvaluationScalesLinearly/long_add_chain_name (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/unary_chain_name (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/union_member_name (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/parse-time_class_name_concat (0.20s)
+    --- PASS: TestConstantEvaluationScalesLinearly/large_literal_array (0.14s)
+    --- PASS: TestConstantEvaluationScalesLinearly/array_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/concat_left_of_and (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/short_ternary_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/unary_chain_left_of_and (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/nested_closures_and_array (0.48s)
+    --- PASS: TestConstantEvaluationScalesLinearly/coalesce_chain (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/many_union_constants (0.12s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_concat_and_add (0.08s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_variables (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_and_of_literals (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/nested_spread (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/logical_or (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/constant_concat_chain (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/class_constant_concat (0.00s)
+    --- PASS: TestConstantEvaluationScalesLinearly/alternating_logical_and_add (0.01s)
+    --- PASS: TestConstantEvaluationScalesLinearly/power_chain (0.00s)
+=== RUN   TestConstantLongChainKeepsNaNWarning
+--- PASS: TestConstantLongChainKeepsNaNWarning (0.00s)
+=== RUN   TestCompatibilityConstantResourceLimit
+--- PASS: TestCompatibilityConstantResourceLimit (0.01s)
+=== RUN   TestCompatibilityLongConcatenationFolds
+--- PASS: TestCompatibilityLongConcatenationFolds (0.00s)
+=== RUN   TestCompatibilityConstantDeepChainAndUnionFold
+--- PASS: TestCompatibilityConstantDeepChainAndUnionFold (0.02s)
+=== RUN   TestConstantMagicPathDrawsOnTheSharedReserve
+--- PASS: TestConstantMagicPathDrawsOnTheSharedReserve (0.00s)
+=== RUN   TestCompatibilityReviewOracle
+    compat_review_oracle_test.go:10: 1134 cases, 0 differences
+--- PASS: TestCompatibilityReviewOracle (0.06s)
+=== RUN   TestCompatibilityReviewRuntimeOperands
+--- PASS: TestCompatibilityReviewRuntimeOperands (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/ir	2.032s
+exit_code=0 seconds=3

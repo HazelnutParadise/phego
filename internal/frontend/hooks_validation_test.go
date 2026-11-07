@@ -15,7 +15,7 @@ func TestNestedPropertyHookParametersAreBounded(t *testing.T) {
 	}
 	_, err := parse(t, source(MaxNesting+10))
 	var syntax *SyntaxError
-	if !errors.As(err, &syntax) || !strings.Contains(syntax.Message, "nesting") {
+	if !errors.As(err, &syntax) || syntax.Message != "memory exhausted" {
 		t.Fatalf("deep property hooks must return a located nesting error: %v", err)
 	}
 	if syntax.Line < 1 {

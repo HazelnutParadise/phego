@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Recheck saved F2XM1 outputs with MPFR and write native pow controls."""
+import argparse
+import ctypes as c
+import json
+import struct
+from pathlib import Path
+
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument("directory", type=Path)
+p.add_argument("--mpfr", required=True, help="path to the MPFR shared library")
+a = p.parse_args()
+
+
+class F(c.Structure):
+    _fields_ = [("prec", c.c_long), ("sign", c.c_int),
+                ("exp", c.c_long), ("d", c.POINTER(c.c_ulong))]
+
+
+m = c.CDLL(a.mpfr)
+ptr = c.POINTER(F)
+for name, args in {
+    "init2": [ptr, c.c_long], "clear": [ptr],
+    "set_d": [ptr, c.c_double, c.c_int],
+    "exp2m1": [ptr, ptr, c.c_int],
+    "set_str": [ptr, c.c_char_p, c.c_int, c.c_int],
+    "cmp": [ptr, ptr], "add_ui": [ptr, ptr, c.c_ulong, c.c_int],
+    "get_d": [ptr, c.c_int],
+}.items():
+    getattr(m, "mpfr_" + name).argtypes = args
+m.mpfr_get_d.restype = c.c_double
+m.mpfr_get_version.restype = c.c_char_p
+x, ideal, actual, rounded = F(), F(), F(), F()
+for value, precision in [(x, 64), (ideal, 64), (actual, 64), (rounded, 53)]:
+    m.mpfr_init2(c.byref(value), precision)
+
+
+def plus_one_bits(value):
+    m.mpfr_add_ui(c.byref(rounded), c.byref(value), 1, 0)
+    return struct.pack(">d", m.mpfr_get_d(c.byref(rounded), 0)).hex()
+
+
+pairs = (a.directory / "fracpairs.txt").read_text().splitlines()
+outputs = (a.directory / "frac-instructions64.txt").read_text().splitlines()
+assert len(pairs) == len(outputs) == 200000
+rows = []
+for i, (pair, output) in enumerate(zip(pairs, outputs)):
+    base, exponent = pair.split()
+    assert base == "4000000000000000"
+    f = struct.unpack(">d", bytes.fromhex(exponent))[0]
+    assert -.5 <= f <= .5
+    m.mpfr_set_d(c.byref(x), f, 0)
+    m.mpfr_exp2m1(c.byref(ideal), c.byref(x), 0)
+    raw = output.split()[1]
+    z = int(raw, 16)
+    sign = "-" if z >> 79 else ""
+    exp = ((z >> 64) & 32767) - 16383 - 63
+    sig = z & ((1 << 64) - 1)
+    encoded = f"{sign}0x{sig:x}p{exp}".encode()
+    assert m.mpfr_set_str(c.byref(actual), encoded, 0, 0) == 0
+    if m.mpfr_cmp(c.byref(ideal), c.byref(actual)):
+        expected, observed = plus_one_bits(ideal), plus_one_bits(actual)
+        assert expected == observed
+        rows.append([i, base, exponent, raw, expected])
+assert len(rows) == 46
+for name, content in {
+    "frac-counter-pairs.txt": "".join(f"{r[1]} {r[2]}\n" for r in rows),
+    "frac-counter-expected.txt": "".join(f"{r[4]}\n" for r in rows),
+}.items():
+    out = a.directory / name
+    if out.exists():
+        assert out.read_text() == content
+    else:
+        out.write_text(content)
+print(json.dumps({"mpfr_version": m.mpfr_get_version().decode(),
+                  "cases": len(pairs), "instruction_differences": len(rows),
+                  "final_rn53_differences": 0, "rows": rows}, indent=2))
+for value in [x, ideal, actual, rounded]:
+    m.mpfr_clear(c.byref(value))

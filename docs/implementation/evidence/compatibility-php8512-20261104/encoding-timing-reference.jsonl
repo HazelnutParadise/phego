@@ -1,0 +1,4 @@
+{"name":"later-syntax-error","source":"<?php\ndeclare(encoding=1+1, ticks=);","reference":["ParseError",2,"syntax error, unexpected token \")\""]}
+{"name":"later-syntax-error-replay","source":"<?php\ndeclare(encoding=1+1, ticks=);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;","reference":["ParseError",2,"syntax error, unexpected token \")\""]}
+{"name":"later-newline","source":"<?php\ndeclare(encoding=1+1,\nticks=1);","reference":["CompileError",3,"Encoding must be a literal"]}
+{"name":"later-newline-replay","source":"<?php\ndeclare(encoding=1+1,\nticks=1);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;","reference":["CompileError",3,"Encoding must be a literal"]}
