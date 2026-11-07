@@ -23,7 +23,7 @@ func w13R6ScopeCase(t *testing.T, h *heap, name string) w13Case {
 		for i := len(owners) - 1; i >= 0; i-- {
 			must(t, h.unset(owners[i]))
 		}
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("scope fixture retained request values")
 		}
 	}()

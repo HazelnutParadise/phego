@@ -215,8 +215,8 @@ func w13R12SetterCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.unset(&receiverOwner))
 	var globals value
 	must(t, h.shutdown(&globals))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("setter fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("setter fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }
@@ -281,8 +281,8 @@ func TestW13R12SetterMetadataIsolation(t *testing.T) {
 				if e := h.shutdown(&globals); e != nil {
 					t.Error(e)
 				}
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
-					t.Errorf("width %d retained values: live=%d typed=%d", width, len(h.live), len(h.typedSources))
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
+					t.Errorf("width %d retained values: live=%d typed=%d", width, h.liveObjects, len(h.typedSources))
 				}
 			}(width)
 		}
@@ -361,8 +361,8 @@ func w13R12HeldReceiverCase(t *testing.T, h *heap) w13Case {
 	if err := h.shutdown(&globals); err != nil {
 		t.Fatal(err)
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("held setter retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("held setter retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: []any{attempt, eventSnapshot}, Diagnostics: w13Diagnostics(h)}
 }

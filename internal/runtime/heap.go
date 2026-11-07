@@ -51,7 +51,8 @@ type heap struct {
 	nextHandle    uint64
 	freeHandles   []uint64
 	noHandleReuse bool
-	live          map[uint64]*object
+	objects       []*object         // the object store, indexed by handle; nil when free
+	liveObjects   int               // non-nil entries of objects
 	roots         map[gcNode]uint64 // possible cycle roots with buffering order
 	rootSlots     []gcNode
 	freeRootSlots []int
@@ -82,7 +83,7 @@ func newHeap(width int) (*heap, error) {
 	if width != 32 && width != 64 {
 		return nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64 bits", width)
 	}
-	return &heap{width: width, live: make(map[uint64]*object), roots: make(map[gcNode]uint64), nextResource: 4}, nil
+	return &heap{width: width, roots: make(map[gcNode]uint64), nextResource: 4}, nil
 }
 
 // Temporaries returned by constructors start with no owner. assign, bind, and
@@ -138,13 +139,34 @@ func (h *heap) newObjectShell(c *class) (value, error) {
 	o := &storage.object
 	*o = object{owner: h, handle: handle, class: c, props: &storage.properties}
 	o.props.initializeLayout(layout)
-	h.live[handle] = o
+	if handle >= uint64(len(h.objects)) {
+		h.objects = append(h.objects, make([]*object, handle+1-uint64(len(h.objects)))...)
+	}
+	h.objects[handle] = o
+	h.liveObjects++
 	return value{kind: valueObject, object: o}, nil
+}
+
+// liveObject is the object stored at handle, or nil. Handles from another
+// heap, freed handles and handles past the store are not live here.
+func (h *heap) liveObject(handle uint64) *object {
+	if handle < uint64(len(h.objects)) {
+		return h.objects[handle]
+	}
+	return nil
+}
+
+// dropObject removes o from the object store.
+func (h *heap) dropObject(o *object) {
+	if h.liveObject(o.handle) == o {
+		h.objects[o.handle] = nil
+		h.liveObjects--
+	}
 }
 
 func (h *heap) discard(v value) error {
 	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
-		v.object.freed && h.live[v.object.handle] != v.object {
+		v.object.freed && h.liveObject(v.object.handle) != v.object {
 		if v.object.refcount > 0 {
 			return h.release(v)
 		}
@@ -191,7 +213,7 @@ func retain(v value) {
 // Destructor errors are returned after cleanup of the released value finishes.
 func (h *heap) release(v value) error {
 	if h.closed && v.kind == valueObject && v.object != nil && v.object.owner == h &&
-		v.object.freed && h.live[v.object.handle] != v.object {
+		v.object.freed && h.liveObject(v.object.handle) != v.object {
 		if v.object.refcount <= 0 {
 			return fmt.Errorf("released object has no owned reference")
 		}
@@ -327,7 +349,7 @@ func (h *heap) freeObject(o *object) error {
 	}
 	o.freed = true
 	h.dropRoot(o)
-	delete(h.live, o.handle)
+	h.dropObject(o)
 	var first error
 	if o.weak != nil {
 		o.weak.target = nil
@@ -1191,7 +1213,7 @@ func (h *heap) collectCyclePass() (int, error, bool) {
 		case *object:
 			freed++
 			x.freed, x.destructorCalled = true, true
-			delete(h.live, x.handle)
+			h.dropObject(x)
 			if x.weak != nil {
 				x.weak.target, x.weak = nil, nil
 			}
@@ -1308,8 +1330,8 @@ func (h *heap) shutdown(globals *value) error {
 	h.noHandleReuse = true
 	// The object-store walk reads its growing top each step.
 	for id := uint64(1); id <= h.nextHandle; id++ {
-		o, ok := h.live[id]
-		if !ok || o.destructorCalled {
+		o := h.liveObject(id)
+		if o == nil || o.destructorCalled {
 			continue
 		}
 		o.destructorCalled = true
@@ -1320,13 +1342,16 @@ func (h *heap) shutdown(globals *value) error {
 		}
 	}
 	h.closed = true
-	for _, o := range h.live {
+	for _, o := range h.objects {
+		if o == nil {
+			continue
+		}
 		o.freed = true
 		if o.weak != nil {
 			o.weak.target, o.weak = nil, nil
 		}
 	}
-	h.live, h.roots, h.freeHandles = nil, nil, nil
+	h.objects, h.liveObjects, h.roots, h.freeHandles = nil, 0, nil, nil
 	h.rootSlots, h.freeRootSlots = nil, nil
 	h.enums, h.typedSources = nil, nil
 	h.classStatics = nil

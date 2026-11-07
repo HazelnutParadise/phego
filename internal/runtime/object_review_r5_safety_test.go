@@ -45,8 +45,8 @@ func TestW13PendingReferenceCloneSafety(t *testing.T) {
 			must(t, h.unset(&clone))
 			globals := value{}
 			must(t, h.shutdown(&globals))
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				t.Fatal("retained objects/sources", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				t.Fatal("retained objects/sources", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}

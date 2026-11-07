@@ -122,7 +122,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 					must(err)
 				case "fatal_shutdown_create":
 					// Store the pre-fatal object so the callback can explicitly unset it.
-					old := value{kind: valueObject, object: x.heap.live[1]}
+					old := value{kind: valueObject, object: x.heap.liveObject(1)}
 					must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
 					must(x.heap.setElement(&x.globals, bytesValue([]byte("a")), old))
 					must(x.registerShutdown(func(x *execution) completion {

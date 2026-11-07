@@ -235,8 +235,8 @@ func w13R6LazyCase(t *testing.T, h *heap, name string) w13Case {
 	for _, owner := range owners {
 		must(t, h.unset(owner))
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("lazy case retained objects=%d typed sources=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("lazy case retained objects=%d typed sources=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: diagnostics}
 }

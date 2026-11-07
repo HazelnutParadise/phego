@@ -21,7 +21,7 @@ func TestW13LazyRollbackConsecutiveSafety(t *testing.T) {
 	}
 	globals := nullValue()
 	must(t, h.shutdown(&globals))
-	if len(h.live) != 0 {
+	if h.liveObjects != 0 {
 		t.Fatal("request retained live objects after shutdown")
 	}
 }

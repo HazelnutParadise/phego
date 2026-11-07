@@ -120,8 +120,8 @@ func w13R12MagicCase(t *testing.T, h *heap, name string) w13Case {
 		}
 		var globals value
 		must(t, h.shutdown(&globals))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("magic fixture retained values after shutdown: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("magic fixture retained values after shutdown: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 

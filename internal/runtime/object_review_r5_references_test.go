@@ -292,8 +292,8 @@ func w13R5ReferenceCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&targetOwner))
 	}
 	must(t, h.unset(&objOwner))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("reference fixture retained objects=%d sources=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("reference fixture retained objects=%d sources=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }

@@ -112,8 +112,8 @@ func TestW13R10HookHoldOwners(t *testing.T) {
 								must(t, h.unset(&ref))
 								must(t, h.unset(&cell))
 							}
-							if len(h.live) != 0 || len(h.typedSources) != 0 {
-								t.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+							if h.liveObjects != 0 || len(h.typedSources) != 0 {
+								t.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 							}
 						})
 					}
@@ -152,8 +152,8 @@ func TestW13R10HookCleanupOrder(t *testing.T) {
 			if fmt.Sprint(events) != "[rhs receiver]" {
 				t.Fatalf("cleanup order=%v", events)
 			}
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				t.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				t.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}
@@ -229,8 +229,8 @@ func BenchmarkW13PropertyHookHolds(b *testing.B) {
 			if err = h.unset(&auxOwner); err != nil {
 				b.Fatal(err)
 			}
-			if len(h.live) != 0 || len(h.typedSources) != 0 {
-				b.Fatalf("retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+			if h.liveObjects != 0 || len(h.typedSources) != 0 {
+				b.Fatalf("retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 			}
 		})
 	}

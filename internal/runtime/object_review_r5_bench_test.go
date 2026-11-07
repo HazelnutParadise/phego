@@ -55,8 +55,8 @@ func BenchmarkW13AliasedClone(b *testing.B) {
 					if err := h.release(src); err != nil {
 						b.Fatal(err)
 					}
-					if len(h.live) != 0 {
-						b.Fatal("live objects", len(h.live))
+					if h.liveObjects != 0 {
+						b.Fatal("live objects", h.liveObjects)
 					}
 				})
 				b.ReportAllocs()

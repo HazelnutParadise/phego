@@ -57,7 +57,7 @@ func w13R6GuardLifetimeCase(t *testing.T, h *heap) w13Case {
 		for _, cell := range []*value{&out, &dst, &answer, &proxy, &target} {
 			must(t, h.unset(cell))
 		}
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("guard lifetime fixture retained request values")
 		}
 	}()

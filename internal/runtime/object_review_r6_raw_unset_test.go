@@ -54,7 +54,7 @@ func w13R6RawUnsetCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.assign(&owner, o))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("raw-unset fixture retained request values")
 		}
 	}()

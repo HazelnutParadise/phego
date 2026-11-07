@@ -105,7 +105,7 @@ func w13R10ProxyControlCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&childCell))
 		must(t, h.unset(&parentCell))
 		must(t, h.shutdown(&value{}))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("proxy control retained request values")
 		}
 	}()
@@ -182,7 +182,7 @@ func w13R10StaticGuardCase(t *testing.T, h *heap, name string) w13Case {
 	must(t, h.assign(&owner, w13Instantiate(t, h, c)))
 	defer func() {
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
 			t.Fatal("static guard control retained values")
 		}
 	}()

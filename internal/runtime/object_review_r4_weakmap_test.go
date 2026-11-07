@@ -109,8 +109,8 @@ func w13R4WeakMapCase(t *testing.T, h *heap, name string) w13Case {
 	for i := range mapOwners {
 		must(t, h.unset(&mapOwners[i]))
 	}
-	if len(h.live) != 0 {
-		t.Fatal("WeakMap fixture retained request objects", len(h.live))
+	if h.liveObjects != 0 {
+		t.Fatal("WeakMap fixture retained request objects", h.liveObjects)
 	}
 	return w13Case{Result: []any{ab, ba, eq, identicalResult, calls}, Diagnostics: w13Diagnostics(h)}
 }

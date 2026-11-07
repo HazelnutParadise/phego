@@ -152,8 +152,8 @@ func w13R10LifeCase(t *testing.T, h *heap, name string) w13Case {
 	finalCleanup = h.mergeObjectErrors(finalCleanup, h.unset(&backingOwner))
 	must(t, finalCleanup)
 	must(t, h.shutdown(&value{}))
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("lifetime fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("lifetime fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 	}
 	return w13Case{Result: result, Diagnostics: w13Diagnostics(h)}
 }

@@ -69,8 +69,8 @@ func w13R7Case(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&payloadOwner))
 		must(t, h.unset(&owner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("defaults case retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("defaults case retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 	initial := w13Int(42)
@@ -148,7 +148,7 @@ func TestW13R7FreshDefaults(t *testing.T) {
 			must(t, h.assign(&owner, o))
 			defer func() {
 				must(t, h.unset(&owner))
-				if len(h.live) != 0 || len(h.typedSources) != 0 {
+				if h.liveObjects != 0 || len(h.typedSources) != 0 {
 					t.Fatal("fresh defaults retained values")
 				}
 			}()

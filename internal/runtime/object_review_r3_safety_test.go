@@ -43,8 +43,8 @@ func TestW13PendingArgumentDestructorSafety(t *testing.T) {
 		must(t, h.unset(&receiver))
 		globals := value{}
 		must(t, h.shutdown(&globals))
-		if len(h.live) != 0 {
-			t.Fatal("request retained objects", len(h.live))
+		if h.liveObjects != 0 {
+			t.Fatal("request retained objects", h.liveObjects)
 		}
 	}
 }

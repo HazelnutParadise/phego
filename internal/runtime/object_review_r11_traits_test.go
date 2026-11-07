@@ -155,8 +155,8 @@ func w13R11TraitCase(t *testing.T, h *heap, name string) w13Case {
 	if e := h.shutdown(&value{}); e != nil {
 		t.Fatalf("shutdown: %v", e)
 	}
-	if len(h.live) != 0 || len(h.typedSources) != 0 {
-		t.Fatalf("retained objects/sources: %d/%d", len(h.live), len(h.typedSources))
+	if h.liveObjects != 0 || len(h.typedSources) != 0 {
+		t.Fatalf("retained objects/sources: %d/%d", h.liveObjects, len(h.typedSources))
 	}
 	return observed
 }

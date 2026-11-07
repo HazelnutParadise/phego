@@ -180,7 +180,10 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	if !stopsUserCode(c) {
 		// Output handlers may create and destroy new locals, but must not
 		// restart a failed destructor pass on surviving old objects.
-		for _, o := range x.heap.live {
+		for _, o := range x.heap.objects {
+			if o == nil {
+				continue
+			}
 			o.destructorCalled = true
 		}
 		x.destructorStop = false
@@ -192,7 +195,10 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	// Output callbacks still need a live heap. Objects retained by those
 	// callbacks get storage release, not a second shutdown destructor pass.
 	x.destructorStop = true
-	for _, o := range x.heap.live {
+	for _, o := range x.heap.objects {
+		if o == nil {
+			continue
+		}
 		o.destructorCalled = true
 	}
 	if err := x.heap.shutdown(&x.globals); err != nil {
@@ -558,7 +564,10 @@ func (x *execution) markFatal(c completion) completion {
 	if x.phaseFatal.kind == endNormal {
 		x.phaseFatal = c
 	}
-	for _, o := range x.heap.live {
+	for _, o := range x.heap.objects {
+		if o == nil {
+			continue
+		}
 		o.destructorCalled = true
 	}
 	return x.phaseFatal

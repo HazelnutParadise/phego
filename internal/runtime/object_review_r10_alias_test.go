@@ -67,8 +67,8 @@ func w13R10AliasCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&owner))
 		must(t, h.shutdown(&value{}))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatalf("R10 alias fixture retained values: live=%d typed=%d", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatalf("R10 alias fixture retained values: live=%d typed=%d", h.liveObjects, len(h.typedSources))
 		}
 	}()
 

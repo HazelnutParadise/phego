@@ -93,8 +93,8 @@ func w13R10ProxyCase(t *testing.T, h *heap, name string) w13Case {
 		must(t, h.unset(&alias))
 		must(t, h.unset(&proxyOwner))
 		must(t, h.unset(&backingOwner))
-		if len(h.live) != 0 || len(h.typedSources) != 0 {
-			t.Fatal("proxy fixture retained request values", len(h.live), len(h.typedSources))
+		if h.liveObjects != 0 || len(h.typedSources) != 0 {
+			t.Fatal("proxy fixture retained request values", h.liveObjects, len(h.typedSources))
 		}
 	}()
 	if warm {

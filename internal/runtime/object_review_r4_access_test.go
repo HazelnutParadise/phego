@@ -41,8 +41,8 @@ func w13R4AccessCase(t *testing.T, h *heap, name string) w13Case {
 		for i := range owners {
 			must(t, h.unset(&owners[i]))
 		}
-		if len(h.live) != 0 {
-			t.Fatal("access fixture retained request objects", len(h.live))
+		if h.liveObjects != 0 {
+			t.Fatal("access fixture retained request objects", h.liveObjects)
 		}
 	}()
 	switch name {
