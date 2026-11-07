@@ -171,3 +171,16 @@ func must(t *testing.T, err error) {
 		t.Fatal(err)
 	}
 }
+
+func TestReviewReservedHostNameNoteAndHostCode(t *testing.T) {
+	ok := func(_ HostContext, _ []Value) (Value, error) { return Null(), nil }
+	_, err := NewEngine(Config{HostFunctions: []HostFunction{{Name: "echo", Func: ok}}})
+	d, _ := Diagnose(err)
+	if !strings.Contains(strings.Join(append(d.Notes, d.Help...), " "), "reserved") {
+		t.Fatalf("reserved word not explained: %+v", d)
+	}
+	d, _ = Diagnose(&ConfigError{Field: "X", Reason: "bad", Code: "HOST1"})
+	if d.Code != "HOST1" {
+		t.Fatalf("host code replaced by %s", d.Code)
+	}
+}

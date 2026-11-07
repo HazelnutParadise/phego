@@ -8,11 +8,25 @@ import (
 	"github.com/HazelnutParadise/phego/internal/diagcodes"
 )
 
-var kindCodes = map[error]diag.Code{
-	ErrInvalid: diagcodes.BytecodeInvalid, ErrLimit: diagcodes.BytecodeLimit,
-	ErrVersion: diagcodes.BytecodeVersion, ErrProfile: diagcodes.BytecodeProfile,
-	ErrIntegrity: diagcodes.BytecodeIntegrity, ErrTrust: diagcodes.BytecodeTrust,
-	ErrCapability: diagcodes.BytecodeCapability,
+// kindCodes is ordered so that an error matching several kinds, such as an
+// errors.Join, always reports the same code.
+var kindCodes = []struct {
+	kind error
+	code diag.Code
+}{
+	{ErrInvalid, diagcodes.BytecodeInvalid}, {ErrLimit, diagcodes.BytecodeLimit},
+	{ErrVersion, diagcodes.BytecodeVersion}, {ErrProfile, diagcodes.BytecodeProfile},
+	{ErrIntegrity, diagcodes.BytecodeIntegrity}, {ErrTrust, diagcodes.BytecodeTrust},
+	{ErrCapability, diagcodes.BytecodeCapability},
+}
+
+func kindCode(kind error) diag.Code {
+	for _, k := range kindCodes {
+		if k.kind == kind {
+			return k.code
+		}
+	}
+	return diagcodes.BytecodeInvalid
 }
 
 // Diagnose describes a Build or Load failure, including the bare sentinel
@@ -23,9 +37,9 @@ func Diagnose(err error) (diag.Diagnostic, bool) {
 	if errors.As(err, &e) {
 		return e.Diagnostic(), true
 	}
-	for kind := range kindCodes {
-		if errors.Is(err, kind) {
-			return (&Error{Kind: kind, Offset: -1, Function: -1, PC: -1}).Diagnostic(), true
+	for _, k := range kindCodes {
+		if errors.Is(err, k.kind) {
+			return (&Error{Kind: k.kind, Offset: -1, Function: -1, PC: -1}).Diagnostic(), true
 		}
 	}
 	return diag.Diagnostic{}, false
@@ -35,10 +49,7 @@ func Diagnose(err error) (diag.Diagnostic, bool) {
 // span covers the instruction's source bytes; otherwise it names the byte
 // offset or the function and instruction that failed verification.
 func (e *Error) Diagnostic() diag.Diagnostic {
-	code, ok := kindCodes[e.Kind]
-	if !ok {
-		code = diagcodes.BytecodeInvalid
-	}
+	code := kindCode(e.Kind)
 	entry := diagcodes.Registry[code]
 	msg := e.Detail
 	if msg == "" {
@@ -75,8 +86,7 @@ func (e *Error) where() string {
 }
 
 // locate adds the source position of the failing instruction to a Build
-// error. Positions are checked by verification, so an out-of-range or
-// synthetic position is simply left out.
+// error. A synthetic position, or one verification rejects, is left out.
 func locate(image Image, err error) error {
 	var e *Error
 	if !errors.As(err, &e) || e.Function < 0 || e.PC < 0 || e.Function >= len(image.Functions) {
@@ -87,7 +97,7 @@ func locate(image Image, err error) error {
 		return err
 	}
 	pos := f.Positions[e.PC]
-	if pos.Source == 0 || uint64(pos.Source) > uint64(len(image.Sources)) || pos.Line == 0 || pos.End < pos.Start {
+	if pos == (Position{}) || positionProblem(image.Sources, pos) != positionOK {
 		return err
 	}
 	cp := *e

@@ -14,7 +14,7 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 ## PHG1001: a size, count or limit is negative
 
 - note: limits and sizes count bytes or items and cannot be below zero
-- help: use 0 for the default or no limit, or a positive value
+- help: use 0 or a positive value; the field's documentation says what 0 means
 
 ## PHG1002: IntSize is not 32 or 64
 
@@ -24,12 +24,12 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 ## PHG1003: the PHP release is not recorded
 
 - note: Release must name a PHP release recorded in the PHP release inventory
-- help: use "8.5.12" or leave Release empty for the default
+- help: use phego.SupportedRelease, or leave Release empty for the default
 
 ## PHG1004: a host function name is not a PHP function name
 
-- note: host functions are called from PHP, so the name must be a PHP label
-- help: use letters, digits and underscores, not starting with a digit
+- note: host functions are called from PHP, so the name must be a PHP label that is not a reserved word such as echo or isset
+- help: use letters, digits and underscores, not starting with a digit, and avoid PHP reserved words
 
 ## PHG1005: a host function has no Func
 
@@ -108,7 +108,7 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 
 ## PHG1020: a file mount needs exactly one of Root and FS
 
-- note: Root mounts a host directory, FS an fs.FS
+- note: Root (called Dir in the policy layer's message) mounts a host directory, FS an fs.FS
 - help: set one of them
 
 ## PHG1021: a mount Root is not an absolute host path
@@ -149,16 +149,16 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 ## PHG2002: the bytecode exceeds a verification limit
 
 - note: limits bound the time and memory spent verifying untrusted input
-- help: raise bytecode Options.Limits, or split the program
+- help: raise the bytecode verification limits, or split the program
 
 ## PHG2003: the bytecode version is not supported
 
 - note: each Phego build reads one bytecode format version
 - help: regenerate the artifact with this Phego build
 
-## PHG2004: the bytecode was built for another profile
+## PHG2004: the bytecode identity is invalid or names another profile
 
-- note: release, integer width and options are part of the artifact identity
+- note: release, integer width, options and host identity are part of the artifact identity
 - help: rebuild the artifact for this engine's profile
 
 ## PHG2005: the bytecode digest does not match
@@ -169,9 +169,9 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 ## PHG2006: the bytecode artifact is not trusted
 
 - note: an artifact is accepted only when its SHA-256 matches a digest obtained from a trusted source
-- help: pass the digest from a trusted source as LoadOptions.TrustedDigest
+- help: supply the artifact's SHA-256 from a trusted source when loading it
 
-## PHG2007: the bytecode needs an unsupported capability
+## PHG2007: the bytecode capabilities are unsupported or incomplete
 
-- note: the artifact uses an operation this build does not provide
+- note: the artifact needs an operation this build does not provide, or its declared capabilities do not cover its opcodes
 - help: rebuild the artifact for this Phego build

@@ -1,0 +1,13 @@
+--- FAIL: TestReviewColumnPastEndIsClamped (0.00s)
+panic: runtime error: makeslice: len out of range [recovered, repanicked]
+panic({0x1022fd240?, 0x10232ae80?})
+FAIL	github.com/HazelnutParadise/phego/diag	0.531s
+FAIL
+--- FAIL: TestReviewLocateSkipsOutOfRangePositions (0.00s)
+--- FAIL: TestReviewDiagnoseJoinedIsDeterministic (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.552s
+--- FAIL: TestReviewReservedHostNameNoteAndHostCode (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.572s
+FAIL

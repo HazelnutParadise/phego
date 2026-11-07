@@ -165,11 +165,10 @@ func verifyImage(b *budget, image Image, cloneCost bool) (CapabilitySet, error) 
 			if p == (Position{}) {
 				continue
 			}
-			if p.Source == 0 || uint64(p.Source) > uint64(len(image.Sources)) || p.Line == 0 {
+			switch positionProblem(image.Sources, p) {
+			case positionInvalid:
 				return 0, functionError(invalid("invalid source position"), fi, pc)
-			}
-			s := image.Sources[p.Source-1]
-			if p.Start > p.End || p.End > s.Bytes || p.Line > s.Lines {
+			case positionOutside:
 				return 0, functionError(invalid("source position outside source"), fi, pc)
 			}
 		}
@@ -883,4 +882,24 @@ func functionError(err error, fi, pc int) error {
 		return &cp
 	}
 	return &Error{Kind: err, Offset: -1, Function: fi, PC: pc, Detail: "invalid function"}
+}
+
+const (
+	positionOK = iota
+	positionInvalid
+	positionOutside
+)
+
+// positionProblem checks a non-zero position against its source record. Both
+// verification and diagnostics use it, so a diagnostic never shows a
+// position verification would reject.
+func positionProblem(sources []Source, p Position) int {
+	if p.Source == 0 || uint64(p.Source) > uint64(len(sources)) || p.Line == 0 {
+		return positionInvalid
+	}
+	s := sources[p.Source-1]
+	if p.Start > p.End || p.End > s.Bytes || p.Line > s.Lines {
+		return positionOutside
+	}
+	return positionOK
 }

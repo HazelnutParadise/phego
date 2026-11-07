@@ -57,8 +57,9 @@ type UnsupportedError struct {
 func (e *UnsupportedError) Error() string { return "phego: unsupported: " + e.Feature }
 
 // ConfigError reports an invalid Config, option, or host function. Code is
-// the stable diagnostic code (docs/diagnostics/codes.md); errors built by
-// host code may leave it empty and then report PHG1000.
+// the stable diagnostic code (docs/diagnostics/codes.md). Errors built by
+// host code may leave it empty and then report PHG1000; a code that is not
+// in the table is kept, with PHG1000's note and help.
 type ConfigError struct {
 	Field  string
 	Reason string
@@ -74,7 +75,10 @@ func (e *ConfigError) Diagnostic() diag.Diagnostic {
 	code := e.Code
 	entry, ok := diagcodes.Registry[code]
 	if !ok {
-		code, entry = diagcodes.ConfigOther, diagcodes.Registry[diagcodes.ConfigOther]
+		entry = diagcodes.Registry[diagcodes.ConfigOther]
+		if code == "" {
+			code = diagcodes.ConfigOther
+		}
 	}
 	return diag.Diagnostic{
 		Code:    code,

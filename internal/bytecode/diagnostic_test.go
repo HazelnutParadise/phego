@@ -60,3 +60,29 @@ func TestBuildErrorCarriesSourcePosition(t *testing.T) {
 		t.Fatalf("primary span %+v", d.Primary)
 	}
 }
+
+// locate must not attach a position that verification rejects.
+func TestReviewLocateSkipsOutOfRangePositions(t *testing.T) {
+	src := Source{Name: "/app/a.php", Digest: sha256.Sum256([]byte("x")), Bytes: 14, Lines: 2}
+	image := Image{Sources: []Source{src}, Functions: []Function{{Positions: []Position{
+		{Source: 1, Start: 0, End: 4, Line: 9}, {Source: 1, Start: 0, End: 999, Line: 1}, {Source: 1, Start: 2, End: 4, Line: 1},
+	}}}}
+	for pc, want := range []bool{false, false, true} {
+		err := locate(image, &Error{Kind: ErrInvalid, Function: 0, PC: pc, Offset: -1})
+		var e *Error
+		errors.As(err, &e)
+		if got := e.Pos.Line != 0; got != want {
+			t.Errorf("pc %d: located %v, want %v (%+v)", pc, got, want, e.Pos)
+		}
+	}
+}
+
+func TestReviewDiagnoseJoinedIsDeterministic(t *testing.T) {
+	err := errors.Join(ErrLimit, ErrTrust)
+	first, _ := Diagnose(err)
+	for i := 0; i < 200; i++ {
+		if d, _ := Diagnose(err); d.Code != first.Code {
+			t.Fatalf("run %d gave %s after %s", i, d.Code, first.Code)
+		}
+	}
+}

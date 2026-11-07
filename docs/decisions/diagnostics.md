@@ -13,8 +13,9 @@
 - **代碼只有一個來源**：`internal/diagcodes/codes.go` 的 registry 以常數當 map key，重複代碼會直接編譯失敗。`docs/diagnostics/codes.md` 由 `go generate ./internal/diagcodes` 產生，測試比對兩者是否一致，也禁止 `PHG` 字面值出現在 registry 以外的正式程式碼。代碼發佈後不改號、不重用，停用時標成 retired。`PHG1xxx` 是設定與執行選項，`PHG2xxx` 是 bytecode。
 - **note 和 help 綁在代碼上**：每個代碼在 registry 寫一次原因與修法，建構點只填 `Code`，動態值放在 `Reason` 或 `Detail`。help 是純文字，不會被自動套用。
 - **既有錯誤只新增**：`ConfigError` 新增匯出欄位 `Code` 與方法 `Diagnostic()`，`Error()` 仍是原本的單行。宿主自己建立、沒有 `Code` 的 `ConfigError` 回報 `PHG1000`。測試掃描根套件，確保引擎建立的每個 `ConfigError` 都有代碼。`phego.Diagnose(err)` 沿錯誤鏈找出第一個能描述自己的錯誤，nil 和其他錯誤回傳 false。
-- **bytecode**：`Error` 新增 `Source` 與 `Pos`，`Build` 失敗時補上出錯指令的原始碼位置。`bytecode.Diagnose` 也處理直接回傳的 sentinel 錯誤，例如 `ErrVersion`。
-- **安全與上限**：渲染器把輸入裡的控制字元與非法 UTF-8 換成 U+FFFD，原始碼和訊息不能操控終端。長行只顯示 span 附近 160 欄，次要 span 最多畫 16 個，其餘以 note 註明省略數量。原始碼由宿主透過 `Options.Source` 提供，遮蔽敏感內容是提供者的責任。
+- **相容性備註**：`ConfigError` 新增欄位後，宿主若用不具名欄位的複合字面值（`ConfigError{"a", "b"}`）會編譯失敗。Go 1 相容承諾允許新增欄位，`go vet` 也會對這種寫法警告。宿主可以填自己的代碼，不在代碼表裡的代碼會保留，note 與 help 用 PHG1000 的內容。代碼常數暫不公開，宿主以 `docs/diagnostics/codes.md` 的字串比對。
+- **bytecode**：`Error` 新增 `Source` 與 `Pos`，`Build` 失敗時補上出錯指令的原始碼位置。位置和驗證共用同一組檢查，驗證會拒絕的位置不會出現在診斷裡。`bytecode.Diagnose` 也處理直接回傳的 sentinel 錯誤，例如 `ErrVersion`。
+- **安全與上限**：渲染器把輸入裡的控制字元、雙向文字控制字元（例如 U+202E）與非法 UTF-8 換成 U+FFFD，原始碼和訊息不能操控終端。行依 PHP 的規則切分，`\n`、`\r\n` 與單獨的 `\r` 都算一行。長行只顯示主要 span 附近 160 欄，視窗外的次要 span 改列成 note，次要 span 最多畫 16 個，其餘以 note 註明省略數量。原始碼由宿主透過 `Options.Source` 提供，遮蔽敏感內容是提供者的責任。
 - **顏色**：只有 `Options.Color` 開關。函式庫不知道輸出會寫到終端、log 還是 HTTP 回應，所以 `NO_COLOR` 與 isatty 偵測交給 CLI（W-35）。
 - **機器可讀**：`Diagnostic` 的 JSON 和終端格式帶著相同的代碼、位置、note 與 help，`Severity` 以 `"error"`／`"warning"` 表示。
 

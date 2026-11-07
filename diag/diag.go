@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -156,51 +157,39 @@ type fileLines struct {
 // never writes terminal control characters taken from its input.
 func Render(w io.Writer, d Diagnostic, opt Options) error {
 	p := palette{opt.Color}
-	text := map[string][]string{}
-	lineText := func(file string, n int) (string, bool) {
-		if n <= 0 || opt.Source == nil {
-			return "", false
-		}
-		ls, ok := text[file]
+	files := map[string]*sourceText{}
+	source := func(file string) *sourceText {
+		t, ok := files[file]
 		if !ok {
-			if src, found := opt.Source(file); found {
-				ls = strings.Split(string(src), "\n")
-				for i := range ls {
-					ls[i] = strings.TrimSuffix(ls[i], "\r")
+			if opt.Source != nil {
+				if src, found := opt.Source(file); found {
+					t = newSourceText(src)
 				}
 			}
-			text[file] = ls
+			files[file] = t
 		}
-		if n > len(ls) {
+		return t
+	}
+	lineText := func(file string, n int) (string, bool) {
+		if n <= 0 {
 			return "", false
 		}
-		return ls[n-1], true
+		return source(file).line(n)
 	}
 
-	// A span with Offset but no Column gets its column from the source text,
-	// when the offset falls inside the span's line.
-	starts := map[string][]int{}
+	// A span with an Offset or Length but no Column gets its column from the
+	// source text when the offset falls inside the span's line; a span with
+	// none of the three keeps an unknown column.
 	resolve := func(sp Span) Span {
-		if sp.Line <= 0 || sp.Column > 0 || opt.Source == nil {
+		if sp.Line <= 0 || sp.Column > 0 || (sp.Offset <= 0 && sp.Length <= 0) {
 			return sp
 		}
-		ls, ok := starts[sp.File]
-		if !ok {
-			if src, found := opt.Source(sp.File); found {
-				ls = []int{0}
-				for i, c := range src {
-					if c == '\n' {
-						ls = append(ls, i+1)
-					}
-				}
-			}
-			starts[sp.File] = ls
-		}
-		if sp.Line > len(ls) {
+		t := source(sp.File)
+		if t == nil || sp.Line > len(t.starts) {
 			return sp
 		}
-		start := ls[sp.Line-1]
-		line, _ := lineText(sp.File, sp.Line)
+		start := t.starts[sp.Line-1]
+		line, _ := t.line(sp.Line)
 		if sp.Offset >= start && sp.Offset <= start+len(line) {
 			sp.Column = sp.Offset - start + 1
 		}
@@ -220,7 +209,7 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 	for _, s := range secondary {
 		all = append(all, marked{s, false})
 	}
-	var files []*fileLines
+	var shownFiles []*fileLines
 	var unshown []marked
 	width := 1
 	for _, m := range all {
@@ -231,14 +220,14 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 			continue
 		}
 		var f *fileLines
-		for _, x := range files {
+		for _, x := range shownFiles {
 			if x.name == m.span.File {
 				f = x
 			}
 		}
 		if f == nil {
 			f = &fileLines{name: m.span.File, lines: map[int][]marked{}}
-			files = append(files, f)
+			shownFiles = append(shownFiles, f)
 		}
 		f.lines[m.span.Line] = append(f.lines[m.span.Line], m)
 		width = max(width, len(strconv.Itoa(m.span.Line)))
@@ -252,7 +241,8 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 		line(pad + p.gutter("--> ") + clean(loc))
 	}
 	shownPrimary := false
-	for fi, f := range files {
+	var offscreen []marked
+	for fi, f := range shownFiles {
 		if fi > 0 || !f.hasPrimary() {
 			if fi > 0 {
 				line(pad + p.gutter(" |"))
@@ -272,11 +262,21 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 			src, _ := lineText(f.name, n)
 			ms := f.lines[n]
 			slices.SortStableFunc(ms, func(a, b marked) int { return a.span.Column - b.span.Column })
-			shown, cut := window(src, ms[0].span.Column)
+			anchor := ms[0].span.Column
+			for _, m := range ms {
+				if m.primary {
+					anchor = m.span.Column
+				}
+			}
+			shown, cut, shownWidth := window(src, anchor)
 			line(p.gutter(fmt.Sprintf("%*d |", width, n)) + " " + shown)
 			for _, m := range ms {
 				start, size := markerRange(src, m.span.Column, m.span.Length)
 				start -= cut
+				if !m.primary && (start < 0 || start > shownWidth) {
+					offscreen = append(offscreen, m)
+					continue
+				}
 				mark := "-"
 				color := p.gutter
 				if m.primary {
@@ -298,7 +298,7 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 	if !shownPrimary && d.Primary.Label != "" {
 		notes = append([]string{d.Primary.Label}, notes...)
 	}
-	for _, m := range unshown {
+	for _, m := range append(unshown, offscreen...) {
 		if m.span.Label != "" {
 			notes = append(notes, m.span.Location()+": "+m.span.Label)
 		}
@@ -306,7 +306,7 @@ func Render(w io.Writer, d Diagnostic, opt Options) error {
 	if omitted > 0 {
 		notes = append(notes, fmt.Sprintf("%d more related locations omitted", omitted))
 	}
-	if len(files) > 0 && len(notes)+len(d.Help) > 0 {
+	if len(shownFiles) > 0 && len(notes)+len(d.Help) > 0 {
 		line(pad + p.gutter(" |"))
 	}
 	for _, n := range notes {
@@ -381,14 +381,14 @@ func markerRange(src string, column, length int) (start, size int) {
 		end += g.width
 	}
 	if lo >= len(src) {
-		start = end + (lo - len(src))
+		start = end // one column past the end of the line
 	}
 	return start, max(size, 1)
 }
 
-// window cuts a long line around the first span, returning the printed text
-// and how many display columns the markers must shift left.
-func window(src string, column int) (string, int) {
+// window cuts a long line around column, returning the printed text, how
+// many display columns the markers must shift left, and the printed width.
+func window(src string, column int) (string, int, int) {
 	gs := glyphs(src)
 	total := 0
 	for _, g := range gs {
@@ -399,13 +399,14 @@ func window(src string, column int) (string, int) {
 		for _, g := range gs {
 			b.WriteString(g.text)
 		}
-		return b.String(), 0
+		return b.String(), 0, total
 	}
 	start, _ := markerRange(src, column, 0)
 	from := max(start-contextBefore, 0)
-	col, dropped := 0, 0
+	col, dropped, printed := 0, 0, 0
 	if from > 0 {
 		b.WriteString("...")
+		printed = 3
 	}
 	for _, g := range gs {
 		if col < from {
@@ -419,11 +420,12 @@ func window(src string, column int) (string, int) {
 		}
 		b.WriteString(g.text)
 		col += g.width
+		printed += g.width
 	}
 	if from > 0 {
 		dropped -= 3 // the leading "..." occupies three columns
 	}
-	return b.String(), dropped
+	return b.String(), dropped, printed
 }
 
 // clean replaces control characters and invalid UTF-8 so input cannot drive
@@ -442,8 +444,11 @@ func clean(s string) string {
 	return b.String()
 }
 
+// isControl also covers format characters such as the bidirectional
+// overrides (U+202A-U+202E, U+2066-U+2069), which can reorder what a
+// terminal shows.
 func isControl(r rune) bool {
-	return r != '\t' && (r < 0x20 || r == 0x7f || (r >= 0x80 && r < 0xa0))
+	return r != '\t' && (r < 0x20 || r == 0x7f || (r >= 0x80 && r < 0xa0) || unicode.Is(unicode.Cf, r))
 }
 
 // runeWidth is the terminal column count of r: East Asian wide and fullwidth
@@ -452,11 +457,54 @@ func runeWidth(r rune) int {
 	switch {
 	case r == '\t':
 		return tabWidth
+	case unicode.In(r, unicode.Mn, unicode.Me):
+		return 0
 	case r >= 0x1100 && r <= 0x115F, r >= 0x2E80 && r <= 0xA4CF && r != 0x303F,
 		r >= 0xAC00 && r <= 0xD7A3, r >= 0xF900 && r <= 0xFAFF, r >= 0xFE30 && r <= 0xFE4F,
 		r >= 0xFF00 && r <= 0xFF60, r >= 0xFFE0 && r <= 0xFFE6, r >= 0x1F300 && r <= 0x1F64F,
-		r >= 0x1F900 && r <= 0x1F9FF, r >= 0x20000 && r <= 0x3FFFD:
+		r >= 0x1F680 && r <= 0x1F6FF, r >= 0x1F900 && r <= 0x1F9FF, r >= 0x1FA70 && r <= 0x1FAFF, r >= 0x20000 && r <= 0x3FFFD:
 		return 2
 	}
 	return 1
+}
+
+// sourceText splits a file into lines as PHP and the Phego lexer count them:
+// "\n", "\r\n" and a lone "\r" each end a line.
+type sourceText struct {
+	src    []byte
+	starts []int // byte offset of each line start
+}
+
+func newSourceText(src []byte) *sourceText {
+	t := &sourceText{src: src, starts: []int{0}}
+	for i := 0; i < len(src); i++ {
+		switch src[i] {
+		case '\r':
+			if i+1 < len(src) && src[i+1] == '\n' {
+				i++
+			}
+			t.starts = append(t.starts, i+1)
+		case '\n':
+			t.starts = append(t.starts, i+1)
+		}
+	}
+	return t
+}
+
+func (t *sourceText) line(n int) (string, bool) {
+	if t == nil || n <= 0 || n > len(t.starts) {
+		return "", false
+	}
+	end := len(t.src)
+	if n < len(t.starts) {
+		end = t.starts[n]
+	}
+	l := t.src[t.starts[n-1]:end]
+	if k := len(l); k > 0 && l[k-1] == '\n' {
+		l = l[:k-1]
+	}
+	if k := len(l); k > 0 && l[k-1] == '\r' {
+		l = l[:k-1]
+	}
+	return string(l), true
 }
