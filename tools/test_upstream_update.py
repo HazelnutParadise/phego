@@ -87,8 +87,10 @@ def _watch_record(version, digest, *, suffix="1", announcement_sha="e"):
 
 def _snapshot(series, *, news_sha="f"):
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "news_sha256": news_sha * 64,
+        "news": [{"id": "2026-11-05-1", "time": "2026-11-05T21:12:54+00:00",
+                  "title": "PHP 8.6.0 RC5 available for testing", "sha256": "d" * 64}],
         "series": series,
     }
 

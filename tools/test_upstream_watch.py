@@ -6,6 +6,34 @@ from urllib.error import URLError
 import tools.upstream_watch as uw
 
 
+def _article(ident, title, body="<p>Body.</p>", time=None):
+    """One news entry in the markup the php.net homepage serves (checked 2026-11-07)."""
+    time = time or ident[:10] + "T10:00:00+00:00"
+    return (
+        '<article class="newsentry">\n  <header class="title">\n'
+        f'    <time datetime="{time}">01 Jan 2026</time>\n'
+        '    <h2 class="newstitle">\n'
+        f'      <a href="https://www.php.net/archive/{ident[:4]}.php#{ident}" id="{ident}">{title}</a>\n'
+        '    </h2>\n  </header>\n  <div class="newscontent">\n    <div>\n'
+        f'      {body}\n    </div>\n  \n  </div>\n</article>'
+    )
+
+
+def _home(articles, banner=""):
+    return (banner + '<section id="layout-content">\n<div class=\'home-content\'>' + "".join(articles)
+            + '<p class="archive"><a href="/archive/">Older News Entries</a></p></div>\n'
+            '</section><!-- layout-content -->').encode("utf-8")
+
+
+# The homepage keeps the latest 25 entries, newest first.
+NEWS_IDS = [f"2026-10-{day:02d}-1" for day in range(30, 5, -1)]
+NEWS_ARTICLES = [_article(ident, "News " + ident) for ident in NEWS_IDS]
+
+
+def _news_list():
+    return uw._news(uw._content(_home(NEWS_ARTICLES)))
+
+
 class FakeFetch:
     def __init__(self, mapping):
         self.mapping = mapping
@@ -21,7 +49,7 @@ class FakeFetch:
                 return val
             return json.dumps(val).encode("utf-8")
         if url == "https://www.php.net/":
-            return b'<section id="layout-content">Official news</section><!-- layout-content -->'
+            return _home(NEWS_ARTICLES)
         raise URLError(f"unexpected {url}")
 
 
@@ -97,7 +125,10 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         f = FakeFetch(mapping)
         snap = uw.observe(f)
         self.assertIsInstance(snap, dict)
-        self.assertEqual(snap.get("schema_version"), 2)
+        self.assertEqual(snap.get("schema_version"), 3)
+        self.assertEqual([entry["id"] for entry in snap["news"]], NEWS_IDS)
+        self.assertEqual(snap["news"][0]["title"], "News 2026-10-30-1")
+        self.assertEqual(snap["news"][0]["time"], "2026-10-30T10:00:00+00:00")
         self.assertIn("series", snap)
         series = snap["series"]
         self.assertEqual(list(series.keys()), sorted(series.keys()))
@@ -146,22 +177,95 @@ class TestUpstreamWatchObserve(unittest.TestCase):
         with self.assertRaises(ValueError):
             uw.observe(FakeFetch(mapping))
 
-    def test_news_content_changes_but_rotating_banner_does_not(self):
+    def _home_mapping(self, home):
         version = "8.3.12"
-        mapping = {CATALOG_URL: b({"8": {"supported_versions": ["8.3"]}}),
-                   "https://www.php.net/releases/index.php?json&version=8.3&max=1": b(self._series_resp("8.3", version)),
-                   "https://api.github.com/repos/php/php-src/git/ref/tags/php-8.3.12": b({"object": {"type": "commit", "sha": "c" * 40}}),
-                   "https://www.php.net/releases/8_3_12.php": self._announce_html(version)}
-        home = "https://www.php.net/"
-        mapping[home] = b'banner A<section id="layout-content">security notice A</section><!-- layout-content -->'
-        old = uw.observe(FakeFetch(mapping))
-        mapping[home] = b'banner B<section id="layout-content">security notice A</section><!-- layout-content -->'
-        same = uw.observe(FakeFetch(mapping))
+        return {CATALOG_URL: b({"8": {"supported_versions": ["8.3"]}}),
+                "https://www.php.net/releases/index.php?json&version=8.3&max=1": b(self._series_resp("8.3", version)),
+                "https://api.github.com/repos/php/php-src/git/ref/tags/php-8.3.12": b({"object": {"type": "commit", "sha": "c" * 40}}),
+                "https://www.php.net/releases/8_3_12.php": self._announce_html(version),
+                "https://www.php.net/": home}
+
+    def _observe_home(self, home):
+        return uw.observe(FakeFetch(self._home_mapping(home)))
+
+    def test_news_content_changes_but_rotating_banner_does_not(self):
+        old = self._observe_home(_home(NEWS_ARTICLES, banner="banner A"))
+        same = self._observe_home(_home(NEWS_ARTICLES, banner="banner B"))
         self.assertEqual(uw.compare(old, same)["status"], "unchanged")
-        mapping[home] = b'banner B<section id="layout-content">security notice B</section><!-- layout-content -->'
-        changed = uw.compare(old, uw.observe(FakeFetch(mapping)))
+        outside = _home(NEWS_ARTICLES).replace(b"Older News Entries", b"Older news")
+        changed = uw.compare(old, self._observe_home(outside))
         self.assertEqual(changed["status"], "pending_review")
         self.assertEqual([entry["field"] for entry in changed["changes"]], ["news_sha256"])
+        self.assertEqual((changed["news_added"], changed["news_removed"], changed["news_changed"]), ([], [], []))
+
+    def test_news_entry_added_and_oldest_pushed_off(self):
+        old = self._observe_home(_home(NEWS_ARTICLES))
+        newest = _article("2026-11-05-1", "PHP 8.6.0 RC5 available for testing", time="2026-11-05T21:12:54+00:00")
+        new = self._observe_home(_home([newest] + NEWS_ARTICLES[:-1]))
+        self.assertEqual(len(new["news"]), 25)
+        result = uw.compare(old, new)
+        self.assertEqual(result["status"], "pending_review")
+        self.assertEqual(result["news_added"], ["2026-11-05-1"])
+        self.assertEqual(result["news_removed"], [NEWS_IDS[-1]])
+        self.assertEqual(result["news_changed"], [])
+        entries = {entry["id"]: entry for entry in result["changes"] if entry["field"] == "news"}
+        self.assertIsNone(entries["2026-11-05-1"]["old"])
+        self.assertEqual(entries["2026-11-05-1"]["new"]["title"], "PHP 8.6.0 RC5 available for testing")
+        self.assertEqual(entries["2026-11-05-1"]["new"]["time"], "2026-11-05T21:12:54+00:00")
+        self.assertEqual(entries[NEWS_IDS[-1]]["old"]["title"], "News " + NEWS_IDS[-1])
+        self.assertIsNone(entries[NEWS_IDS[-1]]["new"])
+        self.assertEqual(result["changes"][-1]["field"], "news_sha256")
+
+    def test_news_entry_edited_in_place(self):
+        old = self._observe_home(_home(NEWS_ARTICLES))
+        edited = list(NEWS_ARTICLES)
+        edited[3] = _article(NEWS_IDS[3], "News " + NEWS_IDS[3], body="<p>Corrected body.</p>")
+        result = uw.compare(old, self._observe_home(_home(edited)))
+        self.assertEqual((result["news_added"], result["news_removed"], result["news_changed"]), ([], [], [NEWS_IDS[3]]))
+        change = result["changes"][0]
+        self.assertEqual(change["field"], "news")
+        self.assertEqual(change["old"]["title"], change["new"]["title"])
+        self.assertNotEqual(change["old"]["sha256"], change["new"]["sha256"])
+        retitled = list(NEWS_ARTICLES)
+        retitled[0] = _article(NEWS_IDS[0], "Security fix &amp; update")
+        result = uw.compare(old, self._observe_home(_home(retitled)))
+        self.assertEqual(result["news_changed"], [NEWS_IDS[0]])
+        self.assertEqual(result["changes"][0]["new"]["title"], "Security fix & update")
+
+    def test_news_reorder_is_caught_by_digest(self):
+        old = self._observe_home(_home(NEWS_ARTICLES))
+        result = uw.compare(old, self._observe_home(_home([NEWS_ARTICLES[1], NEWS_ARTICLES[0]] + NEWS_ARTICLES[2:])))
+        self.assertEqual(result["status"], "pending_review")
+        self.assertEqual([entry["field"] for entry in result["changes"]], ["news_sha256"])
+
+    def test_malformed_article_markup_fails_instead_of_returning_fewer_entries(self):
+        good = NEWS_ARTICLES[0]
+        variants = {
+            "no articles": [],
+            "item class": [good.replace('class="newsentry"', 'class="newsItem"')] + NEWS_ARTICLES[1:],
+            "missing id": [good.replace(f' id="{NEWS_IDS[0]}"', "")] + NEWS_ARTICLES[1:],
+            "attribute order": [good.replace(f'<a href="https://www.php.net/archive/2026.php#{NEWS_IDS[0]}" id="{NEWS_IDS[0]}">',
+                                             f'<a id="{NEWS_IDS[0]}" href="https://www.php.net/archive/2026.php#{NEWS_IDS[0]}">')] + NEWS_ARTICLES[1:],
+            "link mismatch": [good.replace(f"2026.php#{NEWS_IDS[0]}", f"2026.php#{NEWS_IDS[1]}")] + NEWS_ARTICLES[1:],
+            "year mismatch": [good.replace("archive/2026.php", "archive/2025.php")] + NEWS_ARTICLES[1:],
+            "bad id": [_article("2026-10-30", "Undated")] + NEWS_ARTICLES[1:],
+            "bad time": [good.replace("2026-10-30T10:00:00+00:00", "yesterday")] + NEWS_ARTICLES[1:],
+            "markup in title": [good.replace("News 2026-10-30-1", "<em>News</em>")] + NEWS_ARTICLES[1:],
+            "empty title": [good.replace("News 2026-10-30-1", " ")] + NEWS_ARTICLES[1:],
+            "missing time": [good.replace('<time datetime="2026-10-30T10:00:00+00:00">01 Jan 2026</time>', "")] + NEWS_ARTICLES[1:],
+            "unterminated": [good[:-len("</article>")]] + NEWS_ARTICLES[1:],
+            "nested": [good.replace("<p>Body.</p>", NEWS_ARTICLES[1])] + NEWS_ARTICLES[2:],
+            "markup between": [good, "<hr>"] + NEWS_ARTICLES[1:],
+            "stray close": [good, "</article>"] + NEWS_ARTICLES[1:],
+            "duplicate id": [good, good] + NEWS_ARTICLES[1:],
+            "too many": [_article(f"2026-01-01-{n}", f"News {n}") for n in range(1, uw.MAX_NEWS + 2)],
+        }
+        for name, articles in variants.items():
+            with self.subTest(name):
+                with self.assertRaises(ValueError):
+                    self._observe_home(_home(articles))
+        with self.assertRaises(ValueError):
+            self._observe_home(_home(NEWS_ARTICLES).replace(b"News 2026-10-30-1", b"News \xff"))
 
     def test_observe_lightweight_tag_records_same_sha(self):
         catalog = {"8": {"supported_versions": ["8.3"]}}
@@ -274,16 +378,26 @@ class TestUpstreamWatchObserve(unittest.TestCase):
 
 class TestUpstreamWatchCompare(unittest.TestCase):
     def _mk_snap(self, series_map):
-        snap = {"schema_version": 2, "news_sha256": "f" * 64, "series": {}}
+        snap = {"schema_version": 3, "news_sha256": "f" * 64, "news": _news_list(), "series": {}}
         for sname, rec in series_map.items():
             snap["series"][sname] = dict(rec)
         # ensure sorted
         return snap
 
+    def _valid_snap(self):
+        snap = self._mk_snap({"8.1": {
+            "version": "8.1.30", "tag": "php-8.1.30", "tag_object": "a" * 40,
+            "commit": "a" * 40, "sha256": "1" * 64,
+            "announcement": "https://www.php.net/releases/8_1_30.php",
+            "announcement_sha256": "2" * 64, "release_tags": ["security"]}})
+        self.assertEqual(uw.compare(snap, snap)["status"], "unchanged")
+        return snap
+
     def test_compare_unchanged(self):
         old = {
-            "schema_version": 2,
+            "schema_version": 3,
             "news_sha256": "f" * 64,
+            "news": _news_list(),
             "series": {
                 "8.1": {
                     "version": "8.1.30",
@@ -299,13 +413,14 @@ class TestUpstreamWatchCompare(unittest.TestCase):
         }
         new = json.loads(json.dumps(old))
         res = uw.compare(old, new)
-        self.assertEqual(res["schema_version"], 1)
+        self.assertEqual(res["schema_version"], 2)
         self.assertEqual(res["status"], "unchanged")
         self.assertEqual(res["compatibility"], "not_assessed")
         self.assertEqual(res["changes"], [])
+        self.assertEqual((res["news_added"], res["news_removed"], res["news_changed"]), ([], [], []))
 
     def test_news_change_is_separate_candidate(self):
-        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": {
+        old = {"schema_version": 3, "news_sha256": "f" * 64, "news": _news_list(), "series": {"8.1": {
             "version": "8.1.30", "tag": "php-8.1.30", "tag_object": "a" * 40,
             "commit": "a" * 40, "sha256": "1" * 64,
             "announcement": "https://www.php.net/releases/8_1_30.php",
@@ -324,8 +439,9 @@ class TestUpstreamWatchCompare(unittest.TestCase):
 
     def test_compare_release_changes_emit_events_sorted(self):
         old = {
-            "schema_version": 2,
+            "schema_version": 3,
             "news_sha256": "f" * 64,
+            "news": _news_list(),
             "series": {
                 "8.2": {
                     "version": "8.2.24",
@@ -380,8 +496,8 @@ class TestUpstreamWatchCompare(unittest.TestCase):
                     "commit": "b" * 40, "sha256": "c" * 64,
                     "announcement": "https://www.php.net/releases/" + version.replace(".", "_") + ".php",
                     "announcement_sha256": "d" * 64, "release_tags": ["security"]}
-        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": record("8.1.30")}}
-        new = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.2": record("8.2.25")}}
+        old = {"schema_version": 3, "news_sha256": "f" * 64, "news": _news_list(), "series": {"8.1": record("8.1.30")}}
+        new = {"schema_version": 3, "news_sha256": "f" * 64, "news": _news_list(), "series": {"8.2": record("8.2.25")}}
         res = uw.compare(old, new)
         self.assertEqual(res["status"], "pending_review")
         fields = [c["field"] for c in res["changes"]]
@@ -398,12 +514,41 @@ class TestUpstreamWatchCompare(unittest.TestCase):
         with self.assertRaises(ValueError):
             uw.compare(bad3, bad3)
 
+    def test_schema_2_snapshot_is_rejected(self):
+        old = self._valid_snap()
+        del old["news"]
+        old["schema_version"] = 2
+        with self.assertRaises(ValueError):
+            uw.compare(old, self._valid_snap())
+
+    def test_invalid_news_list_rejected(self):
+        entry = _news_list()[0]
+        variants = {
+            "empty": [],
+            "not a list": {"id": entry["id"]},
+            "duplicate id": [entry, dict(entry)],
+            "extra field": [dict(entry, body="x")],
+            "missing field": [{key: value for key, value in entry.items() if key != "time"}],
+            "bad id": [dict(entry, id="../2026")],
+            "bad time": [dict(entry, time="2026-11-05")],
+            "bad digest": [dict(entry, sha256="F" * 64)],
+            "padded title": [dict(entry, title=" News")],
+            "control title": [dict(entry, title="News\nline")],
+            "too many": [dict(entry, id=f"2026-01-01-{n}") for n in range(1, uw.MAX_NEWS + 2)],
+        }
+        for name, news in variants.items():
+            with self.subTest(name):
+                snap = self._valid_snap()
+                snap["news"] = news
+                with self.assertRaises(ValueError):
+                    uw.compare(snap, self._valid_snap())
+
     def test_compare_unrecognized_fields_rejected(self):
         record = {"version": "8.1.30", "tag": "php-8.1.30", "tag_object": "a" * 40,
                   "commit": "a" * 40, "sha256": "1" * 64,
                   "announcement": "https://www.php.net/releases/8_1_30.php",
                   "announcement_sha256": "2" * 64, "release_tags": ["security"], "extra": 1}
-        old = {"schema_version": 2, "news_sha256": "f" * 64, "series": {"8.1": record}}
+        old = {"schema_version": 3, "news_sha256": "f" * 64, "news": _news_list(), "series": {"8.1": record}}
         with self.assertRaises(ValueError):
             uw.compare(old, old)
 
