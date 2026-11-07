@@ -43,8 +43,8 @@
     "T-129",
     "T-130"
   ],
-  "source_base": "62b7877a3393b8da714d47847297860e3645323d",
-  "captured_at": "2026-11-07T02:09:09.206923+00:00",
+  "source_base": "d2f18b30f3f1d649cbbce870f148e1fab95c3d3f",
+  "captured_at": "2026-11-07T02:17:26.531765+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
@@ -96,7 +96,7 @@
     "tools/test_upstream_diff.py": "1b8bdd79ca945f34d043590405b5f2f19fadf889449b2cca333bf91d7a71da52",
     "tools/test_upstream_diff_review.py": "1839eebf1b2f38b21a82b1e5be0ea890b2826d63c1b2da5adb29eb5942ca8daf",
     "tools/upstream_diff.py": "b512a80c93ea91cc6ebaaa181b77da65c4e106de763c9767ae4b0cc496c6870e",
-    "tools/w03-local-checks.json": "bac501ee2cfe9921227f21949767add95f4a705f07c5096dbb7e2a467870f035"
+    "tools/w03-local-checks.json": "13faecd8281757fc45818db55aaff48a1aabca47f5c11b5fdf9b8a2be44ce9b7"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",

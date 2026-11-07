@@ -368,6 +368,7 @@
     "test_upstream_diff_review.TestPropertyStubs.test_hooks_skip_matched_bodies_and_do_not_create_properties_from_locals",
     "test_upstream_diff_review.TestPropertyStubs.test_multiple_properties_split_only_at_top_level_commas",
     "test_upstream_diff_review.TestPropertyStubs.test_typed_properties_keep_modifiers_types_and_defaults",
+    "test_upstream_diff_review.TestSignatureComments.test_comment_beside_type_and_parameter_markers_does_not_change_signatures",
     "test_upstream_diff_review.TestSignatureComments.test_comment_edits_report_no_change_but_real_edits_do",
     "test_upstream_diff_review.TestSignatureComments.test_comment_position_and_line_breaks_do_not_change_signatures",
     "test_upstream_diff_review.TestStubMetadata.test_attribute_argument_changes_are_reported_with_normalized_whitespace",
