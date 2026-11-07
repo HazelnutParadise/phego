@@ -45,10 +45,12 @@ type FileGrant struct {
 	Path string
 	// Root is a host directory opened through os.Root. Absolute symbolic links
 	// may target another granted Root; parent components in link targets may
-	// not leave their selected mount. Regular files, directories and the host's
-	// null, zero, full, random and urandom character devices are supported;
-	// other special files are refused. The host must control the layout,
-	// including existing hard links.
+	// not leave their selected mount. Every file in it opens as PHP's open(2)
+	// opens it, under the host process's own permissions: a FIFO waits for its
+	// peer, a device acts as it does for PHP, and a socket does not open.
+	// Grant a directory holding only what PHP may use, for example a
+	// directory with a few device nodes rather than /dev. The host must
+	// control the layout, including existing hard links.
 	Root string
 	// FS is a trusted host implementation of a read-only source, for example
 	// an embed.FS. It must confine reads to the authorized data and must not
@@ -264,9 +266,10 @@ func (e *Engine) admit(ctx context.Context) (func(), error) {
 	return release, nil
 }
 
-// openFile opens a PHP path through the policy for reading.
-func (e *Engine) openFile(path string) (fs.File, error) {
-	f, err := e.policy.policy.OpenFile(path, os.O_RDONLY, 0)
+// openFile opens a PHP path through the policy for reading. ctx bounds the
+// open and every later read of the file.
+func (e *Engine) openFile(ctx context.Context, path string) (fs.File, error) {
+	f, err := e.policy.policy.OpenFile(ctx, path, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, publicError(err)
 	}

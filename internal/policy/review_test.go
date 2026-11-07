@@ -31,7 +31,7 @@ func TestReviewReadOnlyMountShadowsWritableParent(t *testing.T) {
 			}
 			p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/", Dir: root, Write: true}, child}})
 			for _, flag := range []int{os.O_WRONLY, os.O_RDWR, os.O_WRONLY | os.O_TRUNC, os.O_CREATE | os.O_WRONLY, os.O_APPEND | os.O_WRONLY} {
-				f, err := p.OpenFile("/protected/file", flag, 0600)
+				f, err := p.OpenFile(t.Context(), "/protected/file", flag, 0600)
 				if f != nil {
 					f.Close()
 				}
@@ -178,13 +178,13 @@ func TestReviewRootAndRootFSConfineSymlinks(t *testing.T) {
 	defer root.Close()
 	for _, grant := range []FileGrant{{Path: "/app", Dir: app}, {Path: "/app", FS: root.FS()}} {
 		p := mustPolicy(t, Spec{Files: []FileGrant{grant}})
-		f, err := p.OpenFile("/app/ok", os.O_RDONLY, 0)
+		f, err := p.OpenFile(t.Context(), "/app/ok", os.O_RDONLY, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
 		f.Close()
 		for _, name := range []string{"/app/escape", "/app/../outside", "/application/ok"} {
-			f, err := p.OpenFile(name, os.O_RDONLY, 0)
+			f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
 			if f != nil {
 				f.Close()
 			}

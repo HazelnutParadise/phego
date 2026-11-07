@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/policy"
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
@@ -392,11 +393,13 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 // RunFile reads path through Policy.Files, or directly through legacy
 // Config.Files when used alone, then compiles and runs it, as php path does:
 // a device or FIFO the backend opens is read as the script, a directory runs
-// as an empty script, and a socket cannot be opened. Reading stops at
-// MaxSourceBytes, and a FIFO or device read ends when ctx does; opening a
-// FIFO through an fs.FS or Files is the host's code and may wait for a
-// writer. Host directory mounts keep FIFOs, sockets, block devices and
-// unlisted character devices closed (see FileGrant.Root).
+// as an empty script, and a socket cannot be opened. On a host directory a
+// FIFO waits for a writer, and the system's open error is returned for what
+// cannot be opened, such as a terminal without a controlling tty. Reading
+// stops at MaxSourceBytes, and when ctx ends while the file is opened or
+// read, RunFile reports StatusCancelled. Opening a file through an fs.FS or
+// Files is the host's code and is not interrupted; it may wait for a FIFO
+// writer.
 func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -427,7 +430,7 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		if !strings.HasPrefix(phpPath, "/") {
 			phpPath = "/" + phpPath
 		}
-		f, err = e.openFile(phpPath)
+		f, err = e.openFile(ctx, phpPath)
 	}
 	var pe *PolicyError
 	if errors.As(err, &pe) {
@@ -437,7 +440,13 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		return &Result{Status: StatusPolicyDenied}, pe
 	}
 	if err != nil {
-		return &Result{Status: StatusFailed}, err
+		status := StatusFailed
+		if ctx.Err() != nil {
+			// The policy ends its waits, such as a FIFO's wait for a
+			// writer, when ctx ends.
+			status = StatusCancelled
+		}
+		return &Result{Status: status}, err
 	}
 	defer f.Close()
 	info, err := f.Stat()
@@ -452,7 +461,7 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		return &Result{Status: StatusFailed}, &fs.PathError{Op: "open", Path: path, Err: fs.ErrInvalid}
 	case mode.IsDir():
 	default:
-		data, err = e.readSource(ctx, f, info)
+		data, err = e.readSource(ctx, f, info, path)
 		if ctx.Err() != nil && err != nil {
 			return &Result{Status: StatusCancelled}, ctx.Err()
 		}
@@ -517,16 +526,17 @@ func Run(ctx context.Context, source string, opts ...RunOption) (*Result, error)
 
 // readSource reads one byte past MaxSourceBytes, so a larger source is
 // detected. A FIFO or device can block, as php path waits for a FIFO's
-// writer; a host file of that kind is read so that ending ctx ends the read
-// (see readHostFile). Any other fs.File is the host's trusted code and is
-// read as it is.
-func (e *Engine) readSource(ctx context.Context, f fs.File, info fs.FileInfo) ([]byte, error) {
+// writer. A FIFO or device from a host directory mount ends its own waits
+// when ctx ends, and one that an fs.FS or Files opened as an *os.File is read
+// with the same waits (policy.ReadHostFile). Any other fs.File is the host's
+// trusted code and is read as it is. path names the file in errors.
+func (e *Engine) readSource(ctx context.Context, f fs.File, info fs.FileInfo, path string) ([]byte, error) {
 	limit := int64(e.cfg.MaxSourceBytes)
 	if limit < math.MaxInt64 {
 		limit++
 	}
 	if hf, ok := f.(*os.File); ok && !info.Mode().IsRegular() {
-		return readHostFile(ctx, hf, limit)
+		return policy.ReadHostFile(ctx, hf, path, limit)
 	}
 	return io.ReadAll(io.LimitReader(f, limit))
 }
