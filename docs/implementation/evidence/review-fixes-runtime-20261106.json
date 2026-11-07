@@ -43,23 +43,24 @@
     "T-129",
     "T-130"
   ],
-  "source_base": "d2f18b30f3f1d649cbbce870f148e1fab95c3d3f",
-  "captured_at": "2026-11-07T02:17:26.531765+00:00",
+  "source_base": "a3dd3ac577fa3e17c8ceb0db77387faed478cb4f",
+  "captured_at": "2026-11-07T03:52:18.159660+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
-    "engine.go": "23d30d59879d21b4cdb935bb50bc21c11d364c7cfec6526cdc5c4fba8f7d4f6c",
+    "engine.go": "744ed38b032e0a064994295a8d08eef126c4d85ac610a8dd8a0e46afa40f199c",
     "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
     "internal/bytecode/limits_review_test.go": "c2b640c052007d787f853ff2dc9d11f24509e91b8d16c99db840ef0302b70c0f",
-    "internal/bytecode/verify.go": "46092180fdb60ee3e70fc7a9abc292f1b8d9db4911c09795135ee0271f6dc8aa",
+    "internal/bytecode/verify.go": "5e9d459e1f31eea283e7d7c37cdb544192c245d5b8af04a93b464c9918f6e3c2",
     "internal/ir/ssa/analyze.go": "a6f4b7f7627fb247eab759a985d7f6eb8ba583ac60b8fb6f583fdb3914a9623c",
     "internal/ir/ssa/ssa_test.go": "99a5c355fae14fc99d977b1ff18c874ce703bee89835f1a706cfd506252c866a",
     "internal/policy/absolute_review_fixes_test.go": "1f71a7579a79b871d85c37c3f1f5d58a6062776f62b2ada2f40159bf195e73ea",
     "internal/policy/fifo_review_fixes_test.go": "317fb21cb8440eeb5a351755bc27a6ca65533cf4a93d2024d2ff9b3f3a5b6018",
-    "internal/policy/files.go": "22b91525df034b13b84f48eae638d0422463a2b9ebccc5cc7bce6b89b67ee52c",
+    "internal/policy/files.go": "afe46ef7309bbe7b4c80f225346dfd4edf01a4628f3c4e300aa8f924f56ec7cf",
+    "internal/policy/files_fs.go": "3661e5d650da585d54522415d159d73434a13d9de274113171b3ab4af56a2d94",
     "internal/policy/files_open_other.go": "85b4fe3336e6f4d23e4d811f161e471f8189545b4f7bc4e677c4709214afdc53",
     "internal/policy/files_open_unix.go": "a6483360e70a9453bad41d1b1a5e3b89181128a63903070558fadda1efe0d9fa",
-    "internal/policy/files_root.go": "2046485beead920ff7f5a4bcbfcf9c68922fe64cd536f9e287f06254cf7fc8e2",
+    "internal/policy/files_root.go": "2bc01e9f089531408fdce08f41ce110f1de862221f8b0cf4d9b48afa235ea577",
     "internal/policy/network_review_fixes_test.go": "94e98909cb9d10065faba23b6eff462f223a53fb9dd082374006e202939a5a6a",
     "internal/policy/policy.go": "90ee2a6ff19c5ae7f6687d2ec8ac71a6ce25323a915c4f8bfd50cbbd27252f8f",
     "internal/runtime/array_argument_type_test.go": "ca1c2390a1208de238b74920282f04c6a247f806071c10d6b83c4b4ea4742d6b",
@@ -72,12 +73,12 @@
     "internal/runtime/array_w12.go": "6c10f89dd27d1198d4a3cb446d2e75ca56fe7006cd244f48697a27f448655352",
     "internal/runtime/array_w12_safety_test.go": "9052cd8f59468dead9e7e32a1847ddb34f0d382ae9507e03636bab685b956060",
     "internal/runtime/array_w12_test.go": "a7f66506d7bd9f75d0a49fc3a48862998c5f990040aa953a5531e63adb6c8ae1",
-    "internal/runtime/execution.go": "10fe8d93bf2a87ae254672f5f2bd16f21274f4b585ab84533649640c652a5faf",
+    "internal/runtime/execution.go": "fdc68cd3c628305f1a6dc178504f79e0d215eb9f8d8ee1a7e2b955ecb85c0902",
     "internal/runtime/execution_ci_review_test.go": "009311d1efc90fd2da63a6cf5c75085b9949a15c306ba37bf4b48183e0ec4373",
-    "internal/runtime/execution_oracle_test.go": "b5fa554aaec18a34e39861242b5a73f39362000665d8c45fb34bec6885780ee9",
-    "internal/runtime/execution_output.go": "f8ab0f983674aa85cb57dc78092b72e27e678922b374faa9b3f7fed73789f29f",
+    "internal/runtime/execution_oracle_test.go": "b2dbcf3f0b0fac70bb4580c90fc100c433f6341ecee93ea1225715c434b765a3",
+    "internal/runtime/execution_output.go": "4aeb8c2b86f3cc1c0931149cf08b34feb88826867565e75585116201b9646876",
     "internal/runtime/execution_snapshot_test.go": "a2bbeeca11f1298b3e95cc10b7b17b085f9dc28b650328063f1e7cf21ecf2ea6",
-    "internal/runtime/execution_test.go": "ebb57666996265d4f2e66cce19abfc2a63756e9086950337b6618001be0ce7f5",
+    "internal/runtime/execution_test.go": "eb83af4b10ee6044e9e3c7f3f9468a031d4428722d3d899e9b6c61bdf032027d",
     "internal/runtime/object_model_test.go": "4f077ec0f0914c281ba7a4dad6d6960cc9e837a6bfc28fcd168fafa04a6cde79",
     "internal/runtime/object_review_r14_free_order_test.go": "17ccb6b61c5011edede681de1b4e40fb799d28edccd11b55a5f35fc45ced4d60",
     "internal/runtime/object_table.go": "b8159df6f1b7a7dcbe8d81d4ed562cae0a285a927499681ec81c61b33bc7f2c7",
@@ -86,13 +87,18 @@
     "internal/runtime/testdata/w13-ref-64.json": "a6c3da802dc23b0d89cbf6dc091e99b9f741cd5d1862ddf2eec86f29faef99f1",
     "internal/runtime/testdata/w13-run-32.json": "58a6196fa8905a3e151f70d5a4ea21ed7bbe138886bc227aea64b45d9db13bee",
     "internal/runtime/testdata/w13-run-64.json": "7e105562a62a8214bd2517635cced899b7fc014c604498fb5a09bfea94b6fcb4",
-    "policy_review_test.go": "7d70fa571880ca00bca377d360b5f2aaed9a75ca1b3e9f8d8a1d736ea5fdae5a",
+    "policy_review_test.go": "7d29781feb3aee90776e1c78cdaed56f2ace4e70f3630e99fd4fd13b20c09f9d",
     "tests/lifecycle/w14/buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
     "tests/lifecycle/w14/buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
-    "tests/lifecycle/w14/reference-32.json": "f6deb89e526f4e74f38830e737db145b21daf43a0beea23e5ecb9f9f1c31df6a",
-    "tests/lifecycle/w14/reference.json": "b52379eae61a2c8d45b5f0f4d91ed9ef47c46869ce5910d99a2666d38f3bdd32",
+    "tests/lifecycle/w14/reference-32.json": "b633ecba34e7620ad9c59b7a1540350dc5471a6e3f8244de5f6cf8c3287d8e1c",
+    "tests/lifecycle/w14/reference.json": "328b8fb43176e1124a825f87e34a8f34276a7c5e4475b8801c1124b4b49bfbaa",
+    "tests/lifecycle/w14/solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
+    "tests/lifecycle/w14/solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "tests/lifecycle/w14/solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
+    "tests/lifecycle/w14/solo_shutdown_throw.php": "99cbe67362e47138ed8b33690e087e7d088c9b36dc4a2db1b0646c135b613af3",
     "tests/semantics/w13-objects/matrix.php": "9fc87475e93de5ab002e37c328c873dd49f0bcdf92ff710997bb8382e851a5bc",
     "tests/semantics/w13-objects/review_r14_free_order.php": "39240d4e7c7e04565a3f9236964f171b392d53cc26c67d7b36efd9cc66032fb6",
+    "tools/lifecycle_reference.py": "2ac7b9cdc3dc29191e93e95ba320fcc424d30699cbd177bbac7c65c5299882a8",
     "tools/test_upstream_diff.py": "1b8bdd79ca945f34d043590405b5f2f19fadf889449b2cca333bf91d7a71da52",
     "tools/test_upstream_diff_review.py": "1839eebf1b2f38b21a82b1e5be0ea890b2826d63c1b2da5adb29eb5942ca8daf",
     "tools/upstream_diff.py": "b512a80c93ea91cc6ebaaa181b77da65c4e106de763c9767ae4b0cc496c6870e",
@@ -110,7 +116,8 @@
   "decisions": [
     "W-20 character devices: opening character devices approved by the project owner on 2026-11-06; narrowed on 2026-11-07, with the owner's approval, to the host's null, zero, full, random and urandom devices matched by device number.",
     "Sort functions take op and output buffers take a handler name and flush context: approved by the project owner on 2026-11-06 after an independent Fable 5.1 consultation.",
-    "php8512Sort orders positions through compare(i, j) and swap(i, j) callbacks: approved by the project owner on 2026-11-07 after an independent Fable 5.1 consultation."
+    "php8512Sort orders positions through compare(i, j) and swap(i, j) callbacks: approved by the project owner on 2026-11-07 after an independent Fable 5.1 consultation.",
+    "RunFile matches php path in PHP 8.5.12 (devices and FIFOs a backend opens are read as the script, a directory runs as an empty script, a socket cannot be opened): the owner's rule of 2026-11-07 that externally observable behaviour matches PHP while internals use the best Go design. The policy open path carries one openRequest through every redirect, chosen after an independent Fable 5.1 consultation."
   ],
   "local_status": "pass",
   "product_test_status": "not_run",
@@ -198,12 +205,18 @@
       "exit_code": null,
       "log": "review-fixes-runtime-20261106/red-review3.log",
       "result": "sort() shows 1=a,0=S,2=c during comparisons; a non-allowlisted character device opens; RunFile on a device is not StatusPolicyDenied."
+    },
+    {
+      "command": "go test of the review-4 W-14 solo fixtures, output-limit test and RunFile tests before their fixes (6e36b2c, 50f1c4a and 8ea2b76)",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review4.log",
+      "result": "A throwing only handler at shutdown prints bodyx (PHP prints nothing); exit in a handler drops the buffer; lock errors and limits add the deprecation; the held buffer is not counted; RunFile refuses devices and directories that php path runs."
     }
   ],
   "artifacts": {
     "build.log": {
       "path": "review-fixes-runtime-20261106/build.log",
-      "sha256": "4868412442141f483b4cfe57871bb0afb13851d8ff6bd58e043401e5d1e051bb"
+      "sha256": "90879240e3f8b01a8f7fcec0c48b4854d5ca4b9427eb5acdbd2e3c9d6fcdbfdb"
     },
     "bytecode-budgets.go.txt": {
       "path": "review-fixes-runtime-20261106/bytecode-budgets.go.txt",
@@ -223,11 +236,11 @@
     },
     "fuzz.log": {
       "path": "review-fixes-runtime-20261106/fuzz.log",
-      "sha256": "c38806ac3b93553607fd12f268e102703cafcf68a2466c384317db02d3751b07"
+      "sha256": "7e4e046534fa406ee919086f0523ef66288f90d8eb553e53ec6fea082931cfad"
     },
     "go.log": {
       "path": "review-fixes-runtime-20261106/go.log",
-      "sha256": "692ea1d94d98d6f7dd4eb88b237ff3591443e67df7ca4ec6ca4614553a00b259"
+      "sha256": "fa195c355da2b0fe97c592597a323b306607baf5491b8728ef09cb5cb548e5c7"
     },
     "gofmt.log": {
       "path": "review-fixes-runtime-20261106/gofmt.log",
@@ -259,11 +272,11 @@
     },
     "python.log": {
       "path": "review-fixes-runtime-20261106/python.log",
-      "sha256": "2d68f2e996f931dac0b294c54242a6d20cf315598f2de37777e7d41ec4d7dff4"
+      "sha256": "e771d45ba79024f79bdc7a653c6119a876501c5ba6e337dc063ad8d7df0b7f45"
     },
     "race.log": {
       "path": "review-fixes-runtime-20261106/race.log",
-      "sha256": "f47a4bdcadccec70a411ca8c13cedc0c8fee0c31df46f49208b00a3baea960bc"
+      "sha256": "add007e873d7c526ef57e8c8b16f5b617c9e881c99ef37e6b7887bb5e4333075"
     },
     "red-main.log": {
       "path": "review-fixes-runtime-20261106/red-main.log",
@@ -276,6 +289,10 @@
     "red-review3.log": {
       "path": "review-fixes-runtime-20261106/red-review3.log",
       "sha256": "772ca3c2dc079314a99f6cbc8b44207c3506af2391cb9fb4c23a534822d94c74"
+    },
+    "red-review4.log": {
+      "path": "review-fixes-runtime-20261106/red-review4.log",
+      "sha256": "9baae93397bf135429449571457b1cf4d911a7e7fd4615dcc6b7727f46bd7d9d"
     },
     "upstream-pair-spacing.log": {
       "path": "review-fixes-runtime-20261106/upstream-pair-spacing.log",
