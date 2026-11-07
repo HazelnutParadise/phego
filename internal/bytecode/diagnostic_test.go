@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/HazelnutParadise/phego/diag"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 func TestDiagnoseSentinelsAndErrors(t *testing.T) {
@@ -16,12 +16,12 @@ func TestDiagnoseSentinelsAndErrors(t *testing.T) {
 		err  error
 		code diag.Code
 	}{
-		{ErrInvalid, diagcodes.BytecodeInvalid}, {ErrLimit, diagcodes.BytecodeLimit},
-		{ErrVersion, diagcodes.BytecodeVersion}, {ErrProfile, diagcodes.BytecodeProfile},
-		{ErrIntegrity, diagcodes.BytecodeIntegrity}, {ErrTrust, diagcodes.BytecodeTrust},
-		{ErrCapability, diagcodes.BytecodeCapability},
-		{invalidAt(12, "invalid header length"), diagcodes.BytecodeInvalid},
-		{fail(ErrLimit, "too many functions"), diagcodes.BytecodeLimit},
+		{ErrInvalid, codes.BytecodeInvalid}, {ErrLimit, codes.BytecodeLimit},
+		{ErrVersion, codes.BytecodeVersion}, {ErrProfile, codes.BytecodeProfile},
+		{ErrIntegrity, codes.BytecodeIntegrity}, {ErrTrust, codes.BytecodeTrust},
+		{ErrCapability, codes.BytecodeCapability},
+		{invalidAt(12, "invalid header length"), codes.BytecodeInvalid},
+		{fail(ErrLimit, "too many functions"), codes.BytecodeLimit},
 	} {
 		d, ok := Diagnose(c.err)
 		if !ok || d.Code != c.code || d.Message == "" || len(d.Help) == 0 {

@@ -1,15 +1,23 @@
-// Package diagcodes is the single registry of Phego's diagnostic codes.
+// Package codes lists Phego's diagnostic codes: one exported constant per
+// code, so hosts can compare a diagnostic's Code without spelling the string,
+// and Lookup for its title, note and help.
+//
+// It is the single registry of the codes.
 // docs/diagnostics/codes.md is generated from it (go generate) and a test
 // keeps the two identical. Codes are never renumbered or reused; a retired
 // code stays listed with Retired set.
 //
 // Ranges: PHG1xxx Engine configuration and run options, PHG2xxx bytecode
 // loading and verification.
-package diagcodes
+package codes
 
 //go:generate go run ./gen
 
-import "github.com/HazelnutParadise/phego/diag"
+import (
+	"slices"
+
+	"github.com/HazelnutParadise/phego/diag"
+)
 
 // Entry documents one code. Note explains the cause and Help the fix; both
 // are shown with every diagnostic carrying the code.
@@ -57,8 +65,9 @@ const (
 	BytecodeCapability  diag.Code = "PHG2007"
 )
 
-// Registry holds every code. Constant keys make a duplicate a compile error.
-var Registry = map[diag.Code]Entry{
+// registry holds every code. Constant keys make a duplicate a compile error.
+// It is unexported so hosts cannot change what Phego reports.
+var registry = map[diag.Code]Entry{
 	ConfigOther: {Title: "configuration error without a specific code",
 		Note: "the error was built by host code or predates its code",
 		Help: "see the message for the field and reason"},
@@ -161,4 +170,20 @@ var Registry = map[diag.Code]Entry{
 	BytecodeCapability: {Title: "the bytecode capabilities are unsupported or incomplete",
 		Note: "the artifact needs an operation this build does not provide, or its declared capabilities do not cover its opcodes",
 		Help: "rebuild the artifact for this Phego build"},
+}
+
+// Lookup returns the documentation of a code.
+func Lookup(c diag.Code) (Entry, bool) {
+	e, ok := registry[c]
+	return e, ok
+}
+
+// All returns every code in ascending order, retired ones included.
+func All() []diag.Code {
+	all := make([]diag.Code, 0, len(registry))
+	for c := range registry {
+		all = append(all, c)
+	}
+	slices.Sort(all)
+	return all
 }

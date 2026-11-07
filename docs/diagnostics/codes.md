@@ -1,6 +1,6 @@
 # Phego diagnostic codes
 
-Generated from `internal/diagcodes/codes.go` by `go generate ./internal/diagcodes`; do not edit by hand.
+Generated from `diag/codes/codes.go` by `go generate ./diag/codes`; do not edit by hand.
 
 These codes cover Phego's own diagnostics only. PHP warnings, fatal errors and exception messages keep PHP 8.5.12's exact text and carry no PHG code.
 

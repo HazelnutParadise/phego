@@ -11,7 +11,7 @@ package policy
 
 import (
 	"fmt"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 	"io/fs"
 	"net/netip"
 	"path"
@@ -151,7 +151,7 @@ type Policy struct {
 // rather than ignored, so a typo cannot silently widen or narrow access.
 func New(spec Spec) (*Policy, error) {
 	if spec.Mode > Enforce {
-		return nil, &SpecError{Code: diagcodes.PolicyMode, Field: "Mode", Reason: fmt.Sprintf("unknown mode %d", spec.Mode)}
+		return nil, &SpecError{Code: codes.PolicyMode, Field: "Mode", Reason: fmt.Sprintf("unknown mode %d", spec.Mode)}
 	}
 	p := &Policy{
 		mode: spec.Mode, shell: spec.Shell, dynamicCode: spec.DynamicCode,
@@ -162,15 +162,15 @@ func New(spec Spec) (*Policy, error) {
 		field := fmt.Sprintf("Files[%d]", i)
 		switch {
 		case !path.IsAbs(g.Path) || path.Clean(g.Path) != g.Path:
-			return nil, &SpecError{Code: diagcodes.MountPath, Field: field + ".Path", Reason: fmt.Sprintf("%q is not a clean absolute path", g.Path)}
+			return nil, &SpecError{Code: codes.MountPath, Field: field + ".Path", Reason: fmt.Sprintf("%q is not a clean absolute path", g.Path)}
 		case (g.Dir == "") == (g.FS == nil):
-			return nil, &SpecError{Code: diagcodes.MountSource, Field: field, Reason: "exactly one of Dir and FS must be set"}
+			return nil, &SpecError{Code: codes.MountSource, Field: field, Reason: "exactly one of Dir and FS must be set"}
 		case g.Dir != "" && !filepath.IsAbs(g.Dir):
-			return nil, &SpecError{Code: diagcodes.MountRoot, Field: field + ".Dir", Reason: fmt.Sprintf("%q is not an absolute path", g.Dir)}
+			return nil, &SpecError{Code: codes.MountRoot, Field: field + ".Dir", Reason: fmt.Sprintf("%q is not an absolute path", g.Dir)}
 		case g.Write && g.FS != nil:
-			return nil, &SpecError{Code: diagcodes.MountReadOnly, Field: field + ".Write", Reason: "an fs.FS mount is read-only"}
+			return nil, &SpecError{Code: codes.MountReadOnly, Field: field + ".Write", Reason: "an fs.FS mount is read-only"}
 		case mounted[g.Path]:
-			return nil, &SpecError{Code: diagcodes.MountTwice, Field: field + ".Path", Reason: fmt.Sprintf("%q is mounted twice", g.Path)}
+			return nil, &SpecError{Code: codes.MountTwice, Field: field + ".Path", Reason: fmt.Sprintf("%q is mounted twice", g.Path)}
 		}
 		mounted[g.Path] = true
 		if g.Dir != "" {
@@ -182,12 +182,12 @@ func New(spec Spec) (*Policy, error) {
 		g.Scheme = strings.ToLower(g.Scheme)
 		field := fmt.Sprintf("Network[%d]", i)
 		if g.Scheme == "" || strings.ContainsAny(g.Scheme, ":/") {
-			return nil, &SpecError{Code: diagcodes.NetworkScheme, Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}
+			return nil, &SpecError{Code: codes.NetworkScheme, Field: field, Reason: fmt.Sprintf("scheme %q is not a bare scheme", g.Scheme)}
 		}
 		if a, err := netip.ParseAddr(g.Host); err == nil {
 			// netip accepts any zone text; an interface name is visible ASCII.
 			if !visibleASCII(a.Zone()) {
-				return nil, &SpecError{Code: diagcodes.NetworkHost, Field: field, Reason: fmt.Sprintf("host %q has an IPv6 zone that is not visible ASCII", g.Host)}
+				return nil, &SpecError{Code: codes.NetworkHost, Field: field, Reason: fmt.Sprintf("host %q has an IPv6 zone that is not visible ASCII", g.Host)}
 			}
 			g.Host = a.String()
 		} else {
@@ -196,16 +196,16 @@ func New(spec Spec) (*Policy, error) {
 			// Validate the original bytes before folding: Unicode lowercasing
 			// would turn the Kelvin sign into an accepted ASCII k.
 			if !validDNSHost(strings.TrimPrefix(g.Host, "*.")) {
-				return nil, &SpecError{Code: diagcodes.NetworkHost, Field: field, Reason: fmt.Sprintf("host %q is not a host name, address or *.domain pattern", g.Host)}
+				return nil, &SpecError{Code: codes.NetworkHost, Field: field, Reason: fmt.Sprintf("host %q is not a host name, address or *.domain pattern", g.Host)}
 			}
 			g.Host = asciiLower(g.Host)
 		}
 		if len(g.Ports) == 0 {
-			return nil, &SpecError{Code: diagcodes.NetworkPorts, Field: field, Reason: "no ports are granted"}
+			return nil, &SpecError{Code: codes.NetworkPorts, Field: field, Reason: "no ports are granted"}
 		}
 		for _, port := range g.Ports {
 			if port < 1 || port > 65535 {
-				return nil, &SpecError{Code: diagcodes.NetworkPorts, Field: field, Reason: fmt.Sprintf("port %d is out of range", port)}
+				return nil, &SpecError{Code: codes.NetworkPorts, Field: field, Reason: fmt.Sprintf("port %d is out of range", port)}
 			}
 		}
 		g.Ports = append([]int(nil), g.Ports...)

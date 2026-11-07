@@ -14,7 +14,7 @@ import (
 	"testing/fstest"
 
 	"github.com/HazelnutParadise/phego/diag"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 func TestConfigErrorCodes(t *testing.T) {
@@ -25,29 +25,29 @@ func TestConfigErrorCodes(t *testing.T) {
 		cfg  Config
 		code diag.Code
 	}{
-		{"int size", Config{IntSize: 7}, diagcodes.ConfigIntSize},
-		{"release", Config{Release: "9.0.0"}, diagcodes.ConfigRelease},
-		{"negative source", Config{MaxSourceBytes: -1}, diagcodes.ConfigNegative},
-		{"host name", Config{HostFunctions: []HostFunction{{Name: "1x", Func: ok}}}, diagcodes.HostFuncName},
-		{"host nil", Config{HostFunctions: []HostFunction{{Name: "f"}}}, diagcodes.HostFuncNil},
-		{"host args", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok, MinArgs: -1}}}, diagcodes.HostFuncArgs},
-		{"host capability", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok, Capabilities: []string{""}}}}, diagcodes.HostFuncCapability},
-		{"host duplicate", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok}, {Name: "F", Func: ok}}}, diagcodes.HostFuncDuplicate},
-		{"mode", Config{Policy: Policy{Mode: 99}}, diagcodes.PolicyMode},
-		{"files root", Config{Files: mfs, Policy: Policy{Files: []FileGrant{{Path: "/", FS: mfs}}}}, diagcodes.FilesRootConflict},
-		{"negative limit", Config{Limits: Limits{Steps: -1}}, diagcodes.ConfigNegative},
-		{"output conflict", Config{OutputLimit: 5, Limits: Limits{Output: 6}}, diagcodes.OutputLimitConflict},
-		{"negative active", Config{MaxActive: -1}, diagcodes.ConfigNegative},
-		{"queue", Config{MaxQueued: 1}, diagcodes.QueueWithoutActive},
-		{"mount path", Config{Policy: Policy{Files: []FileGrant{{Path: "app", FS: mfs}}}}, diagcodes.MountPath},
-		{"mount source", Config{Policy: Policy{Files: []FileGrant{{Path: "/app"}}}}, diagcodes.MountSource},
-		{"mount root", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", Root: "rel"}}}}, diagcodes.MountRoot},
-		{"mount read-only", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", FS: mfs, Write: true}}}}, diagcodes.MountReadOnly},
-		{"mount twice", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", FS: mfs}, {Path: "/app", FS: mfs}}}}, diagcodes.MountTwice},
-		{"scheme", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https://", Host: "a.example", Ports: []int{443}}}}}, diagcodes.NetworkScheme},
-		{"host", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "bad host", Ports: []int{443}}}}}, diagcodes.NetworkHost},
-		{"no ports", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "a.example"}}}}, diagcodes.NetworkPorts},
-		{"port range", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "a.example", Ports: []int{0}}}}}, diagcodes.NetworkPorts},
+		{"int size", Config{IntSize: 7}, codes.ConfigIntSize},
+		{"release", Config{Release: "9.0.0"}, codes.ConfigRelease},
+		{"negative source", Config{MaxSourceBytes: -1}, codes.ConfigNegative},
+		{"host name", Config{HostFunctions: []HostFunction{{Name: "1x", Func: ok}}}, codes.HostFuncName},
+		{"host nil", Config{HostFunctions: []HostFunction{{Name: "f"}}}, codes.HostFuncNil},
+		{"host args", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok, MinArgs: -1}}}, codes.HostFuncArgs},
+		{"host capability", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok, Capabilities: []string{""}}}}, codes.HostFuncCapability},
+		{"host duplicate", Config{HostFunctions: []HostFunction{{Name: "f", Func: ok}, {Name: "F", Func: ok}}}, codes.HostFuncDuplicate},
+		{"mode", Config{Policy: Policy{Mode: 99}}, codes.PolicyMode},
+		{"files root", Config{Files: mfs, Policy: Policy{Files: []FileGrant{{Path: "/", FS: mfs}}}}, codes.FilesRootConflict},
+		{"negative limit", Config{Limits: Limits{Steps: -1}}, codes.ConfigNegative},
+		{"output conflict", Config{OutputLimit: 5, Limits: Limits{Output: 6}}, codes.OutputLimitConflict},
+		{"negative active", Config{MaxActive: -1}, codes.ConfigNegative},
+		{"queue", Config{MaxQueued: 1}, codes.QueueWithoutActive},
+		{"mount path", Config{Policy: Policy{Files: []FileGrant{{Path: "app", FS: mfs}}}}, codes.MountPath},
+		{"mount source", Config{Policy: Policy{Files: []FileGrant{{Path: "/app"}}}}, codes.MountSource},
+		{"mount root", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", Root: "rel"}}}}, codes.MountRoot},
+		{"mount read-only", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", FS: mfs, Write: true}}}}, codes.MountReadOnly},
+		{"mount twice", Config{Policy: Policy{Files: []FileGrant{{Path: "/app", FS: mfs}, {Path: "/app", FS: mfs}}}}, codes.MountTwice},
+		{"scheme", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https://", Host: "a.example", Ports: []int{443}}}}}, codes.NetworkScheme},
+		{"host", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "bad host", Ports: []int{443}}}}}, codes.NetworkHost},
+		{"no ports", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "a.example"}}}}, codes.NetworkPorts},
+		{"port range", Config{Policy: Policy{Network: []NetworkGrant{{Scheme: "https", Host: "a.example", Ports: []int{0}}}}}, codes.NetworkPorts},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -85,11 +85,11 @@ func TestRunOptionErrorCodes(t *testing.T) {
 		err  error
 		code diag.Code
 	}{
-		{"output", func() error { _, err := e.Run(context.Background(), p, WithOutput(nil)); return err }(), diagcodes.RunOutputNil},
-		{"global", func() error { _, err := e.Run(context.Background(), p, WithGlobal("1x", Null())); return err }(), diagcodes.RunGlobalName},
-		{"nil option", func() error { _, err := e.Run(context.Background(), p, nil); return err }(), diagcodes.RunOptionNil},
-		{"foreign", func() error { _, err := e.Run(context.Background(), q); return err }(), diagcodes.ProgramForeign},
-		{"zero engine", func() error { _, err := zero.Compile(context.Background(), "a.php", ""); return err }(), diagcodes.EngineZero},
+		{"output", func() error { _, err := e.Run(context.Background(), p, WithOutput(nil)); return err }(), codes.RunOutputNil},
+		{"global", func() error { _, err := e.Run(context.Background(), p, WithGlobal("1x", Null())); return err }(), codes.RunGlobalName},
+		{"nil option", func() error { _, err := e.Run(context.Background(), p, nil); return err }(), codes.RunOptionNil},
+		{"foreign", func() error { _, err := e.Run(context.Background(), q); return err }(), codes.ProgramForeign},
+		{"zero engine", func() error { _, err := zero.Compile(context.Background(), "a.php", ""); return err }(), codes.EngineZero},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			d, ok := Diagnose(c.err)
@@ -108,7 +108,7 @@ func TestDiagnoseOtherErrors(t *testing.T) {
 		t.Fatal("plain error diagnosed")
 	}
 	d, ok := Diagnose(&ConfigError{Field: "X", Reason: "is bad"})
-	if !ok || d.Code != diagcodes.ConfigOther {
+	if !ok || d.Code != codes.ConfigOther {
 		t.Fatalf("host-built ConfigError gave %q, %v", d.Code, ok)
 	}
 }

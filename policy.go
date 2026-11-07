@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/HazelnutParadise/phego/diag"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 	"io/fs"
 	"os"
 	"strings"
@@ -168,11 +168,11 @@ func compilePolicy(cfg *Config, callbacks []string) (*compiledPolicy, error) {
 	case ModeEnforce:
 		spec.Mode = policy.Enforce
 	default:
-		return nil, &ConfigError{Code: diagcodes.PolicyMode, Field: "Policy.Mode", Reason: fmt.Sprintf("unknown mode %d", cfg.Policy.Mode)}
+		return nil, &ConfigError{Code: codes.PolicyMode, Field: "Policy.Mode", Reason: fmt.Sprintf("unknown mode %d", cfg.Policy.Mode)}
 	}
 	for _, g := range cfg.Policy.Files {
 		if cfg.Files != nil && g.Path == "/" {
-			return nil, &ConfigError{Code: diagcodes.FilesRootConflict, Field: "Files", Reason: `Files and Policy.Files both mount "/"`}
+			return nil, &ConfigError{Code: codes.FilesRootConflict, Field: "Files", Reason: `Files and Policy.Files both mount "/"`}
 		}
 		spec.Files = append(spec.Files, policy.FileGrant{Path: g.Path, Dir: g.Root, FS: g.FS, Write: g.Write})
 	}
@@ -206,13 +206,13 @@ func compilePolicy(cfg *Config, callbacks []string) (*compiledPolicy, error) {
 		{"CompileBytes", l.CompileBytes},
 	} {
 		if f.v < 0 {
-			return nil, &ConfigError{Code: diagcodes.ConfigNegative, Field: "Limits." + f.name, Reason: "must not be negative"}
+			return nil, &ConfigError{Code: codes.ConfigNegative, Field: "Limits." + f.name, Reason: "must not be negative"}
 		}
 	}
 	output := l.Output
 	switch {
 	case cfg.OutputLimit != 0 && output != 0 && int64(cfg.OutputLimit) != output:
-		return nil, &ConfigError{Code: diagcodes.OutputLimitConflict, Field: "OutputLimit", Reason: fmt.Sprintf("is %d but Limits.Output is %d", cfg.OutputLimit, output)}
+		return nil, &ConfigError{Code: codes.OutputLimitConflict, Field: "OutputLimit", Reason: fmt.Sprintf("is %d but Limits.Output is %d", cfg.OutputLimit, output)}
 	case output == 0 && cfg.OutputLimit != 0:
 		output = int64(cfg.OutputLimit)
 	case output == 0:
@@ -236,11 +236,11 @@ func compilePolicy(cfg *Config, callbacks []string) (*compiledPolicy, error) {
 	c := &compiledPolicy{policy: pol, limits: limits}
 	switch {
 	case cfg.MaxActive < 0:
-		return nil, &ConfigError{Code: diagcodes.ConfigNegative, Field: "MaxActive", Reason: "must not be negative"}
+		return nil, &ConfigError{Code: codes.ConfigNegative, Field: "MaxActive", Reason: "must not be negative"}
 	case cfg.MaxQueued < 0:
-		return nil, &ConfigError{Code: diagcodes.ConfigNegative, Field: "MaxQueued", Reason: "must not be negative"}
+		return nil, &ConfigError{Code: codes.ConfigNegative, Field: "MaxQueued", Reason: "must not be negative"}
 	case cfg.MaxActive == 0 && cfg.MaxQueued != 0:
-		return nil, &ConfigError{Code: diagcodes.QueueWithoutActive, Field: "MaxQueued", Reason: "needs MaxActive to bound running work"}
+		return nil, &ConfigError{Code: codes.QueueWithoutActive, Field: "MaxQueued", Reason: "needs MaxActive to bound running work"}
 	case cfg.MaxActive > 0:
 		c.admission, err = policy.NewAdmission(cfg.MaxActive, cfg.MaxQueued)
 		if err != nil {
@@ -295,7 +295,7 @@ func publicError(err error) error {
 // policy errors that have none.
 func specCode(c diag.Code) diag.Code {
 	if c == "" {
-		return diagcodes.ConfigOther
+		return codes.ConfigOther
 	}
 	return c
 }

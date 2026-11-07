@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/HazelnutParadise/phego/diag"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 // kindCodes is ordered so that an error matching several kinds, such as an
@@ -14,10 +14,10 @@ var kindCodes = []struct {
 	kind error
 	code diag.Code
 }{
-	{ErrInvalid, diagcodes.BytecodeInvalid}, {ErrLimit, diagcodes.BytecodeLimit},
-	{ErrVersion, diagcodes.BytecodeVersion}, {ErrProfile, diagcodes.BytecodeProfile},
-	{ErrIntegrity, diagcodes.BytecodeIntegrity}, {ErrTrust, diagcodes.BytecodeTrust},
-	{ErrCapability, diagcodes.BytecodeCapability},
+	{ErrInvalid, codes.BytecodeInvalid}, {ErrLimit, codes.BytecodeLimit},
+	{ErrVersion, codes.BytecodeVersion}, {ErrProfile, codes.BytecodeProfile},
+	{ErrIntegrity, codes.BytecodeIntegrity}, {ErrTrust, codes.BytecodeTrust},
+	{ErrCapability, codes.BytecodeCapability},
 }
 
 func kindCode(kind error) diag.Code {
@@ -26,7 +26,7 @@ func kindCode(kind error) diag.Code {
 			return k.code
 		}
 	}
-	return diagcodes.BytecodeInvalid
+	return codes.BytecodeInvalid
 }
 
 // Diagnose describes a Build or Load failure, including the bare sentinel
@@ -50,7 +50,7 @@ func Diagnose(err error) (diag.Diagnostic, bool) {
 // offset or the function and instruction that failed verification.
 func (e *Error) Diagnostic() diag.Diagnostic {
 	code := kindCode(e.Kind)
-	entry := diagcodes.Registry[code]
+	entry, _ := codes.Lookup(code)
 	msg := e.Detail
 	if msg == "" {
 		msg = fmt.Sprint(e.Kind)

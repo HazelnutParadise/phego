@@ -1,4 +1,4 @@
-package diagcodes
+package codes
 
 import (
 	"go/ast"
@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,14 +20,14 @@ func TestCodesDocumentMatchesRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(got) != Markdown() {
-		t.Fatal("docs/diagnostics/codes.md is stale; run go generate ./internal/diagcodes")
+		t.Fatal("docs/diagnostics/codes.md is stale; run go generate ./diag/codes")
 	}
 }
 
 var codeShape = regexp.MustCompile(`^PHG[1-9][0-9]{3}$`)
 
 func TestRegistryEntriesComplete(t *testing.T) {
-	for c, e := range Registry {
+	for c, e := range registry {
 		if !codeShape.MatchString(string(c)) {
 			t.Errorf("%s is not PHG followed by four digits", c)
 		}
@@ -49,7 +50,7 @@ func TestCodeLiteralsOnlyInRegistry(t *testing.T) {
 			return filepath.SkipDir
 		}
 		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") ||
-			filepath.Base(path) == "codes.go" && filepath.Base(filepath.Dir(path)) == "diagcodes" {
+			filepath.Base(path) == "codes.go" && filepath.Base(filepath.Dir(path)) == "codes" {
 			return nil
 		}
 		f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.SkipObjectResolution)
@@ -59,7 +60,7 @@ func TestCodeLiteralsOnlyInRegistry(t *testing.T) {
 		ast.Inspect(f, func(n ast.Node) bool {
 			if b, ok := n.(*ast.BasicLit); ok && b.Kind == token.STRING {
 				if s, err := strconv.Unquote(b.Value); err == nil && lit.MatchString(s) {
-					t.Errorf("%s: code literal %q outside internal/diagcodes/codes.go", path, s)
+					t.Errorf("%s: code literal %q outside diag/codes/codes.go", path, s)
 				}
 			}
 			return true
@@ -68,5 +69,24 @@ func TestCodeLiteralsOnlyInRegistry(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestLookupAndAll(t *testing.T) {
+	all := All()
+	if len(all) != len(registry) || !slices.IsSorted(all) {
+		t.Fatalf("All() = %v", all)
+	}
+	for _, c := range all {
+		if e, ok := Lookup(c); !ok || e != registry[c] {
+			t.Fatalf("Lookup(%s) = %+v, %v", c, e, ok)
+		}
+	}
+	if _, ok := Lookup("PHG9999"); ok {
+		t.Fatal("unknown code found")
+	}
+	all[0] = "changed"
+	if All()[0] == "changed" {
+		t.Fatal("All shares its slice")
 	}
 }

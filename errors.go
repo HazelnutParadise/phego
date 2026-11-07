@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/HazelnutParadise/phego/diag"
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 // ErrEngineClosed is returned by work started after Engine.Close.
@@ -73,11 +73,11 @@ func (e *ConfigError) Error() string { return "phego: invalid " + e.Field + ": "
 // source file; Error() stays the one-line form.
 func (e *ConfigError) Diagnostic() diag.Diagnostic {
 	code := e.Code
-	entry, ok := diagcodes.Registry[code]
+	entry, ok := codes.Lookup(code)
 	if !ok {
-		entry = diagcodes.Registry[diagcodes.ConfigOther]
+		entry, _ = codes.Lookup(codes.ConfigOther)
 		if code == "" {
-			code = diagcodes.ConfigOther
+			code = codes.ConfigOther
 		}
 	}
 	return diag.Diagnostic{

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/HazelnutParadise/phego/internal/diagcodes"
+	"github.com/HazelnutParadise/phego/diag/codes"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		log.Fatal(err)
 	}
-	if err := os.WriteFile(path, []byte(diagcodes.Markdown()), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(codes.Markdown()), 0o644); err != nil {
 		log.Fatal(err)
 	}
 }
