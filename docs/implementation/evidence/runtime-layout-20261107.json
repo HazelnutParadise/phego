@@ -1,0 +1,220 @@
+{
+  "scope": "Runtime layout changes PHP cannot observe (object store, sort ordinals, bucket chunks, execution frames) and the linux/amd64 PHP 8.5.12 reference profile; local evidence only, no VM.",
+  "requirements": [
+    "REQ-012",
+    "REQ-016",
+    "REQ-017",
+    "REQ-018",
+    "REQ-020",
+    "REQ-022",
+    "REQ-040"
+  ],
+  "tests": [
+    "T-023",
+    "T-024",
+    "T-031",
+    "T-032",
+    "T-033",
+    "T-034",
+    "T-035",
+    "T-036",
+    "T-039",
+    "T-040",
+    "T-043",
+    "T-044",
+    "T-079",
+    "T-080"
+  ],
+  "source_base": "03aa83da2cbd7efc7c9c1605d868dbad9166bc95",
+  "captured_at": "2026-11-07T07:57:55.402828+00:00",
+  "source_sha256": {
+    "internal/runtime/heap.go": "1a64b12c206f29bfee68cf19a82417a26fe245932d0fab02bf3e875dcbde7589",
+    "internal/runtime/array.go": "4a6498883c514fbe659a7a48006cbe6af2028eff4caa53a3fb2f6516b22e7a5f",
+    "internal/runtime/array_w12.go": "3bf6188e61b1a3189e64b727c8894d5928aada5ea9edd8463e9390e044e32c27",
+    "internal/runtime/execution.go": "0b7ff9d83b70c63ee2f3128e8a12f7bb2d7483f09fafb27919d1c35d88ed4136",
+    "internal/runtime/execution_destruct.go": "dd6de20b0b7e4162de4e6608efd662a125cfe19741db57c87e931e261b2c2017",
+    "internal/runtime/object_compare.go": "7c2cba88f79e3759e55a9ecb30fc5cbb22e830397acf870b6a68a5fb8c5ceadf",
+    "internal/runtime/object_ownership.go": "e6b4937f11fc60d192bc76dc49f3d7805d1e196b16aee1121bcec60a14e5d564",
+    "internal/runtime/object_properties.go": "6f4c37c22b8d9d6c8f30477fdc837a922e93c16d052abf270c3ffc2d4bbcd543",
+    "internal/runtime/execution_output_bench_test.go": "e197ce27045856364c6b553ac4f23bb72e9ab0df136143979d4d4c4c077c9645",
+    "internal/runtime/array_sort_bench_test.go": "dfdb7bd6a966073295b3e83a510b9c5893ae7eece2ac75eb2f9785ed3732248c",
+    "internal/runtime/value_bench_test.go": "baf379914f8a191ab59e4f220690e1bb8fc815d211321c25928a2463c0793641",
+    "internal/runtime/object_model_test.go": "5b63b9a31d8b787460b113f44599e2e3b0abc0f908ac4856e4cdd57a31167b78",
+    "internal/runtime/array_w12_test.go": "69be57b18cdc502f21d9f74d159e504da248e7dfc455994c091c9dfe0a9b1f63",
+    "internal/runtime/execution_oracle_test.go": "525a6c0610b056817701ee3a12b3454a5f816a67d461d8f89a6ae4f592a482de",
+    "internal/runtime/testdata/w13-ref-64-amd64.json": "5271be8f426e187b7ee4f412ace1e129e83eaec8fe313e4a413944b62a17b029",
+    "internal/runtime/testdata/w13-run-64-amd64.json": "0ae5724db1d7929955c6fe9e673146addb74ceec450cd5b91a752a2f8cc73202",
+    "tests/lifecycle/w14/reference-amd64.json": "79def9630f1bb43bd04dde0669a3fc446b0e57839754848ae3984b4bdd59b565",
+    "tests/semantics/w12-arrays/reference.py": "28c218e3963875b459f30a6bb1bfdf6000dfd7be96b442356d01ebef5418b4be",
+    "tests/semantics/w13-objects/reference.py": "9d0db7bc3b51d8e14eb25871b5b228dec52dc406512af0ea108a3cb46d543bb9",
+    "tools/lifecycle_reference.py": "3edacd449151b6fb11d3a6a53cdc63ef228fe24df04436a48b5f858d5481329a",
+    "tools/test_lifecycle_reference.py": "7b37cd931d7c403a5b9e3f0825a64b1c31d841d3ded48be1d2d6224e614ad338",
+    "tools/test_w13_reference.py": "f2bc982870ce7cd1ed865249c432d7ebd1a5f17edf758cb0be8214c0b949f66f",
+    "tools/w03-local-checks.json": "6210f66efb4d085d3aa6c7685ed8230bfde179cfa76ef672f068fc9fce07733d",
+    ".github/workflows/semantics-arrays.yml": "be7b4a1a40f4e456206f16d32cb9d5df04fe1ec67921f8dd44f64a8662ef9309",
+    ".github/workflows/semantics-objects.yml": "ec9cca5115dad3bbbd1428f1a5be3cf30290845c2a3cb8097534841159696598",
+    ".github/workflows/semantics-lifecycle.yml": "ca0f770da11cf5ee062d8439070e72d779455f642d9e2f6b813735c9e495ccee",
+    ".github/workflows/semantics-optimization.yml": "85d84ae42be8fa69fcded238831bd7c9e14377a9f86d9e0a598b30f45c71cf0b",
+    "docs/decisions/runtime-layout.md": "af6accb09c3b9a0dfe9198ce62f6c23e2fb021fe5850ee207e01dfb0e0e1f7d3"
+  },
+  "environment": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "reference_images": {
+      "linux/arm64": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "linux/386": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "linux/amd64": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f"
+    }
+  },
+  "decisions": [
+    "Each layout change was adopted only after interleaved benchmarks showed a gain; the incremental output-limit total was not adopted. Chosen by the implementer under the owner's rule of 2026-11-07 (match PHP for PHP-visible behaviour, best Go design internally).",
+    "Reference profiles are (integer width, architecture), as the owner asked; amd64 is added on native x86-64 CI runners."
+  ],
+  "local_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "gofmt -l .",
+      "log": "runtime-layout-20261107/gofmt.log",
+      "exit_code": 0
+    },
+    {
+      "command": "CGO_ENABLED=0 go build ./... for linux/amd64, linux/386, windows/amd64, darwin/arm64",
+      "log": "runtime-layout-20261107/build.log",
+      "exit_code": 0
+    },
+    {
+      "command": "go vet ./...",
+      "log": "runtime-layout-20261107/vet.log",
+      "exit_code": 0
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 ./...",
+      "log": "runtime-layout-20261107/go.log",
+      "exit_code": 0
+    },
+    {
+      "command": "go test -race -count=1 -timeout 30m -p 1 ./...",
+      "log": "runtime-layout-20261107/race.log",
+      "exit_code": 0,
+      "result": "Packages run one at a time: internal/ir wall-clock scale bounds, unchanged here, fail under -race with parallel packages on a loaded host."
+    },
+    {
+      "command": "go test ./internal/bytecode -run '^$' -fuzz '^FuzzLoadRejectsMalformedAndRepairedPayloads$' -fuzztime=30s -parallel=4",
+      "log": "runtime-layout-20261107/fuzz.log",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "log": "runtime-layout-20261107/python.log",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "log": "runtime-layout-20261107/docs.log",
+      "exit_code": 0
+    },
+    {
+      "command": "Interleaved benchmark runs of separately built test binaries (see each file's header)",
+      "log": "runtime-layout-20261107/heap-objects.bench.txt",
+      "result": "heap.objects slice: object lifecycle 39-72% faster, destruct 75%, cycle collection 78%; same bytes and allocations."
+    },
+    {
+      "command": "Interleaved benchmark runs",
+      "log": "runtime-layout-20261107/sort-ordinal.bench.txt",
+      "result": "Sort ordinals in a swapped []int32: 13-15% fewer bytes, 2-4 fewer allocations, all-equal sort 16% faster."
+    },
+    {
+      "command": "Interleaved benchmark runs",
+      "log": "runtime-layout-20261107/bucket-chunks.bench.txt",
+      "result": "Per-heap bucket chunks of 5, 13, 21: small arrays 6-7% faster with fewer allocations; 1,024 elements 94-95% fewer allocations."
+    },
+    {
+      "command": "Interleaved benchmark runs",
+      "log": "runtime-layout-20261107/execution-frames.bench.txt",
+      "result": "Frames by value: calls 25% faster, 6 allocations instead of 15."
+    },
+    {
+      "command": "Benchmark runs",
+      "log": "runtime-layout-20261107/output-write.bench.txt",
+      "result": "Incremental output-limit total: no reliable gain, not adopted."
+    },
+    {
+      "command": "PHP 8.5.12 linux/amd64 references against the 64-bit references",
+      "log": "runtime-layout-20261107/amd64-reference.txt",
+      "result": "Only W-13 compare-lazy-operand-owners differs: amd64 and 386 initialize the right lazy object first, arm64 the left."
+    },
+    {
+      "command": "go test of the W-13 amd64 profile with the width-based comparison order",
+      "log": "runtime-layout-20261107/red-w13-amd64.log",
+      "result": "The amd64 profile fails compare-lazy-operand-owners before the fix."
+    }
+  ],
+  "artifacts": {
+    "amd64-reference.txt": {
+      "path": "runtime-layout-20261107/amd64-reference.txt",
+      "sha256": "fedf57f06dc6c3de7bddc04774265dc453e061f3aeaf15b19f5596d22d81ee25"
+    },
+    "bucket-chunks.bench.txt": {
+      "path": "runtime-layout-20261107/bucket-chunks.bench.txt",
+      "sha256": "79eaa3146597cac3546aa66f2dba2338b69b2cc3c34382b6ab573bd6fa0c3f9e"
+    },
+    "build.log": {
+      "path": "runtime-layout-20261107/build.log",
+      "sha256": "d9a584e85ad885dfd2e1344154f935c39c8932af05553ad98eebac64fd4d10a3"
+    },
+    "docs.log": {
+      "path": "runtime-layout-20261107/docs.log",
+      "sha256": "33a7f8c370e61c222c4d2678435f6e41ce26076cedc2184fcdc1c2801902c15a"
+    },
+    "execution-frames.bench.txt": {
+      "path": "runtime-layout-20261107/execution-frames.bench.txt",
+      "sha256": "7ef11adb20ebd3fbbc42b54be32f8e7b25021f238904e5f32c2cce772f5a6f93"
+    },
+    "fuzz.log": {
+      "path": "runtime-layout-20261107/fuzz.log",
+      "sha256": "a3f37c751ae19a8da300564647acc72fe74c41fef66f6fa85fedfa6e4298fc84"
+    },
+    "go.log": {
+      "path": "runtime-layout-20261107/go.log",
+      "sha256": "3e06d0649fcd56961471bccfe81b11b331c0b00d2d59f6484905d84f576830e1"
+    },
+    "gofmt.log": {
+      "path": "runtime-layout-20261107/gofmt.log",
+      "sha256": "2235fa671f8dcbfa731f9d2d9bd65310375030ca4d1d521dcaac15f27f95c44e"
+    },
+    "heap-objects.bench.txt": {
+      "path": "runtime-layout-20261107/heap-objects.bench.txt",
+      "sha256": "183950bfba10c19a7b23227c2193fa82a0ce3b065d5e0121406fb88d791594f6"
+    },
+    "output-write.bench.txt": {
+      "path": "runtime-layout-20261107/output-write.bench.txt",
+      "sha256": "6453280252718cb8b0564cf067ddb5a6b8b1b4752f1eac9c432708e433a75837"
+    },
+    "python.log": {
+      "path": "runtime-layout-20261107/python.log",
+      "sha256": "7b074d20df481a640280172fcf9c4f559a6d03e4e0153892b39b663403e96618"
+    },
+    "race.log": {
+      "path": "runtime-layout-20261107/race.log",
+      "sha256": "e4c0e5f45cf162f98fd2afebdc1f13da4419ab093764e3fe5e62714b6c5eff1a"
+    },
+    "red-w13-amd64.log": {
+      "path": "runtime-layout-20261107/red-w13-amd64.log",
+      "sha256": "95986b9031709aa0796dbeb95c46e2c528d4f712dd9e312edab1931a6e940c18"
+    },
+    "sort-ordinal.bench.txt": {
+      "path": "runtime-layout-20261107/sort-ordinal.bench.txt",
+      "sha256": "a5a4a8d0fb0773fdc401be9f83474ec7bc41653ce45816fb4cecefbf6eff0dd8"
+    },
+    "vet.log": {
+      "path": "runtime-layout-20261107/vet.log",
+      "sha256": "89f25aed4a4b2c04e4f83abb1fb792613835ff684061382f0e6fa27766ecf615"
+    }
+  },
+  "limits": [
+    "amd64 references were generated under emulation on darwin/arm64; the new CI jobs regenerate them natively and compare.",
+    "locals stay caller-owned slots; a value stack needs per-function slot counts from the VM (W-17).",
+    "local() still scans every frame's locals for duplicate registration; narrowing it waits for W-17's registration rules."
+  ]
+}
