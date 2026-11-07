@@ -110,6 +110,7 @@ func replayExecutionOracleMode(t *testing.T, width int, arch string, display boo
 			must(err)
 			x.heap.arch = arch
 			wantOut, wantCode, stderr, prefix := tc.Stdout, tc.ExitCode, tc.Stderr, ""
+			shownCount := func() int { return 0 }
 			if display {
 				wantOut, wantCode, stderr, prefix = tc.Display.Stdout, tc.Display.ExitCode, tc.Display.Stderr, "PHP "
 				// The VM supplies PHP's location and stack trace; the replay
@@ -117,6 +118,7 @@ func replayExecutionOracleMode(t *testing.T, width int, arch string, display boo
 				// displayed diagnostic is the one PHP raised there.
 				levels, texts := logEntries(tc.Display.Stderr)
 				shown := 0
+				shownCount = func() int { return shown }
 				x.errors = errorChannels{display: true, log: true, text: func(level, message string) string {
 					if shown >= len(levels) {
 						t.Errorf("extra displayed %s: %s", level, message)
@@ -669,6 +671,11 @@ func replayExecutionOracleMode(t *testing.T, width int, arch string, display boo
 				}
 				return completion{}
 			})
+			if display {
+				if levels, _ := logEntries(tc.Display.Stderr); len(levels) != shownCount() {
+					t.Errorf("displayed %d diagnostics, PHP logged %d", shownCount(), len(levels))
+				}
+			}
 			if string(result.output) != wantOut || result.end.code != wantCode {
 				t.Errorf("output=%q code=%d, oracle=%q/%d", result.output, result.end.code, wantOut, wantCode)
 			}

@@ -1,0 +1,5 @@
+    execution_display_test.go:36: inHandler=false: end 3 after 1 writes, want the writer failure
+    execution_display_test.go:36: inHandler=true: end 3 after 1 writes, want the writer failure
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.629s
+FAIL

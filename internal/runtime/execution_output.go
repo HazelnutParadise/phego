@@ -8,21 +8,40 @@ import (
 
 // REQ-009, REQ-040; T-017, T-079, T-080. Output is committed once, including
 // a writer's accepted prefix on failure. PHP and host diagnostics stay separate.
-func (x *execution) write(data []byte) (c completion) {
+func (x *execution) write(data []byte) completion {
 	if x.closed {
 		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
 	}
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	return x.writeTo(len(x.buffers)-1, data)
+	// The body of writeTo for the innermost buffer, repeated so that every
+	// echo is one call; keep the two in step.
+	top := len(x.buffers) - 1
+	if (x.filtering || x.outputRunning) && top >= 0 {
+		x.buffers[top].produced = true
+	}
+	remaining := int64(x.limits.output) - x.accepted
+	for _, b := range x.buffers {
+		remaining -= int64(len(b.data))
+	}
+	if int64(len(data)) > remaining {
+		return x.fail(endLimit, errExecutionLimit)
+	}
+	if top >= 0 {
+		b := &x.buffers[top]
+		b.data = append(b.data, data...)
+		return completion{}
+	}
+	return x.writeOut(data)
 }
 
 // writeTo writes into buffer top, or straight to the writer when top < 0.
 // It is php_output_op: a write while a handler runs marks the buffer that
 // receives it as having produced output, which is how a displayed
 // diagnostic that skipped a disabled handler flags the next one.
-func (x *execution) writeTo(top int, data []byte) (c completion) {
+// report uses it for displayed diagnostics; write repeats its body.
+func (x *execution) writeTo(top int, data []byte) completion {
 	if x.closed {
 		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
 	}
@@ -43,6 +62,11 @@ func (x *execution) writeTo(top int, data []byte) (c completion) {
 		b.data = append(b.data, data...)
 		return completion{}
 	}
+	return x.writeOut(data)
+}
+
+// writeOut commits data to the captured output or the host writer.
+func (x *execution) writeOut(data []byte) (c completion) {
 	if x.writer == nil {
 		x.output = append(x.output, data...)
 		x.accepted += int64(len(data))
@@ -116,10 +140,10 @@ func (x *execution) endBufferIn(origin string) completion {
 			// Without a PHP frame the throw or exit bails out of
 			// php_output_end_all, and php_output_deactivate discards every
 			// buffer: nothing is printed and outer handlers never run. The
-			// uncaught error was displayed into the running handler's buffer,
-			// so its displayed text is discarded with it.
-			x.buffers = nil
-			x.errors.discardNext = c.kind == endThrow
+			// buffers stay until teardown discards them, so the uncaught
+			// error displayed now lands in the running handler's buffer and
+			// is discarded with it, as in PHP.
+			x.buffers = x.buffers[:i+1]
 			return c
 		}
 		// From PHP code the handler's result reaches the next level before

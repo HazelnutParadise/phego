@@ -98,6 +98,7 @@ type execution struct {
 	// displayed text goes through write(), so output buffers and their
 	// handlers see it; the log copy is kept in diagnostics.
 	errors          errorChannels
+	reported        int // diagnostics raised, against limits.callbacks
 	started, closed bool
 	filtering       bool
 	// outputRunning is PHP's OG(running) left set by a fatal error inside a
@@ -199,6 +200,11 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 			c = x.replaceOwnedCompletion(c, next)
 			x.recordEnd(c)
 		}
+	}
+	// Displaying the last fatal is the final write. If it failed, that
+	// writer failure or limit is the host's result, as for any other output.
+	if x.stop.kind != endNormal && x.stop.kind != c.kind {
+		c = x.replaceOwnedCompletion(c, x.stop)
 	}
 	// Output callbacks still need a live heap. Objects retained by those
 	// callbacks get storage release, not a second shutdown destructor pass.
@@ -479,9 +485,6 @@ func (x *execution) warning(message string) completion {
 type errorChannels struct {
 	display, log bool
 	text         func(level, message string) string
-	// discardNext drops the display of the next diagnostic, which PHP wrote
-	// into a buffer that was then discarded.
-	discardNext bool
 }
 
 // report raises one PHP diagnostic, as php_error_cb does: the log copy is
@@ -489,14 +492,15 @@ type errorChannels struct {
 // layer. skipRunning is the handler-output deprecation, raised while the
 // running handler is disabled, so its text bypasses that handler's buffer.
 func (x *execution) report(level, message string, skipRunning bool) completion {
-	if len(x.diagnostics) >= x.limits.callbacks {
+	// The cap counts every diagnostic, displayed or logged.
+	if x.reported >= x.limits.callbacks {
 		return x.fail(endLimit, errExecutionLimit)
 	}
+	x.reported++
 	if x.errors.log {
 		x.diagnostics = append(x.diagnostics, executionDiagnostic{level, message})
 	}
-	if !x.errors.display || x.errors.discardNext {
-		x.errors.discardNext = false
+	if !x.errors.display {
 		return completion{}
 	}
 	text := "\n" + level + ": " + message + " in Unknown on line 0\n"
@@ -630,7 +634,7 @@ func (x *execution) recordEnd(c completion) {
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
 	x.phaseCompletion = completion{}
-	if (c.kind == endThrow || c.kind == endFatal) && len(x.diagnostics) < x.limits.callbacks {
+	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.limits.callbacks {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)
