@@ -1,0 +1,8 @@
+# PHP 8.5.12 linux/amd64 (php@sha256:35fd7ee3...) against the committed 64-bit (arm64) references, generated under emulation on darwin/arm64 2026-11-07
+W-12 tests/semantics/w12-arrays/reference.py --arch amd64: byte-identical to internal/runtime/testdata/w12-ref-64.json
+W-13 tests/semantics/w13-objects/reference.py --arch amd64: 1600 of 1601 cases identical; compare-lazy-operand-owners differs:
+   arm64 [false, ["init:A", "init:B", "dtor:A", "dtor:B"]]
+   386 [false, ["init:B", "init:A", "dtor:A", "dtor:B"]]
+   amd64 [false, ["init:B", "init:A", "dtor:A", "dtor:B"]]
+W-14 tools/lifecycle_reference.py on amd64: all 52 cases (pre-#131 fixtures) identical in exit code, stdout, stderr and combined output
+W-15 tests/optimization/w15/reference.php on amd64: byte-identical to tests/optimization/w15/ref-64.json

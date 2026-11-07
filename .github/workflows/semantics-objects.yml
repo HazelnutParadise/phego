@@ -9,14 +9,27 @@ permissions:
 
 jobs:
   reference:
-    name: Object reference (${{ matrix.width }}-bit)
+    name: Object reference (${{ matrix.profile }})
     strategy:
       fail-fast: false
       matrix:
+        # Profiles are (integer width, architecture): amd64 shares arm64's
+        # width but not its C argument evaluation order. Each runs natively.
         include:
-          - width: 64
+          - profile: "64"
+            width: 64
+            arch: arm64
+            reference: "64"
             runner: ubuntu-24.04-arm
-          - width: 32
+          - profile: "32"
+            width: 32
+            arch: "386"
+            reference: "32"
+            runner: ubuntu-24.04
+          - profile: amd64
+            width: 64
+            arch: amd64
+            reference: 64-amd64
             runner: ubuntu-24.04
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
@@ -31,15 +44,15 @@ jobs:
         run: python3 -m unittest discover -s tools -p test_w13_reference.py
       - name: Regenerate and compare pinned PHP observations
         run: |
-          python3 tests/semantics/w13-objects/reference.py --width ${{ matrix.width }} --output-dir "$RUNNER_TEMP/w13-reference"
-          cmp "internal/runtime/testdata/w13-ref-${{ matrix.width }}.json" "$RUNNER_TEMP/w13-reference/w13-ref-${{ matrix.width }}.json"
+          python3 tests/semantics/w13-objects/reference.py --width ${{ matrix.width }} --arch ${{ matrix.arch }} --output-dir "$RUNNER_TEMP/w13-reference"
+          cmp "internal/runtime/testdata/w13-ref-${{ matrix.reference }}.json" "$RUNNER_TEMP/w13-reference/w13-ref-${{ matrix.reference }}.json"
       - name: Compare with Go runtime
         env:
           CGO_ENABLED: '0'
           PHEGO_W13_REFERENCE: ${{ runner.temp }}/w13-reference
-        run: go test -count=1 -run '^TestW13PHP8512Objects/${{ matrix.width }}$' -v ./internal/runtime
+        run: go test -count=1 -run '^TestW13PHP8512Objects/${{ matrix.profile }}$' -v ./internal/runtime
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: w13-reference-${{ matrix.width }}
+          name: w13-reference-${{ matrix.profile }}
           path: ${{ runner.temp }}/w13-reference

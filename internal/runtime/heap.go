@@ -48,6 +48,7 @@ type weakMap struct {
 // concurrent use; an Execution must not share it with another request.
 type heap struct {
 	width         int
+	arch          string // guest architecture of the PHP profile (see newHeapFor)
 	nextHandle    uint64
 	freeHandles   []uint64
 	noHandleReuse bool
@@ -81,11 +82,30 @@ type heap struct {
 	currentCalledScope    *class
 }
 
+// newHeap uses the reference architecture of the integer width: arm64 for
+// 64 bits and 386 for 32 bits, the pinned PHP 8.5.12 reference images.
 func newHeap(width int) (*heap, error) {
+	arch := "arm64"
+	if width == 32 {
+		arch = "386"
+	}
+	return newHeapFor(width, arch)
+}
+
+// newHeapFor makes a heap for a PHP profile of integer width and guest
+// architecture. The width alone does not fix every PHP-visible order: PHP
+// 8.5.12 built for amd64 evaluates some C call arguments in the opposite
+// order from arm64 (see comparisonPropertiesPHP8512).
+func newHeapFor(width int, arch string) (*heap, error) {
 	if width != 32 && width != 64 {
 		return nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64 bits", width)
 	}
-	return &heap{width: width, roots: make(map[gcNode]uint64), nextResource: 4}, nil
+	switch {
+	case width == 64 && (arch == "arm64" || arch == "amd64"), width == 32 && arch == "386":
+	default:
+		return nil, fmt.Errorf("no PHP 8.5.12 reference profile for %d-bit %s", width, arch)
+	}
+	return &heap{width: width, arch: arch, roots: make(map[gcNode]uint64), nextResource: 4}, nil
 }
 
 // Temporaries returned by constructors start with no owner. assign, bind, and

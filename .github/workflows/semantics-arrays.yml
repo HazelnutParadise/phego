@@ -11,10 +11,20 @@ jobs:
   reference:
     strategy:
       matrix:
+        # amd64 output must be byte-identical to the 64-bit (arm64) reference;
+        # the Go test then replays that reference on an amd64 heap profile.
         include:
-          - width: 64
+          - profile: "64"
+            width: 64
+            arch: arm64
             runner: ubuntu-24.04-arm
-          - width: 32
+          - profile: "32"
+            width: 32
+            arch: "386"
+            runner: ubuntu-24.04
+          - profile: amd64
+            width: 64
+            arch: amd64
             runner: ubuntu-24.04
     runs-on: ${{ matrix.runner }}
     steps:
@@ -27,13 +37,16 @@ jobs:
       - name: Test reference runner
         run: python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'
       - name: Run the pinned reference
-        run: python3 tests/semantics/w12-arrays/reference.py --width ${{ matrix.width }} --output-dir "$RUNNER_TEMP/w12-reference"
+        run: python3 tests/semantics/w12-arrays/reference.py --width ${{ matrix.width }} --arch ${{ matrix.arch }} --output-dir "$RUNNER_TEMP/w12-reference"
+      - name: Require amd64 output identical to the 64-bit reference
+        if: matrix.arch == 'amd64'
+        run: cmp internal/runtime/testdata/w12-ref-64.json "$RUNNER_TEMP/w12-reference/w12-ref-64-amd64.json"
       - name: Compare with Go runtime
         env:
-          PHEGO_W12_REFERENCE: ${{ runner.temp }}/w12-reference
-        run: go test -run '^TestW12PHP8512Arrays/${{ matrix.width }}$' -v ./internal/runtime
+          PHEGO_W12_REFERENCE: ${{ matrix.arch != 'amd64' && format('{0}/w12-reference', runner.temp) || '' }}
+        run: go test -run '^TestW12PHP8512Arrays/${{ matrix.profile }}$' -v ./internal/runtime
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: w12-reference-${{ matrix.width }}
+          name: w12-reference-${{ matrix.profile }}
           path: ${{ runner.temp }}/w12-reference
