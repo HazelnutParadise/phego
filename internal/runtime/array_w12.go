@@ -249,7 +249,9 @@ func (h *heap) sortArrayWithPolicy(slot *value, op string, preserveKeys bool, co
 	for i, b := range a.buckets {
 		original[b] = i
 	}
-	php8512Sort(a.buckets, func(x, y *bucket) int {
+	buckets := a.buckets
+	php8512Sort(len(buckets), func(i, j int) int {
+		x, y := buckets[i], buckets[j]
 		n := 0
 		if failure == nil && h.closed {
 			failure = ErrHeapClosed
@@ -265,6 +267,16 @@ func (h *heap) sortArrayWithPolicy(slot *value, op string, preserveKeys bool, co
 			return n
 		}
 		return compareInts(int64(original[x]), int64(original[y]))
+	}, func(i, j int) {
+		// A renumbering sort moves only the values (zend_hash_bucket_renum_swap),
+		// so keys stay at their positions while comparisons observe the array;
+		// a key-preserving sort moves keys with values (zend_hash_bucket_swap).
+		// The bucket, with its stable ordinal and element locations, travels
+		// with the value either way.
+		buckets[i], buckets[j] = buckets[j], buckets[i]
+		if !preserveKeys {
+			buckets[i].key, buckets[j].key = buckets[j].key, buckets[i].key
+		}
 	})
 	a.pointer = 0
 	if preserveKeys {

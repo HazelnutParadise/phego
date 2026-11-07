@@ -437,6 +437,10 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
+	if info.Mode()&fs.ModeDevice != 0 {
+		// A device is never a script; the refusal is the policy's.
+		return &Result{Status: StatusPolicyDenied}, &PolicyError{Capability: CapabilityFileRead, Op: "open", Target: path, Rule: RuleNotGranted}
+	}
 	if !info.Mode().IsRegular() {
 		return &Result{Status: StatusFailed}, &fs.PathError{Op: "read", Path: path, Err: fs.ErrInvalid}
 	}

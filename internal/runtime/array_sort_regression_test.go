@@ -1,7 +1,9 @@
 package runtime
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -91,6 +93,57 @@ func TestW12SortKeyLookupDuringComparisons(t *testing.T) {
 			}
 			if _, ok, _ := h.getElement(a.deref(), h.number(1)); !ok {
 				t.Error("key 1 missing after sort")
+			}
+			must(t, h.unset(&a))
+		})
+	}
+}
+
+// PHP 8.5.12 (pinned arm64 image, sort-foreach probe): sort() swaps only the
+// values while comparing (zend_hash_bucket_renum_swap), so a foreach from
+// __toString sees the keys in place; asort() swaps keys with values.
+func TestW12SortIterationDuringComparisons(t *testing.T) {
+	for _, tc := range []struct {
+		op           string
+		preserveKeys bool
+		want         []string
+	}{
+		{"sort", false, []string{"0=S,1=a,2=c", "0=a,1=S,2=c"}},
+		{"asort", true, []string{"0=S,1=a,2=c", "1=a,0=S,2=c"}},
+	} {
+		t.Run(tc.op, func(t *testing.T) {
+			h := testHeap(t)
+			var a value
+			var seen []string
+			c := w13Build(t, classSpec{name: "W12IterateDuringSort", methods: []methodSpec{{name: "__toString", returnType: "string", call: func(h *heap, _ value, _ []value) (value, error) {
+				var item value
+				var parts []string
+				err := h.foreachValue(a.deref(), &item, func(k arrayKey) error {
+					v := "S"
+					if item.deref().kind == valueString {
+						v = item.deref().text
+					}
+					key := fmt.Sprint(k.integer)
+					if k.isString {
+						key = k.text
+					}
+					parts = append(parts, key+"="+v)
+					return nil
+				})
+				seen = append(seen, strings.Join(parts, ","))
+				if e := h.unset(&item); err == nil {
+					err = e
+				}
+				return w13Str("b"), err
+			}}}})
+			o, err := h.newObject(c)
+			must(t, err)
+			must(t, h.appendValue(&a, o))
+			must(t, h.appendValue(&a, w13Str("a")))
+			must(t, h.appendValue(&a, w13Str("c")))
+			must(t, h.sortArrayRegular(&a, tc.op, tc.preserveKeys))
+			if len(seen) < 2 || seen[0] != tc.want[0] || seen[1] != tc.want[1] {
+				t.Errorf("iterations during comparisons = %q, PHP %q", seen, tc.want)
 			}
 			must(t, h.unset(&a))
 		})

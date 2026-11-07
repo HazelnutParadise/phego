@@ -221,3 +221,37 @@ func TestReviewFixFIFOSwapDoesNotBlock(t *testing.T) {
 	default:
 	}
 }
+
+// Character devices are opened only when they are, by device number, the
+// host's null, zero, full, random or urandom. A terminal or pseudo-terminal
+// master blocks a read even with O_NONBLOCK under Go's poller, and other
+// devices may have side effects when opened (for example a watchdog).
+func TestRootOpensOnlyListedCharacterDevices(t *testing.T) {
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/devices", Dir: "/dev", Write: true}}})
+	for _, name := range []string{"zero", "random", "full"} {
+		if _, err := os.Stat("/dev/" + name); err != nil {
+			continue // /dev/full is Linux only
+		}
+		f, err := p.OpenFile("/devices/"+name, os.O_RDONLY, 0)
+		if err != nil {
+			t.Errorf("%s: %v", name, err)
+			continue
+		}
+		f.Close()
+	}
+	for _, name := range []string{"tty", "ptmx"} {
+		if _, err := os.Stat("/dev/" + name); err != nil {
+			continue
+		}
+		for _, flag := range []int{os.O_RDONLY, os.O_RDWR} {
+			f, err := p.OpenFile("/devices/"+name, flag, 0)
+			var pe *PolicyError
+			if !errors.As(err, &pe) || pe.Rule != "not-granted" {
+				if f != nil {
+					f.Close()
+				}
+				t.Errorf("%s flag %d: %v, want not-granted", name, flag, err)
+			}
+		}
+	}
+}

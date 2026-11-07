@@ -199,3 +199,14 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 		t.Fatalf("virtual metadata mistaken for disk: %v", err)
 	}
 }
+
+// A script must be a regular file. A device under a Root mount stays a
+// policy refusal, as before character devices became readable.
+func TestRunFileRefusesDevices(t *testing.T) {
+	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/devices", Root: "/dev"}}}})
+	res, err := e.RunFile(context.Background(), "/devices/null")
+	var pe *PolicyError
+	if res == nil || res.Status != StatusPolicyDenied || !errors.As(err, &pe) || pe.Rule != RuleNotGranted {
+		t.Fatalf("RunFile(/devices/null) = %+v, %v; want StatusPolicyDenied not-granted", res, err)
+	}
+}

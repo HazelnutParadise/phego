@@ -178,7 +178,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
-		if !openableMode(before.Mode()) {
+		if !openable(before) {
 			return nil, denied("not-granted")
 		}
 		// A regular file may be replaced by a FIFO after Lstat. Open without
@@ -192,7 +192,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			f.Close()
 			return nil, err
 		}
-		if !os.SameFile(before, actual) || !openableMode(actual.Mode()) {
+		if !os.SameFile(before, actual) || !openable(actual) {
 			f.Close()
 			return nil, denied("path-changed")
 		}
@@ -229,7 +229,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 		// Exclusive creation cannot follow a final symlink installed after Lstat.
 		return parent.OpenFile(leaf, flag|os.O_EXCL, perm)
 	}
-	if !before.Mode().IsRegular() && !isCharDevice(before.Mode()) {
+	if !before.Mode().IsRegular() && !(isCharDevice(before.Mode()) && listedCharDevice(before)) {
 		return nil, denied("not-granted")
 	}
 	f, err := parent.OpenFile(leaf, flag&^(os.O_TRUNC|os.O_CREATE|os.O_EXCL)|nonblockOpenFlag, perm)
@@ -282,11 +282,13 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	return f, nil
 }
 
-// openableMode admits what PHP opens through a mount: regular files,
-// directories for reading and character devices such as /dev/null. FIFOs,
-// sockets and block devices stay closed; a FIFO open could wait for a peer.
-func openableMode(m fs.FileMode) bool {
-	return m.IsRegular() || m.IsDir() || isCharDevice(m)
+// openable admits what PHP opens through a mount: regular files, directories
+// for reading and the listed character devices such as /dev/null. FIFOs,
+// sockets, block devices and other character devices stay closed: a FIFO or
+// terminal read could wait for a peer, and some devices act when opened.
+func openable(fi fs.FileInfo) bool {
+	m := fi.Mode()
+	return m.IsRegular() || m.IsDir() || isCharDevice(m) && listedCharDevice(fi)
 }
 
 func isCharDevice(m fs.FileMode) bool {

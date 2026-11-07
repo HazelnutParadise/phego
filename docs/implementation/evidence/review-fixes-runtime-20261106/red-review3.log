@@ -1,0 +1,14 @@
+# 4828c13 with the new W-12 and W-20 tests copied in
+    --- FAIL: TestW12SortIterationDuringComparisons/sort (0.00s)
+        array_sort_regression_test.go:146: iterations during comparisons = ["0=S,1=a,2=c" "1=a,0=S,2=c"], PHP ["0=S,1=a,2=c" "0=a,1=S,2=c"]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.581s
+FAIL
+    fifo_review_fixes_test.go:253: ptmx flag 2: <nil>, want not-granted
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.260s
+FAIL
+    policy_review_test.go:210: RunFile(/devices/null) = &{Status:0 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, read /devices/null: invalid argument; want StatusPolicyDenied not-granted
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.274s
+FAIL
