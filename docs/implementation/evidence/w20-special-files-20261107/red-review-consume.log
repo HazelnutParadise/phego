@@ -1,0 +1,5 @@
+    special_files_test.go:198: the other reader got "bc", <nil>; want the whole "abc"
+--- FAIL: TestRootFIFOOpenLeavesDataToOtherReaders (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	1.390s
+FAIL

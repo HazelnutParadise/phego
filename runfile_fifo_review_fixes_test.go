@@ -142,3 +142,37 @@ func TestRunFileSocketFailsLikeKernel(t *testing.T) {
 		t.Fatal("socket retained admission")
 	}
 }
+
+// A host stop while RunFile reads a FIFO reports the host's cause, the same
+// as a stop during the open.
+func TestRunFileFIFOReadCancelKeepsCause(t *testing.T) {
+	dir := t.TempDir()
+	name := filepath.Join(dir, "pipe.php")
+	if err := syscall.Mkfifo(name, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/app", Root: dir}}}})
+	stopped := errors.New("host stopped the request")
+	ctx, cancel := context.WithCancelCause(t.Context())
+	done := runFileAsync(ctx, e, "/app/pipe.php")
+	// An idle writer lets the open return; the read then waits for data.
+	var w int
+	for deadline := time.Now().Add(5 * time.Second); ; {
+		fd, err := syscall.Open(name, syscall.O_WRONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+		if err == nil {
+			w = fd
+			break
+		}
+		if !errors.Is(err, syscall.ENXIO) || time.Now().After(deadline) {
+			t.Fatalf("open writer: %v", err)
+		}
+		time.Sleep(time.Millisecond)
+	}
+	defer syscall.Close(w)
+	time.Sleep(100 * time.Millisecond)
+	cancel(stopped)
+	r := runFinished(t, done)
+	if r.res == nil || r.res.Status != StatusCancelled || !errors.Is(r.err, stopped) {
+		t.Fatalf("RunFile = %+v, %v; want StatusCancelled with the host's cause", r.res, r.err)
+	}
+}

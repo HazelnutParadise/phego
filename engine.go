@@ -464,7 +464,8 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	default:
 		data, err = e.readSource(ctx, f, info, path)
 		if ctx.Err() != nil && err != nil {
-			return &Result{Status: StatusCancelled}, ctx.Err()
+			// As for the open: the read's error carries context.Cause(ctx).
+			return &Result{Status: StatusCancelled}, err
 		}
 		if err != nil {
 			return &Result{Status: StatusFailed}, err

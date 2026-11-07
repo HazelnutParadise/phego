@@ -171,6 +171,34 @@ func TestRootFIFOReadKeepsEarlyData(t *testing.T) {
 	}
 }
 
+// PHP's open(2) never touches the data in a FIFO. An open that is closed
+// without reading, as include does with a FIFO, leaves every byte to the
+// other readers.
+func TestRootFIFOOpenLeavesDataToOtherReaders(t *testing.T) {
+	dir, name := mkfifo(t)
+	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: dir}}})
+	other, err := syscall.Open(name, syscall.O_RDONLY|syscall.O_NONBLOCK|syscall.O_CLOEXEC, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer syscall.Close(other)
+	w := fifoWriter(t, name)
+	defer syscall.Close(w)
+	if _, err := syscall.Write(w, []byte("abc")); err != nil {
+		t.Fatal(err)
+	}
+	r := received(t, openAsync(t.Context(), p, "/app/pipe", os.O_RDONLY), "FIFO open")
+	if r.err != nil {
+		t.Fatal(r.err)
+	}
+	r.f.Close()
+	b := make([]byte, 8)
+	n, err := syscall.Read(other, b)
+	if string(b[:max(n, 0)]) != "abc" {
+		t.Fatalf("the other reader got %q, %v; want the whole \"abc\"", b[:max(n, 0)], err)
+	}
+}
+
 // PHP: a writer that opens and closes without writing ends the wait, and
 // fread then reports EOF. Linux reports that through EPOLLHUP; macOS and the
 // BSDs give a reader no trace of it, as W-20.md records.
@@ -375,6 +403,11 @@ func TestRootOpenMatchesKernelForSpecialFiles(t *testing.T) {
 			t.Errorf("%s flag %#x: %v, kernel opens it", c.phpPath, c.flag, got)
 		case want != nil && !errors.Is(got, want):
 			t.Errorf("%s flag %#x: %v, kernel says %v", c.phpPath, c.flag, got, want)
+		case want != nil:
+			var pe *fs.PathError
+			if !errors.As(got, &pe) || pe.Op != "open" || pe.Path != c.phpPath {
+				t.Errorf("%s flag %#x: %#v, want an open error on the PHP path", c.phpPath, c.flag, got)
+			}
 		}
 	}
 }
@@ -575,6 +608,12 @@ func TestRootFIFOSwapStaysBounded(t *testing.T) {
 		}
 	}()
 	flags := []int{os.O_RDONLY, os.O_WRONLY, os.O_RDWR | os.O_TRUNC, os.O_RDONLY | os.O_TRUNC}
+	opened := 0
+	defer func() {
+		if opened == 0 && !t.Failed() {
+			t.Error("no open succeeded, so nothing was checked")
+		}
+	}()
 	for i := 0; i < 400; i++ {
 		ctx, cancel := context.WithTimeout(t.Context(), 5*time.Millisecond)
 		start := time.Now()
@@ -586,6 +625,7 @@ func TestRootFIFOSwapStaysBounded(t *testing.T) {
 		if err != nil {
 			continue
 		}
+		opened++
 		st, err := f.Stat()
 		f.Close()
 		if err != nil {

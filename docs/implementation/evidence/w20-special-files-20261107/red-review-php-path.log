@@ -1,0 +1,6 @@
+--- FAIL: TestRootOpenMatchesKernelForSpecialFiles (0.00s)
+    special_files_test.go:409: /app/s flag 0x0: &fs.PathError{Op:"openat", Path:"s", Err:0x66}, want an open error on the PHP path
+    special_files_test.go:409: /app/s flag 0x1: &fs.PathError{Op:"openat", Path:"s", Err:0x66}, want an open error on the PHP path
+    special_files_test.go:409: /app/d flag 0x1: &fs.PathError{Op:"openat", Path:"d", Err:0x15}, want an open error on the PHP path
+    special_files_test.go:409: /app/d flag 0x2: &fs.PathError{Op:"openat", Path:"d", Err:0x15}, want an open error on the PHP path
+    special_files_test.go:409: /app/d flag 0x209: &fs.PathError{Op:"openat", Path:"d", Err:0x15}, want an open error on the PHP path
