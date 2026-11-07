@@ -43,12 +43,14 @@
     "T-129",
     "T-130"
   ],
-  "source_base": "b771754aaaeccb5a1886293dfe027169401c7d6f",
-  "captured_at": "2026-11-07T04:28:00.245891+00:00",
+  "source_base": "9ae9e1e9f5de5fc4bf8b2ae474203b85d14b5ab5",
+  "captured_at": "2026-11-07T05:18:55.241576+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
     "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
-    "engine.go": "cbd462925b9e5da8933279731e5dc348c34a3783c9942eeda90c9876f5a97376",
+    "engine.go": "8989ae6d6f32c8892c4323368a556a6294a09ce8d002c65fada559bf6720cfc5",
+    "engine_read_other.go": "124247d71a79e67b332b7d6c3fc677ff2d8310a9f9d562abdcaac043d4dba185",
+    "engine_read_unix.go": "b6c551ddd1f7f6a82347bd1c5507c3cc239094acb0d028a2510bb84ffde69733",
     "engine_test.go": "0d9ec8e35414ae410c95fc9ac5768f37774bead63c30068329c7b6eabcb8ef6b",
     "internal/bytecode/bytecode.go": "cb8d36436a69a065c0eaa35a76421780759e1c77704b549858a27b942966ef54",
     "internal/bytecode/limits_review_test.go": "c2b640c052007d787f853ff2dc9d11f24509e91b8d16c99db840ef0302b70c0f",
@@ -74,10 +76,10 @@
     "internal/runtime/array_w12.go": "6c10f89dd27d1198d4a3cb446d2e75ca56fe7006cd244f48697a27f448655352",
     "internal/runtime/array_w12_safety_test.go": "9052cd8f59468dead9e7e32a1847ddb34f0d382ae9507e03636bab685b956060",
     "internal/runtime/array_w12_test.go": "a7f66506d7bd9f75d0a49fc3a48862998c5f990040aa953a5531e63adb6c8ae1",
-    "internal/runtime/execution.go": "2ca9428e2865013be16a51101d6179f9d9e5bad2da0dd95430b110121f92fcb4",
+    "internal/runtime/execution.go": "50421bacd8f04c5d1718a922f55f09e41dd254b361d13b6a91c915a41f43096a",
     "internal/runtime/execution_ci_review_test.go": "009311d1efc90fd2da63a6cf5c75085b9949a15c306ba37bf4b48183e0ec4373",
-    "internal/runtime/execution_oracle_test.go": "698ce9759722df94c89aa5526d63bf9555ac1e557388c47666c93a87f4c50dad",
-    "internal/runtime/execution_output.go": "7c1d10e509e81ed4602de07e15faeef34843b5bdc304bc6c0bdf41daaef68cd5",
+    "internal/runtime/execution_oracle_test.go": "05c407be196db9f2828def72093f1dfdc5f9db2101d45ffd4ecd3cd5e5e6078f",
+    "internal/runtime/execution_output.go": "88bf1d9e1fd0ceca8fccc4eef4a4d11cbe429011bb0bffcf7314af346c445be3",
     "internal/runtime/execution_snapshot_test.go": "a2bbeeca11f1298b3e95cc10b7b17b085f9dc28b650328063f1e7cf21ecf2ea6",
     "internal/runtime/execution_test.go": "7b88869686aba2e24e4f5f8932c5e65940e3ed62478a72a6d66cf46b1bfeff14",
     "internal/runtime/object_model_test.go": "4f077ec0f0914c281ba7a4dad6d6960cc9e837a6bfc28fcd168fafa04a6cde79",
@@ -90,15 +92,18 @@
     "internal/runtime/testdata/w13-run-64.json": "7e105562a62a8214bd2517635cced899b7fc014c604498fb5a09bfea94b6fcb4",
     "policy.go": "39fb599707e49e514c01fe83471c8d45ff13472fe25ac6eb1894cb0b1d7bb405",
     "policy_review_test.go": "7d29781feb3aee90776e1c78cdaed56f2ace4e70f3630e99fd4fd13b20c09f9d",
-    "runfile_cancel_unix_test.go": "5f0907b842311f9c15591e65502570fb32772bce378aba064b71862d8ce97341",
+    "runfile_cancel_unix_test.go": "428402095d29ccb9907c1e79ad6cf290b006191cdf80a37338b44278e5191473",
     "runfile_review_fixes_test.go": "df758e08e7b15295286470429919b9668aed8a75c970fdb6a7aac8463992cd0a",
     "tests/lifecycle/w14/buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
     "tests/lifecycle/w14/buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
-    "tests/lifecycle/w14/reference-32.json": "48ff5f9f69e5306a58b94304a4f28b7260d0bc8ed7cb4a1f76d92dd8c3d426d4",
-    "tests/lifecycle/w14/reference.json": "a56aaf6074d02cf567925665753a0efb4fcf6d5879ad08b99bd2e635871b58a9",
+    "tests/lifecycle/w14/reference-32.json": "400b48f095287eb6f02a92d85205ac4ca104afca3e1b1cb4f8847adc95ffda71",
+    "tests/lifecycle/w14/reference.json": "4e446835e83323aa4e35bf0a6179e98e58e48c392333456c8455bcd1ecfc061f",
     "tests/lifecycle/w14/solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
     "tests/lifecycle/w14/solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "tests/lifecycle/w14/solo_handler_fatal.php": "a4c92e76e303c340d7eb57cb14bc111a2a1994a87b42d4f0ff5e231bdbe06f41",
+    "tests/lifecycle/w14/solo_printf_empty.php": "06492454682c86837e67e2c51635357bf415c0c8a60dd916857abde56bd82f78",
     "tests/lifecycle/w14/solo_return_dtor_exit.php": "5a7afa30c6ede78ca28c2a843cf27e618858781272721555730fc146db7bf557",
+    "tests/lifecycle/w14/solo_return_dtor_fatal.php": "d5a19699e54a33f6aa28b509ed5450ec9a2123c230f927aaf1d0dde2db2a0d3d",
     "tests/lifecycle/w14/solo_return_dtor_throw.php": "2c4997aff0dc7e419a2153a4d0c95dee4bf7f15683b0a1390739ba151ca89b01",
     "tests/lifecycle/w14/solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
     "tests/lifecycle/w14/solo_shutdown_return_dtor_exit.php": "9798b511edc5e603b41069ce6cc8755b5973d83d8dbbe42913680a6bb5caef1e",
@@ -224,12 +229,18 @@
       "exit_code": null,
       "log": "review-fixes-runtime-20261106/red-review5.log",
       "result": "A destructor throw or exit after the handler returned prints the buffer instead of the returned string and drops the deprecation; the handler sees level 0; a FIFO read ignores ctx; MaxSourceBytes=MaxInt reads nothing."
+    },
+    {
+      "command": "go test of the review-6 tests on 7b82315: a cancelled FIFO read left behind, a fatal error inside a handler, and a zero-length write",
+      "exit_code": null,
+      "log": "review-fixes-runtime-20261106/red-review6.log",
+      "result": "Cancelled FIFO reads leave goroutines that take the next script (darwin); a handler fatal pops its buffer and the outer handler runs; printf(\"\") gets no deprecation."
     }
   ],
   "artifacts": {
     "build.log": {
       "path": "review-fixes-runtime-20261106/build.log",
-      "sha256": "90879240e3f8b01a8f7fcec0c48b4854d5ca4b9427eb5acdbd2e3c9d6fcdbfdb"
+      "sha256": "dd42bfe11a185a3864d7369849ecd6c113f69556a95e8c26a72f85eb8d2526a4"
     },
     "bytecode-budgets.go.txt": {
       "path": "review-fixes-runtime-20261106/bytecode-budgets.go.txt",
@@ -249,11 +260,11 @@
     },
     "fuzz.log": {
       "path": "review-fixes-runtime-20261106/fuzz.log",
-      "sha256": "bd87f1f87a0339cd64471e3e1a4d166b2db2345ca3deac301c4e8fc5eee9b28b"
+      "sha256": "4587cb87dba8e2774ca274ea81cbcb8a188c5d1334cdabbf076ab4464fd6b244"
     },
     "go.log": {
       "path": "review-fixes-runtime-20261106/go.log",
-      "sha256": "4db11553d21dca25fa536a5920950ce11715dd10dcf3d593d8e4937a26bfaf7b"
+      "sha256": "4547b5cd8d64a3f8b9e89bc3977a16c8d98cf40fa323d81b4cf573912417c5f0"
     },
     "gofmt.log": {
       "path": "review-fixes-runtime-20261106/gofmt.log",
@@ -285,11 +296,11 @@
     },
     "python.log": {
       "path": "review-fixes-runtime-20261106/python.log",
-      "sha256": "0973a8f45d90b9891e74d415507181bf5646c2f99b8bf452cb53bec1e6d1f01e"
+      "sha256": "25eacb2a178bdfd3acf02d95b68cff4d358b90d36db5c10616c872b06464194e"
     },
     "race.log": {
       "path": "review-fixes-runtime-20261106/race.log",
-      "sha256": "621ee58c2f19d14b7d22d31684102abc41f64be5a9b557abbe24e798bc2fd88d"
+      "sha256": "a2b21598f9711d1cdb03276941cbdcab7e78cb694cfa78c91d5f3725717f8f82"
     },
     "red-main.log": {
       "path": "review-fixes-runtime-20261106/red-main.log",
@@ -310,6 +321,10 @@
     "red-review5.log": {
       "path": "review-fixes-runtime-20261106/red-review5.log",
       "sha256": "b9dfa7179c9e0c90787421a89df2ace8896efaac712bda4b9eca13a4352802cd"
+    },
+    "red-review6.log": {
+      "path": "review-fixes-runtime-20261106/red-review6.log",
+      "sha256": "76a8e4c9bee7dfc3430471886d16641b077ce9423acd5d01211e0c3266a47b48"
     },
     "upstream-pair-spacing.log": {
       "path": "review-fixes-runtime-20261106/upstream-pair-spacing.log",
