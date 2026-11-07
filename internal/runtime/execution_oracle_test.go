@@ -13,19 +13,23 @@ import (
 
 // REQ-020, REQ-040; T-039, T-040, T-079, T-080.
 // These are local action replays, not execution of PHP source by Phego.
+// The lifecycle references are profiles of (integer width, architecture).
 func TestExecutionOracleReplay(t *testing.T) {
-	for _, width := range []int{64, 32} {
-		t.Run(fmt.Sprint(width), func(t *testing.T) {
-			replayExecutionOracle(t, width)
+	for _, profile := range []struct {
+		name, arch, reference string
+		width                 int
+	}{
+		{"64", "arm64", "reference.json", 64},
+		{"32", "386", "reference-32.json", 32},
+		{"amd64", "amd64", "reference-amd64.json", 64},
+	} {
+		t.Run(profile.name, func(t *testing.T) {
+			replayExecutionOracle(t, profile.width, profile.arch, profile.reference)
 		})
 	}
 }
 
-func replayExecutionOracle(t *testing.T, width int) {
-	name := "reference.json"
-	if width == 32 {
-		name = "reference-32.json"
-	}
+func replayExecutionOracle(t *testing.T, width int, arch, name string) {
 	data, err := os.ReadFile("../../tests/lifecycle/w14/" + name)
 	if err != nil {
 		t.Fatal(err)
@@ -63,6 +67,7 @@ func replayExecutionOracle(t *testing.T, width int) {
 			must(r.Ready())
 			x, err := newExecution(context.Background(), r, width, nil, executionLimits{32, 64, 4096})
 			must(err)
+			x.heap.arch = arch
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			var events []string

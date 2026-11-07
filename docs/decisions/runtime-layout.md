@@ -28,7 +28,7 @@
 64 位元原本只對照 arm64。在 linux/amd64 的 PHP 8.5.12 固定映像上重新產生四套參考後，只有 W-13 的 `compare-lazy-operand-owners` 不同：amd64 和 i386 一樣先初始化右邊的 lazy object，arm64 先初始化左邊（[amd64-reference](../implementation/evidence/runtime-layout-20261107/amd64-reference.txt)）。W-12、W-14、W-15 的輸出和 arm64 逐位元組相同。
 
 - 參考 profile 改為（整數寬度、架構）。`newHeap(width)` 照舊使用該寬度的參考架構（64 位元為 arm64、32 位元為 386），`newHeapFor(width, arch)` 指定架構；沒有固定映像的組合會回報錯誤。
-- W-13 另存 `w13-ref-64-amd64.json`。W-12、W-15 的 amd64 工作在原生 x86-64 runner 重新產生參考，先要求和 64 位元參考逐位元組相同，再用 amd64 profile 執行 Go 對照。
+- W-13 另存 `w13-ref-64-amd64.json`，W-14 另存 `reference-amd64.json`（58 案和 arm64 相同，只有映像紀錄不同）。W-12、W-15 的 amd64 工作在原生 x86-64 runner 重新產生參考，先要求和 64 位元參考逐位元組相同，再用 amd64 profile 執行 Go 對照。
 - 產生工具新增 `--arch`；預設架構維持原本的檔名，其他架構的檔名加上架構後綴。
 
 ## 後續

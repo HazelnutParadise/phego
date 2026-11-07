@@ -5,4 +5,5 @@ W-13 tests/semantics/w13-objects/reference.py --arch amd64: 1600 of 1601 cases i
    386 [false, ["init:B", "init:A", "dtor:A", "dtor:B"]]
    amd64 [false, ["init:B", "init:A", "dtor:A", "dtor:B"]]
 W-14 tools/lifecycle_reference.py on amd64: all 52 cases (pre-#131 fixtures) identical in exit code, stdout, stderr and combined output
+W-14 after merging main (5188785): tools/lifecycle_reference.py --width 64 --arch amd64 --write produced reference-amd64.json; all 58 cases identical to reference.json in exit code, stdout, stderr and combined output (the records differ only in image and platform)
 W-15 tests/optimization/w15/reference.php on amd64: byte-identical to tests/optimization/w15/ref-64.json
