@@ -1,0 +1,50 @@
+name: VM layout benchmarks
+
+# Compares the candidates for VM dispatch, frame layout, local slots and
+# cancellation polling (docs/decisions/W-17-vm.md) with benchstat on hosted
+# runners. All candidates of a family are in one test binary and run the
+# same workloads. Run it by hand, or by changing this file, the script or
+# the benchmarks.
+on:
+  push:
+    paths:
+      - '.github/workflows/vm-layout.yml'
+      - 'tools/benchstat-variants.sh'
+      - 'internal/runtime/vm_bench_test.go'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: ${{ matrix.family }} (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [BenchmarkVMDispatch, BenchmarkVMFrames, BenchmarkVMPolling, BenchmarkVMLocals]
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install benchstat
+        run: go install golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
+      - name: Compare
+        run: |
+          set -euo pipefail
+          tools/benchstat-variants.sh ./internal/runtime '${{ matrix.family }}' 10 "$RUNNER_TEMP/benchstat"
+          { uname -a; nproc; grep -m1 -E 'model name|CPU part' /proc/cpuinfo || true; } > "$RUNNER_TEMP/benchstat/${{ matrix.family }}.host.txt"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vm-layout-${{ matrix.family }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/benchstat
+          if-no-files-found: error
