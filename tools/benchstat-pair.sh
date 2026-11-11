@@ -24,9 +24,11 @@ for file in "$@"; do
 done
 for side in before after; do
   (cd "$work/$side" && CGO_ENABLED=0 go test -c -o "$work/$side.test" ./internal/runtime)
+  # Not "key: value" lines: benchstat would read those as configuration and
+  # refuse to compare two files whose commits differ.
   {
-    echo "commit: $(git rev-parse "${!side}")"
-    echo "go: $(go version)"
+    echo "# commit $(git rev-parse "${!side}")"
+    echo "# $(go version)"
   } > "$out/$name.$side.txt"
 done
 for ((round = 1; round <= rounds; round++)); do

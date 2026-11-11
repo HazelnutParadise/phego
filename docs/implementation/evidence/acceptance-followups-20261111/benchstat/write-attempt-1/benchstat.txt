@@ -1,0 +1,28 @@
+go: go version go1.26.10 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+                │   before    │                after                │
+                │   sec/op    │   sec/op     vs base                │
+OutputWrite/1-4   25.57n ± 1%   33.43n ± 2%  +30.75% (p=0.000 n=10)
+OutputWrite/3-4   26.94n ± 3%   35.84n ± 4%  +33.05% (p=0.000 n=10)
+OutputWrite/8-4   32.39n ± 2%   42.95n ± 2%  +32.57% (p=0.000 n=10)
+geomean           28.15n        37.19n       +32.12%
+
+                │   before   │                after                │
+                │    B/op    │    B/op     vs base                 │
+OutputWrite/1-4   5.000 ± 0%   5.000 ± 0%       ~ (p=1.000 n=10)
+OutputWrite/3-4   5.000 ± 0%   5.000 ± 0%       ~ (p=1.000 n=10)
+OutputWrite/8-4   5.000 ± 0%   5.000 ± 0%       ~ (p=1.000 n=10) ¹
+geomean           5.000        5.000       +0.00%
+¹ all samples are equal
+
+                │    before    │                after                │
+                │  allocs/op   │ allocs/op   vs base                 │
+OutputWrite/1-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+OutputWrite/3-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+OutputWrite/8-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+geomean                      ²               +0.00%                ²
+¹ all samples are equal
+² summaries must be >0 to compute geomean

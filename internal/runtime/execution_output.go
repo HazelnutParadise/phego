@@ -8,25 +8,33 @@ import (
 
 // REQ-009, REQ-040; T-017, T-079, T-080. Output is committed once, including
 // a writer's accepted prefix on failure. PHP and host diagnostics stay separate.
+// write is echo: it honours a pending stop or cancellation first and then
+// writes into the innermost buffer.
 func (x *execution) write(data []byte) completion {
-	if x.closed {
-		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
-	}
-	if c := x.check(); c.kind != endNormal {
-		return c
-	}
-	return x.writeTo(len(x.buffers)-1, data)
+	return x.outputOp(len(x.buffers)-1, data, true)
 }
 
 // writeTo writes into buffer top, or straight to the writer when top < 0.
-// It is php_output_op: a write while a handler runs marks the buffer that
-// receives it as having produced output, which is how a displayed
-// diagnostic that skipped a disabled handler flags the next one.
-// report uses it for displayed diagnostics; write uses it for the innermost
-// buffer.
+// report uses it for displayed diagnostics, which are written even while
+// the execution is stopping.
 func (x *execution) writeTo(top int, data []byte) completion {
+	return x.outputOp(top, data, false)
+}
+
+// outputOp is php_output_op: a write while a handler runs marks the buffer
+// that receives it as having produced output, which is how a displayed
+// diagnostic that skipped a disabled handler flags the next one. write and
+// writeTo are its two entries; they stay one-line so that they inline and
+// every echo is a single call (a completion is too large to return through
+// a second frame for free: benchstat measured about 30% on amd64).
+func (x *execution) outputOp(top int, data []byte, checked bool) completion {
 	if x.closed {
 		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
+	}
+	if checked {
+		if c := x.check(); c.kind != endNormal {
+			return c
+		}
 	}
 	if (x.filtering || x.outputRunning) && top >= 0 {
 		x.buffers[top].produced = true
