@@ -1,0 +1,54 @@
+-- source --
+<?php
+function f() { return 1; }
+function g() { return 2; }
+function h() { return 3; }
+echo f() > g(), f() >= g(), $a > $b;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=124 lines=6
+const 0: null
+const 1: string "a"
+const 2: string "b"
+const 3: int 1
+const 4: int 2
+const 5: int 3
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  registers LLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Call 0 2 1 0 ; line 5 ; f
+  3: Call 0 3 2 0 ; line 5 ; g
+  4: Binary Less 4 3 2 ; line 5
+  5: Output 0 4 0 0 ; line 5
+  6: Call 0 2 1 0 ; line 5 ; f
+  7: Call 0 3 2 0 ; line 5 ; g
+  8: Binary LessOrEqual 4 3 2 ; line 5
+  9: Output 0 4 0 0 ; line 5
+  10: Load 0 2 1 0 ; line 5
+  11: Load 0 3 0 0 ; line 5
+  12: Binary Less 4 2 3 ; line 5
+  13: Output 0 4 0 0 ; line 5
+  14: Const 0 2 0 0 ; line 6 ; null
+  15: Return 0 2 0 0 ; line 6
+func 1 "f" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 3 0 ; line 2 ; int 1
+  1: Return 0 0 0 0 ; line 2
+  2: Const 0 0 0 0 ; line 2 ; null
+  3: Return 0 0 0 0 ; line 2
+func 2 "g" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 4 0 ; line 3 ; int 2
+  1: Return 0 0 0 0 ; line 3
+  2: Const 0 0 0 0 ; line 3 ; null
+  3: Return 0 0 0 0 ; line 3
+func 3 "h" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 5 0 ; line 4 ; int 3
+  1: Return 0 0 0 0 ; line 4
+  2: Const 0 0 0 0 ; line 4 ; null
+  3: Return 0 0 0 0 ; line 4

@@ -1,0 +1,43 @@
+-- source --
+<?php
+echo null, true, false, 0, -7, 9223372036854775807, 1.5, -0.0, 'str', "a\tb";
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=84 lines=3
+const 0: null
+const 1: bool true
+const 2: bool false
+const 3: int 0
+const 4: int 7
+const 5: int 9223372036854775807
+const 6: float 1.5 (0x3ff8000000000000)
+const 7: float 0 (0x0000000000000000)
+const 8: string "str"
+const 9: string "a\tb"
+func 0 "{main}" params=0 locals=0 registers=2 maxstack=0
+  registers VV
+  0: Const 0 0 0 0 ; line 2 ; null
+  1: Output 0 0 0 0 ; line 2
+  2: Const 0 0 1 0 ; line 2 ; bool true
+  3: Output 0 0 0 0 ; line 2
+  4: Const 0 0 2 0 ; line 2 ; bool false
+  5: Output 0 0 0 0 ; line 2
+  6: Const 0 0 3 0 ; line 2 ; int 0
+  7: Output 0 0 0 0 ; line 2
+  8: Const 0 0 4 0 ; line 2 ; int 7
+  9: Unary Negate 1 0 0 ; line 2
+  10: Output 0 1 0 0 ; line 2
+  11: Const 0 0 5 0 ; line 2 ; int 9223372036854775807
+  12: Output 0 0 0 0 ; line 2
+  13: Const 0 0 6 0 ; line 2 ; float 1.5 (0x3ff8000000000000)
+  14: Output 0 0 0 0 ; line 2
+  15: Const 0 0 7 0 ; line 2 ; float 0 (0x0000000000000000)
+  16: Unary Negate 1 0 0 ; line 2
+  17: Output 0 1 0 0 ; line 2
+  18: Const 0 0 8 0 ; line 2 ; string "str"
+  19: Output 0 0 0 0 ; line 2
+  20: Const 0 0 9 0 ; line 2 ; string "a\tb"
+  21: Output 0 0 0 0 ; line 2
+  22: Const 0 0 0 0 ; line 3 ; null
+  23: Return 0 0 0 0 ; line 3

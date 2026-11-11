@@ -1,0 +1,56 @@
+-- source --
+<?php
+$a = 1;
+echo $a ? 'y' : 'n', $a ?: 'n';
+echo $a ? ($a > 1 ? 'big' : 'one') : 'zero';
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=91 lines=5
+const 0: int 1
+const 1: string "y"
+const 2: string "n"
+const 3: string "big"
+const 4: string "one"
+const 5: string "zero"
+const 6: null
+const 7: string "a"
+func 0 "{main}" params=0 locals=1 registers=6 maxstack=0
+  local 0 "a"
+  registers LVVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Const 0 1 0 0 ; line 2 ; int 1
+  2: Store 0 0 1 0 ; line 2
+  3: Load 0 2 0 0 ; line 3
+  4: Branch 0 2 5 8 ; line 3
+  5: Const 0 2 1 0 ; line 3 ; string "y"
+  6: Move 0 1 2 0 ; line 3
+  7: Jump 0 10 0 0 ; line 3
+  8: Const 0 2 2 0 ; line 3 ; string "n"
+  9: Move 0 1 2 0 ; line 3
+  10: Output 0 1 0 0 ; line 3
+  11: Load 0 2 0 0 ; line 3
+  12: Branch 0 2 13 15 ; line 3
+  13: Move 0 1 2 0 ; line 3
+  14: Jump 0 17 0 0 ; line 3
+  15: Const 0 2 2 0 ; line 3 ; string "n"
+  16: Move 0 1 2 0 ; line 3
+  17: Output 0 1 0 0 ; line 3
+  18: Load 0 2 0 0 ; line 4
+  19: Branch 0 2 20 31 ; line 4
+  20: Const 0 3 0 0 ; line 4 ; int 1
+  21: Load 0 4 0 0 ; line 4
+  22: Binary Less 5 3 4 ; line 4
+  23: Branch 0 5 24 27 ; line 4
+  24: Const 0 3 3 0 ; line 4 ; string "big"
+  25: Move 0 2 3 0 ; line 4
+  26: Jump 0 29 0 0 ; line 4
+  27: Const 0 3 4 0 ; line 4 ; string "one"
+  28: Move 0 2 3 0 ; line 4
+  29: Move 0 1 2 0 ; line 4
+  30: Jump 0 33 0 0 ; line 4
+  31: Const 0 2 5 0 ; line 4 ; string "zero"
+  32: Move 0 1 2 0 ; line 4
+  33: Output 0 1 0 0 ; line 4
+  34: Const 0 1 6 0 ; line 5 ; null
+  35: Return 0 1 0 0 ; line 5

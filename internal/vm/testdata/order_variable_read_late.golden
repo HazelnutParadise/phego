@@ -1,0 +1,32 @@
+-- source --
+<?php
+$k = 5;
+echo $k + $k++ + $k;
+$a[$k] = $k++;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=50 lines=5
+const 0: int 5
+const 1: null
+const 2: string "k"
+const 3: string "a"
+func 0 "{main}" params=0 locals=2 registers=6 maxstack=0
+  local 0 "k"
+  local 1 "a"
+  registers LLVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Const 0 2 0 0 ; line 2 ; int 5
+  3: Store 0 0 2 0 ; line 2
+  4: IncDec PostInc 2 0 0 ; line 3
+  5: Load 0 3 0 0 ; line 3
+  6: Binary Add 4 3 2 ; line 3
+  7: Load 0 5 0 0 ; line 3
+  8: Binary Add 2 4 5 ; line 3
+  9: Output 0 2 0 0 ; line 3
+  10: IncDec PostInc 2 0 0 ; line 4
+  11: Load 0 3 0 0 ; line 4
+  12: ArraySet 0 1 3 2 ; line 4
+  13: Const 0 2 1 0 ; line 5 ; null
+  14: Return 0 2 0 0 ; line 5

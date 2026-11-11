@@ -1,0 +1,31 @@
+-- source --
+<p>head</p>
+<?php echo 'a', 1, 2.5; print 'p'; ?>
+tail
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=54 lines=3
+const 0: string "<p>head</p>\n"
+const 1: string "a"
+const 2: int 1
+const 3: float 2.5 (0x4004000000000000)
+const 4: string "p"
+const 5: string "tail"
+const 6: null
+func 0 "{main}" params=0 locals=0 registers=2 maxstack=0
+  registers VV
+  0: Const 0 0 0 0 ; line 1 ; string "<p>head</p>\n"
+  1: Output 0 0 0 0 ; line 1
+  2: Const 0 0 1 0 ; line 2 ; string "a"
+  3: Output 0 0 0 0 ; line 2
+  4: Const 0 0 2 0 ; line 2 ; int 1
+  5: Output 0 0 0 0 ; line 2
+  6: Const 0 0 3 0 ; line 2 ; float 2.5 (0x4004000000000000)
+  7: Output 0 0 0 0 ; line 2
+  8: Const 0 0 4 0 ; line 2 ; string "p"
+  9: Output 0 0 0 0 ; line 2
+  10: Const 0 1 2 0 ; line 2 ; int 1
+  11: Const 0 0 5 0 ; line 3 ; string "tail"
+  12: Output 0 0 0 0 ; line 3
+  13: Const 0 0 6 0 ; line 3 ; null
+  14: Return 0 0 0 0 ; line 3

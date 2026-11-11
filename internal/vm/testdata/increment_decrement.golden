@@ -1,0 +1,28 @@
+-- source --
+<?php
+$i = 0;
+$i++; ++$i; $i--; --$i;
+echo $i++ + ++$i;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=56 lines=5
+const 0: int 0
+const 1: null
+const 2: string "i"
+func 0 "{main}" params=0 locals=1 registers=4 maxstack=0
+  local 0 "i"
+  registers LVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Const 0 1 0 0 ; line 2 ; int 0
+  2: Store 0 0 1 0 ; line 2
+  3: IncDec PostInc 1 0 0 ; line 3
+  4: IncDec PreInc 1 0 0 ; line 3
+  5: IncDec PostDec 1 0 0 ; line 3
+  6: IncDec PreDec 1 0 0 ; line 3
+  7: IncDec PostInc 1 0 0 ; line 4
+  8: IncDec PreInc 2 0 0 ; line 4
+  9: Binary Add 3 1 2 ; line 4
+  10: Output 0 3 0 0 ; line 4
+  11: Const 0 1 1 0 ; line 5 ; null
+  12: Return 0 1 0 0 ; line 5

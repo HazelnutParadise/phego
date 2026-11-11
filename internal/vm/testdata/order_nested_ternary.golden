@@ -1,0 +1,57 @@
+-- source --
+<?php
+function f() { return 1; }
+function g() { return 2; }
+function h() { return 3; }
+echo f() ? (g() ? 1 : 2) : (h() ? 3 : 4);
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=129 lines=6
+const 0: int 1
+const 1: int 2
+const 2: int 3
+const 3: int 4
+const 4: null
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+  registers VVV
+  0: Call 0 1 1 0 ; line 5 ; f
+  1: Branch 0 1 2 11 ; line 5
+  2: Call 0 2 2 0 ; line 5 ; g
+  3: Branch 0 2 4 7 ; line 5
+  4: Const 0 2 0 0 ; line 5 ; int 1
+  5: Move 0 1 2 0 ; line 5
+  6: Jump 0 9 0 0 ; line 5
+  7: Const 0 2 1 0 ; line 5 ; int 2
+  8: Move 0 1 2 0 ; line 5
+  9: Move 0 0 1 0 ; line 5
+  10: Jump 0 19 0 0 ; line 5
+  11: Call 0 2 3 0 ; line 5 ; h
+  12: Branch 0 2 13 16 ; line 5
+  13: Const 0 2 2 0 ; line 5 ; int 3
+  14: Move 0 1 2 0 ; line 5
+  15: Jump 0 18 0 0 ; line 5
+  16: Const 0 2 3 0 ; line 5 ; int 4
+  17: Move 0 1 2 0 ; line 5
+  18: Move 0 0 1 0 ; line 5
+  19: Output 0 0 0 0 ; line 5
+  20: Const 0 0 4 0 ; line 6 ; null
+  21: Return 0 0 0 0 ; line 6
+func 1 "f" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 0 0 ; line 2 ; int 1
+  1: Return 0 0 0 0 ; line 2
+  2: Const 0 0 4 0 ; line 2 ; null
+  3: Return 0 0 0 0 ; line 2
+func 2 "g" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 1 0 ; line 3 ; int 2
+  1: Return 0 0 0 0 ; line 3
+  2: Const 0 0 4 0 ; line 3 ; null
+  3: Return 0 0 0 0 ; line 3
+func 3 "h" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 2 0 ; line 4 ; int 3
+  1: Return 0 0 0 0 ; line 4
+  2: Const 0 0 4 0 ; line 4 ; null
+  3: Return 0 0 0 0 ; line 4

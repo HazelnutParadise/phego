@@ -1,0 +1,64 @@
+-- source --
+<?php
+function add($a, $b) {
+    $c = $a + $b;
+    return $c;
+}
+function none() {
+}
+function bare() {
+    return;
+}
+echo add(1, 2), none(), bare();
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=148 lines=12
+const 0: int 1
+const 1: int 2
+const 2: null
+const 3: string "a"
+const 4: string "b"
+const 5: string "c"
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=2
+  registers VVV
+  0: Const 0 1 0 0 ; line 11 ; int 1
+  1: Const 0 2 1 0 ; line 11 ; int 2
+  2: Push 0 1 0 0 ; line 11
+  3: Push 0 2 0 0 ; line 11
+  4: Call 0 0 1 2 ; line 11 ; add
+  5: Output 0 0 0 0 ; line 11
+  6: Call 0 0 2 0 ; line 11 ; none
+  7: Output 0 0 0 0 ; line 11
+  8: Call 0 0 3 0 ; line 11 ; bare
+  9: Output 0 0 0 0 ; line 11
+  10: Const 0 0 2 0 ; line 12 ; null
+  11: Return 0 0 0 0 ; line 12
+func 1 "add" params=2 locals=3 registers=8 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  local 2 "c"
+  registers VVLLLVVV
+  0: Local 0 2 0 0 ; line 2
+  1: Local 0 3 1 0 ; line 2
+  2: Local 0 4 2 0 ; line 2
+  3: Store 0 2 0 0 ; line 2
+  4: Store 0 3 1 0 ; line 2
+  5: Load 0 5 2 0 ; line 3
+  6: Load 0 6 3 0 ; line 3
+  7: Binary Add 7 5 6 ; line 3
+  8: Store 0 4 7 0 ; line 3
+  9: Load 0 5 4 0 ; line 4
+  10: Return 0 5 0 0 ; line 4
+  11: Const 0 5 2 0 ; line 4 ; null
+  12: Return 0 5 0 0 ; line 4
+func 2 "none" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 2 0 ; line 6 ; null
+  1: Return 0 0 0 0 ; line 6
+func 3 "bare" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 2 0 ; line 9 ; null
+  1: Return 0 0 0 0 ; line 9
+  2: Const 0 0 2 0 ; line 9 ; null
+  3: Return 0 0 0 0 ; line 9
