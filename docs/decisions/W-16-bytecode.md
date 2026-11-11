@@ -59,11 +59,12 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 | 程式入口 | Required:u16、Entry:u32 |
 | constants table | Kind:u8、Bits:u64、Bytes:str |
 | sources table | Name:str、Digest:32 bytes、Bytes:u32、Lines:u32 |
-| functions table | Name:str、Params:u32、Locals:u32、MaxStack:u32、ReturnKind:u8，再接以下四張函式內表格 |
+| functions table | Name:str、Params:u32、Locals:u32、MaxStack:u32、ReturnKind:u8，再接以下函式內表格，minor 0 為前四張，minor 1 為五張 |
 | function registers table | Kind:u8 |
 | function instructions table | Op:u16、Aux:u16、A:u32、B:u32、C:u32 |
 | function positions table | Source:u32、Start:u32、End:u32、Line:u32 |
 | function handlers table | Start:u32、End:u32、Target:u32、BodyEnd:u32、StackDepth:u32、Register:u32、Kind:u32 |
+| function local names table（僅 minor 1） | 常數索引:u32 |
 
 Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。每條指令必須對應一筆 Position。Position 全零表示 synthetic，否則 Source 是從 1 開始的 sources 索引，Line 必須為正，Start／End 為來源 bytes 的半開區間。v1 的 Handler.StackDepth 固定為零，Finally.Register 固定為零，Catch.Register 則指向 Value 暫存器。
 
@@ -71,7 +72,7 @@ RegisterKind 的 Value／Location 分別是 1／2。ConstantKind 的 Null／Bool
 
 Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35。零與其他編號均為未知指令，目前第一個未知編號是 36。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。
 
-格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。
+格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。1.1 的每個函式在例外表後多一張 local 名稱表，筆數為 0 或恰好等於 Locals，每筆指向存放不含 `$` 變數名稱的 String 常數，讓 VM 能印出 PHP 的未定義變數警告並依名稱接收宿主提供的全域變數。minor 0 檔案沒有這張表，載入後沒有名稱。筆數不符、索引超出範圍或常數不是 String 時以 `ErrInvalid` 拒絕並指出函式。
 
 ## 固定指令與純量常數
 

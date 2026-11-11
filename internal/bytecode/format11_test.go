@@ -182,15 +182,16 @@ func TestExitIsTerminalAndMayLeavePendingArguments(t *testing.T) {
 	})
 }
 
-// encodeAtMinor encodes image and rewrites its header to the given minor
-// version with a repaired internal digest.
+// encodeAtMinor encodes image with the payload layout of the given minor
+// version (minor 0 has no local names tables). A minor above FormatMinor
+// keeps the current layout and only rewrites the header.
 func encodeAtMinor(t *testing.T, image Image, minor uint16) []byte {
 	t.Helper()
 	p, err := Build(context.Background(), image, testOptions())
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	data, err := p.Encode(context.Background())
+	data, err := encodeAt(context.Background(), p, min(minor, FormatMinor))
 	if err != nil {
 		t.Fatalf("Encode: %v", err)
 	}

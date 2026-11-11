@@ -3,6 +3,7 @@ package bytecode
 import (
 	"cmp"
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/HazelnutParadise/phego/internal/profile"
@@ -145,6 +146,9 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 				return 0, err
 			}
 		}
+		if err := verifyLocalNames(b, image, f, cloneCost); err != nil {
+			return 0, functionError(err, fi, -1)
+		}
 		for _, k := range f.Registers {
 			if err := b.chargeWork(1); err != nil {
 				return 0, err
@@ -187,6 +191,34 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 		return 0, fail(ErrCapability, "host does not support required capabilities")
 	}
 	return image.Required, nil
+}
+
+// verifyLocalNames checks the count first, so the loop is bounded by
+// Locals and MaxLocals before any entry is read.
+func verifyLocalNames(b *budget, image Image, f *Function, cloneCost bool) error {
+	if len(f.LocalNames) == 0 {
+		return nil
+	}
+	if uint64(len(f.LocalNames)) != uint64(f.Locals) {
+		return invalid(fmt.Sprintf("local name count %d must be 0 or the function's Locals (%d)", len(f.LocalNames), f.Locals))
+	}
+	if cloneCost {
+		if err := b.reserveMul(uint64(len(f.LocalNames)), 4); err != nil {
+			return err
+		}
+	}
+	if err := b.chargeWork(uint64(len(f.LocalNames))); err != nil {
+		return err
+	}
+	for i, c := range f.LocalNames {
+		if uint64(c) >= uint64(len(image.Constants)) {
+			return invalid(fmt.Sprintf("local name index %d for local %d is outside the %d constants", c, i, len(image.Constants)))
+		}
+		if image.Constants[c].Kind != String {
+			return invalid(fmt.Sprintf("local name constant %d for local %d is not a string", c, i))
+		}
+	}
+	return nil
 }
 
 type argShape struct {

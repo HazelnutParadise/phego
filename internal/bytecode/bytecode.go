@@ -224,6 +224,9 @@ type Position struct{ Source, Start, End, Line uint32 }
 // Function describes one frame. Parameter registers are the first Params
 // registers and are Value class. Locals are request-owned PHP locations.
 // Code has one Position per instruction. ReturnKind governs direct call results.
+// LocalNames is empty (no names, as in every format 1.0 function) or has
+// exactly Locals entries, each the index of a String constant holding the
+// variable name without "$". Names need not be unique or non-empty.
 type Function struct {
 	Name                     string
 	Params, Locals, MaxStack uint32
@@ -232,6 +235,7 @@ type Function struct {
 	Code                     []Instruction
 	Positions                []Position
 	Handlers                 []Handler
+	LocalNames               []uint32
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged
@@ -344,14 +348,18 @@ func (p *Program) Instructions(function uint32, dst []Instruction) ([]Instructio
 	return append(dst, p.image.Functions[function].Code...), true
 }
 
-// FunctionView has no mutating operations or exposed slices.
-type FunctionView struct{ function *Function }
+// FunctionView has no mutating operations or exposed slices. constants is
+// the Program's own pool, read only to resolve local names.
+type FunctionView struct {
+	function  *Function
+	constants []Constant
+}
 
 func (p *Program) Function(index uint32) (FunctionView, bool) {
 	if uint64(index) >= uint64(len(p.image.Functions)) {
 		return FunctionView{}, false
 	}
-	return FunctionView{&p.image.Functions[index]}, true
+	return FunctionView{&p.image.Functions[index], p.image.Constants}, true
 }
 func (f FunctionView) Len() int {
 	if f.function == nil {
@@ -382,6 +390,19 @@ func (f FunctionView) RegisterKind(index uint32) (RegisterKind, bool) {
 		return 0, false
 	}
 	return f.function.Registers[index], true
+}
+
+// LocalName is the PHP name, without "$", of local index. ok is false when
+// the function has no names or index is out of range.
+func (f FunctionView) LocalName(index uint32) (name string, ok bool) {
+	if f.function == nil || uint64(index) >= uint64(len(f.function.LocalNames)) {
+		return "", false
+	}
+	c := f.function.LocalNames[index]
+	if uint64(c) >= uint64(len(f.constants)) {
+		return "", false // unreachable for a verified Program
+	}
+	return f.constants[c].Bytes, true
 }
 func (f FunctionView) HandlerCount() int {
 	if f.function == nil {

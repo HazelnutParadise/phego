@@ -21,7 +21,8 @@ const wireHeader = 64
 // digest[32], byte length u32, and line count u32. A function is name string,
 // params/locals/max-stack u32, return-kind u8, register count plus u8 kinds,
 // instruction count plus fixed 16-byte instructions, position count plus
-// 16-byte positions, then handler count plus fixed 28-byte handlers. Strings
+// 16-byte positions, handler count plus fixed 28-byte handlers, then, from
+// format 1.1 on, local name count plus u32 constant indices. Strings
 // and table counts use u32 byte lengths/counts. All integers are little-endian.
 
 func load(ctx context.Context, data []byte, opts LoadOptions) (*Program, error) {
@@ -81,7 +82,7 @@ func load(ctx context.Context, data []byte, opts LoadOptions) (*Program, error) 
 	if err = b.reserve(512); err != nil {
 		return nil, err
 	}
-	image, err := decodePayload(ctx, b, data[wireHeader:])
+	image, err := decodePayload(ctx, b, data[wireHeader:], minor)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,12 @@ func load(ctx context.Context, data []byte, opts LoadOptions) (*Program, error) 
 	return &Program{image: image, limits: opts.Limits}, nil
 }
 
-func encode(ctx context.Context, p *Program) ([]byte, error) {
+func encode(ctx context.Context, p *Program) ([]byte, error) { return encodeAt(ctx, p, FormatMinor) }
+
+// encodeAt writes the payload layout of format 1.minor. Encode always uses
+// FormatMinor; minor 0 exists for tests of 1.0 files and must only be used
+// for programs that need no 1.1 feature.
+func encodeAt(ctx context.Context, p *Program, minor uint16) ([]byte, error) {
 	if p == nil || len(p.image.Functions) == 0 {
 		return nil, ErrInvalid
 	}
@@ -106,7 +112,7 @@ func encode(ctx context.Context, p *Program) ([]byte, error) {
 		return nil, err
 	}
 	// Program has already passed verification and exposes no mutable storage.
-	size, err := encodedSize(b, p.image)
+	size, err := encodedSize(b, p.image, minor)
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +131,12 @@ func encode(ctx context.Context, p *Program) ([]byte, error) {
 	out := make([]byte, int(size))
 	copy(out[:8], wireMagic[:])
 	binary.LittleEndian.PutUint16(out[8:10], FormatVersion)
-	binary.LittleEndian.PutUint16(out[10:12], FormatMinor)
+	binary.LittleEndian.PutUint16(out[10:12], minor)
 	binary.LittleEndian.PutUint32(out[12:16], wireHeader)
 	binary.LittleEndian.PutUint64(out[16:24], size)
 	binary.LittleEndian.PutUint64(out[56:64], 0)
 	w := writer{b: b, data: out, pos: wireHeader}
-	if err = w.payload(p.image); err != nil {
+	if err = w.payload(p.image, minor); err != nil {
 		return nil, err
 	}
 	if w.pos != len(out) {
@@ -208,7 +214,7 @@ func (w *writer) str(s string) error {
 	}
 	return nil
 }
-func (w *writer) payload(i Image) error {
+func (w *writer) payload(i Image, minor uint16) error {
 	if err := w.str(i.Identity.Profile.Release); err != nil {
 		return err
 	}
@@ -336,6 +342,16 @@ func (w *writer) payload(i Image) error {
 		for _, h := range f.Handlers {
 			for _, v := range []uint32{h.Start, h.End, h.Target, h.BodyEnd, h.StackDepth, h.Register, uint32(h.Kind)} {
 				if err := w.u32(v); err != nil {
+					return err
+				}
+			}
+		}
+		if minor >= 1 {
+			if err := w.u32(uint32(len(f.LocalNames))); err != nil {
+				return err
+			}
+			for _, c := range f.LocalNames {
+				if err := w.u32(c); err != nil {
 					return err
 				}
 			}
@@ -479,7 +495,7 @@ func (r *reader) count(min uint64, max uint32) (uint32, error) {
 	return n, nil
 }
 
-func decodePayload(ctx context.Context, b *budget, data []byte) (Image, error) {
+func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (Image, error) {
 	r := reader{b: b, data: data}
 	var i Image
 	var err error
@@ -579,7 +595,13 @@ func decodePayload(ctx context.Context, b *budget, data []byte) (Image, error) {
 		}
 		i.Sources[x] = Source{Name: name, Digest: i.Sources[x].Digest, Bytes: sz, Lines: lines}
 	}
-	n, err = r.count(66, b.lim.MaxFunctions)
+	// The smallest function record is 66 bytes, plus the local names count
+	// from format 1.1 on.
+	minFunction := uint64(66)
+	if minor >= 1 {
+		minFunction += 4
+	}
+	n, err = r.count(minFunction, b.lim.MaxFunctions)
 	if err != nil {
 		return Image{}, err
 	}
@@ -689,6 +711,25 @@ func decodePayload(ctx context.Context, b *budget, data []byte) (Image, error) {
 				return Image{}, ee
 			}
 			f.Handlers[j] = Handler{Start: binary.LittleEndian.Uint32(p), End: binary.LittleEndian.Uint32(p[4:]), Target: binary.LittleEndian.Uint32(p[8:]), BodyEnd: binary.LittleEndian.Uint32(p[12:]), StackDepth: binary.LittleEndian.Uint32(p[16:]), Register: binary.LittleEndian.Uint32(p[20:]), Kind: HandlerKind(binary.LittleEndian.Uint32(p[24:]))}
+		}
+		if minor >= 1 {
+			// Verification checks the count against Locals; MaxLocals
+			// bounds the allocation here.
+			nn, ee := r.count(4, b.lim.MaxLocals)
+			if ee != nil {
+				return Image{}, ee
+			}
+			if nn > 0 {
+				if ee = b.reserveMul(uint64(nn), 4); ee != nil {
+					return Image{}, ee
+				}
+				f.LocalNames = make([]uint32, int(nn))
+				for j := range f.LocalNames {
+					if f.LocalNames[j], ee = r.u32(); ee != nil {
+						return Image{}, ee
+					}
+				}
+			}
 		}
 	}
 	if r.pos != len(data) {

@@ -27,6 +27,13 @@ func FuzzLoadRejectsMalformedAndRepairedPayloads(f *testing.F) {
 	} else {
 		f.Fatalf("cannot construct format 1.1 fuzz seed: %v", err)
 	}
+	if pn, err := Build(context.Background(), localNamesImage(), testOptions()); err == nil {
+		if en, err := pn.Encode(context.Background()); err == nil {
+			f.Add(append([]byte(nil), en[64:]...))
+		}
+	} else {
+		f.Fatalf("cannot construct local names fuzz seed: %v", err)
+	}
 	f.Add(append([]byte(nil), encodedSeed...))
 	f.Add([]byte{})
 	f.Add([]byte("PHEGOBC\x00"))
