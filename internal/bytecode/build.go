@@ -14,7 +14,7 @@ func build(ctx context.Context, image Image, opts Options) (*Program, error) {
 		return nil, invalid("unknown supported capability")
 	}
 	b.supported = opts.Supported
-	if _, err = verifyImage(b, image, true); err != nil {
+	if _, err = verifyImage(b, image, FormatMinor, true); err != nil {
 		return nil, err
 	}
 	size, err := encodedSize(b, image)

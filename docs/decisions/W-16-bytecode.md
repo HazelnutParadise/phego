@@ -41,13 +41,13 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 |---|---|---|
 | 0 | 8 | `PHEGOBC` 加 NUL |
 | 8 | 2 | major，版本 1 |
-| 10 | 2 | minor，版本 0 |
+| 10 | 2 | minor，`Encode` 寫入 1，`Load` 接受 0 與 1 |
 | 12 | 4 | 表頭大小，必須為 64 |
 | 16 | 8 | 整份檔案長度，必須與輸入完全相等 |
 | 24 | 32 | SHA-256，計算 `data[:24]` 接 `data[56:]` |
 | 56 | 8 | features，目前必須為零 |
 
-所有整數均採 little-endian。解析器拒絕不同 major/minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
+所有整數均採 little-endian。解析器拒絕不同 major、大於 1 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
 
 ## Payload 的區段順序
 
@@ -69,7 +69,9 @@ Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。
 
 RegisterKind 的 Value／Location 分別是 1／2。ConstantKind 的 Null／Bool／Int／Float／String 分別是 1–5。HandlerKind 的 Catch／Finally 分別是 1／2。CapabilitySet 的 HostCallbacks／DynamicCode／FileRead／Shell 分別為 bit 0–3。
 
-Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。零與其他編號均為未知指令。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11。
+Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35。零與其他編號均為未知指令，目前第一個未知編號是 36。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。
+
+格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。
 
 ## 固定指令與純量常數
 
@@ -81,7 +83,7 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 
 ## 指令操作數
 
-下表省略的操作數必須為零。除 Binary 與 Include 外，Aux 必須為零。暫存器索引從零開始。
+下表省略的操作數必須為零。除 Binary、Include、Load、ArrayGet、Unary、Cast、IncDec 與 Exit 外，Aux 必須為零。暫存器索引從零開始。
 
 | 指令 | A | B | C |
 |---|---|---|---|
@@ -106,10 +108,22 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 | Include、Eval、Shell | 目的 Value | 來源 Value | — |
 | Drop | 要釋放的暫存器 | — | — |
 | EndFinally | — | — | — |
+| Unary | 目的 Value | 來源 Value | — |
+| Cast | 目的 Value | 來源 Value | — |
+| IncDec | 結果 Value | 目標 Location | — |
+| ArraySet | 容器 Location | key Value | 值 Value |
+| ArrayAppend | 容器 Location | 值 Value | — |
+| ArrayUnset | 容器 Location | key Value | — |
+| Isset | 目的 Value | 檢查的 Location | — |
+| ArrayIsset | 目的 Value | 容器 Value | key Value |
+| Unset | 要 unset 的 Location | — | — |
+| Exit | Aux 1 時為狀態 Value | — | — |
 
-Binary 的 Aux 為 Add 至 BitXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。這些指令是後端要實作的 PHP 操作，不會在載入時執行。
+Binary 的 Aux 為 Add 至 BoolXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。Load 與 ArrayGet 的 Aux 為 0 或 1，1 表示安靜讀取，Load 不發出未定義變數警告，ArrayGet 不發出未定義 key 或 offset 警告。Unary、Cast、IncDec 的 Aux 分別是 UnaryOp、CastKind、IncDecOp 的有效值。Exit 的 Aux 為 0 時沒有狀態且 A 為零，為 1 時 A 是狀態 Value。
 
-Push 將帶有 Value／Location 類別及可選名稱的引數加入請求內 stack。Call 只接受數量恰好等於 Params 的位置 Value 引數，CallValue 交由 Runtime 綁定可帶 Location 或名稱的引數。HostCall 只接受 Value 引數，可帶名稱，實際名稱綁定依宿主呼叫契約處理。三種呼叫指令均消耗 stack 尾端 C 筆，保留外層呼叫已累積的引數。分支合流時 stack 形狀必須相同。Return、ReturnRef、Throw、Leave、EndFinally 不得留下待處理引數。
+Unset 不會讓暫存器變回未定義，Location 仍可繼續使用，只有對應的 PHP 變數變成 unset。Exit 和 Return 一樣是終止指令，沒有後繼指令，可以是函式最後一條指令。這些指令是後端要實作的 PHP 操作，不會在載入時執行。
+
+Push 將帶有 Value／Location 類別及可選名稱的引數加入請求內 stack。Call 只接受數量恰好等於 Params 的位置 Value 引數，CallValue 交由 Runtime 綁定可帶 Location 或名稱的引數。HostCall 只接受 Value 引數，可帶名稱，實際名稱綁定依宿主呼叫契約處理。三種呼叫指令均消耗 stack 尾端 C 筆，保留外層呼叫已累積的引數。分支合流時 stack 形狀必須相同。Return、ReturnRef、Throw、Leave、EndFinally 不得留下待處理引數。Exit 例外，因為 PHP 可以在計算呼叫引數途中結束執行。
 
 ## 例外區間與暫存器資料流
 

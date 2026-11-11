@@ -13,7 +13,13 @@ import (
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
-const FormatVersion uint16 = 1
+// FormatVersion is the major format version. FormatMinor is the minor
+// version Encode writes. Load accepts minor 0 (format 1.0) and minor 1
+// (format 1.1, added by W-17); a minor-0 file may not use 1.1 operations.
+const (
+	FormatVersion uint16 = 1
+	FormatMinor   uint16 = 1
+)
 
 // Identity is compared in full against a trusted host expectation. Digests are
 // of canonical manifests, not filenames or mtimes. Empty manifests still have
@@ -108,6 +114,49 @@ const (
 	OpDrop
 	OpLeave
 	OpEndFinally
+	// Format 1.1 (W-17). Operands are in docs/decisions/W-16-bytecode.md.
+	OpUnary       // A dest Value, B operand Value; Aux is a UnaryOp
+	OpCast        // A dest Value, B operand Value; Aux is a CastKind
+	OpIncDec      // A result Value, B target Location; Aux is an IncDecOp
+	OpArraySet    // A container Location, B key Value, C value Value: $a[k] = v
+	OpArrayAppend // A container Location, B value Value: $a[] = v
+	OpArrayUnset  // A container Location, B key Value: unset($a[k])
+	OpIsset       // A dest Value (bool), B Location: isset($x)
+	OpArrayIsset  // A dest Value (bool), B container Value, C key Value: isset($a[k])
+	OpUnset       // A Location: unset($x)
+	OpExit        // A status Value when Aux is 1; Aux 0 is exit without a status
+)
+
+// UnaryOp is the Aux of OpUnary.
+type UnaryOp uint16
+
+const (
+	Not UnaryOp = iota + 1
+	Negate
+	Plus
+	BitNot
+)
+
+// CastKind is the Aux of OpCast.
+type CastKind uint16
+
+const (
+	CastBool CastKind = iota + 1
+	CastInt
+	CastFloat
+	CastString
+	CastArray
+)
+
+// IncDecOp is the Aux of OpIncDec. The result is the new value for the pre
+// forms and the old value for the post forms.
+type IncDecOp uint16
+
+const (
+	PreInc IncDecOp = iota + 1
+	PreDec
+	PostInc
+	PostDec
 )
 
 type BinaryOp uint16
@@ -124,6 +173,16 @@ const (
 	BitAnd
 	BitOr
 	BitXor
+	// Format 1.1 (W-17).
+	Modulo
+	Power
+	ShiftLeft
+	ShiftRight
+	NotEqual
+	NotIdentical
+	LessOrEqual
+	Spaceship
+	BoolXor
 )
 
 // Instruction is a pointer-free 16-byte record in memory and on disk. Jump
@@ -266,6 +325,23 @@ func (p *Program) Constant(index uint32) (Constant, bool) {
 		return Constant{}, false
 	}
 	return p.image.Constants[index], true
+}
+
+// Constants appends a copy of the constant table to dst and returns it.
+// Changing the result never affects p.
+func (p *Program) Constants(dst []Constant) []Constant {
+	return append(dst, p.image.Constants...)
+}
+
+// Instructions appends a copy of the code of function to dst. It reports
+// false, returning dst unchanged, when function is out of range. A VM may use
+// it to build its own private decoded form once per Program; changing the
+// result never affects p.
+func (p *Program) Instructions(function uint32, dst []Instruction) ([]Instruction, bool) {
+	if uint64(function) >= uint64(len(p.image.Functions)) {
+		return dst, false
+	}
+	return append(dst, p.image.Functions[function].Code...), true
 }
 
 // FunctionView has no mutating operations or exposed slices.

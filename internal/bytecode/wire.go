@@ -43,7 +43,7 @@ func load(ctx context.Context, data []byte, opts LoadOptions) (*Program, error) 
 		return nil, invalidAt(0, "bad magic")
 	}
 	major, minor := binary.LittleEndian.Uint16(data[8:10]), binary.LittleEndian.Uint16(data[10:12])
-	if major != FormatVersion || minor != 0 {
+	if major != FormatVersion || minor > FormatMinor {
 		return nil, ErrVersion
 	}
 	if binary.LittleEndian.Uint32(data[12:16]) != wireHeader {
@@ -88,7 +88,7 @@ func load(ctx context.Context, data []byte, opts LoadOptions) (*Program, error) 
 	if err = validateIdentity(opts.Expected); err != nil || image.Identity != opts.Expected {
 		return nil, ErrProfile
 	}
-	if _, err = verifyImage(b, image, false); err != nil {
+	if _, err = verifyImage(b, image, minor, false); err != nil {
 		return nil, err
 	}
 	if err = b.poll(); err != nil {
@@ -125,7 +125,7 @@ func encode(ctx context.Context, p *Program) ([]byte, error) {
 	out := make([]byte, int(size))
 	copy(out[:8], wireMagic[:])
 	binary.LittleEndian.PutUint16(out[8:10], FormatVersion)
-	binary.LittleEndian.PutUint16(out[10:12], 0)
+	binary.LittleEndian.PutUint16(out[10:12], FormatMinor)
 	binary.LittleEndian.PutUint32(out[12:16], wireHeader)
 	binary.LittleEndian.PutUint64(out[16:24], size)
 	binary.LittleEndian.PutUint64(out[56:64], 0)

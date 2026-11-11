@@ -19,6 +19,14 @@ func FuzzLoadRejectsMalformedAndRepairedPayloads(f *testing.F) {
 		f.Fatalf("cannot encode valid bytecode fuzz seed: len=%d err=%v", len(encodedSeed), err)
 	}
 	f.Add(append([]byte(nil), encodedSeed[64:]...))
+	// A format 1.1 seed lets the repaired-payload path reach the 1.1 opcodes.
+	if p11, err := Build(context.Background(), format11Everything(), testOptions()); err == nil {
+		if e11, err := p11.Encode(context.Background()); err == nil {
+			f.Add(append([]byte(nil), e11[64:]...))
+		}
+	} else {
+		f.Fatalf("cannot construct format 1.1 fuzz seed: %v", err)
+	}
 	f.Add(append([]byte(nil), encodedSeed...))
 	f.Add([]byte{})
 	f.Add([]byte("PHEGOBC\x00"))
@@ -73,14 +81,18 @@ func FuzzLoadRejectsMalformedAndRepairedPayloads(f *testing.F) {
 		if len(payload) > 4032 {
 			payload = payload[:4032]
 		}
-		repaired := make([]byte, 64+len(payload))
-		copy(repaired[:8], []byte{'P', 'H', 'E', 'G', 'O', 'B', 'C', 0})
-		binary.LittleEndian.PutUint16(repaired[8:10], 1)
-		binary.LittleEndian.PutUint16(repaired[10:12], 0)
-		binary.LittleEndian.PutUint32(repaired[12:16], 64)
-		binary.LittleEndian.PutUint64(repaired[16:24], uint64(len(repaired)))
-		copy(repaired[64:], payload)
-		repairWireIntegrity(repaired)
-		check(repaired, "repaired payload")
+		// Both supported minor versions see the same payload, so the 1.0
+		// gate and the 1.1 verifier are both exercised.
+		for _, minor := range []uint16{0, FormatMinor} {
+			repaired := make([]byte, 64+len(payload))
+			copy(repaired[:8], []byte{'P', 'H', 'E', 'G', 'O', 'B', 'C', 0})
+			binary.LittleEndian.PutUint16(repaired[8:10], 1)
+			binary.LittleEndian.PutUint16(repaired[10:12], minor)
+			binary.LittleEndian.PutUint32(repaired[12:16], 64)
+			binary.LittleEndian.PutUint64(repaired[16:24], uint64(len(repaired)))
+			copy(repaired[64:], payload)
+			repairWireIntegrity(repaired)
+			check(repaired, "repaired payload")
+		}
 	})
 }

@@ -9,6 +9,10 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 	case OpConst, OpMove, OpLocal, OpLoad, OpStore, OpBinary, OpDrop, OpLeave, OpEndFinally, OpReturn, OpReturnRef, OpThrow, OpOutput, OpNewArray, OpArrayGet, OpCall, OpCallValue, OpHostCall, OpInclude, OpEval, OpShell:
 		// Replacing or releasing a runtime value can run user destructors.
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpUnary, OpCast, OpIncDec, OpArraySet, OpArrayAppend, OpArrayUnset, OpIsset, OpArrayIsset, OpUnset, OpExit:
+		// Format 1.1. Conversions can call __toString, and writes, unsets
+		// and exit can release values and run destructors.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:
