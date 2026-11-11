@@ -41,10 +41,9 @@ func TestReviewFixRunFileReadsNonregularLikePHP(t *testing.T) {
 				cfg.Policy.Files = []FileGrant{{Path: "/app", FS: s}}
 			}
 			e := newPolicyEngine(t, cfg)
-			_, err := e.RunFile(context.Background(), name)
-			var unsupported *UnsupportedError
+			res, err := e.RunFile(context.Background(), name)
 			wantReads, compiled := mode != fs.ModeSocket && mode != fs.ModeDir, mode != fs.ModeSocket
-			if compiled != errors.As(err, &unsupported) {
+			if compiled != ranToCompletion(res, err) {
 				t.Errorf("mode=%v legacy=%v: error %v, want compiled=%v", mode, legacy, err, compiled)
 			}
 			if (s.reads != 0) != wantReads || s.closes != 1 {

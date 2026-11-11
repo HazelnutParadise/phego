@@ -70,6 +70,7 @@ type vmState struct {
 	done     <-chan struct{}
 	scratch  []byte
 	globals  []Global
+	prelude  []RunDiagnostic
 	variant  vmVariant
 	closures [][]vmClosure // dispatch candidate 1, per function
 	end      completion
@@ -81,7 +82,7 @@ type vmState struct {
 }
 
 func newVMState(p *Program, x *execution, cfg RunConfig) *vmState {
-	s := &vmState{prog: p, x: x, h: x.heap, globals: cfg.Globals, variant: cfg.variant, done: cfg.Context.Done()}
+	s := &vmState{prog: p, x: x, h: x.heap, globals: cfg.Globals, prelude: cfg.Prelude, variant: cfg.variant, done: cfg.Context.Done()}
 	s.limit = cfg.Steps
 	if s.limit == 0 {
 		s.limit = math.MaxInt64 - 1 // limit+1 must not overflow
@@ -134,6 +135,15 @@ func (s *vmState) internal(format string, args ...any) error {
 
 // body is the execution action of the request: it runs {main} to completion.
 func (s *vmState) body(x *execution) completion {
+	// Compile-time diagnostics come first, located where PHP compiled them.
+	for _, d := range s.prelude {
+		s.lastFile, s.lastLine = d.File, d.Line
+		if c := x.report(d.Level, d.Message, false); c.kind != endNormal {
+			s.ended, s.end = true, c
+			return c
+		}
+	}
+	s.lastFile, s.lastLine = "", 0
 	main := &s.prog.funcs[s.prog.entry]
 	if err := s.push(main, 0, 0); err != nil {
 		s.stop(err)
@@ -316,12 +326,12 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	x := s.x
 	// {main} runs inside the execution's own frame, which counts as one.
-	if len(x.frames)-1+len(s.frames)+1 > x.limits.depth {
-		return x.fail(endLimit, errExecutionLimit)
+	if depth := len(x.frames) - 1 + len(s.frames); depth+1 > x.limits.depth {
+		return x.fail(endLimit, limitHit("frames", x.limits.depth, depth, 1))
 	}
 	if len(s.frames) > 0 {
 		if x.calls >= x.limits.callbacks {
-			return x.fail(endLimit, errExecutionLimit)
+			return x.fail(endLimit, limitHit("calls", x.limits.callbacks, x.calls, 1))
 		}
 		x.calls++
 	}

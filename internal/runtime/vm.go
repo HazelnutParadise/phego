@@ -16,12 +16,17 @@ type RunConfig struct {
 	Output         io.Writer       // nil captures output
 	Depth          int             // call depth limit (>0); {main} counts as one
 	Callbacks      int             // call and diagnostic budget (>0), as executionLimits.callbacks
+	Diagnostics    int             // diagnostic budget apart from calls; 0 shares Callbacks
 	OutputBytes    int             // output limit (>0)
 	Steps          int64           // instruction step budget; 0 means unlimited
 	DisplayErrors  bool
 	LogErrors      bool
 	ErrorReporting int      // PHP error_reporting bitmask; diagnostics outside it are neither displayed nor logged
 	Globals        []Global // host-supplied top-level variables, by name
+	// Prelude holds the diagnostics PHP raised while compiling the file. They
+	// are reported, in order and at their own File and Line, before {main}
+	// starts, so display_errors, log_errors and ErrorReporting apply to them.
+	Prelude []RunDiagnostic
 
 	// variant selects a benchmark candidate layout; the zero value is the
 	// production path. Only tests in this package set it.
@@ -107,6 +112,25 @@ type ThrownError struct {
 // ErrStepLimit ends a run that used its instruction budget.
 var ErrStepLimit = errors.New("instruction step limit exceeded")
 
+// LimitError is the cause of a LimitExceeded run for every budget except
+// the step budget (ErrStepLimit). Resource is "frames", "calls", "output" or
+// "diagnostics"; Used is what the run had used before Requested more.
+type LimitError struct {
+	Resource               string
+	Limit, Used, Requested int64
+}
+
+func (e *LimitError) Error() string {
+	return fmt.Sprintf("%s limit %d exceeded (used %d, requested %d)", e.Resource, e.Limit, e.Used, e.Requested)
+}
+
+// Unwrap keeps errors.Is(err, errExecutionLimit) true for every limit.
+func (e *LimitError) Unwrap() error { return errExecutionLimit }
+
+func limitHit(resource string, limit, used, requested int) error {
+	return &LimitError{Resource: resource, Limit: int64(limit), Used: int64(used), Requested: int64(requested)}
+}
+
 // Run executes the program once. All mutable state belongs to the run.
 func (p *Program) Run(cfg RunConfig) RunResult {
 	if err := p.checkConfig(cfg); err != nil {
@@ -116,6 +140,7 @@ func (p *Program) Run(cfg RunConfig) RunResult {
 	if err != nil {
 		return RunResult{End: Internal, ExitCode: 255, Err: err}
 	}
+	x.diagnosticCap = cfg.Diagnostics
 	s := newVMState(p, x, cfg)
 	res := x.run(cfg.Cleanup, s.body)
 	return s.result(res)
@@ -131,6 +156,8 @@ func (p *Program) checkConfig(cfg RunConfig) error {
 		return fmt.Errorf("Run: the program was compiled for %d-bit integers, not %d", p.width, cfg.IntWidth)
 	case cfg.Depth <= 0 || cfg.Callbacks <= 0 || cfg.OutputBytes <= 0:
 		return errors.New("Run: Depth, Callbacks and OutputBytes must be positive")
+	case cfg.Diagnostics < 0:
+		return errors.New("Run: Diagnostics must not be negative")
 	case cfg.Steps < 0:
 		return errors.New("Run: Steps must not be negative")
 	}

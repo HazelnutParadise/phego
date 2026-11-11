@@ -100,7 +100,8 @@ type Limits struct {
 	Output int64
 	// Diagnostics bounds recorded notices, warnings and errors. Zero: 10000.
 	Diagnostics int
-	// Frames bounds the call depth. Zero: unlimited.
+	// Frames bounds the PHP call depth; the script's top level counts as
+	// one frame. Zero: 10000, until frames are charged against Memory.
 	Frames int
 	// OpenFiles bounds files open at once. Zero: unlimited.
 	OpenFiles int

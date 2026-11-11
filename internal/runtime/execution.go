@@ -105,8 +105,11 @@ type execution struct {
 	// errors routes each PHP diagnostic as display_errors and log_errors do:
 	// displayed text goes through write(), so output buffers and their
 	// handlers see it; the log copy is kept in diagnostics.
-	errors          errorChannels
-	reported        int // diagnostics raised, against limits.callbacks
+	errors   errorChannels
+	reported int // diagnostics raised, against diagnosticLimit()
+	// diagnosticCap bounds reported diagnostics apart from calls; zero
+	// shares limits.callbacks with them.
+	diagnosticCap   int
 	started, closed bool
 	filtering       bool
 	// outputRunning is PHP's OG(running) left set by a fatal error inside a
@@ -262,8 +265,11 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	if len(x.frames) >= x.limits.depth || x.calls >= x.limits.callbacks {
-		return x.fail(endLimit, errExecutionLimit)
+	if len(x.frames) >= x.limits.depth {
+		return x.fail(endLimit, limitHit("frames", x.limits.depth, len(x.frames), 1))
+	}
+	if x.calls >= x.limits.callbacks {
+		return x.fail(endLimit, limitHit("calls", x.limits.callbacks, x.calls, 1))
 	}
 	x.calls++
 	previousHook := x.heap.currentHook
@@ -285,7 +291,7 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	}
 	if (c.kind == endNormal || c.kind == endReturn || c.kind == endThrow) && finally != nil {
 		if x.calls >= x.limits.callbacks {
-			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, limitHit("calls", x.limits.callbacks, x.calls, 1)))
 		} else {
 			x.calls++
 			if next := x.invoke(finally); next.kind != endNormal {
@@ -538,8 +544,8 @@ func (x *execution) report(level, message string, skipRunning bool) completion {
 		return completion{}
 	}
 	// The cap counts every diagnostic, displayed or logged.
-	if x.reported >= x.limits.callbacks {
-		return x.fail(endLimit, errExecutionLimit)
+	if x.reported >= x.diagnosticLimit() {
+		return x.fail(endLimit, limitHit("diagnostics", x.diagnosticLimit(), x.reported, 1))
 	}
 	x.reported++
 	file, line := "", 0
@@ -562,6 +568,13 @@ func (x *execution) report(level, message string, skipRunning bool) completion {
 		text = "\n" + level + ": " + message + " in Unknown on line 0\n"
 	}
 	return x.writeTo(len(x.buffers)-1-boolInt(skipRunning && x.filtering), []byte(text))
+}
+
+func (x *execution) diagnosticLimit() int {
+	if x.diagnosticCap > 0 {
+		return x.diagnosticCap
+	}
+	return x.limits.callbacks
 }
 
 func boolInt(b bool) int {
@@ -688,7 +701,7 @@ func (x *execution) recordEnd(c completion) {
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
 	x.phaseCompletion = completion{}
-	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.limits.callbacks {
+	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.diagnosticLimit() {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)

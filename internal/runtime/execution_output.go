@@ -29,7 +29,7 @@ func (x *execution) write(data []byte) completion {
 		remaining -= int64(len(b.data))
 	}
 	if int64(len(data)) > remaining {
-		return x.fail(endLimit, errExecutionLimit)
+		return x.fail(endLimit, &LimitError{Resource: "output", Limit: int64(x.limits.output), Used: int64(x.limits.output) - remaining, Requested: int64(len(data))})
 	}
 	if top >= 0 {
 		b := &x.buffers[top]
@@ -58,7 +58,7 @@ func (x *execution) writeTo(top int, data []byte) completion {
 		remaining -= int64(len(b.data))
 	}
 	if int64(len(data)) > remaining {
-		return x.fail(endLimit, errExecutionLimit)
+		return x.fail(endLimit, &LimitError{Resource: "output", Limit: int64(x.limits.output), Used: int64(x.limits.output) - remaining, Requested: int64(len(data))})
 	}
 	if top >= 0 {
 		b := &x.buffers[top]

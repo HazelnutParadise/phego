@@ -3,6 +3,7 @@ package phego
 import (
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/HazelnutParadise/phego/diag"
 	"github.com/HazelnutParadise/phego/diag/codes"
@@ -52,9 +53,36 @@ func (e *PHPError) Error() string {
 // unimplemented feature or PHP release. It is never reported as success.
 type UnsupportedError struct {
 	Feature string
+	// File and Line locate a PHP construct this build cannot run yet, with
+	// the file name given to Compile and PHP's line number. They are empty
+	// and zero for a request without a source location, such as a release.
+	File string
+	Line int
 }
 
-func (e *UnsupportedError) Error() string { return "phego: unsupported: " + e.Feature }
+func (e *UnsupportedError) Error() string {
+	if e.File == "" && e.Line == 0 {
+		return "phego: unsupported: " + e.Feature
+	}
+	return fmt.Sprintf("phego: unsupported: %s in %s on line %d", e.Feature, e.File, e.Line)
+}
+
+// Diagnostic describes the error in rustc style for diag.Render. A located
+// construct reports PHG3001 with its file and line as the primary span; the
+// compiler records lines but not columns, so the span covers the whole line
+// from column 1. Pass the source through diag.Options.Source to show it.
+// Anything else reports PHG3000 with the feature as the span.
+func (e *UnsupportedError) Diagnostic() diag.Diagnostic {
+	code, primary := codes.Unsupported, diag.Span{File: e.Feature}
+	message := e.Feature + " is not supported by this build"
+	if e.File != "" || e.Line != 0 {
+		code = codes.UnsupportedConstruct
+		primary = diag.Span{File: e.File, Line: e.Line, Column: 1, Length: math.MaxInt32, Label: "this build's VM cannot run this yet"}
+		message = "unsupported PHP construct: " + e.Feature
+	}
+	entry, _ := codes.Lookup(code)
+	return diag.Diagnostic{Code: code, Message: message, Primary: primary, Notes: []string{entry.Note}, Help: []string{entry.Help}}
+}
 
 // ConfigError reports an invalid Config, option, or host function. Code is
 // the stable diagnostic code (docs/diagnostics/codes.md). Errors built by

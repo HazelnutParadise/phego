@@ -79,9 +79,8 @@ func TestRunFileFIFORunsWriterSource(t *testing.T) {
 	}
 	syscall.Close(w)
 	r := runFinished(t, done)
-	var ue *UnsupportedError
-	if !errors.As(r.err, &ue) || ue.Feature != "PHP execution" {
-		t.Fatalf("RunFile = %+v, %v; want the FIFO source compiled", r.res, r.err)
+	if n, _ := r.res.Return.Int64(); !ranToCompletion(r.res, r.err) || n != 1 {
+		t.Fatalf("RunFile = %+v, %v; want the FIFO source run", r.res, r.err)
 	}
 	if e.policy.admission.Active() != 0 {
 		t.Fatal("FIFO retained admission")
@@ -108,10 +107,8 @@ func TestRunFileFIFOCancelReleasesAdmission(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "ok.php"), []byte("<?php return 1;"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	_, err := e.RunFile(t.Context(), "/app/ok.php")
-	var ue *UnsupportedError
-	if !errors.As(err, &ue) {
-		t.Fatalf("next file cannot run: %v", err)
+	if res, err := e.RunFile(t.Context(), "/app/ok.php"); !ranToCompletion(res, err) {
+		t.Fatalf("next file cannot run: %+v %v", res, err)
 	}
 }
 

@@ -12,9 +12,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/ir"
 	"github.com/HazelnutParadise/phego/internal/policy"
 	"github.com/HazelnutParadise/phego/internal/profile"
+	"github.com/HazelnutParadise/phego/internal/runtime"
+	"github.com/HazelnutParadise/phego/internal/vm"
 )
 
 // SupportedRelease is the PHP release whose syntax this build implements.
@@ -219,7 +223,12 @@ type Program struct {
 	// runs under a different profile, even through a shared cache.
 	profile profile.Profile
 	name    string
-	tree    *frontend.Node
+	// code is the verified bytecode prepared for the interpreter. It holds
+	// no request state, so every run shares it.
+	code *runtime.Program
+	// prelude holds the warnings and deprecations PHP raises while
+	// compiling the file; every run reports them before the script starts.
+	prelude []runtime.RunDiagnostic
 }
 
 // Name returns the source name used in diagnostics.
@@ -239,8 +248,12 @@ func (e *Engine) begin() error {
 	return nil
 }
 
-// Compile parses source under the engine's profile. name identifies the
-// source in diagnostics. The size limit applies before parsing starts.
+// Compile parses, compiles and verifies source under the engine's profile.
+// name identifies the source in diagnostics. The size limit applies before
+// parsing starts. A syntax error is a PHPError of kind ParseError and a fatal
+// error PHP raises while compiling is one of kind CompileError. A construct
+// this build cannot run yet is an UnsupportedError located at its file and
+// line; no partial program is returned.
 func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, error) {
 	if err := e.begin(); err != nil {
 		return nil, err
@@ -266,7 +279,62 @@ func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, er
 	if err != nil {
 		return nil, err
 	}
-	return &Program{engine: e, profile: e.profile, name: name, tree: tree}, nil
+	return e.compileTree(ctx, name, source, tree)
+}
+
+// compileTree lowers a parsed file and prepares it for the interpreter.
+func (e *Engine) compileTree(ctx context.Context, name, source string, tree *frontend.Node) (*Program, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	unit, err := ir.Lower(tree, e.profile, ir.Options{File: name})
+	var ce *ir.CompileError
+	if errors.As(err, &ce) {
+		return nil, &PHPError{Kind: CompileError, Message: ce.Message, File: name, Line: ce.Line}
+	}
+	if err != nil {
+		return nil, err
+	}
+	image, err := vm.Compile(ctx, unit, []byte(source))
+	var vu *vm.UnsupportedError
+	switch {
+	case errors.As(err, &vu):
+		return nil, &UnsupportedError{Feature: vu.Feature, File: vu.File, Line: vu.Line}
+	case err != nil && ctx.Err() != nil:
+		return nil, ctx.Err()
+	case err != nil:
+		return nil, internalError("compiling "+name, err)
+	}
+	built, err := bytecode.Build(ctx, image, bytecode.Options{Limits: bytecode.DefaultLimits()})
+	var be *bytecode.Error
+	switch {
+	case err != nil && ctx.Err() != nil:
+		return nil, ctx.Err()
+	case errors.Is(err, bytecode.ErrLimit):
+		// The verification limits are this build's, not the host's: a
+		// program beyond them is one this build cannot run.
+		u := &UnsupportedError{Feature: "a program beyond the bytecode limits", File: name, Line: 1}
+		if errors.As(err, &be) {
+			if be.Detail != "" {
+				u.Feature += " (" + be.Detail + ")"
+			}
+			if be.Pos.Line > 0 {
+				u.Line = int(be.Pos.Line)
+			}
+		}
+		return nil, u
+	case err != nil:
+		return nil, internalError("verifying "+name, err)
+	}
+	code, err := runtime.NewProgram(built)
+	if err != nil {
+		return nil, internalError("preparing "+name, err)
+	}
+	p := &Program{engine: e, profile: e.profile, name: name, code: code}
+	for _, d := range unit.Diagnostics {
+		p.prelude = append(p.prelude, runtime.RunDiagnostic{Level: d.Level, Message: d.Message, File: name, Line: d.Line})
+	}
+	return p, nil
 }
 
 // Status is how a run ended.
@@ -291,12 +359,17 @@ type Result struct {
 	Status Status
 	// Return is the top-level return value; PHP null when absent.
 	Return Value
-	// ExitCode is the PHP exit status.
+	// ExitCode is the PHP exit status: 0 for a completed script, exit's
+	// status, and 255 after an uncaught throwable or another failure.
 	ExitCode int
 	// Output is the captured output when no writer was given. Output
-	// written before a failure is kept.
+	// written before a failure is kept. With display_errors on (the
+	// default, see WithINI) displayed PHP diagnostics are part of it, at
+	// the point PHP printed them.
 	Output []byte
-	// Diagnostics are PHP notices, warnings, and errors in order.
+	// Diagnostics are PHP's log_errors channel: notices, warnings and
+	// errors in order, each with the file and line PHP reports. It is empty
+	// unless log_errors is on (see WithINI).
 	Diagnostics []Diagnostic
 }
 
@@ -314,6 +387,7 @@ type RunOption func(*runConfig) error
 type runConfig struct {
 	output io.Writer
 	inputs map[string]Value
+	ini    iniSettings
 }
 
 // WithOutput streams output to w instead of capturing it. A write error
@@ -343,13 +417,20 @@ func WithGlobal(name string, v Value) RunOption {
 	}
 }
 
-// Run executes program in a new isolated execution.
+// Run executes program in a new isolated execution. Output written before a
+// failure is kept in Result.Output (or was written to WithOutput's writer).
+// The error says why a run did not complete: a PHPError for an uncaught
+// throwable (ExitCode 255, as PHP exits), a ResourceError for a limit, the
+// context's error when ctx ends the run, the writer's error, or an
+// UnsupportedError for a construct this build cannot run. A failed request
+// cleanup after the script ended is also an error; Status still says how the
+// script ended.
 func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (*Result, error) {
-	return e.run(ctx, program, false, opts...)
+	return e.run(ctx, program, nil, opts...)
 }
 
-// run reuses a slot already held by RunFile when admitted is true.
-func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts ...RunOption) (*Result, error) {
+// run reuses the slot RunFile already holds when release is not nil.
+func (e *Engine) run(ctx context.Context, program *Program, release func(), opts ...RunOption) (*Result, error) {
 	if err := e.begin(); err != nil {
 		return &Result{Status: StatusFailed}, err
 	}
@@ -361,7 +442,7 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 		return &Result{Status: StatusFailed}, &ConfigError{Code: codes.ProgramProfile, Field: "program",
 			Reason: "was compiled for " + program.profile.String() + ", not " + e.profile.String()}
 	}
-	var rc runConfig
+	rc := runConfig{ini: defaultINI}
 	for _, opt := range opts {
 		if opt == nil {
 			return &Result{Status: StatusFailed}, &ConfigError{Code: codes.RunOptionNil, Field: "RunOption", Reason: "is nil"}
@@ -373,8 +454,9 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
-	if !admitted {
-		release, err := e.admit(ctx)
+	if release == nil {
+		var err error
+		release, err = e.admit(ctx)
 		if err != nil {
 			var re *ResourceError
 			switch {
@@ -385,10 +467,8 @@ func (e *Engine) run(ctx context.Context, program *Program, admitted bool, opts 
 			}
 			return &Result{Status: StatusFailed}, err
 		}
-		defer release()
 	}
-	// Execution arrives with the VM; until then a run never claims success.
-	return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "PHP execution"}
+	return e.execute(ctx, program, &rc, release)
 }
 
 // RunFile reads path through Policy.Files, or directly through legacy
@@ -421,6 +501,7 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		}
 		return &Result{Status: status}, err
 	}
+	// The run hands the slot to its request; releasing again is a no-op.
 	defer release()
 	var f fs.File
 	if e.cfg.Files != nil && len(e.cfg.Policy.Files) == 0 {
@@ -481,12 +562,12 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		}
 		return &Result{Status: StatusFailed}, err
 	}
-	return e.run(ctx, program, true, opts...)
+	return e.run(ctx, program, release, opts...)
 }
 
 // Close stops new work and waits for running work until ctx ends. It does
-// not yet cancel work in progress; that arrives with execution. It is safe to
-// call more than once; later calls wait the same way.
+// not cancel work in progress; cancel the runs' contexts to stop them. It is
+// safe to call more than once; later calls wait the same way.
 func (e *Engine) Close(ctx context.Context) error {
 	e.mu.Lock()
 	if !e.ready {

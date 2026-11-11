@@ -65,10 +65,9 @@ func TestRunFileLegacyFilesCompatibility(t *testing.T) {
 		"bad.php": {Data: []byte("<?php 1 <")},
 	}})
 	for _, path := range []string{"a.php"} {
-		_, err := e.RunFile(ctx, path)
-		var ue *UnsupportedError
-		if !errors.As(err, &ue) {
-			t.Fatalf("RunFile(%q) error = %v, want *UnsupportedError after a successful read and compile", path, err)
+		r, err := e.RunFile(ctx, path)
+		if n, _ := r.Return.Int64(); !ranToCompletion(r, err) || n != 1 {
+			t.Fatalf("RunFile(%q) = %+v, %v; want the file read, compiled and run", path, r, err)
 		}
 	}
 	for _, path := range []string{"bad.php"} {
@@ -88,8 +87,8 @@ func TestPolicyFileMounts(t *testing.T) {
 	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{
 		{Path: "/app", FS: fstest.MapFS{"x.php": {Data: []byte("<?php return 1;")}}},
 	}}})
-	if _, err := e.RunFile(ctx, "/app/x.php"); !errors.As(err, new(*UnsupportedError)) {
-		t.Fatalf("mounted file error = %v, want *UnsupportedError", err)
+	if r, err := e.RunFile(ctx, "/app/x.php"); !ranToCompletion(r, err) {
+		t.Fatalf("mounted file = %+v, %v; want it run", r, err)
 	}
 	r, err := e.RunFile(ctx, "/etc/x.php")
 	if r == nil || r.Status != StatusPolicyDenied {
@@ -113,8 +112,10 @@ func TestPolicyFileMounts(t *testing.T) {
 		t.Fatal(err)
 	}
 	rooted := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/root", Root: dir}}}})
-	if _, err := rooted.RunFile(ctx, "/root/y.php"); !errors.As(err, new(*UnsupportedError)) {
-		t.Fatalf("root mount error = %v, want *UnsupportedError", err)
+	if r, err := rooted.RunFile(ctx, "/root/y.php"); !ranToCompletion(r, err) {
+		t.Fatalf("root mount = %+v, %v; want it run", r, err)
+	} else if n, _ := r.Return.Int64(); n != 2 {
+		t.Fatalf("root mount returned %+v, want 2", r.Return)
 	}
 }
 
@@ -309,8 +310,8 @@ func TestPolicySnapshotIsolation(t *testing.T) {
 	files[0].Path = "/evil"
 	ports[0] = 1
 
-	if _, err := e.RunFile(ctx, "/app/x.php"); !errors.As(err, new(*UnsupportedError)) {
-		t.Fatalf("original mount changed with the caller's slice: %v", err)
+	if r, err := e.RunFile(ctx, "/app/x.php"); !ranToCompletion(r, err) {
+		t.Fatalf("original mount changed with the caller's slice: %+v %v", r, err)
 	}
 	if _, err := e.RunFile(ctx, "/evil/x.php"); !errors.As(err, new(*PolicyError)) {
 		t.Fatalf("mutated mount path was accepted: %v", err)
