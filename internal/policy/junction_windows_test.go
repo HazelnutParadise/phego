@@ -70,12 +70,11 @@ func TestRootWindowsJunctionOutsideMountIsRefused(t *testing.T) {
 					t.Errorf("OpenFile(%s, %#x) opened through a junction that leaves the mount", name, flag)
 					continue
 				}
-				// Exclusive creation never follows the last name, so an
-				// existing junction is reported as existing, as a symbolic
-				// link is.
+				// Exclusive creation never follows the last name, so the
+				// junction itself is refused as PHP refuses a directory.
 				if name == "/app/out" && flag&os.O_EXCL != 0 {
-					if !errors.Is(err, fs.ErrExist) {
-						t.Errorf("OpenFile(%s, %#x): %v, want file exists", name, flag, err)
+					if !errors.Is(err, fs.ErrPermission) {
+						t.Errorf("OpenFile(%s, %#x): %v, want Permission denied", name, flag, err)
 					}
 					continue
 				}
@@ -109,6 +108,12 @@ func TestRootWindowsJunctionInsideMountOpens(t *testing.T) {
 	}
 	mustJunction(t, filepath.Join(work, "in"), filepath.Join(work, "real"))
 	mustJunction(t, filepath.Join(work, "upper"), filepath.Join(work, "REAL"))
+	writable := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: work, Write: true}}})
+	for _, flag := range []int{os.O_WRONLY | os.O_CREATE | os.O_TRUNC, os.O_WRONLY | os.O_CREATE | os.O_EXCL} {
+		if _, err := writable.OpenFile(t.Context(), "/app/in", flag, 0o600); !errors.Is(err, fs.ErrPermission) {
+			t.Errorf("OpenFile(/app/in, %#x): %v, want Permission denied", flag, err)
+		}
+	}
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: work}}})
 	for _, name := range []string{"/app/upper/file.txt", "/app/in/../real/file.txt"} {
 		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)

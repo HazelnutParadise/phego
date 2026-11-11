@@ -27,3 +27,6 @@ func directoryOpenError(string) error { return nil }
 
 // sameHostName compares one component of two host paths.
 func sameHostName(a, b string) bool { return a == b }
+
+// Only Windows has junctions.
+func junction(*os.Root, string, fs.FileInfo) bool { return false }

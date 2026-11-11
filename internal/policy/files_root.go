@@ -182,7 +182,7 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	if kind == FileWrite && !grant.Write {
 		return nil, denied("not-granted")
 	}
-	if before != nil && before.IsDir() {
+	if before != nil && (before.IsDir() || junction(stack[len(stack)-1].root, leaf, before)) {
 		if err := directoryOpenError(name); err != nil {
 			return nil, err
 		}

@@ -56,3 +56,14 @@ func directoryOpenError(name string) error {
 // The comparison only selects the mount a link target continues in; the
 // rest is still resolved inside that mount's directory.
 func sameHostName(a, b string) bool { return strings.EqualFold(a, b) }
+
+// junction reports whether leaf is a junction. Exclusive creation does not
+// follow the last name, and PHP reports an existing junction as it reports
+// a directory: Permission denied (special-files workflow, windows-2025).
+func junction(parent *os.Root, leaf string, st fs.FileInfo) bool {
+	if parent == nil || st.Mode()&fs.ModeIrregular == 0 {
+		return false
+	}
+	_, err := parent.Readlink(leaf)
+	return err == nil
+}
