@@ -29,7 +29,15 @@ type Throwable struct {
 
 func (t *Throwable) Error() string { return t.Class + ": " + t.Message }
 
+// warn raises a PHP diagnostic from a modeled operation. Under the VM, sink
+// reports it at once through execution.report with the current instruction's
+// file and line, in the order PHP raises it relative to the operation's
+// effects; without a VM it is kept in h.diagnostics.
 func (h *heap) warn(level int, message string) {
+	if h.sink != nil {
+		h.sink(level, message)
+		return
+	}
 	h.diagnostics = append(h.diagnostics, diagnostic{level, message})
 }
 

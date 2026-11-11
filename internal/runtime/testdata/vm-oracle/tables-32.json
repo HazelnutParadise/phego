@@ -1,0 +1,4723 @@
+{
+ "cast_array": [
+  {
+   "d": [],
+   "r": [
+    "a:[]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"b:0\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"b:1\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:0\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:1\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:-1\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"d:3ff8000000000000\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:31\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:312e35\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:616263\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:1\"]]"
+   ]
+  }
+ ],
+ "container_append": [
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Automatic conversion of false to array is deprecated"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "[] operator not supported for strings"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "[] operator not supported for strings"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "[] operator not supported for strings"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "[] operator not supported for strings"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:1\"],[\"i:1\",\"s:76\"]]"
+   ]
+  }
+ ],
+ "container_isset": [
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  }
+ ],
+ "container_read": [
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on null"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on false"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on true"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on float"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"k\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"k\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  }
+ ],
+ "container_read_array_key": [
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on null"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on false"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on true"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on int"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Trying to access array offset on float"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  }
+ ],
+ "container_read_quiet": [
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  }
+ ],
+ "container_set": [
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:6b\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Automatic conversion of false to array is deprecated"
+    ]
+   ],
+   "r": [
+    "a:[[\"s:6b\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot use a scalar value as an array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type string on string"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:6b\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:1\"],[\"s:6b\",\"s:76\"]]"
+   ]
+  }
+ ],
+ "container_unset": [
+  {
+   "d": [],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Automatic conversion of false to array is deprecated"
+    ]
+   ],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset offset in a non-array variable"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset offset in a non-array variable"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset offset in a non-array variable"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset offset in a non-array variable"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset offset in a non-array variable"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset string offsets"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset string offsets"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset string offsets"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "Error",
+    "Cannot unset string offsets"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"i:1\"]]"
+   ]
+  }
+ ],
+ "incdec_values": [
+  "N",
+  "b:0",
+  "b:1",
+  "i:0",
+  "i:1",
+  "i:-1",
+  "d:3ff8000000000000",
+  "s:31",
+  "s:312e35",
+  "s:616263",
+  "s:",
+  "a:[]",
+  "a:[[\"i:0\",\"i:1\"]]",
+  "i:2147483647",
+  "i:-2147483648",
+  "d:8000000000000000",
+  "d:7e37e43c8800759c",
+  "s:61",
+  "s:7a",
+  "s:417a",
+  "s:7a7a",
+  "s:5a7a",
+  "s:6139",
+  "s:413939",
+  "s:35",
+  "s:352e35",
+  "s:316532",
+  "s:2035",
+  "s:3520",
+  "s:2d33",
+  "s:2d",
+  "s:612d",
+  "s:7a20",
+  "s:39323233333732303336383534373735383037",
+  "s:2d39323233333732303336383534373735383038",
+  "s:32313437343833363437",
+  "s:2d32313437343833363438",
+  "s:30783141",
+  "s:303037",
+  "s:2e35",
+  "s:00"
+ ],
+ "int_size": 4,
+ "isset_var": [
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  }
+ ],
+ "key_isset": [
+  {
+   "d": [
+    [
+     8192,
+     "Using null as an array offset is deprecated, use an empty string instead"
+    ]
+   ],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ]
+   ],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array in isset or empty"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array in isset or empty"
+   ]
+  }
+ ],
+ "key_read": [
+  {
+   "d": [
+    [
+     8192,
+     "Using null as an array offset is deprecated, use an empty string instead"
+    ]
+   ],
+   "r": [
+    "s:656d707479"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6d696e7573"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ],
+    [
+     2,
+     "Undefined array key 1661992960"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:737472"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:73"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:656d707479"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"08\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"-0\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"0x1\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6d696e7573"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \" 1\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"1 \""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"9223372036854775807\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"9223372036854775808\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"-9223372036854775808\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"2147483648\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key \"-2147483649\""
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined array key 2147483647"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  }
+ ],
+ "key_read_quiet": [
+  {
+   "d": [
+    [
+     8192,
+     "Using null as an array offset is deprecated, use an empty string instead"
+    ]
+   ],
+   "r": [
+    "s:656d707479"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6d696e7573"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "s:7a65726f"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ]
+   ],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6f6e65"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:737472"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:73"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:656d707479"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:6d696e7573"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  }
+ ],
+ "key_unset": [
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "a:[[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot unset offset of type array on array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot unset offset of type array on array"
+   ]
+  }
+ ],
+ "key_write": [
+  {
+   "d": [
+    [
+     8192,
+     "Using null as an array offset is deprecated, use an empty string instead"
+    ]
+   ],
+   "r": [
+    "a:[[\"s:\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:-1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ]
+   ],
+   "r": [
+    "a:[[\"i:1661992960\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:312e35\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:616263\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:3038\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:2d30\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:307831\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:-1\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:2031\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:3120\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:39323233333732303336383534373735383037\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:39323233333732303336383534373735383038\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:2d39323233333732303336383534373735383038\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:32313437343833363438\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:2d32313437343833363439\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:2147483647\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot access offset of type array on array"
+   ]
+  }
+ ],
+ "keys": [
+  "N",
+  "b:0",
+  "b:1",
+  "i:0",
+  "i:1",
+  "i:-1",
+  "d:3ff8000000000000",
+  "d:bfe0000000000000",
+  "d:4415af1d78b58c40",
+  "s:31",
+  "s:312e35",
+  "s:616263",
+  "s:",
+  "s:3038",
+  "s:2d30",
+  "s:307831",
+  "s:2d31",
+  "s:2031",
+  "s:3120",
+  "s:39323233333732303336383534373735383037",
+  "s:39323233333732303336383534373735383038",
+  "s:2d39323233333732303336383534373735383038",
+  "s:32313437343833363438",
+  "s:2d32313437343833363439",
+  "i:2147483647",
+  "a:[]",
+  "a:[[\"i:0\",\"i:1\"]]"
+ ],
+ "php": "8.5.12",
+ "post_dec": [
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type null has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "N",
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:0",
+    "b:0"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:1",
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:0",
+    "i:-1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:1",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-1",
+    "i:-2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3ff8000000000000",
+    "d:3fe0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:31",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:312e35",
+    "d:3fe0000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:616263",
+    "s:616263"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on empty string is deprecated as non-numeric"
+    ]
+   ],
+   "r": [
+    "s:",
+    "i:-1"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot decrement array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot decrement array"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2147483647",
+    "i:2147483646"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2147483648",
+    "d:c1e0000000200000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:8000000000000000",
+    "d:bff0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:7e37e43c8800759c",
+    "d:7e37e43c8800759c"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:61",
+    "s:61"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a",
+    "s:7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:417a",
+    "s:417a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a7a",
+    "s:7a7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:5a7a",
+    "s:5a7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:6139",
+    "s:6139"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:413939",
+    "s:413939"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:35",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:352e35",
+    "d:4012000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:316532",
+    "d:4058c00000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2035",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:3520",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d33",
+    "i:-4"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:2d",
+    "s:2d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:612d",
+    "s:612d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a20",
+    "s:7a20"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:39323233333732303336383534373735383037",
+    "d:43e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d39323233333732303336383534373735383038",
+    "d:c3e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:32313437343833363437",
+    "i:2147483646"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d32313437343833363438",
+    "d:c1e0000000200000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:30783141",
+    "s:30783141"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:303037",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2e35",
+    "d:bfe0000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:00",
+    "s:00"
+   ]
+  }
+ ],
+ "post_inc": [
+  {
+   "d": [],
+   "r": [
+    "N",
+    "i:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Increment on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:0",
+    "b:0"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Increment on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:1",
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:0",
+    "i:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:1",
+    "i:2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-1",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3ff8000000000000",
+    "d:4004000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:31",
+    "i:2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:312e35",
+    "d:4004000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:616263",
+    "s:616264"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:",
+    "s:31"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot increment array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot increment array"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2147483647",
+    "d:41e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2147483648",
+    "i:-2147483647"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:8000000000000000",
+    "d:3ff0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:7e37e43c8800759c",
+    "d:7e37e43c8800759c"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:61",
+    "s:62"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:7a",
+    "s:6161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:417a",
+    "s:4261"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:7a7a",
+    "s:616161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:5a7a",
+    "s:414161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:6139",
+    "s:6230"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:413939",
+    "s:423030"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:35",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:352e35",
+    "d:401a000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:316532",
+    "d:4059400000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2035",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:3520",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d33",
+    "i:-2"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:2d",
+    "s:2d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:612d",
+    "s:612d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:7a20",
+    "s:7a20"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:39323233333732303336383534373735383037",
+    "d:43e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d39323233333732303336383534373735383038",
+    "d:c3e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:32313437343833363437",
+    "d:41e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2d32313437343833363438",
+    "i:-2147483647"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:30783141",
+    "s:30783142"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:303037",
+    "i:8"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:2e35",
+    "d:3ff8000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:00",
+    "s:00"
+   ]
+  }
+ ],
+ "pre_dec": [
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type null has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "N",
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:0",
+    "b:0"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Decrement on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:1",
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-1",
+    "i:-1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:0",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2",
+    "i:-2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3fe0000000000000",
+    "d:3fe0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:0",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3fe0000000000000",
+    "d:3fe0000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:616263",
+    "s:616263"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on empty string is deprecated as non-numeric"
+    ]
+   ],
+   "r": [
+    "i:-1",
+    "i:-1"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot decrement array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot decrement array"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2147483646",
+    "i:2147483646"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:c1e0000000200000",
+    "d:c1e0000000200000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:bff0000000000000",
+    "d:bff0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:7e37e43c8800759c",
+    "d:7e37e43c8800759c"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:61",
+    "s:61"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a",
+    "s:7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:417a",
+    "s:417a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a7a",
+    "s:7a7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:5a7a",
+    "s:5a7a"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:6139",
+    "s:6139"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:413939",
+    "s:413939"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:4",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:4012000000000000",
+    "d:4012000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:4058c00000000000",
+    "d:4058c00000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:4",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:4",
+    "i:4"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-4",
+    "i:-4"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:2d",
+    "s:2d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:612d",
+    "s:612d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:7a20",
+    "s:7a20"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:43e0000000000000",
+    "d:43e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:c3e0000000000000",
+    "d:c3e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2147483646",
+    "i:2147483646"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:c1e0000000200000",
+    "d:c1e0000000200000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:30783141",
+    "s:30783141"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:6",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:bfe0000000000000",
+    "d:bfe0000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Decrement on non-numeric string has no effect and is deprecated"
+    ]
+   ],
+   "r": [
+    "s:00",
+    "s:00"
+   ]
+  }
+ ],
+ "pre_inc": [
+  {
+   "d": [],
+   "r": [
+    "i:1",
+    "i:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Increment on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:0",
+    "b:0"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Increment on type bool has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "b:1",
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:1",
+    "i:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2",
+    "i:2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:0",
+    "i:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:4004000000000000",
+    "d:4004000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:2",
+    "i:2"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:4004000000000000",
+    "d:4004000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:616264",
+    "s:616264"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:31",
+    "s:31"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot increment array"
+   ]
+  },
+  {
+   "d": [],
+   "e": [
+    "TypeError",
+    "Cannot increment array"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:41e0000000000000",
+    "d:41e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2147483647",
+    "i:-2147483647"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3ff0000000000000",
+    "d:3ff0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:7e37e43c8800759c",
+    "d:7e37e43c8800759c"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:62",
+    "s:62"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:6161",
+    "s:6161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:4261",
+    "s:4261"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:616161",
+    "s:616161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:414161",
+    "s:414161"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:6230",
+    "s:6230"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:423030",
+    "s:423030"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:6",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:401a000000000000",
+    "d:401a000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:4059400000000000",
+    "d:4059400000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:6",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:6",
+    "i:6"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2",
+    "i:-2"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:2d",
+    "s:2d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:612d",
+    "s:612d"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:7a20",
+    "s:7a20"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:43e0000000000000",
+    "d:43e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:c3e0000000000000",
+    "d:c3e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:41e0000000000000",
+    "d:41e0000000000000"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:-2147483647",
+    "i:-2147483647"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:30783142",
+    "s:30783142"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "i:8",
+    "i:8"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "d:3ff8000000000000",
+    "d:3ff8000000000000"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Increment on non-numeric string is deprecated, use str_increment() instead"
+    ]
+   ],
+   "r": [
+    "s:00",
+    "s:00"
+   ]
+  }
+ ],
+ "read_array": "a:[[\"i:0\",\"s:7a65726f\"],[\"s:\",\"s:656d707479\"],[\"i:1\",\"s:6f6e65\"],[\"s:616263\",\"s:73\"],[\"i:-1\",\"s:6d696e7573\"],[\"s:312e35\",\"s:737472\"]]",
+ "string_isset": [
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float 1.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     8192,
+     "Implicit conversion from float -0.5 to int loses precision"
+    ]
+   ],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "The float 1.0E+20 is not representable as an int, cast occurred"
+    ],
+    [
+     8192,
+     "Implicit conversion from float 1.0E+20 to int loses precision"
+    ]
+   ],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  }
+ ],
+ "undefined_container": [
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ],
+    [
+     2,
+     "Trying to access array offset on null"
+    ]
+   ],
+   "r": [
+    "N"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "s:64666c74"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"s:6b\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "a:[[\"i:0\",\"s:76\"]]"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ]
+   ],
+   "r": [
+    "i:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  }
+ ],
+ "undefined_inc": [
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ]
+   ],
+   "r": [
+    "i:1",
+    "i:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ],
+    [
+     2,
+     "Decrement on type null has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "N",
+    "N"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ]
+   ],
+   "r": [
+    "N",
+    "i:1"
+   ]
+  },
+  {
+   "d": [
+    [
+     2,
+     "Undefined variable $u"
+    ],
+    [
+     2,
+     "Decrement on type null has no effect, this will change in the next major version of PHP"
+    ]
+   ],
+   "r": [
+    "N",
+    "N"
+   ]
+  }
+ ],
+ "values": [
+  "N",
+  "b:0",
+  "b:1",
+  "i:0",
+  "i:1",
+  "i:-1",
+  "d:3ff8000000000000",
+  "s:31",
+  "s:312e35",
+  "s:616263",
+  "s:",
+  "a:[]",
+  "a:[[\"i:0\",\"i:1\"]]"
+ ],
+ "xor": [
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:1"
+   ]
+  },
+  {
+   "d": [],
+   "r": [
+    "b:0"
+   ]
+  }
+ ]
+}
