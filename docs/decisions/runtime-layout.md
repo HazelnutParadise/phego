@@ -16,6 +16,31 @@
 | 執行框架 | 採用：`x.frames` 以值存放，同一深度重用 locals 的儲存空間 | 三層巢狀、每層兩個 local 的呼叫快 25%，配置從 15 次降到 6 次（[execution-frames](../implementation/evidence/runtime-layout-20261107/execution-frames.bench.txt)） | 每次呼叫配置新的 frame。locals 改成真正的值堆疊：locals 的位置交給呼叫端，擴容會讓舊指標失效，要等 VM 提供每個函式的變數數量（W-17） |
 | 輸出上限的剩餘量 | 不採用：維持每次寫入掃描全部緩衝 | 增量記錄的版本在 1、3、8 層緩衝下量不出穩定差異（[output-write](../implementation/evidence/runtime-layout-20261107/output-write.bench.txt)） | 增量計數要在 5 個地方同步更新，沒有量到好處就不值得增加這份維護負擔 |
 
+## CI 上的 benchstat 重量（2026-11-11）
+
+上表的時間是在一台同時執行其他工作的 darwin/arm64 機器上取中位數，只能當方向參考。2026-11-11 改在 GitHub 的 ubuntu-24.04 runner（linux/amd64，go1.26.10，4 核）重量：每一項把改動前與改動後的 commit 各自編成測試執行檔，交替執行 10 輪，再以 benchstat 比較（`tools/benchstat-pair.sh`，「Runtime layout benchmarks」工作流程）。下表只列 benchstat 判定有差異（p < 0.05）的時間，配置次數與位元組和上表相同的不重複。原始輸出在[benchstat 證據目錄](../implementation/evidence/acceptance-followups-20261111/benchstat/)。
+
+| 項目 | 改動前 → 改動後 | CI 上的時間差異 | 和上表的差別 |
+|---|---|---|---|
+| 物件表 | 063aebe → 935a223 | 建立與釋放 0、1、4 個屬性的物件快 20%、10～11%、3～7%，32 與 256 個屬性量不出差異；materialize 後的生命週期快 10～13%，解構快 16.6%，循環回收快 13.0% | 方向一致，幅度小很多：上表的 39～72%、75%、78% 在 CI 上重現不出來 |
+| 排序原位置 | 935a223 → 2cc3dcc | 全部相等的資料快 23.2%；32、128、1,024 個元素分別為 −3.0%、+2.5%、+0.5% | 一致：一般資料持平，相等資料變快 |
+| 陣列 bucket | 2cc3dcc → e5eaac6 | COW 分離快 18.8%，1,024 個元素 append 快 3.7%，3、8、20 個元素快 1.5～2.6%；排序 32、128、1,024 個元素慢 6.2%、5.7%、7.3% | 小陣列只快 1.5～2.6%，不是 6～7%。排序變慢是上表沒有量到的退步 |
+| 執行框架 | e5eaac6 → 81f9ac8 | 三層巢狀呼叫快 21.7% | 一致（上表為 25%） |
+
+bucket 塊讓排序慢 6～7%，配置次數則少 78～94%。這項決定維持不變，因為配置次數與 COW 的改善涵蓋所有陣列操作，但排序的退步要在 W-17 以真實工作量重測時一併追查原因。
+
+### echo 的 write 不和 writeTo 合併
+
+`execution.write` 與 `writeTo` 的本體相同。驗收審查建議讓 `write` 直接呼叫 `writeTo`，依據是 [display_errors 的量測](../implementation/evidence/display-errors-20261107/bench-write.txt)，那份資料是在高負載的機器上取得。在 CI 上以 benchstat 重量（改動前為 f11fe9e）：
+
+| 寫法 | 1、3、8 層緩衝的 `BenchmarkOutputWrite` |
+|---|---|
+| `write` 呼叫 `writeTo` | 慢 30.8%、33.1%、32.6% |
+| 兩者都是一行、可內聯的入口，共用一個本體 | 慢 10.1%、9.7%、15.0% |
+| 維持兩份本體（採用） | 基準 |
+
+`completion` 是很大的結構，多經過一層函式回傳就有成本，所以保留兩份本體，並在程式註解寫明原因。
+
 ## Bucket 塊的細節
 
 - Go 1.22 起，大於 512 bytes 且含指標的物件會多一個 8 bytes 的配置標頭。bucket 是 96 bytes，所以 8 個（768 bytes）實際占 896 的級距，16 個（1,536 bytes）占 1,792。選用的 5、13、21 個分別是 480、1,280（含標頭）與 2,048 bytes（含標頭），都剛好填滿級距。

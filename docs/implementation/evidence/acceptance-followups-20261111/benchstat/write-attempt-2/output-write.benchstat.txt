@@ -1,0 +1,26 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 7763 64-Core Processor                
+                │   before    │                after                │
+                │   sec/op    │   sec/op     vs base                │
+OutputWrite/1-4   29.57n ± 2%   32.55n ± 2%  +10.06% (p=0.000 n=10)
+OutputWrite/3-4   31.82n ± 1%   34.92n ± 3%   +9.73% (p=0.000 n=10)
+OutputWrite/8-4   36.98n ± 2%   42.52n ± 2%  +14.98% (p=0.000 n=10)
+geomean           32.65n        36.43n       +11.56%
+
+                │   before    │               after                │
+                │    B/op     │    B/op     vs base                │
+OutputWrite/1-4   6.000 ±  0%   5.000 ± 0%  -16.67% (p=0.000 n=10)
+OutputWrite/3-4   6.000 ± 33%   5.000 ± 0%  -16.67% (p=0.038 n=10)
+OutputWrite/8-4   5.000 ± 20%   5.000 ± 0%        ~ (p=0.474 n=10)
+geomean           5.646         5.000       -11.45%
+
+                │    before    │                after                │
+                │  allocs/op   │ allocs/op   vs base                 │
+OutputWrite/1-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+OutputWrite/3-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+OutputWrite/8-4   0.000 ± 0%     0.000 ± 0%       ~ (p=1.000 n=10) ¹
+geomean                      ²               +0.00%                ²
+¹ all samples are equal
+² summaries must be >0 to compute geomean

@@ -1,0 +1,92 @@
+# commit 2cc3dccfb79d47244fd544d3814d13cb35eadc63
+# go version go1.26.10 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50365	     23558 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8990	    124131 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     807	   1474464 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    2004	    591906 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50709	     23533 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    9091	    123957 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     810	   1471330 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    2005	    598604 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50230	     23734 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8973	    124296 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     801	   1470501 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1980	    591719 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   49609	     23592 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    9566	    126359 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     799	   1476232 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    2019	    604460 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50414	     23623 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8890	    123562 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     806	   1471859 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1981	    593588 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50760	     23561 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8886	    124184 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     802	   1469009 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1971	    593827 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50584	     24452 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8803	    124164 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     810	   1521555 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1959	    593203 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50431	     23569 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8972	    124227 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     808	   1470811 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1983	    592038 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50560	     23530 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8934	    123999 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     807	   1472121 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1978	    591660 ns/op	  210480 B/op	    1034 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkW12Sorting/32-4     	   50316	     23648 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-4    	    8712	    124240 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-4   	     807	   1471320 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-4   	    1986	    592317 ns/op	  210480 B/op	    1034 allocs/op
+PASS

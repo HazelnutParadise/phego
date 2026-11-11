@@ -1,0 +1,62 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+                                        │    before    │                after                │
+                                        │    sec/op    │   sec/op     vs base                │
+W13ObjectLifecycle/0/declared=false-4     116.60n ± 5%   93.14n ± 3%  -20.12% (p=0.000 n=10)
+W13ObjectLifecycle/0/declared=true-4      115.65n ± 4%   92.11n ± 2%  -20.35% (p=0.000 n=10)
+W13ObjectLifecycle/1/declared=false-4      298.5n ± 4%   267.4n ± 4%  -10.43% (p=0.000 n=10)
+W13ObjectLifecycle/1/declared=true-4       224.1n ± 3%   198.4n ± 3%  -11.45% (p=0.000 n=10)
+W13ObjectLifecycle/4/declared=false-4      683.3n ± 4%   662.2n ± 5%   -3.10% (p=0.007 n=10)
+W13ObjectLifecycle/4/declared=true-4       496.3n ± 4%   463.2n ± 4%   -6.67% (p=0.002 n=10)
+W13ObjectLifecycle/32/declared=false-4     5.242µ ± 3%   5.155µ ± 3%        ~ (p=0.280 n=10)
+W13ObjectLifecycle/32/declared=true-4      3.610µ ± 7%   3.533µ ± 3%        ~ (p=0.089 n=10)
+W13ObjectLifecycle/256/declared=false-4    37.53µ ± 2%   37.67µ ± 4%        ~ (p=0.912 n=10)
+W13ObjectLifecycle/256/declared=true-4     27.55µ ± 2%   27.44µ ± 4%        ~ (p=0.912 n=10)
+W13MaterializedLifecycle/once-4            251.4n ± 3%   222.0n ± 3%  -11.68% (p=0.000 n=10)
+W13MaterializedLifecycle/repeated-4        269.8n ± 3%   243.6n ± 3%   -9.68% (p=0.000 n=10)
+W13MaterializedLifecycle/clone-4           505.4n ± 5%   440.7n ± 3%  -12.80% (p=0.000 n=10)
+ObjectDestruct-4                           149.3n ± 3%   124.5n ± 3%  -16.64% (p=0.000 n=10)
+Collect100ObjectCycles-4                   76.69µ ± 3%   66.74µ ± 5%  -12.97% (p=0.000 n=10)
+geomean                                    1.059µ        957.4n        -9.56%
+
+                                        │    before    │                 after                 │
+                                        │     B/op     │     B/op      vs base                 │
+W13ObjectLifecycle/0/declared=false-4       160.0 ± 0%     160.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/0/declared=true-4        160.0 ± 0%     160.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/1/declared=false-4       544.0 ± 0%     544.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/1/declared=true-4        224.0 ± 0%     224.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/4/declared=false-4     1.109Ki ± 0%   1.109Ki ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/4/declared=true-4        416.0 ± 0%     416.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/32/declared=false-4    7.680Ki ± 0%   7.680Ki ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/32/declared=true-4     2.406Ki ± 0%   2.406Ki ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/256/declared=false-4   50.02Ki ± 0%   50.02Ki ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/256/declared=true-4    18.16Ki ± 0%   18.16Ki ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/once-4             248.0 ± 0%     248.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/repeated-4         248.0 ± 0%     248.0 ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/clone-4            472.0 ± 0%     472.0 ± 0%       ~ (p=1.000 n=10) ¹
+ObjectDestruct-4                            160.0 ± 0%     160.0 ± 0%       ~ (p=1.000 n=10) ¹
+Collect100ObjectCycles-4                  94.82Ki ± 0%   94.82Ki ± 0%       ~ (p=1.000 n=10) ¹
+geomean                                   1.154Ki        1.154Ki       +0.00%
+¹ all samples are equal
+
+                                        │   before   │                after                │
+                                        │ allocs/op  │ allocs/op   vs base                 │
+W13ObjectLifecycle/0/declared=false-4     1.000 ± 0%   1.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/0/declared=true-4      1.000 ± 0%   1.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/1/declared=false-4     4.000 ± 0%   4.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/1/declared=true-4      2.000 ± 0%   2.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/4/declared=false-4     6.000 ± 0%   6.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/4/declared=true-4      2.000 ± 0%   2.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/32/declared=false-4    16.00 ± 0%   16.00 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/32/declared=true-4     2.000 ± 0%   2.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/256/declared=false-4   36.00 ± 0%   36.00 ± 0%       ~ (p=1.000 n=10) ¹
+W13ObjectLifecycle/256/declared=true-4    2.000 ± 0%   2.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/once-4           3.000 ± 0%   3.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/repeated-4       3.000 ± 0%   3.000 ± 0%       ~ (p=1.000 n=10) ¹
+W13MaterializedLifecycle/clone-4          5.000 ± 0%   5.000 ± 0%       ~ (p=1.000 n=10) ¹
+ObjectDestruct-4                          1.000 ± 0%   1.000 ± 0%       ~ (p=1.000 n=10) ¹
+Collect100ObjectCycles-4                  456.0 ± 0%   456.0 ± 0%       ~ (p=1.000 n=10) ¹
+geomean                                   4.403        4.403       +0.00%
+¹ all samples are equal

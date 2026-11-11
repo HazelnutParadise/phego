@@ -1,0 +1,4 @@
+=== RUN   TestHostProfileLazyOperandOrder
+--- PASS: TestHostProfileLazyOperandOrder (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.028s
