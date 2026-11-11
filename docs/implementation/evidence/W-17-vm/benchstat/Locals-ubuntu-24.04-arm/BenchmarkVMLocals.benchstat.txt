@@ -1,0 +1,14 @@
+goos: linux
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+           │    slots    │              registered               │
+           │   sec/op    │    sec/op     vs base                 │
+VMLocals-4   582.1µ ± 0%   2010.5µ ± 1%  +245.37% (p=0.000 n=10)
+
+           │    slots     │                registered                │
+           │     B/op     │      B/op       vs base                  │
+VMLocals-4   40.92Ki ± 0%   1964.39Ki ± 0%  +4700.91% (p=0.000 n=10)
+
+           │   slots    │               registered                │
+           │ allocs/op  │  allocs/op    vs base                   │
+VMLocals-4   23.00 ± 0%   8422.00 ± 0%  +36517.39% (p=0.000 n=10)

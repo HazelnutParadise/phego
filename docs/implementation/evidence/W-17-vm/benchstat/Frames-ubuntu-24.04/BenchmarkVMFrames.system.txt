@@ -1,0 +1,2 @@
+# commit 5545d4f3e1761807bc18942259a0867519c3f7d8
+# go version go1.26.10 linux/amd64
