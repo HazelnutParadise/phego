@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 // W-14: REQ-009, REQ-020, REQ-022, REQ-030, REQ-040, REQ-044; T-017, T-018, T-039, T-040, T-043, T-044, T-059, T-060, T-079, T-080, T-087, T-088.
@@ -62,7 +63,14 @@ type executionBuffer struct {
 	// PHP's PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT does.
 	produced bool
 }
-type executionDiagnostic struct{ level, message string }
+
+// executionDiagnostic is one logged PHP diagnostic with the location the VM
+// reported it at; file is empty and line 0 without a VM (PHP's "Unknown").
+type executionDiagnostic struct {
+	level, message string
+	file           string
+	line           int
+}
 
 type executionResult struct {
 	end             completion
@@ -485,6 +493,40 @@ func (x *execution) warning(message string) completion {
 type errorChannels struct {
 	display, log bool
 	text         func(level, message string) string
+	// where is the VM's current PHP file and line; displayed text then
+	// follows php_error_cb with html_errors off.
+	where func() (file string, line int)
+	// excluded holds the error_reporting bits that are off; a diagnostic of
+	// such a level is neither displayed nor logged.
+	excluded int
+}
+
+// diagnosticLevelBit is the E_* constant of a PHP diagnostic level.
+func diagnosticLevelBit(level string) int {
+	switch level {
+	case "Fatal error":
+		return 1 // E_ERROR
+	case "Warning":
+		return levelWarning
+	case "Notice":
+		return levelNotice
+	case "Deprecated":
+		return levelDeprecated
+	}
+	return 0
+}
+
+// diagnosticLevelName is PHP's spelling of an E_* level raised by the heap.
+func diagnosticLevelName(level int) string {
+	switch level {
+	case levelWarning:
+		return "Warning"
+	case levelNotice:
+		return "Notice"
+	case levelDeprecated:
+		return "Deprecated"
+	}
+	return "Fatal error"
 }
 
 // report raises one PHP diagnostic, as php_error_cb does: the log copy is
@@ -492,20 +534,32 @@ type errorChannels struct {
 // layer. skipRunning is the handler-output deprecation, raised while the
 // running handler is disabled, so its text bypasses that handler's buffer.
 func (x *execution) report(level, message string, skipRunning bool) completion {
+	if x.errors.excluded&diagnosticLevelBit(level) != 0 {
+		return completion{}
+	}
 	// The cap counts every diagnostic, displayed or logged.
 	if x.reported >= x.limits.callbacks {
 		return x.fail(endLimit, errExecutionLimit)
 	}
 	x.reported++
+	file, line := "", 0
+	if x.errors.where != nil {
+		file, line = x.errors.where()
+	}
 	if x.errors.log {
-		x.diagnostics = append(x.diagnostics, executionDiagnostic{level, message})
+		x.diagnostics = append(x.diagnostics, executionDiagnostic{level: level, message: message, file: file, line: line})
 	}
 	if !x.errors.display {
 		return completion{}
 	}
-	text := "\n" + level + ": " + message + " in Unknown on line 0\n"
-	if x.errors.text != nil {
+	var text string
+	switch {
+	case x.errors.text != nil:
 		text = x.errors.text(level, message)
+	case x.errors.where != nil:
+		text = "\n" + level + ": " + message + " in " + vmFileName(file) + " on line " + strconv.Itoa(line) + "\n"
+	default:
+		text = "\n" + level + ": " + message + " in Unknown on line 0\n"
 	}
 	return x.writeTo(len(x.buffers)-1-boolInt(skipRunning && x.filtering), []byte(text))
 }

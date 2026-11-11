@@ -66,6 +66,8 @@ type heap struct {
 	// diagnostics are the PHP warnings and deprecations raised by modeled
 	// operations, in order.
 	diagnostics []diagnostic
+	// sink, when set by the VM, receives each diagnostic instead.
+	sink func(level int, message string)
 	// PHP 8.5.12 array user-sort deprecation state is request-local. A nested
 	// user sort resets it; returning from that sort does not restore it.
 	// REQ-017; T-033/T-034.
