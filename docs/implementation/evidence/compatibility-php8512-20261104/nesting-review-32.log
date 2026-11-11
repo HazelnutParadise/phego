@@ -1,0 +1,8 @@
+=== RUN   TestControlProbe
+--- PASS: TestControlProbe (0.00s)
+=== RUN   TestFinalProbe
+--- PASS: TestFinalProbe (0.01s)
+=== RUN   TestTimingProbe
+--- PASS: TestTimingProbe (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/frontend	0.570s

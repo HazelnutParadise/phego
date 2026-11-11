@@ -1,0 +1,4 @@
+ProductName:		macOS
+ProductVersion:		15.7.9
+BuildVersion:		24G830
+Darwin sjc20-av657-d3602ac2-e4d2-4b38-a83c-e3241efdbccc-E2938C1F4769.local 24.6.0 Darwin Kernel Version 24.6.0: Tue Jul 21 20:50:07 PDT 2026; root:xnu-11417.140.69.711.44~1/RELEASE_X86_64 x86_64

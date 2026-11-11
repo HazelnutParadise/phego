@@ -1,0 +1,12 @@
+$ CGO_ENABLED=0 go test -count=1 ./...
+ok  	github.com/HazelnutParadise/phego	2.812s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	15.198s
+ok  	github.com/HazelnutParadise/phego/internal/compat	1.689s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	4.125s
+ok  	github.com/HazelnutParadise/phego/internal/ir	25.226s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.040s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.980s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	5.558s
+ok  	github.com/HazelnutParadise/phego/internal/profile	18.966s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	68.512s
+exit=0

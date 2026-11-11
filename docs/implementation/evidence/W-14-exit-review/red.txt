@@ -1,0 +1,36 @@
+--- FAIL: TestExecutionOracleReplay (0.01s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/array_exit_throw (0.00s)
+            execution_oracle_test.go:404: output="[(BDSD)]" code=7, oracle="[(BDunexpectedSD)]"/7
+            execution_oracle_test.go:413: events=[destroy:exit destroy:throw destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:exit destroy:throw destroy:tail caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/array_throw_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BDunexpectedSD)]" code=0, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:413: events=[destroy:throw destroy:exit destroy:tail caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:throw destroy:exit destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/exit_cleanup_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BSD)]" code=9, oracle="[(BDSD)]"/9
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:exit flush:inner flush:outer], oracle=[destroy:exit destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/exit_cleanup_throw (0.00s)
+            execution_oracle_test.go:404: output="[(BSD)]" code=255, oracle="[(BDSD)]"/255
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:throw flush:inner flush:outer], oracle=[destroy:throw destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/frame_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BSDD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:local flush:inner flush:outer], oracle=[destroy:local shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/array_exit_throw (0.00s)
+            execution_oracle_test.go:404: output="[(BDSD)]" code=7, oracle="[(BDunexpectedSD)]"/7
+            execution_oracle_test.go:413: events=[destroy:exit destroy:throw destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:exit destroy:throw destroy:tail caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/array_throw_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BDunexpectedSD)]" code=0, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:413: events=[destroy:throw destroy:exit destroy:tail caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:throw destroy:exit destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/exit_cleanup_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BSD)]" code=9, oracle="[(BDSD)]"/9
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:exit flush:inner flush:outer], oracle=[destroy:exit destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/exit_cleanup_throw (0.00s)
+            execution_oracle_test.go:404: output="[(BSD)]" code=255, oracle="[(BDSD)]"/255
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:throw flush:inner flush:outer], oracle=[destroy:throw destroy:tail shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/frame_exit (0.00s)
+            execution_oracle_test.go:404: output="[(BSDD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:413: events=[shutdown:1 shutdown:2 destroy:global destroy:local flush:inner flush:outer], oracle=[destroy:local shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.559s
+FAIL

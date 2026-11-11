@@ -1,0 +1,15 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+                │   before    │                after                │
+                │   sec/op    │   sec/op     vs base                │
+ExecutionCall-4   609.2n ± 3%   477.0n ± 3%  -21.70% (p=0.000 n=10)
+
+                │   before   │               after                │
+                │    B/op    │    B/op     vs base                │
+ExecutionCall-4   528.0 ± 0%   384.0 ± 0%  -27.27% (p=0.000 n=10)
+
+                │   before    │               after                │
+                │  allocs/op  │ allocs/op   vs base                │
+ExecutionCall-4   15.000 ± 0%   6.000 ± 0%  -60.00% (p=0.000 n=10)

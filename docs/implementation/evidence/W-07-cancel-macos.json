@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "scope": "cooperative_cancel_probe_only",
+  "platform": "darwin/arm64",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+  "go": "go1.26.5",
+  "source_sha256": {
+    "experiments/nativecancel/cancel_panic_test.go": "675a82956c2d01ed2059d3bdcad066760ab43bcf4605c03f82e7bab6ee2425a1",
+    "experiments/nativecancel/cancel_race_test.go": "a703b71a33fd8f09236444e89f73b7544b56f5d82b14fb88e8eebf421a1ed3e7",
+    "experiments/nativecancel/cancel_test.go": "08e2d13b26025f9948f15ffe722c1218dee7ab708885419948a77a3c5901569c",
+    "experiments/nativecancel/loop.ll": "c2fb46934611af927efd82c97853defeb66675ce6f29b06edf2b914d1790bc25",
+    "experiments/nativecancel/main.go": "fff26564c70fd05e01f6972a9d86568cbd6423b2ff797a1fd639c219dc25f2d2"
+  },
+  "command": "probe_dir=$(mktemp -d)\nclang -O2 -c experiments/nativecancel/loop.ll -o \"$probe_dir/loop.o\"\nar rcs \"$probe_dir/libphegocancel.a\" \"$probe_dir/loop.o\"\nCGO_ENABLED=1 CC=clang CGO_LDFLAGS=\"-L$probe_dir -lphegocancel\" go test -race -count=1 -tags=phego_native_probe ./experiments/nativecancel\nGODEBUG=panicnil=1 CGO_ENABLED=1 CC=clang CGO_LDFLAGS=\"-L$probe_dir -lphegocancel\" go test -count=1 -tags=phego_native_probe -run '^TestNilPanicCannotBeReportedAsSuccess$' ./experiments/nativecancel",
+  "exit_code": 0,
+  "passed_tests": [
+    "TestNilPanicCannotBeReportedAsSuccess",
+    "TestReleaseDuringContextCheckDoesNotDeadlockOrSucceed",
+    "TestRegisterNilContextReturnsZero",
+    "TestNormalCompletionCountsEveryCheckpoint",
+    "TestZeroIterationsDoNotCheckpoint",
+    "TestInvalidTokenIsRejectedBeforeLimit",
+    "TestReleasedTokenIsRejectedBeforeLimitAndReleaseIsNotRepeated",
+    "TestAlreadyCanceledContextStopsWithoutCheckpoint",
+    "TestCancellationAfterFirstCheckpoint",
+    "TestErrPanicIsReturnedAsStatusThree",
+    "TestRuntimeGCKeepsRegisteredContextAlive"
+  ],
+  "output_excerpt": [
+    "PASS",
+    "ld: warning: ignoring duplicate libraries: '-lphegocancel'"
+  ],
+  "limits": [
+    "Host-provided toolchain, not the W-02 locked Linux toolchain.",
+    "A single GC test is not stress testing or proof of complex object lifetime.",
+    "This is an isolated cooperative cancellation experiment, not product acceptance."
+  ]
+}

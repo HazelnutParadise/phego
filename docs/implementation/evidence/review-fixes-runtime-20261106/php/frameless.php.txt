@@ -1,0 +1,8 @@
+<?php
+function f() { return in_array(1, "x"); }
+try { f(); } catch (TypeError $e) { echo $e->getMessage(), "\n", $e->getTraceAsString(), "\n"; }
+$fn = 'in_array';
+try { $fn(1, "x"); } catch (TypeError $e) { echo $e->getTraceAsString(), "\n"; }
+set_error_handler(function () { echo json_encode(array_column(debug_backtrace(), 'function')), "\n"; return true; });
+echo str_replace([], [], 1), "\n";
+echo implode(",", [1, [2]]), "\n";

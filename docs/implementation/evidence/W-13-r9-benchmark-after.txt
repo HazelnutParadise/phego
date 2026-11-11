@@ -1,0 +1,100 @@
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=184 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=184 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+=== RUN   TestW13LayoutEvidence
+    object_table_test.go:12: value=64 B
+    object_table_test.go:12: reference=80 B
+    object_table_test.go:12: bucket=96 B
+    object_table_test.go:12: phpArray=88 B
+    object_table_test.go:12: object=96 B
+    object_table_test.go:12: propertyTable=64 B
+    object_table_test.go:12: classSpec=184 B
+--- PASS: TestW13LayoutEvidence (0.00s)
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13DynamicChurn
+BenchmarkW13DynamicChurn/0
+BenchmarkW13DynamicChurn/0-8    	 2754402	        43.28 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/0-8    	 2778969	        56.94 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/0-8    	 2889109	        41.16 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/1
+BenchmarkW13DynamicChurn/1-8    	 2200834	        55.34 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/1-8    	 2191448	        55.25 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/1-8    	 2196874	        54.88 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/32
+BenchmarkW13DynamicChurn/32-8   	 2151787	        55.31 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/32-8   	 2188574	        54.89 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13DynamicChurn/32-8   	 2199513	        67.37 ns/op	      88 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal
+BenchmarkW13ChurnTraversal/0
+BenchmarkW13ChurnTraversal/0-8  	36036944	         3.449 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/0-8  	34628286	         3.444 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/0-8  	35793296	         3.454 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/10000
+BenchmarkW13ChurnTraversal/10000-8         	34771269	         3.454 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/10000-8         	34836883	         3.445 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/10000-8         	35566093	         3.442 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/100000
+BenchmarkW13ChurnTraversal/100000-8        	34838146	         3.531 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/100000-8        	34316353	         3.477 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ChurnTraversal/100000-8        	34828035	         3.446 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectLifecycle
+BenchmarkW13ObjectLifecycle/0/declared=false
+BenchmarkW13ObjectLifecycle/0/declared=false-8         	 1320216	        94.85 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=false-8         	 1297720	        91.35 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=false-8         	 1310564	        91.55 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true
+BenchmarkW13ObjectLifecycle/0/declared=true-8          	 1303598	        95.74 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-8          	 1300400	        91.35 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-8          	 1314584	        91.42 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false
+BenchmarkW13ObjectLifecycle/1/declared=false-8         	  460887	       249.9 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-8         	  484196	       248.6 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-8         	  469590	       249.6 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true
+BenchmarkW13ObjectLifecycle/1/declared=true-8          	  625827	       193.4 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-8          	  642770	       192.6 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-8          	  647714	       193.7 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false
+BenchmarkW13ObjectLifecycle/4/declared=false-8         	  184628	       636.8 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-8         	  182276	       634.8 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-8         	  185168	       628.3 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true
+BenchmarkW13ObjectLifecycle/4/declared=true-8          	  260810	       457.0 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-8          	  264392	       453.1 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-8          	  263950	       452.1 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false
+BenchmarkW13ObjectLifecycle/32/declared=false-8        	   26059	      4627 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-8        	   26029	      4613 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-8        	   26175	      4650 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true
+BenchmarkW13ObjectLifecycle/32/declared=true-8         	   39141	      3058 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-8         	   38667	      3056 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-8         	   38827	      3059 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false
+BenchmarkW13ObjectLifecycle/256/declared=false-8       	    3454	     34939 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-8       	    3492	     35065 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-8       	    3420	     34902 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true
+BenchmarkW13ObjectLifecycle/256/declared=true-8        	    5238	     23502 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-8        	    5196	     23745 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-8        	    5168	     23592 ns/op	   18592 B/op	       2 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	7.676s

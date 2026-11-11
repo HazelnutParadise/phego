@@ -1,0 +1,1104 @@
+internal/runtime/object_lazy.go:5:6: can inline objectHasDestructor with cost 29 as: func(*object) bool { return o.class != nil && o.class.destructor != nil && (o.lazy == nil || o.lazy.initialize == nil && o.lazy.target.kind != valueKind(7)) }
+internal/runtime/object_table.go:220:6: can inline (*propertyTable).beginIteration with cost 12 as: method(*propertyTable) func() bool { previous := p.iterating; p.iterating = true; return previous }
+internal/runtime/object_table.go:178:6: cannot inline (*propertyTable).reclaimRetired: function too complex: cost 140 exceeds budget 80
+internal/runtime/object_table.go:226:6: can inline (*propertyTable).endIteration with cost 66 as: method(*propertyTable) func(bool) { p.iterating = previous; if !previous { (*propertyTable).reclaimRetired(p) } }
+internal/runtime/object_table.go:233:6: cannot inline (*propertyTable).each: unhandled op DEFER
+internal/runtime/object_table.go:234:2: can inline (*propertyTable).each.deferwrap1 with cost 69 as: func() { (*propertyTable).endIteration(.autotmp_2, .autotmp_3) }
+internal/runtime/object_lazy.go:305:6: cannot inline (*heap).freeLazyStorage: function too complex: cost 226 exceeds budget 80
+internal/runtime/object_table.go:258:6: can inline (*heap).freeProperties with cost 64 as: method(*heap) func(*object, map[any]bool) error { return (*heap).freePropertyTable(h, o.props, dead, true) }
+internal/runtime/object_table.go:262:6: cannot inline (*heap).freePropertyTable: function too complex: cost 90 exceeds budget 80
+internal/runtime/object_table.go:266:14: can inline (*heap).freePropertyTable.func1 with cost 198 as: func(string, *value) { found = true; if detach { (*heap).detachPropertySource(h, slot) }; old := *slot; *slot = value{}; first = (*heap).mergeObjectErrors(h, first, (*heap).releaseOutside(h, old, dead)) }
+internal/runtime/object_compare.go:100:6: cannot inline directObjectComparisonEligible: function too complex: cost 88 exceeds budget 80
+internal/runtime/object_table.go:95:6: can inline (*propertyTable).initializeLayout with cost 15 as: method(*propertyTable) func(*propertyLayout) { p.layout = layout; if layout != nil { p.declared = make([]value, len(layout.names)) } }
+internal/runtime/object_table.go:88:6: can inline newPropertyTable with cost 26 as: func(*propertyLayout) *propertyTable { p := &propertyTable{}; (*propertyTable).initializeLayout(p, layout); return p }
+internal/runtime/object_table.go:102:6: can inline (*propertyTable).lookup with cost 46 as: method(*propertyTable) func(string) (*value, bool) { if p.layout != nil { if ok { return &p.declared[i], true } }; v, ok := (*value)(.autotmp_10), .autotmp_11; if !ok { return nil, false }; return v, true }
+internal/runtime/object_table.go:46:6: cannot inline newPropertyBlock: function too complex: cost 96 exceeds budget 80
+internal/runtime/object_table.go:115:6: cannot inline (*propertyTable).slot: function too complex: cost 245 exceeds budget 80
+internal/runtime/object_lazy.go:163:6: cannot inline copyPropertyValues: function too complex: cost 123 exceeds budget 80
+internal/runtime/object_lazy.go:173:11: can inline copyPropertyValues.func1 with cost 93 as: func(string, *value) { retain(*v); *(*propertyTable).slot(dst, name) = *v }
+internal/runtime/object_lazy.go:157:6: cannot inline copyPropertyTable: function too complex: cost 97 exceeds budget 80
+internal/runtime/object_lazy.go:377:6: cannot inline lazyProxyClassCompatible: function too complex: cost 219 exceeds budget 80
+internal/runtime/object_lazy.go:323:6: cannot inline (*heap).restoreLazyProperties: function too complex: cost 602 exceeds budget 80
+internal/runtime/object_lazy.go:176:6: cannot inline (*heap).initializeLazy: unhandled op DEFER
+internal/runtime/object_lazy.go:205:8: can inline (*heap).initializeLazy.func1 with cost 142 as: func() { if cleanup != nil { err = (*heap).mergeObjectErrors(h, err, cleanup) }; l.running = false; if err != nil { out = nil } }
+internal/runtime/object_lazy.go:219:32: can inline (*heap).initializeLazy.func2 with cost 76 as: func() (value, error) { return value(.autotmp_2), .autotmp_3 }
+internal/runtime/object_compare.go:191:6: cannot inline (*heap).comparisonPropertiesPHP8512: function too complex: cost 187 exceeds budget 80
+internal/runtime/object_compare.go:114:6: can inline objectHashPropertyCount with cost 30 as: func(*object) int { declared := 0; if o.props != nil { declared = len(o.props.declared); if o.props.index != nil { declared += len(o.props.index) } }; return declared }
+internal/runtime/object_compare.go:5:6: cannot inline (*heap).compareObjectValues: unhandled op DEFER
+internal/runtime/object_compare.go:60:8: can inline (*heap).compareObjectValues.func1 with cost 128 as: func() { for loop }
+internal/runtime/object_compare.go:86:2: can inline (*heap).compareObjectValues.deferwrap1 with cost 3 as: func() { delete(.autotmp_34, .autotmp_35) }
+internal/runtime/object_compare.go:125:6: cannot inline (*heap).compareDeclaredObjectProperties: function too complex: cost 111 exceeds budget 80
+internal/runtime/object_compare.go:169:6: cannot inline (*heap).compareObjectPropertyValues: function too complex: cost 142 exceeds budget 80
+internal/runtime/object_compare.go:138:6: cannot inline (*heap).compareHashObjectProperties: unhandled op DEFER
+internal/runtime/object_compare.go:139:2: can inline (*heap).compareHashObjectProperties.deferwrap1 with cost 69 as: func() { (*propertyTable).endIteration(.autotmp_6, .autotmp_7) }
+internal/runtime/object_lazy.go:11:6: cannot inline (*heap).newLazyObject: function too complex: cost 495 exceeds budget 80
+internal/runtime/object_lazy.go:50:6: cannot inline (*heap).newLazyObjectWithInitializer: function too complex: cost 362 exceeds budget 80
+internal/runtime/object_lazy.go:67:6: cannot inline (*heap).isLazyObject: function too complex: cost 87 exceeds budget 80
+internal/runtime/object_lazy.go:82:6: can inline isLazyPropertyInfo with cost 48 as: func(*object, *propertyInfo) bool { if p == nil || p.propertySpec.static || p.propertySpec.virtual || o.lazy == nil || o.lazy.initialize == nil || !o.lazy.proxy && o.lazy.running { return false }; _, nonLazy := (struct {})(.autotmp_4), .autotmp_5; return !nonLazy }
+internal/runtime/object_lazy.go:72:6: cannot inline (*heap).isLazyProperty: function too complex: cost 225 exceeds budget 80
+internal/runtime/object_lazy.go:100:6: cannot inline (*heap).resolvePropertyBacking: function too complex: cost 265 exceeds budget 80
+internal/runtime/object_lazy.go:92:6: can inline (*heap).objectForProperty with cost 73 as: method(*heap) func(*object, *propertyInfo, string) (*object, error) { return (*object)(.autotmp_6), .autotmp_7 }
+internal/runtime/object_lazy.go:96:6: can inline (*heap).objectForPropertyRead with cost 73 as: method(*heap) func(*object, *propertyInfo, string) (*object, error) { return (*object)(.autotmp_6), .autotmp_7 }
+internal/runtime/object_lazy.go:130:6: can inline magicPropertyKey with cost 6 as: func(string, string) string { return "\x00magic:" + operation + ":" + name }
+internal/runtime/object_lazy.go:134:6: cannot inline (*heap).installPropertyGuard: function too complex: cost 118 exceeds budget 80
+internal/runtime/object_lazy.go:149:6: can inline (*forwardedPropertyGuard).restore with cost 23 as: method(*forwardedPropertyGuard) func() { target, key := g.target, g.key; *g = forwardedPropertyGuard{}; if target != nil { delete(target.hooks, key) } }
+internal/runtime/object_lazy.go:490:6: cannot inline cloneObjectProperties: function too complex: cost 317 exceeds budget 80
+internal/runtime/object_lazy.go:492:17: can inline cloneObjectProperties.func1 with cost 131 as: func(string, *value) { if slot.kind != valueKind(8) { return  }; if slot.ref.refcount == 2 { old := *slot; v := value.deref(slot); retain(v); *slot = v; _ = (*heap).release(h, old); return  } }
+internal/runtime/object_lazy.go:406:6: cannot inline (*heap).cloneObject: unhandled op DEFER
+internal/runtime/object_lazy.go:414:8: can inline (*heap).cloneObject.func1 with cost 328 as: func() { hold, protected := methodHold(.autotmp_2), .autotmp_3; err = (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, source)); if protected { if err != nil { hold.temporary = false }; err = (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, hold)) }; if err != nil { result = value{} } }
+internal/runtime/object_lazy.go:519:6: cannot inline (*heap).enumCase: function too complex: cost 588 exceeds budget 80
+internal/runtime/object_table.go:13:6: can inline newPropertyLayout with cost 43 as: func([]string) *propertyLayout { p := &propertyLayout{...}; for loop; return p }
+internal/runtime/object_table.go:149:6: cannot inline (*propertyTable).remove: function too complex: cost 156 exceeds budget 80
+internal/runtime/object_table.go:234:39: inlining call to (*propertyTable).beginIteration
+internal/runtime/object_table.go:234:22: inlining call to (*propertyTable).endIteration
+internal/runtime/object_table.go:90:20: inlining call to (*propertyTable).initializeLayout
+internal/runtime/object_table.go:116:22: inlining call to (*propertyTable).lookup
+internal/runtime/object_table.go:142:25: inlining call to nullValue
+internal/runtime/object_lazy.go:173:47: inlining call to retain
+internal/runtime/object_lazy.go:158:25: inlining call to newPropertyTable
+internal/runtime/object_lazy.go:158:25: inlining call to (*propertyTable).initializeLayout
+internal/runtime/object_lazy.go:345:24: inlining call to (*heap).addPropertySource
+internal/runtime/object_lazy.go:204:8: inlining call to retain
+internal/runtime/object_lazy.go:219:31: inlining call to (*heap).invokeObject
+internal/runtime/object_lazy.go:231:18: inlining call to value.deref
+internal/runtime/object_lazy.go:248:25: inlining call to value.deref
+internal/runtime/object_lazy.go:249:10: inlining call to retain
+internal/runtime/object_lazy.go:285:58: inlining call to (*heap).freeProperties
+internal/runtime/object_compare.go:201:28: inlining call to (*propertyTable).materialize
+internal/runtime/object_compare.go:204:30: inlining call to (*propertyTable).materialize
+internal/runtime/object_compare.go:21:17: inlining call to (*heap).number
+internal/runtime/object_compare.go:24:19: inlining call to floatValue
+internal/runtime/object_compare.go:26:10: inlining call to (*heap).warn
+internal/runtime/object_compare.go:36:28: inlining call to str
+internal/runtime/object_compare.go:38:34: inlining call to str
+internal/runtime/object_compare.go:90:35: inlining call to objectHashPropertyCount
+internal/runtime/object_compare.go:90:63: inlining call to objectHashPropertyCount
+internal/runtime/object_compare.go:170:29: inlining call to value.deref
+internal/runtime/object_compare.go:171:31: inlining call to value.deref
+internal/runtime/object_compare.go:139:51: inlining call to (*propertyTable).beginIteration
+internal/runtime/object_compare.go:152:31: inlining call to (*propertyTable).lookup
+internal/runtime/object_compare.go:139:28: inlining call to (*propertyTable).endIteration
+internal/runtime/object_lazy.go:13:29: inlining call to fmt.Errorf
+internal/runtime/object_lazy.go:16:29: inlining call to fmt.Errorf
+internal/runtime/object_lazy.go:13:29: inlining call to errors.New
+internal/runtime/object_lazy.go:16:29: inlining call to errors.New
+internal/runtime/object_lazy.go:61:20: inlining call to (*heap).assign
+internal/runtime/object_lazy.go:79:41: inlining call to isLazyPropertyInfo
+internal/runtime/object_lazy.go:116:32: inlining call to (*propertyTable).lookup
+internal/runtime/object_lazy.go:116:113: inlining call to value.isExplicitlyUnset
+internal/runtime/object_lazy.go:138:25: inlining call to magicPropertyKey
+internal/runtime/object_lazy.go:512:35: inlining call to (*propertyTable).lookup
+internal/runtime/object_lazy.go:513:24: inlining call to (*heap).addPropertySource
+internal/runtime/object_lazy.go:499:19: inlining call to value.deref
+internal/runtime/object_lazy.go:500:10: inlining call to retain
+internal/runtime/object_lazy.go:411:35: inlining call to value.deref
+internal/runtime/object_lazy.go:411:25: inlining call to methodRefcount
+internal/runtime/object_lazy.go:412:18: inlining call to value.deref
+internal/runtime/object_lazy.go:412:8: inlining call to retain
+internal/runtime/object_lazy.go:413:39: inlining call to value.deref
+internal/runtime/object_lazy.go:435:62: inlining call to accessName
+internal/runtime/object_lazy.go:435:145: inlining call to methodScopeLabel
+internal/runtime/object_lazy.go:456:9: inlining call to retain
+internal/runtime/object_lazy.go:477:59: inlining call to (*heap).discardMethodReturn
+internal/runtime/object_lazy.go:524:29: inlining call to fmt.Errorf
+internal/runtime/object_lazy.go:559:9: inlining call to retain
+internal/runtime/object_lazy.go:524:29: inlining call to errors.New
+internal/runtime/object_table.go:14:42: inlining call to slices.Clone[go.shape.[]string,go.shape.string]
+internal/runtime/object_table.go:178:7: parameter p leaks to {heap} for (*propertyTable).reclaimRetired with derefs=1:
+internal/runtime/object_table.go:178:7:   flow: block ← *p:
+internal/runtime/object_table.go:178:7:     from p.head (dot of pointer) at internal/runtime/object_table.go:189:16
+internal/runtime/object_table.go:178:7:     from block := p.head (assign) at internal/runtime/object_table.go:189:12
+internal/runtime/object_table.go:178:7:   flow: {heap} ← block:
+internal/runtime/object_table.go:178:7:     from tail.next = block (assign) at internal/runtime/object_table.go:204:15
+internal/runtime/object_table.go:178:7: leaking param content: p
+internal/runtime/object_table.go:234:2: (*propertyTable).each capturing by value: .autotmp_2 (addr=false assign=false width=8)
+internal/runtime/object_table.go:234:39: (*propertyTable).each capturing by value: .autotmp_3 (addr=false assign=false width=1)
+internal/runtime/object_table.go:233:7: parameter p leaks to {heap} for (*propertyTable).each with derefs=1:
+internal/runtime/object_table.go:233:7:   flow: v ← *p:
+internal/runtime/object_table.go:233:7:     from p.declared (dot of pointer) at internal/runtime/object_table.go:237:14
+internal/runtime/object_table.go:233:7:     from p.declared[i] (dot of pointer) at internal/runtime/object_table.go:237:23
+internal/runtime/object_table.go:233:7:     from &p.declared[i] (address-of) at internal/runtime/object_table.go:237:12
+internal/runtime/object_table.go:233:7:     from v := &p.declared[i] (assign) at internal/runtime/object_table.go:237:9
+internal/runtime/object_table.go:233:7:   flow: {heap} ← v:
+internal/runtime/object_table.go:233:7:     from visit(name, v) (call parameter) at internal/runtime/object_table.go:238:10
+internal/runtime/object_table.go:233:7: leaking param content: p
+internal/runtime/object_table.go:233:30: visit does not escape
+internal/runtime/object_table.go:265:3: (*heap).freePropertyTable capturing by ref: found (addr=false assign=true width=1)
+internal/runtime/object_table.go:262:78: (*heap).freePropertyTable capturing by value: detach (addr=false assign=false width=1)
+internal/runtime/object_table.go:262:7: (*heap).freePropertyTable capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_table.go:263:6: (*heap).freePropertyTable capturing by ref: first (addr=false assign=true width=16)
+internal/runtime/object_table.go:262:56: (*heap).freePropertyTable capturing by value: dead (addr=false assign=false width=8)
+internal/runtime/object_table.go:266:29: parameter slot leaks to {heap} for (*heap).freePropertyTable.func1 with derefs=1:
+internal/runtime/object_table.go:266:29:   flow: {heap} ← *slot:
+internal/runtime/object_table.go:266:29:     from (*heap).detachPropertySource(h, slot) (call parameter) at internal/runtime/object_table.go:269:27
+internal/runtime/object_lazy.go:305:7: parameter h leaks to {heap} for (*heap).freeLazyStorage with derefs=0:
+internal/runtime/object_lazy.go:305:7:   flow: h ← h:
+internal/runtime/object_lazy.go:305:7:     from (*heap).releaseOutside(h, initializer, dead) (call parameter) at internal/runtime/object_lazy.go:313:25
+internal/runtime/object_lazy.go:305:7:   flow: h ← h:
+internal/runtime/object_lazy.go:305:7:     from (*heap).release(h, v) (call parameter) at internal/runtime/heap.go:1260:19
+internal/runtime/object_lazy.go:305:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:305:7:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/heap.go:201:25
+internal/runtime/object_table.go:262:34: parameter table leaks to {heap} for (*heap).freePropertyTable with derefs=1:
+internal/runtime/object_table.go:262:34:   flow: {temp} ← table:
+internal/runtime/object_table.go:262:34:     from (*propertyTable).each(table, func literal) (call parameter) at internal/runtime/object_table.go:266:13
+internal/runtime/object_table.go:262:34:   flow: {heap} ← *{temp}:
+internal/runtime/object_table.go:262:7: parameter h leaks to {heap} for (*heap).freePropertyTable with derefs=0:
+internal/runtime/object_table.go:262:7:   flow: h ← h:
+internal/runtime/object_table.go:262:7:     from (*heap).releaseOutside(h, old, dead) (call parameter) at internal/runtime/object_table.go:273:55
+internal/runtime/object_table.go:262:7:   flow: h ← h:
+internal/runtime/object_table.go:262:7:     from (*heap).release(h, v) (call parameter) at internal/runtime/heap.go:1260:19
+internal/runtime/object_table.go:262:7:   flow: {heap} ← h:
+internal/runtime/object_table.go:262:7:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/heap.go:201:25
+internal/runtime/heap.go:324:27:     from (*propertyTable).each(table, func literal) (call parameter) at internal/runtime/object_table.go:266:13
+internal/runtime/object_lazy.go:305:32: parameter o leaks to {heap} for (*heap).freeLazyStorage with derefs=2:
+internal/runtime/object_lazy.go:305:32:   flow: initializer ← **o:
+internal/runtime/object_lazy.go:305:32:     from o.lazy (dot of pointer) at internal/runtime/object_lazy.go:309:26
+internal/runtime/object_lazy.go:305:32:     from o.lazy.initializer (dot of pointer) at internal/runtime/object_lazy.go:309:31
+internal/runtime/object_lazy.go:305:32:     from initializer, target := o.lazy.initializer, o.lazy.target (assign-pair) at internal/runtime/object_lazy.go:309:22
+internal/runtime/object_lazy.go:305:32:   flow: v ← initializer:
+internal/runtime/object_lazy.go:305:32:     from (*heap).releaseOutside(h, initializer, dead) (call parameter) at internal/runtime/object_lazy.go:313:25
+internal/runtime/object_lazy.go:305:32:   flow: v ← v:
+internal/runtime/object_lazy.go:305:32:     from (*heap).release(h, v) (call parameter) at internal/runtime/heap.go:1260:19
+internal/runtime/object_lazy.go:305:32:   flow: {storage for ... argument} ← v:
+internal/runtime/object_lazy.go:305:32:     from ... argument (slice-literal-element) at internal/runtime/heap.go:201:25
+internal/runtime/object_lazy.go:305:32:   flow: {heap} ← {storage for ... argument}:
+internal/runtime/object_lazy.go:305:32:     from ... argument (spill) at internal/runtime/heap.go:201:25
+internal/runtime/object_lazy.go:305:32:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/heap.go:201:25
+internal/runtime/object_table.go:266:29: parameter slot leaks to {temp} for (*heap).freePropertyTable.func1 with derefs=2:
+internal/runtime/object_table.go:266:29:   flow: old ← *slot:
+internal/runtime/object_table.go:266:29:     from *slot (indirection) at internal/runtime/object_table.go:271:11
+internal/runtime/object_table.go:266:29:     from old := *slot (assign) at internal/runtime/object_table.go:271:8
+internal/runtime/object_table.go:266:29:   flow: v ← old:
+internal/runtime/object_table.go:266:29:     from (*heap).releaseOutside(h, old, dead) (call parameter) at internal/runtime/object_table.go:273:55
+internal/runtime/object_table.go:266:29:   flow: v ← v:
+internal/runtime/object_table.go:266:29:     from (*heap).release(h, v) (call parameter) at internal/runtime/heap.go:1260:19
+internal/runtime/object_table.go:266:29:   flow: o ← v:
+internal/runtime/object_table.go:266:29:     from v.object (dot) at internal/runtime/heap.go:216:27
+internal/runtime/object_table.go:266:29:     from (*heap).deleteObject(h, v.object) (call parameter) at internal/runtime/heap.go:216:25
+internal/runtime/object_table.go:266:29:   flow: o ← o:
+internal/runtime/object_table.go:266:29:     from (*heap).freeObject(h, o) (call parameter) at internal/runtime/heap.go:319:50
+internal/runtime/object_table.go:266:29:   flow: o ← o:
+internal/runtime/object_table.go:266:29:     from h, o, dead := h, o, nil (assign-pair) at internal/runtime/heap.go:347:53
+internal/runtime/object_table.go:266:29:   flow: table ← *o:
+internal/runtime/object_table.go:266:29:     from o.props (dot of pointer) at internal/runtime/heap.go:347:53
+internal/runtime/object_table.go:266:29:     from (*heap).freePropertyTable(h, o.props, dead, true) (call parameter) at internal/runtime/heap.go:347:53
+internal/runtime/object_table.go:266:29:   flow: {temp} ← table:
+internal/runtime/object_table.go:266:29:     from (*propertyTable).each(table, func literal) (call parameter) at internal/runtime/object_table.go:266:13
+internal/runtime/object_table.go:266:29: parameter slot leaks to table for (*heap).freePropertyTable.func1 with derefs=2:
+internal/runtime/object_table.go:266:29:   flow: old ← *slot:
+internal/runtime/object_table.go:266:29:     from *slot (indirection) at internal/runtime/object_table.go:271:11
+internal/runtime/object_table.go:266:29:     from old := *slot (assign) at internal/runtime/object_table.go:271:8
+internal/runtime/object_table.go:266:29:   flow: v ← old:
+internal/runtime/object_table.go:266:29:     from (*heap).releaseOutside(h, old, dead) (call parameter) at internal/runtime/object_table.go:273:55
+internal/runtime/object_table.go:266:29:   flow: v ← v:
+internal/runtime/object_table.go:266:29:     from (*heap).release(h, v) (call parameter) at internal/runtime/heap.go:1260:19
+internal/runtime/object_table.go:266:29:   flow: o ← v:
+internal/runtime/object_table.go:266:29:     from v.object (dot) at internal/runtime/heap.go:216:27
+internal/runtime/object_table.go:266:29:     from (*heap).deleteObject(h, v.object) (call parameter) at internal/runtime/heap.go:216:25
+internal/runtime/object_table.go:266:29:   flow: o ← o:
+internal/runtime/object_table.go:266:29:     from (*heap).freeObject(h, o) (call parameter) at internal/runtime/heap.go:319:50
+internal/runtime/object_table.go:266:29:   flow: o ← o:
+internal/runtime/object_table.go:266:29:     from h, o, dead := h, o, nil (assign-pair) at internal/runtime/heap.go:347:53
+internal/runtime/object_table.go:266:29:   flow: table ← *o:
+internal/runtime/object_table.go:266:29:     from o.props (dot of pointer) at internal/runtime/heap.go:347:53
+internal/runtime/object_table.go:266:29:     from (*heap).freePropertyTable(h, o.props, dead, true) (call parameter) at internal/runtime/heap.go:347:53
+internal/runtime/object_lazy.go:305:7: leaking param: h
+internal/runtime/object_lazy.go:305:32: leaking param content: o
+internal/runtime/object_lazy.go:305:43: dead does not escape
+internal/runtime/object_table.go:262:7: leaking param: h
+internal/runtime/object_table.go:262:34: leaking param content: table
+internal/runtime/object_table.go:262:56: dead does not escape
+internal/runtime/object_table.go:266:29: leaking param content: slot
+internal/runtime/object_table.go:266:14: func literal does not escape
+internal/runtime/object_compare.go:100:37: x does not escape
+internal/runtime/object_compare.go:100:40: y does not escape
+internal/runtime/object_compare.go:101:29: []*object{...} does not escape
+internal/runtime/object_table.go:84:9: "invalid property block capacity" escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:84:9:   flow: {heap} ← &{storage for "invalid property block capacity"}:
+internal/runtime/object_table.go:84:9:     from "invalid property block capacity" (spill) at internal/runtime/object_table.go:84:9
+internal/runtime/object_table.go:84:9:     from panic("invalid property block capacity") (call parameter) at internal/runtime/object_table.go:84:8
+internal/runtime/object_table.go:49:14: &struct { block propertyBlock; entries [1]propertyEntry }{} escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:49:14:   flow: storage ← &{storage for &struct { block propertyBlock; entries [1]propertyEntry }{}}:
+internal/runtime/object_table.go:49:14:     from &struct { block propertyBlock; entries [1]propertyEntry }{} (spill) at internal/runtime/object_table.go:49:14
+internal/runtime/object_table.go:49:14:     from storage := &struct { block propertyBlock; entries [1]propertyEntry }{} (assign) at internal/runtime/object_table.go:49:11
+internal/runtime/object_table.go:49:14:   flow: {heap} ← storage:
+internal/runtime/object_table.go:49:14:     from storage.entries (dot of pointer) at internal/runtime/object_table.go:53:34
+internal/runtime/object_table.go:49:14:     from storage.entries (address-of) at internal/runtime/object_table.go:53:42
+internal/runtime/object_table.go:49:14:     from storage.entries[:] (slice) at internal/runtime/object_table.go:53:42
+internal/runtime/object_table.go:49:14:     from storage.block.entries = storage.entries[:] (assign) at internal/runtime/object_table.go:53:25
+internal/runtime/object_table.go:56:14: &struct { block propertyBlock; entries [2]propertyEntry }{} escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:56:14:   flow: storage ← &{storage for &struct { block propertyBlock; entries [2]propertyEntry }{}}:
+internal/runtime/object_table.go:56:14:     from &struct { block propertyBlock; entries [2]propertyEntry }{} (spill) at internal/runtime/object_table.go:56:14
+internal/runtime/object_table.go:56:14:     from storage := &struct { block propertyBlock; entries [2]propertyEntry }{} (assign) at internal/runtime/object_table.go:56:11
+internal/runtime/object_table.go:56:14:   flow: {heap} ← storage:
+internal/runtime/object_table.go:56:14:     from storage.entries (dot of pointer) at internal/runtime/object_table.go:60:34
+internal/runtime/object_table.go:56:14:     from storage.entries (address-of) at internal/runtime/object_table.go:60:42
+internal/runtime/object_table.go:56:14:     from storage.entries[:] (slice) at internal/runtime/object_table.go:60:42
+internal/runtime/object_table.go:56:14:     from storage.block.entries = storage.entries[:] (assign) at internal/runtime/object_table.go:60:25
+internal/runtime/object_table.go:63:14: &struct { block propertyBlock; entries [4]propertyEntry }{} escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:63:14:   flow: storage ← &{storage for &struct { block propertyBlock; entries [4]propertyEntry }{}}:
+internal/runtime/object_table.go:63:14:     from &struct { block propertyBlock; entries [4]propertyEntry }{} (spill) at internal/runtime/object_table.go:63:14
+internal/runtime/object_table.go:63:14:     from storage := &struct { block propertyBlock; entries [4]propertyEntry }{} (assign) at internal/runtime/object_table.go:63:11
+internal/runtime/object_table.go:63:14:   flow: {heap} ← storage:
+internal/runtime/object_table.go:63:14:     from storage.entries (dot of pointer) at internal/runtime/object_table.go:67:34
+internal/runtime/object_table.go:63:14:     from storage.entries (address-of) at internal/runtime/object_table.go:67:42
+internal/runtime/object_table.go:63:14:     from storage.entries[:] (slice) at internal/runtime/object_table.go:67:42
+internal/runtime/object_table.go:63:14:     from storage.block.entries = storage.entries[:] (assign) at internal/runtime/object_table.go:67:25
+internal/runtime/object_table.go:70:14: &struct { block propertyBlock; entries [8]propertyEntry }{} escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:70:14:   flow: storage ← &{storage for &struct { block propertyBlock; entries [8]propertyEntry }{}}:
+internal/runtime/object_table.go:70:14:     from &struct { block propertyBlock; entries [8]propertyEntry }{} (spill) at internal/runtime/object_table.go:70:14
+internal/runtime/object_table.go:70:14:     from storage := &struct { block propertyBlock; entries [8]propertyEntry }{} (assign) at internal/runtime/object_table.go:70:11
+internal/runtime/object_table.go:70:14:   flow: {heap} ← storage:
+internal/runtime/object_table.go:70:14:     from storage.entries (dot of pointer) at internal/runtime/object_table.go:74:34
+internal/runtime/object_table.go:70:14:     from storage.entries (address-of) at internal/runtime/object_table.go:74:42
+internal/runtime/object_table.go:70:14:     from storage.entries[:] (slice) at internal/runtime/object_table.go:74:42
+internal/runtime/object_table.go:70:14:     from storage.block.entries = storage.entries[:] (assign) at internal/runtime/object_table.go:74:25
+internal/runtime/object_table.go:77:14: &struct { block propertyBlock; entries [16]propertyEntry }{} escapes to heap in newPropertyBlock:
+internal/runtime/object_table.go:77:14:   flow: storage ← &{storage for &struct { block propertyBlock; entries [16]propertyEntry }{}}:
+internal/runtime/object_table.go:77:14:     from &struct { block propertyBlock; entries [16]propertyEntry }{} (spill) at internal/runtime/object_table.go:77:14
+internal/runtime/object_table.go:77:14:     from storage := &struct { block propertyBlock; entries [16]propertyEntry }{} (assign) at internal/runtime/object_table.go:77:11
+internal/runtime/object_table.go:77:14:   flow: {heap} ← storage:
+internal/runtime/object_table.go:77:14:     from storage.entries (dot of pointer) at internal/runtime/object_table.go:81:34
+internal/runtime/object_table.go:77:14:     from storage.entries (address-of) at internal/runtime/object_table.go:81:42
+internal/runtime/object_table.go:77:14:     from storage.entries[:] (slice) at internal/runtime/object_table.go:81:42
+internal/runtime/object_table.go:77:14:     from storage.block.entries = storage.entries[:] (assign) at internal/runtime/object_table.go:81:25
+internal/runtime/object_table.go:49:14: &struct { block propertyBlock; entries [1]propertyEntry }{} escapes to heap
+internal/runtime/object_table.go:56:14: &struct { block propertyBlock; entries [2]propertyEntry }{} escapes to heap
+internal/runtime/object_table.go:63:14: &struct { block propertyBlock; entries [4]propertyEntry }{} escapes to heap
+internal/runtime/object_table.go:70:14: &struct { block propertyBlock; entries [8]propertyEntry }{} escapes to heap
+internal/runtime/object_table.go:77:14: &struct { block propertyBlock; entries [16]propertyEntry }{} escapes to heap
+internal/runtime/object_table.go:84:9: "invalid property block capacity" escapes to heap
+internal/runtime/object_table.go:120:17: make(map[string]*value) escapes to heap in (*propertyTable).slot:
+internal/runtime/object_table.go:120:17:   flow: {heap} ← &{storage for make(map[string]*value)}:
+internal/runtime/object_table.go:120:17:     from make(map[string]*value) (spill) at internal/runtime/object_table.go:120:17
+internal/runtime/object_table.go:120:17:     from p.index = make(map[string]*value) (assign) at internal/runtime/object_table.go:120:11
+internal/runtime/object_table.go:115:30: parameter name leaks to {heap} for (*propertyTable).slot with derefs=0:
+internal/runtime/object_table.go:115:30:   flow: {heap} ← name:
+internal/runtime/object_table.go:115:30:     from entry.name = name (assign) at internal/runtime/object_table.go:141:13
+internal/runtime/object_table.go:115:7: parameter p leaks to {heap} for (*propertyTable).slot with derefs=2:
+internal/runtime/object_table.go:115:7:   flow: entry ← **p:
+internal/runtime/object_table.go:115:7:     from p.tail (dot of pointer) at internal/runtime/object_table.go:140:13
+internal/runtime/object_table.go:115:7:     from p.tail.entries (dot of pointer) at internal/runtime/object_table.go:140:18
+internal/runtime/object_table.go:115:7:     from p.tail.entries[p.tail.used] (dot of pointer) at internal/runtime/object_table.go:140:26
+internal/runtime/object_table.go:115:7:     from &p.tail.entries[p.tail.used] (address-of) at internal/runtime/object_table.go:140:11
+internal/runtime/object_table.go:115:7:     from entry := &p.tail.entries[p.tail.used] (assign) at internal/runtime/object_table.go:140:8
+internal/runtime/object_table.go:115:7:   flow: {heap} ← entry:
+internal/runtime/object_table.go:115:7:     from entry.value (dot of pointer) at internal/runtime/object_table.go:144:24
+internal/runtime/object_table.go:115:7:     from &entry.value (address-of) at internal/runtime/object_table.go:144:18
+internal/runtime/object_table.go:115:7:     from p.index[name] = &entry.value (assign) at internal/runtime/object_table.go:144:16
+internal/runtime/object_table.go:115:7: parameter p leaks to ~r0 for (*propertyTable).slot with derefs=2:
+internal/runtime/object_table.go:115:7:   flow: entry ← **p:
+internal/runtime/object_table.go:115:7:     from p.tail (dot of pointer) at internal/runtime/object_table.go:140:13
+internal/runtime/object_table.go:115:7:     from p.tail.entries (dot of pointer) at internal/runtime/object_table.go:140:18
+internal/runtime/object_table.go:115:7:     from p.tail.entries[p.tail.used] (dot of pointer) at internal/runtime/object_table.go:140:26
+internal/runtime/object_table.go:115:7:     from &p.tail.entries[p.tail.used] (address-of) at internal/runtime/object_table.go:140:11
+internal/runtime/object_table.go:115:7:     from entry := &p.tail.entries[p.tail.used] (assign) at internal/runtime/object_table.go:140:8
+internal/runtime/object_table.go:115:7:   flow: ~r0 ← entry:
+internal/runtime/object_table.go:115:7:     from entry.value (dot of pointer) at internal/runtime/object_table.go:145:15
+internal/runtime/object_table.go:115:7:     from &entry.value (address-of) at internal/runtime/object_table.go:145:9
+internal/runtime/object_table.go:115:7:     from return &entry.value (return) at internal/runtime/object_table.go:145:2
+internal/runtime/object_table.go:115:7: parameter p leaks to ~r0 for (*propertyTable).slot with derefs=1:
+internal/runtime/object_table.go:115:7:   flow: p ← p:
+internal/runtime/object_table.go:115:7:     from p, name := p, name (assign-pair) at internal/runtime/object_table.go:116:22
+internal/runtime/object_table.go:115:7:   flow: ~r0 ← *p:
+internal/runtime/object_table.go:115:7:     from p.declared (dot of pointer) at internal/runtime/object_table.go:116:22
+internal/runtime/object_table.go:115:7:     from p.declared[i] (dot of pointer) at internal/runtime/object_table.go:116:22
+internal/runtime/object_table.go:115:7:     from &p.declared[i] (address-of) at internal/runtime/object_table.go:116:22
+internal/runtime/object_table.go:115:7:     from ~r0, ~r1 = &p.declared[i], true (assign-pair) at internal/runtime/object_table.go:116:22
+internal/runtime/object_table.go:115:7:   flow: .autotmp_5 ← ~r0:
+internal/runtime/object_table.go:115:7:   flow: v ← .autotmp_5:
+internal/runtime/object_table.go:115:7:     from v, ok := (*value)(.autotmp_5), .autotmp_6 (assign-pair) at internal/runtime/object_table.go:116:11
+internal/runtime/object_table.go:115:7:   flow: ~r0 ← v:
+internal/runtime/object_table.go:115:7:     from return v (return) at internal/runtime/object_table.go:117:3
+internal/runtime/object_table.go:115:7: leaking param content: p
+internal/runtime/object_table.go:115:7: leaking param: p to result ~r0 level=1
+internal/runtime/object_table.go:115:30: leaking param: name
+internal/runtime/object_table.go:120:17: make(map[string]*value) escapes to heap
+internal/runtime/object_lazy.go:166:19: make(map[string]*value, len(src.index)) escapes to heap in copyPropertyValues:
+internal/runtime/object_lazy.go:166:19:   flow: {heap} ← &{storage for make(map[string]*value, len(src.index))}:
+internal/runtime/object_lazy.go:166:19:     from make(map[string]*value, len(src.index)) (spill) at internal/runtime/object_lazy.go:166:19
+internal/runtime/object_lazy.go:166:19:     from dst.index = make(map[string]*value, len(src.index)) (assign) at internal/runtime/object_lazy.go:166:13
+internal/runtime/object_lazy.go:163:25: copyPropertyValues capturing by value: dst (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:173:16: parameter name leaks to {heap} for copyPropertyValues.func1 with derefs=0:
+internal/runtime/object_lazy.go:173:16:   flow: {heap} ← name:
+internal/runtime/object_lazy.go:173:16:     from (*propertyTable).slot(dst, name) (call parameter) at internal/runtime/object_lazy.go:173:62
+internal/runtime/object_lazy.go:173:29: parameter v leaks to {heap} for copyPropertyValues.func1 with derefs=1:
+internal/runtime/object_lazy.go:173:29:   flow: {heap} ← *v:
+internal/runtime/object_lazy.go:173:29:     from *v (indirection) at internal/runtime/object_lazy.go:173:71
+internal/runtime/object_lazy.go:173:29:     from *(*propertyTable).slot(dst, name) = *v (assign) at internal/runtime/object_lazy.go:173:69
+internal/runtime/object_lazy.go:163:30: parameter src leaks to {heap} for copyPropertyValues with derefs=1:
+internal/runtime/object_lazy.go:163:30:   flow: {temp} ← src:
+internal/runtime/object_lazy.go:163:30:     from (*propertyTable).each(src, func literal) (call parameter) at internal/runtime/object_lazy.go:173:10
+internal/runtime/object_lazy.go:163:30:   flow: {heap} ← *{temp}:
+internal/runtime/object_lazy.go:163:25: parameter dst leaks to {heap} for copyPropertyValues with derefs=2:
+internal/runtime/object_lazy.go:163:25:   flow: {temp} ← dst:
+internal/runtime/object_lazy.go:163:25:     from (*propertyTable).slot(dst, name) (call parameter) at internal/runtime/object_lazy.go:173:62
+internal/runtime/object_lazy.go:163:25:   flow: {heap} ← **{temp}:
+internal/runtime/object_lazy.go:163:25: leaking param content: dst
+internal/runtime/object_lazy.go:163:30: leaking param content: src
+internal/runtime/object_lazy.go:173:16: leaking param: name
+internal/runtime/object_lazy.go:173:29: leaking param content: v
+internal/runtime/object_lazy.go:166:19: make(map[string]*value, len(src.index)) escapes to heap
+internal/runtime/object_lazy.go:173:11: func literal does not escape
+internal/runtime/object_lazy.go:158:25: make([]value, len(layout.names)) escapes to heap in copyPropertyTable:
+internal/runtime/object_lazy.go:158:25:   flow: {heap} ← &{storage for make([]value, len(layout.names))}:
+internal/runtime/object_lazy.go:158:25:     from make([]value, len(layout.names)) (spill) at internal/runtime/object_lazy.go:158:25
+internal/runtime/object_lazy.go:158:25:     from p.declared = make([]value, len(layout.names)) (assign) at internal/runtime/object_lazy.go:158:25
+internal/runtime/object_lazy.go:157:24: parameter src leaks to {heap} for copyPropertyTable with derefs=1:
+internal/runtime/object_lazy.go:157:24:   flow: {temp} ← src:
+internal/runtime/object_lazy.go:157:24:     from copyPropertyValues(dst, src) (call parameter) at internal/runtime/object_lazy.go:159:20
+internal/runtime/object_lazy.go:157:24:   flow: {heap} ← *{temp}:
+internal/runtime/object_lazy.go:158:25: &propertyTable{} escapes to heap in copyPropertyTable:
+internal/runtime/object_lazy.go:158:25:   flow: p ← &{storage for &propertyTable{}}:
+internal/runtime/object_lazy.go:158:25:     from &propertyTable{} (spill) at internal/runtime/object_lazy.go:158:25
+internal/runtime/object_lazy.go:158:25:     from p := &propertyTable{} (assign) at internal/runtime/object_lazy.go:158:25
+internal/runtime/object_lazy.go:158:25:   flow: ~r0 ← p:
+internal/runtime/object_lazy.go:158:25:     from ~r0 = p (assign-pair) at internal/runtime/object_lazy.go:158:25
+internal/runtime/object_lazy.go:158:25:   flow: dst ← ~r0:
+internal/runtime/object_lazy.go:158:25:     from dst := ~r0 (assign) at internal/runtime/object_lazy.go:158:6
+internal/runtime/object_lazy.go:158:25:   flow: ~r0 ← dst:
+internal/runtime/object_lazy.go:158:25:     from return dst (return) at internal/runtime/object_lazy.go:160:2
+internal/runtime/object_lazy.go:157:24: leaking param content: src
+internal/runtime/object_lazy.go:158:25: &propertyTable{} escapes to heap
+internal/runtime/object_lazy.go:158:25: make([]value, len(layout.names)) escapes to heap
+internal/runtime/object_lazy.go:377:31: h does not escape
+internal/runtime/object_lazy.go:377:40: wrapper does not escape
+internal/runtime/object_lazy.go:377:49: target does not escape
+internal/runtime/object_lazy.go:345:24: make(map[*reference][]propertySource) escapes to heap in (*heap).restoreLazyProperties:
+internal/runtime/object_lazy.go:345:24:   flow: {heap} ← &{storage for make(map[*reference][]propertySource)}:
+internal/runtime/object_lazy.go:345:24:     from make(map[*reference][]propertySource) (spill) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:     from h.typedSources = make(map[*reference][]propertySource) (assign) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24: append(sources, source) escapes to heap in (*heap).restoreLazyProperties:
+internal/runtime/object_lazy.go:345:24:   flow: {heap} ← &{storage for append(sources, source)}:
+internal/runtime/object_lazy.go:345:24:     from append(sources, source) (spill) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:     from h.typedSources[r] = append(sources, source) (assign) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:323:7: parameter h leaks to {heap} for (*heap).restoreLazyProperties with derefs=0:
+internal/runtime/object_lazy.go:323:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:323:7:     from (*heap).release(h, old) (call parameter) at internal/runtime/object_lazy.go:339:23
+internal/runtime/object_lazy.go:323:49: parameter before leaks to {heap} for (*heap).restoreLazyProperties with derefs=1:
+internal/runtime/object_lazy.go:323:49:   flow: {heap} ← *before:
+internal/runtime/object_lazy.go:323:49:     from before.index (dot of pointer) at internal/runtime/object_lazy.go:363:24
+internal/runtime/object_lazy.go:323:49:     from o.props.index = before.index (assign) at internal/runtime/object_lazy.go:363:16
+internal/runtime/object_lazy.go:323:38: parameter o leaks to {heap} for (*heap).restoreLazyProperties with derefs=3:
+internal/runtime/object_lazy.go:323:38:   flow: slot ← **o:
+internal/runtime/object_lazy.go:323:38:     from o.props (dot of pointer) at internal/runtime/object_lazy.go:335:14
+internal/runtime/object_lazy.go:323:38:     from o.props.declared (dot of pointer) at internal/runtime/object_lazy.go:335:20
+internal/runtime/object_lazy.go:323:38:     from o.props.declared[physical] (dot of pointer) at internal/runtime/object_lazy.go:335:29
+internal/runtime/object_lazy.go:323:38:     from &o.props.declared[physical] (address-of) at internal/runtime/object_lazy.go:335:12
+internal/runtime/object_lazy.go:323:38:     from slot := &o.props.declared[physical] (assign) at internal/runtime/object_lazy.go:335:9
+internal/runtime/object_lazy.go:323:38:   flow: source ← slot:
+internal/runtime/object_lazy.go:323:38:     from propertySource{...} (struct literal element) at internal/runtime/object_lazy.go:345:49
+internal/runtime/object_lazy.go:323:38:     from h, r, source := h, slot.ref, propertySource{...} (assign-pair) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:323:38:   flow: {heap} ← source:
+internal/runtime/object_lazy.go:323:38:     from append(sources, source) (call parameter) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:323:38: parameter o leaks to {heap} for (*heap).restoreLazyProperties with derefs=2:
+internal/runtime/object_lazy.go:323:38:   flow: slot ← **o:
+internal/runtime/object_lazy.go:323:38:     from o.props (dot of pointer) at internal/runtime/object_lazy.go:335:14
+internal/runtime/object_lazy.go:323:38:     from o.props.declared (dot of pointer) at internal/runtime/object_lazy.go:335:20
+internal/runtime/object_lazy.go:323:38:     from o.props.declared[physical] (dot of pointer) at internal/runtime/object_lazy.go:335:29
+internal/runtime/object_lazy.go:323:38:     from &o.props.declared[physical] (address-of) at internal/runtime/object_lazy.go:335:12
+internal/runtime/object_lazy.go:323:38:     from slot := &o.props.declared[physical] (assign) at internal/runtime/object_lazy.go:335:9
+internal/runtime/object_lazy.go:323:38:   flow: source ← slot:
+internal/runtime/object_lazy.go:323:38:     from propertySource{...} (struct literal element) at internal/runtime/object_lazy.go:345:49
+internal/runtime/object_lazy.go:323:38:     from h, r, source := h, slot.ref, propertySource{...} (assign-pair) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:323:38:   flow: {heap} ← source:
+internal/runtime/object_lazy.go:323:38:     from append(sources, source) (call parameter) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24: make([]propertySource, len(sources), capacity) escapes to heap in (*heap).restoreLazyProperties:
+internal/runtime/object_lazy.go:345:24:   flow: grown ← &{storage for make([]propertySource, len(sources), capacity)}:
+internal/runtime/object_lazy.go:345:24:     from make([]propertySource, len(sources), capacity) (spill) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:     from grown := make([]propertySource, len(sources), capacity) (assign) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:   flow: sources ← grown:
+internal/runtime/object_lazy.go:345:24:     from sources = grown (assign) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:   flow: {temp} ← sources:
+internal/runtime/object_lazy.go:345:24:     from append(sources, source) (call parameter) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:345:24:   flow: {temp} ← {temp}:
+internal/runtime/object_lazy.go:345:24:   flow: {heap} ← {temp}:
+internal/runtime/object_lazy.go:345:24:     from h.typedSources[r] = append(sources, source) (assign) at internal/runtime/object_lazy.go:345:24
+internal/runtime/object_lazy.go:323:7: leaking param: h
+internal/runtime/object_lazy.go:323:38: leaking param content: o
+internal/runtime/object_lazy.go:323:49: leaking param content: before
+internal/runtime/object_lazy.go:345:24: make(map[*reference][]propertySource) escapes to heap
+internal/runtime/object_lazy.go:345:24: make([]propertySource, len(sources), capacity) escapes to heap
+internal/runtime/object_lazy.go:345:24: append escapes to heap
+internal/runtime/object_lazy.go:352:13: &propertyTable{...} does not escape
+internal/runtime/object_lazy.go:263:20: make(map[string]bool, len(hooksBefore)) escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:263:20:   flow: {heap} ← &{storage for make(map[string]bool, len(hooksBefore))}:
+internal/runtime/object_lazy.go:263:20:     from make(map[string]bool, len(hooksBefore)) (spill) at internal/runtime/object_lazy.go:263:20
+internal/runtime/object_lazy.go:263:20:     from o.hooks = make(map[string]bool, len(hooksBefore)) (assign) at internal/runtime/object_lazy.go:263:14
+internal/runtime/object_lazy.go:176:7: (*heap).initializeLazy capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:203:2: (*heap).initializeLazy capturing by value: held (addr=false assign=false width=72)
+internal/runtime/object_lazy.go:176:56: (*heap).initializeLazy capturing by ref: err (addr=false assign=true width=16)
+internal/runtime/object_lazy.go:177:2: (*heap).initializeLazy capturing by value: l (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:176:43: (*heap).initializeLazy capturing by ref: out (addr=false assign=true width=8)
+internal/runtime/object_lazy.go:177:2: (*heap).initializeLazy capturing by value: l (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:176:7: (*heap).initializeLazy capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:176:31: (*heap).initializeLazy capturing by value: o (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:176:7: parameter h leaks to {heap} for (*heap).initializeLazy with derefs=0:
+internal/runtime/object_lazy.go:176:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:176:7:     from (*heap).releaseMethodHold(h, held) (call parameter) at internal/runtime/object_lazy.go:206:36
+internal/runtime/object_lazy.go:176:31: parameter o leaks to {heap} for (*heap).initializeLazy with derefs=0:
+internal/runtime/object_lazy.go:176:31:   flow: {heap} ← o:
+internal/runtime/object_lazy.go:176:31:     from value{...} (struct literal element) at internal/runtime/object_lazy.go:220:32
+internal/runtime/object_lazy.go:176:31:     from l.initialize(h, value{...}) (call parameter) at internal/runtime/object_lazy.go:220:23
+internal/runtime/object_lazy.go:227:9: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:227:9:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:227:9:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:227:9
+internal/runtime/object_lazy.go:227:9:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:227:9
+internal/runtime/object_lazy.go:227:9:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:227:7
+internal/runtime/object_lazy.go:227:9:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:227:9:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:232:10: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:232:10:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:232:10:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:232:10
+internal/runtime/object_lazy.go:232:10:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:232:10
+internal/runtime/object_lazy.go:232:10:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:232:8
+internal/runtime/object_lazy.go:232:10:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:232:10:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:238:10: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:238:10:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:238:10:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:238:10
+internal/runtime/object_lazy.go:238:10:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:238:10
+internal/runtime/object_lazy.go:238:10:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:238:8
+internal/runtime/object_lazy.go:238:10:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:238:10:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:240:10: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:240:10:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:240:10:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:240:10
+internal/runtime/object_lazy.go:240:10:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:240:10
+internal/runtime/object_lazy.go:240:10:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:240:8
+internal/runtime/object_lazy.go:240:10:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:240:10:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:242:10: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:242:10:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:242:10:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:242:10
+internal/runtime/object_lazy.go:242:10:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:242:10
+internal/runtime/object_lazy.go:242:10:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:242:8
+internal/runtime/object_lazy.go:242:10:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:242:10:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:245:10: &Throwable{...} escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:245:10:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:245:10:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:245:10
+internal/runtime/object_lazy.go:245:10:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:245:10
+internal/runtime/object_lazy.go:245:10:     from err = &Throwable{...} (assign) at internal/runtime/object_lazy.go:245:8
+internal/runtime/object_lazy.go:245:10:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:245:10:     from (*heap).mergeObjectErrors(h, err, cleanup) (call parameter) at internal/runtime/object_lazy.go:207:29
+internal/runtime/object_lazy.go:240:141: "The real instance class " + target.class.name + " is not compatible with the proxy class " + o.class.name + ". The proxy must be a instance of the same class as the real instanc... escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:240:141:   flow: {storage for &Throwable{...}} ← &{storage for "The real instance class " + target.class.name + " is not compatible with the proxy class " + o.class.name + ". The proxy must be a instance of the same class as the real instanc...}:
+internal/runtime/object_lazy.go:240:141:     from "The real instance class " + target.class.name + " is not compatible with the proxy class " + o.class.name + ". The proxy must be a instance of the same class as the real instanc... (spill) at internal/runtime/object_lazy.go:240:141
+internal/runtime/object_lazy.go:240:141:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:240:20
+internal/runtime/object_lazy.go:238:149: "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:238:149:   flow: {storage for &Throwable{...}} ← &{storage for "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned"}:
+internal/runtime/object_lazy.go:238:149:     from "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" (spill) at internal/runtime/object_lazy.go:238:149
+internal/runtime/object_lazy.go:238:149:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:238:20
+internal/runtime/object_lazy.go:232:149: "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" escapes to heap in (*heap).initializeLazy:
+internal/runtime/object_lazy.go:232:149:   flow: {storage for &Throwable{...}} ← &{storage for "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned"}:
+internal/runtime/object_lazy.go:232:149:     from "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" (spill) at internal/runtime/object_lazy.go:232:149
+internal/runtime/object_lazy.go:232:149:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:232:20
+internal/runtime/object_lazy.go:176:31: parameter o leaks to out for (*heap).initializeLazy with derefs=0:
+internal/runtime/object_lazy.go:176:31:   flow: out ← o:
+internal/runtime/object_lazy.go:176:31:     from return o, nil (return) at internal/runtime/object_lazy.go:179:3
+internal/runtime/object_lazy.go:176:7: leaking param: h
+internal/runtime/object_lazy.go:176:31: leaking param: o
+internal/runtime/object_lazy.go:196:22: make(map[string]bool, len(o.hooks)) does not escape
+internal/runtime/object_lazy.go:205:8: func literal does not escape
+internal/runtime/object_lazy.go:219:32: func literal does not escape
+internal/runtime/object_lazy.go:227:9: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:232:10: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:232:149: "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" escapes to heap
+internal/runtime/object_lazy.go:238:10: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:238:149: "Lazy proxy factory must return an instance of a class compatible with " + o.class.name + ", " + valueName(result) + " returned" escapes to heap
+internal/runtime/object_lazy.go:240:10: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:240:141: "The real instance class " + target.class.name + " is not compatible with the proxy class " + o.class.name + ". The proxy must be a instance of the same class as the real instanc... escapes to heap
+internal/runtime/object_lazy.go:242:10: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:245:10: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:263:20: make(map[string]bool, len(hooksBefore)) escapes to heap
+internal/runtime/object_compare.go:191:7: parameter h leaks to {heap} for (*heap).comparisonPropertiesPHP8512 with derefs=0:
+internal/runtime/object_compare.go:191:7:   flow: {heap} ← h:
+internal/runtime/object_compare.go:191:7:     from (*heap).initializeLazy(h, *first) (call parameter) at internal/runtime/object_compare.go:197:32
+internal/runtime/object_compare.go:191:44: parameter left leaks to {heap} for (*heap).comparisonPropertiesPHP8512 with derefs=0:
+internal/runtime/object_compare.go:191:44:   flow: first ← &left:
+internal/runtime/object_compare.go:191:44:     from &left (address-of) at internal/runtime/object_compare.go:192:19
+internal/runtime/object_compare.go:191:44:     from first, second := &left, &right (assign-pair) at internal/runtime/object_compare.go:192:16
+internal/runtime/object_compare.go:191:44:   flow: {heap} ← *first:
+internal/runtime/object_compare.go:191:44:     from *first (indirection) at internal/runtime/object_compare.go:197:33
+internal/runtime/object_compare.go:191:44:     from (*heap).initializeLazy(h, *first) (call parameter) at internal/runtime/object_compare.go:197:32
+internal/runtime/object_compare.go:191:50: parameter right leaks to {heap} for (*heap).comparisonPropertiesPHP8512 with derefs=0:
+internal/runtime/object_compare.go:191:50:   flow: second ← &right:
+internal/runtime/object_compare.go:191:50:     from &right (address-of) at internal/runtime/object_compare.go:192:26
+internal/runtime/object_compare.go:191:50:     from first, second := &left, &right (assign-pair) at internal/runtime/object_compare.go:192:16
+internal/runtime/object_compare.go:191:50:   flow: {heap} ← *second:
+internal/runtime/object_compare.go:191:50:     from *second (indirection) at internal/runtime/object_compare.go:202:34
+internal/runtime/object_compare.go:191:50:     from (*heap).initializeLazy(h, *second) (call parameter) at internal/runtime/object_compare.go:202:33
+internal/runtime/object_compare.go:191:50: parameter right leaks to ~r1 for (*heap).comparisonPropertiesPHP8512 with derefs=0:
+internal/runtime/object_compare.go:191:50:   flow: ~r1 ← right:
+internal/runtime/object_compare.go:191:50:     from return left, right, err (return) at internal/runtime/object_compare.go:206:2
+internal/runtime/object_compare.go:191:44: parameter left leaks to ~r0 for (*heap).comparisonPropertiesPHP8512 with derefs=0:
+internal/runtime/object_compare.go:191:44:   flow: ~r0 ← left:
+internal/runtime/object_compare.go:191:44:     from return left, right, err (return) at internal/runtime/object_compare.go:206:2
+internal/runtime/object_compare.go:191:7: leaking param: h
+internal/runtime/object_compare.go:191:44: leaking param: left
+internal/runtime/object_compare.go:191:50: leaking param: right
+internal/runtime/object_compare.go:26:10: append(h.diagnostics, diagnostic{...}) escapes to heap in (*heap).compareObjectValues:
+internal/runtime/object_compare.go:26:10:   flow: {heap} ← &{storage for append(h.diagnostics, diagnostic{...})}:
+internal/runtime/object_compare.go:26:10:     from append(h.diagnostics, diagnostic{...}) (spill) at internal/runtime/object_compare.go:26:10
+internal/runtime/object_compare.go:26:10:     from h.diagnostics = append(h.diagnostics, diagnostic{...}) (assign) at internal/runtime/object_compare.go:26:10
+internal/runtime/object_compare.go:83:28: make(map[*object]bool) escapes to heap in (*heap).compareObjectValues:
+internal/runtime/object_compare.go:83:28:   flow: {heap} ← &{storage for make(map[*object]bool)}:
+internal/runtime/object_compare.go:83:28:     from make(map[*object]bool) (spill) at internal/runtime/object_compare.go:83:28
+internal/runtime/object_compare.go:83:28:     from h.comparingObjects = make(map[*object]bool) (assign) at internal/runtime/object_compare.go:83:22
+internal/runtime/object_compare.go:57:2: (*heap).compareObjectValues capturing by ref: owners (addr=true assign=false width=24)
+internal/runtime/object_compare.go:5:92: (*heap).compareObjectValues capturing by ref: failure (addr=false assign=true width=16)
+internal/runtime/object_compare.go:5:7: (*heap).compareObjectValues capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_compare.go:86:16: (*heap).compareObjectValues capturing by value: .autotmp_34 (addr=false assign=false width=8)
+internal/runtime/object_compare.go:86:2: (*heap).compareObjectValues capturing by value: .autotmp_35 (addr=false assign=false width=8)
+internal/runtime/object_compare.go:139:9: (*heap).compareHashObjectProperties capturing by value: .autotmp_6 (addr=false assign=false width=8)
+internal/runtime/object_compare.go:139:51: (*heap).compareHashObjectProperties capturing by value: .autotmp_7 (addr=false assign=false width=1)
+internal/runtime/object_compare.go:5:7: parameter h leaks to {heap} for (*heap).compareObjectValues with derefs=0:
+internal/runtime/object_compare.go:5:7:   flow: {heap} ← h:
+internal/runtime/object_compare.go:5:7:     from (*heap).toString(h, obj) (call parameter) at internal/runtime/object_compare.go:31:28
+internal/runtime/object_compare.go:5:36: parameter a leaks to {heap} for (*heap).compareObjectValues with derefs=0:
+internal/runtime/object_compare.go:5:36:   flow: {heap} ← a:
+internal/runtime/object_compare.go:5:36:     from (*heap).holdMethodValue(h, a, &owners) (call parameter) at internal/runtime/object_compare.go:58:19
+internal/runtime/object_compare.go:5:39: parameter b leaks to {heap} for (*heap).compareObjectValues with derefs=0:
+internal/runtime/object_compare.go:5:39:   flow: {heap} ← b:
+internal/runtime/object_compare.go:5:39:     from (*heap).holdMethodValue(h, b, &owners) (call parameter) at internal/runtime/object_compare.go:59:19
+internal/runtime/object_compare.go:169:44: parameter left leaks to {heap} for (*heap).compareObjectPropertyValues with derefs=1:
+internal/runtime/object_compare.go:169:44:   flow: a ← *left:
+internal/runtime/object_compare.go:169:44:     from *left (indirection) at internal/runtime/object_compare.go:184:22
+internal/runtime/object_compare.go:169:44:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:169:44:   flow: {heap} ← a:
+internal/runtime/object_compare.go:169:44:     from a.text (dot) at internal/runtime/ops_php8512.go:766:33
+internal/runtime/object_compare.go:169:44:     from (*heap).smartStringCompare(h, a.text, b.text) (call parameter) at internal/runtime/ops_php8512.go:766:31
+internal/runtime/object_compare.go:169:50: parameter right leaks to {heap} for (*heap).compareObjectPropertyValues with derefs=1:
+internal/runtime/object_compare.go:169:50:   flow: b ← *right:
+internal/runtime/object_compare.go:169:50:     from *right (indirection) at internal/runtime/object_compare.go:184:29
+internal/runtime/object_compare.go:169:50:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:169:50:   flow: {heap} ← b:
+internal/runtime/object_compare.go:169:50:     from b.text (dot) at internal/runtime/ops_php8512.go:766:41
+internal/runtime/object_compare.go:169:50:     from (*heap).smartStringCompare(h, a.text, b.text) (call parameter) at internal/runtime/ops_php8512.go:766:31
+internal/runtime/object_compare.go:169:7: parameter h leaks to {heap} for (*heap).compareObjectPropertyValues with derefs=0:
+internal/runtime/object_compare.go:169:7:   flow: h ← h:
+internal/runtime/object_compare.go:169:7:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:169:7:   flow: {heap} ← h:
+internal/runtime/object_compare.go:169:7:     from (*heap).compareFloatToString(h, a.floating, b.text) (call parameter) at internal/runtime/ops_php8512.go:785:33
+internal/runtime/object_compare.go:26:94: "Object of class " + obj.object.class.name + " could not be converted to " + name escapes to heap in (*heap).compareObjectValues:
+internal/runtime/object_compare.go:26:94:   flow: message ← &{storage for "Object of class " + obj.object.class.name + " could not be converted to " + name}:
+internal/runtime/object_compare.go:26:94:     from "Object of class " + obj.object.class.name + " could not be converted to " + name (spill) at internal/runtime/object_compare.go:26:94
+internal/runtime/object_compare.go:26:94:     from h, level, message := h, 8, "Object of class " + obj.object.class.name + " could not be converted to " + name (assign-pair) at internal/runtime/object_compare.go:26:10
+internal/runtime/object_compare.go:26:94:   flow: {heap} ← message:
+internal/runtime/object_compare.go:26:94:     from diagnostic{...} (struct literal element) at internal/runtime/object_compare.go:26:10
+internal/runtime/object_compare.go:26:94:     from append(h.diagnostics, diagnostic{...}) (call parameter) at internal/runtime/object_compare.go:26:10
+internal/runtime/object_compare.go:80:13: &Throwable{...} escapes to heap in (*heap).compareObjectValues:
+internal/runtime/object_compare.go:80:13:   flow: failure ← &{storage for &Throwable{...}}:
+internal/runtime/object_compare.go:80:13:     from &Throwable{...} (spill) at internal/runtime/object_compare.go:80:13
+internal/runtime/object_compare.go:80:13:     from &Throwable{...} (interface-converted) at internal/runtime/object_compare.go:80:13
+internal/runtime/object_compare.go:80:13:     from return 1, &Throwable{...} (return) at internal/runtime/object_compare.go:80:3
+internal/runtime/object_compare.go:80:13:   flow: {heap} ← failure:
+internal/runtime/object_compare.go:80:13:     from (*heap).mergeObjectErrors(h, failure, (*heap).releaseMethodHold(h, owner)) (call parameter) at internal/runtime/object_compare.go:62:33
+internal/runtime/object_compare.go:125:48: parameter x leaks to {heap} for (*heap).compareDeclaredObjectProperties with derefs=3:
+internal/runtime/object_compare.go:125:48:   flow: left ← **x:
+internal/runtime/object_compare.go:125:48:     from x.props (dot of pointer) at internal/runtime/object_compare.go:130:54
+internal/runtime/object_compare.go:125:48:     from x.props.declared (dot of pointer) at internal/runtime/object_compare.go:130:60
+internal/runtime/object_compare.go:125:48:     from x.props.declared[i] (dot of pointer) at internal/runtime/object_compare.go:130:69
+internal/runtime/object_compare.go:125:48:     from &x.props.declared[i] (address-of) at internal/runtime/object_compare.go:130:52
+internal/runtime/object_compare.go:125:48:     from (*heap).compareObjectPropertyValues(h, &x.props.declared[i], &y.props.declared[i], arrays, direct) (call parameter) at internal/runtime/object_compare.go:130:51
+internal/runtime/object_compare.go:125:48:   flow: a ← *left:
+internal/runtime/object_compare.go:125:48:     from *left (indirection) at internal/runtime/object_compare.go:184:22
+internal/runtime/object_compare.go:125:48:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:125:48:   flow: {heap} ← a:
+internal/runtime/object_compare.go:125:48:     from a.text (dot) at internal/runtime/ops_php8512.go:766:33
+internal/runtime/object_compare.go:125:48:     from (*heap).smartStringCompare(h, a.text, b.text) (call parameter) at internal/runtime/ops_php8512.go:766:31
+internal/runtime/object_compare.go:125:51: parameter y leaks to {heap} for (*heap).compareDeclaredObjectProperties with derefs=3:
+internal/runtime/object_compare.go:125:51:   flow: right ← **y:
+internal/runtime/object_compare.go:125:51:     from y.props (dot of pointer) at internal/runtime/object_compare.go:130:76
+internal/runtime/object_compare.go:125:51:     from y.props.declared (dot of pointer) at internal/runtime/object_compare.go:130:82
+internal/runtime/object_compare.go:125:51:     from y.props.declared[i] (dot of pointer) at internal/runtime/object_compare.go:130:91
+internal/runtime/object_compare.go:125:51:     from &y.props.declared[i] (address-of) at internal/runtime/object_compare.go:130:74
+internal/runtime/object_compare.go:125:51:     from (*heap).compareObjectPropertyValues(h, &x.props.declared[i], &y.props.declared[i], arrays, direct) (call parameter) at internal/runtime/object_compare.go:130:51
+internal/runtime/object_compare.go:125:51:   flow: b ← *right:
+internal/runtime/object_compare.go:125:51:     from *right (indirection) at internal/runtime/object_compare.go:184:29
+internal/runtime/object_compare.go:125:51:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:125:51:   flow: {heap} ← b:
+internal/runtime/object_compare.go:125:51:     from b.text (dot) at internal/runtime/ops_php8512.go:766:41
+internal/runtime/object_compare.go:125:51:     from (*heap).smartStringCompare(h, a.text, b.text) (call parameter) at internal/runtime/ops_php8512.go:766:31
+internal/runtime/object_compare.go:125:7: parameter h leaks to {heap} for (*heap).compareDeclaredObjectProperties with derefs=0:
+internal/runtime/object_compare.go:125:7:   flow: h ← h:
+internal/runtime/object_compare.go:125:7:     from (*heap).compareObjectPropertyValues(h, &x.props.declared[i], &y.props.declared[i], arrays, direct) (call parameter) at internal/runtime/object_compare.go:130:51
+internal/runtime/object_compare.go:125:7:   flow: h ← h:
+internal/runtime/object_compare.go:125:7:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:125:7:   flow: {heap} ← h:
+internal/runtime/object_compare.go:125:7:     from (*heap).compareFloatToString(h, a.floating, b.text) (call parameter) at internal/runtime/ops_php8512.go:785:33
+internal/runtime/object_compare.go:138:7: parameter h leaks to {heap} for (*heap).compareHashObjectProperties with derefs=0:
+internal/runtime/object_compare.go:138:7:   flow: h ← h:
+internal/runtime/object_compare.go:138:7:     from (*heap).compareObjectPropertyValues(h, &entry.value, other, arrays, false) (call parameter) at internal/runtime/object_compare.go:157:49
+internal/runtime/object_compare.go:138:7:   flow: h ← h:
+internal/runtime/object_compare.go:138:7:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:138:7:   flow: {heap} ← h:
+internal/runtime/object_compare.go:138:7:     from (*heap).compareFloatToString(h, a.floating, b.text) (call parameter) at internal/runtime/ops_php8512.go:785:33
+internal/runtime/object_compare.go:57:16: make([]methodHold, 0, 2) escapes to heap in (*heap).compareObjectValues:
+internal/runtime/object_compare.go:57:16:   flow: owners ← &{storage for make([]methodHold, 0, 2)}:
+internal/runtime/object_compare.go:57:16:     from make([]methodHold, 0, 2) (spill) at internal/runtime/object_compare.go:57:16
+internal/runtime/object_compare.go:57:16:     from owners := make([]methodHold, 0, 2) (assign) at internal/runtime/object_compare.go:57:9
+internal/runtime/object_compare.go:57:16:   flow: {temp} ← &owners:
+internal/runtime/object_compare.go:57:16:     from &owners (address-of) at internal/runtime/object_compare.go:58:23
+internal/runtime/object_compare.go:57:16:     from (*heap).holdMethodValue(h, a, &owners) (call parameter) at internal/runtime/object_compare.go:58:19
+internal/runtime/object_compare.go:57:16:   flow: {heap} ← *{temp}:
+internal/runtime/object_compare.go:138:44: parameter x leaks to {heap} for (*heap).compareHashObjectProperties with derefs=2:
+internal/runtime/object_compare.go:138:44:   flow: .autotmp_6 ← *x:
+internal/runtime/object_compare.go:138:44:     from x.props (dot of pointer) at internal/runtime/object_compare.go:139:9
+internal/runtime/object_compare.go:138:44:     from .autotmp_6, .autotmp_7 = x.props, ~r0 (assign-pair) at internal/runtime/object_compare.go:139:2
+internal/runtime/object_compare.go:138:44:   flow: p ← .autotmp_6:
+internal/runtime/object_compare.go:138:44:     from p, previous := .autotmp_6, .autotmp_7 (assign-pair) at internal/runtime/object_compare.go:139:28
+internal/runtime/object_compare.go:138:44:   flow: {temp} ← p:
+internal/runtime/object_compare.go:138:44:     from (*propertyTable).reclaimRetired(p) (call parameter) at internal/runtime/object_compare.go:139:28
+internal/runtime/object_compare.go:138:44:   flow: {heap} ← *{temp}:
+internal/runtime/object_compare.go:138:47: parameter y leaks to {heap} for (*heap).compareHashObjectProperties with derefs=3:
+internal/runtime/object_compare.go:138:47:   flow: y ← y:
+internal/runtime/object_compare.go:138:47:     from (*heap).compareDeclaredObjectProperties(h, x, y, arrays, false) (call parameter) at internal/runtime/object_compare.go:140:57
+internal/runtime/object_compare.go:138:47:   flow: right ← **y:
+internal/runtime/object_compare.go:138:47:     from y.props (dot of pointer) at internal/runtime/object_compare.go:130:76
+internal/runtime/object_compare.go:138:47:     from y.props.declared (dot of pointer) at internal/runtime/object_compare.go:130:82
+internal/runtime/object_compare.go:138:47:     from y.props.declared[i] (dot of pointer) at internal/runtime/object_compare.go:130:91
+internal/runtime/object_compare.go:138:47:     from &y.props.declared[i] (address-of) at internal/runtime/object_compare.go:130:74
+internal/runtime/object_compare.go:138:47:     from (*heap).compareObjectPropertyValues(h, &x.props.declared[i], &y.props.declared[i], arrays, direct) (call parameter) at internal/runtime/object_compare.go:130:51
+internal/runtime/object_compare.go:138:47:   flow: b ← *right:
+internal/runtime/object_compare.go:138:47:     from *right (indirection) at internal/runtime/object_compare.go:184:29
+internal/runtime/object_compare.go:138:47:     from (*heap).compareIn(h, *left, *right, arrays) (call parameter) at internal/runtime/object_compare.go:184:21
+internal/runtime/object_compare.go:138:47:   flow: {heap} ← b:
+internal/runtime/object_compare.go:138:47:     from b.text (dot) at internal/runtime/ops_php8512.go:766:41
+internal/runtime/object_compare.go:138:47:     from (*heap).smartStringCompare(h, a.text, b.text) (call parameter) at internal/runtime/ops_php8512.go:766:31
+internal/runtime/ops_php8512.go:853:13:     from return int(.autotmp_22), .autotmp_23 (return) at internal/runtime/object_compare.go:36:6
+internal/runtime/ops_php8512.go:853:13:     from (*heap).mergeObjectErrors(h, failure, (*heap).releaseMethodHold(h, owner)) (call parameter) at internal/runtime/object_compare.go:62:33
+internal/runtime/object_compare.go:5:7: leaking param: h
+internal/runtime/object_compare.go:5:36: leaking param: a
+internal/runtime/object_compare.go:5:39: leaking param: b
+internal/runtime/object_compare.go:5:48: arrays does not escape
+internal/runtime/object_compare.go:125:7: leaking param: h
+internal/runtime/object_compare.go:125:48: leaking param content: x
+internal/runtime/object_compare.go:125:51: leaking param content: y
+internal/runtime/object_compare.go:125:62: arrays does not escape
+internal/runtime/object_compare.go:169:7: leaking param: h
+internal/runtime/object_compare.go:169:44: leaking param content: left
+internal/runtime/object_compare.go:169:50: leaking param content: right
+internal/runtime/object_compare.go:169:64: arrays does not escape
+internal/runtime/object_compare.go:138:7: leaking param: h
+internal/runtime/object_compare.go:138:44: leaking param content: x
+internal/runtime/object_compare.go:138:47: leaking param content: y
+internal/runtime/object_compare.go:138:58: arrays does not escape
+internal/runtime/object_compare.go:26:94: "Object of class " + obj.object.class.name + " could not be converted to " + name escapes to heap
+internal/runtime/object_compare.go:26:10: append escapes to heap
+internal/runtime/object_compare.go:57:16: make([]methodHold, 0, 2) escapes to heap
+internal/runtime/object_compare.go:60:8: func literal does not escape
+internal/runtime/object_compare.go:80:13: &Throwable{...} escapes to heap
+internal/runtime/object_compare.go:83:28: make(map[*object]bool) escapes to heap
+internal/runtime/object_compare.go:114:30: o does not escape
+internal/runtime/object_lazy.go:5:26: o does not escape
+internal/runtime/object_lazy.go:44:20: &lazyObject{...} escapes to heap in (*heap).newLazyObject:
+internal/runtime/object_lazy.go:44:20:   flow: {heap} ← &{storage for &lazyObject{...}}:
+internal/runtime/object_lazy.go:44:20:     from &lazyObject{...} (spill) at internal/runtime/object_lazy.go:44:20
+internal/runtime/object_lazy.go:44:20:     from obj.object.lazy = &lazyObject{...} (assign) at internal/runtime/object_lazy.go:44:18
+internal/runtime/object_lazy.go:11:30: parameter c leaks to {heap} for (*heap).newLazyObject with derefs=0:
+internal/runtime/object_lazy.go:11:30:   flow: {heap} ← c:
+internal/runtime/object_lazy.go:11:30:     from (*heap).registerClass(h, c) (call parameter) at internal/runtime/object_lazy.go:19:28
+internal/runtime/object_lazy.go:11:7: parameter h leaks to {heap} for (*heap).newLazyObject with derefs=0:
+internal/runtime/object_lazy.go:11:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:11:7:     from (*heap).newObject(h, c) (call parameter) at internal/runtime/object_lazy.go:38:21
+internal/runtime/object_lazy.go:11:52: parameter initialize leaks to {storage for &lazyObject{...}} for (*heap).newLazyObject with derefs=0:
+internal/runtime/object_lazy.go:11:52:   flow: {storage for &lazyObject{...}} ← initialize:
+internal/runtime/object_lazy.go:11:52:     from lazyObject{...} (struct literal element) at internal/runtime/object_lazy.go:44:31
+internal/runtime/object_lazy.go:34:20: &Throwable{...} escapes to heap in (*heap).newLazyObject:
+internal/runtime/object_lazy.go:34:20:   flow: ~r1 ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:34:20:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:34:20
+internal/runtime/object_lazy.go:34:20:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:34:20
+internal/runtime/object_lazy.go:34:20:     from return value{}, &Throwable{...} (return) at internal/runtime/object_lazy.go:34:4
+internal/runtime/object_lazy.go:13:29: &errors.errorString{...} escapes to heap in (*heap).newLazyObject:
+internal/runtime/object_lazy.go:13:29:   flow: ~r0 ← &{storage for &errors.errorString{...}}:
+internal/runtime/object_lazy.go:13:29:     from &errors.errorString{...} (spill) at internal/runtime/object_lazy.go:13:29
+internal/runtime/object_lazy.go:13:29:     from &errors.errorString{...} (interface-converted) at internal/runtime/object_lazy.go:13:29
+internal/runtime/object_lazy.go:13:29:     from ~r0 = &errors.errorString{...} (assign-pair) at internal/runtime/object_lazy.go:13:29
+internal/runtime/object_lazy.go:13:29:   flow: fmt.err ← ~r0:
+internal/runtime/object_lazy.go:13:29:     from fmt.err = ~r0 (assign-pair) at internal/runtime/object_lazy.go:13:29
+internal/runtime/object_lazy.go:13:29:   flow: ~r1 ← fmt.err:
+internal/runtime/object_lazy.go:13:29:     from return value{}, fmt.err (return) at internal/runtime/object_lazy.go:13:3
+internal/runtime/object_lazy.go:16:29: &errors.errorString{...} escapes to heap in (*heap).newLazyObject:
+internal/runtime/object_lazy.go:16:29:   flow: ~r0 ← &{storage for &errors.errorString{...}}:
+internal/runtime/object_lazy.go:16:29:     from &errors.errorString{...} (spill) at internal/runtime/object_lazy.go:16:29
+internal/runtime/object_lazy.go:16:29:     from &errors.errorString{...} (interface-converted) at internal/runtime/object_lazy.go:16:29
+internal/runtime/object_lazy.go:16:29:     from ~r0 = &errors.errorString{...} (assign-pair) at internal/runtime/object_lazy.go:16:29
+internal/runtime/object_lazy.go:16:29:   flow: fmt.err ← ~r0:
+internal/runtime/object_lazy.go:16:29:     from fmt.err = ~r0 (assign-pair) at internal/runtime/object_lazy.go:16:29
+internal/runtime/object_lazy.go:16:29:   flow: ~r1 ← fmt.err:
+internal/runtime/object_lazy.go:16:29:     from return value{}, fmt.err (return) at internal/runtime/object_lazy.go:16:3
+internal/runtime/object_lazy.go:34:75: "Cannot instantiate " + kind + " " + c.name escapes to heap in (*heap).newLazyObject:
+internal/runtime/object_lazy.go:34:75:   flow: {storage for &Throwable{...}} ← &{storage for "Cannot instantiate " + kind + " " + c.name}:
+internal/runtime/object_lazy.go:34:75:     from "Cannot instantiate " + kind + " " + c.name (spill) at internal/runtime/object_lazy.go:34:75
+internal/runtime/object_lazy.go:34:75:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:34:30
+internal/runtime/object_lazy.go:11:7: leaking param: h
+internal/runtime/object_lazy.go:11:30: leaking param: c
+internal/runtime/object_lazy.go:11:52: leaking param: initialize
+internal/runtime/object_lazy.go:13:29: &errors.errorString{...} escapes to heap
+internal/runtime/object_lazy.go:16:29: &errors.errorString{...} escapes to heap
+internal/runtime/object_lazy.go:34:20: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:34:75: "Cannot instantiate " + kind + " " + c.name escapes to heap
+internal/runtime/object_lazy.go:44:20: &lazyObject{...} escapes to heap
+internal/runtime/object_lazy.go:50:7: parameter h leaks to {heap} for (*heap).newLazyObjectWithInitializer with derefs=0:
+internal/runtime/object_lazy.go:50:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:50:7:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/object_lazy.go:51:25
+internal/runtime/object_lazy.go:50:45: parameter c leaks to {heap} for (*heap).newLazyObjectWithInitializer with derefs=0:
+internal/runtime/object_lazy.go:50:45:   flow: {heap} ← c:
+internal/runtime/object_lazy.go:50:45:     from (*heap).newLazyObject(h, c, proxy, initialize) (call parameter) at internal/runtime/object_lazy.go:54:27
+internal/runtime/object_lazy.go:50:86: parameter initialize leaks to {heap} for (*heap).newLazyObjectWithInitializer with derefs=0:
+internal/runtime/object_lazy.go:50:86:   flow: {heap} ← initialize:
+internal/runtime/object_lazy.go:50:86:     from (*heap).newLazyObject(h, c, proxy, initialize) (call parameter) at internal/runtime/object_lazy.go:54:27
+internal/runtime/object_lazy.go:50:67: parameter initializer leaks to {heap} for (*heap).newLazyObjectWithInitializer with derefs=0:
+internal/runtime/object_lazy.go:50:67:   flow: {storage for ... argument} ← initializer:
+internal/runtime/object_lazy.go:50:67:     from ... argument (slice-literal-element) at internal/runtime/object_lazy.go:51:25
+internal/runtime/object_lazy.go:50:67:   flow: {heap} ← {storage for ... argument}:
+internal/runtime/object_lazy.go:50:67:     from ... argument (spill) at internal/runtime/object_lazy.go:51:25
+internal/runtime/object_lazy.go:50:67:     from (*heap).claimValues(h, ... argument...) (call parameter) at internal/runtime/object_lazy.go:51:25
+internal/runtime/object_lazy.go:50:7: leaking param: h
+internal/runtime/object_lazy.go:50:45: leaking param: c
+internal/runtime/object_lazy.go:50:67: leaking param: initializer
+internal/runtime/object_lazy.go:50:86: leaking param: initialize
+internal/runtime/object_lazy.go:51:25: ... argument does not escape
+internal/runtime/object_lazy.go:67:7: parameter h leaks to {heap} for (*heap).isLazyObject with derefs=0:
+internal/runtime/object_lazy.go:67:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:67:7:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:68:27
+internal/runtime/object_lazy.go:67:29: parameter obj leaks to {heap} for (*heap).isLazyObject with derefs=0:
+internal/runtime/object_lazy.go:67:29:   flow: {heap} ← obj:
+internal/runtime/object_lazy.go:67:29:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:68:27
+internal/runtime/object_lazy.go:67:7: leaking param: h
+internal/runtime/object_lazy.go:67:29: leaking param: obj
+internal/runtime/object_lazy.go:72:7: parameter h leaks to {heap} for (*heap).isLazyProperty with derefs=0:
+internal/runtime/object_lazy.go:72:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:72:7:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:73:27
+internal/runtime/object_lazy.go:72:31: parameter obj leaks to {heap} for (*heap).isLazyProperty with derefs=0:
+internal/runtime/object_lazy.go:72:31:   flow: {heap} ← obj:
+internal/runtime/object_lazy.go:72:31:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:73:27
+internal/runtime/object_lazy.go:72:7: leaking param: h
+internal/runtime/object_lazy.go:72:31: leaking param: obj
+internal/runtime/object_lazy.go:72:42: name does not escape
+internal/runtime/object_lazy.go:82:25: o does not escape
+internal/runtime/object_lazy.go:82:36: p does not escape
+internal/runtime/object_lazy.go:100:7: parameter h leaks to {heap} for (*heap).resolvePropertyBacking with derefs=0:
+internal/runtime/object_lazy.go:100:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:100:7:     from (*heap).initializeLazy(h, o) (call parameter) at internal/runtime/object_lazy.go:106:26
+internal/runtime/object_lazy.go:100:39: parameter o leaks to {heap} for (*heap).resolvePropertyBacking with derefs=0:
+internal/runtime/object_lazy.go:100:39:   flow: {heap} ← o:
+internal/runtime/object_lazy.go:100:39:     from (*heap).initializeLazy(h, o) (call parameter) at internal/runtime/object_lazy.go:106:26
+internal/runtime/object_lazy.go:100:39: parameter o leaks to ~r0 for (*heap).resolvePropertyBacking with derefs=0:
+internal/runtime/object_lazy.go:100:39:   flow: ~r0 ← o:
+internal/runtime/object_lazy.go:100:39:     from return o, nil (return) at internal/runtime/object_lazy.go:102:3
+internal/runtime/object_lazy.go:100:7: leaking param: h
+internal/runtime/object_lazy.go:100:39: leaking param: o
+internal/runtime/object_lazy.go:100:50: p does not escape
+internal/runtime/object_lazy.go:100:67: name does not escape
+internal/runtime/object_lazy.go:92:7: parameter h leaks to {heap} for (*heap).objectForProperty with derefs=0:
+internal/runtime/object_lazy.go:92:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:92:7:     from (*heap).resolvePropertyBacking(h, o, p, name, false) (call parameter) at internal/runtime/object_lazy.go:93:33
+internal/runtime/object_lazy.go:92:34: parameter o leaks to {heap} for (*heap).objectForProperty with derefs=0:
+internal/runtime/object_lazy.go:92:34:   flow: {heap} ← o:
+internal/runtime/object_lazy.go:92:34:     from (*heap).resolvePropertyBacking(h, o, p, name, false) (call parameter) at internal/runtime/object_lazy.go:93:33
+internal/runtime/object_lazy.go:92:7: leaking param: h
+internal/runtime/object_lazy.go:92:34: leaking param: o
+internal/runtime/object_lazy.go:92:45: p does not escape
+internal/runtime/object_lazy.go:92:62: name does not escape
+internal/runtime/object_lazy.go:96:7: parameter h leaks to {heap} for (*heap).objectForPropertyRead with derefs=0:
+internal/runtime/object_lazy.go:96:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:96:7:     from (*heap).resolvePropertyBacking(h, o, p, name, true) (call parameter) at internal/runtime/object_lazy.go:97:33
+internal/runtime/object_lazy.go:96:38: parameter o leaks to {heap} for (*heap).objectForPropertyRead with derefs=0:
+internal/runtime/object_lazy.go:96:38:   flow: {heap} ← o:
+internal/runtime/object_lazy.go:96:38:     from (*heap).resolvePropertyBacking(h, o, p, name, true) (call parameter) at internal/runtime/object_lazy.go:97:33
+internal/runtime/object_lazy.go:96:7: leaking param: h
+internal/runtime/object_lazy.go:96:38: leaking param: o
+internal/runtime/object_lazy.go:96:49: p does not escape
+internal/runtime/object_lazy.go:96:66: name does not escape
+internal/runtime/object_lazy.go:131:40: "\x00magic:" + operation + ":" + name escapes to heap in magicPropertyKey:
+internal/runtime/object_lazy.go:131:40:   flow: ~r0 ← &{storage for "\x00magic:" + operation + ":" + name}:
+internal/runtime/object_lazy.go:131:40:     from "\x00magic:" + operation + ":" + name (spill) at internal/runtime/object_lazy.go:131:40
+internal/runtime/object_lazy.go:131:40:     from return "\x00magic:" + operation + ":" + name (return) at internal/runtime/object_lazy.go:131:2
+internal/runtime/object_lazy.go:130:23: operation does not escape
+internal/runtime/object_lazy.go:130:34: name does not escape
+internal/runtime/object_lazy.go:131:40: "\x00magic:" + operation + ":" + name escapes to heap
+internal/runtime/object_lazy.go:143:22: make(map[string]bool) escapes to heap in (*heap).installPropertyGuard:
+internal/runtime/object_lazy.go:143:22:   flow: {heap} ← &{storage for make(map[string]bool)}:
+internal/runtime/object_lazy.go:143:22:     from make(map[string]bool) (spill) at internal/runtime/object_lazy.go:143:22
+internal/runtime/object_lazy.go:143:22:     from target.hooks = make(map[string]bool) (assign) at internal/runtime/object_lazy.go:143:16
+internal/runtime/object_lazy.go:138:25: "\x00magic:" + operation + ":" + name escapes to heap in (*heap).installPropertyGuard:
+internal/runtime/object_lazy.go:138:25:   flow: ~r0 ← &{storage for "\x00magic:" + operation + ":" + name}:
+internal/runtime/object_lazy.go:138:25:     from "\x00magic:" + operation + ":" + name (spill) at internal/runtime/object_lazy.go:138:25
+internal/runtime/object_lazy.go:138:25:     from ~r0 = "\x00magic:" + operation + ":" + name (assign-pair) at internal/runtime/object_lazy.go:138:25
+internal/runtime/object_lazy.go:138:25:   flow: key ← ~r0:
+internal/runtime/object_lazy.go:138:25:     from key := ~r0 (assign) at internal/runtime/object_lazy.go:138:6
+internal/runtime/object_lazy.go:138:25:   flow: {heap} ← key:
+internal/runtime/object_lazy.go:138:25:     from target.hooks[key] (key of map put) at internal/runtime/object_lazy.go:145:14
+internal/runtime/object_lazy.go:134:37: parameter target leaks to ~r0 for (*heap).installPropertyGuard with derefs=0:
+internal/runtime/object_lazy.go:134:37:   flow: ~r0 ← target:
+internal/runtime/object_lazy.go:134:37:     from forwardedPropertyGuard{...} (struct literal element) at internal/runtime/object_lazy.go:146:31
+internal/runtime/object_lazy.go:134:37:     from return forwardedPropertyGuard{...} (return) at internal/runtime/object_lazy.go:146:2
+internal/runtime/object_lazy.go:134:7: h does not escape
+internal/runtime/object_lazy.go:134:37: leaking param: target to result ~r0 level=0
+internal/runtime/object_lazy.go:134:53: operation does not escape
+internal/runtime/object_lazy.go:134:64: name does not escape
+internal/runtime/object_lazy.go:135:48: "__" + operation does not escape
+internal/runtime/object_lazy.go:138:25: "\x00magic:" + operation + ":" + name escapes to heap
+internal/runtime/object_lazy.go:143:22: make(map[string]bool) escapes to heap
+internal/runtime/object_lazy.go:149:7: g does not escape
+internal/runtime/object_lazy.go:513:24: make(map[*reference][]propertySource) escapes to heap in cloneObjectProperties:
+internal/runtime/object_lazy.go:513:24:   flow: {heap} ← &{storage for make(map[*reference][]propertySource)}:
+internal/runtime/object_lazy.go:513:24:     from make(map[*reference][]propertySource) (spill) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:     from h.typedSources = make(map[*reference][]propertySource) (assign) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24: append(sources, source) escapes to heap in cloneObjectProperties:
+internal/runtime/object_lazy.go:513:24:   flow: {heap} ← &{storage for append(sources, source)}:
+internal/runtime/object_lazy.go:513:24:     from append(sources, source) (spill) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:     from h.typedSources[r] = append(sources, source) (assign) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:490:28: cloneObjectProperties capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:490:28: parameter h leaks to {heap} for cloneObjectProperties with derefs=0:
+internal/runtime/object_lazy.go:490:28:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:490:28:     from (*heap).release(h, old) (call parameter) at internal/runtime/object_lazy.go:502:17
+internal/runtime/object_lazy.go:490:37: parameter dst leaks to {heap} for cloneObjectProperties with derefs=2:
+internal/runtime/object_lazy.go:490:37:   flow: {temp} ← *dst:
+internal/runtime/object_lazy.go:490:37:     from dst.props (dot of pointer) at internal/runtime/object_lazy.go:492:5
+internal/runtime/object_lazy.go:490:37:     from (*propertyTable).each(dst.props, func literal) (call parameter) at internal/runtime/object_lazy.go:492:16
+internal/runtime/object_lazy.go:490:37:   flow: {heap} ← *{temp}:
+internal/runtime/object_lazy.go:490:42: parameter src leaks to {heap} for cloneObjectProperties with derefs=2:
+internal/runtime/object_lazy.go:490:42:   flow: {temp} ← *src:
+internal/runtime/object_lazy.go:490:42:     from src.props (dot of pointer) at internal/runtime/object_lazy.go:491:35
+internal/runtime/object_lazy.go:490:42:     from copyPropertyValues(dst.props, src.props) (call parameter) at internal/runtime/object_lazy.go:491:20
+internal/runtime/object_lazy.go:490:42:   flow: {heap} ← *{temp}:
+internal/runtime/object_lazy.go:492:32: parameter slot leaks to {heap} for cloneObjectProperties.func1 with derefs=1:
+internal/runtime/object_lazy.go:492:32:   flow: old ← *slot:
+internal/runtime/object_lazy.go:492:32:     from *slot (indirection) at internal/runtime/object_lazy.go:498:11
+internal/runtime/object_lazy.go:492:32:     from old := *slot (assign) at internal/runtime/object_lazy.go:498:8
+internal/runtime/object_lazy.go:492:32:   flow: {heap} ← old:
+internal/runtime/object_lazy.go:492:32:     from (*heap).release(h, old) (call parameter) at internal/runtime/object_lazy.go:502:17
+internal/runtime/object_lazy.go:513:24: make([]propertySource, len(sources), capacity) escapes to heap in cloneObjectProperties:
+internal/runtime/object_lazy.go:513:24:   flow: grown ← &{storage for make([]propertySource, len(sources), capacity)}:
+internal/runtime/object_lazy.go:513:24:     from make([]propertySource, len(sources), capacity) (spill) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:     from grown := make([]propertySource, len(sources), capacity) (assign) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:   flow: sources ← grown:
+internal/runtime/object_lazy.go:513:24:     from sources = grown (assign) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:   flow: {temp} ← sources:
+internal/runtime/object_lazy.go:513:24:     from append(sources, source) (call parameter) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:513:24:   flow: {temp} ← {temp}:
+internal/runtime/object_lazy.go:513:24:   flow: {heap} ← {temp}:
+internal/runtime/object_lazy.go:513:24:     from h.typedSources[r] = append(sources, source) (assign) at internal/runtime/object_lazy.go:513:24
+internal/runtime/object_lazy.go:490:28: leaking param: h
+internal/runtime/object_lazy.go:490:37: leaking param content: dst
+internal/runtime/object_lazy.go:490:42: leaking param content: src
+internal/runtime/object_lazy.go:492:32: leaking param content: slot
+internal/runtime/object_lazy.go:492:17: func literal does not escape
+internal/runtime/object_lazy.go:513:24: make(map[*reference][]propertySource) escapes to heap
+internal/runtime/object_lazy.go:513:24: make([]propertySource, len(sources), capacity) escapes to heap
+internal/runtime/object_lazy.go:513:24: append escapes to heap
+internal/runtime/object_lazy.go:455:23: &lazyObject{...} escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:455:23:   flow: {heap} ← &{storage for &lazyObject{...}}:
+internal/runtime/object_lazy.go:455:23:     from &lazyObject{...} (spill) at internal/runtime/object_lazy.go:455:23
+internal/runtime/object_lazy.go:455:23:     from clone.object.lazy = &lazyObject{...} (assign) at internal/runtime/object_lazy.go:455:21
+internal/runtime/object_lazy.go:470:29: make(map[string]bool) escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:470:29:   flow: {heap} ← &{storage for make(map[string]bool)}:
+internal/runtime/object_lazy.go:470:29:     from make(map[string]bool) (spill) at internal/runtime/object_lazy.go:470:29
+internal/runtime/object_lazy.go:470:29:     from clone.object.hooks = make(map[string]bool) (assign) at internal/runtime/object_lazy.go:470:23
+internal/runtime/object_lazy.go:406:7: (*heap).cloneObject capturing by value: h (addr=false assign=false width=8)
+internal/runtime/object_lazy.go:406:54: (*heap).cloneObject capturing by ref: result (addr=false assign=true width=64)
+internal/runtime/object_lazy.go:406:68: (*heap).cloneObject capturing by ref: err (addr=false assign=true width=16)
+internal/runtime/object_lazy.go:413:2: (*heap).cloneObject capturing by value: source (addr=false assign=false width=72)
+internal/runtime/object_lazy.go:406:7: parameter h leaks to {heap} for (*heap).cloneObject with derefs=0:
+internal/runtime/object_lazy.go:406:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:406:7:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:407:27
+internal/runtime/object_lazy.go:406:28: parameter obj leaks to {heap} for (*heap).cloneObject with derefs=0:
+internal/runtime/object_lazy.go:406:28:   flow: {heap} ← obj:
+internal/runtime/object_lazy.go:406:28:     from (*heap).checkedObject(h, obj) (call parameter) at internal/runtime/object_lazy.go:407:27
+internal/runtime/object_lazy.go:431:19: &Throwable{...} escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:431:19:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:431:19:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:431:19
+internal/runtime/object_lazy.go:431:19:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:431:19
+internal/runtime/object_lazy.go:431:19:     from return value{}, &Throwable{...} (return) at internal/runtime/object_lazy.go:431:3
+internal/runtime/object_lazy.go:431:19:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:431:19:     from (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, source)) (call parameter) at internal/runtime/object_lazy.go:416:28
+internal/runtime/object_lazy.go:435:19: &Throwable{...} escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:435:19:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:435:19:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:435:19
+internal/runtime/object_lazy.go:435:19:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:435:19
+internal/runtime/object_lazy.go:435:19:     from return value{}, &Throwable{...} (return) at internal/runtime/object_lazy.go:435:3
+internal/runtime/object_lazy.go:435:19:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:435:19:     from (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, source)) (call parameter) at internal/runtime/object_lazy.go:416:28
+internal/runtime/object_lazy.go:443:20: &Throwable{...} escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:443:20:   flow: err ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:443:20:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:443:20
+internal/runtime/object_lazy.go:443:20:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:443:20
+internal/runtime/object_lazy.go:443:20:     from return value{}, &Throwable{...} (return) at internal/runtime/object_lazy.go:443:4
+internal/runtime/object_lazy.go:443:20:   flow: {heap} ← err:
+internal/runtime/object_lazy.go:443:20:     from (*heap).mergeObjectErrors(h, err, (*heap).releaseMethodHold(h, source)) (call parameter) at internal/runtime/object_lazy.go:416:28
+internal/runtime/object_lazy.go:435:127: "Call to " + ~r0 + " method " + m.owner.name + "::__clone() from " + ~r0 escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:435:127:   flow: {storage for &Throwable{...}} ← &{storage for "Call to " + ~r0 + " method " + m.owner.name + "::__clone() from " + ~r0}:
+internal/runtime/object_lazy.go:435:127:     from "Call to " + ~r0 + " method " + m.owner.name + "::__clone() from " + ~r0 (spill) at internal/runtime/object_lazy.go:435:127
+internal/runtime/object_lazy.go:435:127:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:435:29
+internal/runtime/object_lazy.go:431:89: "Trying to clone an uncloneable object of class " + o.class.name escapes to heap in (*heap).cloneObject:
+internal/runtime/object_lazy.go:431:89:   flow: {storage for &Throwable{...}} ← &{storage for "Trying to clone an uncloneable object of class " + o.class.name}:
+internal/runtime/object_lazy.go:431:89:     from "Trying to clone an uncloneable object of class " + o.class.name (spill) at internal/runtime/object_lazy.go:431:89
+internal/runtime/object_lazy.go:431:89:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:431:29
+internal/runtime/object_lazy.go:406:7: leaking param: h
+internal/runtime/object_lazy.go:406:28: leaking param: obj
+internal/runtime/object_lazy.go:406:39: scope does not escape
+internal/runtime/object_lazy.go:414:8: func literal does not escape
+internal/runtime/object_lazy.go:431:19: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:431:89: "Trying to clone an uncloneable object of class " + o.class.name escapes to heap
+internal/runtime/object_lazy.go:435:19: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:435:127: "Call to " + ~r0 + " method " + m.owner.name + "::__clone() from " + ~r0 escapes to heap
+internal/runtime/object_lazy.go:435:145: "scope " + scope.name does not escape
+internal/runtime/object_lazy.go:443:20: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:455:23: &lazyObject{...} escapes to heap
+internal/runtime/object_lazy.go:470:29: make(map[string]bool) escapes to heap
+internal/runtime/object_lazy.go:527:17: make(map[*class]map[string]value) escapes to heap in (*heap).enumCase:
+internal/runtime/object_lazy.go:527:17:   flow: {heap} ← &{storage for make(map[*class]map[string]value)}:
+internal/runtime/object_lazy.go:527:17:     from make(map[*class]map[string]value) (spill) at internal/runtime/object_lazy.go:527:17
+internal/runtime/object_lazy.go:527:17:     from h.enums = make(map[*class]map[string]value) (assign) at internal/runtime/object_lazy.go:527:11
+internal/runtime/object_lazy.go:519:25: parameter c leaks to {heap} for (*heap).enumCase with derefs=0:
+internal/runtime/object_lazy.go:519:25:   flow: {heap} ← c:
+internal/runtime/object_lazy.go:519:25:     from h.enums[c] (key of map put) at internal/runtime/object_lazy.go:532:10
+internal/runtime/object_lazy.go:519:7: parameter h leaks to {heap} for (*heap).enumCase with derefs=0:
+internal/runtime/object_lazy.go:519:7:   flow: {heap} ← h:
+internal/runtime/object_lazy.go:519:7:     from (*heap).newObject(h, c) (call parameter) at internal/runtime/object_lazy.go:541:24
+internal/runtime/object_lazy.go:519:35: parameter name leaks to {heap} for (*heap).enumCase with derefs=0:
+internal/runtime/object_lazy.go:519:35:   flow: {heap} ← name:
+internal/runtime/object_lazy.go:519:35:     from value{...} (struct literal element) at internal/runtime/object_lazy.go:545:42
+internal/runtime/object_lazy.go:519:35:     from (*heap).writeObject(h, v, "name", value{...}, c, true) (call parameter) at internal/runtime/object_lazy.go:545:25
+internal/runtime/object_lazy.go:531:15: make(map[string]value) escapes to heap in (*heap).enumCase:
+internal/runtime/object_lazy.go:531:15:   flow: cases ← &{storage for make(map[string]value)}:
+internal/runtime/object_lazy.go:531:15:     from make(map[string]value) (spill) at internal/runtime/object_lazy.go:531:15
+internal/runtime/object_lazy.go:531:15:     from cases = make(map[string]value) (assign) at internal/runtime/object_lazy.go:531:9
+internal/runtime/object_lazy.go:531:15:   flow: {heap} ← cases:
+internal/runtime/object_lazy.go:531:15:     from h.enums[c] = cases (assign) at internal/runtime/object_lazy.go:532:14
+internal/runtime/object_lazy.go:563:18: &Throwable{...} escapes to heap in (*heap).enumCase:
+internal/runtime/object_lazy.go:563:18:   flow: ~r1 ← &{storage for &Throwable{...}}:
+internal/runtime/object_lazy.go:563:18:     from &Throwable{...} (spill) at internal/runtime/object_lazy.go:563:18
+internal/runtime/object_lazy.go:563:18:     from &Throwable{...} (interface-converted) at internal/runtime/object_lazy.go:563:18
+internal/runtime/object_lazy.go:563:18:     from return value{}, &Throwable{...} (return) at internal/runtime/object_lazy.go:563:2
+internal/runtime/object_lazy.go:524:29: &errors.errorString{...} escapes to heap in (*heap).enumCase:
+internal/runtime/object_lazy.go:524:29:   flow: ~r0 ← &{storage for &errors.errorString{...}}:
+internal/runtime/object_lazy.go:524:29:     from &errors.errorString{...} (spill) at internal/runtime/object_lazy.go:524:29
+internal/runtime/object_lazy.go:524:29:     from &errors.errorString{...} (interface-converted) at internal/runtime/object_lazy.go:524:29
+internal/runtime/object_lazy.go:524:29:     from ~r0 = &errors.errorString{...} (assign-pair) at internal/runtime/object_lazy.go:524:29
+internal/runtime/object_lazy.go:524:29:   flow: fmt.err ← ~r0:
+internal/runtime/object_lazy.go:524:29:     from fmt.err = ~r0 (assign-pair) at internal/runtime/object_lazy.go:524:29
+internal/runtime/object_lazy.go:524:29:   flow: ~r1 ← fmt.err:
+internal/runtime/object_lazy.go:524:29:     from return value{}, fmt.err (return) at internal/runtime/object_lazy.go:524:3
+internal/runtime/object_lazy.go:563:76: "Undefined constant " + c.name + "::" + name escapes to heap in (*heap).enumCase:
+internal/runtime/object_lazy.go:563:76:   flow: {storage for &Throwable{...}} ← &{storage for "Undefined constant " + c.name + "::" + name}:
+internal/runtime/object_lazy.go:563:76:     from "Undefined constant " + c.name + "::" + name (spill) at internal/runtime/object_lazy.go:563:76
+internal/runtime/object_lazy.go:563:76:     from Throwable{...} (struct literal element) at internal/runtime/object_lazy.go:563:28
+internal/runtime/object_lazy.go:519:7: leaking param: h
+internal/runtime/object_lazy.go:519:25: leaking param: c
+internal/runtime/object_lazy.go:519:35: leaking param: name
+internal/runtime/object_lazy.go:524:29: &errors.errorString{...} escapes to heap
+internal/runtime/object_lazy.go:527:17: make(map[*class]map[string]value) escapes to heap
+internal/runtime/object_lazy.go:531:15: make(map[string]value) escapes to heap
+internal/runtime/object_lazy.go:563:18: &Throwable{...} escapes to heap
+internal/runtime/object_lazy.go:563:76: "Undefined constant " + c.name + "::" + name escapes to heap
+internal/runtime/object_table.go:149:7: parameter p leaks to {heap} for (*propertyTable).remove with derefs=1:
+internal/runtime/object_table.go:149:7:   flow: {temp} ← p:
+internal/runtime/object_table.go:149:7:     from (*propertyTable).reclaimRetired(p) (call parameter) at internal/runtime/object_table.go:171:18
+internal/runtime/object_table.go:149:7:   flow: {heap} ← *{temp}:
+internal/runtime/object_table.go:149:7: parameter p leaks to ~r0 for (*propertyTable).remove with derefs=2:
+internal/runtime/object_table.go:149:7:   flow: v ← *p:
+internal/runtime/object_table.go:149:7:     from p.declared (dot of pointer) at internal/runtime/object_table.go:152:11
+internal/runtime/object_table.go:149:7:     from p.declared[i] (dot of pointer) at internal/runtime/object_table.go:152:20
+internal/runtime/object_table.go:149:7:     from &p.declared[i] (address-of) at internal/runtime/object_table.go:152:9
+internal/runtime/object_table.go:149:7:     from v := &p.declared[i] (assign) at internal/runtime/object_table.go:152:6
+internal/runtime/object_table.go:149:7:   flow: old ← *v:
+internal/runtime/object_table.go:149:7:     from *v (indirection) at internal/runtime/object_table.go:156:11
+internal/runtime/object_table.go:149:7:     from old := *v (assign) at internal/runtime/object_table.go:156:8
+internal/runtime/object_table.go:149:7:   flow: ~r0 ← old:
+internal/runtime/object_table.go:149:7:     from return old, true (return) at internal/runtime/object_table.go:158:4
+internal/runtime/object_table.go:149:7: leaking param content: p
+internal/runtime/object_table.go:149:32: name does not escape
+internal/runtime/object_table.go:13:24: parameter names leaks to {heap} for newPropertyLayout with derefs=1:
+internal/runtime/object_table.go:13:24:   flow: slices.s ← names:
+internal/runtime/object_table.go:13:24:     from slices..dict, slices.s := &slices..dict.Clone[[]string,string], names (assign-pair) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:13:24:   flow: {heap} ← *slices.s:
+internal/runtime/object_table.go:13:24:     from append(go.shape.[]string{}, slices.s...) (call parameter) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:13:24:     from append(go.shape.[]string{}, slices.s...) (appended slice...) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:7: &propertyLayout{...} escapes to heap in newPropertyLayout:
+internal/runtime/object_table.go:14:7:   flow: p ← &{storage for &propertyLayout{...}}:
+internal/runtime/object_table.go:14:7:     from &propertyLayout{...} (spill) at internal/runtime/object_table.go:14:7
+internal/runtime/object_table.go:14:7:     from p := &propertyLayout{...} (assign) at internal/runtime/object_table.go:14:4
+internal/runtime/object_table.go:14:7:   flow: ~r0 ← p:
+internal/runtime/object_table.go:14:7:     from return p (return) at internal/runtime/object_table.go:18:2
+internal/runtime/object_table.go:14:62: make(map[string]int, len(names)) escapes to heap in newPropertyLayout:
+internal/runtime/object_table.go:14:62:   flow: {storage for &propertyLayout{...}} ← &{storage for make(map[string]int, len(names))}:
+internal/runtime/object_table.go:14:62:     from make(map[string]int, len(names)) (spill) at internal/runtime/object_table.go:14:62
+internal/runtime/object_table.go:14:62:     from propertyLayout{...} (struct literal element) at internal/runtime/object_table.go:14:22
+internal/runtime/object_table.go:14:42: append(go.shape.[]string{}, slices.s...) escapes to heap in newPropertyLayout:
+internal/runtime/object_table.go:14:42:   flow: ~r0 ← &{storage for append(go.shape.[]string{}, slices.s...)}:
+internal/runtime/object_table.go:14:42:     from append(go.shape.[]string{}, slices.s...) (spill) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:42:     from ~r0 = append(go.shape.[]string{}, slices.s...) (assign-pair) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:42:   flow: {storage for &propertyLayout{...}} ← ~r0:
+internal/runtime/object_table.go:14:42:     from propertyLayout{...} (struct literal element) at internal/runtime/object_table.go:14:22
+internal/runtime/object_table.go:14:42: go.shape.[]string{} escapes to heap in newPropertyLayout:
+internal/runtime/object_table.go:14:42:   flow: {temp} ← &{storage for go.shape.[]string{}}:
+internal/runtime/object_table.go:14:42:     from go.shape.[]string{} (spill) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:42:     from append(go.shape.[]string{}, slices.s...) (call parameter) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:42:   flow: {temp} ← {temp}:
+internal/runtime/object_table.go:14:42:   flow: ~r0 ← {temp}:
+internal/runtime/object_table.go:14:42:     from ~r0 = append(go.shape.[]string{}, slices.s...) (assign-pair) at internal/runtime/object_table.go:14:42
+internal/runtime/object_table.go:14:42:   flow: {storage for &propertyLayout{...}} ← ~r0:
+internal/runtime/object_table.go:14:42:     from propertyLayout{...} (struct literal element) at internal/runtime/object_table.go:14:22
+internal/runtime/object_table.go:13:24: leaking param content: names
+internal/runtime/object_table.go:14:7: &propertyLayout{...} escapes to heap
+internal/runtime/object_table.go:14:42: go.shape.[]string{} escapes to heap
+internal/runtime/object_table.go:14:42: append escapes to heap
+internal/runtime/object_table.go:14:62: make(map[string]int, len(names)) escapes to heap
+internal/runtime/object_table.go:90:20: make([]value, len(layout.names)) escapes to heap in newPropertyTable:
+internal/runtime/object_table.go:90:20:   flow: {heap} ← &{storage for make([]value, len(layout.names))}:
+internal/runtime/object_table.go:90:20:     from make([]value, len(layout.names)) (spill) at internal/runtime/object_table.go:90:20
+internal/runtime/object_table.go:90:20:     from p.declared = make([]value, len(layout.names)) (assign) at internal/runtime/object_table.go:90:20
+internal/runtime/object_table.go:88:23: parameter layout leaks to {heap} for newPropertyTable with derefs=0:
+internal/runtime/object_table.go:88:23:   flow: layout ← layout:
+internal/runtime/object_table.go:88:23:     from p, layout := p, layout (assign-pair) at internal/runtime/object_table.go:90:20
+internal/runtime/object_table.go:88:23:   flow: {heap} ← layout:
+internal/runtime/object_table.go:88:23:     from p.layout = layout (assign) at internal/runtime/object_table.go:90:20
+internal/runtime/object_table.go:89:7: &propertyTable{} escapes to heap in newPropertyTable:
+internal/runtime/object_table.go:89:7:   flow: p ← &{storage for &propertyTable{}}:
+internal/runtime/object_table.go:89:7:     from &propertyTable{} (spill) at internal/runtime/object_table.go:89:7
+internal/runtime/object_table.go:89:7:     from p := &propertyTable{} (assign) at internal/runtime/object_table.go:89:4
+internal/runtime/object_table.go:89:7:   flow: ~r0 ← p:
+internal/runtime/object_table.go:89:7:     from return p (return) at internal/runtime/object_table.go:91:2
+internal/runtime/object_table.go:88:23: leaking param: layout
+internal/runtime/object_table.go:89:7: &propertyTable{} escapes to heap
+internal/runtime/object_table.go:90:20: make([]value, len(layout.names)) escapes to heap
+internal/runtime/object_table.go:98:20: make([]value, len(layout.names)) escapes to heap in (*propertyTable).initializeLayout:
+internal/runtime/object_table.go:98:20:   flow: {heap} ← &{storage for make([]value, len(layout.names))}:
+internal/runtime/object_table.go:98:20:     from make([]value, len(layout.names)) (spill) at internal/runtime/object_table.go:98:20
+internal/runtime/object_table.go:98:20:     from p.declared = make([]value, len(layout.names)) (assign) at internal/runtime/object_table.go:98:14
+internal/runtime/object_table.go:95:42: parameter layout leaks to {heap} for (*propertyTable).initializeLayout with derefs=0:
+internal/runtime/object_table.go:95:42:   flow: {heap} ← layout:
+internal/runtime/object_table.go:95:42:     from p.layout = layout (assign) at internal/runtime/object_table.go:96:11
+internal/runtime/object_table.go:95:7: p does not escape
+internal/runtime/object_table.go:95:42: leaking param: layout
+internal/runtime/object_table.go:98:20: make([]value, len(layout.names)) escapes to heap
+internal/runtime/object_table.go:102:7: parameter p leaks to ~r0 for (*propertyTable).lookup with derefs=1:
+internal/runtime/object_table.go:102:7:   flow: ~r0 ← *p:
+internal/runtime/object_table.go:102:7:     from p.declared (dot of pointer) at internal/runtime/object_table.go:105:13
+internal/runtime/object_table.go:102:7:     from p.declared[i] (dot of pointer) at internal/runtime/object_table.go:105:22
+internal/runtime/object_table.go:102:7:     from &p.declared[i] (address-of) at internal/runtime/object_table.go:105:11
+internal/runtime/object_table.go:102:7:     from return &p.declared[i], true (return) at internal/runtime/object_table.go:105:4
+internal/runtime/object_table.go:102:7: leaking param: p to result ~r0 level=1
+internal/runtime/object_table.go:102:32: name does not escape
+internal/runtime/object_table.go:220:7: p does not escape
+internal/runtime/object_table.go:226:7: parameter p leaks to {heap} for (*propertyTable).endIteration with derefs=1:
+internal/runtime/object_table.go:226:7:   flow: {temp} ← p:
+internal/runtime/object_table.go:226:7:     from (*propertyTable).reclaimRetired(p) (call parameter) at internal/runtime/object_table.go:229:19
+internal/runtime/object_table.go:226:7:   flow: {heap} ← *{temp}:
+internal/runtime/object_table.go:226:7: leaking param content: p
+internal/runtime/object_table.go:258:7: parameter h leaks to {heap} for (*heap).freeProperties with derefs=0:
+internal/runtime/object_table.go:258:7:   flow: {heap} ← h:
+internal/runtime/object_table.go:258:7:     from (*heap).freePropertyTable(h, o.props, dead, true) (call parameter) at internal/runtime/object_table.go:259:28
+internal/runtime/object_table.go:258:31: parameter o leaks to {heap} for (*heap).freeProperties with derefs=2:
+internal/runtime/object_table.go:258:31:   flow: {temp} ← *o:
+internal/runtime/object_table.go:258:31:     from o.props (dot of pointer) at internal/runtime/object_table.go:259:30
+internal/runtime/object_table.go:258:31:     from (*heap).freePropertyTable(h, o.props, dead, true) (call parameter) at internal/runtime/object_table.go:259:28
+internal/runtime/object_table.go:258:31:   flow: {heap} ← *{temp}:
+internal/runtime/object_table.go:258:7: leaking param: h
+internal/runtime/object_table.go:258:31: leaking param content: o
+internal/runtime/object_table.go:258:42: dead does not escape

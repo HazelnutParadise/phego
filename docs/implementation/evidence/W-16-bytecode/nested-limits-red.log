@@ -1,0 +1,7 @@
+--- FAIL: TestNestedCatchInsideFinallyRoundTrip (0.00s)
+    review_test.go:199: valid control Build failed: invalid bytecode at byte -1, function 0, instruction -1: overlapping handler bodies
+--- FAIL: TestEncodingRetainsExplicitVerificationLimits (0.01s)
+    review_test.go:207: Encode replaced explicit limits with defaults: bytecode verification limit exceeded
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.469s
+FAIL

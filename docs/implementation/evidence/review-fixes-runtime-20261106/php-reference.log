@@ -1,0 +1,242 @@
+### php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 sort-reentry
+count=3 direct=NULL globals=false [0][1][2]
+count=3 direct=NULL globals=false [0][1][2]
+count=3 direct=S globals=true [0][1][2]
+["a","b","c"]
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+usort sees true count=3
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+Warning: Undefined array key 1 in /w/sort-reentry.php.txt on line 5
+Warning: Undefined array key 1 in /w/sort-reentry.php.txt on line 5
+exit_code=0
+### php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 argument-types
+sort(): Argument #1 ($array) must be of type array, true given
+sort(): Argument #1 ($array) must be of type array, false given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, stdClass given
+sort(): Argument #1 ($array) must be of type array, class@anonymous given
+ksort(): Argument #1 ($array) must be of type array, true given
+ksort(): Argument #1 ($array) must be of type array, false given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, stdClass given
+ksort(): Argument #1 ($array) must be of type array, class@anonymous given
+usort(): Argument #1 ($array) must be of type array, true given
+usort(): Argument #1 ($array) must be of type array, false givenDeprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero in /w/argument-types.php.txt on line 9
+
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, stdClass given
+usort(): Argument #1 ($array) must be of type array, class@anonymous given
+uksort(): Argument #1 ($array) must be of type array, true given
+uksort(): Argument #1 ($array) must be of type array, false given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, stdClass given
+uksort(): Argument #1 ($array) must be of type array, class@anonymous given
+current(): Argument #1 ($array) must be of type array, true given
+current(): Argument #1 ($array) must be of type array, false given
+current(): Argument #1 ($array) must be of type array, resource given
+current(): Argument #1 ($array) must be of type array, resource given
+current: no error
+current: no error
+exit_code=0
+### php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 pointer-objects
+int(1)
+string(1) "a"
+bool(false)
+int(1)
+int(1)
+bool(false)
+int(5)
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: key(): Calling key() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: next(): Calling next() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: reset(): Calling reset() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: end(): Calling end() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: prev(): Calling prev() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 7
+exit_code=0
+### php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 handler-deprecations
+Deprecated: ob_end_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_get_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_end_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_get_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: PHP Request Shutdown: Producing output from user output handler {closure:/w/handler-deprecations.php.txt:6} is deprecated in Unknown on line 0
+bodybodyend
+exit_code=0
+### php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 frameless
+in_array(): Argument #2 ($haystack) must be of type array, string given
+#0 /w/frameless.php.txt(2): in_array(1, 'x')
+#1 /w/frameless.php.txt(3): f()
+#2 {main}
+#0 /w/frameless.php.txt(5): in_array(1, 'x')
+#1 {main}
+1
+["{closure:\/w\/frameless.php.txt:6}","implode"]
+1,Array
+exit_code=0
+### i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 sort-reentry
+count=3 Warning: Undefined array key 1 in /w/sort-reentry.php.txt on line 5
+direct=NULL globals=false [0][1][2]
+count=3 direct=NULL globals=false [0][1][2]
+Warning: Undefined array key 1 in /w/sort-reentry.php.txt on line 5
+count=3 direct=S globals=true [0][1][2]
+["a","b","c"]
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+usort sees true count=3
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+exit_code=0
+### i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 argument-types
+sort(): Argument #1 ($array) must be of type array, true given
+sort(): Argument #1 ($array) must be of type array, false given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, stdClass given
+sort(): Argument #1 ($array) must be of type array, class@anonymous given
+ksort(): Argument #1 ($array) must be of type array, true given
+ksort(): Argument #1 ($array) must be of type array, false given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, stdClass given
+ksort(): Argument #1 ($array) must be of type array, class@anonymous given
+usort(): Argument #1 ($array) must be of type array, true given
+usort(): Argument #1 ($array) must be of type array, false given
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, stdClass given
+usort(): Argument #1 ($array) must be of type array, class@anonymous given
+uksort(): Argument #1 ($array) must be of type array, true given
+uksort(): Argument #1 ($array) must be of type array, false given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, stdClass given
+uksort(): Argument #1 ($array) must be of type array, class@anonymous given
+current(): Argument #1 ($array) must be of type array, true given
+current(): Argument #1 ($array) must be of type array, false given
+current(): Argument #1 ($array) must be of type array, resource given
+current(): Argument #1 ($array) must be of type array, resource given
+current: no error
+current: no error
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero in /w/argument-types.php.txt on line 9
+exit_code=0
+### i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 pointer-objects
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+int(1)
+Deprecated: key(): Calling key() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+string(1) "a"
+Deprecated: next(): Calling next() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+bool(false)
+Deprecated: reset(): Calling reset() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+int(1)
+Deprecated: end(): Calling end() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+int(1)
+Deprecated: prev(): Calling prev() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 7
+bool(false)
+int(5)
+exit_code=0
+### i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 handler-deprecations
+Deprecated: ob_end_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+bodyDeprecated: ob_get_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_end_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_get_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+bodyendDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/w/handler-deprecations.php.txt:6} is deprecated in Unknown on line 0
+exit_code=0
+### i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 frameless
+in_array(): Argument #2 ($haystack) must be of type array, string given
+#0 /w/frameless.php.txt(2): in_array(1, 'x')
+#1 /w/frameless.php.txt(3): f()
+#2 {main}
+#0 /w/frameless.php.txt(5): in_array(1, 'x')
+#1 {main}
+1
+["{closure:\/w\/frameless.php.txt:6}","implode"]
+1,Array
+exit_code=0
+### php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f sort-reentry
+count=3 Warning: Undefined array key 1direct= in /w/sort-reentry.php.txt on line 5
+NULL globals=false [0][1][2]
+Warning: Undefined array key 1 in /w/sort-reentry.php.txt on line 5
+count=3 direct=NULL globals=false [0][1][2]
+count=3 direct=S globals=true [0][1][2]
+["a","b","c"]
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+usort sees true count=3
+usort sees true count=3
+count=3 direct='a' globals=true [0][1][2]
+exit_code=0
+### php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f argument-types
+sort(): Argument #1 ($array) must be of type array, true given
+sort(): Argument #1 ($array) must be of type array, false given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, resource given
+sort(): Argument #1 ($array) must be of type array, stdClass given
+sort(): Argument #1 ($array) must be of type array, class@anonymous given
+ksort(): Argument #1 ($array) must be of type array, true given
+ksort(): Argument #1 ($array) must be of type array, false given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, resource given
+ksort(): Argument #1 ($array) must be of type array, stdClass given
+ksort(): Argument #1 ($array) must be of type array, class@anonymous given
+usort(): Argument #1 ($array) must be of type array, true given
+usort(): Argument #1 ($array) must be of type array, false given
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, resource given
+usort(): Argument #1 ($array) must be of type array, stdClass given
+usort(): Argument #1 ($array) must be of type array, class@anonymous given
+uksort(): Argument #1 ($array) must be of type array, true given
+uksort(): Argument #1 ($array) must be of type array, false given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, resource given
+uksort(): Argument #1 ($array) must be of type array, stdClass given
+uksort(): Argument #1 ($array) must be of type array, class@anonymous given
+current(): Argument #1 ($array) must be of type array, true given
+current(): Argument #1 ($array) must be of type array, false given
+current(): Argument #1 ($array) must be of type array, resource given
+current(): Argument #1 ($array) must be of type array, resource given
+current: no error
+current: no error
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero in /w/argument-types.php.txt on line 9
+exit_code=0
+### php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f pointer-objects
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+int(1)
+Deprecated: key(): Calling key() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+string(1) "a"
+Deprecated: next(): Calling next() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+bool(false)
+Deprecated: reset(): Calling reset() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+int(1)
+int(1)
+Deprecated: end(): Calling end() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+Deprecated: prev(): Calling prev() on an object is deprecated in /w/pointer-objects.php.txt on line 4
+bool(false)
+Deprecated: current(): Calling current() on an object is deprecated in /w/pointer-objects.php.txt on line 7
+int(5)
+exit_code=0
+### php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f handler-deprecations
+Deprecated: ob_end_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_get_flush(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_end_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: ob_get_clean(): Producing output from user output handler named is deprecated in /w/handler-deprecations.php.txt on line 4
+Deprecated: PHP Request Shutdown: Producing output from user output handler {closure:/w/handler-deprecations.php.txt:6} is deprecated in Unknown on line 0
+bodybodyend
+exit_code=0
+### php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f frameless
+in_array(): Argument #2 ($haystack) must be of type array, string given
+#0 /w/frameless.php.txt(2): in_array(1, 'x')
+#1 /w/frameless.php.txt(3): f()
+#2 {main}
+#0 /w/frameless.php.txt(5): in_array(1, 'x')
+#1 {main}
+1
+["{closure:\/w\/frameless.php.txt:6}","implode"]
+1,Array
+exit_code=0

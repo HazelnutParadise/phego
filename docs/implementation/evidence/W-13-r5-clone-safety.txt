@@ -1,0 +1,8 @@
+=== RUN   TestW13PendingReferenceCloneSafety
+=== RUN   TestW13PendingReferenceCloneSafety/32
+=== RUN   TestW13PendingReferenceCloneSafety/64
+--- PASS: TestW13PendingReferenceCloneSafety (0.00s)
+    --- PASS: TestW13PendingReferenceCloneSafety/32 (0.00s)
+    --- PASS: TestW13PendingReferenceCloneSafety/64 (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.512s

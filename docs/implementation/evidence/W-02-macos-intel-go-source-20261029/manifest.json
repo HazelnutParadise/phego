@@ -1,0 +1,130 @@
+{
+  "commit": "820287e5bc178db61a9d0d0b8a2613c7b438293c",
+  "raw_files": {
+    "build-1-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "build-1.log": {
+      "bytes": 730,
+      "sha256": "4b6700459011316502613a09c0b3a15e742800a164bc3de035ca72068a380ac8"
+    },
+    "build-2-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "build-2.log": {
+      "bytes": 730,
+      "sha256": "5816b021873a2e61abea9573f2e0e7f69739cad2105aea62271cf0e90fb45a24"
+    },
+    "commit.txt": {
+      "bytes": 41,
+      "sha256": "2f650eee955e3572ecb124e0b82fb7dcf49eefb4fafedb082a1768dbacb39199"
+    },
+    "comparison.txt": {
+      "bytes": 40,
+      "sha256": "8e0942f28b6b0524628231acf5287c82104c3694bc251f0d06955c3e19d29a2f"
+    },
+    "cpu.txt": {
+      "bytes": 41,
+      "sha256": "8654db3d299186d3074bea1db036d2b0937f406974389fbd19e4ee2bad90ab20"
+    },
+    "go-1.sha256": {
+      "bytes": 65,
+      "sha256": "7a0c6708635e2f13d3005f4cf11b762c5d6bf2626d04810edd90afb9bda55471"
+    },
+    "go-2.sha256": {
+      "bytes": 65,
+      "sha256": "7a0c6708635e2f13d3005f4cf11b762c5d6bf2626d04810edd90afb9bda55471"
+    },
+    "kernel.txt": {
+      "bytes": 195,
+      "sha256": "bba6662109b6f46f8cbc0341d7e8b539baac3e70a9698522fef45f1479f0c235"
+    },
+    "lock-sha256.txt": {
+      "bytes": 83,
+      "sha256": "778a7693daee2418459c9b71fb505b7d05c391884be0a02d75dc2fbcba277379"
+    },
+    "os.txt": {
+      "bytes": 66,
+      "sha256": "31fd674ddb951680692d7b68cafdeab5baa6b3e82aae843269dad73b53f25fc5"
+    },
+    "probe-1.sha256": {
+      "bytes": 65,
+      "sha256": "c5fac1641ce1a31a7cc401a63780a3c5f3d0fd936d4846fcb64b9bb351a9b744"
+    },
+    "probe-2.sha256": {
+      "bytes": 65,
+      "sha256": "c5fac1641ce1a31a7cc401a63780a3c5f3d0fd936d4846fcb64b9bb351a9b744"
+    },
+    "probe-build-1-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "probe-build-1.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe-build-2-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "probe-build-2.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe-run-1-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "probe-run-1.log": {
+      "bytes": 28,
+      "sha256": "ab5e1408e0ece2d31818a0be07732ee4e9474cc8c39fd6de30145f2e18ac2a2e"
+    },
+    "probe-run-2-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "probe-run-2.log": {
+      "bytes": 28,
+      "sha256": "ab5e1408e0ece2d31818a0be07732ee4e9474cc8c39fd6de30145f2e18ac2a2e"
+    },
+    "runner.txt": {
+      "bytes": 75,
+      "sha256": "47de225944e9c32d17de1c27bf0f13b6ca907b0de463ea4eea0c34246b43ceb5"
+    },
+    "sandbox-1-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "sandbox-1.log": {
+      "bytes": 321,
+      "sha256": "79d61f419e55292d42ef9b02b9600184efef8947b6e6c5a98439a45c8095c962"
+    },
+    "sandbox-2-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "sandbox-2.log": {
+      "bytes": 321,
+      "sha256": "4124224c0254bbfe5dd648b57523063662c589b8a881f5d1ff5c7548d9466ac5"
+    },
+    "version-1-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "version-1.txt": {
+      "bytes": 33,
+      "sha256": "404ead4cdba562ada3c26aa2aa47c0d231467fa9246f6aafbc711ef35d6006f9"
+    },
+    "version-2-exit.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "version-2.txt": {
+      "bytes": 33,
+      "sha256": "404ead4cdba562ada3c26aa2aa47c0d231467fa9246f6aafbc711ef35d6006f9"
+    }
+  },
+  "run_id": 40871229613
+}

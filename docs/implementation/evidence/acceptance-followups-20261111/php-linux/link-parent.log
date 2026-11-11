@@ -1,0 +1,10 @@
+8.5.12 Linux aarch64
+/app/return -> <base>/other/toapp/../../app/file: 'app/file'
+/app/sibling -> <base>/other/toapp/../../other/file: 'other/file'
+/app/wander -> <base>/other/toapp/../../outside/../app/file: 'app/file'
+/app/escape -> <base>/other/toapp/../../outside/file: 'outside/file'
+/app/rel -> ../other/toapp/../file: 'app/file'
+/app/escape-return -> <base>/app/../app/file: 'app/file'
+/app/target-boundary -> <base>/other/../app/file: 'app/file'
+/app/parent-outside -> <base>/app/../outside/file: 'outside/file'
+/app/parent-prefix -> <base>/app/../app2/file: 'app2/file'

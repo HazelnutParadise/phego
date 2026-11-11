@@ -1,0 +1,7 @@
+--- FAIL: TestRootFIFOWriteWaitsForReader (0.21s)
+    special_files_test.go:279: write after the reader closed: write /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/TestRootFIFOWriteWaitsForReader1757523323/001/pipe: broken pipe, want EPIPE on the PHP path
+--- FAIL: TestRootFIFOReadWriteOpensAtOnce (0.00s)
+    special_files_test.go:298: seek: seek /var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/TestRootFIFOReadWriteOpensAtOnce577780785/001/pipe: illegal seek, want ESPIPE on the PHP path
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.751s
+FAIL

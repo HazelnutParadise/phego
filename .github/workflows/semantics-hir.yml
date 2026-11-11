@@ -1,0 +1,30 @@
+name: PHP 8.5.12 HIR references
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    # Regenerates the Reflection and effects references for the HIR
+    # fixtures natively and requires them to equal the committed files.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify constant compilation fixtures on both PHP widths
+        run: python3 tools/verify_compile_fixtures.py
+      - name: Regenerate references with the pinned PHP image
+        run: |
+          set -euo pipefail
+          image=php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f
+          cd tests/semantics/w11-hir
+          for f in reflect/*.php; do
+            docker run --rm --network none --platform linux/amd64 -v "$PWD:/w:ro" "$image" php -n /w/reflect.php "/w/$f" > "${f%.php}.json"
+          done
+          for f in effects/*.php; do
+            docker run --rm --network none --platform linux/amd64 -v "$PWD:/w:ro" "$image" php -n /w/effects.php "/w/$f" > "${f%.php}.json"
+          done
+          git diff --exit-code -- .

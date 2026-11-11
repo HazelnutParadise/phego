@@ -1,0 +1,238 @@
+{
+  "scope": "W-15 local compiler/runtime-subset evidence, not VM or product acceptance",
+  "requirements": [
+    "REQ-016",
+    "REQ-024",
+    "REQ-034",
+    "REQ-054"
+  ],
+  "tests": [
+    "T-031",
+    "T-032",
+    "T-047",
+    "T-048",
+    "T-067",
+    "T-068",
+    "T-107",
+    "T-108"
+  ],
+  "source_base": "589ae5b76e0e83fd394484049242f556905b6be0",
+  "product_test_status": "not_run",
+  "reference": {
+    "64": {
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "platform": "linux/arm64",
+      "cases": 285
+    },
+    "32": {
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "platform": "linux/386",
+      "cases": 285
+    }
+  },
+  "pass_configurations": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "seed": 15031,
+  "python_tools": {
+    "command": "python3 -m unittest discover -s tools -p test_*.py",
+    "exit_code": 0,
+    "tests": 536,
+    "log": "W-15-ssa/python-tools.log"
+  },
+  "limits": [
+    "No product VM or AOT acceptance",
+    "W-21 runtime string-segment provenance not implemented",
+    "Existing W-11 compile-time constant diagnostics remain listed in corpus_gaps_test.go"
+  ],
+  "review": {
+    "adversarial": "two reproduced findings fixed; container records metering and nil capture",
+    "no_cost_improvements": [
+      "inline two ID operands; reuse immutable HIR operand lengths",
+      "single-pass closure capture effects"
+    ],
+    "remote_latest_head": "not_yet_submitted_at_evidence_capture; consult PR #75 current-head reviews",
+    "remote_source": "https://github.com/HazelnutParadise/phego/pull/75",
+    "findings": [
+      {
+        "issue": "compiler budget omitted empty container slots and captures",
+        "red_command": "go test ./internal/ir/ssa -run TestContainerSlotsConsumeCompilerBudget -count=1",
+        "red_exit_code": 1,
+        "resolution": "meter container slots, repeated lists and every closure capture scan before allocation; check cancellation on nil/deduplicated entries",
+        "regressions": [
+          "TestContainerSlotsConsumeCompilerBudget",
+          "TestClosureCaptureBudgetAndMalformedCapture"
+        ]
+      },
+      {
+        "issue": "nil capture panicked in OperationEffects",
+        "red_command": "go test ./internal/ir -run TestOperationEffectsMalformedClosure -count=1",
+        "red_exit_code": 1,
+        "red_log": "W-15-ssa/red-capture.log",
+        "resolution": "single-pass conservative closure effects and explicit nil capture rejection",
+        "regressions": [
+          "TestOperationEffectsMalformedClosure"
+        ]
+      }
+    ]
+  },
+  "logs_sha256": {
+    "benchmark-final.log": "574d80b1035f8dbb5d5ad08db44a4b9504c8d3f1ebb23521b44850e4e555e745",
+    "benchmark-inline-initial.log": "f1d2582fd468f8cc1c9e1ba9e601e34169db34a5591eadaa4047f13608686993",
+    "benchmark-slab.log": "920f9f4d99135a0ae70630114265f32d249e6c2dc3700be58fb2986638c42d01",
+    "differential-final.log": "ff05e747706e0b738107ca0d6f4a0e1d8d14f228bb069d3aa6d1fab8a9dfe246",
+    "documents-final.log": "6c634f45be84a908dbb76f4b79880de83537f21fed42a69e99897033e1eb7f7b",
+    "fuzz-final.log": "ee803418af0887f5b39dad5382d06d2ffeb928ddca224152369f4b2c5a38dd83",
+    "fuzz-initial.log": "f6cc8c2d9fc2f02292135064dbeb186468c498deb6205a4bec835c4ac43bb4b0",
+    "go-cgo0-final.log": "da40a99b8444c59d959be53a71a70f692f024ef871ef763087b6b16f7a32df08",
+    "go-race-final.log": "cbcfc059ee47cd04a0a090253a7bfd3a3bf32cf9dc488cf8c0fef5399c414ed6",
+    "go-vet-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gofmt-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-tools.log": "7203e155f118b763d5544dae413536ebbdf1a184c7681888eac2e3fafe12336a",
+    "red-capture.log": "b58eb5206da9f1b969e80bbe7ef829564b590411d730e73cc5c4a13b6e49127a"
+  },
+  "commands": [
+    {
+      "command": [
+        "gofmt",
+        "-l",
+        "internal"
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/gofmt-final.log"
+    },
+    {
+      "command": [
+        "env",
+        "CGO_ENABLED=0",
+        "go",
+        "test",
+        "./..."
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/go-cgo0-final.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "./..."
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/go-race-final.log"
+    },
+    {
+      "command": [
+        "go",
+        "vet",
+        "./..."
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/go-vet-final.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "./internal/runtime",
+        "-run",
+        "^$",
+        "-fuzz",
+        "^FuzzW15Differential$",
+        "-fuzztime=30s",
+        "-parallel=2"
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/fuzz-final.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "./internal/ir/ssa",
+        "-run",
+        "^$",
+        "-bench",
+        "BenchmarkW15",
+        "-benchmem",
+        "-count=3",
+        "-benchtime=200ms"
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/benchmark-final.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "./internal/runtime",
+        "-run",
+        "^TestW15PinnedDifferential$",
+        "-count=1",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/differential-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/validate_docs.py"
+      ],
+      "exit_code": 0,
+      "log": "W-15-ssa/documents-final.log"
+    }
+  ],
+  "gofmt_stdout_empty": true,
+  "toolchain": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "host": "darwin/arm64",
+    "cpu": "Apple M3",
+    "cgo_default_core": false
+  },
+  "source_files_sha256": {
+    ".github/workflows/semantics-optimization.yml": "83f4a95f32f8660ed387b035978c5f0d3ce43c1a37d12e47e4c614583cc2872b",
+    "internal/ir/effects.go": "a6f638d6100898b94470d8b408f15b97873efcac05a03b2b84117f8bf27063eb",
+    "internal/ir/effects_w15_test.go": "caa6b15d1756833c57e4b31fc6d1b8c0db090a049cc4138b435edba629147dac",
+    "internal/ir/ssa/analyze.go": "44195b78faccbcff415b6f5df4d04b6aff32ce237e1db585df294daf38392feb",
+    "internal/ir/ssa/bench_test.go": "0cf373591dae5d39c2f40d56b7f6af4625d141ffe6e294c2391e862e0ebb070b",
+    "internal/ir/ssa/build.go": "c1f17b161ef5810134dc8a3761a53ed67703e96dea7f04df3045730d3c9dfb4c",
+    "internal/ir/ssa/limits_test.go": "c14cca249161fedb179e37f5ff829ded9a42aef3e6725f1b6d1d2cc977bef21d",
+    "internal/ir/ssa/metadata_test.go": "a317395fe95e559bb1b56d131f8c7398ce002734e4b5daaa822d7a72aff9b25f",
+    "internal/ir/ssa/ssa.go": "ba01db541a402396352b0b7da84b9a45db4f27e07140470c234c6c6e80f829a1",
+    "internal/ir/ssa/ssa_test.go": "890b506674299ef76151b22ea4b9af7101463bd28d1d6ad93ef578af929d555b",
+    "internal/runtime/optimization_w15_properties_test.go": "1b2ed7cd652847d8694edcb3762b34232842f49a6f3eae35271181b579e10844",
+    "internal/runtime/optimization_w15_replay_test.go": "50e1e21352efac271158ea3c217365a8c7c78a2b17f51430c8af52954a15e0f5",
+    "internal/runtime/optimization_w15_test.go": "185c3949827b3b21c9408f6e7d90b3f3bfd660b9c515da0d2f2cebf9f8b5660b",
+    "tests/optimization/w15/ref-32.json": "6065ead554f26258ee316dab7f6e79ccb6b910e2cb8c31cc0b30eccc5b2fe1f7",
+    "tests/optimization/w15/ref-64.json": "ed38eddccbd20aa818fcc9e55ebe3cbabd90d200a1f3bb1456420edb4d642b60",
+    "tests/optimization/w15/reference.php": "85e20f82758b9c3a38efd24b49595b2bf19000ffcbf276629dcdb9f07ed70a25"
+  },
+  "source_fingerprint_sha256": "4e5fad0079165151b1bed5531558ec2bd6c1ce5f38de36729bc1f5e08c439b33",
+  "source_identity": "source_base plus source_files_sha256 identifies the tested local changes; the containing Git commit records the final repository snapshot",
+  "fuzz_final": {
+    "seconds": 30,
+    "executions": 322717,
+    "exit_code": 0
+  },
+  "delegation": {
+    "host": "Codex",
+    "decision": "agy claude-opus-4-6-thinking quota exhausted -> native gpt-6.1-sol medium",
+    "testing": "opencode/big-pickle timeout and probe handoff failure -> copilot auto monthly quota (twice) -> native gpt-6-luna medium",
+    "effects_consultation": "native gpt-6-astra medium, read-only",
+    "adversarial_review": "agy claude-opus-4-6-thinking quota exhausted -> native gpt-6.1-sol medium",
+    "documentation_review": "agy claude-opus-4-6-thinking quota exhausted -> native gpt-6.1-sol medium"
+  },
+  "comment_only_followup": {
+    "change": "Clarify that source values are copied, Program does not retain the map, and caller keeps map stable during Build; no executable statements changed",
+    "validation": [
+      "go test ./internal/ir/ssa -count=1: exit 0",
+      "git diff --check: exit 0"
+    ],
+    "full_suite_snapshot": "0319381; executable code unchanged; latest-head full checks additionally run in CI"
+  }
+}

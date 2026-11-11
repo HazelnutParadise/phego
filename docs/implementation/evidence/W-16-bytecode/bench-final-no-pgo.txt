@@ -1,0 +1,151 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/bytecode
+cpu: Apple M3
+BenchmarkDispatch/arithmetic/switch-8         	  226806	       811.8 ns/op	       193.0 dispatches/op	      3088 instruction-B	 237732346 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/switch-8         	  243016	       818.5 ns/op	       193.0 dispatches/op	      3088 instruction-B	 235808814 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/switch-8         	  215440	       807.3 ns/op	       193.0 dispatches/op	      3088 instruction-B	 239078585 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/switch-8         	  220910	       816.0 ns/op	       193.0 dispatches/op	      3088 instruction-B	 236510611 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/switch-8         	  219584	       815.6 ns/op	       193.0 dispatches/op	      3088 instruction-B	 236637701 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  260956	       696.5 ns/op	       193.0 dispatches/op	      3088 instruction-B	 277090415 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  248869	       705.1 ns/op	       193.0 dispatches/op	      3088 instruction-B	 273721910 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  257128	       735.9 ns/op	       193.0 dispatches/op	      3088 instruction-B	 262267006 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  252024	       695.2 ns/op	       193.0 dispatches/op	      3088 instruction-B	 277637827 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  249135	       707.8 ns/op	       193.0 dispatches/op	      3088 instruction-B	 272662307 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  222720	       780.4 ns/op	       193.0 dispatches/op	      3088 instruction-B	 247315683 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  246628	       781.9 ns/op	       193.0 dispatches/op	      3088 instruction-B	 246847721 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  265797	       696.5 ns/op	       193.0 dispatches/op	      3088 instruction-B	 277086854 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  189774	       831.9 ns/op	       193.0 dispatches/op	      3088 instruction-B	 231989840 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  251425	       682.0 ns/op	       193.0 dispatches/op	      3088 instruction-B	 282972871 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  245238	       722.0 ns/op	       193.0 dispatches/op	      3088 instruction-B	 267312394 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  240795	       764.6 ns/op	       193.0 dispatches/op	      3088 instruction-B	 252410231 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  242672	       733.2 ns/op	       193.0 dispatches/op	      3088 instruction-B	 263218992 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  248319	       731.5 ns/op	       193.0 dispatches/op	      3088 instruction-B	 263855667 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  239520	       728.4 ns/op	       193.0 dispatches/op	      3088 instruction-B	 264959295 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  295034	       609.1 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 316846253 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  299262	       604.6 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 319194423 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  297765	       604.3 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 319390761 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  299689	       611.4 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 315673013 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  296186	       611.4 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 315687616 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  193437	       940.7 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 271067685 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  189237	       936.9 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 272169745 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  192618	       933.6 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 273127258 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  192135	       929.2 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 274422904 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  193356	       934.4 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 272894424 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  191797	       910.2 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 280147849 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  196588	       909.8 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 280269256 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  193114	       898.3 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 283880807 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  193032	       899.7 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 283417499 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  185955	       911.4 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 279792589 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  234164	       769.7 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 331310678 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  234231	       771.5 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 330510030 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  234423	       765.8 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 332966582 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  234106	       768.4 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 331874951 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  233554	       768.3 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 331905680 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  180408	      1067 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 238961027 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  179704	      1079 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 236424980 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  149143	      1062 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 240214972 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  181238	      1053 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 242150161 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  177728	      1040 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 245305386 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  178111	      1011 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 252278600 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  177639	      1015 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 251136931 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  177312	      1012 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 251953459 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  177868	      1011 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 252202270 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  178281	      1011 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 252150162 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	  428668	       421.4 ns/op	        97.00 dispatches/op	      1552 instruction-B	 230202178 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	  427798	       416.0 ns/op	        97.00 dispatches/op	      1552 instruction-B	 233176474 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	  433060	       416.5 ns/op	        97.00 dispatches/op	      1552 instruction-B	 232913590 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	  432804	       420.7 ns/op	        97.00 dispatches/op	      1552 instruction-B	 230589969 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	  433221	       415.8 ns/op	        97.00 dispatches/op	      1552 instruction-B	 233305039 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	  436852	       413.2 ns/op	        97.00 dispatches/op	      1552 instruction-B	 234754658 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	  439716	       411.1 ns/op	        97.00 dispatches/op	      1552 instruction-B	 235978156 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	  438391	       411.6 ns/op	        97.00 dispatches/op	      1552 instruction-B	 235681295 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	  438172	       412.8 ns/op	        97.00 dispatches/op	      1552 instruction-B	 234977677 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	  441564	       413.1 ns/op	        97.00 dispatches/op	      1552 instruction-B	 234790351 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	  508138	       354.1 ns/op	        97.00 dispatches/op	      1552 instruction-B	 273897129 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	  509691	       356.9 ns/op	        97.00 dispatches/op	      1552 instruction-B	 271796469 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	  505032	       356.1 ns/op	        97.00 dispatches/op	      1552 instruction-B	 272431213 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	  509193	       357.9 ns/op	        97.00 dispatches/op	      1552 instruction-B	 271063738 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	  505398	       360.8 ns/op	        97.00 dispatches/op	      1552 instruction-B	 268816684 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	  426241	       464.0 ns/op	        97.00 dispatches/op	      1552 instruction-B	 209056911 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	  432601	       408.7 ns/op	        97.00 dispatches/op	      1552 instruction-B	 237346776 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	  450008	       407.3 ns/op	        97.00 dispatches/op	      1552 instruction-B	 238164371 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	  445723	       403.4 ns/op	        97.00 dispatches/op	      1552 instruction-B	 240474891 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	  443850	       407.2 ns/op	        97.00 dispatches/op	      1552 instruction-B	 238226859 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	  424611	       417.9 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 232106214 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	  434961	       415.0 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 233726069 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	  429286	       416.1 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 233092827 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	  436857	       415.6 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 233377277 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	  431430	       413.8 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 234415092 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/switch-8             	  366757	       479.8 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 254269434 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/switch-8             	  376125	       480.4 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 253960941 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/switch-8             	  370093	       477.5 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 255496647 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/switch-8             	  373300	       481.5 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 253358356 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/switch-8             	  369982	       479.9 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 254231721 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/function-table-8     	  371852	       482.8 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 252690661 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/function-table-8     	  373088	       481.2 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 253533876 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/function-table-8     	  374931	       481.3 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 253473601 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/function-table-8     	  367077	       483.5 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 252309577 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/function-table-8     	  373072	       485.9 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 251055334 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/predecoded-closures-8         	  438760	       410.2 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 297432313 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/predecoded-closures-8         	  436848	       410.3 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 297317395 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/predecoded-closures-8         	  434646	       412.0 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 296094778 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/predecoded-closures-8         	  434966	       410.1 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 297513044 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/predecoded-closures-8         	  438908	       412.2 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 295999282 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/bounded-trampoline-8          	  292262	       557.1 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 219010083 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/bounded-trampoline-8          	  374804	       544.9 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 223879896 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/bounded-trampoline-8          	  364590	       827.4 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 147443191 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/bounded-trampoline-8          	  135254	      1157 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 105468848 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/bounded-trampoline-8          	  315730	       498.2 ns/op	       122.0 dispatches/op	        96.00 instruction-B	 244886728 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/superinstruction-add-pair-8   	  347300	       514.1 ns/op	       122.0 dispatches/op	         6.000 fusion-index-B	        96.00 instruction-B	 237287779 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/superinstruction-add-pair-8   	  349130	       514.8 ns/op	       122.0 dispatches/op	         6.000 fusion-index-B	        96.00 instruction-B	 236969909 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/superinstruction-add-pair-8   	  349958	       515.1 ns/op	       122.0 dispatches/op	         6.000 fusion-index-B	        96.00 instruction-B	 236842877 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/superinstruction-add-pair-8   	  349488	       515.0 ns/op	       122.0 dispatches/op	         6.000 fusion-index-B	        96.00 instruction-B	 236884960 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/heldout-alternating/superinstruction-add-pair-8   	  340558	       516.5 ns/op	       122.0 dispatches/op	         6.000 fusion-index-B	        96.00 instruction-B	 236193253 semantic-steps/s	       122.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkEncoding/fixed16/encode-8                                  	  616948	       266.3 ns/op	      1552 program-B	    1792 B/op	       1 allocs/op
+BenchmarkEncoding/fixed16/encode-8                                  	  631882	       262.4 ns/op	      1552 program-B	    1792 B/op	       1 allocs/op
+BenchmarkEncoding/fixed16/encode-8                                  	  683175	       261.1 ns/op	      1552 program-B	    1792 B/op	       1 allocs/op
+BenchmarkEncoding/fixed16/encode-8                                  	  650102	       263.1 ns/op	      1552 program-B	    1792 B/op	       1 allocs/op
+BenchmarkEncoding/fixed16/encode-8                                  	  688335	       263.5 ns/op	      1552 program-B	    1792 B/op	       1 allocs/op
+BenchmarkEncoding/fixed16/decode-8                                  	 1000000	       172.6 ns/op	8992.77 MB/s	      1552 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/fixed16/decode-8                                  	 1000000	       172.3 ns/op	9006.23 MB/s	      1552 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/fixed16/decode-8                                  	 1000000	       172.9 ns/op	8976.54 MB/s	      1552 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/fixed16/decode-8                                  	 1000000	       173.5 ns/op	8947.13 MB/s	      1552 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/fixed16/decode-8                                  	 1000000	       175.3 ns/op	8853.97 MB/s	      1552 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/compact8/encode-8                                 	  709976	       221.6 ns/op	       776.0 program-B	     896 B/op	       1 allocs/op
+BenchmarkEncoding/compact8/encode-8                                 	  765726	       219.9 ns/op	       776.0 program-B	     896 B/op	       1 allocs/op
+BenchmarkEncoding/compact8/encode-8                                 	  762577	       222.6 ns/op	       776.0 program-B	     896 B/op	       1 allocs/op
+BenchmarkEncoding/compact8/encode-8                                 	  739750	       221.9 ns/op	       776.0 program-B	     896 B/op	       1 allocs/op
+BenchmarkEncoding/compact8/encode-8                                 	  778098	       222.7 ns/op	       776.0 program-B	     896 B/op	       1 allocs/op
+BenchmarkEncoding/compact8/decode-8                                 	 1202872	       149.6 ns/op	5185.52 MB/s	       776.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/compact8/decode-8                                 	 1203968	       149.5 ns/op	5189.55 MB/s	       776.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/compact8/decode-8                                 	 1000000	       150.3 ns/op	5161.91 MB/s	       776.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/compact8/decode-8                                 	 1206194	       149.3 ns/op	5198.26 MB/s	       776.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/compact8/decode-8                                 	 1000000	       153.6 ns/op	5051.84 MB/s	       776.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/uvarint/encode-8                                  	  385365	       446.5 ns/op	       485.0 program-B	     704 B/op	       1 allocs/op
+BenchmarkEncoding/uvarint/encode-8                                  	  387721	       439.3 ns/op	       485.0 program-B	     704 B/op	       1 allocs/op
+BenchmarkEncoding/uvarint/encode-8                                  	  402530	       449.8 ns/op	       485.0 program-B	     704 B/op	       1 allocs/op
+BenchmarkEncoding/uvarint/encode-8                                  	  389708	       455.5 ns/op	       485.0 program-B	     704 B/op	       1 allocs/op
+BenchmarkEncoding/uvarint/encode-8                                  	  388628	       449.0 ns/op	       485.0 program-B	     704 B/op	       1 allocs/op
+BenchmarkEncoding/uvarint/decode-8                                  	  178820	       997.4 ns/op	 486.26 MB/s	       485.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/uvarint/decode-8                                  	  181450	       994.6 ns/op	 487.63 MB/s	       485.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/uvarint/decode-8                                  	  181484	       993.4 ns/op	 488.21 MB/s	       485.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/uvarint/decode-8                                  	  181094	       993.8 ns/op	 488.05 MB/s	       485.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkEncoding/uvarint/decode-8                                  	  179929	       994.8 ns/op	 487.51 MB/s	       485.0 program-B	       0 B/op	       0 allocs/op
+BenchmarkPreparation/predecode-super-pairs-8                        	 1870972	        95.52 ns/op	     112 B/op	       1 allocs/op
+BenchmarkPreparation/predecode-super-pairs-8                        	 1882550	        95.52 ns/op	     112 B/op	       1 allocs/op
+BenchmarkPreparation/predecode-super-pairs-8                        	 1889701	        95.16 ns/op	     112 B/op	       1 allocs/op
+BenchmarkPreparation/predecode-super-pairs-8                        	 1887424	        97.25 ns/op	     112 B/op	       1 allocs/op
+BenchmarkPreparation/predecode-super-pairs-8                        	 1838750	       106.9 ns/op	     112 B/op	       1 allocs/op
+BenchmarkPreparation/predecode-closures-8                           	  127293	      1403 ns/op	    3968 B/op	      97 allocs/op
+BenchmarkPreparation/predecode-closures-8                           	  130765	      1377 ns/op	    3968 B/op	      97 allocs/op
+BenchmarkPreparation/predecode-closures-8                           	  129784	      1372 ns/op	    3968 B/op	      97 allocs/op
+BenchmarkPreparation/predecode-closures-8                           	  130747	      1367 ns/op	    3968 B/op	      97 allocs/op
+BenchmarkPreparation/predecode-closures-8                           	  132096	      1363 ns/op	    3968 B/op	      97 allocs/op
+BenchmarkPreparation/compact-decode-8                               	  733906	       241.5 ns/op	    1792 B/op	       1 allocs/op
+BenchmarkPreparation/compact-decode-8                               	  734630	       244.6 ns/op	    1792 B/op	       1 allocs/op
+BenchmarkPreparation/compact-decode-8                               	  734131	       246.4 ns/op	    1792 B/op	       1 allocs/op
+BenchmarkPreparation/compact-decode-8                               	  737553	       244.2 ns/op	    1792 B/op	       1 allocs/op
+BenchmarkPreparation/compact-decode-8                               	  709498	       242.7 ns/op	    1792 B/op	       1 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	29.037s

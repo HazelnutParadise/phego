@@ -1,0 +1,23 @@
+<?php
+require __DIR__ . '/config.php';
+include 'lib/util.php';
+include $theme . '/header.php';
+foo();
+\App\helper();
+$handler();
+$obj->render();
+$obj->$action();
+Cache::get('k');
+$class::make();
+$new = new Widget();
+$dyn = new $widgetClass();
+call_user_func('strtolower', 'X');
+call_user_func($callback);
+array_map(fn($x) => $x, [1]);
+usort($rows, 'strcmp');
+eval($code);
+$$name = 1;
+$out = `ls -l`;
+shell_exec('id');
+file_put_contents('/var/www/uploads/a.txt', 'x');
+file_put_contents($target, 'x');

@@ -1,0 +1,31 @@
+== fopen mknod null(1,3) r
+fopen returned stream at 0.0
+fread '' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== fopen block loop0 r
+fopen returned stream at 0.0
+fread '' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== php block loop0
+exit=0
+== include block loop0
+Warning: include(/work/blk): Failed to open stream: Success in /probe/t.php on line 8
+Warning: include(): Failed opening '/work/blk' for inclusion (include_path='.:/usr/local/lib/php') in /probe/t.php on line 8
+include returned false at 0.0
+exit=0
+== fopen block w
+fopen returned stream at 0.0
+exit=0
+== fopen block loop200 (absent) r
+fopen returned stream at 0.0
+exit=0
+== fopen watchdog(10,130) not in cgroup r
+Warning: fopen(/work/chr2): Failed to open stream: Operation not permitted in /probe/t.php on line 16
+fopen returned false at 0.0
+exit=0
+== php fifo no writer
+exit=124
+== include fifo no writer
+exit=124

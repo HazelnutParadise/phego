@@ -1,0 +1,24 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkW13ObjectComparison/0-8  	 2463132	        96.92 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/0-8  	 2481253	        97.20 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/0-8  	 2482803	        96.95 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/1-8  	 2071864	       115.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/1-8  	 2072281	       115.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/1-8  	 2067567	       115.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/32-8 	  305176	       784.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/32-8 	  325437	       783.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13ObjectComparison/32-8 	  324300	       782.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1335663	       179.1 ns/op	       8 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1325415	       181.7 ns/op	       8 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/get-8         	 1313247	       180.6 ns/op	       8 B/op	       1 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  642526	       380.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  629466	       381.1 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/scalar-set-8  	  656536	       381.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  586533	       423.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  562088	       425.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkW13PropertyHookHolds/object-set-8  	  579260	       425.4 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	5.983s

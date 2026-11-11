@@ -1,0 +1,20 @@
+package phpnum
+import("testing";"os";"strings";"strconv";"math")
+func TestResearchOracle(t *testing.T) {
+ for _,kind:= range []string{"new","int"} {
+  base:="/tmp/phego-compat-pow-research/"
+  input,err:=os.ReadFile(base+kind+"pairs.txt");if err!=nil{t.Fatal(err)}
+  ref,err:=os.ReadFile(base+kind+"pow32.txt");if err!=nil{t.Fatal(err)}
+  pairs:=strings.Split(strings.TrimSpace(string(input)),"\n");expected:=strings.Split(strings.TrimSpace(string(ref)),"\n")
+  if len(pairs)!=len(expected){t.Fatal("count")};bad:=0
+  for i,line:=range pairs {
+   xs,ys,_:=strings.Cut(line," ");var got float64
+   if kind=="new" {x,_:=strconv.ParseUint(xs,16,64);y,_:=strconv.ParseUint(ys,16,64);got=Pow(math.Float64frombits(x),math.Float64frombits(y),32)} else {
+    x,_:=strconv.ParseInt(xs,10,64);y,_:=strconv.ParseInt(ys,10,64);n,f,isInt:=IntPow(x,y,32);got=f;if isInt{got=float64(n)}
+   }
+   w,e:=strconv.ParseUint(expected[i],16,64);if e!=nil{t.Fatal(e)}
+   if math.Float64bits(got)!=w && !(math.IsNaN(got)&&math.IsNaN(math.Float64frombits(w))) {bad++;if bad<=10{t.Errorf("%s line%d %s got%016x want%016x",kind,i,line,math.Float64bits(got),w)}}
+  }
+  t.Logf("%s: %d cases, %d differences",kind,len(pairs),bad)
+ }
+}

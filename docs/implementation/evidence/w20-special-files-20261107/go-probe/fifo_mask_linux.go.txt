@@ -1,0 +1,23 @@
+package main
+
+import (
+	"fmt"
+	"syscall"
+)
+
+func mask(fd int) string {
+	ep, err := syscall.EpollCreate1(syscall.EPOLL_CLOEXEC)
+	if err != nil {
+		return err.Error()
+	}
+	defer syscall.Close(ep)
+	if err := syscall.EpollCtl(ep, syscall.EPOLL_CTL_ADD, fd, &syscall.EpollEvent{Events: syscall.EPOLLIN, Fd: int32(fd)}); err != nil {
+		return err.Error()
+	}
+	ev := make([]syscall.EpollEvent, 1)
+	n, err := syscall.EpollWait(ep, ev, 0)
+	if n == 0 {
+		return fmt.Sprintf("mask none(%v)", err)
+	}
+	return fmt.Sprintf("mask in=%v hup=%v", ev[0].Events&syscall.EPOLLIN != 0, ev[0].Events&syscall.EPOLLHUP != 0)
+}

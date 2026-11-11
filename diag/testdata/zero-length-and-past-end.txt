@@ -1,0 +1,5 @@
+error[PHG0125]: unexpected end
+ --> y.php:1:4
+  |
+1 | abc
+  |    ^ expected more here

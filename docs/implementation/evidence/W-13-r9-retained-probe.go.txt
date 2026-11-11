@@ -1,0 +1,11 @@
+
+func TestW13R9RetainedCounts(t *testing.T) {
+ for _, anchors := range []int{0,1,32} {
+  p:=newPropertyTable(nil)
+  for i:=range anchors {*p.slot(fmt.Sprint("a",i))=w13Int(int64(i))}
+  for range 100000 {*p.slot("x")=w13Int(1);p.remove("x")}
+  used,capacity,blocks:=0,0,0
+  for b:=p.head;b!=nil;b=b.next{used+=b.used;capacity+=len(b.entries);blocks++}
+  t.Logf("anchors=%d live=%d retained_used=%d capacity=%d blocks=%d",anchors,len(p.index),used,capacity,blocks)
+ }
+}

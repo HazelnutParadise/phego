@@ -1,0 +1,125 @@
+== system: Darwin arm64
+8.5.12 Darwin
+== fifo r, no writer
+exit=142
+== fifo r, writer opens at 1s and writes
+fopen returned stream at 1.1
+fread 'payload' at 1.1 eof=true
+fread2 '' at 1.1 eof=true
+exit=0
+== fifo r, writer already waiting, writes at 1s, closes at 2s
+fopen returned stream at 0.0
+fread 'payload' at 2.2 eof=true
+fread2 '' at 2.2 eof=true
+exit=0
+== fifo r, writer opens and closes at 1s without data
+fopen returned stream at 1.0
+fread '' at 1.0 eof=true
+fread2 '' at 1.0 eof=true
+exit=0
+== fifo r+, no peer
+fopen returned stream at 0.0
+exit=0
+== fifo w, no reader
+exit=142
+== fifo w, reader opens at 1s reads 7 bytes then closes
+fopen returned stream at 1.0
+fwrite 7 at 1.0
+reader got: payload
+Notice: fwrite(): Write of 5 bytes failed with errno=32 Broken pipe in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 30
+fwrite2 false at 2.1
+exit=0
+== fifo a, reader at 1s
+fopen returned stream at 1.0
+fwrite 7 at 1.0
+fwrite2 5 at 2.2
+exit=0
+== fifo c, reader at 1s
+fopen returned stream at 1.1
+fwrite 7 at 1.1
+fwrite2 5 at 2.2
+exit=0
+== fifo x
+Warning: fopen(/tmp/phego-sf.Kitsie/f10): Failed to open stream: File exists in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== php fifo
+from fifo
+exit=0
+== include fifo
+Warning: include(/private/tmp/phego-sf.Kitsie/f12): Failed to open stream: Undefined error: 0 in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+Warning: include(): Failed opening '/tmp/phego-sf.Kitsie/f12' for inclusion (include_path='.:') in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+include returned false at 1.0
+exit=0
+== file_get_contents fifo
+fgc returned 'abc' at 1.0
+exit=0
+== php fifo, no writer
+exit=142
+== php /dev/tty
+Could not open input file: /dev/tty
+exit=1
+== fopen /dev/tty r
+Warning: fopen(/dev/tty): Failed to open stream: Device not configured in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen /dev/tty w
+Warning: fopen(/dev/tty): Failed to open stream: Device not configured in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== include /dev/tty
+Warning: include(/dev/tty): Failed to open stream: Device not configured in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+Warning: include(): Failed opening '/dev/tty' for inclusion (include_path='.:') in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+include returned false at 0.0
+exit=0
+== include /dev/null
+Warning: include(/dev/null): Failed to open stream: Undefined error: 0 in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+Warning: include(): Failed opening '/dev/null' for inclusion (include_path='.:') in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+include returned false at 0.0
+exit=0
+== include /dev/zero
+Warning: include(/dev/zero): Failed to open stream: Undefined error: 0 in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+Warning: include(): Failed opening '/dev/zero' for inclusion (include_path='.:') in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+include returned false at 0.0
+exit=0
+== fopen /dev/ptmx r+
+fopen returned stream at 0.0
+exit=0
+== fopen /dev/zero w
+fopen returned stream at 0.0
+exit=0
+== fopen dir w
+Warning: fopen(/tmp/phego-sf.Kitsie/d): Failed to open stream: Is a directory in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir r+
+Warning: fopen(/tmp/phego-sf.Kitsie/d): Failed to open stream: Is a directory in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir a
+Warning: fopen(/tmp/phego-sf.Kitsie/d): Failed to open stream: Is a directory in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== php socket
+Could not open input file: /tmp/phego-sf.Kitsie/sock
+exit=1
+== fopen socket r
+Warning: fopen(/tmp/phego-sf.Kitsie/sock): Failed to open stream: Operation not supported on socket in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen socket w
+Warning: fopen(/tmp/phego-sf.Kitsie/sock): Failed to open stream: Operation not supported on socket in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== include socket
+Warning: include(/private/tmp/phego-sf.Kitsie/sock): Failed to open stream: Operation not supported on socket in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+Warning: include(): Failed opening '/tmp/phego-sf.Kitsie/sock' for inclusion (include_path='.:') in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 10
+include returned false at 0.0
+exit=0
+== fopen block device /dev/disk0 r
+Warning: fopen(/dev/disk0): Failed to open stream: Permission denied in /Users/runner/work/phego/phego/tests/policy/special-files/probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== php block device /dev/disk0
+Could not open input file: /dev/disk0
+exit=1

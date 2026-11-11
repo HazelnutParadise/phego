@@ -1,0 +1,27 @@
+# executionFrame pointers (e5eaac6) vs frames by value with reused locals; interleaved runs of separately built binaries, 4 rounds x count=3
+## before
+BenchmarkExecutionCall-8   	  757800	      1576 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  865196	      1340 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  895471	      1375 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  589110	      2392 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  711265	      1650 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  772610	      1387 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  928933	      1431 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  819433	      1505 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  882944	      1588 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  463495	      2926 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  668056	      3184 ns/op	     528 B/op	      15 allocs/op
+BenchmarkExecutionCall-8   	  702426	      2338 ns/op	     528 B/op	      15 allocs/op
+## after
+BenchmarkExecutionCall-8   	 1235336	      1011 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	 1000000	      1089 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  825651	      1278 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	 1000000	      1008 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	 1000000	      1017 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	 1202560	      1075 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	 1051801	      1638 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  725292	      2586 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  642990	      2589 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  972046	      1435 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  879002	      1158 ns/op	     384 B/op	       6 allocs/op
+BenchmarkExecutionCall-8   	  905536	      1214 ns/op	     384 B/op	       6 allocs/op

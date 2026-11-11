@@ -1,0 +1,264 @@
+--- FAIL: TestW13PHP8512Objects (0.05s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.03s)
+        object_model_test.go:788: r2-return-coerced-hook
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:788: r2-return-coerced-hook-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:788: r2-values-string-reference-concat
+            Go:  {"result":[["TypeError","W13R2VStringReference::__toString(): Return value must be of type string, string returned"],[],["wrapper"]],"diagnostics":[]}
+            PHP: {"result":["prefix:value",[],["wrapper"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-primary
+            Go:  {"result":-1,"diagnostics":[]}
+            PHP: {"result":1,"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-reverse
+            Go:  {"result":1,"diagnostics":[]}
+            PHP: {"result":-1,"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-uninitialized
+            Go:  {"result":[-1,1,{"a":3},{"a":3},{"a":3,"b":2},{"a":3,"b":2}],"diagnostics":[]}
+            PHP: {"result":[1,1,{"a":3},{"a":3},{"a":3,"b":2},{"a":3,"b":2}],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-materialized-table
+            Go:  {"result":[-1,{"a":1},{"a":1},-1,1,-1,{"a":1},{"a":1}],"diagnostics":[]}
+            PHP: {"result":[1,{"a":1},{"a":1},1,1,1,{"a":1},{"a":1}],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-materialized-prefix
+            Go:  {"result":[-1,-1,-1,-1],"diagnostics":[]}
+            PHP: {"result":[1,-1,-1,-1],"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intstring-huge
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intstring-nan
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-property-intstring-inf
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-huge
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-nan
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-property-intbool-inf
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-numeric-string
+            Go:  {"result":["TypeError","Cannot assign string to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intstring-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intstring-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-argument-intstring-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-argument-intbool-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-numeric-string
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, string given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intstring-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intstring-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-return-intstring-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-return-intbool-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-numeric-string
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, string returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-magic-duplicate-missing
+            Go:  {"result":[null,["magic"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Named parameter $duplicate overwrites previous argument"],[]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-magic-duplicate-inaccessible
+            Go:  {"result":[null,["magic"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Named parameter $duplicate overwrites previous argument"],[]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ordinary-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["destructor"],["destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ordinary-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["destructor"],["destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ghost-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["initializer","destructor"],["initializer","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ghost-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["initializer","destructor"],["initializer","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-proxy-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["initializer","destructor","destructor"],["initializer","destructor","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-proxy-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["initializer","destructor","destructor"],["initializer","destructor","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-unset-magic
+            Go:  {"result":[["Error","Typed property W13R2PUnset::$p must not be accessed before initialization"],null,true,["Error","Typed property W13R2PUnset::$q must not be accessed before initialization"],[],null,null,["clone"]],"diagnostics":[[2,"Undefined property: W13R2PUnset::$u"],[2,"Undefined property: W13R2PUnset::$u"]]}
+            PHP: {"result":[2,null,true,["Error","Typed property W13R2PUnset::$q must not be accessed before initialization"],["get","set","isset","unset"],2,2,["get","set","isset","unset","get","clone","get"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-stringable-receiver-release
+            Go:  {"result":[null,["string","destruct","destruct"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Object was released while assigning to property W13R2PReceiver::$text"],["string","destruct","destruct"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-readonly-unset
+            Go:  {"result":[["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],null,["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot unset protected(set) readonly property W13R2PReadonlyBase::$p from global scope"],null,null,null,["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-magic-result-destruction
+            Go:  {"result":[null,null,null,true,["set","unset","isset","isset"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","dtor"],["Exception","dtor"],["Exception","dtor"],true,["set","result-dtor","unset","result-dtor","unset","result-dtor","isset","result-dtor","isset","plain-dtor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-zero-proxy
+            Go:  {"result":[[true,false],[]],"diagnostics":[]}
+            PHP: {"result":[[false,true],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-zero-ghost
+            Go:  {"result":[[true,false],[]],"diagnostics":[]}
+            PHP: {"result":[[false,true],["destructor"]],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.02s)
+        object_model_test.go:788: r2-return-coerced-hook
+            Go:  {"result":["after"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:788: r2-return-coerced-hook-frame
+            Go:  {"result":["after","child"],"diagnostics":[]}
+            PHP: {"result":["child","after"],"diagnostics":[]}
+        object_model_test.go:788: r2-values-string-reference-concat
+            Go:  {"result":[["TypeError","W13R2VStringReference::__toString(): Return value must be of type string, string returned"],[],["wrapper"]],"diagnostics":[]}
+            PHP: {"result":["prefix:value",[],["wrapper"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-primary
+            Go:  {"result":-1,"diagnostics":[]}
+            PHP: {"result":1,"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-reverse
+            Go:  {"result":1,"diagnostics":[]}
+            PHP: {"result":-1,"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-compare-uninitialized
+            Go:  {"result":[-1,1,{"a":3},{"a":3},{"a":3,"b":2},{"a":3,"b":2}],"diagnostics":[]}
+            PHP: {"result":[1,1,{"a":3},{"a":3},{"a":3,"b":2},{"a":3,"b":2}],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-materialized-table
+            Go:  {"result":[-1,{"a":1},{"a":1},-1,1,-1,{"a":1},{"a":1}],"diagnostics":[]}
+            PHP: {"result":[1,{"a":1},{"a":1},1,1,1,{"a":1},{"a":1}],"diagnostics":[]}
+        object_model_test.go:788: r2-values-typed-materialized-prefix
+            Go:  {"result":[-1,-1,-1,-1],"diagnostics":[]}
+            PHP: {"result":[1,-1,-1,-1],"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intstring-huge
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intstring-nan
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-property-intstring-inf
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntString::$value of type int|string"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-huge
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-nan
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-property-intbool-inf
+            Go:  {"result":["TypeError","Cannot assign float to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-property-intbool-numeric-string
+            Go:  {"result":["TypeError","Cannot assign string to property W13R2VUnionIntBool::$value of type int|bool"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intstring-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intstring-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-argument-intstring-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntString::accept(): Argument #1 ($value) must be of type int|string, float given"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-argument-intbool-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, float given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-argument-intbool-numeric-string
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::accept(): Argument #1 ($value) must be of type int|bool, string given"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intstring-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"1.0E+30","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intstring-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"NAN","diagnostics":[[2,"unexpected NAN value was coerced to string"]]}
+        object_model_test.go:788: r2-values-union-return-intstring-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntString::produce(): Return value must be of type int|string, float returned"],"diagnostics":[]}
+            PHP: {"result":"INF","diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-huge
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-nan
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[[2,"unexpected NAN value was coerced to bool"]]}
+        object_model_test.go:788: r2-values-union-return-intbool-inf
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, float returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-union-return-intbool-numeric-string
+            Go:  {"result":["TypeError","W13R2VUnionIntBool::produce(): Return value must be of type int|bool, string returned"],"diagnostics":[]}
+            PHP: {"result":true,"diagnostics":[]}
+        object_model_test.go:788: r2-values-magic-duplicate-missing
+            Go:  {"result":[null,["magic"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Named parameter $duplicate overwrites previous argument"],[]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-magic-duplicate-inaccessible
+            Go:  {"result":[null,["magic"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Named parameter $duplicate overwrites previous argument"],[]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ordinary-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["destructor"],["destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ordinary-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["destructor"],["destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ghost-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["initializer","destructor"],["initializer","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-ghost-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["initializer","destructor"],["initializer","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-proxy-private
+            Go:  {"result":[["Error","Call to private W13R2VClonePrivate::__clone() from global scope"],["initializer","destructor","destructor"],["initializer","destructor","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to private method W13R2VClonePrivate::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-values-clone-proxy-protected
+            Go:  {"result":[["Error","Call to protected W13R2VCloneProtected::__clone() from global scope"],["initializer","destructor","destructor"],["initializer","destructor","destructor","destructor"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Call to protected method W13R2VCloneProtected::__clone() from global scope"],[],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-unset-magic
+            Go:  {"result":[["Error","Typed property W13R2PUnset::$p must not be accessed before initialization"],null,true,["Error","Typed property W13R2PUnset::$q must not be accessed before initialization"],[],null,null,["clone"]],"diagnostics":[[2,"Undefined property: W13R2PUnset::$u"],[2,"Undefined property: W13R2PUnset::$u"]]}
+            PHP: {"result":[2,null,true,["Error","Typed property W13R2PUnset::$q must not be accessed before initialization"],["get","set","isset","unset"],2,2,["get","set","isset","unset","get","clone","get"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-stringable-receiver-release
+            Go:  {"result":[null,["string","destruct","destruct"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Object was released while assigning to property W13R2PReceiver::$text"],["string","destruct","destruct"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-readonly-unset
+            Go:  {"result":[["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"],null,["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"]],"diagnostics":[]}
+            PHP: {"result":[["Error","Cannot unset protected(set) readonly property W13R2PReadonlyBase::$p from global scope"],null,null,null,["Error","Cannot unset readonly property W13R2PReadonlyBase::$p"]],"diagnostics":[]}
+        object_model_test.go:788: r2-property-magic-result-destruction
+            Go:  {"result":[null,null,null,true,["set","unset","isset","isset"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","dtor"],["Exception","dtor"],["Exception","dtor"],true,["set","result-dtor","unset","result-dtor","unset","result-dtor","isset","result-dtor","isset","plain-dtor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-zero-proxy
+            Go:  {"result":[[true,false],[]],"diagnostics":[]}
+            PHP: {"result":[[false,true],["destructor"]],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-zero-ghost
+            Go:  {"result":[[true,false],[]],"diagnostics":[]}
+            PHP: {"result":[[false,true],["destructor"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.031s
+FAIL

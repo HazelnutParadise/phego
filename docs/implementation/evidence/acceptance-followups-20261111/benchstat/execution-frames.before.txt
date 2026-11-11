@@ -1,0 +1,62 @@
+# commit e5eaac6ec2608c4104957a0327e2756fb250beb5
+# go version go1.26.10 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1932513	       610.5 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1905704	       610.2 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 2039482	       586.4 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1952820	       661.6 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1968537	       608.2 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1963520	       627.3 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 1992540	       606.0 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 2030461	       589.5 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 2016260	       627.7 ns/op	     528 B/op	      15 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkExecutionCall-4   	 2000360	       605.6 ns/op	     528 B/op	      15 allocs/op
+PASS

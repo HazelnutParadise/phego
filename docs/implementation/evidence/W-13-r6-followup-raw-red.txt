@@ -1,0 +1,30 @@
+--- FAIL: TestW13R6PHP8512Regression (0.01s)
+    --- FAIL: TestW13R6PHP8512Regression/32 (0.01s)
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-raw-unset-followup (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[5,true],["Exception","init"],[7,true,["Exception","init"]]],["init","init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"],false,["Error","Cannot access uninitialized non-nullable property W13R6RawFollowup::$q by reference"],["Exception","init"],["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"],[1,true],["Exception","init"],[2,true,["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"]]],["init","init"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-raw-unset-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,null,23,[0,true],["Exception","init"],[1,true,23]],["get:q","isset:q","set:q:12","get:q","init","get:q"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-raw-unset-magic-throw (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,["Exception","set"],23,[0,true],["Exception","init"],[1,true,23]],["get:q","isset:q","set:q:12","get:q","init","get:q"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-lazy-raw-unset-magic-reentry (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,["Exception","init"],23,[1,true],["Exception","init"],[2,true,23]],["get:q","isset:q","set:q:12","init","get:q","init","get:q"]],"diagnostics":[]}
+    --- FAIL: TestW13R6PHP8512Regression/64 (0.00s)
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-raw-unset-followup (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[5,true],["Exception","init"],[7,true,["Exception","init"]]],["init","init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"],false,["Error","Cannot access uninitialized non-nullable property W13R6RawFollowup::$q by reference"],["Exception","init"],["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"],[1,true],["Exception","init"],[2,true,["Error","Typed property W13R6RawFollowup::$q must not be accessed before initialization"]]],["init","init"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-raw-unset-magic (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,null,23,[0,true],["Exception","init"],[1,true,23]],["get:q","isset:q","set:q:12","get:q","init","get:q"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-raw-unset-magic-throw (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,["Exception","set"],23,[0,true],["Exception","init"],[1,true,23]],["get:q","isset:q","set:q:12","get:q","init","get:q"]],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-lazy-raw-unset-magic-reentry (0.00s)
+            object_review_r6_test.go:47: Go: {"result":[true,[null,["Exception","init"],["Exception","init"],["Exception","init"],["Exception","init"],[4,true],["Exception","init"],[6,true,["Exception","init"]]],["init","init","init","init","init","init"]],"diagnostics":[]}
+                PHP: {"result":[true,[null,23,true,["Exception","init"],23,[1,true],["Exception","init"],[2,true,23]],["get:q","isset:q","set:q:12","init","get:q","init","get:q"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.649s
+FAIL

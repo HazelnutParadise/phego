@@ -1,0 +1,38 @@
+$ go run ./fifoprobe   # darwin/arm64 27.0.1
+no writer ever: mask none(<nil>) read n=0 err=<nil>
+writer open err: <nil>
+writer idle: mask none(<nil>) read n=-1 err=resource temporarily unavailable
+writer wrote 2: mask data=2 eof=false flags=0x1 read n=1 err=<nil>
+after 1 consumed: mask data=1 eof=false flags=0x1 read n=1 err=<nil>
+writer closed: mask none(<nil>) read n=0 err=<nil>
+fresh reader after writer left: mask none(<nil>) read n=0 err=<nil>
+fresh reader, writer came and went: mask none(<nil>) read n=0 err=<nil>
+write open no reader: device not configured
+rdwr open: <nil>
+os.File deadline: file type does not support deadline
+tty open: open /dev/tty: device not configured
+zero deadline: file type does not support deadline
+$ docker run --rm --network none --read-only php@sha256:add6a138... /p/fp-arm64   # linux/arm64
+no writer ever: mask none(<nil>) read n=0 err=<nil>
+writer open err: <nil>
+writer idle: mask none(<nil>) read n=-1 err=resource temporarily unavailable
+writer wrote 2: mask in=true hup=false read n=1 err=<nil>
+after 1 consumed: mask in=true hup=false read n=1 err=<nil>
+writer closed: mask in=false hup=true read n=0 err=<nil>
+fresh reader after writer left: mask none(<nil>) read n=0 err=<nil>
+fresh reader, writer came and went: mask in=false hup=true read n=0 err=<nil>
+write open no reader: no such device or address
+rdwr open: <nil>
+os.File deadline: <nil>
+tty open: open /dev/tty: no such device or address
+zero deadline: file type does not support deadline
+$ go run ./ptyprobe   # darwin/arm64
+open ptmx: <nil>
+deadline: <nil>
+read n=0 err=read /dev/ptmx: i/o timeout after 300ms
+raw read n=-1 err=resource temporarily unavailable
+$ docker run ... /p/pp   # linux/arm64
+open ptmx: <nil>
+deadline: <nil>
+read n=0 err=read /dev/ptmx: i/o timeout after 300ms
+raw read n=-1 err=resource temporarily unavailable

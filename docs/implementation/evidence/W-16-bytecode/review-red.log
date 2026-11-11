@@ -1,0 +1,64 @@
+--- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode (0.00s)
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/unknown_register_kind (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/wrong_return_class (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/position_count (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/synthetic_position_garbage (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/null_bytes (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/integer_bytes (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/no_functions (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/unreachable_bad_constant (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/no_instructions (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/falls_off_end (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/float_bytes (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/unknown_constant (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/unreachable_unknown_opcode (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/null_bits (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/bool_bits (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/string_bits (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/bad_entry (0.00s)
+        review_test.go:39: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/policy_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/empty_release (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/unknown_release (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/empty_target (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/source_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/compiler_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/scope_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/empty_guest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/modules_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+    --- FAIL: TestRejectsMalformedConstantsIdentityAndUnreachableCode/ABI_digest (0.00s)
+        review_test.go:54: valid control Build failed: invalid bytecode
+--- FAIL: TestOpcodeCapabilitiesCannotBeUnderdeclared (0.00s)
+    review_test.go:71: valid control Build failed: invalid bytecode
+--- FAIL: TestCancellationNilContextAndZeroProgram (0.00s)
+    review_test.go:81: valid control Build failed: invalid bytecode
+--- FAIL: TestNestedArgumentsAndStackJoin (0.00s)
+    review_test.go:121: valid control Build failed: invalid bytecode
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.549s
+FAIL

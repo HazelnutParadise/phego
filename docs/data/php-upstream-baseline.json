@@ -1,0 +1,206 @@
+{
+  "news": [
+    {
+      "id": "2026-11-05-1",
+      "sha256": "2c69b5fa25a3d67862a2a109f3cac582cd42944dbc67e95b00531ef33be43c39",
+      "time": "2026-11-05T21:12:54+00:00",
+      "title": "PHP 8.6.0 RC5 available for testing"
+    },
+    {
+      "id": "2026-10-26-1",
+      "sha256": "2023684d2020c47247d6c2fc2819ef42b40ce776005ffdd64f7b74466a2b1e55",
+      "time": "2026-10-26T11:57:45+00:00",
+      "title": "Updated PHP Windows builds for Brotli security fix"
+    },
+    {
+      "id": "2026-10-23-1",
+      "sha256": "f5ea542f4839aa7c3832b90b48e9bdfc1b650584cb8690e0a19aee629d0a66a1",
+      "time": "2026-10-23T10:12:28+00:00",
+      "title": "Informational advisory: Session upload progress"
+    },
+    {
+      "id": "2026-10-21-5",
+      "sha256": "42fa7cbfe6ebd54c1a4fa79b7c384932f5c39e5a36aaf7d0feb217c131bb3571",
+      "time": "2026-10-21T00:35:26+00:00",
+      "title": "Security advisory: Critical remote code execution vulnerabilities, update now"
+    },
+    {
+      "id": "2026-10-21-6",
+      "sha256": "3741fed40f805e3b9e40659a737c98cf4f73776458782f8e8a1bc4e9c3f91f0e",
+      "time": "2026-10-21T15:41:41+00:00",
+      "title": "PHP 8.6.0 RC4 available for testing"
+    },
+    {
+      "id": "2026-10-21-4",
+      "sha256": "72e45df24f3e6767d00de532eb435765b05f0aed566b4674be3e78bfe7758754",
+      "time": "2026-10-21T00:24:52+00:00",
+      "title": "PHP 8.5.12 Released!"
+    },
+    {
+      "id": "2026-10-21-3",
+      "sha256": "c32d12adab8d078e950249e96d0c5c2531f85e0e735b8ee731e8b4a78c3fd8c5",
+      "time": "2026-10-21T00:20:54+00:00",
+      "title": "PHP 8.4.27 Released!"
+    },
+    {
+      "id": "2026-10-21-2",
+      "sha256": "9d8b90ec61f5a6924ec9aa4de6c12e55ed9744c5848ecbb5f5760af403e41993",
+      "time": "2026-10-21T00:14:54+00:00",
+      "title": "PHP 8.3.36 Released!"
+    },
+    {
+      "id": "2026-10-21-1",
+      "sha256": "569e39a269300d28f702f1ee1c89ff2460afdb461a18e5c0d320d697f7c1ab04",
+      "time": "2026-10-21T00:05:37+00:00",
+      "title": "PHP 8.2.35 Released!"
+    },
+    {
+      "id": "2026-10-20-1",
+      "sha256": "9d85c90f46ae8df3a5adaab383a333dac5e0149f49678570633e2090ceb2ba86",
+      "time": "2026-10-20T20:32:00+00:00",
+      "title": "Upcoming Critical PHP Security Release"
+    },
+    {
+      "id": "2026-10-08-1",
+      "sha256": "f5d0eeabbb9645e4f2ad810490606df9f5947ff1b15cc27231ca362905d2d1b6",
+      "time": "2026-10-08T15:12:35+00:00",
+      "title": "PHP 8.6.0 RC3 available for testing"
+    },
+    {
+      "id": "2026-09-24-5",
+      "sha256": "5505c5c26e39cd9277f56f36c200bd2b81f6e27bcc49606e8a2d02ef090000e3",
+      "time": "2026-09-24T15:26:06+00:00",
+      "title": "PHP 8.4.26 Released!"
+    },
+    {
+      "id": "2026-09-24-4",
+      "sha256": "b37f7db074ace3fb53d28671f120ef5a996ecc2b92025271c4b220c3551df345",
+      "time": "2026-09-24T13:53:04+00:00",
+      "title": "PHP 8.2.34 Released!"
+    },
+    {
+      "id": "2026-09-24-3",
+      "sha256": "6413a7370f5cf1673dcd1ad025c400cd453ddfb16a13b289991a0ada877ed778",
+      "time": "2026-09-24T11:40:51+00:00",
+      "title": "PHP 8.5.11 Released!"
+    },
+    {
+      "id": "2026-09-24-2",
+      "sha256": "2b631b80770b6c72ad2f6a79d935b76da7bedcb39849d1bbfe46ee01733e5631",
+      "time": "2026-09-24T09:51:44+00:00",
+      "title": "PHP 8.3.35 Released!"
+    },
+    {
+      "id": "2026-09-24-1",
+      "sha256": "a23cd982449740416dae568ea8085b673180d98b1790355b8035e8c663c675ec",
+      "time": "2026-09-24T08:21:25+00:00",
+      "title": "PHP 8.6.0 RC2 available for testing"
+    },
+    {
+      "id": "2026-09-10-1",
+      "sha256": "d1b0d6c19c77c3e8a01b0ca8031d71e8fb4c31ea66f2d902b265d107124007d7",
+      "time": "2026-09-10T22:19:15+00:00",
+      "title": "PHP 8.6.0 Beta 3 is available for testing"
+    },
+    {
+      "id": "2026-08-27-3",
+      "sha256": "980ead843972d5003f3dcabb5dd0430b57cdee465c3fcbffe1aaa01f821e4bf9",
+      "time": "2026-08-27T22:44:37+00:00",
+      "title": "PHP 8.5.10 Released!"
+    },
+    {
+      "id": "2026-08-27-2",
+      "sha256": "1be20047e3fa6d1b950de9a24b47d53b1012bfdf1e36048497fdc47fe3bb891c",
+      "time": "2026-08-27T14:59:19+00:00",
+      "title": "PHP 8.4.25 Released!"
+    },
+    {
+      "id": "2026-08-27-1",
+      "sha256": "6a79166f8906afe02b1d284aec14c8d0eb00bb6a8d925e91fcf55afd4102b7c6",
+      "time": "2026-08-27T10:55:50+00:00",
+      "title": "PHP 8.6.0 Beta 2 available for testing"
+    },
+    {
+      "id": "2026-08-25-1",
+      "sha256": "c0d4697db5d13250b9f35fea8a21ce91964588f26e96c8a5ff7450cc7306352f",
+      "time": "2026-08-25T08:38:33+00:00",
+      "title": "Last Call for the State of PHP Survey"
+    },
+    {
+      "id": "2026-08-13-1",
+      "sha256": "2dd33fb2b2c2a8cfd00a85c36a29569533450b637c2db20b146fb7bb9aaee657",
+      "time": "2026-08-13T14:33:26+00:00",
+      "title": "PHP 8.6.0 Beta 1 is available for testing"
+    },
+    {
+      "id": "2026-07-30-5",
+      "sha256": "22ad48b0856ef079cde4b5a6b7695bed25354c4ccc4122e526c39890fb6aa482",
+      "time": "2026-07-30T14:55:16+00:00",
+      "title": "PHP 8.4.24 Released!"
+    },
+    {
+      "id": "2026-07-30-4",
+      "sha256": "17079945da4fab02d646e717ab4d7a525afc15dbb0622e51844b1ee45b2fe77b",
+      "time": "2026-07-30T14:48:58+00:00",
+      "title": "PHP 8.3.33 Released!"
+    },
+    {
+      "id": "2026-07-30-3",
+      "sha256": "d4d1d19925a39d040d1b105ddddb479e533440ab0d1011ad94dc95b88c564140",
+      "time": "2026-07-30T13:24:32+00:00",
+      "title": "PHP 8.6.0 Alpha 3 available for testing"
+    }
+  ],
+  "news_sha256": "94798b739b391c5e5af8dadc1cea3b23ba6a227d1118f63afc62ce808c54c65e",
+  "schema_version": 3,
+  "series": {
+    "8.2": {
+      "announcement": "https://www.php.net/releases/8_2_35.php",
+      "announcement_sha256": "3e08437b0466b0232557487fa86c738f32a4a222298e963ede1aad4d946a41f1",
+      "commit": "09a9f29a0402bb87bb448cb2e3149ccbec1699c6",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "5737b98601fe5ab1b8c5db0c82ed3158acb9283ed3081ffe2faffb9ac81455e6",
+      "tag": "php-8.2.35",
+      "tag_object": "5db33b627a2a1cc18e307f8ecd6060875efa28b1",
+      "version": "8.2.35"
+    },
+    "8.3": {
+      "announcement": "https://www.php.net/releases/8_3_36.php",
+      "announcement_sha256": "22bb5a177652f9a97f8b50c7fdea87ec28cb6bf2f482d1b902ab325360db8661",
+      "commit": "5ba6ad519229ac09fc4fc74155c76bdca69ae0de",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "dd54693aa334c5c4d72e9aee96b082c2473750a18a6c1d105789c93a3b1692fd",
+      "tag": "php-8.3.36",
+      "tag_object": "7ed5ca1aa4fe3272c08ad5283217dc96ac6e3d82",
+      "version": "8.3.36"
+    },
+    "8.4": {
+      "announcement": "https://www.php.net/releases/8_4_27.php",
+      "announcement_sha256": "04b82cfea23b0c874473f6e61fc5c065d3221212c02f370410cd3c48fd44b849",
+      "commit": "00d8bae801541db0d95a698e108bb4b1b273fe6e",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0",
+      "tag": "php-8.4.27",
+      "tag_object": "aa58018e5a2d69f3c497aa22a085fc897b5c3df8",
+      "version": "8.4.27"
+    },
+    "8.5": {
+      "announcement": "https://www.php.net/releases/8_5_12.php",
+      "announcement_sha256": "6f1482b63d6d01103339dc521e4cf91ead7016f594a234d017e7b5c4c8ee3cd8",
+      "commit": "136e049ac10b032c83018e65b63b6df858943750",
+      "release_tags": [
+        "security"
+      ],
+      "sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
+      "tag": "php-8.5.12",
+      "tag_object": "c96586077b050b362744ba295f97f6395f58a75a",
+      "version": "8.5.12"
+    }
+  }
+}

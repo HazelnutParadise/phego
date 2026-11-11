@@ -1,0 +1,12 @@
+--- FAIL: TestHeaderDiagnosticsIdentifyFixedFields (0.00s)
+    --- FAIL: TestHeaderDiagnosticsIdentifyFixedFields/truncated (0.00s)
+        review_test.go:276: want offset 7, got invalid bytecode at byte -1, function -1, instruction -1: truncated header
+    --- FAIL: TestHeaderDiagnosticsIdentifyFixedFields/magic (0.00s)
+        review_test.go:276: want offset 0, got invalid bytecode at byte -1, function -1, instruction -1: bad magic
+    --- FAIL: TestHeaderDiagnosticsIdentifyFixedFields/header_length (0.00s)
+        review_test.go:276: want offset 12, got invalid bytecode at byte -1, function -1, instruction -1: invalid header length
+    --- FAIL: TestHeaderDiagnosticsIdentifyFixedFields/total_length (0.00s)
+        review_test.go:276: want offset 16, got invalid bytecode at byte -1, function -1, instruction -1: invalid header length
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	1.176s
+FAIL

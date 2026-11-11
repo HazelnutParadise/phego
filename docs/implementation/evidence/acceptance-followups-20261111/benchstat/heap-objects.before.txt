@@ -1,0 +1,202 @@
+# commit 063aebef6001248961b9e6f5e3826bfed127ef30
+# go version go1.26.10 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	 9889514	       117.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10028637	       120.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 3971961	       301.3 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5196759	       233.1 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1681530	       695.9 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2157832	       513.3 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  223593	      5209 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  329820	      3588 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   31866	     37373 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   44452	     27365 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4775538	       250.2 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4343980	       270.8 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2384457	       507.1 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 7972862	       149.7 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15214	     78240 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10322316	       117.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10190941	       118.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4078615	       298.0 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5338423	       226.1 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1785171	       683.5 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2469962	       488.6 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  224997	      5131 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  330913	      3558 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   32164	     37761 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   43578	     27562 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4773307	       254.4 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4436826	       267.9 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2396559	       496.3 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8251910	       150.6 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15390	     77531 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10510322	       117.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10294402	       116.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 3916736	       304.7 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5403696	       220.6 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1770211	       711.2 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2415134	       500.1 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  202683	      5234 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  313236	      3859 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   30910	     37571 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   38385	     27442 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4695934	       255.9 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4394776	       278.4 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2328079	       510.9 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 7905002	       152.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15145	     78773 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10684525	       113.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10713530	       119.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4061541	       309.2 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5279167	       226.3 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1715451	       693.3 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2440104	       494.2 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  214964	      5331 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  316352	      3963 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   31594	     37600 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   42702	     27534 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4526599	       253.7 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4381489	       273.7 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2313217	       531.0 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 7953224	       150.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15561	     76546 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10632211	       116.6 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10282443	       114.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4124842	       287.2 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5307789	       231.1 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1756070	       679.9 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2479114	       498.4 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  214131	      5300 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  314956	      3670 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   31464	     37489 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   39438	     27570 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4729434	       257.1 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4323982	       277.2 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2328440	       529.2 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8142450	       150.6 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15519	     76831 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10067179	       120.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10145704	       118.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 3925851	       299.3 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5522294	       223.2 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1706259	       723.8 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2240251	       500.3 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  221592	      5312 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  312568	      3731 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   32353	     38629 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   43628	     27853 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4603749	       250.1 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4418265	       271.0 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2347442	       503.6 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8327286	       148.9 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15288	     78190 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10211472	       116.6 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10736910	       112.7 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4225338	       290.7 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5501560	       221.7 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1735494	       676.3 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2472003	       503.1 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  231494	      5265 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  297622	      3631 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   31941	     37193 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   43291	     27751 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4755396	       252.5 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4547470	       268.7 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2230742	       533.6 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 7959024	       147.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   16018	     74480 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10608163	       114.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10623832	       114.2 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4083932	       299.1 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5404179	       225.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1729647	       683.2 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2472951	       493.4 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  232682	      5249 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  318367	      3570 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   31974	     38165 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   45044	     27566 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4734261	       244.6 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4525077	       263.6 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2430212	       498.8 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8462569	       146.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   15898	     75105 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10421870	       110.9 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10439138	       112.4 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4148826	       283.5 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5586285	       221.0 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1786966	       659.3 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2568813	       475.6 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  236049	      4973 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  329004	      3527 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   32557	     36613 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   45260	     26936 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4939250	       248.7 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4331478	       266.8 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2458376	       489.0 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8241505	       145.5 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   16125	     74904 ns/op	   97092 B/op	     456 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V45 96-Core Processor                
+BenchmarkW13ObjectLifecycle/0/declared=false-4         	10735508	       110.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/0/declared=true-4          	10645330	       112.8 ns/op	     160 B/op	       1 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=false-4         	 4144730	       286.7 ns/op	     544 B/op	       4 allocs/op
+BenchmarkW13ObjectLifecycle/1/declared=true-4          	 5421243	       216.9 ns/op	     224 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=false-4         	 1777435	       667.0 ns/op	    1136 B/op	       6 allocs/op
+BenchmarkW13ObjectLifecycle/4/declared=true-4          	 2556496	       472.5 ns/op	     416 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=false-4        	  238753	      5091 ns/op	    7864 B/op	      16 allocs/op
+BenchmarkW13ObjectLifecycle/32/declared=true-4         	  340332	      3457 ns/op	    2464 B/op	       2 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=false-4       	   32620	     36990 ns/op	   51224 B/op	      36 allocs/op
+BenchmarkW13ObjectLifecycle/256/declared=true-4        	   45076	     26503 ns/op	   18592 B/op	       2 allocs/op
+BenchmarkW13MaterializedLifecycle/once-4               	 4908375	       241.9 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/repeated-4           	 4585345	       267.8 ns/op	     248 B/op	       3 allocs/op
+BenchmarkW13MaterializedLifecycle/clone-4              	 2441046	       488.0 ns/op	     472 B/op	       5 allocs/op
+BenchmarkObjectDestruct-4                              	 8426288	       144.0 ns/op	     160 B/op	       1 allocs/op
+BenchmarkCollect100ObjectCycles-4                      	   16148	     73718 ns/op	   97092 B/op	     456 allocs/op
+PASS

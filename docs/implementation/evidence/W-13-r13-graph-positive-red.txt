@@ -1,0 +1,8 @@
+--- FAIL: TestW13R13SuccessfulGraphAllocations (0.00s)
+    --- FAIL: TestW13R13SuccessfulGraphAllocations/false (0.00s)
+        object_review_r13_graph_test.go:189: successful query matched=true allocations=8, want true/0
+    --- FAIL: TestW13R13SuccessfulGraphAllocations/true (0.00s)
+        object_review_r13_graph_test.go:189: successful query matched=true allocations=8, want true/0
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.587s
+FAIL

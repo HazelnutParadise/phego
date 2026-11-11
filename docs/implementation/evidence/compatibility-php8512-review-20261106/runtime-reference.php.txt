@@ -1,0 +1,14 @@
+<?php
+echo PHP_VERSION, " ", PHP_INT_SIZE, " ", php_uname('m'), "\n";
+class A { static function f() { return "A::f"; } public static $p = "A::p"; const C = "A::C"; }
+class B { static function f() { return "B::f"; } public static $p = "B::p"; const C = "B::C"; }
+const A = "B";
+echo (A)::f(), " ", (A)::$p, " ", (A)::C, " ", get_class(new (A)), "\n";
+try { echo (A)::class, "\n"; } catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+$o = new stdClass;
+try { $o->{[9223372036854775807 => 1, 2]}; } catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+try { $o->{[9223372036854775807 => 1, 2]}(); } catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+$o->{[1.5 => 1]};
+$o->{[null => 1]};
+$o->{1e999-1e999};
+echo "done\n";

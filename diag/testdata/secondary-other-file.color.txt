@@ -1,0 +1,10 @@
+[1;31merror[PHG0203][0m[1m: duplicate function name[0m
+ [1;34m--> [0mb.php:1:10
+ [1;34m |[0m
+[1;34m1 |[0m function f() {}
+ [1;34m |[0m          [1;31m^ second definition[0m
+ [1;34m |[0m
+ [1;34m::: [0ma.php:1:10
+ [1;34m |[0m
+[1;34m1 |[0m function f() {}
+ [1;34m |[0m          [1;34m- first definition[0m

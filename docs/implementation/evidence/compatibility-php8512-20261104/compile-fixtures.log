@@ -1,0 +1,5 @@
+PASS php8512-constant-compile.json.gz: 4681 cases, PHP 8.5.12 int32
+PASS php8512-constant-compile.json.gz: 4681 cases, PHP 8.5.12 int64
+PASS php8512-syntax-constant-compile.json.gz: 700 cases, PHP 8.5.12 int32
+PASS php8512-syntax-constant-compile.json.gz: 700 cases, PHP 8.5.12 int64
+PASS 10762 reference cases; compilation evidence only

@@ -1,0 +1,54 @@
+--- FAIL: TestW13PHP8512Objects (0.05s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.03s)
+        object_model_test.go:794: r2-cleanup-isset
+            Go:  {"result":[true,["after"]],"diagnostics":[]}
+            PHP: {"result":[true,["child","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-isset-throw
+            Go:  {"result":[true,["after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","child",null],["child","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone
+            Go:  {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["child","after-clone","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-throw
+            Go:  {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","child",null],["child","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-array
+            Go:  {"result":[null,["after-clone","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-double
+            Go:  {"result":[["Exception","clone",null],["clone","after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor","clone"],["clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-dynamic
+            Go:  {"result":[[1,2],["get","after"]],"diagnostics":[]}
+            PHP: {"result":[[2,7],["after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-handler
+            Go:  {"result":[null,["parent","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["subclass","after"]],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.02s)
+        object_model_test.go:794: r2-cleanup-isset
+            Go:  {"result":[true,["after"]],"diagnostics":[]}
+            PHP: {"result":[true,["child","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-isset-throw
+            Go:  {"result":[true,["after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","child",null],["child","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone
+            Go:  {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["child","after-clone","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-throw
+            Go:  {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","child",null],["child","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-array
+            Go:  {"result":[null,["after-clone","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["after-clone","clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-clone-double
+            Go:  {"result":[["Exception","clone",null],["clone","after"]],"diagnostics":[]}
+            PHP: {"result":[["Exception","destructor","clone"],["clone","after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-dynamic
+            Go:  {"result":[[1,2],["get","after"]],"diagnostics":[]}
+            PHP: {"result":[[2,7],["after"]],"diagnostics":[]}
+        object_model_test.go:794: r2-cleanup-handler
+            Go:  {"result":[null,["parent","after"]],"diagnostics":[]}
+            PHP: {"result":[null,["subclass","after"]],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	1.042s
+FAIL

@@ -1,0 +1,46 @@
+name: PHP 8.5.12 lifecycle semantics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    name: Lifecycle reference (${{ matrix.profile }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # Profiles are (integer width, architecture), each on a native runner.
+        include:
+          - profile: "64"
+            width: 64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - profile: "32"
+            width: 32
+            arch: "386"
+            runner: ubuntu-24.04
+          - profile: amd64
+            width: 64
+            arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      # REQ-020/REQ-040; T-039/T-040/T-079/T-080.
+      - name: Test reference runner and stream isolation
+        run: python3 -m unittest discover -s tools -p test_lifecycle_reference.py
+      - name: Regenerate pinned reference and compare every recorded field
+        run: python3 tools/lifecycle_reference.py --width ${{ matrix.width }} --arch ${{ matrix.arch }}
+      - name: Replay lifecycle actions with the matching guest width
+        env:
+          CGO_ENABLED: '0'
+        run: go test -count=1 -run '^TestExecutionOracleReplay$/^${{ matrix.profile }}$' -v ./internal/runtime

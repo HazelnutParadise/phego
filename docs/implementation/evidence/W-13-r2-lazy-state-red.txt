@@ -1,0 +1,18 @@
+--- FAIL: TestW13PHP8512Objects (0.03s)
+    --- FAIL: TestW13PHP8512Objects/32 (0.02s)
+        object_model_test.go:788: r2-property-readonly-coercion-reentry
+            Go:  {"result":[["Error","Cannot modify readonly property W13R2PReadonlyCoercion::$text"],"inner"],"diagnostics":[]}
+            PHP: {"result":[null,"outer"],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-comparison-state
+            Go:  {"result":[-1,1],"diagnostics":[]}
+            PHP: {"result":[-1,-1],"diagnostics":[]}
+    --- FAIL: TestW13PHP8512Objects/64 (0.01s)
+        object_model_test.go:788: r2-property-readonly-coercion-reentry
+            Go:  {"result":[["Error","Cannot modify readonly property W13R2PReadonlyCoercion::$text"],"inner"],"diagnostics":[]}
+            PHP: {"result":[null,"outer"],"diagnostics":[]}
+        object_model_test.go:788: r2-lazy-comparison-state
+            Go:  {"result":[-1,1],"diagnostics":[]}
+            PHP: {"result":[-1,-1],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.624s
+FAIL

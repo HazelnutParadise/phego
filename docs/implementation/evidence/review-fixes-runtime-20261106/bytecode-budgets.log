@@ -1,0 +1,7 @@
+=== RUN   TestZZMeasureDefaultBudgets
+    zz_measure_test.go:47: registers=64 instructions=1048576 bytes=33554865 build_work=8388774 load_work=106956053 build_memory=152045104 load_memory=152045160 defaults_work=134217728 defaults_memory=201326592
+    zz_measure_test.go:47: registers=4096 instructions=1048576 bytes=33558897 build_work=140517414 load_work=239092757 build_memory=680560672 load_memory=680560728 defaults_work=134217728 defaults_memory=201326592
+--- PASS: TestZZMeasureDefaultBudgets (88.31s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	89.061s
+exit_code=0

@@ -1,0 +1,6 @@
+=== RUN   TestHostProfileLazyOperandOrder
+    host_profile_test.go:30: host profile amd64: Phego [false,["init:B","init:A","dtor:A","dtor:B"]], PHP 8.5.12 on this system [false,["init:A","init:B","dtor:A","dtor:B"]]
+--- FAIL: TestHostProfileLazyOperandOrder (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.018s
+FAIL

@@ -1,0 +1,68 @@
+name: PHP 8.5.12 optimization semantics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    name: Optimization reference (${{ matrix.profile }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # amd64 output is compared with the 64-bit reference file.
+        include:
+          - profile: "64"
+            width: 64
+            runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            image: php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9
+          - profile: "32"
+            width: 32
+            runner: ubuntu-24.04
+            platform: linux/386
+            image: i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049
+          - profile: amd64
+            width: 64
+            runner: ubuntu-24.04
+            platform: linux/amd64
+            image: php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Regenerate isolated pinned reference
+        env:
+          IMAGE: ${{ matrix.image }}
+          PLATFORM: ${{ matrix.platform }}
+          WIDTH: ${{ matrix.width }}
+        run: |
+          docker pull --platform "$PLATFORM" "$IMAGE"
+          mkdir -p "$RUNNER_TEMP/w15-reference"
+          docker run --pull never --rm --network none --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --user 65534:65534 --pids-limit 32 \
+            --memory 128m --cpus 1 --platform "$PLATFORM" \
+            -v "$PWD/tests/optimization/w15:/w:ro" "$IMAGE" php -n /w/reference.php \
+            > "$RUNNER_TEMP/w15-reference/ref-$WIDTH.json" 2> "$RUNNER_TEMP/w15-reference/stderr.txt"
+          test ! -s "$RUNNER_TEMP/w15-reference/stderr.txt"
+          cmp "tests/optimization/w15/ref-$WIDTH.json" "$RUNNER_TEMP/w15-reference/ref-$WIDTH.json"
+      - name: Compare optimization off and every pass with fresh PHP
+        env:
+          CGO_ENABLED: '0'
+          PHEGO_W15_REFERENCE: ${{ runner.temp }}/w15-reference
+        run: go test -count=1 -run '^TestW15PinnedDifferential/${{ matrix.width }}$' -v ./internal/runtime
+      - name: Fuzz optimization equivalence
+        if: matrix.profile == '64'
+        run: go test ./internal/runtime -run '^$' -fuzz '^FuzzW15Differential$' -fuzztime=30s -parallel=2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: w15-reference-${{ matrix.profile }}
+          path: ${{ runner.temp }}/w15-reference

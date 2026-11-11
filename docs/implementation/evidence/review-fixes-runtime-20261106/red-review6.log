@@ -1,0 +1,37 @@
+# 7b82315 with TestRunFileCancelledFIFOReadLeavesNoReader (before the fix, darwin arm64)
+--- FAIL: TestRunFileCancelledFIFOReadLeavesNoReader (5.17s)
+    runfile_cancel_unix_test.go:89: goroutines 5 after cancelled reads, 2 before
+    runfile_cancel_unix_test.go:108: second RunFile did not finish after the writer closed
+FAIL
+FAIL	github.com/HazelnutParadise/phego	6.024s
+FAIL
+
+# 7b82315 with the handler fatal and zero-length write solo fixtures (before the fix)
+--- FAIL: TestExecutionOracleReplay (0.01s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/solo_handler_fatal (0.00s)
+            execution_oracle_test.go:606: output="<[S]>" code=255, oracle=""/255
+            execution_oracle_test.go:646: handler messages=[], oracle=["PHP Request Shutdown: Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:inner diagnostic:Deprecated diagnostic:Fatal error shutdown:level=1 flush:outer], oracle=[flush:inner diagnostic:Deprecated diagnostic:Fatal error shutdown:level=2 diagnostic:Fatal error]
+        --- FAIL: TestExecutionOracleReplay/64/solo_printf_empty (0.00s)
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner], oracle=[flush:inner diagnostic:Deprecated]
+        --- FAIL: TestExecutionOracleReplay/64/solo_return_dtor_fatal (0.00s)
+            execution_oracle_test.go:606: output="<[S]>" code=255, oracle=""/255
+            execution_oracle_test.go:646: handler messages=[], oracle=["PHP Request Shutdown: Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local diagnostic:Deprecated diagnostic:Fatal error shutdown:level=1 flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated diagnostic:Fatal error shutdown:level=2 diagnostic:Fatal error]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/solo_handler_fatal (0.00s)
+            execution_oracle_test.go:606: output="<[S]>" code=255, oracle=""/255
+            execution_oracle_test.go:646: handler messages=[], oracle=["PHP Request Shutdown: Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:inner diagnostic:Deprecated diagnostic:Fatal error shutdown:level=1 flush:outer], oracle=[flush:inner diagnostic:Deprecated diagnostic:Fatal error shutdown:level=2 diagnostic:Fatal error]
+        --- FAIL: TestExecutionOracleReplay/32/solo_printf_empty (0.00s)
+            execution_oracle_test.go:646: handler messages=[], oracle=["ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated"]
+            execution_oracle_test.go:649: events=[flush:inner], oracle=[flush:inner diagnostic:Deprecated]
+        --- FAIL: TestExecutionOracleReplay/32/solo_return_dtor_fatal (0.00s)
+            execution_oracle_test.go:606: output="<[S]>" code=255, oracle=""/255
+            execution_oracle_test.go:646: handler messages=[], oracle=["PHP Request Shutdown: Cannot use output buffering in output buffering display handlers"]
+            execution_oracle_test.go:649: events=[flush:inner destroy:local diagnostic:Deprecated diagnostic:Fatal error shutdown:level=1 flush:outer], oracle=[flush:inner destroy:local diagnostic:Deprecated diagnostic:Fatal error shutdown:level=2 diagnostic:Fatal error]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.578s
+FAIL

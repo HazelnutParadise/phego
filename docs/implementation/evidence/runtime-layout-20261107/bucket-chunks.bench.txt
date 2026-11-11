@@ -1,0 +1,361 @@
+# bucket allocation: per bucket (N, 2cc3dcc) vs per-array chunks (F) vs per-heap chunks (H, adopted); interleaved runs of separately built binaries, 4 rounds x count=3
+## N
+BenchmarkW12Sorting/1024-8           	    1266	    946086 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1267	    944587 ns/op	      9942 comparisons/op	  210485 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1272	    942177 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkPackedAppend1K-8            	    9801	    121651 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9978	    122024 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9522	    126130 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2420173	       493.9 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2449808	       491.9 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2403654	       496.3 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1177 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1197 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1210 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  417091	      2868 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  419041	      2883 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  414325	      2948 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34922	     34539 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   35180	     34146 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34806	     34736 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkW12Sorting/1024-8           	    1243	    957886 ns/op	      9942 comparisons/op	  210485 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1270	    945441 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1275	    945152 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkPackedAppend1K-8            	    9838	    121734 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9908	    123425 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9735	    123229 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2445908	       495.3 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2399476	       495.0 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2437455	       491.8 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1202 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  984250	      1222 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1224 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  413274	      2917 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  418995	      2825 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  422766	      2827 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34987	     34211 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34826	     34704 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   33925	     34819 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkW12Sorting/1024-8           	    1261	    952302 ns/op	      9942 comparisons/op	  210489 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1256	    958709 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1238	    953534 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkPackedAppend1K-8            	    9813	    122454 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    122847 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9769	    125504 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2225791	       533.5 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2331475	       499.5 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2452618	       495.0 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1220 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1234 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1251 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  377863	      2869 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  420213	      2806 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  386805	      2882 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   33225	     35326 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34671	     35180 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34726	     35242 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkW12Sorting/1024-8           	    1258	    948173 ns/op	      9942 comparisons/op	  210485 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1263	    948833 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8           	    1264	    951473 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkPackedAppend1K-8            	    9824	    124296 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9526	    125617 ns/op	  128585 B/op	    1039 allocs/op
+BenchmarkPackedAppend1K-8            	    9396	    125654 ns/op	  128584 B/op	    1039 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2378642	       510.8 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2352186	       512.6 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2389406	       504.9 ns/op	     440 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  983296	      1215 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  932560	      1328 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1177 ns/op	     984 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  415894	      2872 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  411872	      2866 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  414814	      2845 ns/op	    2520 B/op	      27 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34371	     34807 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   34810	     34287 ns/op	  107872 B/op	    1026 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   35070	     34237 ns/op	  107872 B/op	    1026 allocs/op
+## F
+BenchmarkW12Sorting/1024-8           	    1261	    945908 ns/op	      9942 comparisons/op	  213542 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1245	    966258 ns/op	      9942 comparisons/op	  213541 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1246	    945612 ns/op	      9942 comparisons/op	  213537 B/op	      61 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117852 ns/op	  131801 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117839 ns/op	  131801 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    118529 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2385060	       504.0 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2384010	       505.6 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2383784	       506.9 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1189 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1189 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1224 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  410894	      2876 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  418951	      2844 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  428461	      2848 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43525	     28241 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   41456	     28177 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   42906	     27880 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkW12Sorting/1024-8           	    1255	    935641 ns/op	      9942 comparisons/op	  213537 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1282	    936790 ns/op	      9942 comparisons/op	  213541 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1280	    937337 ns/op	      9942 comparisons/op	  213537 B/op	      61 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    118232 ns/op	  131801 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117698 ns/op	  131801 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    118367 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2400639	       500.8 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2385788	       504.0 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2406886	       499.5 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1169 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1168 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1170 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  418615	      2851 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  424692	      2843 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  426399	      2840 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43258	     28162 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   40267	     28907 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   44110	     27237 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkW12Sorting/1024-8           	    1255	    959637 ns/op	      9942 comparisons/op	  213537 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1195	    955590 ns/op	      9942 comparisons/op	  213536 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1261	    962431 ns/op	      9942 comparisons/op	  213536 B/op	      61 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    118867 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    119230 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    120013 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2340198	       507.4 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2370045	       512.5 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2385471	       514.3 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1187 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1176 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  991977	      1167 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  422762	      2830 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  421282	      2838 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  419181	      2855 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43909	     27450 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43753	     27419 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43764	     27767 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkW12Sorting/1024-8           	    1274	    937147 ns/op	      9942 comparisons/op	  213542 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1281	    940964 ns/op	      9942 comparisons/op	  213536 B/op	      61 allocs/op
+BenchmarkW12Sorting/1024-8           	    1278	    938330 ns/op	      9942 comparisons/op	  213537 B/op	      61 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117474 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117548 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117639 ns/op	  131800 B/op	      73 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2403672	       500.3 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2382350	       504.7 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2390486	       505.5 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  976797	      1174 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1167 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1162 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  424251	      2829 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  427045	      2846 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  414246	      2942 ns/op	    2824 B/op	      15 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43003	     27518 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43846	     27480 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43908	     27390 ns/op	  110928 B/op	      53 allocs/op
+## H
+BenchmarkW12Sorting/1024-8           	    1280	    933191 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1273	    937796 ns/op	      9942 comparisons/op	  212040 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1280	    937502 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    116663 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117009 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117605 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2563756	       465.6 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2583926	       464.4 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2546899	       469.0 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1128 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1135 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1119 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  449482	      2680 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  450001	      2681 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  451833	      2717 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43078	     27896 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43285	     27718 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43201	     28102 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkW12Sorting/1024-8           	    1275	    936474 ns/op	      9942 comparisons/op	  212046 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1281	    935230 ns/op	      9942 comparisons/op	  212045 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1272	    941698 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    116813 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    116931 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117388 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2573592	       464.5 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2588943	       463.7 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2568054	       466.8 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1135 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1123 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1134 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  445302	      2683 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  447667	      2697 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  447768	      2722 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   42519	     27807 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43400	     27614 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43626	     27520 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkW12Sorting/1024-8           	    1254	    940675 ns/op	      9942 comparisons/op	  212046 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1256	    942645 ns/op	      9942 comparisons/op	  212041 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1269	    942244 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    119364 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    116939 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    116987 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2581957	       463.9 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2595726	       464.1 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2556562	       469.7 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1142 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1161 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1138 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  440937	      2739 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  438901	      2747 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  449671	      2690 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43279	     27626 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43484	     27710 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   43660	     27761 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkW12Sorting/1024-8           	    1258	    947683 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1267	    936575 ns/op	      9942 comparisons/op	  212042 B/op	      58 allocs/op
+BenchmarkW12Sorting/1024-8           	    1269	    942963 ns/op	      9942 comparisons/op	  212041 B/op	      58 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    117600 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    119770 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppend1K-8            	   10000	    120168 ns/op	  130376 B/op	      65 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2565505	       473.3 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2358034	       483.4 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2563860	       475.0 ns/op	     444 B/op	       4 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1139 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1138 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/8-8       	 1000000	      1149 ns/op	     996 B/op	       5 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  434112	      2753 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  445659	      2710 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  452188	      2695 ns/op	    2550 B/op	       7 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   42752	     28132 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   42566	     28333 ns/op	  109432 B/op	      50 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   41859	     28589 ns/op	  109432 B/op	      50 allocs/op
+## chunk sizing candidates (bytes and allocations; times noisy)
+### A
+BenchmarkPackedAppend1K-8            	    3127	    361917 ns/op	  131132 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    3764	    330421 ns/op	  131130 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    3714	    389430 ns/op	  131129 B/op	      69 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  687582	      1898 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  733910	      1638 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  756862	      1434 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  505018	      2254 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  536721	      2091 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  664359	      2068 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  241094	      5089 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  267544	      4350 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  258820	      4657 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   30512	     53024 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   19140	     58359 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   23791	     50002 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkPackedAppend1K-8            	    8294	    151484 ns/op	  131130 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    8140	    144626 ns/op	  131128 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    8570	    138160 ns/op	  131128 B/op	      69 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2194164	       537.5 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2262170	       530.6 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 2259990	       541.9 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  904974	      1395 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  880790	      1331 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  926008	      1308 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  344947	      3475 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  377617	      3226 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  393698	      3099 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   41076	     30873 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   36553	     32267 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   35527	     35537 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkPackedAppend1K-8            	    4933	    256545 ns/op	  131132 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    3808	    262685 ns/op	  131128 B/op	      69 allocs/op
+BenchmarkPackedAppend1K-8            	    4789	    242960 ns/op	  131129 B/op	      69 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1000000	      1174 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  904612	      1127 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1226478	       980.6 ns/op	     552 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  539012	      2379 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  559290	      2332 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  576933	      2155 ns/op	    1000 B/op	       9 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  235046	      5003 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  240828	      5356 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  234231	      5134 ns/op	    3144 B/op	      13 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   23142	     52990 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   19515	     62351 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   17809	     66803 ns/op	  109936 B/op	      51 allocs/op
+### B
+BenchmarkPackedAppend1K-8            	    9620	    135306 ns/op	  131801 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    7641	    160588 ns/op	  131800 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    9032	    138934 ns/op	  131800 B/op	      74 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1796641	       709.8 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1990276	       582.3 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1916220	       689.8 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  807933	      1480 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  802048	      1536 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  810450	      1428 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  381577	      3267 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  320137	      3511 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  363105	      3787 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   39769	     30457 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   40546	     32893 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   31594	     44471 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkPackedAppend1K-8            	    7112	    143710 ns/op	  131803 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    8584	    137684 ns/op	  131800 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    8948	    139143 ns/op	  131800 B/op	      74 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1742932	       676.2 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1731217	       861.4 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1000000	      1405 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  352306	      3226 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  335476	      3189 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  415112	      2952 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  194148	      6841 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  166824	      7382 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  189985	      8101 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	    9441	    134091 ns/op	  110929 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   10000	    127824 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   15109	     80287 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkPackedAppend1K-8            	    4436	    234913 ns/op	  131803 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    5064	    280583 ns/op	  131801 B/op	      74 allocs/op
+BenchmarkPackedAppend1K-8            	    4387	    258994 ns/op	  131801 B/op	      74 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1284439	       922.2 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  863541	      1226 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1511265	       867.1 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  527160	      2582 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  448924	      2754 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  472408	      2658 ns/op	    1096 B/op	      11 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  204616	      6319 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  194773	      5867 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  196766	      5659 ns/op	    2824 B/op	      16 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   17276	     64736 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   21543	     57503 ns/op	  110928 B/op	      53 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   17670	     63417 ns/op	  110928 B/op	      53 allocs/op
+### C
+BenchmarkPackedAppend1K-8            	    8665	    145194 ns/op	  131130 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    7855	    160717 ns/op	  131129 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    7071	    169770 ns/op	  131129 B/op	      70 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1659722	       728.3 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1631654	       740.0 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1683547	       745.7 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  659083	      1525 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  877400	      1379 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  804842	      1906 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  285954	      3880 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  369278	      3029 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  421124	      2973 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   35263	     38749 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   23636	     48619 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   35347	     31500 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkPackedAppend1K-8            	    4640	    257297 ns/op	  131129 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    4521	    256867 ns/op	  131128 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    5684	    246458 ns/op	  131129 B/op	      70 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1000000	      1139 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	  912338	      1192 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1037749	      1142 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  473856	      2595 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  437965	      2409 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  500994	      2583 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  175555	      7650 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  157165	      7417 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  187855	      6411 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   16630	     73874 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   15366	     75835 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   15994	     73838 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkPackedAppend1K-8            	    5110	    238328 ns/op	  131130 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    4966	    235002 ns/op	  131128 B/op	      70 allocs/op
+BenchmarkPackedAppend1K-8            	    5079	    244079 ns/op	  131128 B/op	      70 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1214191	       984.1 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1351052	       886.5 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/3-8       	 1377301	       880.7 ns/op	     456 B/op	       7 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  575923	      2055 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  630872	      2030 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/8-8       	  618122	      2193 ns/op	    1000 B/op	      10 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  207391	      5783 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  234860	      5451 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkPackedAppendSmall/20-8      	  227194	      5611 ns/op	    3144 B/op	      14 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   18001	     68118 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   17037	     64782 ns/op	  109936 B/op	      51 allocs/op
+BenchmarkCopyOnWriteSeparation1K-8   	   28738	     40801 ns/op	  109936 B/op	      51 allocs/op
+## make([]bucket, n) allocated bytes on go1.26.5 darwin/arm64 (8-byte malloc header above 512 bytes)
+n=1 96, n=2 192, n=3 288, n=4 384, n=5 480, n=8 896, n=10 1024, n=13 1280, n=16 1792, n=21 2048, n=42 4096, n=85 8192

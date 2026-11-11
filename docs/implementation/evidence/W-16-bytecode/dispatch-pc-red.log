@@ -1,0 +1,10 @@
+--- FAIL: TestDispatchCandidates (0.00s)
+    --- FAIL: TestDispatchCandidates/arithmetic (0.00s)
+        --- FAIL: TestDispatchCandidates/arithmetic/superinstruction-add-pair (0.00s)
+            --- FAIL: TestDispatchCandidates/arithmetic/superinstruction-add-pair/cancel-between-fused-steps (0.00s)
+                dispatch_bench_test.go:335: result err=context canceled steps=1 regs=[4 3 7 0 0 0 0 0] output=; want err=context canceled steps=1 regs=[4 3 7 0 0 0 0 0] output=
+            --- FAIL: TestDispatchCandidates/arithmetic/superinstruction-add-pair/quota-between-fused-steps (0.00s)
+                dispatch_bench_test.go:335: result err=synthetic step quota exceeded steps=1 regs=[4 3 7 0 0 0 0 0] output=; want err=synthetic step quota exceeded steps=1 regs=[4 3 7 0 0 0 0 0] output=
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.836s
+FAIL

@@ -9,7 +9,6 @@ The design baseline is specification **1.1.2**, dated **2026-10-28**. The detail
 - [Benchmark contract](benchmarks/README.md): competitor discovery, fairness, statistics, and completion gates.
 - [Application acceptance](acceptance/README.md): genuine applications, source locks, workflows, and data invariants.
 - [Decision register](decisions/README.md): all 28 decisions and their status.
-
 - [Implementation issues and draft PRs](implementation/README.md): all 60 work packages, dependency order, and acceptance ownership.
 
 ## Machine-readable planning records

@@ -1,0 +1,3 @@
+--- FAIL: TestRunFileFIFOReadCancelKeepsCause (0.10s)
+    runfile_fifo_review_fixes_test.go:176: RunFile = &{Status:3 Return:{kind:0 boolean:false integer:0 floating:0 text: entries:[]} ExitCode:0 Output:[] Diagnostics:[]}, context canceled; want StatusCancelled with the host's cause
+FAIL

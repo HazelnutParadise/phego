@@ -1,0 +1,817 @@
+{
+  "php_version": "8.5.12",
+  "int_size": 8,
+  "os": "Linux",
+  "cases": [
+    {
+      "case": "array_exit",
+      "exit_code": 7,
+      "stdout": "[(BADSD)]",
+      "stderr": "destroy:array-a\ndestroy:array-b\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:array-a\ndestroy:array-b\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BADSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BADSD)]",
+        "stderr": "destroy:array-a\ndestroy:array-b\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_exit_caught",
+      "exit_code": 7,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BDSD)]",
+        "stderr": "destroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_exit_throw",
+      "exit_code": 7,
+      "stdout": "[(BDunexpectedSD)]",
+      "stderr": "destroy:exit\ndestroy:throw\ndestroy:tail\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:exit\ndestroy:throw\ndestroy:tail\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDunexpectedSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BDunexpectedSD)]",
+        "stderr": "destroy:exit\ndestroy:throw\ndestroy:tail\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_fatal",
+      "exit_code": 255,
+      "stdout": "[(BAS)]",
+      "stderr": "destroy:array-a\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n",
+      "combined": "destroy:array-a\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BAS)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(BA\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\n\nFatal error: array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nS)]",
+        "stderr": "destroy:array-a\nPHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_fatal.php on line 5\nPHP Fatal error:  array failure in /fixtures/array_fatal.php on line 5\nStack trace:\n#0 /fixtures/array_fatal.php(5): trigger_error('array failure', 256)\n#1 /fixtures/array_fatal.php(8): ArrayFirst->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_finally_return_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\nfinally\ndestroy:local\ncaught:destructor\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\nfinally\ndestroy:local\ncaught:destructor\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "destroy:first\nfinally\ndestroy:local\ncaught:destructor\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_throw_caught_chain",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\ncaught:middle\ndestroy:third\ncaught:third\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\ncaught:middle\ndestroy:third\ncaught:third\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "destroy:first\ncaught:middle\ndestroy:third\ncaught:third\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_throw_chain",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "destroy:first\ndestroy:second\ndestroy:third\ncaught:third\nprevious:second\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:first\ndestroy:second\ndestroy:third\ncaught:third\nprevious:second\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "destroy:first\ndestroy:second\ndestroy:third\ncaught:third\nprevious:second\nprevious:first\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_throw_exit",
+      "exit_code": 7,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:throw\ndestroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:throw\ndestroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BDSD)]",
+        "stderr": "destroy:throw\ndestroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_throw_exit_caught",
+      "exit_code": 7,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:throw\ndestroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:throw\ndestroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BDSD)]",
+        "stderr": "destroy:throw\ndestroy:exit\ncaught:tail\nfinally\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "array_throw_fatal",
+      "exit_code": 255,
+      "stdout": "[(BS)]",
+      "stderr": "destroy:throw\ndestroy:fatal\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\nFatal error: fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n",
+      "combined": "destroy:throw\ndestroy:fatal\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\nFatal error: fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BS)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(B\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\n\nFatal error: fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nS)]",
+        "stderr": "destroy:throw\ndestroy:fatal\nPHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/array_throw_fatal.php on line 8\nPHP Fatal error:  fatal destructor in /fixtures/array_throw_fatal.php on line 8\nStack trace:\n#0 /fixtures/array_throw_fatal.php(8): trigger_error('fatal destructo...', 256)\n#1 /fixtures/array_throw_fatal.php(12): LaterFatal->__destruct()\n#2 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "buffer_echo",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:echo\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/buffer_echo.php:4} is deprecated in Unknown on line 0\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:echo\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/buffer_echo.php:4} is deprecated in Unknown on line 0\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/common.php:11} is deprecated in Unknown on line 0\n[\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/common.php:12} is deprecated in Unknown on line 0\n(\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/buffer_echo.php:4} is deprecated in Unknown on line 0\nBSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:echo\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/buffer_echo.php:4} is deprecated in Unknown on line 0\nflush:inner\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/common.php:12} is deprecated in Unknown on line 0\nflush:outer\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/common.php:11} is deprecated in Unknown on line 0\n"
+      }
+    },
+    {
+      "case": "buffer_nested_start_flush",
+      "exit_code": 255,
+      "stdout": "S",
+      "stderr": "flush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nshutdown:1\nshutdown:2\n",
+      "combined": "flush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nshutdown:1\nshutdown:2\nS",
+      "display": {
+        "exit_code": 255,
+        "stdout": "\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nS",
+        "stderr": "flush:nested\nPHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_flush.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_flush.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_flush.php:5}('body', 9)\n#2 /fixtures/buffer_nested_start_flush.php(7): ob_end_flush()\n#3 {main}\nshutdown:1\nshutdown:2\n"
+      }
+    },
+    {
+      "case": "buffer_nested_start_shutdown",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:nested\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "\nFatal error: ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:nested\nPHP Fatal error:  ob_start(): Cannot use output buffering in output buffering display handlers in /fixtures/buffer_nested_start_shutdown.php on line 5\nStack trace:\n#0 /fixtures/buffer_nested_start_shutdown.php(5): ob_start()\n#1 [internal function]: {closure:/fixtures/buffer_nested_start_shutdown.php:5}('bodySD', 9)\n#2 {main}\n"
+      }
+    },
+    {
+      "case": "buffer_object",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "buffer_retained",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:retained\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:retained\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:retained\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "caught_then_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "caught_then_throw_destructor",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "caught_then_throw_helper",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "caught:first\ncaught:second\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "destructor_create",
+      "exit_code": 0,
+      "stdout": "[(BSDCD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:creator\ndestroy:late\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:creator\ndestroy:late\nflush:inner\nflush:outer\n[(BSDCD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSDCD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:creator\ndestroy:late\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "destructor_throw",
+      "exit_code": 255,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:throw\nFatal error: Uncaught Exception: destructor failure in /fixtures/destructor_throw.php:5\nStack trace:\n#0 [internal function]: Broken->__destruct()\n#1 {main}\n  thrown in /fixtures/destructor_throw.php on line 5\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:throw\nFatal error: Uncaught Exception: destructor failure in /fixtures/destructor_throw.php:5\nStack trace:\n#0 [internal function]: Broken->__destruct()\n#1 {main}\n  thrown in /fixtures/destructor_throw.php on line 5\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(BSD\nFatal error: Uncaught Exception: destructor failure in /fixtures/destructor_throw.php:5\nStack trace:\n#0 [internal function]: Broken->__destruct()\n#1 {main}\n  thrown in /fixtures/destructor_throw.php on line 5\n)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:throw\nPHP Fatal error:  Uncaught Exception: destructor failure in /fixtures/destructor_throw.php:5\nStack trace:\n#0 [internal function]: Broken->__destruct()\n#1 {main}\n  thrown in /fixtures/destructor_throw.php on line 5\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "die",
+      "exit_code": 0,
+      "stdout": "[(BbyeSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BbyeSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BbyeSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "exit",
+      "exit_code": 7,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "exit_cleanup_exit",
+      "exit_code": 9,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 9,
+        "stdout": "[(BDSD)]",
+        "stderr": "destroy:exit\ndestroy:tail\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "exit_cleanup_throw",
+      "exit_code": 255,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:throw\ndestroy:tail\nFatal error: Uncaught Exception: cleanup failure in /fixtures/exit_cleanup_throw.php:4\nStack trace:\n#0 /fixtures/exit_cleanup_throw.php(7): ExitCleanupThrow->__destruct()\n#1 {main}\n  thrown in /fixtures/exit_cleanup_throw.php on line 4\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:throw\ndestroy:tail\nFatal error: Uncaught Exception: cleanup failure in /fixtures/exit_cleanup_throw.php:4\nStack trace:\n#0 /fixtures/exit_cleanup_throw.php(7): ExitCleanupThrow->__destruct()\n#1 {main}\n  thrown in /fixtures/exit_cleanup_throw.php on line 4\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(BD\nFatal error: Uncaught Exception: cleanup failure in /fixtures/exit_cleanup_throw.php:4\nStack trace:\n#0 /fixtures/exit_cleanup_throw.php(7): ExitCleanupThrow->__destruct()\n#1 {main}\n  thrown in /fixtures/exit_cleanup_throw.php on line 4\nSD)]",
+        "stderr": "destroy:throw\ndestroy:tail\nPHP Fatal error:  Uncaught Exception: cleanup failure in /fixtures/exit_cleanup_throw.php:4\nStack trace:\n#0 /fixtures/exit_cleanup_throw.php(7): ExitCleanupThrow->__destruct()\n#1 {main}\n  thrown in /fixtures/exit_cleanup_throw.php on line 4\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "fatal",
+      "exit_code": 255,
+      "stdout": "[(BS)]",
+      "stderr": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal.php on line 5\nFatal error: body failure in /fixtures/fatal.php on line 5\nStack trace:\n#0 /fixtures/fatal.php(5): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n",
+      "combined": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal.php on line 5\nFatal error: body failure in /fixtures/fatal.php on line 5\nStack trace:\n#0 /fixtures/fatal.php(5): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n[(BS)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(B\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal.php on line 5\n\nFatal error: body failure in /fixtures/fatal.php on line 5\nStack trace:\n#0 /fixtures/fatal.php(5): trigger_error('body failure', 256)\n#1 {main}\nS)]",
+        "stderr": "PHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal.php on line 5\nPHP Fatal error:  body failure in /fixtures/fatal.php on line 5\nStack trace:\n#0 /fixtures/fatal.php(5): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "fatal_buffer_object",
+      "exit_code": 255,
+      "stdout": "[(BS)]",
+      "stderr": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_buffer_object.php on line 13\nFatal error: body failure in /fixtures/fatal_buffer_object.php on line 13\nStack trace:\n#0 /fixtures/fatal_buffer_object.php(13): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n",
+      "combined": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_buffer_object.php on line 13\nFatal error: body failure in /fixtures/fatal_buffer_object.php on line 13\nStack trace:\n#0 /fixtures/fatal_buffer_object.php(13): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n[(BS)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(B\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_buffer_object.php on line 13\n\nFatal error: body failure in /fixtures/fatal_buffer_object.php on line 13\nStack trace:\n#0 /fixtures/fatal_buffer_object.php(13): trigger_error('body failure', 256)\n#1 {main}\nS)]",
+        "stderr": "PHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_buffer_object.php on line 13\nPHP Fatal error:  body failure in /fixtures/fatal_buffer_object.php on line 13\nStack trace:\n#0 /fixtures/fatal_buffer_object.php(13): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nflush:object\ndestroy:buffer-local\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "fatal_shutdown_create",
+      "exit_code": 255,
+      "stdout": "[(BSDD)]",
+      "stderr": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_create.php on line 12\nFatal error: body failure in /fixtures/fatal_shutdown_create.php on line 12\nStack trace:\n#0 /fixtures/fatal_shutdown_create.php(12): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:create\ndestroy:new-local\ndestroy:new-retained\nflush:inner\nflush:outer\n",
+      "combined": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_create.php on line 12\nFatal error: body failure in /fixtures/fatal_shutdown_create.php on line 12\nStack trace:\n#0 /fixtures/fatal_shutdown_create.php(12): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:create\ndestroy:new-local\ndestroy:new-retained\nflush:inner\nflush:outer\n[(BSDD)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(B\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_create.php on line 12\n\nFatal error: body failure in /fixtures/fatal_shutdown_create.php on line 12\nStack trace:\n#0 /fixtures/fatal_shutdown_create.php(12): trigger_error('body failure', 256)\n#1 {main}\nSDD)]",
+        "stderr": "PHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_create.php on line 12\nPHP Fatal error:  body failure in /fixtures/fatal_shutdown_create.php on line 12\nStack trace:\n#0 /fixtures/fatal_shutdown_create.php(12): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:create\ndestroy:new-local\ndestroy:new-retained\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "fatal_shutdown_exit",
+      "exit_code": 9,
+      "stdout": "[(BS)]",
+      "stderr": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\nFatal error: body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:exit\nflush:inner\nflush:outer\n",
+      "combined": "Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\nFatal error: body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:exit\nflush:inner\nflush:outer\n[(BS)]",
+      "display": {
+        "exit_code": 9,
+        "stdout": "[(B\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\n\nFatal error: body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nS)]",
+        "stderr": "PHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/fatal_shutdown_exit.php on line 6\nPHP Fatal error:  body failure in /fixtures/fatal_shutdown_exit.php on line 6\nStack trace:\n#0 /fixtures/fatal_shutdown_exit.php(6): trigger_error('body failure', 256)\n#1 {main}\nshutdown:1\nshutdown:2\nshutdown:exit\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "finally_return_object_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "finally\ndestroy:local\ndestroy:returned\ncaught:returned\nprevious:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\ndestroy:local\ndestroy:returned\ncaught:returned\nprevious:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "finally\ndestroy:local\ndestroy:returned\ncaught:returned\nprevious:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "finally_return_suppresses_throw",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "finally\ndestroy:local\ncaught:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\ndestroy:local\ncaught:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "finally\ndestroy:local\ncaught:destructor\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "flush_throw",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:throw\nFatal error: Uncaught Exception: flush failure in /fixtures/flush_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/flush_throw.php:4}('BSD', 9)\n#1 {main}\n  thrown in /fixtures/flush_throw.php on line 4\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:throw\nFatal error: Uncaught Exception: flush failure in /fixtures/flush_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/flush_throw.php:4}('BSD', 9)\n#1 {main}\n  thrown in /fixtures/flush_throw.php on line 4\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:throw\nPHP Fatal error:  Uncaught Exception: flush failure in /fixtures/flush_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/flush_throw.php:4}('BSD', 9)\n#1 {main}\n  thrown in /fixtures/flush_throw.php on line 4\n"
+      }
+    },
+    {
+      "case": "frame_destructor_throw",
+      "exit_code": 0,
+      "stdout": "[(BDDSD)]",
+      "stderr": "destroy:local-a\ndestroy:local-b\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:local-a\ndestroy:local-b\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDDSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BDDSD)]",
+        "stderr": "destroy:local-a\ndestroy:local-b\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "frame_exit",
+      "exit_code": 7,
+      "stdout": "[(BDSD)]",
+      "stderr": "destroy:local\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:local\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 7,
+        "stdout": "[(BDSD)]",
+        "stderr": "destroy:local\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "frame_locals",
+      "exit_code": 0,
+      "stdout": "[(BDDSD)]",
+      "stderr": "destroy:local-a\ndestroy:local-b\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:local-a\ndestroy:local-b\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDDSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BDDSD)]",
+        "stderr": "destroy:local-a\ndestroy:local-b\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "frame_throw",
+      "exit_code": 0,
+      "stdout": "[(BDSD)]",
+      "stderr": "finally\ndestroy:local\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\ndestroy:local\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BDSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BDSD)]",
+        "stderr": "finally\ndestroy:local\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "local_cow",
+      "exit_code": 0,
+      "stdout": "[(BchangedoriginalSD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BchangedoriginalSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BchangedoriginalSD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "normal",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "body\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "body\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "body\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "return_finally_array",
+      "exit_code": 0,
+      "stdout": "[(BkeptSD)]",
+      "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BkeptSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BkeptSD)]",
+        "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "return_finally_reference",
+      "exit_code": 0,
+      "stdout": "[(BkeptSD)]",
+      "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BkeptSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BkeptSD)]",
+        "stderr": "finally\nreturned\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "return_finally_replace",
+      "exit_code": 0,
+      "stdout": "[(BONSD)]",
+      "stderr": "destroy:old\ndestroy:new\ncaught:new\nprevious:old\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:old\ndestroy:new\ncaught:new\nprevious:old\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BONSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BONSD)]",
+        "stderr": "destroy:old\ndestroy:new\ncaught:new\nprevious:old\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "return_replaced_destructor",
+      "exit_code": 0,
+      "stdout": "[(BRSD)]",
+      "stderr": "destroy:local\ndestroy:returned\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "destroy:local\ndestroy:returned\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BRSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BRSD)]",
+        "stderr": "destroy:local\ndestroy:returned\ncaught\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "shutdown_exit",
+      "exit_code": 9,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 9,
+        "stdout": "[(BSD)]",
+        "stderr": "shutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "shutdown_nested_catch",
+      "exit_code": 0,
+      "stdout": "[(BSDD)]",
+      "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:child\ncaught:child\ndestroy:tail\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:child\ncaught:child\ndestroy:tail\nflush:inner\nflush:outer\n[(BSDD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSDD)]",
+        "stderr": "shutdown:1\nshutdown:2\ndestroy:global\ndestroy:child\ncaught:child\ndestroy:tail\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "shutdown_register",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\nshutdown:register\nshutdown:late\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\nshutdown:register\nshutdown:late\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(BSD)]",
+        "stderr": "shutdown:1\nshutdown:2\nshutdown:register\nshutdown:late\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "shutdown_throw",
+      "exit_code": 255,
+      "stdout": "[(BSD)]",
+      "stderr": "shutdown:1\nshutdown:2\nshutdown:throw\nFatal error: Uncaught Exception: shutdown failure in /fixtures/shutdown_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/shutdown_throw.php:4}()\n#1 {main}\n  thrown in /fixtures/shutdown_throw.php on line 4\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "shutdown:1\nshutdown:2\nshutdown:throw\nFatal error: Uncaught Exception: shutdown failure in /fixtures/shutdown_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/shutdown_throw.php:4}()\n#1 {main}\n  thrown in /fixtures/shutdown_throw.php on line 4\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(BS\nFatal error: Uncaught Exception: shutdown failure in /fixtures/shutdown_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/shutdown_throw.php:4}()\n#1 {main}\n  thrown in /fixtures/shutdown_throw.php on line 4\nD)]",
+        "stderr": "shutdown:1\nshutdown:2\nshutdown:throw\nPHP Fatal error:  Uncaught Exception: shutdown failure in /fixtures/shutdown_throw.php:4\nStack trace:\n#0 [internal function]: {closure:/fixtures/shutdown_throw.php:4}()\n#1 {main}\n  thrown in /fixtures/shutdown_throw.php on line 4\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "solo_display_handler",
+      "exit_code": 0,
+      "stdout": "[body]|tail",
+      "stderr": "Warning: inside handler in /fixtures/solo_display_handler.php on line 5\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_display_handler.php:11} is deprecated in Unknown on line 0\n",
+      "combined": "Warning: inside handler in /fixtures/solo_display_handler.php on line 5\n[body]|Deprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_display_handler.php:11} is deprecated in Unknown on line 0\ntail",
+      "display": {
+        "exit_code": 0,
+        "stdout": "\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_display_handler.php:4} is deprecated in /fixtures/solo_display_handler.php on line 9\n[body]|\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_display_handler.php:11} is deprecated in Unknown on line 0\ntail",
+        "stderr": "PHP Warning:  inside handler in /fixtures/solo_display_handler.php on line 5\nPHP Deprecated:  ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_display_handler.php:4} is deprecated in /fixtures/solo_display_handler.php on line 9\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_display_handler.php:11} is deprecated in Unknown on line 0\n"
+      }
+    },
+    {
+      "case": "solo_display_upper",
+      "exit_code": 255,
+      "stdout": "BODY\nAFTER\n",
+      "stderr": "Warning: first warning in /fixtures/solo_display_upper.php on line 7\nWarning: last warning in /fixtures/solo_display_upper.php on line 9\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_display_upper.php on line 10\nFatal error: boom in /fixtures/solo_display_upper.php on line 10\nStack trace:\n#0 /fixtures/solo_display_upper.php(10): trigger_error('boom', 256)\n#1 {main}\n",
+      "combined": "Warning: first warning in /fixtures/solo_display_upper.php on line 7\nWarning: last warning in /fixtures/solo_display_upper.php on line 9\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_display_upper.php on line 10\nFatal error: boom in /fixtures/solo_display_upper.php on line 10\nStack trace:\n#0 /fixtures/solo_display_upper.php(10): trigger_error('boom', 256)\n#1 {main}\nBODY\nAFTER\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "BODY\n\nWARNING: FIRST WARNING IN /FIXTURES/SOLO_DISPLAY_UPPER.PHP ON LINE 7\nAFTER\n\nWARNING: LAST WARNING IN /FIXTURES/SOLO_DISPLAY_UPPER.PHP ON LINE 9\n\nDEPRECATED: PASSING E_USER_ERROR TO TRIGGER_ERROR() IS DEPRECATED SINCE 8.4, THROW AN EXCEPTION OR CALL EXIT WITH A STRING MESSAGE INSTEAD IN /FIXTURES/SOLO_DISPLAY_UPPER.PHP ON LINE 10\n\nFATAL ERROR: BOOM IN /FIXTURES/SOLO_DISPLAY_UPPER.PHP ON LINE 10\nSTACK TRACE:\n#0 /FIXTURES/SOLO_DISPLAY_UPPER.PHP(10): TRIGGER_ERROR('BOOM', 256)\n#1 {MAIN}\n",
+        "stderr": "PHP Warning:  first warning in /fixtures/solo_display_upper.php on line 7\nPHP Warning:  last warning in /fixtures/solo_display_upper.php on line 9\nPHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_display_upper.php on line 10\nPHP Fatal error:  boom in /fixtures/solo_display_upper.php on line 10\nStack trace:\n#0 /fixtures/solo_display_upper.php(10): trigger_error('boom', 256)\n#1 {main}\n"
+      }
+    },
+    {
+      "case": "solo_end_exit",
+      "exit_code": 3,
+      "stdout": "[bodyxS]",
+      "stderr": "flush:exit\nshutdown:solo\nflush:outer\n",
+      "combined": "flush:exit\nshutdown:solo\nflush:outer\n[bodyxS]",
+      "display": {
+        "exit_code": 3,
+        "stdout": "[bodyxS]",
+        "stderr": "flush:exit\nshutdown:solo\nflush:outer\n"
+      }
+    },
+    {
+      "case": "solo_end_lock_echo",
+      "exit_code": 255,
+      "stdout": "[S]",
+      "stderr": "flush:lock\nFatal error: ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\nshutdown:solo\n",
+      "combined": "flush:lock\nFatal error: ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\nshutdown:solo\n[S]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "\nFatal error: ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\n[S]",
+        "stderr": "flush:lock\nPHP Fatal error:  ob_end_flush(): Cannot use output buffering in output buffering display handlers in /fixtures/solo_end_lock_echo.php on line 7\nStack trace:\n#0 /fixtures/solo_end_lock_echo.php(7): ob_end_flush()\n#1 [internal function]: {closure:/fixtures/solo_end_lock_echo.php:7}('body', 9)\n#2 /fixtures/solo_end_lock_echo.php(9): ob_end_flush()\n#3 {main}\nshutdown:solo\n"
+      }
+    },
+    {
+      "case": "solo_handler_fatal",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "flush:inner\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_handler_fatal.php on line 8\nFatal error: boom in /fixtures/solo_handler_fatal.php on line 8\nStack trace:\n#0 /fixtures/solo_handler_fatal.php(8): trigger_error('boom', 256)\n#1 [internal function]: {closure:/fixtures/solo_handler_fatal.php:8}('body', 9)\n#2 /fixtures/solo_handler_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "combined": "flush:inner\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_handler_fatal.php on line 8\nFatal error: boom in /fixtures/solo_handler_fatal.php on line 8\nStack trace:\n#0 /fixtures/solo_handler_fatal.php(8): trigger_error('boom', 256)\n#1 [internal function]: {closure:/fixtures/solo_handler_fatal.php:8}('body', 9)\n#2 /fixtures/solo_handler_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+        "stderr": "flush:inner\nPHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_handler_fatal.php on line 8\nPHP Fatal error:  boom in /fixtures/solo_handler_fatal.php on line 8\nStack trace:\n#0 /fixtures/solo_handler_fatal.php(8): trigger_error('boom', 256)\n#1 [internal function]: {closure:/fixtures/solo_handler_fatal.php:8}('body', 9)\n#2 /fixtures/solo_handler_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nPHP Fatal error:  PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n"
+      }
+    },
+    {
+      "case": "solo_printf_empty",
+      "exit_code": 0,
+      "stdout": "R",
+      "stderr": "flush:inner\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\n",
+      "combined": "flush:inner\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\nR",
+      "display": {
+        "exit_code": 0,
+        "stdout": "\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\nR",
+        "stderr": "flush:inner\nPHP Deprecated:  ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_printf_empty.php:5} is deprecated in /fixtures/solo_printf_empty.php on line 7\n"
+      }
+    },
+    {
+      "case": "solo_return_dtor_exit",
+      "exit_code": 4,
+      "stdout": "<RS>",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\n<RS>",
+      "display": {
+        "exit_code": 4,
+        "stdout": "\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:8} is deprecated in Unknown on line 0\n<\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nRS>",
+        "stderr": "flush:inner\ndestroy:local\nPHP Deprecated:  ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:9} is deprecated in /fixtures/solo_return_dtor_exit.php on line 11\nshutdown:solo\nflush:outer\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_return_dtor_exit.php:8} is deprecated in Unknown on line 0\n"
+      }
+    },
+    {
+      "case": "solo_return_dtor_fatal",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_return_dtor_fatal.php on line 5\nFatal error: boom in /fixtures/solo_return_dtor_fatal.php on line 5\nStack trace:\n#0 /fixtures/solo_return_dtor_fatal.php(5): trigger_error('boom', 256)\n#1 [internal function]: T->__destruct()\n#2 /fixtures/solo_return_dtor_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_return_dtor_fatal.php on line 5\nFatal error: boom in /fixtures/solo_return_dtor_fatal.php on line 5\nStack trace:\n#0 /fixtures/solo_return_dtor_fatal.php(5): trigger_error('boom', 256)\n#1 [internal function]: T->__destruct()\n#2 /fixtures/solo_return_dtor_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "\nFatal error: PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n",
+        "stderr": "flush:inner\ndestroy:local\nPHP Deprecated:  Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in /fixtures/solo_return_dtor_fatal.php on line 5\nPHP Fatal error:  boom in /fixtures/solo_return_dtor_fatal.php on line 5\nStack trace:\n#0 /fixtures/solo_return_dtor_fatal.php(5): trigger_error('boom', 256)\n#1 [internal function]: T->__destruct()\n#2 /fixtures/solo_return_dtor_fatal.php(10): ob_end_flush()\n#3 {main}\nshutdown:level=2\nPHP Fatal error:  PHP Request Shutdown: Cannot use output buffering in output buffering display handlers in Unknown on line 0\nStack trace:\n#0 {main}\n"
+      }
+    },
+    {
+      "case": "solo_return_dtor_throw",
+      "exit_code": 0,
+      "stdout": "<Rcaught:dtor|after>",
+      "stderr": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\ncaught\nflush:outer\n",
+      "combined": "flush:inner\ndestroy:local\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\ncaught\nflush:outer\n<Rcaught:dtor|after>",
+      "display": {
+        "exit_code": 0,
+        "stdout": "\nDeprecated: PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:7} is deprecated in Unknown on line 0\n<\nDeprecated: ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\nRcaught:dtor|after>",
+        "stderr": "flush:inner\ndestroy:local\nPHP Deprecated:  ob_end_flush(): Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:8} is deprecated in /fixtures/solo_return_dtor_throw.php on line 10\ncaught\nflush:outer\nPHP Deprecated:  PHP Request Shutdown: Producing output from user output handler {closure:/fixtures/solo_return_dtor_throw.php:7} is deprecated in Unknown on line 0\n"
+      }
+    },
+    {
+      "case": "solo_shutdown_exit",
+      "exit_code": 3,
+      "stdout": "",
+      "stderr": "flush:exit\n",
+      "combined": "flush:exit\n",
+      "display": {
+        "exit_code": 3,
+        "stdout": "",
+        "stderr": "flush:exit\n"
+      }
+    },
+    {
+      "case": "solo_shutdown_return_dtor_exit",
+      "exit_code": 4,
+      "stdout": "",
+      "stderr": "flush:inner\ndestroy:local\n",
+      "combined": "flush:inner\ndestroy:local\n",
+      "display": {
+        "exit_code": 4,
+        "stdout": "",
+        "stderr": "flush:inner\ndestroy:local\n"
+      }
+    },
+    {
+      "case": "solo_shutdown_throw",
+      "exit_code": 255,
+      "stdout": "",
+      "stderr": "flush:throw\nFatal error: Uncaught Exception: boom in /fixtures/solo_shutdown_throw.php:6\nStack trace:\n#0 [internal function]: {closure:/fixtures/solo_shutdown_throw.php:6}('body', 9)\n#1 {main}\n  thrown in /fixtures/solo_shutdown_throw.php on line 6\n",
+      "combined": "flush:throw\nFatal error: Uncaught Exception: boom in /fixtures/solo_shutdown_throw.php:6\nStack trace:\n#0 [internal function]: {closure:/fixtures/solo_shutdown_throw.php:6}('body', 9)\n#1 {main}\n  thrown in /fixtures/solo_shutdown_throw.php on line 6\n",
+      "display": {
+        "exit_code": 255,
+        "stdout": "",
+        "stderr": "flush:throw\nPHP Fatal error:  Uncaught Exception: boom in /fixtures/solo_shutdown_throw.php:6\nStack trace:\n#0 [internal function]: {closure:/fixtures/solo_shutdown_throw.php:6}('body', 9)\n#1 {main}\n  thrown in /fixtures/solo_shutdown_throw.php on line 6\n"
+      }
+    },
+    {
+      "case": "uncaught",
+      "exit_code": 255,
+      "stdout": "[(BSD)]",
+      "stderr": "Fatal error: Uncaught Exception: body failure in /fixtures/uncaught.php:5\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught.php on line 5\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "Fatal error: Uncaught Exception: body failure in /fixtures/uncaught.php:5\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught.php on line 5\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 255,
+        "stdout": "[(B\nFatal error: Uncaught Exception: body failure in /fixtures/uncaught.php:5\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught.php on line 5\nSD)]",
+        "stderr": "PHP Fatal error:  Uncaught Exception: body failure in /fixtures/uncaught.php:5\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught.php on line 5\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "uncaught_shutdown_exit",
+      "exit_code": 9,
+      "stdout": "[(BSD)]",
+      "stderr": "Fatal error: Uncaught Exception: body failure in /fixtures/uncaught_shutdown_exit.php:6\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught_shutdown_exit.php on line 6\nshutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "Fatal error: Uncaught Exception: body failure in /fixtures/uncaught_shutdown_exit.php:6\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught_shutdown_exit.php on line 6\nshutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 9,
+        "stdout": "[(B\nFatal error: Uncaught Exception: body failure in /fixtures/uncaught_shutdown_exit.php:6\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught_shutdown_exit.php on line 6\nSD)]",
+        "stderr": "PHP Fatal error:  Uncaught Exception: body failure in /fixtures/uncaught_shutdown_exit.php:6\nStack trace:\n#0 {main}\n  thrown in /fixtures/uncaught_shutdown_exit.php on line 6\nshutdown:1\nshutdown:2\nshutdown:exit\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    },
+    {
+      "case": "warning",
+      "exit_code": 0,
+      "stdout": "[(BSD)]",
+      "stderr": "Warning: first warning in /fixtures/warning.php on line 5\nWarning: second warning in /fixtures/warning.php on line 6\nbody:continued\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n",
+      "combined": "Warning: first warning in /fixtures/warning.php on line 5\nWarning: second warning in /fixtures/warning.php on line 6\nbody:continued\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n[(BSD)]",
+      "display": {
+        "exit_code": 0,
+        "stdout": "[(B\nWarning: first warning in /fixtures/warning.php on line 5\n\nWarning: second warning in /fixtures/warning.php on line 6\nSD)]",
+        "stderr": "PHP Warning:  first warning in /fixtures/warning.php on line 5\nPHP Warning:  second warning in /fixtures/warning.php on line 6\nbody:continued\nshutdown:1\nshutdown:2\ndestroy:global\nflush:inner\nflush:outer\n"
+      }
+    }
+  ],
+  "image": "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f",
+  "command": [
+    "docker",
+    "run",
+    "--pull=never",
+    "--platform",
+    "linux/amd64",
+    "--rm",
+    "--name",
+    "<unique-container-name>",
+    "--network=none",
+    "--read-only",
+    "--user=65534:65534",
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges",
+    "--pids-limit=32",
+    "--memory=128m",
+    "--cpus=1",
+    "--tmpfs=/tmp:rw,noexec,nosuid,size=8m",
+    "--mount",
+    "type=bind,src=<repo>/tests/lifecycle/w14,dst=/fixtures,readonly",
+    "php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f",
+    "php",
+    "-n",
+    "/fixtures/reference.php"
+  ],
+  "inputs_sha256": {
+    "array_exit.php": "8292a1e03a37836e8fc464b4f343ea7e032beecee5d025b90cd024b9706e9eb2",
+    "array_exit_caught.php": "5bf22790cd750cbc2fa3971ee8c80bd16486e87f54c474bb367590a053b2c276",
+    "array_exit_throw.php": "48fe6ddf61ad79f03e1c5a6a32ca52577c88517590897e555c4512e387e26756",
+    "array_fatal.php": "883f5a9223149f9d57a974284c84f22486d2e94fd146d19ffebebd7b222ebe6d",
+    "array_finally_return_suppresses_throw.php": "1d3fd12560c578a6f56540d61d5a7c59ab7160ecc6acb24e56e66b295a462be6",
+    "array_throw_caught_chain.php": "a774878b9e7f1f0c97607df4d7fde36e2486e4f4e7b982504ae8fb62de431bc2",
+    "array_throw_chain.php": "82ef3a1e25d3f18869fbe049dc37ae314e6cf7468b5aaaa2c1a1c35dcd17900f",
+    "array_throw_exit.php": "060b7c8de261a3f44cc5a467a8e81bc6d5b6fcbade4964657dce5cd880e5ae76",
+    "array_throw_exit_caught.php": "22775eb2098175cc33dd91769e4e802c2cba0722c8ce63f7a4f581d06ca3b623",
+    "array_throw_fatal.php": "a41e3e121141556ef61386252c73e3396f7e759532cab0cf3eba20fefcd23e03",
+    "buffer_echo.php": "4488a62345db335b415a1bb00c3e6218bf36c099418bd1ea3801e52c25dc8c16",
+    "buffer_nested_start_flush.php": "1881d159f80a0157b594ee20851e96c1c85c39e2981f31c4ade29750562a4c5c",
+    "buffer_nested_start_shutdown.php": "6c29cea9141b9d97458dee8d6b69618a84ce5645a5a854cc169aa042d906e9d7",
+    "buffer_object.php": "b38844512581c9e2f47e35858e4f8f78f069818d8b0321800219e61fd5a2bf3e",
+    "buffer_retained.php": "47dd495bc1be6bf42a05c4c9e46646de715f6a10b82e68a29eb5820c50abf247",
+    "caught_then_throw.php": "ff6d55f22074c9791e350c9693a50bb8dda4679b04467ce9c46605ce3497884e",
+    "caught_then_throw_destructor.php": "4cbc74ce8686cfa8b4c6ce4f690f6d1f13d2eaa1a01843e1b1ab01d94f92eff4",
+    "caught_then_throw_helper.php": "c58b17a935712ae7971001d0e17ecb03d61e3001cbecd91bcdaf15d1703fe743",
+    "common.php": "1b3c6eccdc2c20c95ce3c86228eb5ea2b8f8e4474cdba01ada3258affec5d712",
+    "destructor_create.php": "8fd9ac029f15ee93e155f0f0ace814e86d4c6f8851204944c58f5988b041f9c5",
+    "destructor_throw.php": "5ce9f8a00b48429e0b6b7f2e622e41c56da69e0e79056774f6e0ee2ee77568ab",
+    "die.php": "987d75e53ae22ea7f5bb5490dcba955104a00e60c181d68f5878c68086b31934",
+    "exit.php": "0403a1efb99a5ba83d918ac70171164cbe1fd7692541bbbf9aef191c0216a19e",
+    "exit_cleanup_exit.php": "69f8bcc0a984cae0a2728a9e74e14da4061589b25ecd63faf2643ce10a7cc5ed",
+    "exit_cleanup_throw.php": "34fd70e5f4c3a1207089897f5b712d3d83500759248215944f4e3899597b9ab3",
+    "fatal.php": "2b9b6ce06fa71bc4ebde4c4703ae655824b6b0fa50e18530de486abbb67c4d78",
+    "fatal_buffer_object.php": "7b1db14d184073377637faaab9c80a6581c72c4c02ce37e82dab07242a057487",
+    "fatal_shutdown_create.php": "de129cf010aa13e1ad3840cc727b5342884299dfff8afacf2bd54d07185b615d",
+    "fatal_shutdown_exit.php": "8d49ab5d15c9d730223fd95acf55c41884323c54e185684a84d12f1c36d11ef3",
+    "finally_return_object_suppresses_throw.php": "4752f711e46747f2a125cf5f241a5b4c5ee08463db9d0ca80525a50cfde9a511",
+    "finally_return_suppresses_throw.php": "ee9ca7bcf9bcc117b6d37d8c1f2c2c165b8bac4a654ac4ee0de7e564c3087875",
+    "flush_throw.php": "6c0ca200757ecfc2838b2bebf51283a7ae2b969e41ed53eb3d0952d489a56597",
+    "frame_destructor_throw.php": "ca7f8702945f9e291ace5f784bdd153ae9092b9b81b485fe2c696160a242a424",
+    "frame_exit.php": "55820aaffecfa239111fd183c56e397672f91142824cde13af9be71735f04c51",
+    "frame_locals.php": "f5f00e5c2d6dc7659886be695716ce6bbc9fb1cbfd3572012f98be7435fea1bb",
+    "frame_throw.php": "c821c8975574ecb4687f094044a354c2bbc7be2b3f71b2e5a11e3c02e4b36404",
+    "local_cow.php": "2ba5428768d8fb755c8662fba5f5c98bee6300c9583f7b65dfabc05b5926494a",
+    "normal.php": "4fb9daf3ed2b25d8cc812210b843bdbf16a9b16dbbc53fe14ec92b16c69d03f4",
+    "reference.php": "a280ac1e8b61fe70fc902405ca08d19c0b6666ac9aee9ce84eacee915268ff9f",
+    "return_finally_array.php": "0f9c50344db2e76797766f38b0b67e6d0efd2d91bceb854771f33e2d4e843f21",
+    "return_finally_reference.php": "ae9a1a07944f0a30a91389a757f975b6ae86e14e0990bb2d1448c4e510082161",
+    "return_finally_replace.php": "8fc5bdbdaf1cb6db6e7e06516dda051ea1aba7ae84e2f7abe3aeb6a620b4f648",
+    "return_replaced_destructor.php": "508b9829a97971e3aad19f3e9acc18ea323e3e60e31ee68b28766496888f045b",
+    "shutdown_exit.php": "97f16da5fe1b87f4c97e95ce25219e251d6136f97c513b89aaf8b0439019447e",
+    "shutdown_nested_catch.php": "74e560fe19d3f58e2e21159483463a932da4ba6595af8294b4b53c7b56df5062",
+    "shutdown_register.php": "028d0aeb25f7bfe22f04e4a45a612f07a6045c1d5747a72729d30d5db4ef817d",
+    "shutdown_throw.php": "5c565fd14dc430c4f88ffa0d7c73e82958148cddf2b49a31dbe9b0836b0afa93",
+    "solo_display_handler.php": "543e046c03c40e9ab45ced8283bb98288584a0eef9d8e91d8e6c319feadeb768",
+    "solo_display_upper.php": "5c73f978a1a5e39d6c486d7701d5161c9ce2d63a3f31c8f2c6e1baf4ccee69f0",
+    "solo_end_exit.php": "71ca70e786fdfcde0dadd17362b5181db7bd878e3b1bea8f7dd7374e50ce85e0",
+    "solo_end_lock_echo.php": "d00fa727ac0412a27ef17fc18522642540c2f706c39ed9716711f1b42f60abc4",
+    "solo_handler_fatal.php": "a4c92e76e303c340d7eb57cb14bc111a2a1994a87b42d4f0ff5e231bdbe06f41",
+    "solo_printf_empty.php": "06492454682c86837e67e2c51635357bf415c0c8a60dd916857abde56bd82f78",
+    "solo_return_dtor_exit.php": "5a7afa30c6ede78ca28c2a843cf27e618858781272721555730fc146db7bf557",
+    "solo_return_dtor_fatal.php": "d5a19699e54a33f6aa28b509ed5450ec9a2123c230f927aaf1d0dde2db2a0d3d",
+    "solo_return_dtor_throw.php": "2c4997aff0dc7e419a2153a4d0c95dee4bf7f15683b0a1390739ba151ca89b01",
+    "solo_shutdown_exit.php": "5f5d68d857f4d076f81c585f8e3c0595832a97481941c3e7b56eed669c5633cd",
+    "solo_shutdown_return_dtor_exit.php": "9798b511edc5e603b41069ce6cc8755b5973d83d8dbbe42913680a6bb5caef1e",
+    "solo_shutdown_throw.php": "99cbe67362e47138ed8b33690e087e7d088c9b36dc4a2db1b0646c135b613af3",
+    "uncaught.php": "ac1040cfe0c54d7603c2f2c0eea6104cbef05d3a1048756d4e0e3dbb72e528f5",
+    "uncaught_shutdown_exit.php": "2d3cf1489a2b8093db3e7a10b63fe7722667b9c1c605e726eed24e437760231d",
+    "warning.php": "b0495f16c02569ba51f2aa4511ecc08597f867c34ff1aefe853b51f486ffb233"
+  }
+}

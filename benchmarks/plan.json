@@ -1,0 +1,4130 @@
+{
+ "version": 1,
+ "competitors": [
+  "COMP-01",
+  "COMP-02",
+  "COMP-03",
+  "COMP-04",
+  "COMP-05",
+  "COMP-06",
+  "COMP-07",
+  "COMP-08",
+  "DISC-01",
+  "DISC-02",
+  "DISC-03",
+  "DISC-04",
+  "DISC-05",
+  "DISC-06",
+  "DISC-07",
+  "DISC-08",
+  "DISC-09",
+  "DISC-10",
+  "DISC-11",
+  "DISC-12",
+  "DISC-13"
+ ],
+ "workloads": [
+  "fib",
+  "array_sort",
+  "hash_count",
+  "string_build",
+  "object_calls",
+  "regex_match"
+ ],
+ "platforms": [
+  "linux/amd64",
+  "linux/arm64"
+ ],
+ "modes": [
+  "cli-cold",
+  "cli-warm"
+ ],
+ "cells": [
+  {
+   "competitor": "COMP-01",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-01",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-02",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-03",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-04",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-05",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-06",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-07",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "COMP-08",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-01",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-02",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-03",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-04",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-05",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-06",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-07",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-08",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-09",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-10",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-11",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-12",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "fib",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "fib",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "array_sort",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "array_sort",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "hash_count",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "hash_count",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "string_build",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "string_build",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "object_calls",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "object_calls",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "regex_match",
+   "platform": "linux/amd64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-cold",
+   "status": "pending",
+   "evidence": ""
+  },
+  {
+   "competitor": "DISC-13",
+   "workload": "regex_match",
+   "platform": "linux/arm64",
+   "mode": "cli-warm",
+   "status": "pending",
+   "evidence": ""
+  }
+ ],
+ "files": [
+  {
+   "path": "benchmarks/workloads/fib.php",
+   "sha256": "8e995a66ce6fd0f26a0a26921752fd9b70a91ed26ec0ed5f6183aa874dd19d9a"
+  },
+  {
+   "path": "benchmarks/workloads/fib.expected",
+   "sha256": "b8726240f6df9471dd03b4e7e352ab482e45c7009f05949fa3aab09beb4b662a"
+  },
+  {
+   "path": "benchmarks/workloads/array_sort.php",
+   "sha256": "25a9daa2e785b1be4cadd3ba6e7f733351b3ad915512a35869c111597786a3ec"
+  },
+  {
+   "path": "benchmarks/workloads/array_sort.expected",
+   "sha256": "b1b16c1f1ab2ae662f5e1c76aee8d1e4654d408231a119ade8da004f5f2b9596"
+  },
+  {
+   "path": "benchmarks/workloads/hash_count.php",
+   "sha256": "3b63de3029534e1b5d370f57a2c6e569f53ee0ec4a67a051851cc4e431a42b05"
+  },
+  {
+   "path": "benchmarks/workloads/hash_count.expected",
+   "sha256": "f26a9369cec69fc99640d80245aaf9373a716bd3ca01a643a6eef83f29a89d73"
+  },
+  {
+   "path": "benchmarks/workloads/string_build.php",
+   "sha256": "b829ed2973280fad54300f9ce5674a49a054daebe57643e43fba29be7db2a683"
+  },
+  {
+   "path": "benchmarks/workloads/string_build.expected",
+   "sha256": "328481ec1e3d5cf4226ad510e5a269d9a8154d22a731f4fc6e35e6f1b9690ed4"
+  },
+  {
+   "path": "benchmarks/workloads/object_calls.php",
+   "sha256": "63a1741a6f3dfc4b0ef878bb26337651caf0cf15b2d20d0181518feaaa2c3a9d"
+  },
+  {
+   "path": "benchmarks/workloads/object_calls.expected",
+   "sha256": "f733272f5723f4892d7497dc032fa62db021c8d12f6794373ec32756dd1d2673"
+  },
+  {
+   "path": "benchmarks/workloads/regex_match.php",
+   "sha256": "ce2e39aa127a3742d026e6423162a43f9eef7f0335cf98484573ea6dcd9f2857"
+  },
+  {
+   "path": "benchmarks/workloads/regex_match.expected",
+   "sha256": "974fd70dc6e2d23e3eeafb05c92066c638c3a1a56753ae08b3c3ef1a9d642018"
+  },
+  {
+   "path": "docs/implementation/evidence/W-54-discovered-inventory.json",
+   "sha256": "0f6c8a5d9a947fa88f29460d540a43015bdfe1d674ace622b2bdd67548dba026"
+  }
+ ]
+}

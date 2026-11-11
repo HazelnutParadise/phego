@@ -1,0 +1,12 @@
+$ go test -race -count=1 ./...
+ok  	github.com/HazelnutParadise/phego	3.355s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	63.020s
+ok  	github.com/HazelnutParadise/phego/internal/compat	2.294s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	16.999s
+ok  	github.com/HazelnutParadise/phego/internal/ir	36.283s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.759s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	1.787s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	6.996s
+ok  	github.com/HazelnutParadise/phego/internal/profile	19.192s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	234.985s
+exit=0

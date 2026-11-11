@@ -1,0 +1,41 @@
+name: Go checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Check formatting
+        # gofmt reports parse errors on stderr with a failing status.
+        run: |
+          files=$(gofmt -l .)
+          if [ -n "$files" ]; then
+            printf 'not gofmt-formatted:\n%s\n' "$files"
+            exit 1
+          fi
+      - name: Build without cgo
+        run: CGO_ENABLED=0 go build ./...
+      - name: Build other supported targets without cgo
+        run: |
+          failed=0
+          for target in linux/386 windows/amd64 darwin/arm64; do
+            CGO_ENABLED=0 GOOS=${target%/*} GOARCH=${target#*/} go build ./... || { echo "::error::build failed for $target"; failed=1; }
+          done
+          exit $failed
+      - name: Test without cgo
+        run: CGO_ENABLED=0 go test ./...
+      - name: Test race conditions
+        run: go test -race ./...
+      - name: Vet
+        run: go vet ./...

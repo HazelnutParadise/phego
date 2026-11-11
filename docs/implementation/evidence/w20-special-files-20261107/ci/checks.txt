@@ -1,0 +1,47 @@
+SUCCESS	Documentation checks	documentation
+SUCCESS	Documentation checks	documentation
+SUCCESS	Go checks	go
+SUCCESS	Go checks	go
+SUCCESS	Native ABI callback probe	callback-probe
+SUCCESS	Native ABI callback probe	callback-probe
+SUCCESS	Native ABI handle probe	handle-probe
+SUCCESS	Native ABI handle probe	handle-probe
+SUCCESS	Native ABI numeric probe	numeric-probe
+SUCCESS	Native ABI numeric probe	numeric-probe
+SUCCESS	Native cancellation probe	cancellation-probe
+SUCCESS	Native cancellation probe	cancellation-probe
+SUCCESS	PHP 8.5.12 HIR references	reference
+SUCCESS	PHP 8.5.12 HIR references	reference
+SUCCESS	PHP 8.5.12 array semantics	reference (32, 32, 386, ubuntu-24.04)
+SUCCESS	PHP 8.5.12 array semantics	reference (32, 32, 386, ubuntu-24.04)
+SUCCESS	PHP 8.5.12 array semantics	reference (64, 64, arm64, ubuntu-24.04-arm)
+SUCCESS	PHP 8.5.12 array semantics	reference (64, 64, arm64, ubuntu-24.04-arm)
+SUCCESS	PHP 8.5.12 array semantics	reference (amd64, 64, amd64, ubuntu-24.04)
+SUCCESS	PHP 8.5.12 array semantics	reference (amd64, 64, amd64, ubuntu-24.04)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (32)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (32)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (64)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (64)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (amd64)
+SUCCESS	PHP 8.5.12 lifecycle semantics	Lifecycle reference (amd64)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (32)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (32)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (64)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (64)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (amd64)
+SUCCESS	PHP 8.5.12 object semantics	Object reference (amd64)
+SUCCESS	PHP 8.5.12 operator semantics	native-reference
+SUCCESS	PHP 8.5.12 operator semantics	native-reference
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (32)
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (32)
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (64)
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (64)
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (amd64)
+SUCCESS	PHP 8.5.12 optimization semantics	Optimization reference (amd64)
+SUCCESS	PHPT runner checks	phpt
+SUCCESS	PHPT runner checks	phpt
+SUCCESS	Special files on macOS and Windows	macos (macos-15)
+SUCCESS	Special files on macOS and Windows	macos (macos-15-intel)
+SUCCESS	Special files on macOS and Windows	windows
+SUCCESS	W-03 local exit condition	w03-local-exit
+SUCCESS	W-03 local tool checks	w03-local-checks

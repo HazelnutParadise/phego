@@ -1,0 +1,101 @@
+# sort ordinal map[*bucket]int (935a223) vs swapped []int32; interleaved runs of separately built test binaries, 4 rounds x count=3, host also ran an independent review
+## BenchmarkW12Sorting before
+BenchmarkW12Sorting/32-8         	   32900	     36323 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   41756	     28904 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   39714	     35861 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/128-8        	    5364	    193680 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	    7408	    155578 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	    7614	    159689 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/1024-8       	     582	   2429299 ns/op	      9942 comparisons/op	  243330 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     681	   1770384 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     663	   1585294 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/32-8         	   36716	     42220 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   41995	     38876 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   44895	     25510 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    119631 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    100339 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   12094	     96644 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/1024-8       	    1062	   1375254 ns/op	      9942 comparisons/op	  243328 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     873	   1447584 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     818	   1340918 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/32-8         	   47954	     29724 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   58117	     19031 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   61150	     21683 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    101973 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   12650	     97866 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   12026	     92977 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/1024-8       	    1104	   1103412 ns/op	      9942 comparisons/op	  243328 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     921	   1380488 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	     889	   1200241 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/32-8         	   57984	     21567 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   54278	     22489 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/32-8         	   51685	     23572 ns/op	       148.0 comparisons/op	    7472 B/op	      42 allocs/op
+BenchmarkW12Sorting/128-8        	   12691	     89312 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   12367	     99718 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/128-8        	   13029	     98591 ns/op	       810.0 comparisons/op	   29488 B/op	     138 allocs/op
+BenchmarkW12Sorting/1024-8       	    1106	   1052706 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	    1131	   1205758 ns/op	      9942 comparisons/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12Sorting/1024-8       	    1041	   1111143 ns/op	      9942 comparisons/op	  243328 B/op	    1038 allocs/op
+## BenchmarkW12Sorting after
+BenchmarkW12Sorting/32-8         	   61448	     21419 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   50984	     23412 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   49800	     24331 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-8        	    9688	    145507 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	    8352	    163290 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	    6086	    185421 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-8       	     693	   1785428 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	     724	   1520501 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	     823	   1509238 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/32-8         	   61245	     18863 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   65640	     17873 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   67444	     18066 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    100238 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   12104	    100336 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   12920	     94943 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-8       	    1059	   1161788 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	    1060	   1092652 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	    1107	   1183548 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/32-8         	   64033	     18728 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   54165	     23382 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   64695	     17532 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-8        	   13165	    122002 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    124425 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   10000	    156340 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-8       	     663	   2244936 ns/op	      9942 comparisons/op	  210482 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	     466	   2272128 ns/op	      9942 comparisons/op	  210482 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	     958	   1234857 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/32-8         	   66574	     17624 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   70149	     17121 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/32-8         	   70478	     17152 ns/op	       148.0 comparisons/op	    6408 B/op	      40 allocs/op
+BenchmarkW12Sorting/128-8        	   13684	     88939 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   13342	     92676 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/128-8        	   13120	     91240 ns/op	       810.0 comparisons/op	   25096 B/op	     136 allocs/op
+BenchmarkW12Sorting/1024-8       	    1150	   1069058 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	    1108	   1092352 ns/op	      9942 comparisons/op	  210481 B/op	    1034 allocs/op
+BenchmarkW12Sorting/1024-8       	    1117	   1156295 ns/op	      9942 comparisons/op	  210480 B/op	    1034 allocs/op
+## BenchmarkW12SortingEqual before
+BenchmarkW12SortingEqual-8   	    1876	    714076 ns/op	  243330 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1546	    760628 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1650	    730859 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1720	    662575 ns/op	  243332 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1729	    693586 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1898	    589623 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1509	    673985 ns/op	  243332 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    2032	    575905 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    2124	    556275 ns/op	  243329 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1196	    917743 ns/op	  243333 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1324	    886315 ns/op	  243328 B/op	    1038 allocs/op
+BenchmarkW12SortingEqual-8   	    1310	    912559 ns/op	  243329 B/op	    1038 allocs/op
+## BenchmarkW12SortingEqual after
+BenchmarkW12SortingEqual-8   	    2146	    584518 ns/op	  210483 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2089	    586604 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2041	    592125 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2522	    489087 ns/op	  210485 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2314	    532523 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2018	    620259 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2622	    461441 ns/op	  210483 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2648	    473867 ns/op	  210482 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    2173	    727122 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    1644	    744811 ns/op	  210484 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    1756	    710545 ns/op	  210480 B/op	    1034 allocs/op
+BenchmarkW12SortingEqual-8   	    1654	    725582 ns/op	  210480 B/op	    1034 allocs/op

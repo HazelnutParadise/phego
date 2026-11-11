@@ -1,0 +1,364 @@
+--- FAIL: TestW13R11EnumScalarComparison (1.69s)
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-zero/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-one/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-two/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-minus-one/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-float-one/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-float-two/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-nan/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-inf/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-negative-inf/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-empty-string/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-numeric-string/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-text/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-empty-array/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-array/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-resource/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-zero/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-one/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-two/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-minus-one/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-float-one/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-float-two/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-nan/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-inf/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-negative-inf/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-empty-string/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-numeric-string/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-text/32 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-int-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-empty-array/32 (0.10s)
+        object_review_r11_enum_test.go:161: r11-enum-int-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-array/32 (0.07s)
+        object_review_r11_enum_test.go:161: r11-enum-int-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-resource/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-zero/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-one/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-two/32 (0.04s)
+        object_review_r11_enum_test.go:161: r11-enum-string-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-minus-one/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-float-one/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-float-two/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-nan/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-inf/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-negative-inf/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-empty-string/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-numeric-string/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-text/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-empty-array/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-array/32 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-resource/32 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-zero/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-one/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-two/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-minus-one/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"],[8,"Object of class W13R11Unit could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-float-one/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-float-two/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-nan/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-inf/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-negative-inf/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"],[8,"Object of class W13R11Unit could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-empty-string/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-numeric-string/64 (0.09s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-text/64 (0.03s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-empty-array/64 (0.06s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-array/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-unit-resource/64 (0.08s)
+        object_review_r11_enum_test.go:161: r11-enum-unit-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-zero/64 (0.07s)
+        object_review_r11_enum_test.go:161: r11-enum-int-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-one/64 (0.05s)
+        object_review_r11_enum_test.go:161: r11-enum-int-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-two/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-minus-one/64 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-int-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"],[8,"Object of class W13R11Int could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-float-one/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-float-two/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-nan/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-inf/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-negative-inf/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"],[8,"Object of class W13R11Int could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-empty-string/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-numeric-string/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-text/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-empty-array/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-int-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-array/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-int-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-int-resource/64 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-int-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-zero/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-zero
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-one/64 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-string-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-two/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-minus-one/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-minus-one
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"],[8,"Object of class W13R11String could not be converted to int"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-float-one/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-float-one
+            Go: {"result":[true,0,0],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-float-two/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-float-two
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-nan/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-nan
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-inf/64 (0.01s)
+        object_review_r11_enum_test.go:161: r11-enum-string-inf
+            Go: {"result":[false,-1,1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-negative-inf/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-negative-inf
+            Go: {"result":[false,1,-1],"diagnostics":[[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"],[8,"Object of class W13R11String could not be converted to float"]]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-empty-string/64 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-string-empty-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-numeric-string/64 (0.02s)
+        object_review_r11_enum_test.go:161: r11-enum-string-numeric-string
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-text/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-text
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-empty-array/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-empty-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-array/64 (0.04s)
+        object_review_r11_enum_test.go:161: r11-enum-string-array
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+    --- FAIL: TestW13R11EnumScalarComparison/r11-enum-string-resource/64 (0.00s)
+        object_review_r11_enum_test.go:161: r11-enum-string-resource
+            Go: {"result":[false,1,-1],"diagnostics":[]}
+            PHP: {"result":[false,1,1],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	3.444s
+FAIL

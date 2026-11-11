@@ -1,0 +1,7 @@
+--- FAIL: TestReviewForeachRefKeyAfterDestructorRemovesNext (0.00s)
+    array_chunk_review_test.go:30: keys [true:a0 false:0 true:c0], PHP gives [true:a0 true:b0 true:c0]
+--- FAIL: TestReviewFreedArrayClearsChunkBuckets (0.00s)
+    array_chunk_review_test.go:44: freed bucket still holds {key:{isString:true integer:0 text:k} val:{kind:5 boolean:false integer:0 floating:0 text:large value array:<nil> object:<nil> ref:<nil>}}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.372s
+FAIL

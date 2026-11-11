@@ -1,0 +1,5 @@
+--- FAIL: TestFunctionEntryCannotBeAHandlerBody (0.00s)
+    review_test.go:176: Build accepted invalid image
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	0.411s
+FAIL

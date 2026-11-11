@@ -1,0 +1,919 @@
+package runtime
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"strings"
+	"testing"
+	"time"
+)
+
+// REQ-020, REQ-040; T-039, T-040, T-079, T-080.
+// These are local action replays, not execution of PHP source by Phego.
+// The lifecycle references are profiles of (integer width, architecture).
+func TestExecutionOracleReplay(t *testing.T) {
+	for _, profile := range []struct {
+		name, arch, reference string
+		width                 int
+	}{
+		{"64", "arm64", "reference.json", 64},
+		{"32", "386", "reference-32.json", 32},
+		{"amd64", "amd64", "reference-amd64.json", 64},
+	} {
+		t.Run(profile.name, func(t *testing.T) {
+			replayExecutionOracle(t, profile.width, profile.arch, profile.reference)
+		})
+	}
+}
+
+func replayExecutionOracle(t *testing.T, width int, arch, name string) {
+	data, err := os.ReadFile("../../tests/lifecycle/w14/" + name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var oracle struct {
+		IntSize    int    `json:"int_size"`
+		PHPVersion string `json:"php_version"`
+		OS         string `json:"os"`
+		// Each case also carries Display: the same fixture with
+		// display_errors=1 and log_errors=1, displayed errors on stdout and
+		// the log on stderr.
+		Cases []lifecycleCase
+	}
+	if err := json.Unmarshal(data, &oracle); err != nil {
+		t.Fatal(err)
+	}
+	if oracle.IntSize*8 != width || oracle.PHPVersion != "8.5.12" || oracle.OS != "Linux" {
+		t.Fatalf("unexpected reference profile: %s/%s/%d", oracle.PHPVersion, oracle.OS, oracle.IntSize)
+	}
+	if len(oracle.Cases) != 60 {
+		t.Fatalf("want 60 cases, got %d", len(oracle.Cases))
+	}
+	for _, display := range []bool{false, true} {
+		mode := "stderr"
+		if display {
+			mode = "display"
+		}
+		t.Run(mode, func(t *testing.T) { replayExecutionOracleMode(t, width, arch, display, oracle.Cases) })
+	}
+}
+
+type lifecycleCase = struct {
+	Case           string
+	ExitCode       int `json:"exit_code"`
+	Stdout, Stderr string
+	Display        struct {
+		ExitCode       int `json:"exit_code"`
+		Stdout, Stderr string
+	}
+}
+
+// lifecycleEvent reports whether a stderr line is a fixture event rather
+// than part of a diagnostic.
+func lifecycleEvent(line string) bool {
+	return strings.HasPrefix(line, "shutdown:") || strings.HasPrefix(line, "destroy:") || strings.HasPrefix(line, "flush:") || line == "finally" || line == "caught" || strings.HasPrefix(line, "caught:") || strings.HasPrefix(line, "previous:") || line == "returned" || strings.HasPrefix(line, "body")
+}
+
+// logEntries splits a display-mode stderr into its log entries: each
+// "PHP Level:  text" line plus its continuation lines (stack traces).
+func logEntries(stderr string) (levels, texts []string) {
+	for _, line := range strings.Split(stderr, "\n") {
+		if level, rest, ok := strings.Cut(strings.TrimPrefix(line, "PHP "), ":  "); ok && strings.HasPrefix(line, "PHP ") {
+			levels, texts = append(levels, level), append(texts, rest)
+			continue
+		}
+		if len(texts) > 0 && line != "" && !lifecycleEvent(line) {
+			texts[len(texts)-1] += "\n" + line
+		}
+	}
+	return levels, texts
+}
+
+func replayExecutionOracleMode(t *testing.T, width int, arch string, display bool, cases []lifecycleCase) {
+	for _, tc := range cases {
+		t.Run(tc.Case, func(t *testing.T) {
+			r, _ := NewRequest(nil)
+			must := func(err error) {
+				t.Helper()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			must(r.Admit(func(context.Context) error { return nil }))
+			must(r.BeginInit())
+			must(r.Ready())
+			x, err := newExecution(context.Background(), r, width, nil, executionLimits{32, 64, 4096})
+			must(err)
+			x.heap.arch, x.heap.os = arch, "linux"
+			wantOut, wantCode, stderr, prefix := tc.Stdout, tc.ExitCode, tc.Stderr, ""
+			shownCount := func() int { return 0 }
+			if display {
+				wantOut, wantCode, stderr, prefix = tc.Display.Stdout, tc.Display.ExitCode, tc.Display.Stderr, "PHP "
+				// The VM supplies PHP's location and stack trace; the replay
+				// takes them from the log copy, in order, and checks that each
+				// displayed diagnostic is the one PHP raised there.
+				levels, texts := logEntries(tc.Display.Stderr)
+				shown := 0
+				shownCount = func() int { return shown }
+				x.errors = errorChannels{display: true, log: true, text: func(level, message string) string {
+					if shown >= len(levels) {
+						t.Errorf("extra displayed %s: %s", level, message)
+						return ""
+					}
+					i := shown
+					shown++
+					if levels[i] != level || !strings.Contains(texts[i], message) {
+						t.Errorf("displayed %d is %s: %q, PHP logged %s: %q", i, level, message, levels[i], texts[i])
+					}
+					return "\n" + level + ": " + texts[i] + "\n"
+				}}
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			var events []string
+			// Diagnostics join the event stream at the next event, so their
+			// order relative to destructors, shutdown and flushes is compared.
+			marked := 0
+			markDiagnostics := func() {
+				for ; marked < len(x.diagnostics); marked++ {
+					events = append(events, "diagnostic:"+x.diagnostics[marked].level)
+				}
+			}
+			event := func(s string) { markDiagnostics(); events = append(events, s) }
+			// trigger_error(..., E_USER_ERROR) deprecates its level before the
+			// fatal error; the fixtures use it to reach a fatal from PHP code.
+			userError := func(x *execution, message string) completion {
+				x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
+				return completion{kind: endFatal, err: errors.New(message)}
+			}
+			result := x.run(ctx, func(x *execution) completion {
+				// Handler names are PHP's callable names for the fixture closures.
+				handler := func(file string, line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", file, line) }
+				// solo_ fixtures do not require common.php.
+				if strings.HasPrefix(tc.Case, "solo_") {
+					return replaySoloOutputCase(t, x, tc.Case, event)
+				}
+				_, err := x.object("Tracked", func(x *execution) completion { event("destroy:global"); return x.write([]byte("D")) })
+				must(err)
+				must(x.registerShutdown(func(x *execution) completion { event("shutdown:1"); return x.write([]byte("S")) }))
+				must(x.registerShutdown(func(x *execution) completion { event("shutdown:2"); return completion{} }))
+				must(x.startBuffer(handler("common", 11), func(_ *execution, b []byte) ([]byte, completion) {
+					event("flush:outer")
+					return []byte("[" + string(b) + "]"), completion{}
+				}))
+				must(x.startBuffer(handler("common", 12), func(_ *execution, b []byte) ([]byte, completion) {
+					event("flush:inner")
+					return []byte("(" + string(b) + ")"), completion{}
+				}))
+				switch tc.Case {
+				case "shutdown_nested_catch":
+					_, err := x.object("Outer", func(x *execution) completion {
+						child, err := x.object("NestedChild", func(*execution) completion {
+							event("destroy:child")
+							return completion{kind: endThrow, err: errors.New("child failure")}
+						})
+						must(err)
+						var slot value
+						must(x.heap.assign(&slot, child))
+						var caught completion
+						if err := x.heap.unset(&slot); !errors.As(err, &caught) || caught.kind != endThrow {
+							t.Fatalf("expected child exception: %v", err)
+						}
+						event("caught:child")
+						return completion{}
+					})
+					must(err)
+					_, err = x.object("Tracked", func(x *execution) completion { event("destroy:tail"); return x.write([]byte("D")) })
+					must(err)
+				case "fatal_shutdown_create":
+					// Store the pre-fatal object so the callback can explicitly unset it.
+					old := value{kind: valueObject, object: x.heap.liveObject(1)}
+					must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
+					must(x.heap.setElement(&x.globals, bytesValue([]byte("a")), old))
+					must(x.registerShutdown(func(x *execution) completion {
+						event("shutdown:create")
+						must(x.heap.unsetElement(&x.globals, bytesValue([]byte("a"))))
+						v, err := x.object("Tracked", func(x *execution) completion { event("destroy:new-local"); return x.write([]byte("D")) })
+						must(err)
+						var local value
+						must(x.heap.assign(&local, v))
+						must(x.heap.unset(&local))
+						v, err = x.object("Tracked", func(x *execution) completion { event("destroy:new-retained"); return x.write([]byte("D")) })
+						must(err)
+						must(x.heap.setElement(&x.globals, bytesValue([]byte("new")), v))
+						return completion{}
+					}))
+				case "buffer_echo":
+					must(x.startBuffer(handler("buffer_echo", 4), func(x *execution, b []byte) ([]byte, completion) {
+						event("flush:echo")
+						return b, x.write([]byte("discarded"))
+					}))
+				case "buffer_retained":
+					must(x.startBuffer(handler("buffer_retained", 4), func(x *execution, b []byte) ([]byte, completion) {
+						event("flush:retained")
+						v, err := x.object("Tracked", func(x *execution) completion { event("destroy:unexpected-late"); return x.write([]byte("D")) })
+						must(err)
+						must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
+						must(x.heap.setElement(&x.globals, bytesValue([]byte("late")), v))
+						return b, completion{}
+					}))
+				case "destructor_create":
+					_, err := x.object("Creator", func(x *execution) completion {
+						event("destroy:creator")
+						v, err := x.object("Tracked", func(x *execution) completion { event("destroy:late"); return x.write([]byte("D")) })
+						must(err)
+						must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
+						must(x.heap.setElement(&x.globals, bytesValue([]byte("late")), v))
+						return x.write([]byte("C"))
+					})
+					must(err)
+				case "buffer_object", "fatal_buffer_object":
+					must(x.startBuffer(handler(tc.Case, 7), func(x *execution, b []byte) ([]byte, completion) {
+						event("flush:object")
+						v, err := x.object("BufferLocal", func(_ *execution) completion { event("destroy:buffer-local"); return completion{} })
+						must(err)
+						must(x.local(&v))
+						return b, completion{}
+					}))
+				case "buffer_nested_start_shutdown", "buffer_nested_start_flush":
+					must(x.startBuffer(handler(tc.Case, 5), func(x *execution, b []byte) ([]byte, completion) {
+						event("flush:nested")
+						if err := x.startBuffer("", nil); err != nil {
+							var c completion
+							if !errors.As(err, &c) {
+								t.Fatalf("nested ob_start: %v", err)
+							}
+							return b, c
+						}
+						return b, completion{}
+					}))
+					if c := x.write([]byte("body")); c.kind != endNormal {
+						return c
+					}
+					if tc.Case == "buffer_nested_start_flush" {
+						if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+							return c
+						}
+						event("body:after")
+					}
+				case "flush_throw":
+					must(x.startBuffer(handler("flush_throw", 4), func(_ *execution, _ []byte) ([]byte, completion) {
+						event("flush:throw")
+						return nil, completion{kind: endThrow, err: errors.New("flush failure")}
+					}))
+				case "shutdown_throw", "shutdown_exit", "fatal_shutdown_exit", "uncaught_shutdown_exit":
+					must(x.registerShutdown(func(_ *execution) completion {
+						if tc.Case != "shutdown_throw" {
+							event("shutdown:exit")
+							return completion{kind: endExit, code: 9}
+						}
+						event("shutdown:throw")
+						return completion{kind: endThrow, err: errors.New("shutdown failure")}
+					}))
+					must(x.registerShutdown(func(_ *execution) completion { event("shutdown:unexpected"); return completion{} }))
+				case "shutdown_register":
+					must(x.registerShutdown(func(x *execution) completion {
+						event("shutdown:register")
+						must(x.registerShutdown(func(_ *execution) completion { event("shutdown:late"); return completion{} }))
+						return completion{}
+					}))
+				case "destructor_throw":
+					_, err := x.object("Broken", func(_ *execution) completion {
+						event("destroy:throw")
+						return completion{kind: endThrow, err: errors.New("destructor failure")}
+					})
+					must(err)
+				}
+				if c := x.write([]byte("B")); c.kind != endNormal {
+					return c
+				}
+				switch tc.Case {
+				case "normal":
+					event("body")
+				case "return_finally_array", "return_finally_reference":
+					var alias value
+					c := x.call(func(x *execution) completion {
+						must(x.heap.assign(&x.globals, x.heap.newArrayValue()))
+						must(x.heap.setElement(&x.globals, bytesValue([]byte("key")), bytesValue([]byte("kept"))))
+						if tc.Case == "return_finally_reference" {
+							must(x.heap.bind(&alias, &x.globals))
+						}
+						return completion{kind: endReturn, value: x.globals}
+					}, func(x *execution) completion {
+						if tc.Case == "return_finally_reference" {
+							v := x.heap.newArrayValue()
+							must(x.heap.setElement(&v, bytesValue([]byte("key")), bytesValue([]byte("changed"))))
+							must(x.heap.assign(&alias, v))
+							must(x.heap.unset(&alias))
+						}
+						must(x.heap.unset(&x.globals))
+						event("finally")
+						return completion{}
+					})
+					if c.kind != endReturn {
+						t.Fatalf("return failed: %+v", c)
+					}
+					snapshot, err := exportSnapshot(c.value)
+					must(err)
+					entries := snapshot.([]SnapshotEntry)
+					if len(entries) != 1 {
+						t.Fatalf("pending return lost: %#v", snapshot)
+					}
+					if next := x.write(entries[0].Value.([]byte)); next.kind != endNormal {
+						return next
+					}
+					if next := x.releaseReturn(&c); next.kind != endNormal {
+						return next
+					}
+					event("returned")
+				case "finally_return_suppresses_throw", "array_finally_return_suppresses_throw", "finally_return_object_suppresses_throw":
+					body := func(x *execution) completion {
+						v, err := x.object("FinallyLocal", func(*execution) completion {
+							event("destroy:local")
+							return completion{kind: endThrow, err: errors.New("destructor")}
+						})
+						must(err)
+						must(x.local(&v))
+						return completion{kind: endThrow, err: errors.New("suppressed")}
+					}
+					finally := func(x *execution) completion {
+						event("finally")
+						if tc.Case == "finally_return_object_suppresses_throw" {
+							v, err := x.object("Returned", func(*execution) completion {
+								event("destroy:returned")
+								return completion{kind: endThrow, err: errors.New("returned")}
+							})
+							must(err)
+							return completion{kind: endReturn, value: v}
+						}
+						return completion{kind: endReturn, value: nullValue()}
+					}
+					var c completion
+					if strings.HasPrefix(tc.Case, "array_") {
+						c = x.call(func(x *execution) completion {
+							a := x.heap.newArrayValue()
+							must(x.local(&a))
+							first, err := x.object("Earlier", func(*execution) completion {
+								event("destroy:first")
+								return completion{kind: endThrow, err: errors.New("first")}
+							})
+							must(err)
+							second, err := x.object("FinallyReturn", func(x *execution) completion { return x.call(body, finally) })
+							must(err)
+							must(x.heap.setElement(&a, bytesValue([]byte("first")), first))
+							must(x.heap.setElement(&a, bytesValue([]byte("second")), second))
+							return completion{}
+						}, nil)
+					} else {
+						c = x.call(body, finally)
+					}
+					if c.kind != endThrow {
+						t.Fatalf("expected destructor exception: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					for previous := c.previous; previous != nil; {
+						var prior completion
+						if !errors.As(previous, &prior) {
+							t.Fatalf("non-completion previous: %v", previous)
+						}
+						event("previous:" + prior.err.Error())
+						previous = prior.previous
+					}
+				case "return_replaced_destructor":
+					c := x.call(func(x *execution) completion {
+						v, err := x.object("ReturnTracked", func(x *execution) completion { event("destroy:returned"); return x.write([]byte("R")) })
+						must(err)
+						must(x.local(&v))
+						local, err := x.object("UnwindFailure", func(*execution) completion {
+							event("destroy:local")
+							return completion{kind: endThrow, err: errors.New("local failure")}
+						})
+						must(err)
+						must(x.local(&local))
+						return completion{kind: endReturn, value: v}
+					}, nil)
+					if c.kind != endThrow {
+						t.Fatalf("destructor failure lost: %+v", c)
+					}
+					event("caught")
+				case "return_finally_replace":
+					newReturn := func(name, output string) completion {
+						v, err := x.object("Replacement", func(x *execution) completion {
+							event("destroy:" + name)
+							if next := x.write([]byte(output)); next.kind != endNormal {
+								return next
+							}
+							return completion{kind: endThrow, err: errors.New(name)}
+						})
+						must(err)
+						return completion{kind: endReturn, value: v}
+					}
+					c := x.call(func(*execution) completion { return newReturn("old", "O") }, func(*execution) completion { return newReturn("new", "N") })
+					if c.kind != endThrow || c.previous == nil {
+						t.Fatalf("replacement exception chain lost: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					event("previous:" + c.previous.Error())
+				case "caught_then_throw", "caught_then_throw_helper", "caught_then_throw_destructor":
+					c := x.call(func(x *execution) completion {
+						handled := x.tryCatch(func(x *execution) completion {
+							return x.call(func(*execution) completion { return completion{kind: endThrow, err: errors.New("first")} }, nil)
+						}, func(completion) executionAction {
+							return func(*execution) completion { event("caught:first"); return completion{} }
+						})
+						if handled.kind != endNormal {
+							return handled
+						}
+						raise := func(*execution) completion { return completion{kind: endThrow, err: errors.New("second")} }
+						if tc.Case == "caught_then_throw_helper" {
+							return x.call(raise, nil)
+						}
+						if tc.Case == "caught_then_throw_destructor" {
+							v, err := x.object("ThrowSecond", raise)
+							must(err)
+							must(x.local(&v))
+							var result completion
+							if err := x.heap.unset(&v); err != nil {
+								if !errors.As(err, &result) {
+									t.Fatal(err)
+								}
+							}
+							return result
+						}
+						return raise(x)
+					}, nil)
+					if c.kind != endThrow {
+						t.Fatalf("expected second throw: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					if c.previous != nil {
+						event("previous:" + c.previous.Error())
+					}
+				case "local_cow":
+					show := func(v value) completion {
+						snapshot, err := exportSnapshot(v)
+						must(err)
+						entries := snapshot.([]SnapshotEntry)
+						if len(entries) != 1 {
+							t.Fatalf("shared array lost: %#v", snapshot)
+						}
+						return x.write(entries[0].Value.([]byte))
+					}
+					c := x.call(func(x *execution) completion {
+						a := x.heap.newArrayValue()
+						must(x.local(&a))
+						must(x.heap.setElement(&a, bytesValue([]byte("key")), bytesValue([]byte("original"))))
+						must(x.heap.assign(&x.globals, a))
+						must(x.heap.setElement(&a, bytesValue([]byte("key")), bytesValue([]byte("changed"))))
+						return show(a)
+					}, nil)
+					if c.kind != endNormal {
+						return c
+					}
+					return show(x.globals)
+				case "array_throw_chain", "array_throw_caught_chain":
+					c := x.call(func(x *execution) completion {
+						a := x.heap.newArrayValue()
+						must(x.local(&a))
+						for i, name := range []string{"first", "second", "third"} {
+							o, err := x.object("ChainThrow", func(x *execution) completion {
+								if tc.Case == "array_throw_caught_chain" && name == "second" {
+									c := x.call(func(*execution) completion { return completion{kind: endThrow, err: errors.New("middle")} }, nil)
+									if c.kind != endThrow {
+										return c
+									}
+									event("caught:middle")
+									return completion{}
+								}
+								event("destroy:" + name)
+								return completion{kind: endThrow, err: errors.New(name)}
+							})
+							must(err)
+							key, err := intValue(int64(i), width)
+							must(err)
+							must(x.heap.setElement(&a, key, o))
+						}
+						return completion{}
+					}, nil)
+					if c.kind != endThrow {
+						t.Fatalf("expected aggregate exception: %+v", c)
+					}
+					event("caught:" + c.err.Error())
+					for previous := c.previous; previous != nil; {
+						var prior completion
+						if errors.As(previous, &prior) {
+							event("previous:" + prior.err.Error())
+							previous = prior.previous
+						} else {
+							event("previous:" + previous.Error())
+							break
+						}
+					}
+				case "array_throw_fatal", "array_throw_exit", "array_exit_throw", "array_exit_caught", "array_throw_exit_caught":
+					c := x.call(func(x *execution) completion {
+						a := x.heap.newArrayValue()
+						must(x.local(&a))
+						kinds := []endKind{endThrow, endFatal, endNormal}
+						if tc.Case == "array_throw_exit" || tc.Case == "array_throw_exit_caught" {
+							kinds = []endKind{endThrow, endExit, endNormal}
+						}
+						if tc.Case == "array_exit_throw" {
+							kinds = []endKind{endExit, endThrow, endNormal}
+						}
+						if tc.Case == "array_exit_caught" {
+							kinds = []endKind{endExit, endNormal}
+						}
+						for i, kind := range kinds {
+							o, err := x.object("Element", func(x *execution) completion {
+								switch kind {
+								case endThrow:
+									event("destroy:throw")
+									return completion{kind: endThrow, err: errors.New("earlier throw")}
+								case endExit:
+									event("destroy:exit")
+									return completion{kind: endExit, code: 7}
+								case endFatal:
+									event("destroy:fatal")
+									return userError(x, "fatal destructor")
+								default:
+									if strings.HasSuffix(tc.Case, "_caught") {
+										return x.call(func(x *execution) completion {
+											c := x.call(func(*execution) completion { return completion{kind: endThrow, err: errors.New("caught tail")} }, nil)
+											if c.kind != endThrow {
+												return c
+											}
+											event("caught:tail")
+											return x.write([]byte("D"))
+										}, func(*execution) completion { event("finally"); return completion{} })
+									}
+									event("destroy:tail")
+									return x.write([]byte("D"))
+								}
+							})
+							must(err)
+							key, err := intValue(int64(i), width)
+							must(err)
+							must(x.heap.setElement(&a, key, o))
+						}
+						return completion{}
+					}, nil)
+					if c.kind == endThrow {
+						event("caught")
+						return x.write([]byte("unexpected"))
+					}
+					return c
+				case "frame_exit", "exit_cleanup_throw", "exit_cleanup_exit":
+					return x.call(func(x *execution) completion {
+						first, err := x.object("Local", func(x *execution) completion {
+							switch tc.Case {
+							case "exit_cleanup_throw":
+								event("destroy:throw")
+								return completion{kind: endThrow, err: errors.New("cleanup failure")}
+							case "exit_cleanup_exit":
+								event("destroy:exit")
+								return completion{kind: endExit, code: 9}
+							default:
+								event("destroy:local")
+								return x.write([]byte("D"))
+							}
+						})
+						must(err)
+						must(x.local(&first))
+						if tc.Case != "frame_exit" {
+							tail, err := x.object("Tracked", func(x *execution) completion { event("destroy:tail"); return x.write([]byte("D")) })
+							must(err)
+							must(x.local(&tail))
+						}
+						return completion{kind: endExit, code: 7}
+					}, func(*execution) completion { event("finally"); return completion{} })
+				case "array_fatal", "array_exit":
+					return x.call(func(x *execution) completion {
+						a := x.heap.newArrayValue()
+						must(x.local(&a))
+						first, err := x.object("ArrayFirst", func(x *execution) completion {
+							event("destroy:array-a")
+							if c := x.write([]byte("A")); c.kind != endNormal {
+								return c
+							}
+							if tc.Case == "array_exit" {
+								return completion{kind: endExit, code: 7}
+							}
+							return userError(x, "array failure")
+						})
+						must(err)
+						second, err := x.object("Tracked", func(x *execution) completion { event("destroy:array-b"); return x.write([]byte("D")) })
+						must(err)
+						zero, err := intValue(0, width)
+						must(err)
+						one, err := intValue(1, width)
+						must(err)
+						must(x.heap.setElement(&a, zero, first))
+						must(x.heap.setElement(&a, one, second))
+						return completion{}
+					}, nil)
+				case "warning":
+					x.warning("first warning")
+					x.warning("second warning")
+					event("body:continued")
+				case "uncaught", "uncaught_shutdown_exit":
+					return completion{kind: endThrow, err: errors.New("body failure")}
+				case "fatal", "fatal_shutdown_exit", "fatal_shutdown_create", "fatal_buffer_object":
+					return userError(x, "body failure")
+				case "exit":
+					return completion{kind: endExit, code: 7}
+				case "die":
+					x.write([]byte("bye"))
+					return completion{kind: endExit}
+				case "frame_throw":
+					c := x.call(func(x *execution) completion {
+						v, err := x.object("Tracked", func(x *execution) completion { event("destroy:local"); return x.write([]byte("D")) })
+						must(err)
+						must(x.local(&v))
+						return completion{kind: endThrow, err: errors.New("caught")}
+					}, func(_ *execution) completion { event("finally"); return completion{} })
+					if c.kind != endThrow {
+						t.Errorf("throw lost: %+v", c)
+					}
+					event("caught")
+				case "frame_locals", "frame_destructor_throw":
+					c := x.call(func(x *execution) completion {
+						for _, name := range []string{"local-a", "local-b"} {
+							v, err := x.object("Tracked", func(x *execution) completion {
+								event("destroy:" + name)
+								if c := x.write([]byte("D")); c.kind != endNormal {
+									return c
+								}
+								if tc.Case == "frame_destructor_throw" && name == "local-a" {
+									return completion{kind: endThrow, err: errors.New("local failure")}
+								}
+								return completion{}
+							})
+							must(err)
+							must(x.local(&v))
+						}
+						return completion{}
+					}, nil)
+					if tc.Case == "frame_destructor_throw" {
+						if c.kind != endThrow {
+							t.Errorf("throw lost: %+v", c)
+						}
+						event("caught")
+					} else {
+						if c.kind != endNormal {
+							t.Errorf("unexpected completion: %+v", c)
+						}
+						event("returned")
+					}
+				}
+				return completion{}
+			})
+			if display {
+				if levels, _ := logEntries(tc.Display.Stderr); len(levels) != shownCount() {
+					t.Errorf("displayed %d diagnostics, PHP logged %d", shownCount(), len(levels))
+				}
+			}
+			if string(result.output) != wantOut || result.end.code != wantCode {
+				t.Errorf("output=%q code=%d, oracle=%q/%d", result.output, result.end.code, wantOut, wantCode)
+			}
+			markDiagnostics()
+			var want []string
+			sep := ": "
+			if display {
+				sep = ":  "
+			}
+			for _, line := range strings.Split(stderr, "\n") {
+				if lifecycleEvent(line) {
+					want = append(want, line)
+				}
+				// display_errors=stderr prints each diagnostic as "Level: message";
+				// stack traces and "thrown in" lines continue the previous one.
+				for _, level := range []string{"Fatal error", "Warning", "Deprecated", "Notice"} {
+					if strings.HasPrefix(line, prefix+level+sep) {
+						want = append(want, "diagnostic:"+level)
+					}
+				}
+			}
+			// Output handler deprecations name the handler and the flushing
+			// context, and lock errors name the calling function; compare
+			// their full text.
+			handlerMessage := func(level, message string) bool {
+				return level == "Deprecated" && strings.Contains(message, "user output handler") ||
+					level == "Fatal error" && strings.Contains(message, "output buffering display handlers")
+			}
+			var wantHandler, gotHandler []string
+			for _, line := range strings.Split(stderr, "\n") {
+				for _, level := range []string{"Deprecated", "Fatal error"} {
+					if message, ok := strings.CutPrefix(line, prefix+level+sep); ok && handlerMessage(level, message) {
+						if at := strings.LastIndex(message, " in "); at >= 0 {
+							message = message[:at]
+						}
+						wantHandler = append(wantHandler, message)
+					}
+				}
+			}
+			for _, d := range result.diagnostics {
+				if handlerMessage(d.level, d.message) {
+					gotHandler = append(gotHandler, d.message)
+				}
+			}
+			if strings.Join(gotHandler, "\n") != strings.Join(wantHandler, "\n") {
+				t.Errorf("handler messages=%q, oracle=%q", gotHandler, wantHandler)
+			}
+			if strings.Join(events, "\n") != strings.Join(want, "\n") {
+				t.Errorf("events=%v, oracle=%v", events, want)
+			}
+			if !result.cleanupComplete || result.cleanupErr != nil {
+				t.Errorf("cleanup: %+v", result)
+			}
+		})
+	}
+}
+
+// soloCases describes the solo_ fixtures, which set up their own shutdown
+// function and buffers: the line of each closure (0 when absent) and what
+// the handler under test does after it echoes "x".
+var soloCases = map[string]struct {
+	shutdown, outer, inner int
+	shutdownOut            string
+	event                  string
+	end                    string // "throw", "exit", "lock", "fatal", "printf", "dtor-throw", "dtor-exit" or "dtor-fatal"
+	flush                  bool   // main calls ob_end_flush()
+}{
+	"solo_shutdown_throw":            {0, 0, 6, "", "flush:throw", "throw", false},
+	"solo_shutdown_exit":             {0, 6, 7, "", "flush:exit", "exit", false},
+	"solo_end_exit":                  {6, 7, 8, "S", "flush:exit", "exit", true},
+	"solo_end_lock_echo":             {6, 0, 7, "[S]", "flush:lock", "lock", true},
+	"solo_return_dtor_throw":         {0, 7, 8, "", "flush:inner", "dtor-throw", true},
+	"solo_return_dtor_exit":          {7, 8, 9, "S", "flush:inner", "dtor-exit", true},
+	"solo_shutdown_return_dtor_exit": {0, 6, 7, "", "flush:inner", "dtor-exit", false},
+	"solo_handler_fatal":             {6, 7, 8, "[S]", "flush:inner", "fatal", true},
+	"solo_return_dtor_fatal":         {6, 7, 8, "[S]", "flush:inner", "dtor-fatal", true},
+	"solo_printf_empty":              {0, 0, 5, "", "flush:inner", "printf", true},
+}
+
+// replaySoloOutputCase replays one solo_ fixture.
+func replaySoloOutputCase(t *testing.T, x *execution, name string, event func(string)) completion {
+	t.Helper()
+	switch name {
+	case "solo_display_upper", "solo_display_handler":
+		return replayDisplayCase(t, x, name)
+	}
+	tc, ok := soloCases[name]
+	if !ok {
+		t.Fatalf("unknown solo fixture %s", name)
+	}
+	must := func(err error) {
+		t.Helper()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	handler := func(line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", name, line) }
+	// trigger_error(..., E_USER_ERROR) deprecates its level before the fatal.
+	userError := func(x *execution) completion {
+		x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
+		return completion{kind: endFatal, err: errors.New("boom")}
+	}
+	fatal := tc.end == "fatal" || tc.end == "dtor-fatal"
+	if tc.shutdown != 0 {
+		must(x.registerShutdown(func(x *execution) completion {
+			if fatal {
+				// These fixtures print ob_get_level() at shutdown.
+				event(fmt.Sprintf("shutdown:level=%d", len(x.buffers)))
+			} else {
+				event("shutdown:solo")
+			}
+			return x.write([]byte(tc.shutdownOut))
+		}))
+	}
+	if tc.outer != 0 {
+		must(x.startBuffer(handler(tc.outer), func(_ *execution, b []byte) ([]byte, completion) {
+			event("flush:outer")
+			if strings.HasPrefix(tc.end, "dtor-") || fatal {
+				return []byte("<" + string(b) + ">"), completion{}
+			}
+			return []byte("[" + string(b) + "]"), completion{}
+		}))
+	}
+	must(x.startBuffer(handler(tc.inner), func(x *execution, b []byte) ([]byte, completion) {
+		event(tc.event)
+		switch tc.end {
+		case "dtor-throw", "dtor-exit", "dtor-fatal":
+			// The local's destructor runs as the handler's frame unwinds,
+			// after the handler returned "R".
+			v, err := x.object("T", func(x *execution) completion {
+				event("destroy:local")
+				switch tc.end {
+				case "dtor-throw":
+					return completion{kind: endThrow, err: errors.New("dtor")}
+				case "dtor-fatal":
+					return userError(x)
+				}
+				return completion{kind: endExit, code: 4}
+			})
+			must(err)
+			must(x.local(&v))
+		}
+		if tc.end == "printf" {
+			// printf("") writes nothing but still produces output.
+			if c := x.write(nil); c.kind != endNormal {
+				return nil, c
+			}
+			return []byte("R"), completion{}
+		}
+		if c := x.write([]byte("x")); c.kind != endNormal {
+			return nil, c
+		}
+		if tc.end == "fatal" {
+			return nil, userError(x)
+		}
+		switch tc.end {
+		case "throw":
+			return nil, completion{kind: endThrow, err: errors.New("Uncaught Exception: boom")}
+		case "exit":
+			return nil, completion{kind: endExit, code: 3}
+		case "lock":
+			if c := x.endBuffer("ob_end_flush"); c.kind != endNormal {
+				return nil, c
+			}
+			return b, completion{}
+		}
+		return []byte("R"), completion{}
+	}))
+	if c := x.write([]byte("body")); c.kind != endNormal || !tc.flush {
+		return c
+	}
+	c := x.endBuffer("ob_end_flush")
+	if tc.end == "dtor-throw" && c.kind == endThrow {
+		event("caught")
+		if c := x.write([]byte("caught:dtor")); c.kind != endNormal {
+			return c
+		}
+		return x.write([]byte("|after"))
+	}
+	if c.kind != endNormal {
+		return c
+	}
+	switch name {
+	case "solo_end_exit":
+		return x.write([]byte("after"))
+	case "solo_handler_fatal", "solo_return_dtor_fatal":
+		return x.write([]byte("|after"))
+	}
+	return completion{}
+}
+
+// replayDisplayCase replays the solo_display_ fixtures, which exercise
+// displayed errors passing through output handlers.
+func replayDisplayCase(t *testing.T, x *execution, name string) completion {
+	t.Helper()
+	handler := func(line int) string { return fmt.Sprintf("{closure:/fixtures/%s.php:%d}", name, line) }
+	steps := func(cs ...func() completion) completion {
+		for _, c := range cs {
+			if r := c(); r.kind != endNormal {
+				return r
+			}
+		}
+		return completion{}
+	}
+	write := func(s string) func() completion { return func() completion { return x.write([]byte(s)) } }
+	warn := func(m string) func() completion { return func() completion { return x.warning(m) } }
+	switch name {
+	case "solo_display_upper":
+		if err := x.startBuffer(handler(5), func(_ *execution, b []byte) ([]byte, completion) {
+			return bytes.ToUpper(b), completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		if c := steps(write("body\n"), warn("first warning"), write("after\n"), warn("last warning")); c.kind != endNormal {
+			return c
+		}
+		x.report("Deprecated", "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead", false)
+		return completion{kind: endFatal, err: errors.New("boom")}
+	default: // solo_display_handler
+		if err := x.startBuffer(handler(4), func(x *execution, b []byte) ([]byte, completion) {
+			if c := x.warning("inside handler"); c.kind != endNormal {
+				return nil, c
+			}
+			return []byte("[" + string(b) + "]"), completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		if c := steps(write("body"), func() completion { return x.endBuffer("ob_end_flush") }, write("|")); c.kind != endNormal {
+			return c
+		}
+		if err := x.startBuffer(handler(11), func(x *execution, b []byte) ([]byte, completion) {
+			if c := x.write([]byte("x")); c.kind != endNormal {
+				return nil, c
+			}
+			return b, completion{}
+		}); err != nil {
+			t.Fatal(err)
+		}
+		return x.write([]byte("tail"))
+	}
+}

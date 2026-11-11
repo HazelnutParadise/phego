@@ -1,0 +1,109 @@
+=== RUN   TestRootWindowsReservedNamesAreMissing
+    special_files_windows_test.go:47: fopen(/app/NUL, "r"): policy: file-read open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "w"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "r+"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "a"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "x"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "r"): policy: file-read open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "w"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "r+"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "a"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "x"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "r"): policy: file-read open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "w"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "r+"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "a"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "x"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "r"): policy: file-read open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "w"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "r+"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "a"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "x"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "r"): policy: file-read open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "w"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "r+"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "a"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "x"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "r"): policy: file-read open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "w"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "r+"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "a"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "x"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "r"): policy: file-read open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "w"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "r+"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "a"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "x"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "r"): policy: file-read open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "w"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "r+"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "a"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "x"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "r"): policy: file-read open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "w"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "r+"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "a"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "x"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "r"): policy: file-read open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "w"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "r+"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "a"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL, "x"): policy: file-write open "/app/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "r"): policy: file-read open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "w"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "r+"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "a"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/nul, "x"): policy: file-write open "/app/nul" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "r"): policy: file-read open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "w"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "r+"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "a"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/sub/NUL, "x"): policy: file-write open "/app/sub/NUL" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "r"): policy: file-read open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "w"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "r+"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "a"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CON, "x"): policy: file-write open "/app/CON" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "r"): policy: file-read open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "w"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "r+"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "a"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/COM1, "x"): policy: file-write open "/app/COM1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "r"): policy: file-read open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "w"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "r+"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "a"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONIN$, "x"): policy: file-write open "/app/CONIN$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "r"): policy: file-read open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "w"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "r+"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "a"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/CONOUT$, "x"): policy: file-write open "/app/CONOUT$" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "r"): policy: file-read open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "w"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "r+"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "a"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/LPT1, "x"): policy: file-write open "/app/LPT1" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "r"): policy: file-read open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "w"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "r+"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "a"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+    special_files_windows_test.go:47: fopen(/app/NUL/x, "x"): policy: file-write open "/app/NUL/x" refused (outside-root), want No such file or directory
+--- FAIL: TestRootWindowsReservedNamesAreMissing (0.01s)
+=== RUN   TestRootWindowsDirectoriesAreDenied
+    special_files_windows_test.go:90: fopen(/app/d, "r") opened, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d, "w"): openat d: is a directory, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d, "r+"): openat d: is a directory, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d, "a"): openat d: is a directory, want Permission denied
+    special_files_windows_test.go:90: fopen(/app/d/, "r") opened, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d/, "w"): open /app/d/.: invalid argument, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d/, "r+"): open /app/d/.: invalid argument, want Permission denied
+    special_files_windows_test.go:95: fopen(/app/d/, "a"): open /app/d/.: invalid argument, want Permission denied
+    special_files_windows_test.go:90: fopen(/app, "r") opened, want Permission denied
+    special_files_windows_test.go:95: fopen(/app, "w"): open /app: invalid argument, want Permission denied
+    special_files_windows_test.go:95: fopen(/app, "r+"): open /app: invalid argument, want Permission denied
+    special_files_windows_test.go:95: fopen(/app, "a"): open /app: invalid argument, want Permission denied
+--- FAIL: TestRootWindowsDirectoriesAreDenied (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.035s
+FAIL

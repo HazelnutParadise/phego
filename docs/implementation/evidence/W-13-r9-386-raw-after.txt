@@ -1,0 +1,23 @@
+goos: linux
+goarch: 386
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: QEMU TCG CPU version 2.5+
+BenchmarkW13RawGhost/2/initialize=false-2         	   10869	     12370 ns/op	     432 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-2         	   11106	     11340 ns/op	     432 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=false-2         	   10000	     11034 ns/op	     432 B/op	       6 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-2          	    6709	     19150 ns/op	     560 B/op	       8 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-2          	    6673	     17790 ns/op	     560 B/op	       8 allocs/op
+BenchmarkW13RawGhost/2/initialize=true-2          	    6906	     17858 ns/op	     560 B/op	       8 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-2        	    9237	     14420 ns/op	    1760 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-2        	    9732	     12960 ns/op	    1760 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=false-2        	    9585	     13846 ns/op	    1760 B/op	       6 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-2         	    2494	     48745 ns/op	    3216 B/op	       8 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-2         	    2499	     49104 ns/op	    3216 B/op	       8 allocs/op
+BenchmarkW13RawGhost/32/initialize=true-2         	    2494	     49285 ns/op	    3216 B/op	       8 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-2       	    4954	     26100 ns/op	   11232 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-2       	    5088	     25715 ns/op	   11232 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=false-2       	    5179	     25096 ns/op	   11232 B/op	       6 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-2        	     434	    264076 ns/op	   22161 B/op	       8 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-2        	     451	    279982 ns/op	   22160 B/op	       8 allocs/op
+BenchmarkW13RawGhost/256/initialize=true-2        	     451	    279887 ns/op	   22160 B/op	       8 allocs/op
+PASS

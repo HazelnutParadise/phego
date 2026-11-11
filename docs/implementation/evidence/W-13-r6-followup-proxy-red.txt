@@ -1,0 +1,84 @@
+--- FAIL: TestW13R6PHP8512Regression (0.01s)
+    --- FAIL: TestW13R6PHP8512Regression/32 (0.01s)
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-isset (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["isset:q","init","isset:q"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:q","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-set (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["set:q","init","set:q"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:q","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-isset-fresh (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:q"],false],"diagnostics":[]}
+                PHP: {"result":[false,["init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-set-different (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["set:q","set:r","init","set:r"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:q","set:r","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-get-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-reference-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-isset-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:x"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-set-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["init","set:x"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:x","init","get:x"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-unset-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["unset:x","init","unset:x"],false],"diagnostics":[]}
+                PHP: {"result":[null,["unset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-get-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-reference-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-isset-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:x"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/32/r6-proxy-guard-unset-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["unset:x","init","unset:x"],false],"diagnostics":[]}
+                PHP: {"result":[null,["unset:x","init"],false],"diagnostics":[]}
+    --- FAIL: TestW13R6PHP8512Regression/64 (0.01s)
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-isset (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["isset:q","init","isset:q"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:q","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-set (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["set:q","init","set:q"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:q","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-isset-fresh (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:q"],false],"diagnostics":[]}
+                PHP: {"result":[false,["init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-set-different (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["set:q","set:r","init","set:r"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:q","set:r","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-get-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-reference-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-isset-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:x"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-set-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[12,["init","set:x"],false],"diagnostics":[]}
+                PHP: {"result":[12,["set:x","init","get:x"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-unset-dynamic (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["unset:x","init","unset:x"],false],"diagnostics":[]}
+                PHP: {"result":[null,["unset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-get-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"]]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-reference-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["init","get:x"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+                PHP: {"result":[null,["get:x","init"],false],"diagnostics":[[2,"Undefined property: W13R6ProxyGuard::$x"],[8,"Indirect modification of overloaded property W13R6ProxyGuard::$x has no effect"]]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-isset-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[false,["init","isset:x"],false],"diagnostics":[]}
+                PHP: {"result":[false,["isset:x","init"],false],"diagnostics":[]}
+        --- FAIL: TestW13R6PHP8512Regression/64/r6-proxy-guard-unset-dynamic-direct (0.00s)
+            object_review_r6_test.go:48: Go: {"result":[null,["unset:x","init","unset:x"],false],"diagnostics":[]}
+                PHP: {"result":[null,["unset:x","init"],false],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.914s
+FAIL

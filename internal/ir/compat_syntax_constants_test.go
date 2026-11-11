@@ -1,0 +1,152 @@
+package ir
+
+import "testing"
+
+// Constants in arrays/declarations have a distinct pre-evaluation order in PHP.
+// Expected outcomes are from pinned PHP 8.5.12 lint, before any PHP execution.
+func TestCompatibilitySyntaxConstants(t *testing.T) {
+	for _, tc := range []struct {
+		name, source, want string
+		line               int
+	}{
+		{"array-and-array", "<?php [[] && [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-and-array", "<?php ([[] && [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-and-array", "<?php const X = [] && [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-and-scalar", "<?php [false && [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-and-scalar", "<?php ([false && [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-and-scalar", "<?php const X = false && [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-or-array", "<?php [[1] || [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-or-array", "<?php ([[1] || [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-or-array", "<?php const X = [1] || [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-unknown-binary", "<?php [$x + [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-unknown-binary", "<?php ([$x + [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-unknown-binary", "<?php const X = $x + [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-unknown-call-skipped", "<?php [false && f(...$x, 1)];", "", 0},
+		{"array-class-unknown-call-skipped", "<?php ([false && f(...$x, 1)])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-unknown-call-skipped", "<?php const X = false && f(...$x, 1);", "", 0},
+		{"array-unknown-call-unset", "<?php [false && f((unset)$x)];", "", 0},
+		{"array-class-unknown-call-unset", "<?php ([false && f((unset)$x)])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-unknown-call-unset", "<?php const X = false && f((unset)$x);", "", 0},
+		{"array-unknown-unset", "<?php [$x && (unset)$y];", "The (unset) cast is no longer supported", 1},
+		{"array-class-unknown-unset", "<?php ([$x && (unset)$y])::class;", "The (unset) cast is no longer supported", 1},
+		{"const-unknown-unset", "<?php const X = $x && (unset)$y;", "The (unset) cast is no longer supported", 1},
+		{"array-unknown-ternary", "<?php [$x ? [] : [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-unknown-ternary", "<?php ([$x ? [] : [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-unknown-ternary", "<?php const X = $x ? [] : [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-known-ternary", "<?php [true ? [] : [...1]];", "", 0},
+		{"array-class-known-ternary", "<?php ([true ? [] : [...1]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-known-ternary", "<?php const X = true ? [] : [...1];", "", 0},
+		{"array-false-ternary", "<?php [false ? [...1] : []];", "", 0},
+		{"array-class-false-ternary", "<?php ([false ? [...1] : []])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-false-ternary", "<?php const X = false ? [...1] : [];", "", 0},
+		{"array-ternary-dynamic", "<?php [true ? f() : (unset)$x];", "", 0},
+		{"array-class-ternary-dynamic", "<?php ([true ? f() : (unset)$x])::class;", "", 0},
+		{"const-ternary-dynamic", "<?php const X = true ? f() : (unset)$x;", "Constant expression contains invalid operations", 1},
+		{"array-short-ternary", "<?php [[1] ?: [...1]];", "", 0},
+		{"array-class-short-ternary", "<?php ([[1] ?: [...1]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-short-ternary", "<?php const X = [1] ?: [...1];", "", 0},
+		{"array-empty-short", "<?php [[] ?: [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-empty-short", "<?php ([[] ?: [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-empty-short", "<?php const X = [] ?: [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-coalesce", "<?php [1 ?? [...1]];", "", 0},
+		{"array-class-coalesce", "<?php ([1 ?? [...1]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-coalesce", "<?php const X = 1 ?? [...1];", "", 0},
+		{"array-coalesce-null", "<?php [null ?? [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-coalesce-null", "<?php ([null ?? [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-coalesce-null", "<?php const X = null ?? [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-coalesce-unknown", "<?php [$x ?? [...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-coalesce-unknown", "<?php ([$x ?? [...1]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-coalesce-unknown", "<?php const X = $x ?? [...1];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-cast-bool", "<?php [(bool)1.0];", "", 0},
+		{"array-class-cast-bool", "<?php ([(bool)1.0])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-bool", "<?php const X = (bool)1.0;", "", 0},
+		{"array-cast-int", "<?php [(int)1.5];", "", 0},
+		{"array-class-cast-int", "<?php ([(int)1.5])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-int", "<?php const X = (int)1.5;", "", 0},
+		{"array-cast-double", "<?php [(float)\"3\"];", "", 0},
+		{"array-class-cast-double", "<?php ([(float)\"3\"])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-double", "<?php const X = (float)\"3\";", "", 0},
+		{"array-cast-string", "<?php [(string)true];", "", 0},
+		{"array-class-cast-string", "<?php ([(string)true])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-string", "<?php const X = (string)true;", "", 0},
+		{"array-cast-float-string", "<?php [(string)1.0];", "", 0},
+		{"array-class-cast-float-string", "<?php ([(string)1.0])::class;", "", 0},
+		{"const-cast-float-string", "<?php const X = (string)1.0;", "", 0},
+		{"array-cast-array", "<?php [(array)1];", "", 0},
+		{"array-class-cast-array", "<?php ([(array)1])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-array", "<?php const X = (array)1;", "", 0},
+		{"array-cast-null-array", "<?php [(array)null];", "", 0},
+		{"array-class-cast-null-array", "<?php ([(array)null])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-null-array", "<?php const X = (array)null;", "", 0},
+		{"array-cast-array-int", "<?php [(int)[]];", "", 0},
+		{"array-class-cast-array-int", "<?php ([(int)[]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-array-int", "<?php const X = (int)[];", "", 0},
+		{"array-cast-array-bool", "<?php [(bool)[]];", "", 0},
+		{"array-class-cast-array-bool", "<?php ([(bool)[]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-cast-array-bool", "<?php const X = (bool)[];", "", 0},
+		{"array-cast-object", "<?php [(object)[]];", "", 0},
+		{"array-class-cast-object", "<?php ([(object)[]])::class;", "", 0},
+		{"const-cast-object", "<?php const X = (object)[];", "", 0},
+		{"array-dim-array", "<?php [[1][0]];", "", 0},
+		{"array-class-dim-array", "<?php ([[1][0]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-dim-array", "<?php const X = [1][0];", "", 0},
+		{"array-dim-array-nested", "<?php [[[1]][0]];", "", 0},
+		{"array-class-dim-array-nested", "<?php ([[[1]][0]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-dim-array-nested", "<?php const X = [[1]][0];", "", 0},
+		{"array-dim-string", "<?php [\"ABC\"[1]];", "", 0},
+		{"array-class-dim-string", "<?php ([\"ABC\"[1]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-dim-string", "<?php const X = \"ABC\"[1];", "", 0},
+		{"array-dim-neg", "<?php [\"ABC\"[-1]];", "", 0},
+		{"array-class-dim-neg", "<?php ([\"ABC\"[-1]])::class;", "", 0},
+		{"const-dim-neg", "<?php const X = \"ABC\"[-1];", "", 0},
+		{"array-dim-missing", "<?php [[1][2]];", "", 0},
+		{"array-class-dim-missing", "<?php ([[1][2]])::class;", "", 0},
+		{"const-dim-missing", "<?php const X = [1][2];", "", 0},
+		{"array-dim-string-num", "<?php [\"ABC\"[\"1\"]];", "", 0},
+		{"array-class-dim-string-num", "<?php ([\"ABC\"[\"1\"]])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-dim-string-num", "<?php const X = \"ABC\"[\"1\"];", "", 0},
+		{"array-dim-array-illegal", "<?php [[1][[]]];", "", 0},
+		{"array-class-dim-array-illegal", "<?php ([[1][[]]])::class;", "", 0},
+		{"const-dim-array-illegal", "<?php const X = [1][[]];", "", 0},
+		{"array-dim-array-null", "<?php [[1][null]];", "", 0},
+		{"array-class-dim-array-null", "<?php ([[1][null]])::class;", "", 0},
+		{"const-dim-array-null", "<?php const X = [1][null];", "", 0},
+		{"array-dim-string-float", "<?php [\"ABC\"[1.0]];", "", 0},
+		{"array-class-dim-string-float", "<?php ([\"ABC\"[1.0]])::class;", "", 0},
+		{"const-dim-string-float", "<?php const X = \"ABC\"[1.0];", "", 0},
+		{"array-value-before-key", "<?php [[[[]=>1]=>[...1]]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-value-before-key", "<?php ([[[[]=>1]=>[...1]]])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-value-before-key", "<?php const X = [[[]=>1]=>[...1]];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-dynamic-array-before-key", "<?php [[[[]=>1]=>$x]];", "Illegal offset type", 1},
+		{"array-class-dynamic-array-before-key", "<?php ([[[[]=>1]=>$x]])::class;", "Illegal offset type", 1},
+		{"const-dynamic-array-before-key", "<?php const X = [[[]=>1]=>$x];", "Illegal offset type", 1},
+		{"array-unselected-cast", "<?php [true ? 1 : (unset)$x];", "", 0},
+		{"array-class-unselected-cast", "<?php ([true ? 1 : (unset)$x])::class;", "Cannot use \"::class\" on array", 1},
+		{"const-unselected-cast", "<?php const X = true ? 1 : (unset)$x;", "", 0},
+		{"array-unselected-new", "<?php [false && new Missing([...1])];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-unselected-new", "<?php ([false && new Missing([...1])])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-unselected-new", "<?php const X = false && new Missing([...1]);", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-prop-child", "<?php [$x->{[...1]}];", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-class-prop-child", "<?php ([$x->{[...1]}])::class;", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"const-prop-child", "<?php const X = $x->{[...1]};", "Only arrays and Traversables can be unpacked, int given", 1},
+		{"array-cast-hidden", "<?php [false && ((unset)$x)];", "The (unset) cast is no longer supported", 1},
+		{"array-class-cast-hidden", "<?php ([false && ((unset)$x)])::class;", "The (unset) cast is no longer supported", 1},
+		{"const-cast-hidden", "<?php const X = false && ((unset)$x);", "The (unset) cast is no longer supported", 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, width := range []int{32, 64} {
+				_, err := lowerSource(tc.source, width)
+				if tc.want == "" {
+					if err != nil {
+						t.Fatalf("int%d: %v", width, err)
+					}
+					continue
+				}
+				ce, ok := err.(*CompileError)
+				if !ok || ce.Message != tc.want || ce.Line != tc.line {
+					t.Fatalf("int%d: got %v, want line%d %s", width, err, tc.line, tc.want)
+				}
+			}
+		})
+	}
+}

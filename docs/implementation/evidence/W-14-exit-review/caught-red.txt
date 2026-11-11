@@ -1,0 +1,18 @@
+--- FAIL: TestExecutionOracleReplay (0.00s)
+    --- FAIL: TestExecutionOracleReplay/64 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/64/array_exit_caught (0.00s)
+            execution_oracle_test.go:417: output="[(BDunexpectedSD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:426: events=[destroy:exit caught:tail finally caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:exit caught:tail finally shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/64/array_throw_exit_caught (0.00s)
+            execution_oracle_test.go:417: output="[(BDunexpectedSD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:426: events=[destroy:throw destroy:exit caught:tail finally caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:throw destroy:exit caught:tail finally shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+    --- FAIL: TestExecutionOracleReplay/32 (0.00s)
+        --- FAIL: TestExecutionOracleReplay/32/array_exit_caught (0.00s)
+            execution_oracle_test.go:417: output="[(BDunexpectedSD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:426: events=[destroy:exit caught:tail finally caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:exit caught:tail finally shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+        --- FAIL: TestExecutionOracleReplay/32/array_throw_exit_caught (0.00s)
+            execution_oracle_test.go:417: output="[(BDunexpectedSD)]" code=7, oracle="[(BDSD)]"/7
+            execution_oracle_test.go:426: events=[destroy:throw destroy:exit caught:tail finally caught shutdown:1 shutdown:2 destroy:global flush:inner flush:outer], oracle=[destroy:throw destroy:exit caught:tail finally shutdown:1 shutdown:2 destroy:global flush:inner flush:outer]
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.469s
+FAIL

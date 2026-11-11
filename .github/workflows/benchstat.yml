@@ -1,0 +1,74 @@
+name: Runtime layout benchmarks
+
+# Re-measures the runtime layout decisions (docs/decisions/runtime-layout.md)
+# with benchstat on a hosted runner: for each decision, the commit before it
+# and the commit that made it run alternately. Run it by hand, or by changing
+# this file or the script.
+on:
+  push:
+    paths:
+      - '.github/workflows/benchstat.yml'
+      - 'tools/benchstat-pair.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: heap-objects
+            before: 063aebe
+            after: 935a223
+            bench: '^Benchmark(W13ObjectLifecycle|W13MaterializedLifecycle|ObjectDestruct|Collect100ObjectCycles)$'
+            files: ''
+          - name: sort-ordinal
+            before: 935a223
+            after: 2cc3dcc
+            bench: '^BenchmarkW12Sorting(Equal)?$'
+            files: internal/runtime/array_sort_bench_test.go
+          - name: bucket-chunks
+            before: 2cc3dcc
+            after: e5eaac6
+            bench: '^Benchmark(PackedAppendSmall|PackedAppend1K|CopyOnWriteSeparation1K|W12Sorting)$'
+            files: internal/runtime/value_bench_test.go
+          - name: execution-frames
+            before: e5eaac6
+            after: 81f9ac8
+            bench: '^BenchmarkExecutionCall$'
+            files: internal/runtime/execution_output_bench_test.go
+          - name: output-write
+            before: f11fe9e
+            after: HEAD
+            bench: '^BenchmarkOutputWrite$'
+            files: ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install benchstat
+        run: go install golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
+      - name: Compare
+        run: |
+          set -euo pipefail
+          { uname -a; nproc; grep -m1 'model name' /proc/cpuinfo; } | tee "$RUNNER_TEMP/system.txt"
+          tools/benchstat-pair.sh '${{ matrix.name }}' '${{ matrix.before }}' '${{ matrix.after }}' '${{ matrix.bench }}' 10 "$RUNNER_TEMP/benchstat" ${{ matrix.files }}
+          mv "$RUNNER_TEMP/system.txt" "$RUNNER_TEMP/benchstat/${{ matrix.name }}.system.txt"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchstat-${{ matrix.name }}
+          path: ${{ runner.temp }}/benchstat
+          if-no-files-found: error

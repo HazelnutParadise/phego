@@ -1,0 +1,21 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/bytecode
+cpu: Apple M3
+BenchmarkDispatch/arithmetic/switch-8         	  719290	       845.3 ns/op	       193.0 dispatches/op	      3088 instruction-B	 228320557 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/function-table-8 	  827348	       743.9 ns/op	       193.0 dispatches/op	      3088 instruction-B	 259432957 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/predecoded-closures-8         	  838764	       689.9 ns/op	       193.0 dispatches/op	      3088 instruction-B	 279764725 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/bounded-trampoline-8          	  778310	       763.0 ns/op	       193.0 dispatches/op	      3088 instruction-B	 252955359 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/arithmetic/superinstruction-add-pair-8   	  959820	       625.0 ns/op	       129.0 dispatches/op	       193.0 fusion-index-B	      3088 instruction-B	 308823209 semantic-steps/s	       193.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/switch-8                    	  626224	      1100 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 231772936 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/function-table-8            	  656778	       895.0 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 284929075 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/predecoded-closures-8       	  777394	       771.7 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 330430128 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/bounded-trampoline-8        	  605930	      1079 ns/op	       255.0 dispatches/op	        48.00 instruction-B	 236427502 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/branch-heavy/superinstruction-add-pair-8 	  606313	      1000 ns/op	       255.0 dispatches/op	         3.000 fusion-index-B	        48.00 instruction-B	 254953027 semantic-steps/s	       255.0 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/switch-8                    	 1441256	       418.1 ns/op	        97.00 dispatches/op	      1552 instruction-B	 231996350 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/function-table-8            	 1459028	       411.7 ns/op	        97.00 dispatches/op	      1552 instruction-B	 235616001 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/predecoded-closures-8       	 1691634	       355.6 ns/op	        97.00 dispatches/op	      1552 instruction-B	 272802310 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/bounded-trampoline-8        	 1481776	       407.8 ns/op	        97.00 dispatches/op	      1552 instruction-B	 237833081 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+BenchmarkDispatch/binary-mixed/superinstruction-add-pair-8 	 1449385	       414.5 ns/op	        97.00 dispatches/op	        97.00 fusion-index-B	      1552 instruction-B	 234016011 semantic-steps/s	        97.00 steps/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	12.410s

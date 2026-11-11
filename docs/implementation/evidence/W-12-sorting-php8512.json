@@ -1,0 +1,1090 @@
+{
+  "work_package": "W-12",
+  "requirements": [
+    "REQ-017"
+  ],
+  "tests": [
+    "T-033",
+    "T-034"
+  ],
+  "status": "local_checks_passed; latest-head remote CI and review results are tracked on PR #72",
+  "source_inventory": "third_party/php-sort/UPSTREAM.json",
+  "baseline_commit": "65adcab07c85de2317e11a8e78da6c6d232043cb",
+  "red_tests": {
+    "command": "go test ./internal/runtime -run '^TestW12SortObservableRegression$' -count=1",
+    "exit_code": 1,
+    "output": "--- FAIL: TestW12SortObservableRegression (0.00s)\n    --- FAIL: TestW12SortObservableRegression/always-positive (0.00s)\n        array_sort_regression_test.go:40: values [3 1 2], PHP [1 2 3]\n    --- FAIL: TestW12SortObservableRegression/always-negative (0.00s)\n        array_sort_regression_test.go:40: values [4 5 2 1 3], PHP [3 1 2 5 4]\n    --- FAIL: TestW12SortObservableRegression/argument-order (0.00s)\n        array_sort_regression_test.go:43: calls [[3 5] [8 5] [1 8] [1 5] [1 3] [9 8] [2 9] [2 8] [2 5] [2 3] [2 1]], PHP [[5 3] [5 8] [8 1] [5 1] [3 1] [8 9] [9 2] [8 2] [5 2] [3 2] [1 2]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.249s\nFAIL\n",
+    "output_sha256": "dd627ab045b5024183318bb97bf43b209c4d9cd52617b865a1dad9a6d97366aa"
+  },
+  "native_counterexamples": {
+    "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+    "platform": "linux/arm64",
+    "exit_code": 0,
+    "output": {
+      "version": "8.5.12",
+      "cases": [
+        {
+          "values": [
+            1,
+            2,
+            3
+          ],
+          "calls": [
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        },
+        {
+          "values": [
+            3,
+            1,
+            2,
+            5,
+            4
+          ],
+          "calls": [
+            [
+              3,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "values": [
+            1,
+            2,
+            3,
+            5,
+            8,
+            9
+          ],
+          "calls": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              8
+            ],
+            [
+              8,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              8,
+              9
+            ],
+            [
+              9,
+              2
+            ],
+            [
+              8,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    "output_sha256": "10e676974d97b9343a8682b663d52a61fed78148172293f8d6d271cf41a8d3dd"
+  },
+  "adapter_red_tests": {
+    "command": "go test ./internal/runtime -run '^TestW12SortUser' -count=1",
+    "exit_code": 1,
+    "output": "--- FAIL: TestW12SortUserBooleanAdapter (0.00s)\n    array_sort_user_php8512_test.go:24: calls [[3 1] [2 3]], PHP [[1 3] [3 1] [3 2] [1 2] [2 1]]\n--- FAIL: TestW12SortUserReverseFailure (0.00s)\n    array_sort_user_php8512_test.go:52: error=<nil> calls=1\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.258s\nFAIL\n",
+    "output_sha256": "43ddc72936af71a2e3b84dc3757c63b61439ae9d11afbf30db0d8395593e5f30"
+  },
+  "integration_owners": {
+    "W-17 (issue #21, PR #77)": "VM/function dispatch supplies callback return values through heap.sortArrayUserWithDiagnostic and a diagnose(level,message) hook for PHP error handlers and thrown diagnostics. Runtime adapter implements bool false reverse retry, nested deprecation state and conversion warnings; full VM/cancellation dispatch remains W-17.",
+    "W-13 (issue #18, PR #73)": "Object/enum native comparison handlers; current scalar/array regular comparison uses existing heap.compare."
+  },
+  "remaining": [
+    "Full PHP engine/product acceptance remains not_run; W-17 VM/error-handler/source-location/cancellation wiring and W-13 object/enum comparisons remain downstream."
+  ],
+  "verification_commit": "43784192ca0addf56bbad90740e33a6df7841151",
+  "product_acceptance_status": "not_run",
+  "recorded_at_utc": "2026-11-01T17:01:02.527199+00:00",
+  "references": [
+    {
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ],
+      "image_preparation": [
+        "docker",
+        "image",
+        "inspect",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049"
+      ],
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/386",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "php",
+        "-n",
+        "/w/matrix.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "platform": "linux/386",
+      "php": "8.5.12",
+      "integer_width": 32,
+      "cases": 650,
+      "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+      "fixture_sources_sha256": {
+        "matrix.php": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+        "sorting.php": "1dfeffec5845d390b3dce80804cef7d23b25bee2cef1fbba2df9604e987a09e6"
+      },
+      "output": "w12-ref-32.json",
+      "output_sha256": "f9d5931d557affba3c1ff5d64092ec5fc68011bf82e0b42578798024fd5a76b0",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
+    },
+    {
+      "requirements": [
+        "REQ-007",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "tests": [
+        "T-013",
+        "T-014",
+        "T-031",
+        "T-032",
+        "T-033",
+        "T-034"
+      ],
+      "image_preparation": [
+        "docker",
+        "image",
+        "inspect",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9"
+      ],
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "-v",
+        "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "/w/matrix.php"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "platform": "linux/arm64",
+      "php": "8.5.12",
+      "integer_width": 64,
+      "cases": 650,
+      "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+      "fixture_sources_sha256": {
+        "matrix.php": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+        "sorting.php": "1dfeffec5845d390b3dce80804cef7d23b25bee2cef1fbba2df9604e987a09e6"
+      },
+      "output": "w12-ref-64.json",
+      "output_sha256": "50ab2e02f45445bfa56c1da70f526a8b4e8e2deff118806b019279582641546c",
+      "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
+    }
+  ],
+  "differential": {
+    "command": "PHEGO_W12_REFERENCE=/tmp/w12-sort-review-reference go test ./internal/runtime -run '^TestW12PHP8512Arrays$' -count=1",
+    "exit_code": 0,
+    "cases_per_profile": 650,
+    "profiles": [
+      32,
+      64
+    ],
+    "code_commit": "43784192ca0addf56bbad90740e33a6df7841151",
+    "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t11.477s\n",
+    "output_sha256": "56cadaf7fc6c81f920b896a15185c631f9c097eb5d2cf305919e7fe8a6db7772"
+  },
+  "supplemental_review": [
+    {
+      "corpus": "general",
+      "cases": 500,
+      "platform": "linux/arm64",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "-i",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--mount",
+        "type=bind,src=/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays,dst=/fixtures,readonly",
+        "--workdir",
+        "/fixtures",
+        "--platform",
+        "linux/arm64",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n"
+      ],
+      "php_exit_code": 0,
+      "php_stderr": "",
+      "input_sha256": "62e2755563ddbbcec7ffee64d551b01b85000980c59d99f2040bccc104d98eae",
+      "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+      "output_sha256": "ceae81856e37d3262ca7bcc66f09f5ca42736926c1e7310143411479a9056f96",
+      "go_exit_code": 0,
+      "go_stdout": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.340s\n",
+      "go_stderr": ""
+    },
+    {
+      "corpus": "foreach",
+      "cases": 700,
+      "platform": "linux/arm64",
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "command": [
+        "docker",
+        "run",
+        "--pull",
+        "never",
+        "--rm",
+        "-i",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--mount",
+        "type=bind,src=/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays,dst=/fixtures,readonly",
+        "--workdir",
+        "/fixtures",
+        "--platform",
+        "linux/arm64",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n"
+      ],
+      "php_exit_code": 0,
+      "php_stderr": "",
+      "input_sha256": "3e88c035c94344270dc6028bd184bd538ec13e8b73463ce5956bbbe94a12789a",
+      "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+      "output_sha256": "0840450b4e4db750a84b9f699c0d0290eb63962a8b0895734ec8cfaea119a2b1",
+      "go_exit_code": 0,
+      "go_stdout": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.203s\n",
+      "go_stderr": ""
+    }
+  ],
+  "additional_red_evidence": {
+    "native-path-red": {
+      "sha256": "d91e6ace0b3fe2b46f08f052b1e6e549f9297801587273e1d94363b35c768c03",
+      "bytes": 2334,
+      "output": "--- FAIL: TestW12PHP8512Arrays (0.50s)\n    --- FAIL: TestW12PHP8512Arrays/64 (0.50s)\n        --- FAIL: TestW12PHP8512Arrays/64/sort-empty-deleted-position (0.00s)\n            array_w12_test.go:304: Go: [[\"value\",[\"n\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"a\",[[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n                PHP: [[\"value\",[\"n\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"a\",[[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/sort-foreach-mixed-holes (0.00s)\n            array_w12_test.go:304: Go: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"2\"]],[[\"i\",\"1\"],[\"i\",\"4\"]]]]],[\"value\",[\"i\",\"4\"]]]\n                PHP: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"a\",[[[\"i\",\"0\"],[\"i\",\"2\"]],[[\"i\",\"1\"],[\"i\",\"4\"]]]]],[\"value\",[\"i\",\"2\"]]]\n        --- FAIL: TestW12PHP8512Arrays/64/asort-single-exhausted-position (0.00s)\n            array_w12_test.go:304: Go: [[\"value\",[\"b\",false]],[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"a\",[[[\"i\",\"3\"],[\"i\",\"1\"]],[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n                PHP: [[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"a\",[[[\"i\",\"3\"],[\"i\",\"1\"]],[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/asort-empty-deleted-position (0.00s)\n            array_w12_test.go:304: Go: [[\"value\",[\"n\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"n\"]],[\"value\",[\"a\",[[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n                PHP: [[\"value\",[\"n\"]],[\"value\",[\"i\",\"9\"]],[\"value\",[\"b\",false]],[\"value\",[\"s\",\"78\"]],[\"value\",[\"a\",[[[\"i\",\"6\"],[\"i\",\"9\"]],[[\"s\",\"78\"],[\"i\",\"7\"]]]]]]\n        --- FAIL: TestW12PHP8512Arrays/64/asort-foreach-mixed-holes (0.00s)\n            array_w12_test.go:304: Go: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"i\",\"4\"]],[\"value\",[\"a\",[[[\"s\",\"7a\"],[\"i\",\"2\"]],[[\"s\",\"77\"],[\"i\",\"4\"]]]]],[\"value\",[\"i\",\"4\"]]]\n                PHP: [[\"value\",[\"i\",\"3\"]],[\"value\",[\"i\",\"2\"]],[\"value\",[\"a\",[[[\"s\",\"7a\"],[\"i\",\"2\"]],[[\"s\",\"77\"],[\"i\",\"4\"]]]]],[\"value\",[\"i\",\"2\"]]]\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t1.377s\nFAIL\n"
+    },
+    "diagnostic-red": {
+      "sha256": "ae2fb1e75b3dc30c0d01314d8c6ce512531ebcf519c771b5fefca0a61a8560e2",
+      "bytes": 670,
+      "output": "--- FAIL: TestW12SortUserReferenceBoolean (0.00s)\n    array_sort_user_php8512_test.go:29: calls=[[1 3] [3 1] [3 2] [1 2] [2 1]] diagnostics=[{level:8192 message:usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero}]\n--- FAIL: TestW12SortDiagnosticFailure (0.00s)\n    --- FAIL: TestW12SortDiagnosticFailure/false (0.00s)\n        array_sort_user_php8512_test.go:48: error=<nil> calls=4 warnings=0\n    --- FAIL: TestW12SortDiagnosticFailure/true (0.00s)\n        array_sort_user_php8512_test.go:48: error=<nil> calls=3 warnings=0\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.249s\nFAIL\n"
+    },
+    "user-closed-red": {
+      "sha256": "4ac03c441211d4954a4e1366d49aded6ff7aad3d0b5275de0a710808a611f681",
+      "bytes": 205,
+      "output": "--- FAIL: TestW12SortUserClosedHeap (0.00s)\n    array_sort_user_php8512_test.go:78: error=request heap is closed calls=2 warnings=0\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.272s\nFAIL\n"
+    },
+    "object-warning-red": {
+      "sha256": "9101d5c6782c059fcc0b457681949a7eb2cd1d14e1d64aa613ed58b37b9a2998",
+      "bytes": 199,
+      "output": "--- FAIL: TestW12SortObjectCoercionDiagnostic (0.00s)\n    array_sort_user_php8512_test.go:107: error=<nil> calls=3 warnings=0\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.543s\nFAIL\n"
+    },
+    "extended-baseline-red": {
+      "sha256": "eaea453b8f3124a0d145985871b28a8104ca7f8643d0ae335b0d9d4fd36db5bc",
+      "bytes": 4529347
+    }
+  },
+  "object_warning_native_reproduction": {
+    "php": "8.5.12",
+    "calls": 1,
+    "warnings": 1,
+    "array": [
+      1,
+      3,
+      2
+    ],
+    "error": [
+      "Exception",
+      "Object of class stdClass could not be converted to int"
+    ]
+  },
+  "native_comparison_counts": {
+    "php": "8.5.12",
+    "int_size": 8,
+    "samples": [
+      {
+        "length": 32,
+        "calls": 148,
+        "sorted_sha256": "2d14eeb29eb5966a07a1e0357ca09293fe3f7d11efc05fb9bedf9ef1960aa04c"
+      },
+      {
+        "length": 128,
+        "calls": 810,
+        "sorted_sha256": "ab8ae162c153751bde03f40af2d49c3e0fc444b22544ef4d085b6f948f725cfc"
+      },
+      {
+        "length": 1024,
+        "calls": 9942,
+        "sorted_sha256": "2b060360ac4a89b3e8208ff63867f463751b9ae0c474ec5e32b9e10e6ccade40"
+      }
+    ]
+  },
+  "baseline_benchmark": {
+    "sha256": "7360e4ba9b4f44a8ede0e2676bd8acdfc416e1c3eca39283079301fd1fdb30fb",
+    "bytes": 1242,
+    "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12Sorting/32-8         \t     200\t     13203 ns/op\t       191.0 comparisons/op\t    6265 B/op\t      39 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t     16321 ns/op\t       191.0 comparisons/op\t    6265 B/op\t      39 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t     19068 ns/op\t       191.0 comparisons/op\t    6265 B/op\t      39 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t    111195 ns/op\t      1119 comparisons/op\t   24569 B/op\t     135 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     66511 ns/op\t      1119 comparisons/op\t   24569 B/op\t     135 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     83100 ns/op\t      1119 comparisons/op\t   24569 B/op\t     135 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t   1173597 ns/op\t     12938 comparisons/op\t  206397 B/op\t    1033 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t   1340844 ns/op\t     12938 comparisons/op\t  206372 B/op\t    1033 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t   1500601 ns/op\t     12938 comparisons/op\t  206373 B/op\t    1033 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t1.502s\n"
+  },
+  "benchmark_limitations": [
+    "Uncontrolled background load; no speedup claim.",
+    "Counts are comparisons/op for deterministic integer inputs; not PHP VM or application performance.",
+    "Stable ordinal map increases allocations; no layout rewrite."
+  ],
+  "limitations": [
+    "PHP 8.5.12 scalar/array runtime subset, not full engine acceptance or all historical versions.",
+    "Object/enum native comparison handlers remain W-13; VM/error-handler/source-location integration remains W-17.",
+    "Single executor per request heap; host callbacks must return cancellation errors.",
+    "Supplemental frozen corpus is arm64-only; both integer widths covered by the 650 fixed cases.",
+    "Optional historical destructor crash observations are retained in W-12-runtime-php8512.json and are not conformance passes.",
+    "Full object destructor exception chaining (a later destructor exception replacing primary and retaining previous) is not represented by the current first-error heap/Throwable model; W-13 object lifecycle and W-17 exception/call integration own it. This is an unimplemented engine capability, not an accepted sorting schedule difference."
+  ],
+  "source_sha256": {
+    "internal/runtime/array_sort_php8512_test.go": "a54bcc4981662513d877ccc5bab04040ebc37975992bb8752fdfd4ee5e08ec3f",
+    "internal/runtime/array_w12_test.go": "628865cd3db20da9f7a8d73f79a8c08c66b5b184ac1fab80e75b9e05d5239259",
+    "internal/runtime/array_w12_safety_test.go": "e050d8904e93d09838f7dd814f0d837fb2da7fbef8e6e04d4292ff7f5c086e24",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_w12_fuzz_test.go": "dd5d0ef510143dcd3243aa34141672802a4a260a99af6eb37d4f9ed9549e6823",
+    "internal/runtime/array_sort_regression_test.go": "a223d1263d0caf32f44ffa35788ab0024dfd45bbe7b18e5bbc7e6fe314902da0",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/array_w12.go": "1c56debd9518d7fbc139ea28fb679e5c7f643ad16a58931fb230b0879937a44b",
+    "internal/runtime/array_sort_user_php8512.go": "88795809c5306f56f478a2ccf56e73896b043c9558d73bc0172065f3dd7b5d06",
+    "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_sort_bench_test.go": "fa801a85983588a2d341a3436795a61a30cf8261b62d04fd3c060089745b6433",
+    "internal/runtime/array.go": "92b7dc8467ee553088372ede35fde3936fd1d19d9135bb90d1cf5d816a0aef3a",
+    "internal/runtime/array_sort_user_php8512_test.go": "3c2c10c4eeb176d48dbb5fad2f26d4cc47a73195b5cafc6a6633778b96081700",
+    "internal/runtime/array_sort_php8512.go": "b408c4432667de42ecde470cfa86ea43feb5e388a2f1bc03f92cf962925077d1",
+    "internal/runtime/heap.go": "7eaf7d85f91fc67f35328e7cc94ee3067f45cb8803e1748cc05d0877795b34af",
+    "tests/semantics/w12-arrays/sorting.php": "1dfeffec5845d390b3dce80804cef7d23b25bee2cef1fbba2df9604e987a09e6",
+    "tests/semantics/w12-arrays/matrix.php": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807"
+  },
+  "checks": [
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "duration_seconds": 0.034,
+      "log": "/tmp/w12-sort-last-gofmt.log",
+      "output": "",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "exit_code": 0,
+      "duration_seconds": 3.353,
+      "log": "/tmp/w12-sort-last-go-test.log",
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t0.261s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t2.587s\n",
+      "output_sha256": "eb665ba41713d943e1adcd14e057e93ab8ea08972363e13c717100f8e8c9a598",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 0,
+      "duration_seconds": 20.046,
+      "log": "/tmp/w12-sort-last-go-race.log",
+      "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.652s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t18.503s\n",
+      "output_sha256": "843f9b04b6354bd4c77d4ac08617f8f490da21789414055ddad57cac77852441",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0,
+      "duration_seconds": 0.264,
+      "log": "/tmp/w12-sort-last-go-vet.log",
+      "output": "",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
+      "exit_code": 0,
+      "duration_seconds": 32.495,
+      "log": "/tmp/w12-sort-last-fuzz.log",
+      "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/105 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 105/105 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 3369 (1123/sec), new interesting: 2 (total: 107)\nfuzz: elapsed: 6s, execs: 37650 (11430/sec), new interesting: 5 (total: 110)\nfuzz: elapsed: 9s, execs: 37650 (0/sec), new interesting: 5 (total: 110)\nfuzz: elapsed: 12s, execs: 37650 (0/sec), new interesting: 5 (total: 110)\nfuzz: elapsed: 15s, execs: 100120 (20738/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 18s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 21s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 24s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 27s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 30s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nfuzz: elapsed: 31s, execs: 100120 (0/sec), new interesting: 8 (total: 113)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.285s\n",
+      "output_sha256": "fa731eba2ab08f33eedadfd40507f3efddbc0f2405034e0a1552771eaa0639d0",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW12Sorting$' -benchtime 200x -count 3",
+      "exit_code": 0,
+      "duration_seconds": 0.942,
+      "log": "/tmp/w12-sort-last-benchmark.log",
+      "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12Sorting/32-8         \t     200\t     10115 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9721 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9659 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48965 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48153 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47992 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    569062 ns/op\t      9942 comparisons/op\t  243340 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    570615 ns/op\t      9942 comparisons/op\t  243314 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    558003 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.453s\n",
+      "output_sha256": "b98eadd2efaca6c0647ae6f0d6ce60a9e9b77bbe655d07a0ad7b7eac76ca0829",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_seconds": 145.769,
+      "log": "/tmp/w12-sort-last-python.log",
+      "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n...........................................................................................................................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 522 tests in 145.625s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+      "output_sha256": "ca8cdfa0e2ea6ac9a8485ed94cec1123cb9cb504bef1beb3ceb220bf2abc3f11",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'",
+      "exit_code": 0,
+      "duration_seconds": 0.077,
+      "log": "/tmp/w12-sort-last-reference-unit.log",
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.002s\n\nOK\n",
+      "output_sha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    },
+    {
+      "command": "go test ./internal/runtime -run '^TestW12Layout$' -v",
+      "exit_code": 0,
+      "log": "/tmp/w12-sort-last-layout.log",
+      "output": "=== RUN   TestW12Layout\n    array_w12_safety_test.go:83: value: 64 bytes\n    array_w12_safety_test.go:83: reference: 72 bytes\n    array_w12_safety_test.go:83: arrayKey: 32 bytes\n    array_w12_safety_test.go:83: bucket: 96 bytes\n    array_w12_safety_test.go:83: phpArray: 80 bytes\n    array_w12_safety_test.go:83: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.102s\n",
+      "output_sha256": "8e11317aca3396a5f0cfa9ebdd3e522b807789090825aca7b50097cf1cbfbe37",
+      "code_commit": "43784192ca0addf56bbad90740e33a6df7841151"
+    }
+  ],
+  "candidate_benchmark": {
+    "command": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW12Sorting$' -benchtime 200x -count 3",
+    "code_commit": "43784192ca0addf56bbad90740e33a6df7841151",
+    "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12Sorting/32-8         \t     200\t     10115 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9721 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9659 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48965 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48153 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47992 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    569062 ns/op\t      9942 comparisons/op\t  243340 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    570615 ns/op\t      9942 comparisons/op\t  243314 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    558003 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.453s\n"
+  },
+  "native_comparison_probe": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--read-only",
+      "--cap-drop",
+      "ALL",
+      "--security-opt",
+      "no-new-privileges",
+      "--pids-limit",
+      "32",
+      "--memory",
+      "128m",
+      "--cpus",
+      "1",
+      "--platform",
+      "linux/arm64",
+      "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "php",
+      "-n",
+      "-r",
+      "$out = ['php'=>PHP_VERSION, 'int_size'=>PHP_INT_SIZE, 'cases'=>[]];\nforeach ([32,128,1024] as $size) {\n    $seed=73; $a=[];\n    for ($i=0;$i<$size;$i++) { $seed=($seed*73+19)%9973; $a[]=$seed; }\n    $calls=0;\n    usort($a,function($x,$y)use(&$calls){$calls++;return $x<=>$y;});\n    $out['cases'][]=['n'=>$size,'calls'=>$calls,'sorted_sha256'=>hash('sha256',json_encode($a))];\n}\necho json_encode($out),\"\\n\";"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "output": {
+      "php": "8.5.12",
+      "int_size": 8,
+      "cases": [
+        {
+          "n": 32,
+          "calls": 148,
+          "sorted_sha256": "2d14eeb29eb5966a07a1e0357ca09293fe3f7d11efc05fb9bedf9ef1960aa04c"
+        },
+        {
+          "n": 128,
+          "calls": 810,
+          "sorted_sha256": "ab8ae162c153751bde03f40af2d49c3e0fc444b22544ef4d085b6f948f725cfc"
+        },
+        {
+          "n": 1024,
+          "calls": 9942,
+          "sorted_sha256": "2b060360ac4a89b3e8208ff63867f463751b9ae0c474ec5e32b9e10e6ccade40"
+        }
+      ]
+    },
+    "output_sha256": "de20ca64ef1aac110ab4ef18ce2dd94a7bd12645b545c0e94df49e25edabab28",
+    "input_rule": "seed=73; seed=(seed*73+19)%9973 before each append, length32/128/1024; integer comparator x<=>y",
+    "sorted_hash_encoding": "SHA-256 of PHP json_encode(sorted integer list), default flags, no newline"
+  },
+  "remote_gate": "https://github.com/HazelnutParadise/phego/pull/72",
+  "documentation_validation": {
+    "command": "python3 tools/validate_docs.py",
+    "exit_code": 0,
+    "output": "{\n  \"scope\": \"documentation_only\",\n  \"status\": \"pass\",\n  \"counts\": {\n    \"chapters\": 40,\n    \"requirements\": 101,\n    \"acceptance_scenarios\": 202,\n    \"work_packages\": 60,\n    \"decisions\": 28,\n    \"sources\": 57,\n    \"local_markdown_links\": 353,\n    \"checks\": 34,\n    \"catalogs\": {\n      \"php-history-policy.json\": 7,\n      \"competitor-catalog.json\": 8,\n      \"application-catalog.json\": 9\n    }\n  },\n  \"product_test_status\": \"not_run\",\n  \"errors\": []\n}\n",
+    "output_sha256": "34e288b042627f64bf456c68321d48ed71f049914107760246bcba2ef1a19dcd",
+    "scope": "documentation_only; not product acceptance"
+  },
+  "documentation_review": {
+    "current_revision": "Independent fresh-context gpt-6.1-sol/medium reader: no confirmed issue. Verified current 17 source hashes, both650-case snapshots, three license texts and nine check-output hashes; targeted sorting/differential Go tests passed.",
+    "previous_revision": {
+      "current_revision": "pending fresh-context reader",
+      "previous_revision": {
+        "initial_reader": "independent gpt-6.1-sol/medium fresh-context subagent",
+        "corrections": [
+          "Added executable native comparison-count probe with complete input and hash encoding; reran successfully.",
+          "Removed chat-dependent authorization wording."
+        ],
+        "final_recheck": "Independent fresh-context gpt-6.1-sol/medium reader: no confirmed issue; verified 17 source hashes, both 646-case snapshots, three license hashes and nine check-output hashes; targeted Go sorting/differential tests pass."
+      }
+    }
+  },
+  "prior_sorting_revision": {
+    "verification_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796",
+    "checks": [
+      {
+        "command": "gofmt -l internal",
+        "exit_code": 0,
+        "duration_seconds": 0.119,
+        "log": "/tmp/w12-sort-final-gofmt.log",
+        "output": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "CGO_ENABLED=0 go test ./...",
+        "exit_code": 0,
+        "duration_seconds": 10.95,
+        "log": "/tmp/w12-sort-final-go-test.log",
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t0.707s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t8.576s\n",
+        "output_sha256": "d183e31ad0c70ce836832230abd471fdea345a2b435efb452943cff8f864af42",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "go test -race ./...",
+        "exit_code": 0,
+        "duration_seconds": 17.876,
+        "log": "/tmp/w12-sort-final-go-race.log",
+        "output": "ok  \tgithub.com/HazelnutParadise/phego\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/compat\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/frontend\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/ir\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/policy\t(cached)\nok  \tgithub.com/HazelnutParadise/phego/internal/profile\t1.803s\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t16.214s\n",
+        "output_sha256": "723d4c9649e00d48afdfbb9d17cba5b02479e70e85138939386c5dfe6c675af2",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "go vet ./...",
+        "exit_code": 0,
+        "duration_seconds": 0.282,
+        "log": "/tmp/w12-sort-final-go-vet.log",
+        "output": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "go test ./internal/runtime -run '^$' -fuzz '^FuzzW12ArrayStructure$' -fuzztime 30s -parallel 2",
+        "exit_code": 0,
+        "duration_seconds": 32.838,
+        "log": "/tmp/w12-sort-final-fuzz.log",
+        "output": "fuzz: elapsed: 0s, gathering baseline coverage: 0/96 completed\nfuzz: elapsed: 0s, gathering baseline coverage: 96/96 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 2126 (708/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 6s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 9s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 12s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 15s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 18s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 21s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 24s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 27s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 30s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nfuzz: elapsed: 31s, execs: 2126 (0/sec), new interesting: 3 (total: 99)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t31.580s\n",
+        "output_sha256": "b0112381078372552122dbb0c372a60b07594928b2a553bbcc13d6bdabc4d1c5",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW12Sorting$' -benchtime 200x -count 3",
+        "exit_code": 0,
+        "duration_seconds": 1.439,
+        "log": "/tmp/w12-sort-final-benchmark.log",
+        "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12Sorting/32-8         \t     200\t     10512 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9878 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9470 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48667 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47458 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47672 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    554579 ns/op\t      9942 comparisons/op\t  243340 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    524416 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    523916 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.898s\n",
+        "output_sha256": "afdafdde7e4e3843bca623e34fb3013cd18e1d0c5cc53df282e89ee6b33ffdb0",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "go test ./internal/runtime -run '^TestW12Layout$' -v",
+        "exit_code": 0,
+        "duration_seconds": 0.569,
+        "log": "/tmp/w12-sort-final-layout.log",
+        "output": "=== RUN   TestW12Layout\n    array_w12_safety_test.go:83: value: 64 bytes\n    array_w12_safety_test.go:83: reference: 72 bytes\n    array_w12_safety_test.go:83: arrayKey: 32 bytes\n    array_w12_safety_test.go:83: bucket: 96 bytes\n    array_w12_safety_test.go:83: phpArray: 80 bytes\n    array_w12_safety_test.go:83: arrayIterator: 8 bytes\n--- PASS: TestW12Layout (0.00s)\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.373s\n",
+        "output_sha256": "f5fe6ed6ad8cd3f919cecd44270607d3fb35dc27259b398b854bb91cf60884b8",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+        "exit_code": 0,
+        "duration_seconds": 187.697,
+        "log": "/tmp/w12-sort-final-python.log",
+        "output": ".............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source\n......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases\n............................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n...........................................................................................................................................................................................................................................................................................................................\n----------------------------------------------------------------------\nRan 522 tests in 185.718s\n\nOK\n\n[PHP/FI build and engine exit code: 23]\n",
+        "output_sha256": "03e3ade6e31dfcbe069189b6ede653b461a6a86865e31222874cfb4f39279321",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      },
+      {
+        "command": "python3 -m unittest discover -s tests/semantics/w12-arrays -p 'test_*.py'",
+        "exit_code": 0,
+        "duration_seconds": 0.077,
+        "log": "/tmp/w12-sort-final-reference-unit.log",
+        "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.002s\n\nOK\n",
+        "output_sha256": "6f283ee6225d2cef4c0127d95456a6f954c45141c92b97dd89016cb1c630e8f4",
+        "code_commit": "ce55ef3f2032819cb7cfb92c7595e33350843796"
+      }
+    ],
+    "references": [
+      {
+        "requirements": [
+          "REQ-007",
+          "REQ-016",
+          "REQ-017"
+        ],
+        "tests": [
+          "T-013",
+          "T-014",
+          "T-031",
+          "T-032",
+          "T-033",
+          "T-034"
+        ],
+        "image_preparation": [
+          "docker",
+          "image",
+          "inspect",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049"
+        ],
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--platform",
+          "linux/386",
+          "-v",
+          "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+          "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+          "php",
+          "-n",
+          "/w/matrix.php"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+        "platform": "linux/386",
+        "php": "8.5.12",
+        "integer_width": 32,
+        "cases": 646,
+        "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+        "fixture_sources_sha256": {
+          "matrix.php": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+          "sorting.php": "4fa9c85d6d3e8e5b0042348fc63e2b4ce3f46bc681e51ed6c803f4000c47c54c"
+        },
+        "output": "w12-ref-32.json",
+        "output_sha256": "1b51ba3c7056a414e722fe579a67cc524559e29f5dde6d5e586054d59f6f49ca",
+        "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
+      },
+      {
+        "requirements": [
+          "REQ-007",
+          "REQ-016",
+          "REQ-017"
+        ],
+        "tests": [
+          "T-013",
+          "T-014",
+          "T-031",
+          "T-032",
+          "T-033",
+          "T-034"
+        ],
+        "image_preparation": [
+          "docker",
+          "image",
+          "inspect",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9"
+        ],
+        "command": [
+          "docker",
+          "run",
+          "--pull",
+          "never",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--pids-limit",
+          "32",
+          "--memory",
+          "128m",
+          "--cpus",
+          "1",
+          "--platform",
+          "linux/arm64",
+          "-v",
+          "/Users/timlai/.codex/worktrees/w06-values/phego/tests/semantics/w12-arrays:/w:ro",
+          "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+          "php",
+          "-n",
+          "/w/matrix.php"
+        ],
+        "exit_code": 0,
+        "stderr": "",
+        "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "platform": "linux/arm64",
+        "php": "8.5.12",
+        "integer_width": 64,
+        "cases": 646,
+        "fixture_sha256": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+        "fixture_sources_sha256": {
+          "matrix.php": "2553d8b789388f8cc544403f43997459034883c4e1a2f9d0038890bed6205807",
+          "sorting.php": "4fa9c85d6d3e8e5b0042348fc63e2b4ce3f46bc681e51ed6c803f4000c47c54c"
+        },
+        "output": "w12-ref-64.json",
+        "output_sha256": "87d90f96411347f0a84ed596e253566cea3bc33dcfe2670f45234ff7b24121fb",
+        "diagnostic_scope": "PHP severity and message; source locations belong to W-17 integration"
+      }
+    ],
+    "differential": {
+      "command": "PHEGO_W12_REFERENCE=/tmp/w12-sort-reference go test ./internal/runtime -run '^TestW12PHP8512Arrays$' -count=1",
+      "exit_code": 0,
+      "cases_per_profile": 646,
+      "profiles": [
+        32,
+        64
+      ],
+      "output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t2.451s\n",
+      "output_sha256": "360b335a1d00ffcc1a4b2c7707c8fcf6c98eab2d22d63b085eedb9b2c0d68b74"
+    },
+    "candidate_benchmark": {
+      "command": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW12Sorting$' -benchtime 200x -count 3",
+      "output": "goos: darwin\ngoarch: arm64\npkg: github.com/HazelnutParadise/phego/internal/runtime\ncpu: Apple M3\nBenchmarkW12Sorting/32-8         \t     200\t     10512 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9878 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/32-8         \t     200\t      9470 ns/op\t       148.0 comparisons/op\t    7457 B/op\t      42 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     48667 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47458 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/128-8        \t     200\t     47672 ns/op\t       810.0 comparisons/op\t   29473 B/op\t     138 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    554579 ns/op\t      9942 comparisons/op\t  243340 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    524416 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nBenchmarkW12Sorting/1024-8       \t     200\t    523916 ns/op\t      9942 comparisons/op\t  243313 B/op\t    1038 allocs/op\nPASS\nok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.898s\n"
+    },
+    "documentation_review": {
+      "initial_reader": "independent gpt-6.1-sol/medium fresh-context subagent",
+      "corrections": [
+        "Added executable native comparison-count probe with complete input and hash encoding; reran successfully.",
+        "Removed chat-dependent authorization wording."
+      ],
+      "final_recheck": "Independent fresh-context gpt-6.1-sol/medium reader: no confirmed issue; verified 17 source hashes, both 646-case snapshots, three license hashes and nine check-output hashes; targeted Go sorting/differential tests pass."
+    }
+  },
+  "codex_review_revision": {
+    "reviewed_commit": "411f5da66960884b36a4b373bc4d692a5665498e",
+    "fix_commit": "5d059388df6e36e37f31054974a473249609452f",
+    "findings": [
+      {
+        "url": "https://github.com/HazelnutParadise/phego/pull/72#discussion_r4436600003",
+        "reproduction": "Retry closes heap and returns an object; diagnostic hook was invoked after shutdown. Original callback error and result cleanup are also tested."
+      },
+      {
+        "url": "https://github.com/HazelnutParadise/phego/pull/72#discussion_r4436600007",
+        "reproduction": "Callback or deprecation handler changes an aliased element 1 to10; retry got(2,1) instead of PHP8.5.12(2,10), bothusort/uasort."
+      }
+    ],
+    "red_command": "go test ./internal/runtime -run '^TestW12SortUserRetry' -count=1",
+    "red_exit_code": 1,
+    "red_output": "--- FAIL: TestW12SortUserRetryLiveReference (0.00s)\n    --- FAIL: TestW12SortUserRetryLiveReference/false/false (0.00s)\n        array_sort_user_php8512_test.go:41: calls=[[1 2] [2 1]], PHP=[[1 2] [2 10]]\n    --- FAIL: TestW12SortUserRetryLiveReference/false/true (0.00s)\n        array_sort_user_php8512_test.go:41: calls=[[1 2] [2 1]], PHP=[[1 2] [2 10]]\n    --- FAIL: TestW12SortUserRetryLiveReference/true/false (0.00s)\n        array_sort_user_php8512_test.go:41: calls=[[1 2] [2 1]], PHP=[[1 2] [2 10]]\n    --- FAIL: TestW12SortUserRetryLiveReference/true/true (0.00s)\n        array_sort_user_php8512_test.go:41: calls=[[1 2] [2 1]], PHP=[[1 2] [2 10]]\n--- FAIL: TestW12SortUserRetryClosedHeap (0.00s)\n    --- FAIL: TestW12SortUserRetryClosedHeap/<nil> (0.00s)\n        array_sort_user_php8512_test.go:87: error=request heap is closed calls=2 diagnostics-after-close=1\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.897s\nFAIL\n",
+    "red_output_sha256": "6b2cc86f0b4089c9dacb6e89b8e3547b6014ffae253d00d84689bfbb164665b4",
+    "native_reproduction": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--pids-limit",
+        "32",
+        "--memory",
+        "128m",
+        "--cpus",
+        "1",
+        "--platform",
+        "linux/arm64",
+        "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+        "php",
+        "-n",
+        "-r",
+        "$out=['php'=>PHP_VERSION,'cases'=>[]];foreach(['usort','uasort']as$f){foreach([false,true]as$handler){$a=[1,2];$r=&$a[0];$calls=[];set_error_handler(function($l,$m)use(&$r,$handler){if($handler)$r=10;});$f($a,function($x,$y)use(&$r,&$calls,$handler){$calls[]=[$x,$y];if(count($calls)===1){if(!$handler)$r=10;return false;}return$x-$y;});restore_error_handler();$out['cases'][]=[$f,$handler,$calls,$a];}}echo json_encode($out),\"\\n\";"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"php\":\"8.5.12\",\"cases\":[[\"usort\",false,[[1,2],[2,10]],[2,10]],[\"usort\",true,[[1,2],[2,10]],[2,10]],[\"uasort\",false,[[1,2],[2,10]],{\"1\":2,\"0\":10}],[\"uasort\",true,[[1,2],[2,10]],{\"1\":2,\"0\":10}]]}\n",
+      "stderr": ""
+    },
+    "green_command": "go test ./internal/runtime -run 'TestW12Sort' -count=1",
+    "green_output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.273s\n",
+    "solution": "Private driver passes live value locations; each callback snapshots and holds its arguments independently. Raw return retained before argument release; each return independently released. Original call error precedes closed-heap failure; coercion/diagnostics guarded after retry shutdown. Added borrowed argument result lifetime regression.",
+    "additional_regressions": {
+      "cleanup": {
+        "red_exit_code": 1,
+        "red_output": "--- FAIL: TestW12SortUserArgumentCleanupFailure (0.00s)\n    --- FAIL: TestW12SortUserArgumentCleanupFailure/positive (0.00s)\n        array_sort_user_php8512_test.go:139: item0=10 PHP=2\n    --- FAIL: TestW12SortUserArgumentCleanupFailure/true (0.00s)\n        array_sort_user_php8512_test.go:139: item0=10 PHP=2\n    --- FAIL: TestW12SortUserArgumentCleanupFailure/object (0.00s)\n        array_sort_user_php8512_test.go:139: item0=10 PHP=2\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.297s\nFAIL\n",
+        "red_output_sha256": "f7e0a80dfd022d8b9241248d2dbac6bbb8b8742a6c14e824ba7a76f154e27d3d",
+        "native": [
+          {
+            "width": 64,
+            "command": [
+              "docker",
+              "run",
+              "--pull",
+              "never",
+              "--rm",
+              "--network",
+              "none",
+              "--read-only",
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--pids-limit",
+              "32",
+              "--memory",
+              "128m",
+              "--cpus",
+              "1",
+              "--platform",
+              "linux/arm64",
+              "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+              "php",
+              "-n",
+              "-r",
+              "class X{function __destruct(){throw new Exception(\"dtor\");}}$out=[];foreach([\"true\",\"one\",\"false\",\"minus\",\"object\",\"float\"]as$mode){$a=[new X,2];$r=&$a[0];$calls=0;$warnings=[];$error=null;set_error_handler(function($l,$m)use(&$warnings){$warnings[]=[$l,$m];});try{usort($a,function($x,$y)use(&$r,&$calls,$mode){$calls++;$r=10;return match($mode){\"true\"=>true,\"one\"=>1,\"false\"=>false,\"minus\"=>-1,\"object\"=>new stdClass,\"float\"=>INF};});}catch(Throwable$e){$error=$e->getMessage();}restore_error_handler();$out[]=[$mode,$calls,$warnings,$a,$error];unset($r);}echo json_encode($out),\"\\n\";"
+            ],
+            "exit_code": 0,
+            "stdout": "[[\"true\",1,[],[2,10],\"dtor\"],[\"one\",1,[],[2,10],\"dtor\"],[\"false\",1,[],[10,2],\"dtor\"],[\"minus\",1,[],[10,2],\"dtor\"],[\"object\",1,[],[2,10],\"dtor\"],[\"float\",1,[],[10,2],\"dtor\"]]\n",
+            "stderr": ""
+          },
+          {
+            "width": 32,
+            "command": [
+              "docker",
+              "run",
+              "--pull",
+              "never",
+              "--rm",
+              "--network",
+              "none",
+              "--read-only",
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--pids-limit",
+              "32",
+              "--memory",
+              "128m",
+              "--cpus",
+              "1",
+              "--platform",
+              "linux/386",
+              "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+              "php",
+              "-n",
+              "-r",
+              "class X{function __destruct(){throw new Exception(\"dtor\");}}$out=[];foreach([\"true\",\"one\",\"false\",\"minus\",\"object\",\"float\"]as$mode){$a=[new X,2];$r=&$a[0];$calls=0;$warnings=[];$error=null;set_error_handler(function($l,$m)use(&$warnings){$warnings[]=[$l,$m];});try{usort($a,function($x,$y)use(&$r,&$calls,$mode){$calls++;$r=10;return match($mode){\"true\"=>true,\"one\"=>1,\"false\"=>false,\"minus\"=>-1,\"object\"=>new stdClass,\"float\"=>INF};});}catch(Throwable$e){$error=$e->getMessage();}restore_error_handler();$out[]=[$mode,$calls,$warnings,$a,$error];unset($r);}echo json_encode($out),\"\\n\";"
+            ],
+            "exit_code": 0,
+            "stdout": "[[\"true\",1,[],[2,10],\"dtor\"],[\"one\",1,[],[2,10],\"dtor\"],[\"false\",1,[],[10,2],\"dtor\"],[\"minus\",1,[],[10,2],\"dtor\"],[\"object\",1,[],[2,10],\"dtor\"],[\"float\",1,[],[10,2],\"dtor\"]]\n",
+            "stderr": ""
+          }
+        ]
+      },
+      "retry-flag": {
+        "red_exit_code": 1,
+        "red_output": "--- FAIL: TestW12SortUserRetryCleanupDeprecationState (0.00s)\n    array_sort_user_php8512_test.go:138: warnings=1 outer calls=2, PHP wants2/2\nFAIL\nFAIL\tgithub.com/HazelnutParadise/phego/internal/runtime\t0.309s\nFAIL\n",
+        "red_output_sha256": "3f98039f4dfea1f5a9f8edc37d87f08a26e3865ef4b7f6be6365ce4f33658f15",
+        "native": [
+          {
+            "width": 64,
+            "command": [
+              "docker",
+              "run",
+              "--pull",
+              "never",
+              "--rm",
+              "--network",
+              "none",
+              "--read-only",
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--pids-limit",
+              "32",
+              "--memory",
+              "128m",
+              "--cpus",
+              "1",
+              "--platform",
+              "linux/arm64",
+              "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+              "php",
+              "-n",
+              "-r",
+              "class X{function __destruct(){throw new Exception(\"dtor\");}}$warnings=[];$phase=\"start\";set_error_handler(function($l,$m)use(&$warnings,&$phase){$warnings[]=[$phase,$l];});$a=[1,2];$outer=0;usort($a,function($x,$y)use(&$outer,&$phase){$outer++;if($outer>1)return$x<=>$y;$inner=[new X,2];$r=&$inner[0];$calls=0;try{usort($inner,function($x,$y)use(&$calls,&$r,&$phase){$calls++;$phase=\"innerfirst\";if($calls===1)return false;$phase=\"innerretry\";$nested=[2,1];usort($nested,fn($a,$b)=>$a<=>$b);$r=10;return false;});}catch(Throwable$e){}$phase=\"outerafter\";return false;});restore_error_handler();echo json_encode([$outer,$warnings,$a]),\"\\n\";"
+            ],
+            "exit_code": 0,
+            "stdout": "[2,[[\"innerfirst\",8192],[\"outerafter\",8192]],[1,2]]\n",
+            "stderr": ""
+          },
+          {
+            "width": 32,
+            "command": [
+              "docker",
+              "run",
+              "--pull",
+              "never",
+              "--rm",
+              "--network",
+              "none",
+              "--read-only",
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--pids-limit",
+              "32",
+              "--memory",
+              "128m",
+              "--cpus",
+              "1",
+              "--platform",
+              "linux/386",
+              "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+              "php",
+              "-n",
+              "-r",
+              "class X{function __destruct(){throw new Exception(\"dtor\");}}$warnings=[];$phase=\"start\";set_error_handler(function($l,$m)use(&$warnings,&$phase){$warnings[]=[$phase,$l];});$a=[1,2];$outer=0;usort($a,function($x,$y)use(&$outer,&$phase){$outer++;if($outer>1)return$x<=>$y;$inner=[new X,2];$r=&$inner[0];$calls=0;try{usort($inner,function($x,$y)use(&$calls,&$r,&$phase){$calls++;$phase=\"innerfirst\";if($calls===1)return false;$phase=\"innerretry\";$nested=[2,1];usort($nested,fn($a,$b)=>$a<=>$b);$r=10;return false;});}catch(Throwable$e){}$phase=\"outerafter\";return false;});restore_error_handler();echo json_encode([$outer,$warnings,$a]),\"\\n\";"
+            ],
+            "exit_code": 0,
+            "stdout": "[2,[[\"innerfirst\",8192],[\"outerafter\",8192]],[1,2]]\n",
+            "stderr": ""
+          }
+        ]
+      }
+    },
+    "final_fix_commit": "43784192ca0addf56bbad90740e33a6df7841151",
+    "final_green_output": "ok  \tgithub.com/HazelnutParadise/phego/internal/runtime\t0.377s\n",
+    "independent_recheck": "gpt-6.1-sol/high: both original P2 fixes and additional cleanup-result/nested-deprecation regressions rechecked; TestW12Sort passes; no remaining confirmed defect."
+  },
+  "initial_adversarial_review": {
+    "scope": "previous revision before Codex review; source commit ce55ef3",
+    "reviewer": "independent gpt-6.1-sol/high adversarial subagent",
+    "finding": "Object return coercion warning bypassed diagnostic handler; reproduced on native PHP and Go before fixing.",
+    "resolution": "Object and scalar coercion warnings route through diagnose; preserve numeric result and original error; temporary result released.",
+    "recheck": "Reviewer reran TestW12Sort and both 646-case profiles, no confirmed findings."
+  }
+}

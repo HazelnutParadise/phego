@@ -1,0 +1,60 @@
+--- FAIL: TestW13R10PropertyAliasStrictness (0.08s)
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-declared-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-declared-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-dynamic-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-dynamic-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-static-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-static-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$t of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-raw-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,false],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,false],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-raw-strict-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-strict-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,false],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,false],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-raw-lazy-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-lazy-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,true],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,true],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/32/r10-alias-raw-lazy-strict-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-lazy-strict-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,true],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,true],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-declared-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-declared-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-dynamic-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-dynamic-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-static-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-static-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$t of type int"],1,1],"diagnostics":[]}
+            PHP: {"result":[null,2,2],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-raw-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,false],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,false],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-raw-strict-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-strict-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,false],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,false],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-raw-lazy-weak-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-lazy-weak-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,true],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,true],"diagnostics":[]}
+    --- FAIL: TestW13R10PropertyAliasStrictness/64/r10-alias-raw-lazy-strict-numeric (0.00s)
+        object_review_r10_alias_test.go:29: r10-alias-raw-lazy-strict-numeric
+            Go: {"result":[["TypeError","Cannot assign string to reference held by property W13R10Alias::$b of type int"],1,1,0,true],"diagnostics":[]}
+            PHP: {"result":[null,2,2,0,true],"diagnostics":[]}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.909s
+FAIL
