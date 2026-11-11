@@ -27,10 +27,24 @@
 
 64 位元原本只對照 arm64。在 linux/amd64 的 PHP 8.5.12 固定映像上重新產生四套參考後，只有 W-13 的 `compare-lazy-operand-owners` 不同：amd64 和 i386 一樣先初始化右邊的 lazy object，arm64 先初始化左邊（[amd64-reference](../implementation/evidence/runtime-layout-20261107/amd64-reference.txt)）。W-12、W-14、W-15 的輸出和 arm64 逐位元組相同。
 
-- 參考 profile 改為（整數寬度、架構）。`newHeap(width)` 照舊使用該寬度的參考架構（64 位元為 arm64、32 位元為 386），`newHeapFor(width, arch)` 指定架構；沒有固定映像的組合會回報錯誤。
+- 參考 profile 改為（整數寬度、架構）。當時 `newHeap(width)` 使用該寬度的參考架構，`newHeapFor(width, arch)` 指定架構；沒有固定映像的組合會回報錯誤。系統後來也納入 profile，見 [macOS 與 Windows 的 profile](#macos-與-windows-的-profile)。
 - W-13 另存 `w13-ref-64-amd64.json`，W-14 另存 `reference-amd64.json`（58 案和 arm64 相同，只有映像紀錄不同）。W-12、W-15 的 amd64 工作在原生 x86-64 runner 重新產生參考，先要求和 64 位元參考逐位元組相同，再執行 Go 對照：W-12 明確指定 amd64 profile，W-15 透過下一點的主機預設取得 amd64 profile。
 - 一般執行（`newExecution`）建立的 64 位元 heap 依主機架構選 profile：amd64 主機用 amd64，其他用 arm64，32 位元用 386。嵌入 Phego 的程式在哪個平台跑，lazy 比較的初始化順序就和該平台的 PHP 8.5.12 相同。和已提交參考比對的測試則固定使用產生參考的架構（`referenceHeap`），不受測試主機影響。
 - 產生工具新增 `--arch`；預設架構維持原本的檔名，其他架構的檔名加上架構後綴。
+
+## macOS 與 Windows 的 profile
+
+linux/amd64 的參考只來自 GCC 建置的映像。2026-11-11 在 GitHub runner 上用 `tests/semantics/w13-objects/lazy-operand-order.php` 重跑同一個案例（[host-profile 證據](../implementation/evidence/acceptance-followups-20261111/host-profile/)）：
+
+| 系統與 PHP 8.5.12 建置 | 先初始化的 lazy object |
+|---|---|
+| linux/arm64，固定映像（GCC） | 左邊 |
+| linux/amd64、linux/386，固定映像（GCC） | 右邊 |
+| macOS 15 arm64，鎖定原始碼以 Apple clang 17 建置 | 左邊 |
+| macOS 15 amd64（Intel），鎖定原始碼以 Apple clang 17 建置 | 左邊 |
+| Windows Server 2025 x64，官方 NTS 建置（Visual C++ 2022） | 右邊 |
+
+macOS 的 amd64 和 linux/amd64 相反，所以參考 profile 改為（整數寬度、架構、系統）。`newHeap(width)` 在 macOS 與 Windows x64 上使用該系統的 profile，其他沒有實測的系統（例如 FreeBSD、Windows 的 32 位元或 arm64）沿用同架構的 Linux profile，這部分沒有對照過 PHP。`newHeapFor(width, arch, system)` 對沒有實測的組合回報錯誤。「Host profile on macOS and Windows」工作流程每次都重跑 PHP 並和 Phego 的主機 profile 比對（`TestHostProfileLazyOperandOrder`）。順序取決於建置 PHP 的 C 編譯器，同一系統改用其他編譯器建置的 PHP 可能不同，這裡只對照上表的建置。
 
 ## 後續
 
