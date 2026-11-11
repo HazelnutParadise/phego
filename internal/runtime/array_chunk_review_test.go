@@ -51,7 +51,7 @@ func TestReviewFreedArrayClearsChunkBuckets(t *testing.T) {
 // architecture and the system both decide the order in which lazy
 // comparison operands are initialized (TestHostProfileLazyOperandOrder
 // compares the order itself with PHP on macOS and Windows).
-func TestReviewDefaultHeapFollowsHostArchitecture(t *testing.T) {
+func TestReviewDefaultHeapFollowsHostProfile(t *testing.T) {
 	h, err := newHeap(64)
 	must(t, err)
 	want := "arm64"

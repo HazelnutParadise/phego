@@ -70,21 +70,25 @@ func (e *ConfigError) Error() string { return "phego: invalid " + e.Field + ": "
 
 // Diagnostic describes the error in rustc style for diag.Render. The primary
 // span names the Config field or run option, since Go configuration has no
-// source file, so the message is the reason alone; Error() stays the
-// one-line form with both.
+// source file, so the field is not repeated: the message is the code's
+// title and the reason labels the span. An error without a code of its own
+// has no title that says what is wrong, so its reason is the message.
+// Error() stays the one-line form with field and reason.
 func (e *ConfigError) Diagnostic() diag.Diagnostic {
 	code := e.Code
 	entry, ok := codes.Lookup(code)
+	message, label := entry.Title, e.Reason
 	if !ok {
 		entry, _ = codes.Lookup(codes.ConfigOther)
 		if code == "" {
 			code = codes.ConfigOther
 		}
+		message, label = e.Reason, ""
 	}
 	return diag.Diagnostic{
 		Code:    code,
-		Message: e.Reason,
-		Primary: diag.Span{File: e.Field},
+		Message: message,
+		Primary: diag.Span{File: e.Field, Label: label},
 		Notes:   []string{entry.Note},
 		Help:    []string{entry.Help},
 	}

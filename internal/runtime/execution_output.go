@@ -8,33 +8,45 @@ import (
 
 // REQ-009, REQ-040; T-017, T-079, T-080. Output is committed once, including
 // a writer's accepted prefix on failure. PHP and host diagnostics stay separate.
-// write is echo: it honours a pending stop or cancellation first and then
-// writes into the innermost buffer.
 func (x *execution) write(data []byte) completion {
-	return x.outputOp(len(x.buffers)-1, data, true)
-}
-
-// writeTo writes into buffer top, or straight to the writer when top < 0.
-// report uses it for displayed diagnostics, which are written even while
-// the execution is stopping.
-func (x *execution) writeTo(top int, data []byte) completion {
-	return x.outputOp(top, data, false)
-}
-
-// outputOp is php_output_op: a write while a handler runs marks the buffer
-// that receives it as having produced output, which is how a displayed
-// diagnostic that skipped a disabled handler flags the next one. write and
-// writeTo are its two entries; they stay one-line so that they inline and
-// every echo is a single call (a completion is too large to return through
-// a second frame for free: benchstat measured about 30% on amd64).
-func (x *execution) outputOp(top int, data []byte, checked bool) completion {
 	if x.closed {
 		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
 	}
-	if checked {
-		if c := x.check(); c.kind != endNormal {
-			return c
-		}
+	if c := x.check(); c.kind != endNormal {
+		return c
+	}
+	// The body of writeTo for the innermost buffer, repeated on purpose; keep
+	// the two in step. A completion is too large to return through a second
+	// frame for free: on linux/amd64 benchstat measured echo 31-33% slower
+	// when this called writeTo, and 10-15% slower with both as inlined
+	// entries to one shared body (docs/decisions/runtime-layout.md).
+	top := len(x.buffers) - 1
+	if (x.filtering || x.outputRunning) && top >= 0 {
+		x.buffers[top].produced = true
+	}
+	remaining := int64(x.limits.output) - x.accepted
+	for _, b := range x.buffers {
+		remaining -= int64(len(b.data))
+	}
+	if int64(len(data)) > remaining {
+		return x.fail(endLimit, errExecutionLimit)
+	}
+	if top >= 0 {
+		b := &x.buffers[top]
+		b.data = append(b.data, data...)
+		return completion{}
+	}
+	return x.writeOut(data)
+}
+
+// writeTo writes into buffer top, or straight to the writer when top < 0.
+// It is php_output_op: a write while a handler runs marks the buffer that
+// receives it as having produced output, which is how a displayed
+// diagnostic that skipped a disabled handler flags the next one.
+// report uses it for displayed diagnostics; write repeats its body.
+func (x *execution) writeTo(top int, data []byte) completion {
+	if x.closed {
+		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}
 	}
 	if (x.filtering || x.outputRunning) && top >= 0 {
 		x.buffers[top].produced = true

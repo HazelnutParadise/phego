@@ -121,11 +121,28 @@ func TestConfigDiagnosticGolden(t *testing.T) {
 	}
 	var b bytes.Buffer
 	must(t, diag.Render(&b, d, diag.Options{}))
-	want := `error[PHG1019]: "app" is not a clean absolute path
+	want := `error[PHG1019]: a mount path is not a clean absolute PHP path
  --> Policy.Files[0].Path
+  = note: "app" is not a clean absolute path
   = note: mounts are matched against absolute PHP paths
   = help: write the path starting with "/" and without "." or ".." segments
 `
+	if b.String() != want {
+		t.Fatalf("got\n%s\nwant\n%s", b.String(), want)
+	}
+}
+
+// A host-built ConfigError has no code of its own, so its reason is the
+// message; the field is named once, by the span.
+func TestHostConfigDiagnosticGolden(t *testing.T) {
+	d, ok := Diagnose(&ConfigError{Field: "Limits.Steps", Reason: "must not be negative"})
+	if !ok {
+		t.Fatal("not diagnosed")
+	}
+	var b bytes.Buffer
+	must(t, diag.Render(&b, d, diag.Options{}))
+	entry, _ := codes.Lookup(codes.ConfigOther)
+	want := "error[PHG1000]: must not be negative\n --> Limits.Steps\n  = note: " + entry.Note + "\n  = help: " + entry.Help + "\n"
 	if b.String() != want {
 		t.Fatalf("got\n%s\nwant\n%s", b.String(), want)
 	}
