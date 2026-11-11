@@ -79,5 +79,9 @@ Set-Content -LiteralPath (Join-Path $outside 'secret.txt') -Value 'secret' -NoNe
 Run 'fopen <work>\in\file.txt r' @($Probe, 'r', (Join-Path $Work 'in\file.txt'), 'read')
 Run 'fopen <work>\out\secret.txt r' @($Probe, 'r', (Join-Path $Work 'out\secret.txt'), 'read')
 Run 'fopen <work>\out r' @($Probe, 'r', (Join-Path $Work 'out'))
+Run 'fopen <work>\out w' @($Probe, 'w', (Join-Path $Work 'out'))
+Run 'fopen <work>\out x' @($Probe, 'x', (Join-Path $Work 'out'))
+Run 'fopen <work>\in r' @($Probe, 'r', (Join-Path $Work 'in'))
+Run 'fopen <work>\in\..\real\file.txt r' @($Probe, 'r', (Join-Path $Work 'in\..\real\file.txt'), 'read')
 Run 'fopen <work>\out\NUL r' @($Probe, 'r', (Join-Path $Work 'out\NUL'), 'read')
 

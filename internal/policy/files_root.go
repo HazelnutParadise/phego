@@ -50,6 +50,11 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			continue
 		case "..":
 			if !linkParentAllowed(part.boundary, mountPath(grant.Path, names)) {
+				if len(stack) == 1 && part.boundary == grant.Path {
+					if mounted, parts, ok := p.linkParentMount(grant, pending); ok {
+						return p.redirectFile(mounted, parts, req)
+					}
+				}
 				return nil, denied("outside-root")
 			}
 			if len(stack) == 1 {
@@ -102,12 +107,11 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 			leaf, before = component, st
 			break
 		}
-		if st.Mode()&os.ModeSymlink != 0 {
+		if target, link, e := linkTarget(parent, component, st); link {
 			links++
 			if links > 40 {
 				return nil, denied("path-changed")
 			}
-			target, e := parent.Readlink(component)
 			if e != nil {
 				return nil, e
 			}
@@ -178,13 +182,13 @@ func (p *Policy) openRootFile(root *os.Root, grant FileGrant, pending []filePart
 	if kind == FileWrite && !grant.Write {
 		return nil, denied("not-granted")
 	}
-	if before != nil && flag&(os.O_CREATE|os.O_EXCL) == os.O_CREATE|os.O_EXCL {
-		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
-	}
 	if before != nil && before.IsDir() {
 		if err := directoryOpenError(name); err != nil {
 			return nil, err
 		}
+	}
+	if before != nil && flag&(os.O_CREATE|os.O_EXCL) == os.O_CREATE|os.O_EXCL {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrExist}
 	}
 	if kind == FileRead {
 		// Opening a FIFO or device already acts on it, so aliases are checked

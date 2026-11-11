@@ -47,8 +47,10 @@ func TestReviewFreedArrayClearsChunkBuckets(t *testing.T) {
 	_ = keep
 }
 
-// An embedded heap must behave as PHP 8.5.12 does on the same host; amd64 and
-// arm64 initialize lazy comparison operands in opposite orders.
+// An embedded heap must behave as PHP 8.5.12 does on the same host; the
+// architecture and the system both decide the order in which lazy
+// comparison operands are initialized (TestHostProfileLazyOperandOrder
+// compares the order itself with PHP on macOS and Windows).
 func TestReviewDefaultHeapFollowsHostArchitecture(t *testing.T) {
 	h, err := newHeap(64)
 	must(t, err)
@@ -59,7 +61,28 @@ func TestReviewDefaultHeapFollowsHostArchitecture(t *testing.T) {
 	if h.arch != want {
 		t.Fatalf("64-bit heap on %s uses %s, want %s", goruntime.GOARCH, h.arch, want)
 	}
-	if h, err = newHeap(32); err != nil || h.arch != "386" {
-		t.Fatalf("32-bit heap arch %q err %v, want 386", h.arch, err)
+	system := "linux"
+	if goruntime.GOOS == "darwin" || goruntime.GOOS == "windows" && want == "amd64" {
+		system = goruntime.GOOS
+	}
+	if h.os != system {
+		t.Fatalf("64-bit heap on %s/%s uses %s, want %s", goruntime.GOOS, goruntime.GOARCH, h.os, system)
+	}
+	if h, err = newHeap(32); err != nil || h.arch != "386" || h.os != "linux" {
+		t.Fatalf("32-bit heap profile %s/%s err %v, want linux/386", h.os, h.arch, err)
+	}
+	for _, c := range []struct {
+		arch, system string
+		rightFirst   bool
+	}{{"arm64", "linux", false}, {"amd64", "linux", true}, {"arm64", "darwin", false}, {"amd64", "darwin", false}, {"amd64", "windows", true}} {
+		h, err := newHeapFor(64, c.arch, c.system)
+		must(t, err)
+		events := w13ReviewCase(t, h, "compare-lazy-operand-owners").Result.([]any)[1].([]any)
+		if got := events[0] == "init:B"; got != c.rightFirst {
+			t.Errorf("%s/%s: events %v, right operand first = %v, want %v", c.system, c.arch, events, got, c.rightFirst)
+		}
+	}
+	if _, err := newHeapFor(64, "arm64", "windows"); err == nil {
+		t.Error("windows/arm64 has no observed PHP 8.5.12 build but got a profile")
 	}
 }

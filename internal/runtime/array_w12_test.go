@@ -291,7 +291,7 @@ func TestW12PHP8512Arrays(t *testing.T) {
 			}
 			for _, c := range ref.Cases {
 				t.Run(c.Name, func(t *testing.T) {
-					h, err := newHeapFor(width, profile.arch)
+					h, err := newHeapFor(width, profile.arch, "linux")
 					if err != nil {
 						t.Fatal(err)
 					}

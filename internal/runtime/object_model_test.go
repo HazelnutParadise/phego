@@ -979,7 +979,7 @@ func TestW13PHP8512Objects(t *testing.T) {
 			for _, name := range w13CaseNames() {
 				name := name
 				if !t.Run(name, func(t *testing.T) {
-					h, err := newHeapFor(width, profile.arch)
+					h, err := newHeapFor(width, profile.arch, "linux")
 					w13Must(t, "newHeapFor", err)
 					observed[name] = w13RunCase(t, h, fixtures, name)
 				}) {

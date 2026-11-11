@@ -50,6 +50,7 @@ type weakMap struct {
 type heap struct {
 	width         int
 	arch          string // guest architecture of the PHP profile (see newHeapFor)
+	os            string // guest system of the PHP profile (see newHeapFor)
 	nextHandle    uint64
 	freeHandles   []uint64
 	noHandleReuse bool
@@ -83,9 +84,10 @@ type heap struct {
 	currentCalledScope    *class
 }
 
-// newHeap uses the guest architecture PHP 8.5.12 would run as on this host:
-// amd64 on an amd64 host and arm64 otherwise for 64 bits, 386 for 32 bits.
-// Only lazy-operand comparison order differs between them.
+// newHeap uses the profile PHP 8.5.12 would run as on this host: amd64 on an
+// amd64 host and arm64 otherwise for 64 bits, 386 for 32 bits, on this
+// system when PHP was measured there and on Linux otherwise. Only
+// lazy-operand comparison order differs between profiles.
 func newHeap(width int) (*heap, error) {
 	arch := "arm64"
 	switch {
@@ -94,23 +96,41 @@ func newHeap(width int) (*heap, error) {
 	case goruntime.GOARCH == "amd64":
 		arch = "amd64"
 	}
-	return newHeapFor(width, arch)
+	system := goruntime.GOOS
+	if !referenceProfile(width, arch, system) {
+		system = "linux"
+	}
+	return newHeapFor(width, arch, system)
 }
 
-// newHeapFor makes a heap for a PHP profile of integer width and guest
-// architecture. The width alone does not fix every PHP-visible order: PHP
-// 8.5.12 built for amd64 evaluates some C call arguments in the opposite
-// order from arm64 (see comparisonPropertiesPHP8512).
-func newHeapFor(width int, arch string) (*heap, error) {
+// referenceProfile reports whether PHP 8.5.12 was observed for the profile:
+// the pinned Linux images, the locked source built with Apple clang on
+// macOS, and the official Windows x64 build (host-profile workflow).
+func referenceProfile(width int, arch, system string) bool {
+	switch system {
+	case "linux":
+		return width == 64 && (arch == "arm64" || arch == "amd64") || width == 32 && arch == "386"
+	case "darwin":
+		return width == 64 && (arch == "arm64" || arch == "amd64")
+	case "windows":
+		return width == 64 && arch == "amd64"
+	}
+	return false
+}
+
+// newHeapFor makes a heap for a PHP profile of integer width, guest
+// architecture and guest system. The width alone does not fix every
+// PHP-visible order: PHP 8.5.12 evaluates some C call arguments in an order
+// that follows the compiler it was built with (see
+// comparisonPropertiesPHP8512).
+func newHeapFor(width int, arch, system string) (*heap, error) {
 	if width != 32 && width != 64 {
 		return nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64 bits", width)
 	}
-	switch {
-	case width == 64 && (arch == "arm64" || arch == "amd64"), width == 32 && arch == "386":
-	default:
-		return nil, fmt.Errorf("no PHP 8.5.12 reference profile for %d-bit %s", width, arch)
+	if !referenceProfile(width, arch, system) {
+		return nil, fmt.Errorf("no PHP 8.5.12 reference profile for %d-bit %s on %s", width, arch, system)
 	}
-	return &heap{width: width, arch: arch, roots: make(map[gcNode]uint64), nextResource: 4}, nil
+	return &heap{width: width, arch: arch, os: system, roots: make(map[gcNode]uint64), nextResource: 4}, nil
 }
 
 // Temporaries returned by constructors start with no owner. assign, bind, and

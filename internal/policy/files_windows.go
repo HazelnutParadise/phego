@@ -2,9 +2,31 @@ package policy
 
 import (
 	"io/fs"
+	"os"
 	"strings"
 	"syscall"
 )
+
+// linkTarget reports whether component, with Lstat result st, is a link the
+// path resolver follows, and reads its target. Besides symbolic links that
+// is a junction (mount point): Lstat reports one as an irregular file whose
+// target Readlink returns as an absolute path. PHP follows a junction like a
+// directory, so its target is resolved as an absolute link target is: into a
+// granted directory, or refused. os.Root would refuse every junction as
+// escaping (special-files workflow, windows-2025). Other reparse points
+// have no link target and stay with os.Root.
+func linkTarget(parent *os.Root, component string, st fs.FileInfo) (string, bool, error) {
+	if st.Mode()&fs.ModeSymlink != 0 {
+		target, err := parent.Readlink(component)
+		return target, true, err
+	}
+	if st.Mode()&fs.ModeIrregular != 0 {
+		if target, err := parent.Readlink(component); err == nil {
+			return target, true, nil
+		}
+	}
+	return "", false, nil
+}
 
 // reservedDeviceName reports whether os.Root refused component, one path
 // name without separators, because Windows opens a device for it in every
@@ -28,3 +50,9 @@ func reservedNameError(name string) error {
 func directoryOpenError(name string) error {
 	return &fs.PathError{Op: "open", Path: name, Err: syscall.ERROR_ACCESS_DENIED}
 }
+
+// sameHostName compares one component of two host paths. Windows names are
+// case-insensitive, and a junction keeps the spelling it was created with.
+// The comparison only selects the mount a link target continues in; the
+// rest is still resolved inside that mount's directory.
+func sameHostName(a, b string) bool { return strings.EqualFold(a, b) }

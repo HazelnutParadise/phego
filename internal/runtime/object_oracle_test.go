@@ -42,7 +42,7 @@ func w13AssertOracleCase(t *testing.T, width int, name string, got w13Case) {
 // generated on (arm64 for 64 bits, 386 for 32), independent of the test host.
 func referenceHeap(width int) (*heap, error) {
 	if width == 32 {
-		return newHeapFor(32, "386")
+		return newHeapFor(32, "386", "linux")
 	}
-	return newHeapFor(64, "arm64")
+	return newHeapFor(64, "arm64", "linux")
 }

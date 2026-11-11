@@ -70,6 +70,15 @@ func TestRootWindowsJunctionOutsideMountIsRefused(t *testing.T) {
 					t.Errorf("OpenFile(%s, %#x) opened through a junction that leaves the mount", name, flag)
 					continue
 				}
+				// Exclusive creation never follows the last name, so an
+				// existing junction is reported as existing, as a symbolic
+				// link is.
+				if name == "/app/out" && flag&os.O_EXCL != 0 {
+					if !errors.Is(err, fs.ErrExist) {
+						t.Errorf("OpenFile(%s, %#x): %v, want file exists", name, flag, err)
+					}
+					continue
+				}
 				var pe *PolicyError
 				if !errors.As(err, &pe) || pe.Rule != "outside-root" {
 					t.Errorf("OpenFile(%s, %#x): %v, want PolicyError outside-root", name, flag, err)
@@ -86,8 +95,10 @@ func TestRootWindowsJunctionOutsideMountIsRefused(t *testing.T) {
 	}
 }
 
-// PHP on Windows follows a junction like any directory. One that stays
-// inside the mount leads to a granted file, so a Root mount opens it too.
+// PHP on Windows follows a junction like any directory (special-files
+// workflow, windows-2025). One that stays inside the mount leads to a
+// granted file, so a Root mount opens it too, however the target's case is
+// spelled; the junction itself is a directory and is refused like one.
 func TestRootWindowsJunctionInsideMountOpens(t *testing.T) {
 	work := t.TempDir()
 	if err := os.Mkdir(filepath.Join(work, "real"), 0o700); err != nil {
@@ -97,7 +108,19 @@ func TestRootWindowsJunctionInsideMountOpens(t *testing.T) {
 		t.Fatal(err)
 	}
 	mustJunction(t, filepath.Join(work, "in"), filepath.Join(work, "real"))
+	mustJunction(t, filepath.Join(work, "upper"), filepath.Join(work, "REAL"))
 	p := mustPolicy(t, Spec{Files: []FileGrant{{Path: "/app", Dir: work}}})
+	for _, name := range []string{"/app/upper/file.txt", "/app/in/../real/file.txt"} {
+		f, err := p.OpenFile(t.Context(), name, os.O_RDONLY, 0)
+		if err != nil {
+			t.Errorf("OpenFile(%s): %v", name, err)
+			continue
+		}
+		f.Close()
+	}
+	if _, err := p.OpenFile(t.Context(), "/app/in", os.O_RDONLY, 0); !errors.Is(err, fs.ErrPermission) {
+		t.Errorf("OpenFile(/app/in): %v, want Permission denied", err)
+	}
 	f, err := p.OpenFile(t.Context(), "/app/in/file.txt", os.O_RDONLY, 0)
 	t.Logf("OpenFile(/app/in/file.txt): %T %v", err, err)
 	if err != nil {

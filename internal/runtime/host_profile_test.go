@@ -27,6 +27,6 @@ func TestHostProfileLazyOperandOrder(t *testing.T) {
 	wantJSON, err := json.Marshal(want)
 	must(t, err)
 	if !bytes.Equal(got, wantJSON) {
-		t.Fatalf("host profile %s: Phego %s, PHP 8.5.12 on this system %s", h.arch, got, wantJSON)
+		t.Fatalf("host profile %s/%s: Phego %s, PHP 8.5.12 on this system %s", h.os, h.arch, got, wantJSON)
 	}
 }

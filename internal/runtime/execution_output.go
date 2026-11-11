@@ -15,32 +15,15 @@ func (x *execution) write(data []byte) completion {
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	// The body of writeTo for the innermost buffer, repeated so that every
-	// echo is one call; keep the two in step.
-	top := len(x.buffers) - 1
-	if (x.filtering || x.outputRunning) && top >= 0 {
-		x.buffers[top].produced = true
-	}
-	remaining := int64(x.limits.output) - x.accepted
-	for _, b := range x.buffers {
-		remaining -= int64(len(b.data))
-	}
-	if int64(len(data)) > remaining {
-		return x.fail(endLimit, errExecutionLimit)
-	}
-	if top >= 0 {
-		b := &x.buffers[top]
-		b.data = append(b.data, data...)
-		return completion{}
-	}
-	return x.writeOut(data)
+	return x.writeTo(len(x.buffers)-1, data)
 }
 
 // writeTo writes into buffer top, or straight to the writer when top < 0.
 // It is php_output_op: a write while a handler runs marks the buffer that
 // receives it as having produced output, which is how a displayed
 // diagnostic that skipped a disabled handler flags the next one.
-// report uses it for displayed diagnostics; write repeats its body.
+// report uses it for displayed diagnostics; write uses it for the innermost
+// buffer.
 func (x *execution) writeTo(top int, data []byte) completion {
 	if x.closed {
 		return completion{kind: endInternal, err: fmt.Errorf("execution is closed")}

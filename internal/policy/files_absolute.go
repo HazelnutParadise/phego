@@ -62,12 +62,33 @@ func (p *Policy) absoluteLinkMount(target, current string) (string, []filePart, 
 	return selected.Path, parts, true
 }
 
+// linkParentMount continues a link target whose .. leaves grant's directory.
+// PHP resolves the rest from that directory's host parent, so a target such
+// as <base>/other/toapp/../../app/file can come back into a granted
+// directory. Nothing outside the mounts is looked up: the rest is a host
+// path, and it is followed only when it spells out a granted directory, the
+// rule absolute link targets already obey. Any other path stays refused.
+func (p *Policy) linkParentMount(grant FileGrant, pending []filePart) (string, []filePart, bool) {
+	root, err := filepath.EvalSymlinks(grant.Dir)
+	if err != nil {
+		return "", nil, false
+	}
+	target := filepath.Dir(root)
+	for i, part := range pending {
+		if part.name == "" || part.name == "." && i < len(pending)-1 {
+			continue
+		}
+		target += string(filepath.Separator) + part.name
+	}
+	return p.absoluteLinkMount(target, grant.Path)
+}
+
 func hasPathComponents(name, prefix []string) bool {
 	if len(name) < len(prefix) {
 		return false
 	}
 	for i, part := range prefix {
-		if name[i] != part {
+		if !sameHostName(name[i], part) {
 			return false
 		}
 	}

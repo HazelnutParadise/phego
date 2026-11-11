@@ -121,7 +121,7 @@ func TestConfigDiagnosticGolden(t *testing.T) {
 	}
 	var b bytes.Buffer
 	must(t, diag.Render(&b, d, diag.Options{}))
-	want := `error[PHG1019]: invalid Policy.Files[0].Path: "app" is not a clean absolute path
+	want := `error[PHG1019]: "app" is not a clean absolute path
  --> Policy.Files[0].Path
   = note: mounts are matched against absolute PHP paths
   = help: write the path starting with "/" and without "." or ".." segments
