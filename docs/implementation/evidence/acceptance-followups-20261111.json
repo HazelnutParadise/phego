@@ -1,0 +1,326 @@
+{
+  "scope": "Follow-ups from the acceptance review: link targets that leave a granted directory with .. and return, Windows junctions, the per-system host profile for lazy comparison order, bucket chunk worst-case memory, ConfigError diagnostics, FIFO wait timers, and a benchstat re-measurement of the runtime layout decisions; local and CI evidence, no VM.",
+  "requirements": [
+    "REQ-009",
+    "REQ-016",
+    "REQ-018",
+    "REQ-020",
+    "REQ-033",
+    "REQ-037",
+    "REQ-040",
+    "REQ-059"
+  ],
+  "tests": [
+    "T-035",
+    "T-065",
+    "T-066",
+    "T-073",
+    "T-074",
+    "T-079",
+    "T-080"
+  ],
+  "source_base": "f11fe9e2cbc65bae5d5e83ce77756ee41ace3259",
+  "captured_at": "2026-11-11T11:48:32.835561+00:00",
+  "source_sha256": {
+    ".github/workflows/benchstat.yml": "c9cba9ddcd868701fd12ef703d20d2cb7e39607177db169e7a767ca41f15f3b9",
+    ".github/workflows/host-profile.yml": "44926f811c9821bb7e1184e37a3fd8754a54dfe19dd03539bf901e2d77edce55",
+    "diagnostics_test.go": "fbddce8e24bbbd9c636ebcb41b34356c4e46e49d720cfb94ae9222610e2e2d31",
+    "errors.go": "6bb0f8f2f6d5bd6327f72da38a237cad22c4671a294f6404582e75d57468995d",
+    "internal/policy/absolute_review_fixes_test.go": "98d34ad083cf522b9f4511577a7f448ea0c12cdc8c0c24a1c03d9eddb2e89b06",
+    "internal/policy/files_absolute.go": "5d337c1a0c445931c83eea57877339914027780407c1df3cdbff27c6521c66f9",
+    "internal/policy/files_nonwindows.go": "3a0a2fef39fbe97bc6b6e5d47fbae25ad6fd00490b467c2ccc172586d8824397",
+    "internal/policy/files_root.go": "14077a3117d9964739adf2393911461ff781163154b6bf07f264072975d1bd86",
+    "internal/policy/files_windows.go": "c1efe0034486a5a852dfb2f4952a125d200acf94c8d0fec370cc5d6f5ca150a0",
+    "internal/policy/junction_windows_test.go": "2b04236c1345127703c0b7f27c40aec778fb02cd107df14c49b82f15c65efb8f",
+    "internal/policy/special_files_windows_test.go": "2355fee9fc560527749f52a044c832ba8f25cd82a40a74ebb3f3a819e9762c04",
+    "internal/policy/special_unix.go": "45adee25116bd5cb7310504a305cbd68e69b67848f7916d1f6dfcaa0621cd6fb",
+    "internal/runtime/array_chunk_review_test.go": "4d69850491818dd1b33feb1549f111e1f03ca5f12c4ae199632dcdfb79bd6cd7",
+    "internal/runtime/array_w12_test.go": "52c540d3f2a22bfb0c8b756dff2f2645ea4fb895a831d7718873f7647508497c",
+    "internal/runtime/execution_oracle_test.go": "580e1e8a2e37028cc3a4b5deb6339b966d97f40a4ef0e946e5d0c072f3b609cf",
+    "internal/runtime/execution_output.go": "0f2b66b33fb366336d61bd1ee80bc40297e163f9e78cc9d025576bdb37e8ed09",
+    "internal/runtime/heap.go": "eaefc12eb7e90f0c37c63c26b1daf88d05a30a9637fe1f6bdce946c410627ff6",
+    "internal/runtime/host_profile_test.go": "8c212c03025187500b0bd9cc19e14939bcea643388d435e7dc5b966e62eaf15d",
+    "internal/runtime/object_compare.go": "3c02a1dc0f91e1bb259be9b79e2ea8d0964cafd2f4f59ec8980fad08c408b9b2",
+    "internal/runtime/object_model_test.go": "9b06d0f66903a5edb8db9d95bf8291ef51c67ae96c64ad50b1af2aded90c6c02",
+    "internal/runtime/object_oracle_test.go": "6f818ad35fb8551c1c08ed43c38508e5f73c90899cf5bdb86112e98fdf12832e",
+    "tests/policy/special-files/probe-windows.ps1": "5c84946d75a7a4c898ba0345af7f627f88ca1a95f27ae756b9e7328eaf4acfc7",
+    "tests/semantics/w13-objects/lazy-operand-order.php": "3b9fa3b01321466c953504a65391d840da99dce2ffe7a85c1924b104618c13cc",
+    "tools/benchstat-pair.sh": "5d7a90a53a00a8f574c178e00b5566ad43ee9ab69fbadddbbdd9bbd9df031fbc"
+  },
+  "environment": {
+    "local": "go1.26.5 darwin/arm64, macOS 27.0",
+    "reference_image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 (linux/arm64), docker run --rm --network none --cap-drop ALL, tmpfs /tmp",
+    "ci": "GitHub-hosted runners: windows-2025 (official PHP 8.5.12 NTS x64 build), macos-15 and macos-15-intel (locked PHP 8.5.12 source built with Apple clang 17), ubuntu-24.04 (go1.26.10 linux/amd64, benchstat v0.0.0-20261009192801-be2c69fb417e)"
+  },
+  "decisions": [
+    "A link-derived .. that leaves a granted directory continues from that directory's host parent when the remaining path spells out a granted directory; nothing outside the mounts is looked up. Paths that pass through an ungranted directory stay outside-root (known difference from PHP).",
+    "Windows junctions are resolved as absolute link targets; mount path comparison folds case on Windows only.",
+    "The 64-bit reference profile is (width, architecture, system): PHP 8.5.12 built with Apple clang for macOS amd64 initializes the left lazy comparison operand first, unlike linux/amd64.",
+    "execution.write keeps its own copy of the output op: both ways of sharing it with writeTo measured slower on linux/amd64.",
+    "ConfigError.Diagnostic uses the code's title as the message and the reason as the span label."
+  ],
+  "local_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "php -n link-parent.php in the pinned linux/arm64 image",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/php-linux/link-parent.log",
+      "result": "PHP opens every link whose target leaves a directory with .. and returns, including one that passes through an ungranted directory."
+    },
+    {
+      "command": "Special files workflow, windows job, run 43008933190 (commit 50bc58e)",
+      "exit_code": 1,
+      "log": "acceptance-followups-20261111/windows-junction/red-phego-tests.log",
+      "result": "Before the fix: os.Root.Lstat of a junction succeeds; a junction inside the mount is refused as outside-root; x on a junction reports File exists."
+    },
+    {
+      "command": "Special files workflow, windows job, run 43011320249 (commit 4b72d2a)",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/windows-junction/phego-tests.log",
+      "result": "TestRootWindowsJunctionOutsideMountIsRefused and TestRootWindowsJunctionInsideMountOpens pass; php-probe.log holds PHP's results for the same junctions and for fopen(dir, 'x')."
+    },
+    {
+      "command": "Host profile workflow, run 43008933505 (commit 50bc58e)",
+      "exit_code": 1,
+      "log": "acceptance-followups-20261111/host-profile/red-macos-15-intel.log",
+      "result": "Before the fix the amd64 profile on macOS Intel initialized the right operand first; PHP there initializes the left one."
+    },
+    {
+      "command": "Host profile workflow, run 43010482256 (commit ea021ae)",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/host-profile/macos-15-intel/phego-test.log",
+      "result": "TestHostProfileLazyOperandOrder passes on macos-15, macos-15-intel and windows-2025."
+    },
+    {
+      "command": "Runtime layout benchmarks workflow, run 43012023379 (tools/benchstat-pair.sh, 10 alternating rounds)",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/benchstat/heap-objects.benchstat.txt",
+      "result": "See docs/decisions/runtime-layout.md: object store 3-20% faster for small objects, sort ordinals 23% faster on equal data, bucket chunks 19% faster copy-on-write and 6-7% slower sorting, frames 22% faster."
+    },
+    {
+      "command": "gofmt -l .; CGO_ENABLED=0 go build ./...; go vet ./...; CGO_ENABLED=0 go test -count=1 ./...; go test -race -count=1 ./...; python3 -m unittest discover -s tools -p 'test_*.py' (commit in local/commit.txt, darwin/arm64)",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/local/go.log",
+      "result": "All pass; 560 Python tests OK. Logs: local/gofmt.log, build.log, vet.log, go.log, race.log, python.log."
+    },
+    {
+      "command": "Runtime layout benchmarks workflow, output-write job, runs 43011320561 (write calls writeTo) and 43012023379 (inlined entries to one body)",
+      "exit_code": 0,
+      "log": "acceptance-followups-20261111/benchstat/write-attempt-2/output-write.benchstat.txt",
+      "result": "Both are slower than the duplicated body: 31-33% and 10-15%."
+    }
+  ],
+  "limits": [
+    "Windows behaviour was run only on the windows-2025 runner; case-sensitive directories, volume GUID junction targets and junction-backed mount directories were not measured.",
+    "macOS link targets that differ from a mount directory only by case are refused; not measured against PHP.",
+    "Systems without an observed PHP 8.5.12 build use the Linux profile of their architecture.",
+    "Benchmarks ran on shared hosted runners; benchstat reports the confidence of each difference."
+  ],
+  "artifacts": {
+    "benchstat/bucket-chunks.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/bucket-chunks.after.txt",
+      "sha256": "ff38aefc99f65c79e45142c170de2c1522018fa66d1377a4bab1931bf01a1c35"
+    },
+    "benchstat/bucket-chunks.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/bucket-chunks.before.txt",
+      "sha256": "5698165ea5556a688de1db31bf3b9ed22f49403b59cded9ad321879f4b83031f"
+    },
+    "benchstat/bucket-chunks.benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/bucket-chunks.benchstat.txt",
+      "sha256": "3a998ca1987130710a16eaa0e4f2419b9fffb7eb0d1301a10ba21b4bb6f3f1aa"
+    },
+    "benchstat/bucket-chunks.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/bucket-chunks.system.txt",
+      "sha256": "20d7ce51e404344cd5f3a7995543c070e0b79de26ee25d948dc2c7227ba73627"
+    },
+    "benchstat/execution-frames.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/execution-frames.after.txt",
+      "sha256": "f76f81d15d9622d462cc2ee2ea8e0b2e728cfdcfc0c420415756042929edad45"
+    },
+    "benchstat/execution-frames.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/execution-frames.before.txt",
+      "sha256": "a3bd51d91c5d65a708f48c8972a4d9a067fc619901cc103c2ed52fb36ea5e16f"
+    },
+    "benchstat/execution-frames.benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/execution-frames.benchstat.txt",
+      "sha256": "341a07f1ee3d33bb657d1f2579ee3776e58c65cf931da5ff50fb913027e8c2ed"
+    },
+    "benchstat/execution-frames.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/execution-frames.system.txt",
+      "sha256": "5ad0466267a19feea23deefef62f9b20825a5bcaa59c2ae8631de53627c31dd4"
+    },
+    "benchstat/heap-objects.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/heap-objects.after.txt",
+      "sha256": "7065dced75ffcc528be514bbbbb80d231add9d4ed90fa647293d2983835be262"
+    },
+    "benchstat/heap-objects.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/heap-objects.before.txt",
+      "sha256": "3df5b30c0a9dec5d658844691a33a70ccef974fd856393bedb1214c0cdd85b18"
+    },
+    "benchstat/heap-objects.benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/heap-objects.benchstat.txt",
+      "sha256": "8344c4393de4db754022bffc65d957b07118525f947025a0752846f9f0c537f0"
+    },
+    "benchstat/heap-objects.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/heap-objects.system.txt",
+      "sha256": "5ad0466267a19feea23deefef62f9b20825a5bcaa59c2ae8631de53627c31dd4"
+    },
+    "benchstat/sort-ordinal.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/sort-ordinal.after.txt",
+      "sha256": "27e49d53612bf7a5579ae51aa225ba96beacaf5dcb6a06b431707e54cb4a70f1"
+    },
+    "benchstat/sort-ordinal.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/sort-ordinal.before.txt",
+      "sha256": "36bcb5e85fd99d28f4dc9885db4373d684a99c2bf9878266b5d8a56ec13ae80a"
+    },
+    "benchstat/sort-ordinal.benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/sort-ordinal.benchstat.txt",
+      "sha256": "ebe41d4a25b6a3140b62242159f0a9c20a90d5d89dccd16223c5ecd77a574d1b"
+    },
+    "benchstat/sort-ordinal.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/sort-ordinal.system.txt",
+      "sha256": "20d7ce51e404344cd5f3a7995543c070e0b79de26ee25d948dc2c7227ba73627"
+    },
+    "benchstat/write-attempt-1/benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-1/benchstat.txt",
+      "sha256": "2e0e885a143dd0754df8794dc026468fcb02a60481e4b4ee2c3a0bd6b02ff8d8"
+    },
+    "benchstat/write-attempt-1/output-write.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-1/output-write.after.txt",
+      "sha256": "348b42b781f3a3c3d9a6f1b362e00805e44ec7d0f7ef17494e5c5cbf910d8bc7"
+    },
+    "benchstat/write-attempt-1/output-write.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-1/output-write.before.txt",
+      "sha256": "0420a4aac818aa77aa3379d362e31a408ee5bd5973a321ba2460cf02991eb0d7"
+    },
+    "benchstat/write-attempt-1/output-write.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-1/output-write.system.txt",
+      "sha256": "20d7ce51e404344cd5f3a7995543c070e0b79de26ee25d948dc2c7227ba73627"
+    },
+    "benchstat/write-attempt-2/output-write.after.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-2/output-write.after.txt",
+      "sha256": "557c75247a078b96f54aa013b3a0c11389b37c60cc9426ed307192ffc18eaa66"
+    },
+    "benchstat/write-attempt-2/output-write.before.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-2/output-write.before.txt",
+      "sha256": "d069e0a1fec9b20292dca8f2fc08863a20598564d0bddad1626e83c349b9c648"
+    },
+    "benchstat/write-attempt-2/output-write.benchstat.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-2/output-write.benchstat.txt",
+      "sha256": "6fca4b1ac325128608dc62ee0334082f41dc4ba010757ea17344a3022a5d0e4a"
+    },
+    "benchstat/write-attempt-2/output-write.system.txt": {
+      "path": "acceptance-followups-20261111/benchstat/write-attempt-2/output-write.system.txt",
+      "sha256": "87711e53c9a0f439c14c60424fac856b782669832debc236039d46ce6d905c03"
+    },
+    "host-profile/macos-15/lazy-operand-order.json": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15/lazy-operand-order.json",
+      "sha256": "d1a8ee6454f26ddf00428630b120507d8530b4c642ce73e9ecefa1108dbfb6f0"
+    },
+    "host-profile/macos-15/os.txt": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15/os.txt",
+      "sha256": "38290c7fd3c0f21cfd0f820c8841a264d030f6e9828ba3ca117d95b1ae99f67c"
+    },
+    "host-profile/macos-15/phego-test.log": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15/phego-test.log",
+      "sha256": "a923075c3152ef59770577f16b8a8340006c53f1198247a75b1e705d4a137b27"
+    },
+    "host-profile/macos-15/php-version.txt": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15/php-version.txt",
+      "sha256": "be4bf85ddc381a18d506f185ccca848e780a5dba480348242aaffc176d1ced07"
+    },
+    "host-profile/macos-15-intel/lazy-operand-order.json": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15-intel/lazy-operand-order.json",
+      "sha256": "d1a8ee6454f26ddf00428630b120507d8530b4c642ce73e9ecefa1108dbfb6f0"
+    },
+    "host-profile/macos-15-intel/os.txt": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15-intel/os.txt",
+      "sha256": "505583fd51e3dae8972569b1ebc7967aa42005576a99ddbe0691d5cac3088d5c"
+    },
+    "host-profile/macos-15-intel/phego-test.log": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15-intel/phego-test.log",
+      "sha256": "4bf8da46811824bc8e95d82a76d636646e8e34789a66acfb9d344a58ec167c07"
+    },
+    "host-profile/macos-15-intel/php-version.txt": {
+      "path": "acceptance-followups-20261111/host-profile/macos-15-intel/php-version.txt",
+      "sha256": "21e681510644746d0b644a4a64d454a93ab8109f695741dc3b4261dcf14608b3"
+    },
+    "host-profile/red-macos-15-intel.log": {
+      "path": "acceptance-followups-20261111/host-profile/red-macos-15-intel.log",
+      "sha256": "09bd34dfd8172a7cbb291ca2749ee94616aa6239bcd35091a13bc37de5ca918a"
+    },
+    "host-profile/windows-2025/lazy-operand-order.json": {
+      "path": "acceptance-followups-20261111/host-profile/windows-2025/lazy-operand-order.json",
+      "sha256": "39aa81b32e321f2f7f5503fffb50776b5b5ae543af0bd83bd46382c2cf5e2923"
+    },
+    "host-profile/windows-2025/os.txt": {
+      "path": "acceptance-followups-20261111/host-profile/windows-2025/os.txt",
+      "sha256": "c4683cd47b45891283648f4867d9b2e99988db4f83f1575b8dab4d8ee7b68c5f"
+    },
+    "host-profile/windows-2025/phego-test.log": {
+      "path": "acceptance-followups-20261111/host-profile/windows-2025/phego-test.log",
+      "sha256": "7798721ef59c9c891bcb3c6069dbaad7028bd9f2996cd9f4df29baa42e53d222"
+    },
+    "host-profile/windows-2025/php-version.txt": {
+      "path": "acceptance-followups-20261111/host-profile/windows-2025/php-version.txt",
+      "sha256": "298fab8730d44a671f5b955b90cdd3a66858d899209e49272ba1e123856f60ce"
+    },
+    "local/build.log": {
+      "path": "acceptance-followups-20261111/local/build.log",
+      "sha256": "28d3b9e880a77975493dc7e359144c0295a4f694cfe0af4f928c22307bc5c320"
+    },
+    "local/commit.txt": {
+      "path": "acceptance-followups-20261111/local/commit.txt",
+      "sha256": "18780eac32d5c9ebc5a3fe0cb407fbd92a839251148ec5d4675110fafd72a99b"
+    },
+    "local/go.log": {
+      "path": "acceptance-followups-20261111/local/go.log",
+      "sha256": "85c7fcdbcd1d5d7969ab5338c73f0a90954df6d88ccf1b28d5bc23c5a31ef798"
+    },
+    "local/gofmt.log": {
+      "path": "acceptance-followups-20261111/local/gofmt.log",
+      "sha256": "28d3b9e880a77975493dc7e359144c0295a4f694cfe0af4f928c22307bc5c320"
+    },
+    "local/python.log": {
+      "path": "acceptance-followups-20261111/local/python.log",
+      "sha256": "94f34f0c33fcc39ffc224b78c214ccbd70022cf471754ddc554c670148e226da"
+    },
+    "local/race.log": {
+      "path": "acceptance-followups-20261111/local/race.log",
+      "sha256": "a19673b7f1378dcee22880833e769b9ec706d6584b949ecc75dfc3b318d263d0"
+    },
+    "local/vet.log": {
+      "path": "acceptance-followups-20261111/local/vet.log",
+      "sha256": "28d3b9e880a77975493dc7e359144c0295a4f694cfe0af4f928c22307bc5c320"
+    },
+    "php-linux/link-parent.log": {
+      "path": "acceptance-followups-20261111/php-linux/link-parent.log",
+      "sha256": "b40ab87457f320f9fd828a4b87abdd210c6a4683e803ef0f56dd7bc0a3073b05"
+    },
+    "php-linux/link-parent.php": {
+      "path": "acceptance-followups-20261111/php-linux/link-parent.php",
+      "sha256": "e87975daaac439d76babbcf047ae6def6a1cbacdca2085720df388e5a99362ec"
+    },
+    "windows-junction/os.txt": {
+      "path": "acceptance-followups-20261111/windows-junction/os.txt",
+      "sha256": "c4683cd47b45891283648f4867d9b2e99988db4f83f1575b8dab4d8ee7b68c5f"
+    },
+    "windows-junction/phego-tests.log": {
+      "path": "acceptance-followups-20261111/windows-junction/phego-tests.log",
+      "sha256": "82395ddc8de4f87f146acaeadf9008e4dbbffdbc1e8f9ca9f155f1cd02fd1475"
+    },
+    "windows-junction/php-probe.log": {
+      "path": "acceptance-followups-20261111/windows-junction/php-probe.log",
+      "sha256": "cff5cd545e0c9949ac049a19d12b0d6e1b5ee22dbe40e4cc33f148b8db0761b0"
+    },
+    "windows-junction/php-version.txt": {
+      "path": "acceptance-followups-20261111/windows-junction/php-version.txt",
+      "sha256": "298fab8730d44a671f5b955b90cdd3a66858d899209e49272ba1e123856f60ce"
+    },
+    "windows-junction/red-phego-tests.log": {
+      "path": "acceptance-followups-20261111/windows-junction/red-phego-tests.log",
+      "sha256": "154ce9f48c82b9f7e24fa4f3be24de6303ff5a925697cd02c1333578a5253205"
+    }
+  }
+}

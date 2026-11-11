@@ -39,8 +39,12 @@ func TestReviewFixAbsoluteSymlinkMounts(t *testing.T) {
 		{"prefix", base + "/app2/file", "", "outside-root"},
 		{"parent", base + "/app/sub/../file", "app/file", ""},
 		{"symlink-parent", base + "/app/deep/../file", "app/sub/file", ""},
-		{"escape-return", base + "/app/../app/file", "", "outside-root"},
-		{"target-boundary", base + "/other/../app/file", "", "outside-root"},
+		// A .. out of a granted directory continues from its host parent, as
+		// for PHP; the rest must spell out a granted directory again.
+		{"escape-return", base + "/app/../app/file", "app/file", ""},
+		{"target-boundary", base + "/other/../app/file", "app/file", ""},
+		{"parent-outside", base + "/app/../outside/file", "", "outside-root"},
+		{"parent-prefix", base + "/app/../app2/file", "", "outside-root"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -240,11 +244,17 @@ func TestReviewFixAbsoluteLinkUsesConfiguredRootAlias(t *testing.T) {
 			t.Fatalf("got %q %v", b, err)
 		}
 	}
+	// alias/sub is the read-only /locked mount; its parent is /app's
+	// directory, so the target is the granted /app/file, as for PHP.
 	f, err := p.OpenFile(t.Context(), "/app/escape", os.O_RDONLY, 0)
-	if f != nil {
-		f.Close()
+	if err != nil {
+		t.Fatal(err)
 	}
-	wantPolicyError(t, err, "outside-root")
+	b, err := io.ReadAll(f)
+	f.Close()
+	if err != nil || string(b) != "file" {
+		t.Fatalf("got %q %v", b, err)
+	}
 	f, err = p.OpenFile(t.Context(), "/app/child", os.O_WRONLY|os.O_TRUNC, 0600)
 	if f != nil {
 		f.Close()
@@ -255,6 +265,10 @@ func TestReviewFixAbsoluteLinkUsesConfiguredRootAlias(t *testing.T) {
 // A link target's .. follows the directory the previous component resolved
 // to. After an absolute link moves resolution into another mount, the
 // remaining components are bounded by that mount instead of the first one.
+// A .. that leaves that mount's directory continues from the directory's
+// host parent, as it does for PHP 8.5.12 (pinned Linux image: /app/return
+// reads "app/file"), and is refused unless the rest spells out a granted
+// directory again.
 func TestAbsoluteLinkChainParentUsesNewMount(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("symlink fixtures require Unix privileges; Windows compilation is checked separately")
@@ -279,6 +293,9 @@ func TestAbsoluteLinkChainParentUsesNewMount(t *testing.T) {
 		"app/deeper":   base + "/other/toapp/../sub/file",
 		"app/escape":   base + "/other/toapp/../../outside/file",
 		"app/return":   base + "/other/toapp/../../app/file",
+		"app/sibling":  base + "/other/toapp/../../other/file",
+		"app/wander":   base + "/other/toapp/../../outside/../app/file",
+		"app/above":    base + "/other/toapp/../..",
 		"app/rel":      "../other/toapp/../file",
 		"other/torel":  "toapp/../file",
 		"app/viaother": base + "/other/torel",
@@ -295,8 +312,11 @@ func TestAbsoluteLinkChainParentUsesNewMount(t *testing.T) {
 		{"/other/torel", "app/file", ""},
 		{"/app/viaother", "app/file", ""},
 		{"/app/escape", "", "outside-root"},
-		{"/app/return", "", "outside-root"},
-		{"/app/rel", "", "outside-root"},
+		{"/app/return", "app/file", ""},
+		{"/app/sibling", "other/file", ""},
+		{"/app/wander", "", "outside-root"},
+		{"/app/above", "", "outside-root"},
+		{"/app/rel", "app/file", ""},
 	} {
 		f, err := p.OpenFile(t.Context(), c.name, os.O_RDONLY, 0)
 		if c.rule != "" {

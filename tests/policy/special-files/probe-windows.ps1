@@ -67,3 +67,21 @@ foreach ($mode in 'r', 'w') {
 Run 'fopen <work>\ads:s r' @($Probe, 'r', (Join-Path $Work 'ads:s'), 'read')
 Run 'fopen <work>\ads:s w' @($Probe, 'w', (Join-Path $Work 'ads:s'), 'write')
 Run 'fopen missing named pipe r' @($Probe, 'r', '\\.\pipe\phego-missing')
+# Junctions (mount points): PHP follows them like directories, inside or
+# outside the directory a Root mount would grant.
+New-Item -ItemType Directory -Path (Join-Path $Work 'real') | Out-Null
+Set-Content -LiteralPath (Join-Path $Work 'real\file.txt') -Value 'inside' -NoNewline
+$outside = "$Work-outside"
+New-Item -ItemType Directory -Path $outside | Out-Null
+Set-Content -LiteralPath (Join-Path $outside 'secret.txt') -Value 'secret' -NoNewline
+& cmd /c mklink /J (Join-Path $Work 'in') (Join-Path $Work 'real') | Out-Null
+& cmd /c mklink /J (Join-Path $Work 'out') $outside | Out-Null
+Run 'fopen <work>\in\file.txt r' @($Probe, 'r', (Join-Path $Work 'in\file.txt'), 'read')
+Run 'fopen <work>\out\secret.txt r' @($Probe, 'r', (Join-Path $Work 'out\secret.txt'), 'read')
+Run 'fopen <work>\out r' @($Probe, 'r', (Join-Path $Work 'out'))
+Run 'fopen <work>\out w' @($Probe, 'w', (Join-Path $Work 'out'))
+Run 'fopen <work>\out x' @($Probe, 'x', (Join-Path $Work 'out'))
+Run 'fopen <work>\in r' @($Probe, 'r', (Join-Path $Work 'in'))
+Run 'fopen <work>\in\..\real\file.txt r' @($Probe, 'r', (Join-Path $Work 'in\..\real\file.txt'), 'read')
+Run 'fopen <work>\out\NUL r' @($Probe, 'r', (Join-Path $Work 'out\NUL'), 'read')
+

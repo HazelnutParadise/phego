@@ -189,14 +189,16 @@ func (h *heap) compareObjectPropertyValues(left, right *value, arrays map[*phpAr
 	}
 }
 
-// The pinned PHP 8.5.12 images evaluate the two property-table operands of
-// zend_std_compare_objects in different orders, as their C compilers order
-// call arguments: arm64 initializes the left lazy object first, while 386
-// and amd64 initialize the right one first. The architecture decides, not
-// the integer width; each order is evidence for its image profile only.
+// PHP 8.5.12 evaluates the two property-table operands of
+// zend_std_compare_objects in the order its C compiler evaluates call
+// arguments. Observed builds: arm64 (GCC on Linux, Apple clang on macOS) and
+// amd64 built with Apple clang on macOS initialize the left lazy object
+// first; 386 and amd64 built with GCC on Linux and the official Windows x64
+// build (Visual C++) initialize the right one first. Each order is evidence
+// for its profile only.
 func (h *heap) comparisonPropertiesPHP8512(left, right *object) (*object, *object, error) {
 	first, second := &left, &right
-	if h.arch != "arm64" {
+	if h.arch != "arm64" && h.os != "darwin" {
 		first, second = second, first
 	}
 	var err error

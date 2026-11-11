@@ -1,0 +1,182 @@
+== system: Microsoft Windows NT 10.0.26100.0 AMD64
+== version
+
+8.5.12 WINNT
+exit=0
+== fopen NUL r
+
+fopen returned stream at 0.0
+fread '' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== fopen NUL w
+
+fopen returned stream at 0.0
+fwrite 7 at 0.0
+fwrite2 5 at 1.0
+exit=0
+== file_get_contents NUL
+
+fgc returned '' at 0.0
+exit=0
+== include NUL
+
+include returned 1 at 0.0
+exit=0
+== php NUL
+
+
+exit=0
+== fopen <work>\NUL r
+Warning: fopen(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\nul r
+Warning: fopen(D:\a\_temp\special-files\nul): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL.txt r
+Warning: fopen(D:\a\_temp\special-files\NUL.txt): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\sub\NUL r
+Warning: fopen(D:\a\_temp\special-files\sub\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\CON r
+Warning: fopen(D:\a\_temp\special-files\CON): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\COM1 r
+Warning: fopen(D:\a\_temp\special-files\COM1): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\CONIN$ r
+Warning: fopen(D:\a\_temp\special-files\CONIN$): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\CONOUT$ r
+Warning: fopen(D:\a\_temp\special-files\CONOUT$): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\LPT1 r
+Warning: fopen(D:\a\_temp\special-files\LPT1): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL\x r
+Warning: fopen(D:\a\_temp\special-files\NUL\x): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL w
+Warning: fopen(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL r+
+Warning: fopen(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL a
+Warning: fopen(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\NUL x
+Warning: fopen(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\sub\CON w
+Warning: fopen(D:\a\_temp\special-files\sub\CON): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== include <work>\NUL
+Warning: include(D:\a\_temp\special-files\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 10
+Warning: include(): Failed opening 'D:\a\_temp\special-files\NUL' for inclusion (include_path='.;C:\php\pear') in D:\a\phego\phego\tests\policy\special-files\probe.php on line 10
+include returned false at 0.0
+exit=0
+== php <work>\NUL
+Could not open input file: D:\a\_temp\special-files\NUL
+
+exit=1
+== fopen dir r
+Warning: fopen(D:\a\_temp\special-files\d): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir w
+Warning: fopen(D:\a\_temp\special-files\d): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir r+
+Warning: fopen(D:\a\_temp\special-files\d): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir a
+Warning: fopen(D:\a\_temp\special-files\d): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen dir x
+Warning: fopen(D:\a\_temp\special-files\d): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== php dir
+Could not open input file: D:\a\_temp\special-files\d
+
+exit=1
+== fopen <work> r
+Warning: fopen(D:\a\_temp\special-files): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work> w
+Warning: fopen(D:\a\_temp\special-files): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\ads:s r
+Warning: fopen(D:\a\_temp\special-files\ads:s): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\ads:s w
+
+fopen returned stream at 0.0
+fwrite 7 at 0.0
+fwrite2 5 at 1.0
+exit=0
+== fopen missing named pipe r
+Warning: fopen(\\.\pipe\phego-missing): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\in\file.txt r
+
+fopen returned stream at 0.0
+fread 'inside' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== fopen <work>\out\secret.txt r
+
+fopen returned stream at 0.0
+fread 'secret' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== fopen <work>\out r
+Warning: fopen(D:\a\_temp\special-files\out): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\out w
+Warning: fopen(D:\a\_temp\special-files\out): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\out x
+Warning: fopen(D:\a\_temp\special-files\out): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\in r
+Warning: fopen(D:\a\_temp\special-files\in): Failed to open stream: Permission denied in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0
+== fopen <work>\in\..\real\file.txt r
+
+fopen returned stream at 0.0
+fread 'inside' at 0.0 eof=true
+fread2 '' at 0.0 eof=true
+exit=0
+== fopen <work>\out\NUL r
+Warning: fopen(D:\a\_temp\special-files\out\NUL): Failed to open stream: No such file or directory in D:\a\phego\phego\tests\policy\special-files\probe.php on line 18
+fopen returned false at 0.0
+exit=0

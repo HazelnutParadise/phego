@@ -60,7 +60,7 @@ func TestRootWindowsReservedNamesAreMissing(t *testing.T) {
 
 // PHP 8.5.12 on Windows opens files with CreateFile, which refuses a
 // directory, so fopen of a directory fails with Permission denied for r, w,
-// r+ and a (special-files workflow, windows-2025). A Root mount refuses the
+// r+, a and x (special-files workflow, windows-2025). A Root mount refuses the
 // same opens with the same error, including the mount directory itself,
 // and leaves the directory untouched. Opens a read-only mount does not
 // grant are still refused by the policy.
@@ -81,6 +81,7 @@ func TestRootWindowsDirectoriesAreDenied(t *testing.T) {
 		{"w", os.O_WRONLY | os.O_CREATE | os.O_TRUNC},
 		{"r+", os.O_RDWR},
 		{"a", os.O_WRONLY | os.O_CREATE | os.O_APPEND},
+		{"x", os.O_WRONLY | os.O_CREATE | os.O_EXCL},
 	}
 	for _, name := range []string{"/app/d", "/app/d/", "/app"} {
 		for _, c := range flags {

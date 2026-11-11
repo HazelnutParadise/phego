@@ -1,0 +1,82 @@
+commit: f11fe9e2cbc65bae5d5e83ce77756ee41ace3259
+go: go version go1.26.10 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	47270454	        25.59 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46349107	        26.97 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	38083368	        32.30 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	45506846	        25.54 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	45977856	        26.71 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	37810604	        32.51 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	47794282	        25.60 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46591752	        26.85 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	37776398	        32.09 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	48041739	        25.36 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46189948	        26.61 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	38179407	        33.19 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	47716287	        25.30 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	45913183	        27.62 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	38380033	        32.43 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	47288163	        25.43 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46230796	        26.73 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	38456962	        31.99 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	47482986	        25.52 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46006846	        27.21 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	37313068	        32.36 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	46480489	        31.28 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	37387549	        33.70 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	36438517	        32.91 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	45839348	        25.72 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	46273352	        26.91 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	38325766	        32.43 ns/op	       5 B/op	       0 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkOutputWrite/1-4 	48012290	        25.79 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/3-4 	45886460	        27.00 ns/op	       5 B/op	       0 allocs/op
+BenchmarkOutputWrite/8-4 	37865395	        32.09 ns/op	       5 B/op	       0 allocs/op
+PASS

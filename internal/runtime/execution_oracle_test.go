@@ -108,7 +108,7 @@ func replayExecutionOracleMode(t *testing.T, width int, arch string, display boo
 			must(r.Ready())
 			x, err := newExecution(context.Background(), r, width, nil, executionLimits{32, 64, 4096})
 			must(err)
-			x.heap.arch = arch
+			x.heap.arch, x.heap.os = arch, "linux"
 			wantOut, wantCode, stderr, prefix := tc.Stdout, tc.ExitCode, tc.Stderr, ""
 			shownCount := func() int { return 0 }
 			if display {

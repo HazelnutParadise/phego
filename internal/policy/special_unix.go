@@ -27,16 +27,30 @@ const (
 	maxPause   = 10 * time.Millisecond
 )
 
-// pause sleeps for *d, or until ctx ends, and then doubles *d up to maxPause.
-func pause(ctx context.Context, d *time.Duration) error {
-	t := time.NewTimer(*d)
-	defer t.Stop()
+// backoff paces the retries of one wait. Its zero value is ready to use; it
+// keeps a single timer for the whole wait, which may recheck every few
+// milliseconds for as long as a FIFO peer stays away.
+type backoff struct {
+	d time.Duration
+	t *time.Timer
+}
+
+// pause sleeps for the current pause, or until ctx ends, and then doubles
+// the pause up to maxPause.
+func (b *backoff) pause(ctx context.Context) error {
+	if b.t == nil {
+		b.d = firstPause
+		b.t = time.NewTimer(b.d)
+	} else {
+		b.t.Reset(b.d)
+	}
 	select {
 	case <-ctx.Done():
+		b.t.Stop()
 		return context.Cause(ctx)
-	case <-t.C:
+	case <-b.t.C:
 	}
-	*d = min(2**d, maxPause)
+	b.d = min(2*b.d, maxPause)
 	return nil
 }
 
@@ -97,13 +111,13 @@ func (s *specialFile) Read(b []byte) (int, error) {
 		return n, nil
 	}
 	s.mu.Unlock()
-	d := firstPause
+	var wait backoff
 	for {
 		n, err := s.file.Read(b)
 		if !errors.Is(err, syscall.EAGAIN) {
 			return n, s.ioError("read", err)
 		}
-		if pause(s.ctx, &d) != nil {
+		if wait.pause(s.ctx) != nil {
 			return 0, s.cancelled("read")
 		}
 	}
@@ -113,7 +127,7 @@ func (s *specialFile) Write(b []byte) (int, error) {
 	if s.ctx.Err() != nil {
 		return 0, s.cancelled("write")
 	}
-	d := firstPause
+	var wait backoff
 	n := 0
 	for {
 		k, err := s.file.Write(b[n:])
@@ -121,7 +135,7 @@ func (s *specialFile) Write(b []byte) (int, error) {
 		if !errors.Is(err, syscall.EAGAIN) {
 			return n, s.ioError("write", err)
 		}
-		if pause(s.ctx, &d) != nil {
+		if wait.pause(s.ctx) != nil {
 			return n, s.cancelled("write")
 		}
 	}
@@ -187,7 +201,7 @@ func (s *specialFile) awaitWriter() error {
 		return &fs.PathError{Op: "open", Path: s.name, Err: err}
 	}
 	defer probe.close()
-	d := firstPause
+	var wait backoff
 	for {
 		if s.ctx.Err() != nil {
 			return s.cancelled("open")
@@ -229,7 +243,7 @@ func (s *specialFile) awaitWriter() error {
 		case ready:
 			return nil
 		}
-		if pause(s.ctx, &d) != nil {
+		if wait.pause(s.ctx) != nil {
 			return s.cancelled("open")
 		}
 	}
@@ -257,8 +271,9 @@ func wrapSpecial(ctx context.Context, f *os.File, info fs.FileInfo, name string,
 // still the FIFO the caller verified.
 func openWriting(ctx context.Context, parent *os.Root, leaf string, flag int, perm fs.FileMode, before fs.FileInfo, name string) (*os.File, error) {
 	f, err := parent.OpenFile(leaf, flag, perm)
-	for d := firstPause; err != nil && before.Mode()&fs.ModeNamedPipe != 0 && errors.Is(err, syscall.ENXIO); {
-		if pause(ctx, &d) != nil {
+	var wait backoff
+	for err != nil && before.Mode()&fs.ModeNamedPipe != 0 && errors.Is(err, syscall.ENXIO) {
+		if wait.pause(ctx) != nil {
 			return nil, &fs.PathError{Op: "open", Path: name, Err: context.Cause(ctx)}
 		}
 		st, e := parent.Lstat(leaf)

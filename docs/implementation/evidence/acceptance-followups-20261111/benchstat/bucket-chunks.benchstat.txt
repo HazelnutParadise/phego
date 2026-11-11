@@ -1,0 +1,47 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+                          │   before    │                after                │
+                          │   sec/op    │   sec/op     vs base                │
+W12Sorting/32-4             24.81µ ± 2%   26.35µ ± 2%   +6.19% (p=0.000 n=10)
+W12Sorting/128-4            131.1µ ± 3%   138.6µ ± 1%   +5.70% (p=0.000 n=10)
+W12Sorting/1024-4           1.558m ± 2%   1.671m ± 1%   +7.30% (p=0.000 n=10)
+PackedAppend1K-4            192.4µ ± 2%   185.2µ ± 2%   -3.73% (p=0.000 n=10)
+PackedAppendSmall/3-4       780.9n ± 2%   769.1n ± 2%   -1.51% (p=0.006 n=10)
+PackedAppendSmall/8-4       1.849µ ± 1%   1.810µ ± 2%   -2.14% (p=0.002 n=10)
+PackedAppendSmall/20-4      4.458µ ± 2%   4.341µ ± 1%   -2.64% (p=0.000 n=10)
+CopyOnWriteSeparation1K-4   60.47µ ± 3%   49.10µ ± 2%  -18.80% (p=0.000 n=10)
+geomean                     28.02µ        27.59µ        -1.54%
+
+                  │     before     │                  after                  │
+                  │ comparisons/op │ comparisons/op  vs base                 │
+W12Sorting/32-4         148.0 ± 0%       148.0 ± 0%       ~ (p=1.000 n=10) ¹
+W12Sorting/128-4        810.0 ± 0%       810.0 ± 0%       ~ (p=1.000 n=10) ¹
+W12Sorting/1024-4      9.942k ± 0%      9.942k ± 0%       ~ (p=1.000 n=10) ¹
+geomean                1.060k           1.060k       +0.00%
+¹ all samples are equal
+
+                          │    before    │                after                │
+                          │     B/op     │     B/op      vs base               │
+W12Sorting/32-4             6.258Ki ± 0%   6.305Ki ± 0%  +0.75% (p=0.000 n=10)
+W12Sorting/128-4            24.51Ki ± 0%   24.70Ki ± 0%  +0.78% (p=0.000 n=10)
+W12Sorting/1024-4           205.5Ki ± 0%   207.1Ki ± 0%  +0.74% (p=0.000 n=10)
+PackedAppend1K-4            125.6Ki ± 0%   127.3Ki ± 0%  +1.39% (p=0.000 n=10)
+PackedAppendSmall/3-4         440.0 ± 0%     444.0 ± 0%  +0.91% (p=0.000 n=10)
+PackedAppendSmall/8-4         984.0 ± 0%     996.0 ± 0%  +1.22% (p=0.000 n=10)
+PackedAppendSmall/20-4      2.461Ki ± 0%   2.490Ki ± 0%  +1.19% (p=0.000 n=10)
+CopyOnWriteSeparation1K-4   105.3Ki ± 0%   106.9Ki ± 0%  +1.45% (p=0.000 n=10)
+geomean                     11.98Ki        12.10Ki       +1.05%
+
+                          │    before    │               after                │
+                          │  allocs/op   │ allocs/op   vs base                │
+W12Sorting/32-4              40.000 ± 0%   9.000 ± 0%  -77.50% (p=0.000 n=10)
+W12Sorting/128-4             136.00 ± 0%   14.00 ± 0%  -89.71% (p=0.000 n=10)
+W12Sorting/1024-4           1034.00 ± 0%   58.00 ± 0%  -94.39% (p=0.000 n=10)
+PackedAppend1K-4            1039.00 ± 0%   65.00 ± 0%  -93.74% (p=0.000 n=10)
+PackedAppendSmall/3-4         7.000 ± 0%   4.000 ± 0%  -42.86% (p=0.000 n=10)
+PackedAppendSmall/8-4        13.000 ± 0%   5.000 ± 0%  -61.54% (p=0.000 n=10)
+PackedAppendSmall/20-4       27.000 ± 0%   7.000 ± 0%  -74.07% (p=0.000 n=10)
+CopyOnWriteSeparation1K-4   1026.00 ± 0%   50.00 ± 0%  -95.13% (p=0.000 n=10)
+geomean                       105.0        15.50       -85.24%

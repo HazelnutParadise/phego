@@ -1,0 +1,41 @@
+=== RUN   TestRootWindowsJunctionOutsideMountIsRefused
+    junction_windows_test.go:46: os.Root.Lstat(out): mode=?rw-rw-rw- err=<nil>
+    junction_windows_test.go:48: os.Root.Readlink(out): "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\TestRootWindowsJunctionOutsideMountIsRefused2546387952\\001\\outside" err=<nil>
+    junction_windows_test.go:50: os.Root.OpenRoot(out): err=openat out: path escapes from parent
+    junction_windows_test.go:52: os.Root.Open(out/secret.txt): err=openat out/secret.txt: path escapes from parent
+    junction_windows_test.go:54: os.Root.Lstat(out/secret.txt): err=statat out/secret.txt: path escapes from parent
+    junction_windows_test.go:56: os.Root.Lstat(NUL): err=statat NUL: path escapes from parent
+    junction_windows_test.go:67: write=false OpenFile(/app/out/secret.txt, 0x0): *policy.PolicyError policy: file-read open "/app/out/secret.txt" refused (outside-root)
+    junction_windows_test.go:67: write=false OpenFile(/app/out/new.txt, 0x0): *policy.PolicyError policy: file-read open "/app/out/new.txt" refused (outside-root)
+    junction_windows_test.go:67: write=false OpenFile(/app/out, 0x0): *policy.PolicyError policy: file-read open "/app/out" refused (outside-root)
+    junction_windows_test.go:67: write=false OpenFile(/app/out/NUL, 0x0): *policy.PolicyError policy: file-read open "/app/out/NUL" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/secret.txt, 0x0): *policy.PolicyError policy: file-read open "/app/out/secret.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/secret.txt, 0x241): *policy.PolicyError policy: file-write open "/app/out/secret.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/secret.txt, 0xc1): *policy.PolicyError policy: file-write open "/app/out/secret.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/new.txt, 0x0): *policy.PolicyError policy: file-read open "/app/out/new.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/new.txt, 0x241): *policy.PolicyError policy: file-write open "/app/out/new.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/new.txt, 0xc1): *policy.PolicyError policy: file-write open "/app/out/new.txt" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out, 0x0): *policy.PolicyError policy: file-read open "/app/out" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out, 0x241): *fs.PathError open /app/out: is a directory
+    junction_windows_test.go:75: OpenFile(/app/out, 0x241): open /app/out: is a directory, want PolicyError outside-root
+    junction_windows_test.go:67: write=true OpenFile(/app/out, 0xc1): *fs.PathError open /app/out: file already exists
+    junction_windows_test.go:75: OpenFile(/app/out, 0xc1): open /app/out: file already exists, want PolicyError outside-root
+    junction_windows_test.go:67: write=true OpenFile(/app/out/NUL, 0x0): *policy.PolicyError policy: file-read open "/app/out/NUL" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/NUL, 0x241): *policy.PolicyError policy: file-write open "/app/out/NUL" refused (outside-root)
+    junction_windows_test.go:67: write=true OpenFile(/app/out/NUL, 0xc1): *policy.PolicyError policy: file-write open "/app/out/NUL" refused (outside-root)
+--- FAIL: TestRootWindowsJunctionOutsideMountIsRefused (0.03s)
+=== RUN   TestRootWindowsJunctionInsideMountOpens
+    junction_windows_test.go:102: OpenFile(/app/in/file.txt): *policy.PolicyError policy: file-read open "/app/in/file.txt" refused (outside-root)
+    junction_windows_test.go:104: OpenFile through a junction inside the mount: policy: file-read open "/app/in/file.txt" refused (outside-root)
+--- FAIL: TestRootWindowsJunctionInsideMountOpens (0.02s)
+=== RUN   TestRootWindowsReservedNamesAreMissing
+--- PASS: TestRootWindowsReservedNamesAreMissing (0.01s)
+=== RUN   TestRootWindowsDirectoriesAreDenied
+--- PASS: TestRootWindowsDirectoriesAreDenied (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/policy	0.102s
+=== RUN   TestRunFileWindowsDirectoryAndDeviceName
+--- PASS: TestRunFileWindowsDirectoryAndDeviceName (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego	0.027s
+FAIL
