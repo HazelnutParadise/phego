@@ -45,7 +45,6 @@ func format12ValidInstructions(t *testing.T) map[string]Instruction {
 		"fetch read-write append":        {Op: OpFetchDim, Aux: uint16(FetchReadWrite | FetchAppend | FetchForAssignOp), A: 4, B: 2},
 		"fetch for incdec":               {Op: OpFetchDim, Aux: uint16(FetchReadWrite | FetchForIncDec), A: 4, B: 2, C: 0},
 		"fetch for assign-op":            {Op: OpFetchDim, Aux: uint16(FetchReadWrite | FetchForAssignOp | FetchKeyLocation), A: 4, B: 2, C: 2},
-		"fetch into its own container":   {Op: OpFetchDim, Aux: uint16(FetchWrite), A: 2, B: 2, C: 0},
 		"iter init":                      {Op: OpIterInit, A: 3, B: 1, C: format12Next},
 		"iter init over itself":          {Op: OpIterInit, A: 1, B: 1, C: format12Next},
 		"iter next value":                {Op: OpIterNext, A: 1, B: 3, C: format12Next},

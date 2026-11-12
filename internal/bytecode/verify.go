@@ -266,6 +266,9 @@ func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Funct
 			}
 		}
 	}
+	if err := verifyElementLocations(b, f); err != nil {
+		return 0, functionError(err, int(index), -1)
+	}
 	if err := verifyFlow(b, image, f, uint32(index)); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}

@@ -66,6 +66,14 @@ type vmState struct {
 	prelude  []RunDiagnostic
 	end      completion
 	ended    bool
+
+	// offsetBuf holds the bytes of offsetLast, the string the last string
+	// offset write built, when offsetValid is set, so that a write
+	// extending it appends instead of copying (offsetString).
+	offsetBuf   strings.Builder
+	offsetLast  string
+	offsetValid bool
+
 	// lastFile and lastLine locate diagnostics raised when no frame is
 	// active: the uncaught throwable reported after unwinding.
 	lastFile string

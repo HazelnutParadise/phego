@@ -919,8 +919,11 @@ func TestVMStage2SharedProgramIsolation(t *testing.T) {
 	m.store("o", m.arrayOf())
 	e := m.elem()
 	m.foreachLoop(m.load("in"), "k", "v", func() {
+		// The value first, as the compiler orders it: nothing but the
+		// write may follow the fetch.
+		v := m.bin(bytecode.Concat, m.load("v"), m.load("tag"))
 		m.fetch(e, m.loc("o"), bytecode.FetchWrite, "k", 0)
-		m.emit(bytecode.OpArrayAppend, 0, e, m.bin(bytecode.Concat, m.load("v"), m.load("tag")), 0)
+		m.emit(bytecode.OpArrayAppend, 0, e, v, 0)
 	})
 	m.ret(m.load("o"))
 	p := a.program()

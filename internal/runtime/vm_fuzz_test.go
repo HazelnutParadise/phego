@@ -7,6 +7,7 @@ import (
 	"math/rand/v2"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 )
@@ -26,12 +27,12 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 		}
 		names := []string{"a", "b", "c", "d"}
 		v := func() uint32 { return vals[rng.IntN(nv)] }
-		// Two element locations, defined here so that every path may use
-		// them, and the Locations an instruction may write through.
+		// Two element locations. The verifier lets one be used only in the
+		// instructions that follow its FetchDim (elementSequence), so no
+		// other instruction names them, and no jump lands inside such a
+		// sequence (inside).
 		elems := []uint32{f.elem(), f.elem()}
-		for _, e := range elems {
-			f.fetch(e, f.loc(names[rng.IntN(4)]), bytecode.FetchUnset, "", v())
-		}
+		inside := map[uint32]bool{}
 		// Two iterator registers that only the iterator instructions write,
 		// so they hold arrays; now and then another value stands in, which
 		// the instructions must refuse.
@@ -42,22 +43,19 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 			}
 			return its[rng.IntN(2)]
 		}
-		anyLoc := func() uint32 {
-			if rng.IntN(3) == 0 {
-				return elems[rng.IntN(2)]
-			}
-			return f.loc(names[rng.IntN(4)])
-		}
-		start := f.pc()
-		n := 1 + rng.IntN(40)
-		var jumps []int
-		for i := 0; i < n; i++ {
-			f.at(uint32(2 + rng.IntN(50)))
-			dst := v()
-			switch rng.IntN(36) {
-			case 25:
-				// FetchDim in every mode and use, through a variable or an
-				// element, with a register or a variable key or none.
+		anyLoc := func() uint32 { return f.loc(names[rng.IntN(4)]) }
+		// elementSequence is what the compiler emits for an element write
+		// of one to three levels: FetchDim from a variable, FetchDim of the
+		// element for each further level, then one write through it.
+		elementSequence := func(dst uint32) {
+			e := elems[rng.IntN(2)]
+			bi := rng.IntN(4)
+			other := func() uint32 { return f.loc(names[(bi+1+rng.IntN(3))%4]) }
+			levels := 1 + rng.IntN(3)
+			terminal := rng.IntN(7)
+			from := f.loc(names[bi])
+			for l := 0; l < levels; l++ {
+				// Every mode and use, and an append now and then.
 				flags := bytecode.FetchFlags(rng.IntN(3))
 				if flags != bytecode.FetchUnset {
 					flags |= bytecode.FetchFlags(rng.IntN(3)) << 4
@@ -66,10 +64,71 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 					}
 				}
 				key := ""
-				if rng.IntN(2) == 0 {
+				if rng.IntN(2) == 0 && flags&bytecode.FetchAppend == 0 {
 					key = names[rng.IntN(4)]
 				}
-				f.fetch(elems[rng.IntN(2)], anyLoc(), flags, key, v())
+				pc := f.pc()
+				f.fetch(e, from, flags, key, v())
+				if l > 0 {
+					inside[pc] = true
+				}
+				from = e
+			}
+			mark := f.pc()
+			switch terminal {
+			case 0:
+				f.emit(bytecode.OpStore, 0, e, v(), 0)
+			case 1:
+				f.emit(bytecode.OpIncDec, uint16(1+rng.IntN(4)), dst, e, 0)
+			case 2:
+				flags, key, val := bytecode.ArrayWriteFlags(0), v(), v()
+				if rng.IntN(3) == 0 {
+					flags, key = flags|bytecode.KeyLocation, anyLoc()
+				}
+				if rng.IntN(3) == 0 {
+					flags, val = flags|bytecode.ValueLocation, other()
+				}
+				aux, ok := bytecode.ArraySetAux(flags, dst)
+				if !ok || rng.IntN(3) == 0 {
+					aux = uint16(flags)
+				}
+				f.emit(bytecode.OpArraySet, aux, e, key, val)
+			case 3:
+				if rng.IntN(2) == 0 {
+					f.emit(bytecode.OpArrayAppend, uint16(bytecode.ValueLocation), e, other(), 0)
+				} else {
+					f.emit(bytecode.OpArrayAppend, 0, e, v(), 0)
+				}
+			case 4:
+				if rng.IntN(2) == 0 {
+					f.emit(bytecode.OpArrayUnset, uint16(bytecode.KeyLocation), e, anyLoc(), 0)
+				} else {
+					f.emit(bytecode.OpArrayUnset, 0, e, v(), 0)
+				}
+			default:
+				// An assign-op: the value variable, the element, the
+				// operation, the store.
+				rv := v()
+				if rng.IntN(2) == 0 {
+					f.emit(bytecode.OpLoad, uint16(rng.IntN(2)), rv, other(), 0)
+				}
+				f.emit(bytecode.OpLoad, 1, dst, e, 0)
+				f.emit(bytecode.OpBinary, uint16(1+rng.IntN(20)), dst, dst, rv)
+				f.emit(bytecode.OpStore, 0, e, dst, 0)
+			}
+			for pc := mark; pc < f.pc(); pc++ {
+				inside[pc] = true
+			}
+		}
+		start := f.pc()
+		n := 1 + rng.IntN(40)
+		var jumps []int
+		for i := 0; i < n; i++ {
+			f.at(uint32(2 + rng.IntN(50)))
+			dst := v()
+			switch rng.IntN(36) {
+			case 25, 35:
+				elementSequence(dst)
 			case 26:
 				// Reads and writes through any Location.
 				switch l := anyLoc(); rng.IntN(6) {
@@ -139,8 +198,6 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 			case 34:
 				// A string to read and write offsets of.
 				f.store(names[rng.IntN(4)], f.k([]string{"", "abc", "0123456789"}[rng.IntN(3)]))
-			case 35:
-				f.emit(bytecode.OpMove, 0, elems[rng.IntN(2)], anyLoc(), 0)
 			case 0:
 				f.emit(bytecode.OpConst, 0, dst, f.a.constant(bytecode.Constant{Kind: bytecode.Int, Bits: uint64(rng.Int64N(100) - 50)}), 0)
 			case 1:
@@ -227,9 +284,15 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 		}
 		end := f.pc()
 		f.ret(v())
+		pick := func() uint32 {
+			for {
+				if pc := start + uint32(rng.IntN(int(end-start)+1)); !inside[pc] {
+					return pc
+				}
+			}
+		}
 		for _, pc := range jumps {
-			target := start + uint32(rng.IntN(int(end-start)+1))
-			other := start + uint32(rng.IntN(int(end-start)+1))
+			target, other := pick(), pick()
 			switch f.code[pc].Op {
 			case bytecode.OpIterNext:
 				f.code[pc].C = target
@@ -272,7 +335,13 @@ func FuzzVMRunsVerifiedImages(f *testing.F) {
 		for _, program := range []*Program{p, fusedProgram(p)} {
 			cfg := vmConfig(t, width)
 			cfg.Steps, cfg.Depth, cfg.Callbacks, cfg.OutputBytes = 3000, 16, 2000, 1<<16
+			// One step may copy or pad a string of up to 128 MiB, so a
+			// run of 3000 steps can take seconds: a deadline bounds it,
+			// and the copies must observe it.
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			cfg.Context = ctx
 			res := program.Run(cfg)
+			cancel()
 			if !vmRunEnds[res.End] {
 				t.Fatalf("undeclared end %v", res.End)
 			}

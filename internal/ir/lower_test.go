@@ -198,6 +198,35 @@ func TestHoistingFollowsDeclarationLevel(t *testing.T) {
 	}
 }
 
+// Literal.Uninterned follows how PHP 8.5.12 holds a short string: whether a
+// parameter default of "[1][5] ?: <expr>" warned on every call or only on
+// the first in the pinned image (2026-11-13; w17_stage2_probes_test.go).
+func TestStringLiteralsRecordInterning(t *testing.T) {
+	for src, want := range map[string]bool{
+		`"a"`: false, `'a'`: false, `b"a"`: false, `"$"`: false, `""`: false, "'\n'": false,
+		`"\n"`: true, `'\''`: true, `"\x41"`: true, `"\101"`: true, `"\u{41}"`: true, `"\\"`: true, `'\\'`: true, `"\$"`: true,
+		"<<<E\na\nE": false, "<<<E\n  a\n  E": false, "<<<E\nE": false, "<<<E\n\\n\nE": true,
+		"<<<'E'\na\nE": true, "<<<'E'\nE": false, "<<<'E'\nab\nE": true,
+		`"\n" . ""`: true, `"" . "\n"`: true, `"a" . ""`: false, `"" . 7`: false, `"" . -1`: true, `"" . 1.0`: true, `"" . true`: false,
+		`(string)"\n"`: true, `(string)7`: false, `~"a"`: false, `~""`: true, `"a" | "b"`: false, `"a" | ""`: true,
+		`["\t"][0]`: true, `true ? "\n" : 1`: true,
+	} {
+		// A parameter default is a constant expression, which is folded.
+		u, err := lowerSource("<?php function f($x = "+src+") {}", 64)
+		if err != nil {
+			t.Fatalf("%s: %v", src, err)
+		}
+		n := u.Functions[0].Params[0].Default
+		if n.Op != OpLiteral || n.Value.Kind != LitString {
+			t.Errorf("%s lowered to %s, not a folded string", src, n.Op)
+			continue
+		}
+		if n.Value.Uninterned != want {
+			t.Errorf("%s: Uninterned %v, want %v", src, n.Value.Uninterned, want)
+		}
+	}
+}
+
 func TestIntegerLiteralsFollowTheProfileWidth(t *testing.T) {
 	for _, c := range []struct {
 		width int
@@ -234,6 +263,23 @@ func TestCompileErrorsCarryPHPLines(t *testing.T) {
 		{"<?php\n$a = [\n 1,\n ...[]\n] = $b;", "Assignments can only happen to writable values", 3},
 		{"<?php\nisset(\n 1 + 1\n);", "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)", 3},
 		{"<?php\n$a?->b\n = 1;", "Can't use nullsafe operator in write context", 2},
+		// unset() rejects [] at every level of its target, after compiling
+		// the level's container: the line is the last key compiled before
+		// it, else the target's first line (pinned image, 2026-11-13).
+		{"<?php\nunset($a[][0]);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($a[0][][1]);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($b, $a[][]);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($x, \n$a[][0]);", "Cannot use [] for unsetting", 3},
+		{"<?php\nunset(\n$a\n[0]\n[\n]\n[1]);", "Cannot use [] for unsetting", 4},
+		{"<?php\nunset(\n$a\n[\n]\n[\n0\n]\n);", "Cannot use [] for unsetting", 3},
+		{"<?php\nunset($a[\n1][]);", "Cannot use [] for unsetting", 3},
+		{"<?php\nunset($a[\n$k][\n]);", "Cannot use [] for unsetting", 3},
+		{"<?php\nunset($a[\n$k][\n2][]);", "Cannot use [] for unsetting", 4},
+		{"<?php\nunset($a\n[\n]\n);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset(($a[])[0]);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($a[]->b);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($a->b[][0]);", "Cannot use [] for unsetting", 2},
+		{"<?php\nunset($a->\nb[]);", "Cannot use [] for unsetting", 3},
 	}
 	for _, c := range cases {
 		_, err := lowerSource(c.src, 64)

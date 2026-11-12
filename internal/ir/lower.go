@@ -194,6 +194,9 @@ type lowerer struct {
 	namedParamRefs map[*Func]map[string]bool
 	// inConstExpr is set while compiling a constant expression.
 	inConstExpr bool
+	// unsetBase marks the next dim or property lowered as a container
+	// level of an unset() target (markUnsetBase).
+	unsetBase bool
 	// decoded holds each decoded literal or string part's warnings.
 	decoded map[*frontend.Node][]Diagnostic
 	// foldLine is CG(zend_lineno) while constants are folded from syntax.

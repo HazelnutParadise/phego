@@ -180,13 +180,14 @@ type w17Observed struct {
 }
 
 // w17Execute compiles and runs one case as php -n /w/cases/<case>.php does.
-// A compile-time fatal error is rendered the way PHP 8.5.12 prints it.
+// A compile-time fatal error or a parse error is rendered the way PHP 8.5.12
+// prints it.
 func w17Execute(t *testing.T, e *Engine, name, src string, opts ...RunOption) w17Observed {
 	t.Helper()
 	ctx := context.Background()
 	p, err := e.Compile(ctx, "/w/cases/"+name+".php", src)
 	var pe *PHPError
-	if errors.As(err, &pe) && pe.Kind == CompileError {
+	if errors.As(err, &pe) && (pe.Kind == CompileError || pe.Kind == ParseError) {
 		var rc runConfig
 		rc.ini = defaultINI
 		for _, opt := range opts {
@@ -197,8 +198,11 @@ func w17Execute(t *testing.T, e *Engine, name, src string, opts ...RunOption) w1
 		obs := w17Observed{exitCode: 255, err: err, compileFatal: pe}
 		// PHP 8.5's fatal_error_backtraces (on by default) appends the
 		// backtrace after the location; while the file is compiled it is
-		// {main} alone.
+		// {main} alone. A parse error has no backtrace.
 		text := "Fatal error: " + pe.Message + " in " + pe.File + " on line " + strconv.Itoa(pe.Line) + "\nStack trace:\n#0 {main}\n"
+		if pe.Kind == ParseError {
+			text = "Parse error: " + pe.Message + " in " + pe.File + " on line " + strconv.Itoa(pe.Line) + "\n"
+		}
 		if rc.ini.display {
 			obs.stdout = []byte("\n" + text)
 		}

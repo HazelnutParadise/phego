@@ -169,6 +169,14 @@ type Literal struct {
 	Int   int64
 	Float float64
 	Str   string // bytes, not necessarily UTF-8
+	// Uninterned marks a string PHP holds in a new, refcounted
+	// zend_string rather than an interned one. It matters for strings of
+	// at most one byte, which PHP otherwise interns: the scanner allocates
+	// a string literal whose source spelling is longer than one byte (one
+	// written with an escape sequence) and any non-empty nowdoc, and
+	// folding keeps or creates such strings as PHP's operators do
+	// (internal/vm defaultMayBeInterned relies on it).
+	Uninterned bool
 }
 
 // NameKind distinguishes the three PHP symbol tables a name can address.

@@ -149,13 +149,20 @@ FetchDim 對應 ZEND_FETCH_DIM_W、ZEND_FETCH_DIM_RW 與 ZEND_FETCH_DIM_UNSET，
 
 FetchAppend 表示 `$a[]`，以下一個索引建立 null 元素，不發出未定義 key 的警告，索引被占用時拋出 `Cannot add element to the array as the next element is already occupied`。FetchUnset 不能和 FetchAppend 或用途同時出現。字串容器有 FetchAppend 時拋出 `[] operator not supported for strings`，否則先照字串位移規則檢查 key（FetchUnset 不發出數字開頭字串的警告，非法型別拋出 `Cannot unset string offsets`），再依用途拋出 `Cannot use string offset as an array`、`Cannot increment/decrement string offsets`（FetchForIncDec）或 `Cannot use assign-op operators with string offsets`（FetchForAssignOp）。
 
-元素位置是指向陣列元素的指標，和 PHP 的 INDIRECT 相同，只在取得後立刻使用才有 PHP 的值語意。編譯器在 FetchDim 與使用它的指令之間只放讀取其他運算元的指令。手寫的映像若在中間改寫或另外持有同一個陣列，VM 仍然不會存取陣列以外的記憶體，也不會重複釋放，但寫入可能落在已經移除的元素上，或被共用同一個陣列的值看見。frame 結束時元素位置一律清空。
+元素位置是指向陣列元素的指標，和 PHP 的 INDIRECT 相同，只在取得後立刻使用才有 PHP 的值語意，所以驗證器限制它的用法。只要有一條 FetchDim 以某個暫存器為 A，這個暫存器就是元素暫存器，只能出現在「從變數取元素的 FetchDim」之後緊接的一段直線指令裡。這段指令依序只能是：
+
+- 以自己為容器、寫回自己的 FetchDim，也就是下一層；
+- Const，以及讀取「不是這串元素起點變數」的 Load，用來在各層之間讀 key 與值；
+- 經由這個暫存器的 IncDec、Store、ArraySet、ArrayAppend 或 ArrayUnset 其中一條，這段到此結束。ArraySet 與 ArrayAppend 以 ValueLocation 自行讀取的值也必須是起點以外的變數，否則陣列會被存進自己的元素；
+- 或是複合指定：Load 這個暫存器，接著只有 Const 與 Binary，最後 Store 回這個暫存器，這段到此結束。
+
+跳躍目標、例外處理目標或其他任何指令都會結束這段，之後再用這個暫存器就是 `ErrInvalid`，錯誤位置是那條指令。元素暫存器也不能出現在這段以外的地方，包含 Local、Move、Drop、Push、Call、Isset、Unset、迭代器指令，或當作 key、值的 Location。是不是起點變數，以 Location 綁定的 local 判斷：被 Local 綁到兩個不同 local，或由 Local 以外的指令定義的 Location，一律視為可能是起點。這條規則逐條掃描所有指令，不可達的程式碼也一樣，所以不合規則的映像不會到達 VM。編譯器產生的序列都符合。被拒絕的寫法列在 `internal/bytecode/elements_test.go` 與 `internal/runtime/vm_stage2_elements_test.go`：在 `$b = $a` 或 foreach 之後經由先前的元素寫入、Unset 或 Isset 元素、把元素搬到別的暫存器、跳進一段的中間，以及把起點變數寫進自己的元素。目前 Load、Const 與 Binary 不會執行使用者程式碼；之後加入錯誤處理函式或物件時，這些指令可能改動同一個陣列，到時必須重新檢查這條規則。frame 結束時元素位置一律清空。
 
 IterInit、IterNext 與 IterKey 對應 by-value 的 foreach（ZEND_FE_RESET_R、ZEND_FE_FETCH_R）。IterInit 把 B 的陣列連同「下一個位置」放進迭代器暫存器 A，並持有這個陣列。它不複製陣列：之後對原變數的寫入會先和迭代器持有的陣列分離，所以迴圈看到的是開始時的陣列。B 不是陣列時發出 `foreach() argument must be of type array|object, T given`，清空 A 並跳到 C。IterNext 取出下一個元素：寫進 Value 暫存器 B，或在 IterLocation 時指定給 Location B（和 FE_FETCH_R 直接指定 CV 相同），沒有元素時跳到 C 且不寫入 B。IterKey 把 IterNext 剛取出的元素的 key 寫進 A。迭代器暫存器只應由這三條指令與 Drop 使用。離開迴圈（包含 `break`、`continue` 到外層）時以 Drop 釋放迭代器。IterNext 與 IterKey 用在不是迭代器的值上時，執行期以 Unsupported 結束，不是內部錯誤。迴圈的回邊照樣檢查取消，IterNext 跳過大量已刪除的元素時每 65,536 個檢查一次。
 
 ParamDefault 對應 ZEND_RECV_INIT。A 是參數暫存器。這次呼叫有傳第 A 個引數時跳到 B，否則順序執行預設值的程式碼，由它把值放進 A。編譯器的函式開頭是：每個 local 一條 Local，接著每個參數依序是 `Store Lk, r_i`，有預設值的參數前面多 `ParamDefault r_i, <那條 Store>` 與計算預設值的指令，這些指令都帶該參數的行號。函式的必要引數個數是「第一個被 ParamDefault 指名的參數」之前的參數數目。引數不足時在被呼叫函式的 frame 內拋出 `ArgumentCountError`，位置是接收第一個缺少參數的那條 Store，文字在有選擇性參數時用 `at least`，否則用 `exactly`。Call 仍然只接受個數恰好等於 Params 的引數，引數個數不同的呼叫由 CallValue 綁定。
 
-ParamDefault 也實作 RECV_INIT 的執行期快取。B 指向的 Store 若正是接收 A 的那條，執行時在這次呼叫沒傳引數的情況下，會把剛算出的預設值記在這次執行的快取裡，但只記 PHP 也會留下的值：null、bool、整數、浮點、空陣列，以及最多一個 byte 的字串（PHP 只留下沒有 refcount 的值）。同一次執行之後再省略這個引數時，ParamDefault 直接把快取的值放進 A 並跳到 B，預設值的程式碼不再執行，所以它的警告只出現在第一次。快取屬於單次執行，不放在共用的 Program 裡。字串是否被 PHP intern 只能由寫法判斷的預設值（由浮點或陣列轉成的字串，以及含跳脫字元的單一 byte 字串），編譯器在 Compile 時以 `parameter default whose string value PHP may intern` 拒絕。
+ParamDefault 也實作 RECV_INIT 的執行期快取。B 指向的 Store 若正是接收 A 的那條，執行時在這次呼叫沒傳引數的情況下，會把剛算出的預設值記在這次執行的快取裡，但只記 PHP 也會留下的值：null、bool、整數、浮點、空陣列，以及最多一個 byte 的字串（PHP 只留下沒有 refcount 的值）。同一次執行之後再省略這個引數時，ParamDefault 直接把快取的值放進 A 並跳到 B，預設值的程式碼不再執行，所以它的警告只出現在第一次。快取屬於單次執行，不放在共用的 Program 裡。字串是否被 PHP intern 無法由值判斷的預設值，編譯器在 Compile 時以 `parameter default whose string value PHP may intern` 拒絕，包含三種：由浮點或陣列轉成的字串；PHP 沒有 intern 的一個 byte 以內的 literal，也就是原始寫法超過一個 byte（含跳脫字元）的字串、非空的 nowdoc，以及由它們摺疊出來的值（HIR 的 `Literal.Uninterned`）；兩邊都可能是字串的 `|`、`&`、`^`，以及運算元可能是字串的 `~`，因為 PHP 只對兩個單一 byte 運算元的結果 intern。至少一邊確定不是字串時，結果是整數，照常接受。
 
 ArrayAdd 對應 ZEND_INIT_ARRAY／ZEND_ADD_ARRAY_ELEMENT，把一個陣列 literal 元素就地加入 A 暫存器裡的陣列。A 會被讀取且保持已定義，指令不重新定義它。沒有 AddKey 時 C 必須為零，值以下一個索引附加；有 AddKey 時 C 是 key，key 依 PHP 陣列 key 規則轉換（null 為空字串並發出 PHP 8.5 的棄用通知，浮點、bool 與數字字串轉成整數 key，陣列與物件拋出 `Cannot access offset of type T on array`）。AddKeyLocation 只能和 AddKey 一起出現，表示 C 是由指令自行讀取的 Location，未定義時只發出未定義變數警告並以空字串為 key，不發出 null key 的棄用通知。A 不是陣列的映像通過驗證，執行時以 Unsupported 結束，因為編譯器只會對 literal 自己的 NewArray 使用 ArrayAdd。
 

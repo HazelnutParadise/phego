@@ -1,0 +1,34 @@
+--- FAIL: TestW17Stage2Probes (0.00s)
+    --- FAIL: TestW17Stage2Probes/def_parse_error/display64 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_def_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_parse_error/log64 (0.00s)
+        w17_stage2_probes_test.go:1077: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_def_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_parse_error/display64 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_fe_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_parse_error/log64 (0.00s)
+        w17_stage2_probes_test.go:1077: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_fe_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/unset_append_inner/display64 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_inner.php: invalid bytecode at byte -1, function 0, instruction 3: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_inner/log64 (0.00s)
+        w17_stage2_probes_test.go:1077: run failed: phego: internal error while verifying /w/cases/s2_unset_append_inner.php: invalid bytecode at byte -1, function 0, instruction 3: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_lines.php: invalid bytecode at byte -1, function 0, instruction 5: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:1077: run failed: phego: internal error while verifying /w/cases/s2_unset_append_lines.php: invalid bytecode at byte -1, function 0, instruction 5: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_middle/display64 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_middle.php: invalid bytecode at byte -1, function 0, instruction 11: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_middle/log64 (0.00s)
+        w17_stage2_probes_test.go:1077: run failed: phego: internal error while verifying /w/cases/s2_unset_append_middle.php: invalid bytecode at byte -1, function 0, instruction 11: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/def_parse_error/display32 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_def_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_parse_error/display32 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: PHP ParseError: syntax error, unexpected token ")" in /w/cases/s2_fe_parse_error.php on line 4
+    --- FAIL: TestW17Stage2Probes/unset_append_inner/display32 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_inner.php: invalid bytecode at byte -1, function 0, instruction 3: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_lines.php: invalid bytecode at byte -1, function 0, instruction 5: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+    --- FAIL: TestW17Stage2Probes/unset_append_middle/display32 (0.00s)
+        w17_stage2_probes_test.go:1072: run failed: phego: internal error while verifying /w/cases/s2_unset_append_middle.php: invalid bytecode at byte -1, function 0, instruction 11: invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.579s
+FAIL

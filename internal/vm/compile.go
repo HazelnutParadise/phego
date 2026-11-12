@@ -139,13 +139,9 @@ type compiler struct {
 	funcIndex map[string]uint32
 	lines     uint32
 	line      int // line of the node being compiled, for internal errors
-	// source is the file's bytes, which the compiler reads only to tell
-	// how a parameter default was spelt (defaultMayBeInterned).
-	source []byte
 }
 
 func (c *compiler) compile(source []byte) (bytecode.Image, error) {
-	c.source = source
 	unit := c.unit
 	if uint64(len(unit.Functions))+1 > uint64(limits.MaxFunctions) {
 		return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}

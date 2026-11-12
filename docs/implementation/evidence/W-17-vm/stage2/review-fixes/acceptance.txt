@@ -1,0 +1,31 @@
+== gofmt -l .
+== CGO_ENABLED=0 go build ./...
+ok
+== CGO_ENABLED=0 go vet ./...
+ok
+== GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go vet ./...
+ok
+== CGO_ENABLED=0 go test -count=1 -timeout 300s ./...
+ok  	github.com/HazelnutParadise/phego	11.023s
+ok  	github.com/HazelnutParadise/phego/diag	0.846s
+ok  	github.com/HazelnutParadise/phego/diag/codes	0.551s
+?   	github.com/HazelnutParadise/phego/diag/codes/gen	[no test files]
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	2.416s
+ok  	github.com/HazelnutParadise/phego/internal/compat	0.569s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	0.855s
+ok  	github.com/HazelnutParadise/phego/internal/ir	2.035s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	0.528s
+ok  	github.com/HazelnutParadise/phego/internal/phpname	0.567s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.567s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	3.526s
+ok  	github.com/HazelnutParadise/phego/internal/profile	0.566s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	12.477s
+ok  	github.com/HazelnutParadise/phego/internal/vm	1.736s
+== CGO_ENABLED=0 go test -count=1 -v -run TestW17PHP8512Programs .
+    w17_differential_test.go:163: profile 64: 576 pass, 0 unsupported, 0 fail of 576
+    w17_differential_test.go:163: profile amd64: 576 pass, 0 unsupported, 0 fail of 576
+    w17_differential_test.go:163: profile 32: 576 pass, 0 unsupported, 0 fail of 576
+ok  	github.com/HazelnutParadise/phego	0.624s
+== python3 tools/validate_docs.py --no-write
+  "errors": []
+}

@@ -156,16 +156,21 @@ func (fc *fnCompiler) receive() {
 // for later calls only when it is not refcounted, so a default that warns
 // does so again on each call, or only on the first. The VM keeps a string
 // of at most one byte (vmDefaultCacheable), which is what PHP interns for a
-// string offset, a digit converted from an integer, a concatenation with an
-// empty side and a one-byte literal written without an escape. It cannot
-// tell three cases, which are refused instead:
+// string offset, a digit, "1" or "" converted from an integer, bool or
+// null, a concatenation with an empty side that keeps an interned operand,
+// a one-byte result of a string bitwise operator on one-byte operands, and
+// a literal the scanner interned (ir.Literal.Uninterned is false). It
+// cannot tell three cases, which are refused instead:
 //
 //   - a string converted from a float ("1" is not interned) or from an
 //     array ("Array" is): a concatenation, interpolation or string cast
 //     with an operand that may be a float or an array;
-//   - a one-byte literal written with an escape ("\n" is not interned):
-//     a one-byte string literal that may be the value, when the lines of
-//     the default contain a backslash.
+//   - a literal of at most one byte PHP holds uninterned: one written with
+//     an escape sequence or as a nowdoc, or folded from such a string;
+//   - the string form of |, &, ^ or ~ (bitwise_or_function and the others
+//     allocate the result unless both operands are one byte long), unless
+//     an operand is known not to be a string, which makes the result an
+//     integer.
 //
 // Keys of an element read or an array item, and the operands of
 // arithmetic, are never the value. The walk keeps its own stack.
@@ -179,17 +184,13 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 		n   *ir.Node
 		pos int
 	}
-	conv, floatOrArray, oneByte := false, false, false
-	first, last := d.Line, d.Line
+	conv, floatOrArray := false, false
 	for stack := []item{{d, value}}; len(stack) > 0; {
 		it := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 		n := it.n
 		if n == nil {
 			continue
-		}
-		if n.Line > 0 {
-			first, last = min(first, n.Line), max(last, n.Line)
 		}
 		kid := value
 		switch n.Op {
@@ -198,8 +199,8 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 				switch {
 				case n.Value.Kind == ir.LitFloat:
 					floatOrArray = true
-				case n.Value.Kind == ir.LitString && len(n.Value.Str) == 1:
-					oneByte = true
+				case n.Value.Kind == ir.LitString && len(n.Value.Str) <= 1 && n.Value.Uninterned:
+					return true
 				}
 			}
 		case ir.OpArray:
@@ -229,24 +230,51 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 				conv = true
 			} else {
 				kid = operand
-				if it.pos == value {
+				if it.pos == value && (n.Text == "float" || n.Text == "array") {
 					floatOrArray = true
 				}
 			}
 		case ir.OpBinary:
 			if n.Text == "." {
 				conv = true
-			} else {
-				kid = operand
-				if it.pos == value {
-					floatOrArray = true
+				break
+			}
+			kid = operand
+			if it.pos != value {
+				break
+			}
+			switch n.Text {
+			case "+", "-", "*", "/", "**":
+				floatOrArray = true
+			case "|", "&", "^":
+				if !notString(n.Kids[0], 0) && !notString(n.Kids[1], 0) {
+					return true
 				}
 			}
 		case ir.OpUnary:
 			kid = operand
-			if it.pos == value {
-				floatOrArray = true
+			if it.pos != value {
+				break
 			}
+			switch n.Text {
+			case "-", "+":
+				floatOrArray = true
+			case "~":
+				if !notString(n.Kids[0], 0) {
+					return true
+				}
+			}
+		case ir.OpLogical, ir.OpIsset, ir.OpEmpty:
+			kid = operand // converted to bool
+		case ir.OpTernary:
+			// The condition is converted to bool, except that ?: (no
+			// middle operand) yields it.
+			cond := operand
+			if n.Kids[1] == nil {
+				cond = it.pos
+			}
+			stack = append(stack, item{n.Kids[0], cond}, item{n.Kids[1], it.pos}, item{n.Kids[2], it.pos})
+			continue
 		default:
 			if it.pos == operand {
 				kid = operand
@@ -256,26 +284,35 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 			stack = append(stack, item{k, kid})
 		}
 	}
-	if conv && floatOrArray {
-		return true
-	}
-	return oneByte && fc.linesHaveBackslash(first, last)
+	return conv && floatOrArray
 }
 
-// linesHaveBackslash reports whether source lines first..last contain a
-// backslash.
-func (fc *fnCompiler) linesHaveBackslash(first, last int) bool {
-	line := 1
-	for _, b := range fc.c.source {
-		if line > last {
-			break
+// notString reports whether n is known never to evaluate to a string: a
+// literal of another type, an array, arithmetic, a comparison, a logical
+// operator, a cast to another type, or a bitwise operator with such an
+// operand (whose result is then an integer). An operand nested deeper than
+// a few levels is not examined.
+func notString(n *ir.Node, depth int) bool {
+	if n == nil || depth > 16 {
+		return false
+	}
+	switch n.Op {
+	case ir.OpLiteral:
+		return n.Value != nil && n.Value.Kind != ir.LitString
+	case ir.OpArray, ir.OpLogical, ir.OpIsset, ir.OpEmpty, ir.OpInstanceof:
+		return true
+	case ir.OpCast:
+		return n.Text != "string"
+	case ir.OpUnary:
+		return n.Text != "~" || notString(n.Kids[0], depth+1)
+	case ir.OpBinary:
+		switch n.Text {
+		case ".", "|>":
+			return false
+		case "|", "&", "^":
+			return notString(n.Kids[0], depth+1) || notString(n.Kids[1], depth+1)
 		}
-		if b == '\\' && line >= first {
-			return true
-		}
-		if b == '\n' {
-			line++
-		}
+		return true
 	}
 	return false
 }

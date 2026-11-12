@@ -1,0 +1,23 @@
+--- FAIL: TestVMStringOffsetAppendsAreLinear (14.69s)
+    vm_stage2_offset_test.go:59: 400 000 appends took 4.16259575s, 100 000 took 308.700875ms: the cost grows faster than linearly
+FAIL
+exit status 1
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	15.652s
+FAIL
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMStringOffsetAppend-8      	       3	1118483931 ns/op	20721924285 B/op	  201155 allocs/op
+BenchmarkVMStringOffsetOverwrite-8   	       3	2181767430 ns/op	40960452722 B/op	  204026 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	13.610s
+=== RUN   TestZZOffsetPadCancelLatency
+    zz_latency_scratch_test.go:26: end Cancelled after 244.218542ms total; 238.230917ms after cancel
+    zz_latency_scratch_test.go:26: end Cancelled after 217.152667ms total; 210.903292ms after cancel
+    zz_latency_scratch_test.go:26: end Cancelled after 210.835292ms total; 204.4895ms after cancel
+    zz_latency_scratch_test.go:26: end Cancelled after 211.864875ms total; 205.552625ms after cancel
+    zz_latency_scratch_test.go:26: end Cancelled after 212.472709ms total; 206.391334ms after cancel
+--- PASS: TestZZOffsetPadCancelLatency (1.16s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	1.751s

@@ -364,27 +364,109 @@ func (s *vmState) stringOffsetSet(f *vmFrame, in *vmInstr, slot *value) error {
 	if off >= vmStringOffsetLimit {
 		return s.x.fail(endLimit, &LimitError{Resource: "memory", Limit: vmStringOffsetLimit, Used: n, Requested: off + 1 - n})
 	}
-	// A large string is copied by this one instruction: observe a stop first.
-	if max(n, off+1) > vmCopyChunk && s.poll() {
+	out, ok := s.offsetString(str, off, text[0], s.poll)
+	if !ok {
 		return nil
 	}
-	var out strings.Builder
-	out.Grow(int(max(n, off+1)))
-	if off < n {
-		out.WriteString(str[:off])
-		out.WriteByte(text[0])
-		out.WriteString(str[off+1:])
-	} else {
-		out.WriteString(str)
-		for i := n; i < off; i++ {
-			out.WriteByte(' ')
-		}
-		out.WriteByte(text[0])
-	}
-	if err := s.h.assign(slot, stringValue(out.String())); err != nil {
+	if err := s.h.assign(slot, stringValue(out)); err != nil {
 		return err
 	}
 	return s.arraySetResult(f, in, stringValue(text[:1]))
+}
+
+// vmSpaces is a block of the padding a string offset write appends.
+var vmSpaces = strings.Repeat(" ", 4096)
+
+// offsetString is str with the byte b at offset off (0 <= off <
+// vmStringOffsetLimit), padded with spaces when off is past its end. ok is
+// false when poll reports a host stop, which it is asked before a large
+// result is allocated and after every vmCopyChunk bytes copied or padded.
+//
+// PHP writes in place when the string has one owner; Go strings are
+// immutable and a value carries no owner count, so a write builds a new
+// string. A write that extends the string the previous one produced costs
+// only the bytes it adds: that string's bytes are the start of
+// offsetBuf, and strings.Builder only ever appends past the bytes of the
+// strings it has returned, so every holder of an earlier result keeps its
+// bytes. A write inside the string still copies it.
+func (s *vmState) offsetString(str string, off int64, b byte, poll func() bool) (out string, ok bool) {
+	n := int64(len(str))
+	need := max(n, off+1)
+	ob := &s.offsetBuf
+	// str == s.offsetLast compares the data pointers first, so the usual
+	// case, the string the last write produced, costs nothing; a different
+	// string of the same length costs at most the copy it saves.
+	extend := off >= n && s.offsetValid && int64(ob.Cap()) >= need && str == s.offsetLast
+	s.offsetValid, s.offsetLast = false, ""
+	if !extend {
+		if need > vmCopyChunk && poll() {
+			return "", false
+		}
+		// Reset leaves the bytes of the strings already returned alone.
+		ob.Reset()
+		size := need
+		if off >= n {
+			// Room to append as much again, so a run of appends copies
+			// the string a logarithmic number of times.
+			size = min(max(need, 2*n), vmStringOffsetLimit)
+		}
+		ob.Grow(int(size))
+	}
+	w := chunkWriter{b: ob, poll: poll}
+	if !extend {
+		if !w.write(str[:min(off, n)]) {
+			return "", false
+		}
+	}
+	if off > n && !w.pad(off-n) {
+		return "", false
+	}
+	ob.WriteByte(b)
+	if off < n-1 && !w.write(str[off+1:]) {
+		return "", false
+	}
+	s.offsetValid, s.offsetLast = true, ob.String()
+	return s.offsetLast, true
+}
+
+// chunkWriter appends to a strings.Builder, calling poll after every
+// vmCopyChunk bytes and stopping when it reports a host stop.
+type chunkWriter struct {
+	b     *strings.Builder
+	poll  func() bool
+	since int
+}
+
+func (w *chunkWriter) room() bool {
+	if w.since < vmCopyChunk {
+		return true
+	}
+	w.since = 0
+	return !w.poll()
+}
+
+func (w *chunkWriter) write(p string) bool {
+	for len(p) > 0 {
+		if !w.room() {
+			return false
+		}
+		k := min(len(p), vmCopyChunk-w.since)
+		w.b.WriteString(p[:k])
+		p, w.since = p[k:], w.since+k
+	}
+	return true
+}
+
+func (w *chunkWriter) pad(n int64) bool {
+	for n > 0 {
+		if !w.room() {
+			return false
+		}
+		k := int(min(n, int64(len(vmSpaces)), int64(vmCopyChunk-w.since)))
+		w.b.WriteString(vmSpaces[:k])
+		n, w.since = n-int64(k), w.since+k
+	}
+	return true
 }
 
 // arraySetResult stores the value of the assignment expression in the
@@ -514,8 +596,9 @@ type vmCachedDefault struct {
 // That is null, bool, int, float, the empty array and an interned string,
 // which for the defaults the compiler lets through is one of at most one
 // byte (internal/vm refuses a default whose string result PHP may or may
-// not intern; see stage2.go there). A default PHP folded when it compiled
-// the function has no diagnostics, so whether it is kept is invisible.
+// not intern; see defaultMayBeInterned in internal/vm/function.go). A
+// default PHP folded when it compiled the function has no diagnostics, so
+// whether it is kept is invisible.
 func vmDefaultCacheable(v value) (vmCachedDefault, bool) {
 	switch v.kind {
 	case valueNull, valueBool, valueInt, valueFloat:
