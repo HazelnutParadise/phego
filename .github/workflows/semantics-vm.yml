@@ -47,4 +47,5 @@ jobs:
       - name: Compare with Phego
         env:
           CGO_ENABLED: '0'
-        run: go test -count=1 -run '^TestW17PHP8512Programs$/^${{ matrix.profile }}$' -v .
+          PHEGO_W17_PROFILE: ${{ matrix.profile }}
+        run: go test -count=1 -run '^TestW17PHP8512Programs$' -v .

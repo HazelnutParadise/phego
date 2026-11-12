@@ -102,12 +102,27 @@ func localIndexReg(img bytecode.Image, fn int, name string) (uint32, bool) {
 	return 0, false
 }
 
-// readsVar matches a warning read of $name: Load with Aux 0 or IncDec.
+// readsVar matches a warning read of $name: Load with Aux 0, IncDec, or an
+// array instruction reading the variable's Location itself.
 func readsVar(name string) func(bytecode.Image, int, int, bytecode.Instruction) bool {
 	return func(img bytecode.Image, fn, pc int, in bytecode.Instruction) bool {
 		l, ok := localIndexReg(img, fn, name)
-		return ok && ((in.Op == bytecode.OpLoad && in.Aux == 0 && in.B == l) || (in.Op == bytecode.OpIncDec && in.B == l))
+		return ok && ((in.Op == bytecode.OpLoad && in.Aux == 0 && in.B == l) || (in.Op == bytecode.OpIncDec && in.B == l) || locationRead(in, l))
 	}
+}
+
+// locationRead reports whether an array instruction reads the variable of
+// Location register l itself (ArrayWriteFlags, AddKeyLocation).
+func locationRead(in bytecode.Instruction, l uint32) bool {
+	switch flags := bytecode.ArrayWriteFlags(in.Aux); in.Op {
+	case bytecode.OpArraySet:
+		return (flags&bytecode.KeyLocation != 0 && in.B == l) || (flags&bytecode.ValueLocation != 0 && in.C == l)
+	case bytecode.OpArrayAppend:
+		return flags&bytecode.ValueLocation != 0 && in.B == l
+	case bytecode.OpArrayAdd:
+		return bytecode.ArrayAddFlags(in.Aux)&bytecode.AddKeyLocation != 0 && in.C == l
+	}
+	return false
 }
 
 func incDecOf(name string, op bytecode.IncDecOp) func(bytecode.Image, int, int, bytecode.Instruction) bool {
@@ -275,6 +290,10 @@ var oracleCases = []struct {
 		"Warning: Undefined variable $u1 in /w/x.php on line 3\n", []sel{{"{main}", readsVar("u1")}}},
 	{"assignment split around =", "<?php\n$z\n    =\n    $u3;\n",
 		"Warning: Undefined variable $u3 in /w/x.php on line 2\n", []sel{{"{main}", readsVar("u3")}}},
+	{"coalesce assignment reads a plain value on the target's line", "<?php\n$a\n ??=\n\n $u;\n",
+		"Warning: Undefined variable $u in /w/x.php on line 2\n", []sel{{"{main}", readsVar("u")}}},
+	{"coalesce assignment of an expression keeps its line", "<?php\n$c\n ??=\n\n -$u;\n",
+		"Warning: Undefined variable $u in /w/x.php on line 5\n", []sel{{"{main}", readsVar("u")}}},
 	{"heredoc parts", "<?php\n$h = <<<EOT\nfirst $u25\nsecond $u26\nEOT;\n",
 		"Warning: Undefined variable $u25 in /w/x.php on line 3\nWarning: Undefined variable $u26 in /w/x.php on line 4\n",
 		[]sel{{"{main}", readsVar("u25")}, {"{main}", readsVar("u26")}}},

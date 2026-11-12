@@ -125,7 +125,12 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		return roleLocation, roleLocal, roleNone
 	case bytecode.OpLoad, bytecode.OpIsset, bytecode.OpIncDec:
 		return roleValue, roleLocation, roleNone
-	case bytecode.OpStore, bytecode.OpArrayAppend, bytecode.OpArrayUnset:
+	case bytecode.OpStore, bytecode.OpArrayUnset:
+		return roleLocation, roleValue, roleNone
+	case bytecode.OpArrayAppend:
+		if bytecode.ArrayWriteFlags(in.Aux)&bytecode.ValueLocation != 0 {
+			return roleLocation, roleLocation, roleNone
+		}
 		return roleLocation, roleValue, roleNone
 	case bytecode.OpBinary, bytecode.OpArrayGet, bytecode.OpArrayIsset:
 		return roleValue, roleValue, roleValue
@@ -150,7 +155,24 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 	case bytecode.OpDrop:
 		return roleAny, roleNone, roleNone
 	case bytecode.OpArraySet:
-		return roleLocation, roleValue, roleValue
+		b, c = roleValue, roleValue
+		if bytecode.ArrayWriteFlags(in.Aux)&bytecode.KeyLocation != 0 {
+			b = roleLocation
+		}
+		if bytecode.ArrayWriteFlags(in.Aux)&bytecode.ValueLocation != 0 {
+			c = roleLocation
+		}
+		return roleLocation, b, c
+	case bytecode.OpArrayAdd:
+		// A is read and updated in place, never redefined, so liveness keeps
+		// the array alive from NewArray to its last use.
+		switch flags := bytecode.ArrayAddFlags(in.Aux); {
+		case flags&bytecode.AddKeyLocation != 0:
+			return roleValue, roleValue, roleLocation
+		case flags&bytecode.AddKey != 0:
+			return roleValue, roleValue, roleValue
+		}
+		return roleValue, roleValue, roleNone
 	case bytecode.OpExit:
 		if in.Aux == 1 {
 			return roleValue, roleNone, roleNone

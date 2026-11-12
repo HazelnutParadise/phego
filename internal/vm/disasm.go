@@ -21,7 +21,7 @@ var opNames = [...]string{
 	bytecode.OpEndFinally: "EndFinally", bytecode.OpUnary: "Unary", bytecode.OpCast: "Cast",
 	bytecode.OpIncDec: "IncDec", bytecode.OpArraySet: "ArraySet", bytecode.OpArrayAppend: "ArrayAppend",
 	bytecode.OpArrayUnset: "ArrayUnset", bytecode.OpIsset: "Isset", bytecode.OpArrayIsset: "ArrayIsset",
-	bytecode.OpUnset: "Unset", bytecode.OpExit: "Exit",
+	bytecode.OpUnset: "Unset", bytecode.OpExit: "Exit", bytecode.OpArrayAdd: "ArrayAdd",
 }
 
 var binaryNames = [...]string{

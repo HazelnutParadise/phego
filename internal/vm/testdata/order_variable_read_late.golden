@@ -26,7 +26,6 @@ func 0 "{main}" params=0 locals=2 registers=6 maxstack=0
   8: Binary Add 2 4 5 ; line 3
   9: Output 0 2 0 0 ; line 3
   10: IncDec PostInc 2 0 0 ; line 4
-  11: Load 0 3 0 0 ; line 4
-  12: ArraySet 0 1 3 2 ; line 4
-  13: Const 0 2 1 0 ; line 5 ; null
-  14: Return 0 2 0 0 ; line 5
+  11: ArraySet 2 1 0 2 ; line 4
+  12: Const 0 2 1 0 ; line 5 ; null
+  13: Return 0 2 0 0 ; line 5

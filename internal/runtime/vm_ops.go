@@ -62,12 +62,16 @@ func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 }
 
 // writable prepares the container of an element write: undefined and null
-// become an array silently, false with PHP 8.1's deprecation; true, numbers
-// and strings fail as zend_fetch_dimension_address_W does.
+// become an empty array silently, false with PHP 8.1's deprecation; true,
+// numbers and strings fail as zend_fetch_dimension_address_W does. The array
+// exists before the key is read ($n = null; $n[$n] = 1 is a TypeError, as the
+// pinned PHP 8.5.12 prints "Cannot access offset of type array on array").
 func (s *vmState) writable(slot *value, appending bool) error {
 	switch c := slot.deref(); c.kind {
-	case valueArray, valueUndefined, valueNull:
+	case valueArray:
 		return nil
+	case valueUndefined, valueNull:
+		return s.h.assign(slot, s.h.newArrayValue())
 	case valueBool:
 		if c.boolean {
 			break
@@ -77,7 +81,7 @@ func (s *vmState) writable(slot *value, appending bool) error {
 		if s.stopped() {
 			return nil
 		}
-		return s.h.assign(slot, nullValue())
+		return s.h.assign(slot, s.h.newArrayValue())
 	case valueString:
 		if appending {
 			return &Throwable{"Error", "[] operator not supported for strings"}
@@ -89,6 +93,35 @@ func (s *vmState) writable(slot *value, appending bool) error {
 	return &Throwable{"Error", "Cannot use a scalar value as an array"}
 }
 
+// readVar reads the variable a Location register names, as a CV operand of a
+// Zend opcode: an undefined variable warns and reads as null. undefined
+// reports that it was undefined.
+func (s *vmState) readVar(f *vmFrame, r uint32) (v value, undefined bool, err error) {
+	slot, err := s.slot(f, r)
+	if err != nil {
+		return value{}, false, err
+	}
+	if v = slot.deref(); v.kind != valueUndefined {
+		return v, false, nil
+	}
+	s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, r))
+	return nullValue(), true, nil
+}
+
+// operandValue is a Value register operand; undefined reads as null.
+func operandValue(regs []value, r uint32) value {
+	if v := regs[r]; v.kind != valueUndefined {
+		return v
+	}
+	return nullValue()
+}
+
+// arraySet is ZEND_ASSIGN_DIM on a variable: the container check (with PHP
+// 8.1's false deprecation), then the key, then the OP_DATA value, then the
+// write. A key or value given as a Location (bytecode.KeyLocation,
+// bytecode.ValueLocation) is read at that point, so its undefined-variable
+// warning follows the container's errors and the key's conversion
+// diagnostics exactly as in PHP.
 func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	slot, err := s.slot(f, in.a)
 	if err != nil {
@@ -97,16 +130,55 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	if err := s.writable(slot, false); err != nil || s.stopped() {
 		return err
 	}
-	k, v := f.regs[in.b], f.regs[in.c]
-	if k.kind == valueUndefined {
-		k = nullValue()
+	flags := bytecode.ArrayWriteFlags(in.aux)
+	var k value
+	if flags&bytecode.KeyLocation == 0 {
+		k = operandValue(f.regs, in.b)
+	} else if k, _, err = s.readVar(f, in.b); err != nil || s.stopped() {
+		return err
 	}
-	if v.kind == valueUndefined {
+	if flags&bytecode.ValueLocation == 0 {
+		return s.h.setElement(slot, k, operandValue(f.regs, in.c))
+	}
+	// The value is taken now but its warning waits for the key conversion,
+	// where zend_fetch_dimension_address_inner_W ends and OP_DATA is read.
+	// Holding it while the element is created separates an array written
+	// into its own element, as storeElement does.
+	vs, err := s.slot(f, in.c)
+	if err != nil {
+		return err
+	}
+	v := vs.deref()
+	undefined := v.kind == valueUndefined
+	if undefined {
 		v = nullValue()
 	}
-	return s.h.setElement(slot, k, v)
+	if err := s.h.runtimeCheck(); err != nil {
+		return err
+	}
+	if err := s.h.claimValues(*slot, k, v); err != nil {
+		return err
+	}
+	if err := ownArrayLocation(slot); err != nil {
+		return err
+	}
+	retain(v)
+	e, err := s.h.element(slot, k)
+	if err == nil && undefined {
+		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.c))
+	}
+	if err == nil && !s.stopped() {
+		err = s.h.assign(e, v)
+	}
+	if rerr := s.h.release(v); err == nil {
+		err = rerr
+	}
+	return err
 }
 
+// arrayAppend is ZEND_ASSIGN_DIM without a key: the container check, then
+// the OP_DATA value, then the insertion, which fails when the next index is
+// taken.
 func (s *vmState) arrayAppend(f *vmFrame, in *vmInstr) error {
 	slot, err := s.slot(f, in.a)
 	if err != nil {
@@ -115,17 +187,52 @@ func (s *vmState) arrayAppend(f *vmFrame, in *vmInstr) error {
 	if err := s.writable(slot, true); err != nil || s.stopped() {
 		return err
 	}
-	v := f.regs[in.b]
-	if v.kind == valueUndefined {
-		v = nullValue()
-	}
-	if err := s.h.appendValue(slot, v); err != nil {
-		if err == ErrNextElementOccupied {
-			return &Throwable{"Error", err.Error()}
-		}
+	var v value
+	if bytecode.ArrayWriteFlags(in.aux)&bytecode.ValueLocation == 0 {
+		v = operandValue(f.regs, in.b)
+	} else if v, _, err = s.readVar(f, in.b); err != nil || s.stopped() {
 		return err
 	}
-	return nil
+	return nextElementError(s.h.appendValue(slot, v))
+}
+
+// nextElementError turns a full next index into PHP's Error.
+func nextElementError(err error) error {
+	if err == ErrNextElementOccupied {
+		return &Throwable{"Error", err.Error()}
+	}
+	return err
+}
+
+// arrayAdd is ZEND_INIT_ARRAY / ZEND_ADD_ARRAY_ELEMENT: one element of an
+// array literal added in place to the array register A, whose value was read
+// before the key. Keys follow ADD_ARRAY_ELEMENT rather than ASSIGN_DIM: an
+// undefined variable (bytecode.AddKeyLocation) warns and is the key "" with
+// no null-offset deprecation; null, floats, bools, numeric strings, arrays
+// and objects convert as zend_hash keys do (arrayKey).
+func (s *vmState) arrayAdd(f *vmFrame, in *vmInstr) error {
+	arr := &f.regs[in.a]
+	if arr.kind != valueArray {
+		// Compiled code adds only to the NewArray of its literal; the
+		// verifier does not track value types, so other images can get here.
+		return s.unsupported("adding an array literal element to a non-array value")
+	}
+	v := operandValue(f.regs, in.b)
+	flags := bytecode.ArrayAddFlags(in.aux)
+	if flags&bytecode.AddKey == 0 {
+		return nextElementError(s.h.appendValue(arr, v))
+	}
+	if flags&bytecode.AddKeyLocation == 0 {
+		return s.h.setElement(arr, operandValue(f.regs, in.c), v)
+	}
+	k, undefined, err := s.readVar(f, in.c)
+	if err != nil || s.stopped() {
+		return err
+	}
+	if undefined {
+		k = stringValue("")
+	}
+	return s.h.setElement(arr, k, v)
 }
 
 // arrayUnset is ZEND_UNSET_DIM.

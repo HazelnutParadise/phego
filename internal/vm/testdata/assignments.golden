@@ -45,6 +45,5 @@ func 0 "{main}" params=0 locals=6 registers=9 maxstack=0
   15: Const 0 7 0 0 ; line 5 ; int 1
   16: Binary Add 8 6 7 ; line 5
   17: Store 0 4 8 0 ; line 5
-  18: Load 0 6 0 0 ; line 6
-  19: Const 0 6 3 0 ; line 7 ; null
-  20: Return 0 6 0 0 ; line 7
+  18: Const 0 6 3 0 ; line 7 ; null
+  19: Return 0 6 0 0 ; line 7

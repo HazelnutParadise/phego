@@ -31,7 +31,7 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 		for i := 0; i < n; i++ {
 			f.at(uint32(2 + rng.IntN(50)))
 			dst := v()
-			switch rng.IntN(20) {
+			switch rng.IntN(24) {
 			case 0:
 				f.emit(bytecode.OpConst, 0, dst, f.a.constant(bytecode.Constant{Kind: bytecode.Int, Bits: uint64(rng.Int64N(100) - 50)}), 0)
 			case 1:
@@ -81,6 +81,25 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 					f.emit(bytecode.OpConst, 0, dst, f.a.str(name), 0)
 					f.emit(bytecode.OpCallValue, 0, v(), dst, uint32(argc))
 				}
+			case 20:
+				if arr := v(); rng.IntN(2) == 0 {
+					f.emit(bytecode.OpArrayAdd, 0, arr, v(), 0)
+				} else {
+					f.add(arr, v(), v())
+				}
+			case 21:
+				f.addVarKey(v(), names[rng.IntN(4)], v())
+			case 22:
+				key, val := "", ""
+				if rng.IntN(2) == 0 {
+					key = names[rng.IntN(4)]
+				}
+				if rng.IntN(2) == 0 {
+					val = names[rng.IntN(4)]
+				}
+				f.setVars(names[rng.IntN(4)], key, v(), val, v())
+			case 23:
+				f.pushVar(names[rng.IntN(4)], names[rng.IntN(4)])
 			case 19:
 				if rng.IntN(4) == 0 {
 					f.exitWith(v())

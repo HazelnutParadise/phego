@@ -532,10 +532,6 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"builtin function strlen()", "namespace A;\necho 1;\necho strlen('x');", 4},
 		{"builtin function strlen()", "namespace A;\necho 1;\necho \\strlen('x');", 4},
 		{"builtin function func_get_args()", "function f() { return func_get_args(); }", 2},
-		// PHP: "Fatal error: Cannot redeclare function strlen()"; ir.Lower
-		// accepts it, so the compiler refuses rather than call the user one.
-		{"declaration of builtin function strlen()", "echo 1;\nfunction strlen($s) { return 1; }", 3},
-		{"declaration of builtin function STRLEN()", "echo 1;\nfunction STRLEN($s) { return 1; }", 3},
 	}
 	if len(cases) < 30 {
 		t.Fatal("too few cases")
@@ -558,6 +554,54 @@ func TestUnsupportedConstructs(t *testing.T) {
 				t.Fatalf("Error() = %q, want %q", ue.Error(), want)
 			}
 		})
+	}
+}
+
+// A hoisted declaration of a builtin's name is PHP's compile-time fatal
+// error, reported before any unsupported construct. The pinned PHP 8.5.12
+// image printed, for each source (php -n, display_errors=1):
+//
+//	"<?php\nfunction strlen() {}\n"            Fatal error: Cannot redeclare function strlen() in /w/r1.php on line 2
+//	"<?php\necho \"a\";\nfunction\n STRLEN\n (\n) {}\n"  Fatal error: Cannot redeclare function STRLEN() in /w/r2.php on line 3
+//	"<?php\nfunction var_dump($x) {}\n"        Fatal error: Cannot redeclare function var_dump() in /w/r5.php on line 2
+//
+// each followed by "Stack trace:\n#0 {main}" and exit code 255, with no
+// output from the echo. Declared in a namespace, strlen is allowed: the
+// namespaced function ran and printed 5.
+func TestCompileErrors(t *testing.T) {
+	for _, tc := range []struct {
+		name, src, msg string
+		line           int
+	}{
+		{"lower case", "<?php\nfunction strlen() {}\n", "Cannot redeclare function strlen()", 2},
+		{"declared spelling on the keyword line", "<?php\necho \"a\";\nfunction\n STRLEN\n (\n) {}\n", "Cannot redeclare function STRLEN()", 3},
+		{"other builtin", "<?php\nfunction var_dump($x) {}\n", "Cannot redeclare function var_dump()", 2},
+		{"ahead of an unsupported construct", "<?php\nforeach ($a as $b) {}\nfunction f() { foreach ($a as $b) {} }\nfunction Count() {}\n", "Cannot redeclare function Count()", 4},
+		{"first declaration in order", "<?php\nfunction printf() {}\nfunction strlen() {}\n", "Cannot redeclare function printf()", 2},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			img, err := compileWidth(t, tc.src, 64, testFile)
+			var ce *CompileError
+			if !errors.As(err, &ce) {
+				t.Fatalf("got image %v, err %v; want CompileError", len(img.Functions), err)
+			}
+			if *ce != (CompileError{Message: tc.msg, File: testFile, Line: tc.line}) {
+				t.Fatalf("got %+v, want %q on line %d", ce, tc.msg, tc.line)
+			}
+			if want := testFile + ":" + itoa(tc.line) + ": " + tc.msg; ce.Error() != want {
+				t.Fatalf("Error() = %q, want %q", ce.Error(), want)
+			}
+			if !reflectZeroImage(img) {
+				t.Fatal("a failed compilation returned a partial image")
+			}
+		})
+	}
+	img, err := compileWidth(t, "<?php\nnamespace N;\nfunction strlen() { return 5; }\necho strlen(), \"\\n\";\n", 64, testFile)
+	if err != nil {
+		t.Fatalf("namespaced strlen: %v", err)
+	}
+	if out, _ := runMini(t, img); out != "5\n" {
+		t.Fatalf("namespaced strlen printed %q, want \"5\\n\"", out)
 	}
 }
 
