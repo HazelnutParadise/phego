@@ -349,7 +349,10 @@ func (e *Engine) compileTree(ctx context.Context, name, source string, tree *fro
 	case err != nil:
 		return nil, internalError("lowering "+name, err)
 	}
-	image, err := vm.Compile(ctx, unit, []byte(source))
+	image, err := vm.CompileWith(ctx, unit, []byte(source), vm.Options{HostFunction: func(lower string) bool {
+		_, registered := e.host[lower]
+		return registered
+	}})
 	var vu *vm.UnsupportedError
 	var vc *vm.CompileError
 	switch {

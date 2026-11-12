@@ -141,3 +141,31 @@ func TestNonASCIICaseDeclaresTwoFunctions(t *testing.T) {
 		t.Fatalf("output %q %v %v", r.Output, r.Status, err)
 	}
 }
+
+// A lone \r ends a line, as do \n and \r\n. The expected bytes are PHP
+// 8.5.12's (php -n in the pinned arm64 image) for this source saved as
+// /w/cr.php.
+func TestLoneCarriageReturnsEndLines(t *testing.T) {
+	e := mustEngine(t, Config{})
+	src := "<?php\recho \"a\";\recho $u;\r\necho \"b\";\recho $v;\r"
+	r, err := e.Run(context.Background(), mustCompile(t, e, "/w/cr.php", src))
+	want := "a\nWarning: Undefined variable $u in /w/cr.php on line 3\nb\nWarning: Undefined variable $v in /w/cr.php on line 5\n"
+	if !ranToCompletion(r, err) || string(r.Output) != want {
+		t.Fatalf("output %q %v\nwant %q", r.Output, err, want)
+	}
+}
+
+// A call to a function the host registered is reported as unsupported at
+// Compile; it is not compiled as a call to an undefined function, which
+// would skip its arguments and report PHP's undefined-function error.
+func TestHostFunctionCallIsUnsupportedNotUndefined(t *testing.T) {
+	e := mustEngine(t, Config{HostFunctions: []HostFunction{{Name: "Host_Add", MinArgs: 2, MaxArgs: 2,
+		Func: func(HostContext, []Value) (Value, error) { return Value{}, nil }}}})
+	for _, src := range []string{"<?php\necho 1;\nhost_add(1, 2);\n", "<?php\nnamespace ns;\necho 1;\nHOST_ADD(1, 2);\n"} {
+		_, err := e.Compile(context.Background(), "/w/h.php", src)
+		var ue *UnsupportedError
+		if !errors.As(err, &ue) || !strings.HasPrefix(ue.Feature, "calling host function ") || ue.File != "/w/h.php" || ue.Line == 0 {
+			t.Fatalf("%q: %#v", src, err)
+		}
+	}
+}

@@ -706,6 +706,9 @@ func (fc *fnCompiler) call(n *ir.Node) operand {
 // declarations, include or eval), so the name cannot become defined later.
 func (fc *fnCompiler) undefinedCall(n *ir.Node) operand {
 	for _, name := range []string{n.Name.Resolved, n.Name.Fallback} {
+		if name != "" && fc.c.host != nil && fc.c.host(phpname.Lower(name)) {
+			fc.unsupported("calling host function "+name+"()", n.Line)
+		}
 		if name != "" && isBuiltin(name) {
 			fc.unsupported("builtin function "+name+"()", n.Line)
 		}

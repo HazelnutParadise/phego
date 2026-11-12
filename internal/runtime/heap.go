@@ -696,7 +696,10 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 		if slot.array.refcount == 1 {
 			return slot.array, nil
 		}
-		dup := h.duplicate(slot.array)
+		dup, err := h.duplicateChecked(slot.array)
+		if err != nil {
+			return nil, err
+		}
 		dup.refcount = 1
 		old := *slot
 		*slot = value{kind: valueArray, array: dup}
@@ -708,6 +711,23 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
+	dup, _ := h.copyArray(src, false)
+	return dup
+}
+
+// copyCheckInterval is how many elements of an array are copied between two
+// checks for a host stop.
+const copyCheckInterval = 1 << 16
+
+// duplicateChecked is duplicate for a write that separates a shared array:
+// a large copy checks for cancellation and other host stops as it goes, so
+// one instruction cannot hold a cancelled run for the whole copy. When it
+// stops, the partial copy is released and the error is the stop.
+func (h *heap) duplicateChecked(src *phpArray) (*phpArray, error) {
+	return h.copyArray(src, true)
+}
+
+func (h *heap) copyArray(src *phpArray, checked bool) (*phpArray, error) {
 	// Callers validate the source first; copying only preserves same-heap edges.
 	// REQ-017; T-033/T-034. An empty COW copy is uninitialized even if the
 	// source was allocated. It keeps nextFree, but not capacity or iterators.
@@ -715,7 +735,7 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		dup := newArray()
 		dup.owner = h
 		dup.nextFree = src.nextFree
-		return dup
+		return dup, nil
 	}
 	dup := &phpArray{owner: h, nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
 	if !src.packed() {
@@ -741,6 +761,11 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 			dup.buckets[pos-1] = dup.newBucket(b.key, v)
 		}
 		dup.live++
+		if checked && dup.live%copyCheckInterval == 0 {
+			if err := h.runtimeCheck(); err != nil {
+				return nil, errors.Join(err, h.discard(value{kind: valueArray, array: dup}))
+			}
+		}
 	}
 	// REQ-017; T-033/034: PHP resets an invalid internal pointer on COW.
 	if src.pointer >= len(src.buckets) {
@@ -762,7 +787,7 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		dup.cursors[it] = copiedPos
 		it.arrays[dup] = struct{}{}
 	}
-	return dup
+	return dup, nil
 }
 
 // element returns a writable element slot, creating it as null when absent.

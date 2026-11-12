@@ -6,7 +6,6 @@
 package vm
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"errors"
@@ -68,6 +67,19 @@ type ctxError struct{ err error }
 // Compile lowers one HIR unit to a bytecode image. source is the file's bytes
 // (for the Source record and digests). It never executes PHP.
 func Compile(ctx context.Context, unit *ir.Unit, source []byte) (image bytecode.Image, err error) {
+	return CompileWith(ctx, unit, source, Options{})
+}
+
+// Options are what the compiler needs to know about its host.
+type Options struct {
+	// HostFunction reports whether the host registered a function under
+	// the lower-case name. A call to one is reported as unsupported: it
+	// must not be compiled as a call to an undefined function.
+	HostFunction func(lower string) bool
+}
+
+// CompileWith is Compile with the host's options.
+func CompileWith(ctx context.Context, unit *ir.Unit, source []byte, opts Options) (image bytecode.Image, err error) {
 	if unit == nil || unit.Main == nil {
 		return bytecode.Image{}, errors.New("vm: Compile needs a lowered unit")
 	}
@@ -82,7 +94,8 @@ func Compile(ctx context.Context, unit *ir.Unit, source []byte) (image bytecode.
 		unit:       unit,
 		constIndex: map[bytecode.Constant]uint32{},
 		funcIndex:  map[string]uint32{},
-		lines:      uint32(bytes.Count(source, []byte{'\n'}) + 1),
+		host:       opts.HostFunction,
+		lines:      sourceLines(source),
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -102,7 +115,21 @@ func Compile(ctx context.Context, unit *ir.Unit, source []byte) (image bytecode.
 	return c.compile(source)
 }
 
+// sourceLines is the number of lines the frontend counts in source: \n,
+// \r\n and a lone \r each end a line, as in PHP's scanner.
+func sourceLines(source []byte) uint32 {
+	n := uint32(1)
+	for i, c := range source {
+		if c == '\n' || c == '\r' && (i+1 >= len(source) || source[i+1] != '\n') {
+			n++
+		}
+	}
+	return n
+}
+
 type compiler struct {
+	// host reports a function the host registered; nil when there is none.
+	host       func(lower string) bool
 	ctx        context.Context
 	unit       *ir.Unit
 	constants  []bytecode.Constant
