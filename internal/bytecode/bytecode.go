@@ -120,7 +120,7 @@ const (
 	OpIncDec      // A result Value, B target Location; Aux is an IncDecOp
 	OpArraySet    // A container Location, B key, C value: $a[k] = v; Aux is ArrayWriteFlags
 	OpArrayAppend // A container Location, B value: $a[] = v; Aux is ArrayWriteFlags (ValueLocation only)
-	OpArrayUnset  // A container Location, B key Value: unset($a[k])
+	OpArrayUnset  // A container Location, B key: unset($a[k]); Aux is 0 or KeyLocation
 	OpIsset       // A dest Value (bool), B Location: isset($x)
 	OpArrayIsset  // A dest Value (bool), B container Value, C key Value: isset($a[k])
 	OpUnset       // A Location: unset($x)
@@ -128,7 +128,9 @@ const (
 	OpArrayAdd    // A array Value (updated in place), B value Value, C key when Aux has AddKey; Aux is ArrayAddFlags
 )
 
-// ArrayWriteFlags is the Aux of OpArraySet and OpArrayAppend. Without a flag
+// ArrayWriteFlags is the Aux of OpArraySet, OpArrayAppend and OpArrayUnset
+// (KeyLocation only; ZEND_UNSET_DIM reads the key after reporting an
+// undefined container). Without a flag
 // the operand is a Value register read before the instruction; with it, the
 // operand is a Location the instruction reads itself, with PHP's undefined
 // variable warning, at the point ZEND_ASSIGN_DIM reads that CV: the key after

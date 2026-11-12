@@ -264,3 +264,43 @@ func TestVMArrayAdd(t *testing.T) {
 			end: Unsupported},
 	})
 }
+
+// unset($a[$k]) with the key passed as a Location (bytecode.KeyLocation):
+// ZEND_UNSET_DIM reports an undefined container, then reads the key, then
+// applies the container's type rule.
+func TestVMArrayUnsetReadsKeyAfterContainer(t *testing.T) {
+	undefinedKey := "Warning: Undefined variable $k"
+	runArrayCases(t, []vmArrayCase{
+		{name: "both undefined", php: `unset($u[$k]);`, locals: []string{"u", "k"},
+			build: func(m *vmFn) uint32 { m.unsetVar("u", "k"); return m.k(nil) },
+			diags: []string{"Warning: Undefined variable $u", undefinedKey}, end: Completed, ret: "N"},
+		{name: "null container", php: `$n = null; unset($n[$k]);`, locals: []string{"n", "k"},
+			build: func(m *vmFn) uint32 { m.store("n", m.k(nil)); m.unsetVar("n", "k"); return m.load("n") },
+			diags: []string{undefinedKey}, end: Completed, ret: "N"},
+		{name: "false container", php: `$f = false; unset($f[$k]);`, locals: []string{"f", "k"},
+			build: func(m *vmFn) uint32 { m.store("f", m.k(false)); m.unsetVar("f", "k"); return m.load("f") },
+			diags: []string{undefinedKey, vmFalseArray}, end: Completed, ret: "b:0"},
+		{name: "string container", php: `$s = "ab"; unset($s[$k]);`, locals: []string{"s", "k"},
+			build: func(m *vmFn) uint32 { m.store("s", m.k("ab")); m.unsetVar("s", "k"); return m.k(nil) },
+			diags: []string{undefinedKey}, end: UncaughtThrowable, thrown: "Error: Cannot unset string offsets"},
+		{name: "int container", php: `$i = 5; unset($i[$k]);`, locals: []string{"i", "k"},
+			build: func(m *vmFn) uint32 { m.store("i", m.k(5)); m.unsetVar("i", "k"); return m.k(nil) },
+			diags: []string{undefinedKey}, end: UncaughtThrowable, thrown: "Error: Cannot unset offset in a non-array variable"},
+		{name: "array container, undefined key is the empty string", php: `$a = ["" => 1, 2]; unset($a[$k]); return $a;`, locals: []string{"a", "k"},
+			build: func(m *vmFn) uint32 {
+				arr := m.newArray()
+				m.add(arr, m.k(""), m.k(1))
+				m.emit(bytecode.OpArrayAdd, 0, arr, m.k(2), 0)
+				m.store("a", arr)
+				m.unsetVar("a", "k")
+				return m.load("a")
+			},
+			diags: []string{undefinedKey}, end: Completed, ret: "[0=>i:2]"},
+		{name: "key is the container", php: `$a = [1]; unset($a[$a]);`, locals: []string{"a"},
+			build: func(m *vmFn) uint32 { m.store("a", m.arrayOf(m.k(1))); m.unsetVar("a", "a"); return m.k(nil) },
+			end:   UncaughtThrowable, thrown: "TypeError: Cannot unset offset of type array on array"},
+		{name: "undefined key is the container", php: `unset($u[$u]);`, locals: []string{"u"},
+			build: func(m *vmFn) uint32 { m.unsetVar("u", "u"); return m.k(nil) },
+			diags: []string{"Warning: Undefined variable $u", "Warning: Undefined variable $u"}, end: Completed, ret: "N"},
+	})
+}
