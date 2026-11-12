@@ -1,0 +1,268 @@
+{
+  "scope": "W-17 stage 1: Engine.Run executes a subset of PHP 8.5.12 end to end through the HIR-to-bytecode compiler and the VM, compared byte for byte with the pinned images; local and CI evidence, not product acceptance.",
+  "requirements": [
+    "REQ-001",
+    "REQ-005",
+    "REQ-011",
+    "REQ-015",
+    "REQ-016",
+    "REQ-025",
+    "REQ-026"
+  ],
+  "tests": [
+    "T-029",
+    "T-030",
+    "T-031",
+    "T-032"
+  ],
+  "source_base": "44f03ac52bbf71fd2a1e49305a6cfaaebe9d9621",
+  "captured_at": "2026-11-12T01:29:44.039761+00:00",
+  "source_sha256": {
+    ".github/workflows/semantics-vm.yml": "b710ebbe8efcacd3f0e05e370058ed53eaed33e02e11c926bde27371cc3160e0",
+    ".github/workflows/vm-layout.yml": "fcf17745467f5ac7680660d231c9277c6fe6c05fea43b201fa9429a4718c55e6",
+    "diag/codes/codes.go": "da619056d4e2bbc1aeb4f3791a6d25cd8b20f1bec60fa6c21fdf3056d82f488f",
+    "diag/codes/markdown.go": "d3c8af053c86d1316a6b3599f49e309ed7625ccbd54e97fea6798fbc8102f5b9",
+    "engine.go": "8b0d2b42998a3fd7939652d4df2b50f8ac59d615cdc0b4e8ce674623773fefa1",
+    "engine_run_test.go": "3876356106916526d257ffd0e9424f64ba00e2364662fbf70a9c8f5c7b4ef2d3",
+    "engine_test.go": "76b631903229ff5184c0528a7dc0864e7f3b621a687b84bfa7bf6ccabeeb3f77",
+    "errors.go": "9a51f4ce51696e0660ef2caadbea21bc94bd481b1d41f017c5894db750d14522",
+    "example_test.go": "76e75be11b2b3fb3ce59911f288d38fb971577a01ad1020b59c1ee3eb7afc152",
+    "internal/bytecode/build.go": "fcaa0d71d61240d2efc42167d31654c5ef2dff43b823de15d5f42f85f4031cbb",
+    "internal/bytecode/bytecode.go": "23fd8e96ad287e7a5e24dc1e02b69e3375255b8ee0c0090d7b7369f337e656fb",
+    "internal/bytecode/bytecode_test.go": "ecd26b3274e80fa7d0c785fa1124bec691691d66e4d34bfdec1771e3d15c357a",
+    "internal/bytecode/format11_test.go": "d5a8defa069ba02e1f08dfe12423bff66e05b75a25da7f268736f7a164943ba4",
+    "internal/bytecode/fuzz_test.go": "b3bc8b79958494b8ecc38504cd015bbb42d182c8caeca9dc076ab7f32d210b75",
+    "internal/bytecode/localnames_test.go": "2b2c31fa33403d47a298deb1f268820296ba8a214ddb0e4be93d99797795aefa",
+    "internal/bytecode/opcode.go": "bcf838edc8d903a70da02758a6d04a1a614d41c5c40a512bd51a5136ae9f3a95",
+    "internal/bytecode/verify.go": "cc1ee7a1106b309fb774cdf8aa24edfe7beeb183d6f13b3a553f500ca3b55eaf",
+    "internal/bytecode/wire.go": "e921d1be2b8d81fd394961ed1076797395dc8fe8c425c144e25e795deed4bb23",
+    "internal/frontend/diagnostics.go": "a418f268a30c07f034581897b0425c836c7d471a34775bd3483c7d47a419e6d0",
+    "internal/frontend/lexer.go": "1cfe33f7996c74ef8e2099ef04cf661b1c4d96ee933c6e011f60d05010bd226f",
+    "internal/frontend/parser.go": "134c06b1a4bf9a8af36c9a6a1c4e057217e4b07484cf5e30988869205559ead7",
+    "internal/ir/constant_budget.go": "5b9bb2808907ee9518d2bbd93f3885c997de8ead1e3a58925bd2a1dd35833cdc",
+    "internal/ir/constant_syntax.go": "3a23c1db1ea1f4b01573d9e0d116d429899c746db4b9822aab67d3bfba69c7f2",
+    "internal/ir/expr.go": "5f2a259e714c346f4473deb5fbd39bb602d2050b73b533d926bd4a6d14cf0af0",
+    "internal/ir/lower.go": "16bbbccd56eb51c76f76e39b88f83e705d3f54efa242c573ce99f09fe5bd7a47",
+    "internal/runtime/execution.go": "e90604ad433d479e6688d4f563a456b7558a34d22e0a7f1b3c373762a20968fc",
+    "internal/runtime/execution_output.go": "e35f0becee4f6f9d9d58f648cad51200e26711a0ffa7ce1ff98a65904d3e3245",
+    "internal/runtime/heap.go": "16384b2fb588efd3938b2a3b9ee0c2865fcba4d16edc9b5a8bed75ddf96c65d4",
+    "internal/runtime/ops_php8512.go": "542853d3f28dad97c27957e48ac377dfb17d5fa9dc87f5388f6c08476801bf09",
+    "internal/runtime/snapshot.go": "a16dc53e91b31854585873c9bac0c37e94965aa6b6a121a7df0e3e0069ec48fc",
+    "internal/runtime/testdata/vm-oracle/generate.py": "374ddafbf4e0beb5249014cdd83b438ef760e8f694482cb7d543bc5efd6cfe7d",
+    "internal/runtime/testdata/vm-oracle/snippets/callvalue_case.php": "8fb8431c41d6d05ca2b7c274c5a9c7c3bb250bac4fda7cfb3b60fda2011a8da5",
+    "internal/runtime/testdata/vm-oracle/snippets/callvalue_extra_args.php": "91e6fcf34748cde1ca5cbecf906d1700a54b96a3df989a6c0c015614fc219083",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_array.php": "c4ad52991027dba8032305bbdfa181ddc294c248770fbbf0e2c7bba497a63815",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_big.php": "3969c2749917b528bcb2c1d2da224cebafe42e8c78c3e860f8167d72bb85eb3c",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_empty_string.php": "673bf9966addc00a0e465b3eb6e321e21cb5299332c0dc2ca4119d60ff7f2a5d",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_false.php": "0715ef807353f314b3ca34731eee58eadb902a90992f42b8256e28532a751f4b",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_float.php": "83901890ab9a3af90e6f304db84e5ffe920f5de95c6af49260414aa250149a60",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_int_string.php": "2b78b939caa69978a47ef8ba986e235910bcaf41dbd9dbf4c4ce77264acca3a1",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_integral_float.php": "f1852b53f066da33f7456cb276f3b7fadbb9519f0e37bfd79e44742e8dbc627a",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_neg_float.php": "25a081d88c351629f62b6a9fb58cd3a873d36f1280c8f6f39229797cc04922df",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_negative.php": "d3276b8348ed1cfea1b9e346c950b28a5d6b796bf25315eed73901de9a72f7bc",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_null.php": "39659d407faaebc80b1833f75ff7f7a769ac5aac5222809c52a555879e35db39",
+    "internal/runtime/testdata/vm-oracle/snippets/exit_true.php": "08d99903794bc3273f6381b2376b1ea6783c620067cb5c8df88cae9e6e88c57b",
+    "internal/runtime/testdata/vm-oracle/snippets/trace_args.php": "bfb7c5bf5f8bfbd09b54e086ac5529efdf7067d6a771257cf5200cbe0e9c63e8",
+    "internal/runtime/testdata/vm-oracle/snippets/trace_nested_too_few.php": "4a6f86d72111721c67161173b805dfc6e0344d36bec9f557fdfd981b9164345a",
+    "internal/runtime/testdata/vm-oracle/snippets/trace_undefined_in_function.php": "9b6848612b99ca2ccf127e175831b26bb150fdfb0dee06aadc437f1afc60c803",
+    "internal/runtime/testdata/vm-oracle/snippets/warning_in_function_then_trace.php": "f4b6cdef75339f26f227a7de0036cd4a3d745a3d659b8e993cd2a21212130c33",
+    "internal/runtime/testdata/vm-oracle/tables.php": "1723aea9fa4dea1d0427546b85b594a9a98478e31b8bbdf6ec6e617f18d8d7e6",
+    "internal/runtime/value.go": "073c9e3f1818f828fa815fec566f72a7dc1f8564d1f51dcd9ff7a5cd7f5b9069",
+    "internal/runtime/vm.go": "43e5a4d0d7a47b44daa431d35eaf736644e5f6294468abb2f1625864c2e33659",
+    "internal/runtime/vm_arrayops_test.go": "fba525e07e8f4204e2b23fb1a2dd91b6e10b5a2c63d20f184529c7933bb63d90",
+    "internal/runtime/vm_asm_test.go": "2f5b4502d6d4631ef08c58d7008eedb1e306528b31defd15003695919c3570d1",
+    "internal/runtime/vm_bench_test.go": "05c778e9fa2efc3008fba2cda82cdfd8880a94ada8c7018c1a6bcd31469cea07",
+    "internal/runtime/vm_concurrency_test.go": "930330e394bd63af91d1086a7b806520ddae96eea61c560b4630037f7457b86b",
+    "internal/runtime/vm_exec.go": "6b4786c506f6581090dad7202e1e9d66374371752795cb4f8514b3a0a2a81f0f",
+    "internal/runtime/vm_fuzz_test.go": "48c0edc4d7a56515f1783de2253192670de430b4c139aa938f2d7cffda925f9f",
+    "internal/runtime/vm_loop.go": "d53720cc416618388fe95a54447a06f9183b079e19805a17e492c238d40d0d17",
+    "internal/runtime/vm_ops.go": "4b91c0b7cfd3b0b520563f965e15158eb41054c441e803fc06040bbd9a881ef8",
+    "internal/runtime/vm_oracle_test.go": "bf87fcd3e997a902e31e57c00dafc71599d1cdd7bf4b1f3c15b3fc70cc05b3a6",
+    "internal/runtime/vm_program.go": "e4f641d4387b77ca2a447d387ce94e12d09125089027ec6aec2163fd355514e1",
+    "internal/runtime/vm_reference_test.go": "65e29d49d14699c43a7a5a511fc229300c74eb455cf55d41c5e117e582e98576",
+    "internal/runtime/vm_runconfig_test.go": "a76c02cc395487951d537e98769df753d4e6a75ed002ac993b5265911285d1bd",
+    "internal/runtime/vm_safety_test.go": "505a18285d691f6728af85635678ac16fe12bc9c1cb735ca92e414cbb31f7779",
+    "internal/runtime/vm_snippets_test.go": "acf47033c07befa32f403580d787a555af46a22f63b9e25b88075a2ad1c24e7f",
+    "internal/runtime/vm_trace.go": "8e1403f85371736642f3b6f28217af3e1af9df39320e4ebcdb9b1c5ea96154ba",
+    "internal/runtime/vm_wiring_test.go": "227a6cbc5d56dee4db798b30d71ed783571c8fe4b85da016f35bd0f6ca0b3949",
+    "internal/runtime/w17_hardening_test.go": "bd7515420f57f5b0ba5890cc845fa390b7ffc2fa9869c420840db54a16f4d6b9",
+    "internal/vm/builtins.go": "d986b12dfde85778189ca55c16db34ca1253b6be64f0ae0fcdb9e280229ad3b2",
+    "internal/vm/builtins_gen.go": "a8c214fe9283cfe940f8cdc9ec1652e43f027dba0a61de797840ab01e8e532a8",
+    "internal/vm/compile.go": "9fccc87e8d37a073f86d7f6976672d9ce0475e49c8384b2db4d0f689df0403b8",
+    "internal/vm/compile_test.go": "fececde2e385ab3b3f55dd1cf90aafe279e60fe57303f2064e7eba44107de3b6",
+    "internal/vm/disasm.go": "d509de3c2d8cf6b585c44e6f2ef1d346788050b2334bb73e70a1b432cfb4c9b7",
+    "internal/vm/expr.go": "602af2aca4e026483eb339f0f9cac9862ddb75562c4818ee25f3d8181915de18",
+    "internal/vm/function.go": "6bead7f4a6090b7f0bc31fcf99f742f3cd9d03d59f5cff3de6fed2c4108267f2",
+    "internal/vm/gen/builtins.php": "5d00c051ccc5e3d16a790c356712dae64874fc734214b73ea3ed913d38400f98",
+    "internal/vm/golden_test.go": "0074add5c64d1ede1c16dcc5e168cfc249c9ce2b85969da291b0a6ad1c3f1021",
+    "internal/vm/lines_test.go": "fb266e10966dcce83e25c073141db0afc7191437ab70ee029f39f7ba8b7d943d",
+    "internal/vm/miniexec_test.go": "6f57ee2449c14dd1a399d0a83a2fa178314fd73e76fac3866a447b9d8ec96589",
+    "internal/vm/property_test.go": "84f10c3b2b7ad8901fd53ab93e630ee3de846f20a28d00ae213270ad495b7f6b",
+    "internal/vm/review_test.go": "b1c43e8ec736a46bd9cb8b3cdbdaf43edb4422a35b2be6ca055e94c256d7388f",
+    "policy.go": "6a29c533314e4d09a2fa3ea9b31cf3c16646b30c90ce7590009a76f9962b5b07",
+    "policy_review_test.go": "59d6d0c9f7a98ba254166acd8af8eccc27eee7f7930f245cf05b7058dc719db2",
+    "policy_test.go": "98cb9f82f6ce072fc36b5907b98f4482c4b5fc8563946683f962601498953b10",
+    "run.go": "890528b6a6ae059825a925ad35a9b98966eeb3933f41ba6aaa9e13b06c2b289b",
+    "runfile_fifo_review_fixes_test.go": "95431c9c1f70c4f6e83869faf9c2668dff32c1326aa4c0077a4f632ae86f0479",
+    "runfile_review_fixes_test.go": "1771bd83832b40b06088248177bb4308cc83064dbbd6ec4616c0cc5dd2b1b880",
+    "tests/vm/w17/reference.php": "63b518e1d88e88d69349efc3a0a6a1a57f72d67f6db60132fb63b51ff2b5bcec",
+    "tests/vm/w17/reference.py": "899bad24246824ddf0b1a508747c45dd4d1a293d410f5a47ea43aefbc0c958bb",
+    "tools/benchstat-variants.sh": "50bd5ab6f4b27172c142928731636342cc91ebb977600b3a445bfdd233e6a214",
+    "tools/test_w17_reference.py": "bb93a25c9b2cdbc522fc1b6940fb7f76d8ac707f1f5cf49582e48c0fee4d83e2",
+    "w17_differential_test.go": "4e104494c7da8f7b03e249de43465c4bdafe46cdca99f5fbb43668be4e4fdefd",
+    "w17_hardening_test.go": "3362dc10e3ce54522b4bd826d95605481d4f350cdd4f9db5127397085a6f91bc",
+    "w17_review_probes_test.go": "e0262bc55f08efe5be70b3e8925e0a25f87b0f1317b9ffd016f768a83aafe821"
+  },
+  "environment": {
+    "local": "go1.26.5 darwin/arm64",
+    "reference_images": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 (linux/arm64), php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f (linux/amd64), i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 (linux/386); php -n, --network none",
+    "ci": "GitHub-hosted ubuntu-24.04 and ubuntu-24.04-arm runners for the VM layout benchstat (commit 5545d4f)"
+  },
+  "decisions": [
+    "See docs/decisions/W-17-vm.md: package split, staged delivery, bytecode 1.1, layout choices measured with benchstat, WithINI, limits behaviour and the fixes made after independent review."
+  ],
+  "local_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 ./...",
+      "exit_code": 0,
+      "log": "W-17-vm/local/go-test.log",
+      "result": "every package ok"
+    },
+    {
+      "command": "go test -race -count=1 -timeout 40m, one package at a time",
+      "exit_code": 0,
+      "log": "W-17-vm/local/race.log",
+      "result": "root, vm, bytecode, ir, ir/ssa, frontend, policy and runtime ok"
+    },
+    {
+      "command": "go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$' -v .",
+      "exit_code": 0,
+      "log": "W-17-vm/local/differential.log",
+      "result": "each of the 64, amd64 and 32 profiles: 261 pass, 9 unsupported, 0 fail of 270; 40 review probes pass"
+    },
+    {
+      "command": "VM layout benchmarks workflow (tools/benchstat-variants.sh), commit 5545d4f",
+      "exit_code": 0,
+      "log": "W-17-vm/benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.benchstat.txt",
+      "result": "switch dispatch, one slab of frames, frame-owned locals and back-edge polling chosen; see the decision record"
+    }
+  ],
+  "limits": [
+    "Local run on darwin/arm64 only; the 386 and amd64 references are replayed on the host architecture.",
+    "The red runs recorded by the fixing engineers before the session restart were not preserved as logs.",
+    "FuzzVMRunsVerifiedImages ran only 462 inputs under load after the last change.",
+    "T-029 to T-032 stay not_run: stage 1 covers a subset of PHP."
+  ],
+  "artifacts": {
+    "local/differential.log": {
+      "path": "W-17-vm/local/differential.log",
+      "sha256": "5b5268fb569abc96fb1741757804d911401962a987fe612bb44ee9c3e4ef83f9"
+    },
+    "local/go-test.log": {
+      "path": "W-17-vm/local/go-test.log",
+      "sha256": "5d278405406815ec2db16caa0644c2a55c63ea174a29a11c34469baa1f94c3ec"
+    },
+    "local/race.log": {
+      "path": "W-17-vm/local/race.log",
+      "sha256": "0464f404b9809f499521b56d4935c87c9d2317aaf8b0151c14c130dadd794161"
+    },
+    "benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.benchstat.txt",
+      "sha256": "187e3a0c065f2a7df959ed711b46f1f48a1486811cabf7e16af241c3ab0161d2"
+    },
+    "benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.host.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.host.txt",
+      "sha256": "20d7ce51e404344cd5f3a7995543c070e0b79de26ee25d948dc2c7227ba73627"
+    },
+    "benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.system.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04/BenchmarkVMFrames.system.txt",
+      "sha256": "fb3fa13144bc31b09ddea7c58a0eee249038dafc7d2aab92a47e4ddcdc9964c0"
+    },
+    "benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.benchstat.txt",
+      "sha256": "540419995bae49d60f64eb2a87afb8ff1ac90640eef186b589ab3499bd1f23df"
+    },
+    "benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.host.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.host.txt",
+      "sha256": "30a1782a6be793bf6de573b4259801f720f0b3f8936de7b72afb4a4d0e935498"
+    },
+    "benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.system.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04-arm/BenchmarkVMLocals.system.txt",
+      "sha256": "d03e71f508600e7b1aa845c9c3d6584ccd072aa4cbdc795ceeb232c0d64327cc"
+    },
+    "benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.benchstat.txt",
+      "sha256": "0ba55db772f434201e21507f1975a09928e64c4c010bfa3cc74331525180f382"
+    },
+    "benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.host.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.host.txt",
+      "sha256": "30a1782a6be793bf6de573b4259801f720f0b3f8936de7b72afb4a4d0e935498"
+    },
+    "benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.system.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04-arm/BenchmarkVMPolling.system.txt",
+      "sha256": "d03e71f508600e7b1aa845c9c3d6584ccd072aa4cbdc795ceeb232c0d64327cc"
+    },
+    "benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.benchstat.txt",
+      "sha256": "985531e29e0f9da7e7445ffea13536eb8969a2a91c58227495f2e5caef0541f4"
+    },
+    "benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.host.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.host.txt",
+      "sha256": "87711e53c9a0f439c14c60424fac856b782669832debc236039d46ce6d905c03"
+    },
+    "benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.system.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04/BenchmarkVMDispatch.system.txt",
+      "sha256": "fb3fa13144bc31b09ddea7c58a0eee249038dafc7d2aab92a47e4ddcdc9964c0"
+    },
+    "benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.benchstat.txt",
+      "sha256": "20c039f6b543e532c4410d526b2da5d5d409af15544a6072afebdd6933af5e6a"
+    },
+    "benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.host.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.host.txt",
+      "sha256": "30a1782a6be793bf6de573b4259801f720f0b3f8936de7b72afb4a4d0e935498"
+    },
+    "benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.system.txt": {
+      "path": "W-17-vm/benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.system.txt",
+      "sha256": "d03e71f508600e7b1aa845c9c3d6584ccd072aa4cbdc795ceeb232c0d64327cc"
+    },
+    "benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.benchstat.txt",
+      "sha256": "88a782522ed567e3d609e0e6e1000857a9e32c2b984273847007c0f0b0b82640"
+    },
+    "benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.host.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.host.txt",
+      "sha256": "30a1782a6be793bf6de573b4259801f720f0b3f8936de7b72afb4a4d0e935498"
+    },
+    "benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.system.txt": {
+      "path": "W-17-vm/benchstat/Frames-ubuntu-24.04-arm/BenchmarkVMFrames.system.txt",
+      "sha256": "d03e71f508600e7b1aa845c9c3d6584ccd072aa4cbdc795ceeb232c0d64327cc"
+    },
+    "benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.benchstat.txt",
+      "sha256": "030411c10bae7d541b3d6682255df64fd6781af98dc5c7efea89de3319f834f6"
+    },
+    "benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.host.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.host.txt",
+      "sha256": "87711e53c9a0f439c14c60424fac856b782669832debc236039d46ce6d905c03"
+    },
+    "benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.system.txt": {
+      "path": "W-17-vm/benchstat/Polling-ubuntu-24.04/BenchmarkVMPolling.system.txt",
+      "sha256": "fb3fa13144bc31b09ddea7c58a0eee249038dafc7d2aab92a47e4ddcdc9964c0"
+    },
+    "benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.benchstat.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.benchstat.txt",
+      "sha256": "167c15e98fac7e277b712d635a8a92c3d26b503a4f1aaae6a667eff3877df3b2"
+    },
+    "benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.host.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.host.txt",
+      "sha256": "20d7ce51e404344cd5f3a7995543c070e0b79de26ee25d948dc2c7227ba73627"
+    },
+    "benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.system.txt": {
+      "path": "W-17-vm/benchstat/Locals-ubuntu-24.04/BenchmarkVMLocals.system.txt",
+      "sha256": "fb3fa13144bc31b09ddea7c58a0eee249038dafc7d2aab92a47e4ddcdc9964c0"
+    }
+  }
+}

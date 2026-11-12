@@ -43,7 +43,8 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | Unary | `!`、負號、正號、`~` |
 | Cast | 轉成 bool、int、float、string、array |
 | IncDec | 對一個位置做前置或後置的遞增、遞減 |
-| ArraySet、ArrayAppend、ArrayUnset | `$a[k] = v`、`$a[] = v`、`unset($a[k])` |
+| ArraySet、ArrayAppend、ArrayUnset | `$a[k] = v`、`$a[] = v`、`unset($a[k])`。ArraySet 與 ArrayAppend 的 Aux 可標示鍵或值是變數位置，由指令在容器檢查之後自己讀取 |
+| ArrayAdd | 對陣列字面值加一個元素，鍵的規則照 PHP 的字面值：未定義變數當鍵只發未定義警告 |
 | Isset、ArrayIsset | `isset($x)`、`isset($a[k])` |
 | Unset | `unset($x)` |
 | Exit | `exit`，可帶狀態 |
@@ -89,13 +90,43 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 
 回報不支援的 9 項是三個程式各三種模式：`compound_assign.php` 第 61 行與 `compound_assign_undefined.php` 第 34 行對陣列元素做複合指定，`isset_unset.php` 第 22 行做巢狀的 `unset`。它們留在分母裡，等之後的階段補上。
 
+## 獨立審查後的修正
+
+三位獨立審查者檢查了 bb8e49a，共跑 416 個端對端探測。確認的問題都以 PHP 8.5.12 固定映像的實際輸出為準修正，每項有回歸測試（`w17_hardening_test.go`、`internal/runtime/w17_hardening_test.go`、`w17_review_probes_test.go`、`internal/vm/review_test.go`）。
+
+**PHP 原始碼不能讓宿主程序崩潰。** 長運算式的 lowering、陣列的釋放與比較改成不靠 Go 堆疊遞迴。超過上限時回報 PHP 自己的錯誤：
+
+| 情況 | Phego 的上限 | PHP 8.5.12 在 linux/arm64 映像的實測 |
+|---|---|---|
+| 運算式巢狀（含 `1+1+…` 這類鏈），`ir.MaxExpressionNesting` | 100,000，超過回編譯錯誤 `Maximum call stack size of 8339456 bytes … reached during compilation. Try splitting expression` | `+` 鏈 55,000 項可編譯，60,000 項起同一個 fatal。`$a[0]…` 鏈 30,000 可以，50,000 fatal |
+| 陣列比較的巢狀，`runtime.MaxComparisonNesting` | 100,000，超過丟出 `Error: Maximum call stack size reached during comparison` | `==` 30,000 層可以，40,000 層起丟出。`===` 60,000 可以，70,000 起丟出 |
+| 回傳值匯出 | 256 層、1,048,576 個元素，超過回 `ResourceError` | 不適用（宿主介面） |
+
+Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 Phego 也能。PHP 的門檻取決於平台的堆疊大小，介於兩者之間的程式 PHP 會失敗而 Phego 會成功。PHP 自己在 300,000 層的 `unset` 會 segfault，Phego 能正常釋放。
+
+**限制的實際行為和文件一致。**
+
+- `Limits.Memory` 大於 0 時 `Run` 回報 `UnsupportedError`，直到記憶體計量完成。
+- `Limits.Diagnostics` 只限制紀錄的筆數，超過後不再記錄，執行繼續，顯示不受影響。
+- `Limits.Frames` 為 0 表示不設上限，專案負責人於 2026-11-12 決定照 PHP。
+- `Engine.Close` 取消進行中的編譯與執行。`Compile` 在解析與 lowering 中檢查 context。
+- 內部錯誤是 `*InternalError`（PHG9000）。清理期限從拆除開始計時，不是從執行開始。
+
+**PHP 可見行為的修正。** 字串插值兩段時延後讀取、三段以上逐段轉字串。元素寫入的順序是容器檢查、讀鍵、轉換鍵、讀值、寫入。單獨一個變數當陳述式不發警告。`??=` 右邊的單純變數用目標那一行。宣告和內建函式同名的函式回報 PHP 的 `Cannot redeclare function`。
+
+**被淘汰的比較候選已移出正式程式碼。** closure 與合併指令只留在測試檔。frame、區域變數與取消檢查的其他候選需要改動直譯器內部，已刪除，上表的量測結果保留為證據。
+
 ## 已知缺口
 
-- **呼叫深度預設上限為 10,000 層**：PHP 本身沒有上限。直譯器用自己的 frame 堆疊，不會耗盡 Go 的堆疊，但目前沒有記憶體計量，實測 100,000 層約配置 230 MB，所以先設保守的預設值。超過時回報 `ResourceError`，不是 PHP 錯誤。`Limits.Frames` 可以調高。
-- **`Limits.Memory` 尚未計量**：Runtime 還沒有邏輯記憶體的帳。
+- **無窮遞迴在預設設定下沒有東西會擋**：PHP 靠 memory_limit（`php -n` 為 128 MB）以 `Allowed memory size exhausted` 結束。Phego 還沒有記憶體計量，實測每層約 1.1～1.5 KB（100,000 層 183 MB，1,000,000 層 1.52 GB），會一路成長到宿主記憶體用完。只有 `Limits.Steps`、`Limits.Frames`、context 或 `Close` 能停止。
+- **`Limits.Memory` 尚未計量**：Runtime 還沒有邏輯記憶體的帳，設定它會被拒絕。
+- **編譯沒有提早結束的工作量上限**：100 萬個陳述式要約 1.7 秒、1.6 GB 才回報程式太大。可以用 context 取消。
+- **編譯器本身仍是遞迴**：`internal/vm` 的運算式編譯受 100,000 層上限保護，約 43 MB 堆疊，尚未改成迭代。
+- **`exit(` 跨行時引數 Deprecated 的行號**：PHP 用右括號那一行，HIR 沒有這個資訊。
+- **`unset($n[$uk])` 兩者都未定義時**：PHP 先警告容器，Phego 先警告鍵。
+- **讀字串位移在執行期才回報不支援**：此時先前的輸出已經送出。
 - **字串串接每次都複製整個字串**：迴圈裡用 `.` 累加字串是平方時間。PHP 在沒有其他持有者時會原地附加。
 - **編譯期警告以 E_WARNING 過濾**：PHP 用的是 E_COMPILE_WARNING，error_reporting 只關其中一個位元時結果會不同。
 - **編譯期 fatal 之前的編譯期警告會遺失**：`Compile` 只回傳 `PHPError`。
-- **宣告和內建函式同名的函式**：PHP 在編譯時回報 `Cannot redeclare function`，目前回報不支援，正確的錯誤要補在 `internal/ir`。
 - **函式隱含的 return 行號**：使用函式內出現過的最大行號，PHP 使用右大括號那一行。階段一觀察不到差別。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
