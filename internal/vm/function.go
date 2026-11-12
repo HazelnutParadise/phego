@@ -378,8 +378,13 @@ func (fc *fnCompiler) unset(k *ir.Node) {
 		if k.Kids[1] == nil {
 			panic(internalError{"unset of []"})
 		}
-		r := fc.value(k.Kids[1])
-		fc.emit(bytecode.OpArrayUnset, 0, l, r, 0)
+		// ZEND_UNSET_DIM reads a plain variable key itself, after it
+		// reports an undefined container.
+		if key := fc.expr(k.Kids[1]); key.cv >= 0 && !key.quiet {
+			fc.emit(bytecode.OpArrayUnset, uint16(bytecode.KeyLocation), l, fc.loc(key.cv), 0)
+		} else {
+			fc.emit(bytecode.OpArrayUnset, 0, l, fc.materialize(key), 0)
+		}
 	default:
 		fc.unsupportedNode(k)
 	}

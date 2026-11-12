@@ -297,6 +297,11 @@ func (f *vmFn) pushVar(name, valueVar string) {
 	f.emit(bytecode.OpArrayAppend, uint16(bytecode.ValueLocation), f.loc(name), f.loc(valueVar), 0)
 }
 
+// unsetVar is unset($name[$keyVar]), the key read by ArrayUnset itself.
+func (f *vmFn) unsetVar(name, keyVar string) {
+	f.emit(bytecode.OpArrayUnset, uint16(bytecode.KeyLocation), f.loc(name), f.loc(keyVar), 0)
+}
+
 // hidden adds a compiler temporary local; it needs its Local at the call
 // site, which it emits.
 func (f *vmFn) hidden() uint32 {

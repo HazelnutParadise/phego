@@ -108,3 +108,39 @@ func TestElementWriteOperands(t *testing.T) {
 		})
 	}
 }
+
+// unset($a[$k]) passes a plain variable key as its Location: ZEND_UNSET_DIM
+// reports an undefined container before it reads the key.
+func TestArrayUnsetOperands(t *testing.T) {
+	for _, tc := range []struct {
+		name, src string
+		aux       uint16
+		loads     int
+	}{
+		{"variable key", "unset($a[$k]);", uint16(bytecode.KeyLocation), 0},
+		{"key is the container", "unset($a[$a]);", uint16(bytecode.KeyLocation), 0},
+		{"constant key", `unset($a["x"]);`, 0, 0},
+		{"expression key", "unset($a[$k + 1]);", 0, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			img := compile(t, "<?php\n"+tc.src+"\n")
+			var unsets []bytecode.Instruction
+			loads := 0
+			for _, in := range img.Functions[0].Code {
+				switch in.Op {
+				case bytecode.OpArrayUnset:
+					unsets = append(unsets, in)
+				case bytecode.OpLoad:
+					loads++
+				}
+			}
+			if len(unsets) != 1 || unsets[0].Aux != tc.aux || loads != tc.loads {
+				t.Fatalf("unsets %+v, %d loads; want aux %d with %d loads\n%s", unsets, loads, tc.aux, tc.loads, Disassemble(img))
+			}
+		})
+	}
+	img := compile(t, "<?php\n$a = [\"x\" => 1, \"y\" => 2];\n$k = \"x\";\nunset($a[$k]);\necho isset($a[\"x\"]) ? \"kept\" : \"gone\", $a[\"y\"];\n")
+	if out, _ := runMini(t, img); out != "gone2" {
+		t.Fatalf("output %q, want \"gone2\"\n%s", out, Disassemble(img))
+	}
+}

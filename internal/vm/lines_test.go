@@ -119,6 +119,8 @@ func locationRead(in bytecode.Instruction, l uint32) bool {
 		return (flags&bytecode.KeyLocation != 0 && in.B == l) || (flags&bytecode.ValueLocation != 0 && in.C == l)
 	case bytecode.OpArrayAppend:
 		return flags&bytecode.ValueLocation != 0 && in.B == l
+	case bytecode.OpArrayUnset:
+		return flags&bytecode.KeyLocation != 0 && in.B == l
 	case bytecode.OpArrayAdd:
 		return bytecode.ArrayAddFlags(in.Aux)&bytecode.AddKeyLocation != 0 && in.C == l
 	}

@@ -301,7 +301,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	}
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
-	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayAdd:
+	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -427,8 +427,12 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid array-append operands: A must be a Location, B a Value (a Location where Aux is ValueLocation), C zero")
 		}
 	case OpArrayUnset:
-		if !reg(in.A, Location) || !reg(in.B, Value) || in.C != 0 {
-			return invalid("invalid array write operands: A must be a Location, B a Value, C zero")
+		key := Value
+		if ArrayWriteFlags(in.Aux) == KeyLocation {
+			key = Location
+		}
+		if (in.Aux != 0 && ArrayWriteFlags(in.Aux) != KeyLocation) || !reg(in.A, Location) || !reg(in.B, key) || in.C != 0 {
+			return invalid("invalid array-unset operands: A must be a Location, B a Value (a Location where Aux is KeyLocation), C zero")
 		}
 	case OpArrayAdd:
 		flags := ArrayAddFlags(in.Aux)

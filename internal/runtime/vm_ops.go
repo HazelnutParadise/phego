@@ -241,17 +241,26 @@ func (s *vmState) arrayUnset(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	k := f.regs[in.b]
-	if k.kind == valueUndefined {
-		k = nullValue()
+	// ZEND_UNSET_DIM reports an undefined container, then reads the key
+	// (bytecode.KeyLocation), then applies the container's rule. An
+	// undefined key reads as null, which unset treats as "" silently.
+	c := slot.deref()
+	if c.kind == valueUndefined {
+		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.a))
+		if s.stopped() {
+			return nil
+		}
 	}
-	switch c := slot.deref(); c.kind {
+	var k value
+	if bytecode.ArrayWriteFlags(in.aux)&bytecode.KeyLocation == 0 {
+		k = operandValue(f.regs, in.b)
+	} else if k, _, err = s.readVar(f, in.b); err != nil || s.stopped() {
+		return err
+	}
+	switch c.kind {
 	case valueArray:
 		return s.h.unsetElement(slot, k)
-	case valueUndefined:
-		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.a))
-		return nil
-	case valueNull:
+	case valueUndefined, valueNull:
 		return nil
 	case valueBool:
 		if !c.boolean {

@@ -401,8 +401,15 @@ func (m *miniVM) call(fi uint32, args []any) any {
 				a.set(a.next, v)
 			}
 		case bytecode.OpArrayUnset:
+			k := fr.regs[in.B]
+			if bytecode.ArrayWriteFlags(in.Aux)&bytecode.KeyLocation != 0 {
+				k = fr.locals[loc(in.B)]
+				if _, undef := k.(undefined); undef {
+					failf("undefined variable read")
+				}
+			}
 			if a, ok := fr.locals[loc(in.A)].(*miniArray); ok {
-				a.unset(key(fr.regs[in.B]))
+				a.unset(key(k))
 			}
 		case bytecode.OpArrayIsset:
 			a, ok := fr.regs[in.B].(*miniArray)

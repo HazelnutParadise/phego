@@ -123,7 +123,12 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		return roleLocation, roleLocal, roleNone
 	case bytecode.OpLoad, bytecode.OpIsset, bytecode.OpIncDec:
 		return roleValue, roleLocation, roleNone
-	case bytecode.OpStore, bytecode.OpArrayUnset:
+	case bytecode.OpStore:
+		return roleLocation, roleValue, roleNone
+	case bytecode.OpArrayUnset:
+		if bytecode.ArrayWriteFlags(in.Aux)&bytecode.KeyLocation != 0 {
+			return roleLocation, roleLocation, roleNone
+		}
 		return roleLocation, roleValue, roleNone
 	case bytecode.OpArrayAppend:
 		if bytecode.ArrayWriteFlags(in.Aux)&bytecode.ValueLocation != 0 {
