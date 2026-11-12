@@ -952,3 +952,35 @@ func TestVMStage2SharedProgramIsolation(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// An image whose ParamDefault names a parameter before a required one does
+// not let a call omit the required one: PHP treats every parameter up to the
+// last required one as required.
+func TestVMParamDefaultBeforeRequiredParameter(t *testing.T) {
+	// function f($a = 1, $b) as a hand-built image would encode it.
+	a := newAsm(t, 64)
+	m := a.fn("{main}", 0, 2)
+	f := &vmFn{a: a, name: "f", params: 2, locs: map[string]uint32{}, index: map[string]uint32{}, line: 10}
+	f.regs = []bytecode.RegisterKind{bytecode.Value, bytecode.Value}
+	for i, l := range []string{"a", "b"} {
+		r := f.reg(bytecode.Location)
+		f.names = append(f.names, a.str(l))
+		f.locs[l], f.index[l] = r, uint32(i)
+		f.emit(bytecode.OpLocal, 0, r, uint32(i), 0)
+	}
+	pd := f.at(11).emit(bytecode.OpParamDefault, 0, 0, 0, 0)
+	f.emit(bytecode.OpConst, 0, 0, f.k(1), 0)
+	f.code[pd].B = f.pc()
+	f.emit(bytecode.OpStore, 0, f.loc("a"), 0, 0)
+	f.at(12).emit(bytecode.OpStore, 0, f.loc("b"), 1, 0)
+	f.at(13).ret(f.bin(bytecode.Add, f.load("a"), f.load("b")))
+	a.funcs = append(a.funcs, f)
+	m.at(5).ret(m.callName("f", m.k(5)))
+	cfg := vmConfig(t, 64)
+	cfg.DisplayErrors = false
+	res := a.program().Run(cfg)
+	want := "Too few arguments to function f(), 1 passed in " + vmTestFile + " on line 5 and exactly 2 expected"
+	if res.End != UncaughtThrowable || res.Throwable.Class != "ArgumentCountError" || res.Throwable.Message != want {
+		t.Fatalf("%v %+v %v", res.End, res.Throwable, res.Err)
+	}
+}

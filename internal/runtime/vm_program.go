@@ -51,8 +51,9 @@ type vmFunction struct {
 	localNames []string
 	paramLocal []int32 // local of parameter i, -1 if the prologue does not store it
 	paramPC    []int32 // pc of the prologue Store that receives parameter i, or -1
-	// required is how many arguments a call must pass: the parameters
-	// before the first one a ParamDefault names.
+	// required is how many arguments a call must pass: every parameter up
+	// to the last one no ParamDefault names, as PHP treats an optional
+	// parameter before a required one as required.
 	required int
 	// nelems is the size of a frame's element window, and elemOf maps each
 	// Location register to its slot there, -1 when no FetchDim defines it.
@@ -341,6 +342,7 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	f.lines = make([]int32, len(code))
 	f.files = make([]string, len(code))
 	f.required = f.params
+	optional := make([]bool, f.params)
 	f.elemOf = make([]int32, f.nlocs)
 	for i := range f.elemOf {
 		f.elemOf[i] = -1
@@ -441,10 +443,13 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			if in.A >= uint32(f.params) {
 				return f, fail(pc, "register %d is not a parameter", in.A)
 			}
-			f.required = min(f.required, int(in.A))
+			optional[in.A] = true
 		}
 		out.a, out.b, out.c = decoded[0], decoded[1], decoded[2]
 		f.code[pc] = out
+	}
+	for f.required > 0 && optional[f.required-1] {
+		f.required--
 	}
 	// The Store a ParamDefault skips to receives that parameter; its
 	// decoded c (zero in the image) is the parameter plus one, which tells
