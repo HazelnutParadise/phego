@@ -471,7 +471,20 @@ func (s *vmState) binary(op bytecode.BinaryOp, a, b value) (value, error) {
 		if a.kind == valueString && b.kind == valueString {
 			return s.join(a.text, b.text), nil
 		}
-		return h.concat(a, b)
+		// As heap.concat, with the copy made by join so that it can be
+		// cancelled whatever the operand types are.
+		if err := h.claimValues(a, b); err != nil {
+			return value{}, err
+		}
+		x, err := h.toString(a)
+		if err != nil {
+			return value{}, err
+		}
+		y, err := h.toString(b)
+		if err != nil {
+			return value{}, err
+		}
+		return s.join(x, y), nil
 	case bytecode.Equal, bytecode.NotEqual:
 		eq, err := h.looseEqual(a, b)
 		return boolValue(eq == (op == bytecode.Equal)), err

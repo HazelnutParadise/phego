@@ -2,7 +2,10 @@ package runtime
 
 import (
 	"context"
+	"strings"
 	"testing"
+
+	"github.com/HazelnutParadise/phego/internal/bytecode"
 )
 
 // Separating a large shared array checks for a host stop as it copies: a
@@ -38,4 +41,46 @@ func TestSeparateStopsCopyingAfterCancellation(t *testing.T) {
 	if slot.array.count() != n || slot.array.refcount != 2 {
 		t.Fatalf("source changed: %d elements, %d holders", slot.array.count(), slot.array.refcount)
 	}
+}
+
+// A large concatenation stops when the run has been cancelled, whatever
+// the operand types are, and gives the same bytes as heap.concat otherwise.
+func TestVMConcatChecksCancellationForEveryOperandType(t *testing.T) {
+	a := newAsm(t, 64)
+	a.fn("{main}", 0, 2).retNull()
+	big := stringValue(strings.Repeat("x", 2*vmCopyChunk))
+	for name, pair := range map[string][2]value{
+		"string . string": {big, big},
+		"string . int":    {big, intOf(t, 1)},
+		"int . string":    {intOf(t, 1), big},
+		"string . null":   {big, nullValue()},
+	} {
+		ctx, cancel := context.WithCancel(context.Background())
+		cfg := vmConfig(t, 64)
+		cfg.Context = ctx
+		x, err := newExecution(ctx, cfg.Request, 64, nil, executionLimits{depth: 4, callbacks: 16, output: 1 << 10})
+		if err != nil {
+			t.Fatal(err)
+		}
+		s := newVMState(a.program(), x, cfg)
+		got, err := s.binary(bytecode.Concat, pair[0], pair[1])
+		want, werr := x.heap.concat(pair[0], pair[1])
+		if err != nil || werr != nil || got.kind != valueString || got.text != want.text || s.stopped() {
+			t.Fatalf("%s: uncancelled join differs or stopped: %v %v", name, err, werr)
+		}
+		cancel()
+		got, err = s.binary(bytecode.Concat, pair[0], pair[1])
+		if err != nil || !s.stopped() || got.kind == valueString {
+			t.Errorf("%s: the copy was made after the context ended (stopped %v, kind %v, err %v)", name, s.stopped(), got.kind, err)
+		}
+	}
+}
+
+func intOf(t *testing.T, i int64) value {
+	t.Helper()
+	v, err := intValue(i, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return v
 }
