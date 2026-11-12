@@ -47,7 +47,7 @@ func (e *CompileError) Error() string {
 const (
 	guestPlatform    = "php-8.5.12"
 	target           = "portable-go"
-	compilerManifest = "phego/internal/vm stage-1 format-1.1"
+	compilerManifest = "phego/internal/vm stage-2 format-1.2"
 	modulesManifest  = "phego/modules/none"
 	runtimeManifest  = "phego/runtime-abi/w17-1"
 	policyManifest   = "phego/policy/unbound"
@@ -139,9 +139,13 @@ type compiler struct {
 	funcIndex map[string]uint32
 	lines     uint32
 	line      int // line of the node being compiled, for internal errors
+	// source is the file's bytes, which the compiler reads only to tell
+	// how a parameter default was spelt (defaultMayBeInterned).
+	source []byte
 }
 
 func (c *compiler) compile(source []byte) (bytecode.Image, error) {
+	c.source = source
 	unit := c.unit
 	if uint64(len(unit.Functions))+1 > uint64(limits.MaxFunctions) {
 		return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}

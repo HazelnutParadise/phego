@@ -237,8 +237,10 @@ func loadBytes(data []byte) (*Program, error) {
 }
 
 func TestLoadAcceptsMinorZeroAndOneAndGatesFormat11(t *testing.T) {
-	if FormatVersion != 1 || FormatMinor != 1 {
-		t.Fatalf("format version = %d.%d, want 1.1", FormatVersion, FormatMinor)
+	// Format 1.2 raised FormatMinor; format12_test.go checks the current
+	// value and that the next minor is refused.
+	if FormatVersion != 1 || FormatMinor < 1 {
+		t.Fatalf("format version = %d.%d, want at least 1.1", FormatVersion, FormatMinor)
 	}
 	encoded, err := requireValidBuild(t, validImage()).Encode(context.Background())
 	if err != nil {
@@ -247,7 +249,7 @@ func TestLoadAcceptsMinorZeroAndOneAndGatesFormat11(t *testing.T) {
 	if got := binary.LittleEndian.Uint16(encoded[10:12]); got != FormatMinor {
 		t.Fatalf("Encode wrote minor %d, want %d", got, FormatMinor)
 	}
-	for _, minor := range []uint16{0, 1} {
+	for _, minor := range []uint16{0, 1, 2} {
 		t.Run(fmt.Sprintf("format 1.0 program at minor %d", minor), func(t *testing.T) {
 			data := encodeAtMinor(t, validCallAndReferenceImage(), minor)
 			p, err := loadBytes(data)
@@ -260,12 +262,6 @@ func TestLoadAcceptsMinorZeroAndOneAndGatesFormat11(t *testing.T) {
 			}
 		})
 	}
-	t.Run("minor 2 is unsupported", func(t *testing.T) {
-		p, err := loadBytes(encodeAtMinor(t, validImage(), 2))
-		if p != nil || !errors.Is(err, ErrVersion) {
-			t.Fatalf("Load=(%v,%v), want ErrVersion", p, err)
-		}
-	})
 	for name, in := range format11ValidInstructions() {
 		t.Run("minor 0 rejects "+name, func(t *testing.T) {
 			image := format11Image(in)
@@ -342,9 +338,6 @@ func TestFormat11Safety(t *testing.T) {
 		if !ok || s != want {
 			t.Errorf("Safety(%d) = %+v, %v; want %+v", op, s, ok, want)
 		}
-	}
-	if _, ok := (OpArrayAdd + 1).Safety(); ok {
-		t.Errorf("opcode %d reported known", OpArrayAdd+1)
 	}
 }
 

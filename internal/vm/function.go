@@ -11,7 +11,9 @@ import (
 //
 //	[0, P)          parameter Value registers (bytecode requires them first)
 //	[P, P+L)        one Location register per local, bound by the prologue
-//	[P+L, ...)      Value temporaries, allocated as a stack per statement
+//	[P+L, P+L+T)    Value temporaries, allocated as a stack per statement
+//	[P+L+T]         one Location register for elements, only in a function
+//	                that writes through an element (FetchDim)
 //
 // L counts the PHP variables, in Func.Vars order.
 type fnCompiler struct {
@@ -36,9 +38,20 @@ type fnCompiler struct {
 	// moves to each statement and expression as compilation reaches it, so
 	// an operation carries the line of the last operand compiled for it.
 	cur int
+	// pinned keeps cur where it is: the code of a parameter default carries
+	// the parameter's line whatever lines its expression spans.
+	pinned bool
 
 	loops []loop
+	// elemPCs are the instructions that name the element register, by the
+	// placeholder elemReg until finish knows where the temporaries end.
+	elemPCs []int
 }
+
+// elemReg stands for the function's element Location register in emitted
+// instructions; finish replaces it. No register, constant or jump target
+// has this value.
+const elemReg = ^uint32(0)
 
 type fixup struct {
 	pc    int
@@ -47,10 +60,14 @@ type fixup struct {
 }
 
 // loop is a break/continue target: a loop or a switch, as HIR counts them.
+// A foreach also has its iterator register, which a break or continue to an
+// outer loop drops on the way out, as PHP emits FE_FREE.
 type loop struct {
 	isSwitch bool
 	brk      int
 	cont     int
+	iter     uint32
+	hasIter  bool
 }
 
 // function compiles one HIR function, returning an UnsupportedError for the
@@ -60,6 +77,10 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 		if r := recover(); r != nil {
 			if ue, ok := r.(*UnsupportedError); ok {
 				err = ue
+				return
+			}
+			if ce, ok := r.(*CompileError); ok {
+				err = ce
 				return
 			}
 			panic(r)
@@ -76,6 +97,7 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	}
 	fc.base = uint32(fc.params + locals)
 	fc.cur = positive(f.Line, 1)
+	fc.receive()
 	for _, s := range f.Body {
 		fc.stmt(s)
 	}
@@ -90,7 +112,172 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	if fc.overReg != 0 {
 		fc.unsupported("expression too large", fc.overReg)
 	}
+	if len(fc.elemPCs) > 0 && uint64(fc.base)+uint64(fc.maxTop)+1 > uint64(limits.MaxRegisters) {
+		fc.unsupported("expression too large", f.Line)
+	}
 	return fc.finish(locals), nil
+}
+
+// receive emits the part of the prologue that receives the parameters, PHP's
+// RECV and RECV_INIT, each on its parameter's line: "Store Lk, r_i", and for
+// a parameter with a default "ParamDefault r_i, <the Store>" and the code
+// that puts the default in r_i before it. The default is evaluated in the
+// callee, on every call that omits the argument, as RECV_INIT evaluates a
+// constant expression.
+func (fc *fnCompiler) receive() {
+	for i, p := range fc.f.Params {
+		fc.cur = positive(p.Line, fc.f.Line)
+		if p.Default != nil {
+			passed := fc.label()
+			pc := fc.emit(bytecode.OpParamDefault, 0, uint32(i), 0, 0)
+			fc.fixups = append(fc.fixups, fixup{pc, 1, passed})
+			mark := fc.top
+			fc.pinned = true
+			if d := p.Default; d.Op == ir.OpLiteral {
+				fc.c.line = d.Line
+				fc.emit(bytecode.OpConst, 0, uint32(i), fc.c.literal(d.Value), 0)
+			} else {
+				fc.emit(bytecode.OpMove, 0, uint32(i), fc.value(d), 0)
+				if !constArray(d) && fc.defaultMayBeInterned(d) {
+					fc.unsupported("parameter default whose string value PHP may intern", fc.cur)
+				}
+			}
+			fc.pinned = false
+			fc.top = mark
+			fc.bind(passed)
+		}
+		fc.emit(bytecode.OpStore, 0, fc.varLoc(p.Var), uint32(i), 0)
+	}
+}
+
+// defaultMayBeInterned reports whether a default PHP evaluates at run time
+// (one the lowering did not fold to a literal) may yield a string whose
+// interning the VM cannot tell. ZEND_RECV_INIT keeps an evaluated default
+// for later calls only when it is not refcounted, so a default that warns
+// does so again on each call, or only on the first. The VM keeps a string
+// of at most one byte (vmDefaultCacheable), which is what PHP interns for a
+// string offset, a digit converted from an integer, a concatenation with an
+// empty side and a one-byte literal written without an escape. It cannot
+// tell three cases, which are refused instead:
+//
+//   - a string converted from a float ("1" is not interned) or from an
+//     array ("Array" is): a concatenation, interpolation or string cast
+//     with an operand that may be a float or an array;
+//   - a one-byte literal written with an escape ("\n" is not interned):
+//     a one-byte string literal that may be the value, when the lines of
+//     the default contain a backslash.
+//
+// Keys of an element read or an array item, and the operands of
+// arithmetic, are never the value. The walk keeps its own stack.
+func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
+	const (
+		value   = iota // the node may be (part of) the default's value
+		operand        // converted to a number or bool, or a key
+		holder         // the array an element is read from
+	)
+	type item struct {
+		n   *ir.Node
+		pos int
+	}
+	conv, floatOrArray, oneByte := false, false, false
+	first, last := d.Line, d.Line
+	for stack := []item{{d, value}}; len(stack) > 0; {
+		it := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		n := it.n
+		if n == nil {
+			continue
+		}
+		if n.Line > 0 {
+			first, last = min(first, n.Line), max(last, n.Line)
+		}
+		kid := value
+		switch n.Op {
+		case ir.OpLiteral:
+			if it.pos == value && n.Value != nil {
+				switch {
+				case n.Value.Kind == ir.LitFloat:
+					floatOrArray = true
+				case n.Value.Kind == ir.LitString && len(n.Value.Str) == 1:
+					oneByte = true
+				}
+			}
+		case ir.OpArray:
+			if it.pos == value {
+				floatOrArray = true
+			}
+			if it.pos == operand {
+				kid = operand
+			}
+		case ir.OpItem:
+			if it.pos == operand {
+				kid = operand
+			}
+			stack = append(stack, item{n.Kids[0], operand}, item{n.Kids[1], kid})
+			continue
+		case ir.OpDim:
+			if it.pos == operand {
+				stack = append(stack, item{n.Kids[0], operand}, item{n.Kids[1], operand})
+			} else {
+				stack = append(stack, item{n.Kids[0], holder}, item{n.Kids[1], operand})
+			}
+			continue
+		case ir.OpInterp:
+			conv = true
+		case ir.OpCast:
+			if n.Text == "string" {
+				conv = true
+			} else {
+				kid = operand
+				if it.pos == value {
+					floatOrArray = true
+				}
+			}
+		case ir.OpBinary:
+			if n.Text == "." {
+				conv = true
+			} else {
+				kid = operand
+				if it.pos == value {
+					floatOrArray = true
+				}
+			}
+		case ir.OpUnary:
+			kid = operand
+			if it.pos == value {
+				floatOrArray = true
+			}
+		default:
+			if it.pos == operand {
+				kid = operand
+			}
+		}
+		for _, k := range n.Kids {
+			stack = append(stack, item{k, kid})
+		}
+	}
+	if conv && floatOrArray {
+		return true
+	}
+	return oneByte && fc.linesHaveBackslash(first, last)
+}
+
+// linesHaveBackslash reports whether source lines first..last contain a
+// backslash.
+func (fc *fnCompiler) linesHaveBackslash(first, last int) bool {
+	line := 1
+	for _, b := range fc.c.source {
+		if line > last {
+			break
+		}
+		if b == '\\' && line >= first {
+			return true
+		}
+		if b == '\n' {
+			line++
+		}
+	}
+	return false
 }
 
 // signature rejects the declaration forms stage 1 does not support, in
@@ -123,8 +310,6 @@ func (fc *fnCompiler) signature() {
 			fc.unsupported("by-reference parameter", line)
 		case p.Variadic:
 			fc.unsupported("variadic parameter", line)
-		case p.Default != nil:
-			fc.unsupported("parameter default value", line)
 		case len(p.Promoted) > 0:
 			fc.unsupported("promoted parameter", line)
 		case p.Var == nil:
@@ -160,7 +345,7 @@ func (fc *fnCompiler) varLoc(v *ir.Var) uint32 {
 
 // at moves the current line to a node's line, as compiling it does in PHP.
 func (fc *fnCompiler) at(line int) {
-	if line > 0 {
+	if line > 0 && !fc.pinned {
 		fc.cur = line
 	}
 }
@@ -210,6 +395,9 @@ func (fc *fnCompiler) emit(op bytecode.Opcode, aux uint16, a, b, cc uint32) int 
 	fc.maxLine = max(fc.maxLine, line)
 	fc.code = append(fc.code, bytecode.Instruction{Op: op, Aux: aux, A: a, B: b, C: cc})
 	fc.lines = append(fc.lines, uint32(line))
+	if a == elemReg || b == elemReg || cc == elemReg {
+		fc.elemPCs = append(fc.elemPCs, len(fc.code)-1)
+	}
 	return len(fc.code) - 1
 }
 
@@ -223,7 +411,8 @@ func (fc *fnCompiler) branch(cond uint32, yes, no int) {
 	fc.fixups = append(fc.fixups, fixup{pc, 1, yes}, fixup{pc, 2, no})
 }
 
-// finish prepends the prologue, resolves labels and builds the frame.
+// finish prepends the Locals of the prologue, resolves labels and the
+// element register and builds the frame.
 func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	c, f := fc.c, fc.f
 	declLine := uint32(positive(f.Line, 1))
@@ -231,10 +420,16 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	for i := 0; i < locals; i++ {
 		code = append(code, bytecode.Instruction{Op: bytecode.OpLocal, A: fc.loc(i), B: uint32(i)})
 	}
-	for i, p := range f.Params {
-		code = append(code, bytecode.Instruction{Op: bytecode.OpStore, A: fc.varLoc(p.Var), B: uint32(i)})
-	}
 	plen := len(code)
+	elem := fc.base + fc.maxTop
+	for _, pc := range fc.elemPCs {
+		in := &fc.code[pc]
+		for _, field := range []*uint32{&in.A, &in.B, &in.C} {
+			if *field == elemReg {
+				*field = elem
+			}
+		}
+	}
 	positions := make([]bytecode.Position, 0, plen+len(fc.code))
 	for range code {
 		positions = append(positions, bytecode.Position{Source: 1, Line: declLine})
@@ -264,6 +459,9 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	}
 	for i := 0; i < locals; i++ {
 		regs[fc.loc(i)] = bytecode.Location
+	}
+	if len(fc.elemPCs) > 0 {
+		regs = append(regs, bytecode.Location)
 	}
 	names := make([]uint32, locals)
 	for i := range names {
@@ -324,6 +522,8 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 		fc.doStmt(n)
 	case ir.OpFor:
 		fc.forStmt(n)
+	case ir.OpForeach:
+		fc.foreachStmt(n)
 	case ir.OpSwitch:
 		fc.switchStmt(n)
 	case ir.OpBreak, ir.OpContinue:
@@ -333,6 +533,12 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 		}
 		if depth < 1 || depth > len(fc.loops) {
 			panic(internalError{fmt.Sprintf("%s %d outside %d loops", n.Op, depth, len(fc.loops))})
+		}
+		// The iterators of the foreach loops left on the way are dropped.
+		for _, inner := range fc.loops[len(fc.loops)-depth+1:] {
+			if inner.hasIter {
+				fc.emit(bytecode.OpDrop, 0, inner.iter, 0, 0)
+			}
 		}
 		l := fc.loops[len(fc.loops)-depth]
 		if n.Op == ir.OpContinue && !l.isSwitch {
@@ -370,20 +576,20 @@ func (fc *fnCompiler) unset(k *ir.Node) {
 		fc.at(k.Line)
 		fc.emit(bytecode.OpUnset, 0, fc.varLoc(k.Var), 0, 0)
 	case ir.OpDim:
-		base := k.Kids[0]
-		if base != nil && base.Op == ir.OpDim {
-			fc.unsupported("nested array unset", k.Line)
-		}
-		l := fc.plainBase(base, k.Line)
-		if k.Kids[1] == nil {
+		// FETCH_DIM_UNSET for every level but the last, then UNSET_DIM,
+		// which reads a plain variable key itself after it reports an
+		// undefined container.
+		t := fc.dimTarget(k, k.Line)
+		last := t.keys[len(t.keys)-1]
+		if last.kind == keyNone {
 			panic(internalError{"unset of []"})
 		}
-		// ZEND_UNSET_DIM reads a plain variable key itself, after it
-		// reports an undefined container.
-		if key := fc.expr(k.Kids[1]); key.cv >= 0 && !key.quiet {
-			fc.emit(bytecode.OpArrayUnset, uint16(bytecode.KeyLocation), l, fc.loc(key.cv), 0)
+		container := fc.fetchPath(t, len(t.keys)-1, bytecode.FetchUnset, 0)
+		fc.cur = last.line
+		if rk, isLoc := fc.keyOperand(last); isLoc {
+			fc.emit(bytecode.OpArrayUnset, uint16(bytecode.KeyLocation), container, rk, 0)
 		} else {
-			fc.emit(bytecode.OpArrayUnset, 0, l, fc.materialize(key), 0)
+			fc.emit(bytecode.OpArrayUnset, 0, container, rk, 0)
 		}
 	default:
 		fc.unsupportedNode(k)
@@ -529,4 +735,74 @@ func (fc *fnCompiler) switchStmt(n *ir.Node) {
 	}
 	fc.loops = fc.loops[:len(fc.loops)-1]
 	fc.bind(end)
+}
+
+// foreachStmt compiles a by-value foreach: FE_RESET_R on the subject's line,
+// then per element FE_FETCH_R and the assignments of the value and then the
+// key. The iterator register holds the array for the whole loop, above the
+// temporaries of the body's statements; leaving the loop drops it.
+//
+//	      <subject -> rs>
+//	      IterInit it, rs, end
+//	next: IterNext it, <value>, brk
+//	      [IterKey <key>, it]
+//	      <body>              ; continue jumps to next
+//	      Jump next
+//	brk:  Drop it             ; break jumps here
+//	end:
+func (fc *fnCompiler) foreachStmt(n *ir.Node) {
+	if n.Flags&ir.FlagRef != 0 {
+		fc.unsupported("foreach by reference", n.Line)
+	}
+	subject, key, val, body := n.Kids[0], n.Kids[1], n.Kids[2], n.Kids[3]
+	it := fc.alloc()
+	inner := fc.top
+	rs := fc.value(subject)
+	next, brk, end := fc.label(), fc.label(), fc.label()
+	pc := fc.emit(bytecode.OpIterInit, 0, it, rs, 0)
+	fc.fixups = append(fc.fixups, fixup{pc, 2, end})
+	fc.top = inner
+	fc.bind(next)
+	fc.iterTarget(val, func(dest uint32, flags bytecode.IterFlags) {
+		pc := fc.emit(bytecode.OpIterNext, uint16(flags), it, dest, 0)
+		fc.fixups = append(fc.fixups, fixup{pc, 2, brk})
+	})
+	fc.top = inner
+	if key != nil {
+		fc.iterTarget(key, func(dest uint32, flags bytecode.IterFlags) {
+			fc.emit(bytecode.OpIterKey, uint16(flags), dest, it, 0)
+		})
+		fc.top = inner
+	}
+	fc.loops = append(fc.loops, loop{brk: brk, cont: next, iter: it, hasIter: true})
+	fc.stmt(body)
+	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.jump(next)
+	fc.bind(brk)
+	fc.emit(bytecode.OpDrop, 0, it, 0, 0)
+	fc.bind(end)
+}
+
+// iterTarget compiles the write of a fetched element or key to its target.
+// A plain variable is assigned by the iterator instruction itself, as
+// FE_FETCH_R assigns a CV; an element target receives a temporary through
+// the same write as "$target = <temporary>".
+func (fc *fnCompiler) iterTarget(target *ir.Node, fetch func(dest uint32, flags bytecode.IterFlags)) {
+	if target == nil {
+		panic(internalError{"foreach without a target"})
+	}
+	fc.c.line = target.Line
+	switch target.Op {
+	case ir.OpVar:
+		fetch(fc.varLoc(target.Var), bytecode.IterLocation)
+	case ir.OpDim:
+		tmp := fc.alloc()
+		fetch(tmp, 0)
+		t := fc.dimTarget(target, target.Line)
+		fc.writeDim(t, reg(tmp), false, false)
+	case ir.OpDestructure, ir.OpArray:
+		fc.unsupported("list() destructuring", target.Line)
+	default:
+		fc.unsupportedNode(target)
+	}
 }

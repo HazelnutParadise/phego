@@ -1,0 +1,42 @@
+-- source --
+<?php
+$a[$i]++;
+--$a[1][2];
+$a[]++;
+echo $a[0]--, ++$a['k'];
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=61 lines=6
+const 0: int 1
+const 1: int 2
+const 2: int 0
+const 3: string "k"
+const 4: null
+const 5: string "a"
+const 6: string "i"
+func 0 "{main}" params=0 locals=2 registers=4 maxstack=0
+  local 0 "a"
+  local 1 "i"
+  registers LLVL
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: FetchDim ReadWrite+key+incdec 3 0 1 ; line 2
+  3: IncDec PostInc 2 3 0 ; line 2
+  4: Const 0 2 0 0 ; line 3 ; int 1
+  5: FetchDim ReadWrite 3 0 2 ; line 3
+  6: Const 0 2 1 0 ; line 3 ; int 2
+  7: FetchDim ReadWrite+incdec 3 3 2 ; line 3
+  8: IncDec PreDec 2 3 0 ; line 3
+  9: FetchDim ReadWrite+append+incdec 3 0 0 ; line 4
+  10: IncDec PostInc 2 3 0 ; line 4
+  11: Const 0 2 2 0 ; line 5 ; int 0
+  12: FetchDim ReadWrite+incdec 3 0 2 ; line 5
+  13: IncDec PostDec 2 3 0 ; line 5
+  14: Output 0 2 0 0 ; line 5
+  15: Const 0 2 3 0 ; line 5 ; string "k"
+  16: FetchDim ReadWrite+incdec 3 0 2 ; line 5
+  17: IncDec PreInc 2 3 0 ; line 5
+  18: Output 0 2 0 0 ; line 5
+  19: Const 0 2 4 0 ; line 6 ; null
+  20: Return 0 2 0 0 ; line 6

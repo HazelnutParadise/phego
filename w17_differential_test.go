@@ -46,15 +46,11 @@ type w17Run struct {
 // w17Unsupported lists the cases this build's first VM stage cannot run,
 // with the located error Compile must return. They count as unsupported in
 // the summary, never as passes.
-var w17Unsupported = map[string]UnsupportedError{
-	"compound_assign":           {Feature: "compound assignment to array element", File: "/w/cases/compound_assign.php", Line: 61},
-	"compound_assign_undefined": {Feature: "compound assignment to array element", File: "/w/cases/compound_assign_undefined.php", Line: 34},
-	"isset_unset":               {Feature: "nested array unset", File: "/w/cases/isset_unset.php", Line: 22},
-}
+var w17Unsupported = map[string]UnsupportedError{}
 
 // w17Cases is the number of programs in tests/vm/w17/cases; every
 // reference file holds one entry per program.
-const w17Cases = 90
+const w17Cases = 192
 
 // w17Profile is one PHP build the reference was recorded on.
 type w17Profile struct {

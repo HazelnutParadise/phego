@@ -114,8 +114,10 @@ type ThrownError struct {
 var ErrStepLimit = errors.New("instruction step limit exceeded")
 
 // LimitError is the cause of a LimitExceeded run for every budget except
-// the step budget (ErrStepLimit). Resource is "frames", "calls", "output" or
-// "diagnostics"; Used is what the run had used before Requested more.
+// the step budget (ErrStepLimit). Resource is "frames", "calls", "output",
+// "diagnostics" or "memory" (a string offset write past vmStringOffsetLimit;
+// memory is not metered otherwise); Used is what the run had used before
+// Requested more.
 type LimitError struct {
 	Resource               string
 	Limit, Used, Requested int64

@@ -1,0 +1,172 @@
+--- FAIL: TestFormat12AcceptsValidOperands (0.00s)
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_write (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_read-write (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_for_incdec (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_for_assign-op (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_into_its_own_container (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_next_value (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_key_location (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_unset (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_key_location (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_unset_key_location (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/param_default (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_append (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/fetch_read-write_append (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_init_over_itself (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_next_location (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/param_default_backwards (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/array_set_result (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestFormat12AcceptsValidOperands/array_set_result_over_value (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestFormat12AcceptsValidOperands/array_set_result_and_locations (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_init (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/iter_key_value (0.00s)
+        format12_test.go:66: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path (0.00s)
+        --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path/iter_key (0.00s)
+            format12_test.go:76: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+        --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path/array_set_result (0.00s)
+            format12_test.go:76: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+        --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path/fetch_dim (0.00s)
+            format12_test.go:76: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+        --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path/iter_init (0.00s)
+            format12_test.go:76: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+        --- FAIL: TestFormat12AcceptsValidOperands/destinations_are_defined_on_the_fall-through_path/iter_next (0.00s)
+            format12_test.go:76: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestFormat12AcceptsValidOperands/a_foreach_loop (0.00s)
+        format12_test.go:82: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+--- FAIL: TestFormat12EdgeDefinitions (0.00s)
+    --- FAIL: TestFormat12EdgeDefinitions/iter_init_clears_a_defined_iterator_on_the_jump (0.00s)
+        format12_test.go:206: error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want a read before definition
+    --- FAIL: TestFormat12EdgeDefinitions/iter_next_leaves_the_element_undefined_on_the_jump (0.00s)
+        format12_test.go:206: error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want a read before definition
+    --- FAIL: TestFormat12EdgeDefinitions/fetch_does_not_define_its_key (0.00s)
+        format12_test.go:206: error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want a read before definition
+    --- FAIL: TestFormat12EdgeDefinitions/param_default_defines_nothing (0.00s)
+        format12_test.go:206: error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want a read before definition
+    --- FAIL: TestFormat12EdgeDefinitions/iter_init_leaves_the_iterator_undefined_on_the_jump (0.00s)
+        format12_test.go:206: error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want a read before definition
+    --- FAIL: TestFormat12EdgeDefinitions/iter_next_keeps_the_element_defined_when_it_already_was (0.00s)
+        format12_test.go:211: valid control Build failed: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+--- FAIL: TestFormat12BranchesRespectHandlers (0.00s)
+    --- FAIL: TestFormat12BranchesRespectHandlers/iter_init (0.00s)
+        format12_test.go:240: Build error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want normal control entering a handler body
+    --- FAIL: TestFormat12BranchesRespectHandlers/iter_next (0.00s)
+        format12_test.go:240: Build error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want normal control entering a handler body
+    --- FAIL: TestFormat12BranchesRespectHandlers/param_default (0.00s)
+        format12_test.go:240: Build error = invalid bytecode at byte -1, function 0, instruction 3: unknown opcode, want normal control entering a handler body
+--- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12 (0.00s)
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_write (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_write (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_read-write (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_read-write (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_unset_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_unset_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_for_incdec (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_for_incdec (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_init_over_itself (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_init_over_itself (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_key_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_key_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_array_set_result_and_locations (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_array_set_result_and_locations (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_unset (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_unset (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_array_set_result_over_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_array_set_result_over_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_append (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_append (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_into_its_own_container (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_into_its_own_container (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_param_default (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_param_default (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_param_default_backwards (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_param_default_backwards (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_key_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_read-write_append (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_read-write_append (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_fetch_for_assign-op (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_fetch_for_assign-op (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_init (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_init (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_next_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_next_value (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_iter_next_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_iter_next_location (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_0_rejects_array_set_result (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+    --- FAIL: TestLoadAcceptsMinorTwoAndGatesFormat12/minor_1_rejects_array_set_result (0.00s)
+        format12_test.go:274: Build: invalid bytecode at byte -1, function 0, instruction 3: invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation
+--- FAIL: TestFormat12EncodeLoadRoundTrip (0.00s)
+    format12_test.go:317: Build: invalid bytecode at byte -1, function 0, instruction 3: unknown opcode
+--- FAIL: TestFormat12Safety (0.00s)
+    format12_test.go:347: Safety(37) = {Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false; want {Steps:1 CheckCancel:true MayAllocate:true MayThrow:true MayCallUser:true Capabilities:0}
+    format12_test.go:347: Safety(38) = {Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false; want {Steps:1 CheckCancel:true MayAllocate:true MayThrow:true MayCallUser:true Capabilities:0}
+    format12_test.go:347: Safety(39) = {Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false; want {Steps:1 CheckCancel:true MayAllocate:true MayThrow:true MayCallUser:true Capabilities:0}
+    format12_test.go:347: Safety(40) = {Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false; want {Steps:1 CheckCancel:true MayAllocate:true MayThrow:true MayCallUser:true Capabilities:0}
+    format12_test.go:347: Safety(41) = {Steps:0 CheckCancel:false MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}, false; want {Steps:1 CheckCancel:true MayAllocate:false MayThrow:false MayCallUser:false Capabilities:0}
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/bytecode	7.325s
+FAIL

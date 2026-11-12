@@ -13,6 +13,12 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		// Format 1.1. Conversions can call __toString, and writes, unsets
 		// and exit can release values and run destructors.
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpFetchDim, OpIterInit, OpIterNext, OpIterKey:
+		// Format 1.2. Element fetches separate and grow arrays and convert
+		// keys; the iterator instructions retain, release and assign values.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpParamDefault:
+		// A branch on the frame's argument count.
 	case Opcode(0):
 		return Safety{}, false
 	default:

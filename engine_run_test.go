@@ -330,13 +330,15 @@ func TestRunRefusesClosedAndForeignEngines(t *testing.T) {
 // location and a rustc-style diagnostic.
 func TestUnsupportedConstructIsLocated(t *testing.T) {
 	e := mustEngine(t, Config{})
-	src := "<?php\n$a = [1];\n$a[0] += 1;\n"
+	// Stage 2 runs "$a[0] += 1", the construct this test used before; a
+	// reference assignment is still outside the VM.
+	src := "<?php\n$a = [1];\n$a[0] = &$b;\n"
 	_, err := e.Compile(context.Background(), "app/x.php", src)
 	var ue *UnsupportedError
-	if !errors.As(err, &ue) || ue.Feature != "compound assignment to array element" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
+	if !errors.As(err, &ue) || ue.Feature != "reference assignment" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
 		t.Fatalf("%#v", err)
 	}
-	if got := err.Error(); got != "phego: unsupported: compound assignment to array element in app/x.php on line 3" {
+	if got := err.Error(); got != "phego: unsupported: reference assignment in app/x.php on line 3" {
 		t.Fatalf("Error() = %q", got)
 	}
 	d, ok := Diagnose(err)
@@ -347,11 +349,11 @@ func TestUnsupportedConstructIsLocated(t *testing.T) {
 	if err := diag.Render(&b, d, diag.Options{Source: func(string) ([]byte, bool) { return []byte(src), true }}); err != nil {
 		t.Fatal(err)
 	}
-	const golden = `error[PHG3001]: unsupported PHP construct: compound assignment to array element
+	const golden = `error[PHG3001]: unsupported PHP construct: reference assignment
  --> app/x.php:3:1
   |
-3 | $a[0] += 1;
-  | ^^^^^^^^^^^ this build's VM cannot run this yet
+3 | $a[0] = &$b;
+  | ^^^^^^^^^^^^ this build's VM cannot run this yet
   |
   = note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly
   = help: run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages

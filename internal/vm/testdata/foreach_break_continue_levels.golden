@@ -1,0 +1,57 @@
+-- source --
+<?php
+foreach ($a as $x) {
+    foreach ($b as $y) {
+        if ($y) {
+            continue 2;
+        }
+        if ($x) {
+            break 2;
+        }
+        continue;
+    }
+    break;
+}
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=190 lines=14
+const 0: null
+const 1: string "a"
+const 2: string "x"
+const 3: string "b"
+const 4: string "y"
+func 0 "{main}" params=0 locals=4 registers=7 maxstack=0
+  local 0 "a"
+  local 1 "x"
+  local 2 "b"
+  local 3 "y"
+  registers LLLLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Local 0 3 3 0 ; line 1
+  4: Load 0 5 0 0 ; line 2
+  5: IterInit 0 4 5 26 ; line 2
+  6: IterNext 1 4 1 25 ; line 2
+  7: Load 0 6 2 0 ; line 3
+  8: IterInit 0 5 6 23 ; line 3
+  9: IterNext 1 5 3 22 ; line 3
+  10: Load 0 6 3 0 ; line 4
+  11: Branch 0 6 12 15 ; line 4
+  12: Drop 0 5 0 0 ; line 5
+  13: Jump 0 6 0 0 ; line 5
+  14: Jump 0 15 0 0 ; line 5
+  15: Load 0 6 1 0 ; line 7
+  16: Branch 0 6 17 20 ; line 7
+  17: Drop 0 5 0 0 ; line 8
+  18: Jump 0 25 0 0 ; line 8
+  19: Jump 0 20 0 0 ; line 8
+  20: Jump 0 9 0 0 ; line 10
+  21: Jump 0 9 0 0 ; line 10
+  22: Drop 0 5 0 0 ; line 10
+  23: Jump 0 25 0 0 ; line 12
+  24: Jump 0 6 0 0 ; line 12
+  25: Drop 0 4 0 0 ; line 12
+  26: Const 0 4 0 0 ; line 14 ; null
+  27: Return 0 4 0 0 ; line 14

@@ -16,7 +16,9 @@ import (
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
-// gen builds random programs from a tiny grammar of the stage-1 subset.
+// gen builds random programs from a tiny grammar of the compiled subset:
+// stage 1 and the element writes, foreach, parameter defaults and string
+// offsets of stage 2.
 type gen struct {
 	r     *rand.Rand
 	b     strings.Builder
@@ -41,7 +43,20 @@ func (g *gen) expr(d int) string {
 		}
 	}
 	e := func() string { return g.expr(d - 1) }
-	switch g.r.Intn(18) {
+	switch g.r.Intn(24) {
+	case 18:
+		return "(" + g.v() + "[" + e() + "][" + e() + "] = " + e() + ")"
+	case 19:
+		return "(" + g.v() + g.dims(d) + " " + []string{"+=", "-=", ".=", "*=", "??=", "|=", "**=", "<<="}[g.r.Intn(8)] + " " + e() + ")"
+	case 20:
+		t := g.v() + g.dims(d)
+		return []string{t + "++", "++" + t, t + "--", "--" + t}[g.r.Intn(4)]
+	case 21:
+		return "(" + g.v() + "[][" + e() + "] = " + g.v() + ")"
+	case 22:
+		return "(" + []string{"'abc'", "\"x\"", "''"}[g.r.Intn(3)] + "[" + e() + "] ?? " + e() + ")"
+	case 23:
+		return "(" + g.v() + "[" + e() + "][] .= " + e() + ")"
 	case 0:
 		ops := []string{"+", "-", "*", "/", "%", "**", ".", "<<", ">>", "&", "|", "^", "==", "!=", "===", "!==", "<", "<=", ">", ">=", "<=>"}
 		return "(" + e() + " " + ops[g.r.Intn(len(ops))] + " " + e() + ")"
@@ -101,6 +116,19 @@ func (g *gen) expr(d int) string {
 	}
 }
 
+// dims is one to three element levels, the last of which has a key.
+func (g *gen) dims(d int) string {
+	out := ""
+	for i := g.r.Intn(3); i > 0; i-- {
+		if g.r.Intn(4) == 0 {
+			out += "[]"
+		} else {
+			out += "[" + g.expr(d-1) + "]"
+		}
+	}
+	return out + "[" + g.expr(d-1) + "]"
+}
+
 func (g *gen) stmt(d, loops int) {
 	e := func() string { return g.expr(2) }
 	if d <= 0 {
@@ -112,7 +140,21 @@ func (g *gen) stmt(d, loops int) {
 			g.stmt(d-1, loops)
 		}
 	}
-	switch g.r.Intn(14) {
+	switch g.r.Intn(18) {
+	case 14:
+		fmt.Fprintf(&g.b, "foreach (%s as %s) {\n", e(), g.v())
+		body(loops + 1)
+		g.b.WriteString("}\n")
+	case 15:
+		fmt.Fprintf(&g.b, "foreach (%s as %s => %s) {\n", g.v(), g.v(), g.v())
+		body(loops + 1)
+		g.b.WriteString("}\n")
+	case 16:
+		fmt.Fprintf(&g.b, "foreach (%s as %s%s => %s[]) {\n", e(), g.v(), g.dims(1), g.v())
+		body(loops + 1)
+		g.b.WriteString("}\n")
+	case 17:
+		fmt.Fprintf(&g.b, "unset(%s%s, %s[%s][%s]);\n", g.v(), "["+e()+"]["+e()+"]["+e()+"]", g.v(), e(), e())
 	case 0:
 		fmt.Fprintf(&g.b, "%s = %s;\n", g.v(), e())
 	case 1:
@@ -175,8 +217,13 @@ func (g *gen) program() string {
 	}
 	for i, params := range g.funcs {
 		ps := make([]string, params)
+		optional := false
 		for j := range ps {
 			ps[j] = fmt.Sprintf("$v%d", j)
+			// Once a parameter has a default, the later ones do too.
+			if optional = optional || g.r.Intn(3) == 0; optional {
+				ps[j] += " = " + []string{"1", "'d'", "null", "[]", "[1, 'k' => [2]]", "1 + 2", "-1.5"}[g.r.Intn(7)]
+			}
 		}
 		fmt.Fprintf(&g.b, "function f%d(%s) {\n", i, strings.Join(ps, ", "))
 		for k := g.r.Intn(3); k >= 0; k-- {
@@ -205,6 +252,10 @@ func TestRandomSubsetProgramsCompileAndBuild(t *testing.T) {
 			t.Fatalf("program %d does not lower: %v\n%s", i, err, src)
 		}
 		img, err := Compile(context.Background(), unit, []byte(src))
+		var fatal *CompileError
+		if errors.As(err, &fatal) && fatal.Message == "Cannot use [] for reading" {
+			continue // "$a[] ??= v", PHP's compile-time fatal that the compiler reports
+		}
 		if err != nil {
 			t.Fatalf("program %d: %v\n%s", i, err, src)
 		}
@@ -230,6 +281,8 @@ func FuzzCompileSubset(f *testing.F) {
 		f.Add(g.program())
 	}
 	f.Add("<?php foreach ($a as $b) {} class A {} $x = fn() => 1;")
+	f.Add("<?php function f($a, $b = [1, 'k' => 2], $c = 'x' . 'y') { foreach ($b as $k => $v[$k][]) { $a[$k][0] .= $v; $a[]++; } unset($a[1][2]); return $a['s'][0] ?? $c[1]; }\necho f(1), $u[1][2] ??= 3;")
+	f.Add("<?php $a[] ??= 1;")
 	prof, err := profile.Resolve("8.5.12", 64, false)
 	if err != nil {
 		f.Fatal(err)
@@ -245,10 +298,18 @@ func FuzzCompileSubset(f *testing.F) {
 		}
 		img, err := Compile(context.Background(), unit, []byte(src))
 		var ue *UnsupportedError
+		var ce *CompileError
 		switch {
 		case errors.As(err, &ue):
 			if ue.Line < 1 || ue.Feature == "" || ue.File != "/fuzz.php" {
 				t.Fatalf("malformed UnsupportedError %+v", ue)
+			}
+			return
+		case errors.As(err, &ce):
+			// A PHP compile-time fatal the compiler reports itself, such as
+			// "$a[] ??= 1" (Cannot use [] for reading).
+			if ce.Line < 1 || ce.Message == "" || ce.File != "/fuzz.php" {
+				t.Fatalf("malformed CompileError %+v", ce)
 			}
 			return
 		case err != nil:

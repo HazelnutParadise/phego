@@ -1,0 +1,386 @@
+--- FAIL: TestVMFetchDim (0.00s)
+    --- FAIL: TestVMFetchDim/write_creates_the_path (0.00s)
+        vm_arrayops_test.go:86: $a[1][2] = 3; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMFetchDim/three_levels_reuse_one_element_register (0.00s)
+        vm_arrayops_test.go:86: $a["x"]["y"]["z"] = 1; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMFetchDim/append_in_the_middle (0.00s)
+        vm_arrayops_test.go:86: $c[][] = 5; $c[0][] = 6; return $c;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 1)), want Completed
+    --- FAIL: TestVMFetchDim/read-write_warns_for_each_missing_key (0.00s)
+        vm_arrayops_test.go:83: $a = []; $a["x"]["y"] .= "w"; return $a;
+            diagnostics []
+            want        ["Warning: Undefined array key \"x\"" "Warning: Undefined array key \"y\""]
+        vm_arrayops_test.go:86: $a = []; $a["x"]["y"] .= "w"; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want Completed
+    --- FAIL: TestVMFetchDim/read-write_on_an_undefined_variable (0.00s)
+        vm_arrayops_test.go:83: $u["p"]["q"] -= 1; return $u;
+            diagnostics []
+            want        ["Warning: Undefined variable $u" "Warning: Undefined array key \"p\"" "Warning: Undefined array key \"q\""]
+        vm_arrayops_test.go:86: $u["p"]["q"] -= 1; return $u;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMFetchDim/write_on_an_undefined_variable_is_silent (0.00s)
+        vm_arrayops_test.go:86: $u["p"]["q"] = 1; return $u;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMFetchDim/increment_through_an_element (0.00s)
+        vm_arrayops_test.go:83: $a = [5]; $x = $a[0]++; $a["n"]--; return [$x, $a];
+            diagnostics []
+            want        ["Warning: Undefined array key \"n\"" "Warning: Decrement on type null has no effect, this will change in the next major version of PHP"]
+        vm_arrayops_test.go:86: $a = [5]; $x = $a[0]++; $a["n"]--; return [$x, $a];: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 6)), want Completed
+    --- FAIL: TestVMFetchDim/read-write_append_creates_null_silently (0.00s)
+        vm_arrayops_test.go:86: $a = []; $a[]++; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 3)), want Completed
+    --- FAIL: TestVMFetchDim/undefined_key_variable (0.00s)
+        vm_arrayops_test.go:83: $a = []; $a[$u1][$u2] = $u3; return $a;
+            diagnostics []
+            want        ["Warning: Undefined variable $u1" "Deprecated: Using null as an array offset is deprecated, use an empty string instead" "Warning: Undefined variable $u2" "Deprecated: Using null as an array offset is deprecated, use an empty string instead" "Warning: Undefined variable $u3"]
+        vm_arrayops_test.go:86: $a = []; $a[$u1][$u2] = $u3; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 6)), want Completed
+    --- FAIL: TestVMFetchDim/false_becomes_an_array_at_each_level (0.00s)
+        vm_arrayops_test.go:83: $a = [false]; $a[0][1] = 2; return $a;
+            diagnostics []
+            want        ["Deprecated: Automatic conversion of false to array is deprecated"]
+        vm_arrayops_test.go:86: $a = [false]; $a[0][1] = 2; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 6)), want Completed
+    --- FAIL: TestVMFetchDim/false_variable_in_write_mode (0.00s)
+        vm_arrayops_test.go:83: $f = false; $f[1][2] = 3; return $f;
+            diagnostics []
+            want        ["Deprecated: Automatic conversion of false to array is deprecated"]
+        vm_arrayops_test.go:86: $f = false; $f[1][2] = 3; return $f;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want Completed
+    --- FAIL: TestVMFetchDim/array_key (0.00s)
+        vm_arrayops_test.go:86: $a = []; $a[[]][$uk] = $uv;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 6)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/append_when_the_next_index_is_taken (0.00s)
+        vm_arrayops_test.go:86: $a = [PHP_INT_MAX => 1]; $a[][$uk] = $uv;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 8)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/scalar_container (0.00s)
+        vm_arrayops_test.go:86: $i = 5; $i[$u1][$u2] = $u3;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/scalar_container,_increment_reads_no_key (0.00s)
+        vm_arrayops_test.go:86: $i = 5; $i[$uk]++;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/scalar_container,_assign-op_reads_the_key_first (0.00s)
+        vm_arrayops_test.go:83: $i = 5; $i[$uk] .= "x";
+            diagnostics []
+            want        ["Warning: Undefined variable $uk"]
+        vm_arrayops_test.go:86: $i = 5; $i[$uk] .= "x";: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/scalar_container,_unset (0.00s)
+        vm_arrayops_test.go:86: $i = 5; unset($i[$u1][$u2]);: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container (0.00s)
+        vm_arrayops_test.go:83: $s = "str"; $s[$u1][$u2] = $u3;
+            diagnostics []
+            want        ["Warning: Undefined variable $u1" "Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: $s = "str"; $s[$u1][$u2] = $u3;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_increment (0.00s)
+        vm_arrayops_test.go:83: $s = "abc"; $s[1.5]++;
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: $s = "abc"; $s[1.5]++;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_assign-op (0.00s)
+        vm_arrayops_test.go:83: $s = "abc"; $s["1x"] .= $uv;
+            diagnostics []
+            want        ["Warning: Illegal string offset \"1x\""]
+        vm_arrayops_test.go:86: $s = "abc"; $s["1x"] .= $uv;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_append (0.00s)
+        vm_arrayops_test.go:86: $s = "str"; $s[][0] = 1;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 3)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_array_key (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; $s[[]][0] = 1;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_non-numeric_key (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; $s["x"]++;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_unset_with_an_array_key (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; unset($s[[]][0]);: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/string_container,_unset_with_a_leading-numeric_key (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; unset($s["1x"][0]);: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/unset_creates_nothing (0.00s)
+        vm_arrayops_test.go:86: $a = ["n" => ["x" => 1]]; unset($a["n"]["x"]); unset($a["no"]["x"]); unset($a["n"]["zz"]["q"]); return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 10)), want Completed
+    --- FAIL: TestVMFetchDim/unset_on_an_undefined_variable (0.00s)
+        vm_arrayops_test.go:83: unset($u["a"]["b"]); return isset($u);
+            diagnostics []
+            want        ["Warning: Undefined variable $u"]
+        vm_arrayops_test.go:86: unset($u["a"]["b"]); return isset($u);: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMFetchDim/unset_through_false (0.00s)
+        vm_arrayops_test.go:83: $f = false; unset($f["a"]["b"]); return $f;
+            diagnostics []
+            want        ["Deprecated: Automatic conversion of false to array is deprecated"]
+        vm_arrayops_test.go:86: $f = false; unset($f["a"]["b"]); return $f;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 4)), want Completed
+    --- FAIL: TestVMFetchDim/unset_with_undefined_key_variables (0.00s)
+        vm_arrayops_test.go:83: $a = []; unset($a[$k1][$k2]); return $a;
+            diagnostics []
+            want        ["Warning: Undefined variable $k1" "Deprecated: Using null as an array offset is deprecated, use an empty string instead" "Warning: Undefined variable $k2"]
+        vm_arrayops_test.go:86: $a = []; unset($a[$k1][$k2]); return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMFetchDim/unset_of_a_string_element's_offset (0.00s)
+        vm_arrayops_test.go:83: $s = ["str"]; unset($s[0][$uk]);
+            diagnostics []
+            want        ["Warning: Undefined variable $uk"]
+        vm_arrayops_test.go:86: $s = ["str"]; unset($s[0][$uk]);: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 7)), want UncaughtThrowable
+    --- FAIL: TestVMFetchDim/a_nested_write_separates_each_shared_level (0.00s)
+        vm_arrayops_test.go:86: $a = [[1, 2]]; $b = $a; $in = $a[0]; $a[0][0] = 9; return [$a, $b, $in];: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 18)), want Completed
+--- FAIL: TestVMStringOffsetWrite (0.00s)
+    --- FAIL: TestVMStringOffsetWrite/in_range (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; $s[1] = "X";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/past_the_end_pads_with_spaces (0.00s)
+        vm_arrayops_test.go:86: $s[5] = "!";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/negative (0.00s)
+        vm_arrayops_test.go:86: $s[-1] = "z";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/first_byte_only (0.00s)
+        vm_arrayops_test.go:83: $s[0] = "long";
+            diagnostics []
+            want        ["Warning: Only the first byte will be assigned to the string offset"]
+        vm_arrayops_test.go:86: $s[0] = "long";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/integer_value (0.00s)
+        vm_arrayops_test.go:83: $s[0] = 65;
+            diagnostics []
+            want        ["Warning: Only the first byte will be assigned to the string offset"]
+        vm_arrayops_test.go:86: $s[0] = 65;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/true_value (0.00s)
+        vm_arrayops_test.go:86: $s[2] = true;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/numeric_string_key (0.00s)
+        vm_arrayops_test.go:86: $s["2"] = "q";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/leading-numeric_key (0.00s)
+        vm_arrayops_test.go:83: $s["1x"] = "A";
+            diagnostics []
+            want        ["Warning: Illegal string offset \"1x\""]
+        vm_arrayops_test.go:86: $s["1x"] = "A";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/float_key (0.00s)
+        vm_arrayops_test.go:83: $s[1.7] = "F";
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: $s[1.7] = "F";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/null_key (0.00s)
+        vm_arrayops_test.go:83: $s[null] = "G";
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: $s[null] = "G";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/before_the_start (0.00s)
+        vm_arrayops_test.go:83: $s[-7] = "H";
+            diagnostics []
+            want        ["Warning: Illegal string offset -7"]
+        vm_arrayops_test.go:86: $s[-7] = "H";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/non-numeric_key (0.00s)
+        vm_arrayops_test.go:86: $s["x"] = "y";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetWrite/float_string_key (0.00s)
+        vm_arrayops_test.go:86: $s["1.5"] = "A";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetWrite/empty_value (0.00s)
+        vm_arrayops_test.go:86: $s[1] = "";: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetWrite/null_value (0.00s)
+        vm_arrayops_test.go:86: $s[1] = null;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetWrite/result_is_the_byte (0.00s)
+        vm_arrayops_test.go:83: $r = $s[0] = "xyz"; return [$r, $s];
+            diagnostics []
+            want        ["Warning: Only the first byte will be assigned to the string offset"]
+        vm_arrayops_test.go:86: $r = $s[0] = "xyz"; return [$r, $s];: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/result_of_an_illegal_offset_is_null (0.00s)
+        vm_arrayops_test.go:83: $r = $s[-9] = "q"; return [$r, $s];
+            diagnostics []
+            want        ["Warning: Illegal string offset -9"]
+        vm_arrayops_test.go:86: $r = $s[-9] = "q"; return [$r, $s];: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/result_of_an_array_element_write_is_the_value (0.00s)
+        vm_arrayops_test.go:91: $a = []; $r = $a["k"] = 7; return [$r, $a];: returned [0=>N,1=>["k"=>i:7]], want [0=>i:7,1=>["k"=>i:7]]
+    --- FAIL: TestVMStringOffsetWrite/the_value_variable_is_read_after_the_offset (0.00s)
+        vm_arrayops_test.go:83: $s[$uk] = $uv;
+            diagnostics []
+            want        ["Warning: Undefined variable $uk" "Warning: String offset cast occurred" "Warning: Undefined variable $uv"]
+        vm_arrayops_test.go:86: $s[$uk] = $uv;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetWrite/an_illegal_offset_does_not_read_the_value (0.00s)
+        vm_arrayops_test.go:83: $s[-9] = $uv; return $s;
+            diagnostics []
+            want        ["Warning: Illegal string offset -9"]
+        vm_arrayops_test.go:86: $s[-9] = $uv; return $s;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/array_value (0.00s)
+        vm_arrayops_test.go:83: $s[1] = [1]; return $s;
+            diagnostics []
+            want        ["Warning: Array to string conversion" "Warning: Only the first byte will be assigned to the string offset"]
+        vm_arrayops_test.go:86: $s[1] = [1]; return $s;: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 7)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/a_string_element_of_an_array (0.00s)
+        vm_arrayops_test.go:86: $a = ["str"]; $a[0][1] = "X"; return $a;: end Unsupported (unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function {main}, pc 6)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/a_copy_keeps_its_bytes (0.00s)
+        vm_arrayops_test.go:86: $s = "abc"; $t = $s; $s[0] = "X"; return [$s, $t];: end Unsupported (unsupported in the stage-1 VM: writing a string offset at /w/t.php:3 (function {main}, pc 8)), want Completed
+    --- FAIL: TestVMStringOffsetWrite/an_offset_past_the_memory_bound_ends_the_run (0.00s)
+        vm_stage2_test.go:416: Unsupported unsupported in the stage-1 VM: writing a string offset at /w/t.php:2 (function {main}, pc 7) "a"
+--- FAIL: TestVMStringOffsetRead (0.00s)
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[0] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[0];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[5] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[5];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-1] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[-1];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-6] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[-6];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[6] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[6];
+            diagnostics []
+            want        ["Warning: Uninitialized string offset 6"]
+        vm_arrayops_test.go:86: return "abcdef"[6];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-7] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[-7];
+            diagnostics []
+            want        ["Warning: Uninitialized string offset -7"]
+        vm_arrayops_test.go:86: return "abcdef"[-7];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[_2] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[ 2];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[3_] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[3 ];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-1]#01 (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[-1];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1x] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[1x];
+            diagnostics []
+            want        ["Warning: Illegal string offset \"1x\""]
+        vm_arrayops_test.go:86: return "abcdef"[1x];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[0x1] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[0x1];
+            diagnostics []
+            want        ["Warning: Illegal string offset \"0x1\""]
+        vm_arrayops_test.go:86: return "abcdef"[0x1];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1.7] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[1.7];
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: return "abcdef"[1.7];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[true] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[true];
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: return "abcdef"[true];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[false] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[false];
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: return "abcdef"[false];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[<nil>] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[<nil>];
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: return "abcdef"[<nil>];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-0.5] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[-0.5];
+            diagnostics []
+            want        ["Warning: String offset cast occurred"]
+        vm_arrayops_test.go:86: return "abcdef"[-0.5];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1000] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[1000];
+            diagnostics []
+            want        ["Warning: String offset cast occurred" "Warning: Uninitialized string offset 1000"]
+        vm_arrayops_test.go:86: return "abcdef"[1000];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1e+30] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[1e+30];
+            diagnostics []
+            want        ["Warning: String offset cast occurred" "Warning: Uninitialized string offset 5076964154930102272"]
+        vm_arrayops_test.go:86: return "abcdef"[1e+30];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[9] (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[9];
+            diagnostics []
+            want        ["Warning: Uninitialized string offset 9"]
+        vm_arrayops_test.go:86: return "abcdef"[9];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[x] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[x];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1.5] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1.5];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1e1] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1e1];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[{}] (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[{}];: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[0]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[0] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[6]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[6] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[-7]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[-7] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[x]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[x] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1.0]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1.0] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[_1]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[ 1] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1x]_??_null (0.00s)
+        vm_arrayops_test.go:83: return "abcdef"[1x] ?? null;
+            diagnostics []
+            want        ["Warning: Illegal string offset \"1x\""]
+        vm_arrayops_test.go:86: return "abcdef"[1x] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1.5]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1.5] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[true]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[true] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[<nil>]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[<nil>] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[1e+30]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[1e+30] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want Completed
+    --- FAIL: TestVMStringOffsetRead/"abcdef"[{}]_??_null (0.00s)
+        vm_arrayops_test.go:86: return "abcdef"[{}] ?? null;: end Unsupported (unsupported in the stage-1 VM: reading a string offset at /w/t.php:3 (function {main}, pc 2)), want UncaughtThrowable
+    --- FAIL: TestVMStringOffsetRead/32-bit_offsets (0.00s)
+        vm_stage2_test.go:486: []
+            N (unsupported in the stage-1 VM: reading a string offset at /w/t.php:2 (function {main}, pc 2))
+--- FAIL: TestVMForeach (0.00s)
+    --- FAIL: TestVMForeach/values_and_keys_in_order (0.00s)
+        vm_arrayops_test.go:86: $o = ""; foreach (["x" => 1, 5 => "five", "" => true] as $k => $v) { $o .= "[$k]=$v;"; } return $o;: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 15)), want Completed
+    --- FAIL: TestVMForeach/an_empty_array_leaves_the_variables_alone (0.00s)
+        vm_arrayops_test.go:86: foreach ([] as $k => $v) {} return [isset($k), isset($v)];: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 3)), want Completed
+    --- FAIL: TestVMForeach/the_loop_iterates_the_array_as_it_was (0.00s)
+        vm_arrayops_test.go:86: $a = [1, 2, 3]; $o = ""; foreach ($a as $k => $v) { $a[] = $v * 10; $a[1] = "c"; unset($a[2]); $o .= $v; } return [$o, $a];: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 15)), want Completed
+    --- FAIL: TestVMForeach/the_array_variable_may_be_the_loop_variable (0.00s)
+        vm_arrayops_test.go:86: $e = [1, 2]; $o = ""; foreach ($e as $e) { $o .= $e; } return [$o, $e];: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 11)), want Completed
+    --- FAIL: TestVMForeach/the_key_is_assigned_after_the_value (0.00s)
+        vm_arrayops_test.go:86: foreach (["k1" => "v1"] as $x => $x) {} return $x;: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 5)), want Completed
+    --- FAIL: TestVMForeach/holes_are_skipped (0.00s)
+        vm_arrayops_test.go:86: $a = [0, 1, 2, 3, 4]; unset($a[1], $a[3]); $o = ""; foreach ($a as $k => $v) { $o .= $k; } return $o;: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 23)), want Completed
+    --- FAIL: TestVMForeach/value_registers_as_destinations (0.00s)
+        vm_arrayops_test.go:86: $o = ""; foreach ([7, 8] as $k => $v) { $o .= $k . $v; } return $o;: end Unsupported (unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:3 (function {main}, pc 8)), want Completed
+    --- FAIL: TestVMForeach/not_iterable:_null (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+    --- FAIL: TestVMForeach/not_iterable:_int (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+    --- FAIL: TestVMForeach/not_iterable:_string (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+    --- FAIL: TestVMForeach/not_iterable:_false (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+    --- FAIL: TestVMForeach/not_iterable:_true (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+    --- FAIL: TestVMForeach/not_iterable:_float (0.00s)
+        vm_stage2_test.go:601: [] Unsupported N ""
+--- FAIL: TestVMForeachChargesStepsBeforeEffects (0.00s)
+    vm_stage2_test.go:655: steps 4: Unsupported unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 3) after 4
+--- FAIL: TestVMForeachPollsCancellationAtTheBackEdge (0.04s)
+    vm_stage2_test.go:676: Unsupported unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 3)
+--- FAIL: TestVMForeachDoesNotCopyTheArray (0.03s)
+    vm_stage2_test.go:695: Unsupported unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 6)
+--- FAIL: TestVMIterNextObservesAStopWhileSkippingHoles (0.00s)
+    vm_stage2_test.go:727: pos 0, found false, stopped false after 0 polls
+--- FAIL: TestVMParamDefault (0.00s)
+    --- FAIL: TestVMParamDefault/1_arguments (0.00s)
+        vm_stage2_test.go:785: UncaughtThrowable N [{Fatal error Uncaught ArgumentCountError: Too few arguments to function f(), 1 passed in /w/t.php on line 2 and exactly 3 expected in /w/t.php:10
+            Stack trace:
+            #0 /w/t.php(2): f(1)
+            #1 {main}
+              thrown /w/t.php 10}] ArgumentCountError: Too few arguments to function f(), 1 passed in /w/t.php on line 2 and exactly 3 expected
+    --- FAIL: TestVMParamDefault/2_arguments (0.00s)
+        vm_stage2_test.go:785: UncaughtThrowable N [{Fatal error Uncaught ArgumentCountError: Too few arguments to function f(), 2 passed in /w/t.php on line 2 and exactly 3 expected in /w/t.php:10
+            Stack trace:
+            #0 /w/t.php(2): f(1, NULL)
+            #1 {main}
+              thrown /w/t.php 10}] ArgumentCountError: Too few arguments to function f(), 2 passed in /w/t.php on line 2 and exactly 3 expected
+    --- FAIL: TestVMParamDefault/3_arguments (0.00s)
+        vm_stage2_test.go:785: Unsupported N [] unsupported in the stage-1 VM: the opcode 41 instruction at /w/t.php:12 (function f, pc 4)
+    --- FAIL: TestVMParamDefault/4_arguments (0.00s)
+        vm_stage2_test.go:785: Unsupported N [] unsupported in the stage-1 VM: the opcode 41 instruction at /w/t.php:12 (function f, pc 4)
+    --- FAIL: TestVMParamDefault/too_few_arguments (0.00s)
+        vm_stage2_test.go:797: UncaughtThrowable &{Class:ArgumentCountError Message:Too few arguments to function f(), 0 passed in /w/t.php on line 5 and exactly 3 expected File:/w/t.php Line:10} ArgumentCountError: Too few arguments to function f(), 0 passed in /w/t.php on line 5 and exactly 3 expected
+    --- FAIL: TestVMParamDefault/the_backtrace_shows_the_passed_arguments_only (0.00s)
+        vm_stage2_test.go:838: trace "Uncaught ArgumentCountError: Too few arguments to function f(), 1 passed in /w/t.php on line 5 and exactly 2 expected in /w/t.php:10\nStack trace:\n#0 /w/t.php(5): f(7)\n#1 {main}\n  thrown"
+--- FAIL: TestVMElementLocationsAreClearedOnPop (0.00s)
+    vm_stage2_test.go:862: verified run: Unsupported "" unsupported in the stage-1 VM: the opcode 37 instruction at /w/t.php:3 (function w, pc 2)
+--- FAIL: TestVMStage2SharedProgramIsolation (0.00s)
+    vm_stage2_test.go:915: goroutine 15 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 6 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 7 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 12 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 13 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 14 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 3 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 4 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 0 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 1 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 9 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 8 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 10 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 11 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 2 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+    vm_stage2_test.go:915: goroutine 5 run 0: Unsupported N unsupported in the stage-1 VM: the opcode 38 instruction at /w/t.php:2 (function {main}, pc 8)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.993s
+FAIL

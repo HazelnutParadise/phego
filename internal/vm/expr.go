@@ -183,6 +183,19 @@ func (fc *fnCompiler) binary(n *ir.Node) operand {
 	if n.Text == ">" || n.Text == ">=" {
 		a, b = b, a
 	}
+	if n.Text == "." {
+		// zend_compile_binary_op gives CONCAT a constant array operand
+		// through a CAST emitted after both operands, left first: its
+		// "Array to string conversion" comes before CONCAT reads a plain
+		// variable operand.
+		for i, o := range []*operand{&a, &b} {
+			if constArray(n.Kids[i]) {
+				r := fc.materialize(*o)
+				fc.emit(bytecode.OpCast, uint16(bytecode.CastString), r, r, 0)
+				*o = reg(r)
+			}
+		}
+	}
 	ra := fc.materialize(a)
 	rb := fc.materialize(b)
 	r := fc.allocNot(mark, ra, rb)
@@ -301,10 +314,9 @@ func (fc *fnCompiler) isset(n *ir.Node) operand {
 			if k.Kids[1] == nil {
 				panic(internalError{"isset of []"})
 			}
-			base := fc.expr(k.Kids[0])
-			key := fc.expr(k.Kids[1])
-			rb := fc.materialize(base)
-			rk := fc.materialize(key)
+			// FETCH_DIM_IS for every level but the last, then
+			// ISSET_ISEMPTY_DIM_OBJ, in the order of any element read.
+			rb, rk := fc.readChain(k)
 			r = fc.allocNot(mark, rb, rk)
 			fc.emit(bytecode.OpArrayIsset, 0, r, rb, rk)
 		default:
@@ -330,7 +342,7 @@ func (fc *fnCompiler) isset(n *ir.Node) operand {
 }
 
 // plainBase returns the Location of the plain variable an element write
-// goes through, or reports why the base is outside stage 1.
+// goes through, or reports why the base is outside this stage.
 func (fc *fnCompiler) plainBase(base *ir.Node, line int) uint32 {
 	if base == nil {
 		panic(internalError{"element access without a base"})
@@ -339,8 +351,6 @@ func (fc *fnCompiler) plainBase(base *ir.Node, line int) uint32 {
 	case ir.OpVar:
 		fc.at(base.Line)
 		return fc.varLoc(base.Var)
-	case ir.OpDim:
-		fc.unsupported("nested array write", line)
 	case ir.OpCall, ir.OpMethodCall, ir.OpStaticCall, ir.OpNullsafeMC, ir.OpBinary:
 		fc.unsupported("array write through a non-variable", line)
 	}
@@ -348,19 +358,246 @@ func (fc *fnCompiler) plainBase(base *ir.Node, line int) uint32 {
 	return 0
 }
 
-func (fc *fnCompiler) dimRead(n *ir.Node) operand {
-	base, key := n.Kids[0], n.Kids[1]
-	if key == nil {
-		panic(internalError{"read of []"})
+// keyKind says how an element target's key reaches its instruction.
+type keyKind uint8
+
+const (
+	keyNone  keyKind = iota // $a[]
+	keyConst                // a literal, loaded right before its instruction
+	keyVar                  // a plain variable, read by the instruction itself
+	keyReg                  // any other expression, evaluated into a register
+)
+
+// dimKey is one level of an element target with its key evaluated. line is
+// the line its instruction carries: PHP creates the opline of each level
+// when the level is compiled, on the line reached after its key.
+type dimKey struct {
+	kind keyKind
+	lit  *ir.Literal
+	cv   int
+	reg  uint32
+	line int
+	dim  int // line of the level's own node, for a compile error
+}
+
+// dimTarget is an element target $base[k1]...[kn], outermost level first.
+type dimTarget struct {
+	base *ir.Var
+	loc  uint32
+	keys []dimKey
+}
+
+// dimTarget compiles the keys of an element target, as
+// zend_delayed_compile_dim does: the key expressions are evaluated in source
+// order, each once, before any level is fetched. A literal is not loaded and
+// a plain variable is not read here: the instruction of its level does that,
+// as PHP's FETCH_DIM and ASSIGN_DIM read CONST and CV operands when they run.
+// The levels are walked with a loop, so the nesting depth costs no Go stack.
+func (fc *fnCompiler) dimTarget(n *ir.Node, line int) dimTarget {
+	var levels []*ir.Node
+	base := n
+	for base != nil && base.Op == ir.OpDim {
+		levels = append(levels, base)
+		base = base.Kids[0]
 	}
-	if base.Op == ir.OpLiteral && base.Value.Kind == ir.LitString {
-		fc.unsupported("string offset on a literal", n.Line)
+	t := dimTarget{loc: fc.plainBase(base, line), base: base.Var, keys: make([]dimKey, 0, len(levels))}
+	for i := len(levels) - 1; i >= 0; i-- {
+		d := levels[i]
+		k := dimKey{dim: d.Line}
+		switch key := d.Kids[1]; {
+		case key == nil:
+		case key.Op == ir.OpLiteral:
+			fc.c.line = key.Line
+			fc.at(key.Line)
+			k.kind, k.lit = keyConst, key.Value
+		default:
+			if o := fc.expr(key); o.cv >= 0 && !o.quiet {
+				k.kind, k.cv = keyVar, o.cv
+			} else {
+				k.kind, k.reg = keyReg, fc.materialize(o)
+			}
+		}
+		k.line = fc.cur
+		t.keys = append(t.keys, k)
 	}
-	mark := fc.top
+	return t
+}
+
+// keyOperand returns the operand of a key: a Location for a plain variable,
+// otherwise a Value register, which for a literal is loaded here.
+func (fc *fnCompiler) keyOperand(k dimKey) (r uint32, isLocation bool) {
+	switch k.kind {
+	case keyVar:
+		return fc.loc(k.cv), true
+	case keyConst:
+		r = fc.alloc()
+		fc.emit(bytecode.OpConst, 0, r, fc.c.literal(k.lit), 0)
+		return r, false
+	case keyReg:
+		return k.reg, false
+	}
+	panic(internalError{"element target without a key"})
+}
+
+// fetchPath emits a FetchDim for each of the first n levels of t and returns
+// the Location the next level is reached through: the base variable when n
+// is zero, else the element register, which every level reuses. use is the
+// FetchFlags use of the last of them; the others are containers of the next.
+func (fc *fnCompiler) fetchPath(t dimTarget, n int, mode, use bytecode.FetchFlags) uint32 {
+	container := t.loc
+	for i, k := range t.keys[:n] {
+		flags := mode
+		if i == n-1 {
+			flags |= use
+		}
+		fc.cur = k.line
+		mark := fc.top
+		if k.kind == keyNone {
+			fc.emit(bytecode.OpFetchDim, uint16(flags|bytecode.FetchAppend), elemReg, container, 0)
+		} else if rk, isLoc := fc.keyOperand(k); isLoc {
+			fc.emit(bytecode.OpFetchDim, uint16(flags|bytecode.FetchKeyLocation), elemReg, container, rk)
+		} else {
+			fc.emit(bytecode.OpFetchDim, uint16(flags), elemReg, container, rk)
+		}
+		if k.kind == keyConst {
+			fc.top = mark // the literal's register is free again
+		}
+		container = elemReg
+	}
+	return container
+}
+
+// writeDim emits "$target = v": FETCH_DIM_W for every level but the last,
+// then ASSIGN_DIM, which carries the line of the last level. A value that is
+// a plain variable is passed as its Location, since ASSIGN_DIM's OP_DATA
+// reads such a CV itself, after the key is converted; self marks the one
+// exception, a value that is the base variable ($a[k] = $a, and the same
+// with ??= and op=), which PHP copies (QM_ASSIGN) before the levels are
+// fetched. used asks for the value of the assignment expression: an
+// element write names a result register, because the result of a write to a
+// string offset is the byte written, not the value.
+func (fc *fnCompiler) writeDim(t dimTarget, v operand, self, used bool) operand {
+	last := t.keys[len(t.keys)-1]
+	fc.cur = last.line
+	var flags bytecode.ArrayWriteFlags
+	var rv uint32
+	if v.cv >= 0 && !v.quiet && !self {
+		flags |= bytecode.ValueLocation
+		rv = fc.loc(v.cv)
+	} else {
+		rv = fc.materialize(v)
+	}
+	container := fc.fetchPath(t, len(t.keys)-1, bytecode.FetchWrite, 0)
+	fc.cur = last.line
+	if last.kind == keyNone {
+		fc.emit(bytecode.OpArrayAppend, uint16(flags), container, rv, 0)
+		if flags&bytecode.ValueLocation == 0 {
+			return reg(rv)
+		}
+		// The appended value, read back quietly: the write cannot change a
+		// variable other than the container, and an undefined one is null.
+		// A discarded value gets a register no instruction writes, which
+		// fails verification if it were ever read.
+		r := fc.alloc()
+		if used {
+			fc.emit(bytecode.OpLoad, 1, r, rv, 0)
+		}
+		return reg(r)
+	}
+	rk, isLoc := fc.keyOperand(last)
+	if isLoc {
+		flags |= bytecode.KeyLocation
+	}
+	if !used {
+		fc.emit(bytecode.OpArraySet, uint16(flags), container, rk, rv)
+		if flags&bytecode.ValueLocation != 0 {
+			return reg(fc.alloc())
+		}
+		return reg(rv)
+	}
+	res := rv
+	if flags&bytecode.ValueLocation != 0 {
+		res = fc.alloc()
+	}
+	aux, ok := bytecode.ArraySetAux(flags, res)
+	if !ok {
+		fc.unsupported("expression too large", last.line)
+	}
+	fc.emit(bytecode.OpArraySet, aux, container, rk, rv)
+	return reg(res)
+}
+
+// readChain compiles the base and the keys of the element read n, and the
+// fetch of every level but the last; it returns the register that holds the
+// last container and the one that holds the last key. PHP delays the fetches
+// of a chain (zend_delayed_compile_dim): a base that is not a plain variable
+// is evaluated first, then the key expressions in source order, and only then
+// is the base variable read and each level fetched, a plain variable key
+// being read by its own level. Each fetch carries the line reached after its
+// key. The levels are walked with a loop, so depth costs no Go stack.
+func (fc *fnCompiler) readChain(n *ir.Node) (container, key uint32) {
+	var levels []*ir.Node
+	base := n
+	for base != nil && base.Op == ir.OpDim {
+		if base.Kids[1] == nil {
+			panic(internalError{"read of []"})
+		}
+		levels = append(levels, base)
+		base = base.Kids[0]
+	}
 	b := fc.expr(base)
-	k := fc.expr(key)
-	rb := fc.materialize(b)
-	rk := fc.materialize(k)
+	type level struct {
+		key   operand
+		lit   *ir.Literal
+		line  int
+		quiet uint16
+	}
+	keys := make([]level, len(levels))
+	for i := len(levels) - 1; i >= 0; i-- {
+		d := levels[i]
+		k := &keys[len(levels)-1-i]
+		k.quiet = uint16(boolInt(d.Flags&ir.FlagQuiet != 0))
+		if kn := d.Kids[1]; kn.Op == ir.OpLiteral && len(levels) > 1 {
+			// A literal of a chain is loaded right before its level, so a
+			// long chain needs no register per level.
+			fc.c.line = kn.Line
+			fc.at(kn.Line)
+			k.lit = kn.Value
+		} else if k.key = fc.expr(kn); k.key.cv < 0 {
+			k.key = reg(fc.materialize(k.key))
+		}
+		k.line = fc.cur
+	}
+	fc.cur = keys[0].line
+	container = fc.materialize(b)
+	if len(keys) == 1 {
+		return container, fc.materialize(keys[0].key)
+	}
+	// Two registers take turns holding the element of a level.
+	t := [2]uint32{fc.alloc(), fc.alloc()}
+	for i, k := range keys {
+		fc.cur = k.line
+		inner := fc.top
+		if k.lit != nil {
+			key = fc.alloc()
+			fc.emit(bytecode.OpConst, 0, key, fc.c.literal(k.lit), 0)
+		} else {
+			key = fc.materialize(k.key)
+		}
+		if i == len(keys)-1 {
+			return container, key
+		}
+		dest := t[i%2]
+		fc.emit(bytecode.OpArrayGet, k.quiet, dest, container, key)
+		container = dest
+		fc.top = inner
+	}
+	panic(internalError{"element read without a level"})
+}
+
+func (fc *fnCompiler) dimRead(n *ir.Node) operand {
+	mark := fc.top
+	rb, rk := fc.readChain(n)
 	r := fc.allocNot(mark, rb, rk)
 	fc.emit(bytecode.OpArrayGet, uint16(boolInt(n.Flags&ir.FlagQuiet != 0)), r, rb, rk)
 	return reg(r)
@@ -386,78 +623,33 @@ func (fc *fnCompiler) assign(n *ir.Node, used bool) operand {
 	return operand{}
 }
 
-// assignDim compiles $a[k] = v and $a[] = v. ASSIGN_DIM is created when its
-// target is compiled, so it carries the line reached after the key (or the
-// base for []), and the value read by its OP_DATA shares it. A key or value
-// that is a plain variable is passed as its Location: ASSIGN_DIM reads such a
-// CV itself, the key after the container check and the value after the key
-// conversion. The one exception is a value that is the container variable
-// itself ($a[k] = $a): zend_compile_expr_with_potential_assign_to_self copies
-// it first, so it is read before the write.
+// assignDim compiles an element assignment of any depth: the keys in source
+// order, then the value, then the write (writeDim). The current line ends
+// where the value left it.
 func (fc *fnCompiler) assignDim(n *ir.Node, used bool) operand {
 	target, value := n.Kids[0], n.Kids[1]
-	base := target.Kids[0]
-	l := fc.plainBase(base, n.Line)
-	var k operand
-	if target.Kids[1] != nil {
-		k = fc.expr(target.Kids[1])
-	}
-	opLine := fc.cur
+	t := fc.dimTarget(target, n.Line)
 	v := fc.expr(value)
 	after := fc.cur
-	fc.cur = opLine
-	var flags bytecode.ArrayWriteFlags
-	var rk, rv uint32
-	if target.Kids[1] != nil {
-		if k.cv >= 0 && !k.quiet {
-			flags |= bytecode.KeyLocation
-			rk = fc.loc(k.cv)
-		} else {
-			rk = fc.materialize(k)
-		}
-	}
-	self := value.Op == ir.OpVar && value.Var == base.Var
-	if v.cv >= 0 && !v.quiet && !self {
-		flags |= bytecode.ValueLocation
-		rv = fc.loc(v.cv)
-	} else {
-		rv = fc.materialize(v)
-	}
-	if target.Kids[1] == nil {
-		fc.emit(bytecode.OpArrayAppend, uint16(flags), l, rv, 0)
-	} else {
-		fc.emit(bytecode.OpArraySet, uint16(flags), l, rk, rv)
-	}
-	if flags&bytecode.ValueLocation != 0 {
-		// The assigned value, read back quietly: the write cannot change a
-		// variable other than the container, and an undefined one is null.
-		if !used {
-			// discard drops it; a register no instruction wrote fails
-			// verification if it were ever read.
-			fc.cur = after
-			return reg(fc.alloc())
-		}
-		r := fc.alloc()
-		fc.emit(bytecode.OpLoad, 1, r, rv, 0)
-		rv = r
-	}
+	r := fc.writeDim(t, v, value.Op == ir.OpVar && value.Var == t.base, used)
 	fc.cur = after
-	return reg(rv)
+	return r
 }
 
 // assignOp compiles $x op= e: e first, then $x is read, as PHP's ASSIGN_OP.
 func (fc *fnCompiler) assignOp(n *ir.Node) operand {
 	target := n.Kids[0]
 	switch target.Op {
-	case ir.OpVar:
-	case ir.OpDim:
-		fc.unsupported("compound assignment to array element", n.Line)
+	case ir.OpVar, ir.OpDim:
 	default:
 		fc.unsupportedNode(target)
 	}
 	op, ok := binaryOps[n.Text]
 	if !ok || n.Text == ">" || n.Text == ">=" {
 		panic(internalError{"assignment operator " + n.Text + "="})
+	}
+	if target.Op == ir.OpDim {
+		return fc.assignOpDim(n, op)
 	}
 	l := fc.varLoc(target.Var)
 	mark := fc.top
@@ -470,12 +662,95 @@ func (fc *fnCompiler) assignOp(n *ir.Node) operand {
 	return reg(r)
 }
 
+// assignOpDim compiles $a[k]...[kn] op= e, PHP's ASSIGN_DIM_OP: the keys,
+// then e, then every level is fetched for read and write (a missing key
+// warns and becomes null), then a plain variable e is read, then the
+// element is combined and stored. The fetch of the last level is marked as
+// an assign-op's, which decides what PHP says about a string or scalar
+// container.
+func (fc *fnCompiler) assignOpDim(n *ir.Node, op bytecode.BinaryOp) operand {
+	mark := fc.top
+	t := fc.dimTarget(n.Kids[0], n.Line)
+	v := fc.expr(n.Kids[1])
+	after := fc.cur
+	if value := n.Kids[1]; value.Op == ir.OpVar && value.Var == t.base {
+		// $a[k] op= $a: PHP copies the base variable before the levels are
+		// fetched, as it does for "=".
+		fc.cur = t.keys[len(t.keys)-1].line
+		v = reg(fc.materialize(v))
+	}
+	e := fc.fetchPath(t, len(t.keys), bytecode.FetchReadWrite, bytecode.FetchForAssignOp)
+	rv := fc.materialize(v)
+	old := fc.alloc()
+	fc.emit(bytecode.OpLoad, 1, old, e, 0)
+	r := fc.allocNot(mark, rv, old)
+	fc.emit(bytecode.OpBinary, uint16(op), r, old, rv)
+	fc.emit(bytecode.OpStore, 0, e, r, 0)
+	fc.cur = after
+	return reg(r)
+}
+
+// coalesceSetDim compiles $a[k]...[kn] ??= e as zend_compile_assign_coalesce
+// does: the target is read quietly (FETCH_DIM_IS at each level), and only
+// when that is null is e evaluated and the target written (FETCH_DIM_W and
+// ASSIGN_DIM). The key expressions are evaluated once, for both passes;
+// a key that is a plain variable is read by each pass, as PHP memoizes
+// compiled expressions but reads a CV wherever it is used.
+func (fc *fnCompiler) coalesceSetDim(n *ir.Node) operand {
+	target, value := n.Kids[0], n.Kids[1]
+	res := fc.alloc()
+	mark := fc.top
+	t := fc.dimTarget(target, n.Line)
+	for _, k := range t.keys {
+		if k.kind == keyNone {
+			// PHP rejects the file when it compiles the read.
+			panic(&CompileError{Message: "Cannot use [] for reading", File: fc.c.unit.File, Line: positive(k.dim, n.Line)})
+		}
+	}
+	keys := fc.top
+	keep, assign, end := fc.label(), fc.label(), fc.label()
+	// Two registers take turns holding the container and the element.
+	cur, other := fc.alloc(), fc.alloc()
+	fc.cur = t.keys[0].line
+	fc.emit(bytecode.OpLoad, 1, cur, t.loc, 0)
+	for _, k := range t.keys {
+		fc.cur = k.line
+		inner := fc.top
+		rk, isLoc := fc.keyOperand(k)
+		if isLoc {
+			r := fc.alloc()
+			fc.emit(bytecode.OpLoad, 0, r, rk, 0)
+			rk = r
+		}
+		fc.emit(bytecode.OpArrayGet, 1, other, cur, rk)
+		cur, other = other, cur
+		fc.top = inner
+	}
+	null := fc.alloc()
+	fc.emit(bytecode.OpConst, 0, null, fc.c.literal(&ir.Literal{Kind: ir.LitNull}), 0)
+	set := fc.alloc()
+	fc.emit(bytecode.OpBinary, uint16(bytecode.NotIdentical), set, cur, null)
+	fc.branch(set, keep, assign)
+	fc.bind(keep)
+	fc.emit(bytecode.OpMove, 0, res, cur, 0)
+	fc.jump(end)
+	fc.top = keys
+	fc.bind(assign)
+	v := fc.expr(value)
+	after := fc.cur
+	fc.emit(bytecode.OpMove, 0, res, fc.materialize(fc.writeDim(t, v, value.Op == ir.OpVar && value.Var == t.base, true)), 0)
+	fc.cur = after
+	fc.top = mark
+	fc.bind(end)
+	return reg(res)
+}
+
 func (fc *fnCompiler) coalesceSet(n *ir.Node) operand {
 	target := n.Kids[0]
 	switch target.Op {
 	case ir.OpVar:
 	case ir.OpDim:
-		fc.unsupported("??= on array element", n.Line)
+		return fc.coalesceSetDim(n)
 	default:
 		fc.unsupportedNode(target)
 	}
@@ -507,9 +782,7 @@ func (fc *fnCompiler) coalesceSet(n *ir.Node) operand {
 func (fc *fnCompiler) incDec(n *ir.Node) operand {
 	target := n.Kids[0]
 	switch target.Op {
-	case ir.OpVar:
-	case ir.OpDim:
-		fc.unsupported("increment of array element", n.Line)
+	case ir.OpVar, ir.OpDim:
 	default:
 		fc.unsupportedNode(target)
 	}
@@ -526,10 +799,53 @@ func (fc *fnCompiler) incDec(n *ir.Node) operand {
 	default:
 		panic(internalError{"increment operator " + n.Text})
 	}
+	if target.Op == ir.OpDim {
+		// FETCH_DIM_RW for every level, the last one marked as an
+		// increment's, then the operation on the element, on the line of
+		// the last key.
+		mark := fc.top
+		t := fc.dimTarget(target, n.Line)
+		e := fc.fetchPath(t, len(t.keys), bytecode.FetchReadWrite, bytecode.FetchForIncDec)
+		fc.top = mark
+		r := fc.alloc()
+		fc.emit(bytecode.OpIncDec, uint16(op), r, e, 0)
+		return reg(r)
+	}
 	fc.at(target.Line) // PHP compiles the variable, then emits the operation
 	r := fc.alloc()
 	fc.emit(bytecode.OpIncDec, uint16(op), r, fc.varLoc(target.Var), 0)
 	return reg(r)
+}
+
+// constArray reports whether n is an array literal PHP evaluates at compile
+// time (zend_try_ct_eval_array): every key and value a literal or such an
+// array, no spread and no reference. The walk keeps its own stack, so the
+// nesting depth costs no Go stack.
+func constArray(n *ir.Node) bool {
+	if n == nil || n.Op != ir.OpArray {
+		return false
+	}
+	for stack := []*ir.Node{n}; len(stack) > 0; {
+		a := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		for _, it := range a.Kids {
+			if it == nil || it.Op != ir.OpItem || it.Flags&ir.FlagRef != 0 {
+				return false
+			}
+			if k := it.Kids[0]; k != nil && k.Op != ir.OpLiteral {
+				return false
+			}
+			switch v := it.Kids[1]; {
+			case v == nil:
+				return false
+			case v.Op == ir.OpArray:
+				stack = append(stack, v)
+			case v.Op != ir.OpLiteral:
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // array builds a literal in its result register: NewArray, then one

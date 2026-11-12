@@ -38,11 +38,11 @@ func 0 "{main}" params=0 locals=2 registers=8 maxstack=0
   16: Const 0 3 4 0 ; line 3 ; string "u"
   17: Move 0 2 3 0 ; line 3
   18: Output 0 2 0 0 ; line 3
-  19: Const 0 3 0 0 ; line 3 ; string "k"
-  20: Load 1 4 0 0 ; line 3
-  21: ArrayGet 1 5 4 3 ; line 3
+  19: Load 1 3 0 0 ; line 3
+  20: Const 0 6 0 0 ; line 3 ; string "k"
+  21: ArrayGet 1 4 3 6 ; line 3
   22: Const 0 6 1 0 ; line 3 ; string "j"
-  23: ArrayGet 1 3 5 6 ; line 3
+  23: ArrayGet 1 3 4 6 ; line 3
   24: Const 0 4 3 0 ; line 3 ; null
   25: Binary NotIdentical 5 3 4 ; line 3
   26: Branch 0 5 27 29 ; line 3

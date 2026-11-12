@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"context"
+	"errors"
 	"math"
 	"math/rand/v2"
 	"strings"
@@ -25,13 +26,121 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 		}
 		names := []string{"a", "b", "c", "d"}
 		v := func() uint32 { return vals[rng.IntN(nv)] }
+		// Two element locations, defined here so that every path may use
+		// them, and the Locations an instruction may write through.
+		elems := []uint32{f.elem(), f.elem()}
+		for _, e := range elems {
+			f.fetch(e, f.loc(names[rng.IntN(4)]), bytecode.FetchUnset, "", v())
+		}
+		// Two iterator registers that only the iterator instructions write,
+		// so they hold arrays; now and then another value stands in, which
+		// the instructions must refuse.
+		its := []uint32{f.arrayOf(v(), v(), v()), f.arrayOf()}
+		iter := func() uint32 {
+			if rng.IntN(10) == 0 {
+				return v()
+			}
+			return its[rng.IntN(2)]
+		}
+		anyLoc := func() uint32 {
+			if rng.IntN(3) == 0 {
+				return elems[rng.IntN(2)]
+			}
+			return f.loc(names[rng.IntN(4)])
+		}
 		start := f.pc()
 		n := 1 + rng.IntN(40)
 		var jumps []int
 		for i := 0; i < n; i++ {
 			f.at(uint32(2 + rng.IntN(50)))
 			dst := v()
-			switch rng.IntN(25) {
+			switch rng.IntN(36) {
+			case 25:
+				// FetchDim in every mode and use, through a variable or an
+				// element, with a register or a variable key or none.
+				flags := bytecode.FetchFlags(rng.IntN(3))
+				if flags != bytecode.FetchUnset {
+					flags |= bytecode.FetchFlags(rng.IntN(3)) << 4
+					if rng.IntN(4) == 0 {
+						flags |= bytecode.FetchAppend
+					}
+				}
+				key := ""
+				if rng.IntN(2) == 0 {
+					key = names[rng.IntN(4)]
+				}
+				f.fetch(elems[rng.IntN(2)], anyLoc(), flags, key, v())
+			case 26:
+				// Reads and writes through any Location.
+				switch l := anyLoc(); rng.IntN(6) {
+				case 0:
+					f.emit(bytecode.OpLoad, uint16(rng.IntN(2)), dst, l, 0)
+				case 1:
+					f.emit(bytecode.OpStore, 0, l, v(), 0)
+				case 2:
+					f.emit(bytecode.OpIncDec, uint16(1+rng.IntN(4)), dst, l, 0)
+				case 3:
+					f.emit(bytecode.OpArrayAppend, 0, l, v(), 0)
+				case 4:
+					f.emit(bytecode.OpArrayUnset, 0, l, v(), 0)
+				default:
+					f.emit(bytecode.OpIsset, 0, dst, l, 0)
+				}
+			case 27:
+				// ArraySet with a result register, through any Location.
+				flags, key, val := bytecode.ArrayWriteFlags(0), v(), v()
+				if rng.IntN(3) == 0 {
+					flags, key = flags|bytecode.KeyLocation, f.loc(names[rng.IntN(4)])
+				}
+				if rng.IntN(3) == 0 {
+					flags, val = flags|bytecode.ValueLocation, f.loc(names[rng.IntN(4)])
+				}
+				aux, ok := bytecode.ArraySetAux(flags, dst)
+				if !ok || rng.IntN(3) == 0 {
+					aux = uint16(flags)
+				}
+				f.emit(bytecode.OpArraySet, aux, anyLoc(), key, val)
+			case 28, 29:
+				// IterInit clears its iterator when the subject cannot be
+				// iterated; that edge lands on an instruction that defines
+				// the register again, so every later read is verified.
+				it := iter()
+				pc := f.emit(bytecode.OpIterInit, 0, it, v(), 0)
+				f.jump(f.pc() + 2)
+				f.code[pc].C = f.pc()
+				f.emit(bytecode.OpNewArray, 0, it, 0, 0)
+			case 30, 31:
+				// IterNext on any value: an array iterates from wherever its
+				// position stands, anything else is refused.
+				it := iter()
+				if rng.IntN(2) == 0 {
+					jumps = append(jumps, f.emit(bytecode.OpIterNext, 0, it, dst, 0))
+				} else {
+					jumps = append(jumps, f.emit(bytecode.OpIterNext, uint16(bytecode.IterLocation), it, anyLoc(), 0))
+				}
+				// Usually the key of the element just fetched.
+				if rng.IntN(3) != 0 {
+					if rng.IntN(2) == 0 {
+						f.emit(bytecode.OpIterKey, 0, v(), it, 0)
+					} else {
+						f.emit(bytecode.OpIterKey, uint16(bytecode.IterLocation), anyLoc(), it, 0)
+					}
+				}
+			case 32:
+				// A key read wherever control arrives from: refused when
+				// the iterator has fetched nothing yet.
+				if rng.IntN(4) == 0 {
+					f.emit(bytecode.OpIterKey, 0, dst, iter(), 0)
+				}
+			case 33:
+				if f.params > 0 {
+					jumps = append(jumps, f.emit(bytecode.OpParamDefault, 0, uint32(rng.IntN(f.params)), 0, 0))
+				}
+			case 34:
+				// A string to read and write offsets of.
+				f.store(names[rng.IntN(4)], f.k([]string{"", "abc", "0123456789"}[rng.IntN(3)]))
+			case 35:
+				f.emit(bytecode.OpMove, 0, elems[rng.IntN(2)], anyLoc(), 0)
 			case 0:
 				f.emit(bytecode.OpConst, 0, dst, f.a.constant(bytecode.Constant{Kind: bytecode.Int, Bits: uint64(rng.Int64N(100) - 50)}), 0)
 			case 1:
@@ -82,13 +191,19 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 					f.emit(bytecode.OpCallValue, 0, v(), dst, uint32(argc))
 				}
 			case 20:
-				if arr := v(); rng.IntN(2) == 0 {
+				// Mostly the literal under construction, as compiled code
+				// does; another value is refused.
+				arr := its[rng.IntN(2)]
+				if rng.IntN(8) == 0 {
+					arr = v()
+				}
+				if rng.IntN(2) == 0 {
 					f.emit(bytecode.OpArrayAdd, 0, arr, v(), 0)
 				} else {
 					f.add(arr, v(), v())
 				}
 			case 21:
-				f.addVarKey(v(), names[rng.IntN(4)], v())
+				f.addVarKey(iter(), names[rng.IntN(4)], v())
 			case 22:
 				key, val := "", ""
 				if rng.IntN(2) == 0 {
@@ -115,7 +230,14 @@ func vmFuzzImage(t testing.TB, seed uint64, width int) *vmAsm {
 		for _, pc := range jumps {
 			target := start + uint32(rng.IntN(int(end-start)+1))
 			other := start + uint32(rng.IntN(int(end-start)+1))
-			f.patch(pc, target, other)
+			switch f.code[pc].Op {
+			case bytecode.OpIterNext:
+				f.code[pc].C = target
+			case bytecode.OpParamDefault:
+				f.code[pc].B = target
+			default:
+				f.patch(pc, target, other)
+			}
 		}
 	}
 	main := a.fn("{main}", 0, 2, "a", "b", "c", "d")
@@ -165,4 +287,56 @@ func FuzzVMRunsVerifiedImages(f *testing.F) {
 			}
 		}
 	})
+}
+
+// The generator must keep producing images the verifier accepts and runs
+// that get past their first instructions, or the fuzz target tests nothing.
+func TestVMFuzzGeneratorCoversStage2(t *testing.T) {
+	const seeds = 400
+	built := 0
+	ops := map[bytecode.Opcode]int{}
+	ends := map[RunEnd]int{}
+	refused := map[string]int{}
+	for seed := uint64(0); seed < seeds; seed++ {
+		a := vmFuzzImage(t, seed, 64)
+		img := a.image()
+		bp, err := bytecode.Build(context.Background(), img, bytecode.Options{Limits: bytecode.DefaultLimits()})
+		if err != nil {
+			continue
+		}
+		built++
+		for _, f := range img.Functions {
+			for _, in := range f.Code {
+				ops[in.Op]++
+			}
+		}
+		p, err := NewProgram(bp)
+		if err != nil {
+			t.Fatalf("seed %d: NewProgram rejected a verified image: %v", seed, err)
+		}
+		cfg := vmConfig(t, 64)
+		cfg.Steps, cfg.Depth, cfg.Callbacks, cfg.OutputBytes = 3000, 16, 2000, 1<<16
+		res := p.Run(cfg)
+		ends[res.End]++
+		if res.End == Internal {
+			t.Fatalf("seed %d: internal error on a verified image: %v", seed, res.Err)
+		}
+		var u *UnsupportedError
+		if errors.As(res.Err, &u) {
+			refused[u.Feature]++
+		}
+	}
+	t.Logf("refused: %v", refused)
+	if built < seeds*6/10 {
+		t.Fatalf("only %d of %d generated images verify", built, seeds)
+	}
+	for _, op := range []bytecode.Opcode{bytecode.OpFetchDim, bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpIterKey, bytecode.OpParamDefault} {
+		if ops[op] < 50 {
+			t.Errorf("opcode %d appears %d times in the verified images", op, ops[op])
+		}
+	}
+	if ends[Unsupported] > built/4 || ends[Completed]+ends[UncaughtThrowable]+ends[Exited]+ends[LimitExceeded] < built*2/3 {
+		t.Errorf("runs end as %v: too few get past the refused instructions", ends)
+	}
+	t.Logf("%d of %d images verify; ends %v", built, seeds, ends)
 }

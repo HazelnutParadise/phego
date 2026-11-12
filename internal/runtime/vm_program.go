@@ -38,19 +38,26 @@ type vmInstr struct {
 }
 
 type vmFunction struct {
-	name        string
-	index       int
-	params      int
-	nvals       int // Value registers
-	nlocs       int // Location registers
-	locals      int
-	code        []vmInstr
-	lines       []int32
-	files       []string // per instruction; "" for a synthetic position
-	kills       []uint32
-	localNames  []string
-	paramLocal  []int32 // local of parameter i, -1 if the prologue does not store it
-	prologueEnd int     // first pc after the parameter prologue
+	name       string
+	index      int
+	params     int
+	nvals      int // Value registers
+	nlocs      int // Location registers
+	locals     int
+	code       []vmInstr
+	lines      []int32
+	files      []string // per instruction; "" for a synthetic position
+	kills      []uint32
+	localNames []string
+	paramLocal []int32 // local of parameter i, -1 if the prologue does not store it
+	paramPC    []int32 // pc of the prologue Store that receives parameter i, or -1
+	// required is how many arguments a call must pass: the parameters
+	// before the first one a ParamDefault names.
+	required int
+	// nelems is the size of a frame's element window, and elemOf maps each
+	// Location register to its slot there, -1 when no FetchDim defines it.
+	nelems int
+	elemOf []int32
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
@@ -180,6 +187,28 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		if in.Aux == 1 {
 			return roleValue, roleNone, roleNone
 		}
+	case bytecode.OpFetchDim:
+		switch flags := bytecode.FetchFlags(in.Aux); {
+		case flags&bytecode.FetchAppend != 0:
+			return roleLocation, roleLocation, roleNone
+		case flags&bytecode.FetchKeyLocation != 0:
+			return roleLocation, roleLocation, roleLocation
+		}
+		return roleLocation, roleLocation, roleValue
+	case bytecode.OpIterInit:
+		return roleValue, roleValue, roleTarget
+	case bytecode.OpIterNext:
+		if bytecode.IterFlags(in.Aux) == bytecode.IterLocation {
+			return roleValue, roleLocation, roleTarget
+		}
+		return roleValue, roleValue, roleTarget
+	case bytecode.OpIterKey:
+		if bytecode.IterFlags(in.Aux) == bytecode.IterLocation {
+			return roleLocation, roleValue, roleNone
+		}
+		return roleValue, roleValue, roleNone
+	case bytecode.OpParamDefault:
+		return roleValue, roleTarget, roleNone
 	}
 	return roleNone, roleNone, roleNone
 }
@@ -311,6 +340,11 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	f.code = make([]vmInstr, len(code))
 	f.lines = make([]int32, len(code))
 	f.files = make([]string, len(code))
+	f.required = f.params
+	f.elemOf = make([]int32, f.nlocs)
+	for i := range f.elemOf {
+		f.elemOf[i] = -1
+	}
 	for pc, in := range code {
 		pos, _ := fv.Position(uint32(pc))
 		if pos.Source > 0 && int(pos.Source) <= len(sources) {
@@ -388,11 +422,41 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			if kinds[in.A] != bytecode.Value {
 				out.aux = 1 // a Location result: a by-reference callee
 			}
+		case bytecode.OpArraySet:
+			// The result register is renumbered like an operand.
+			if r, ok := bytecode.ArraySetResult(in.Aux); ok {
+				if r >= nregs || kinds[r] != bytecode.Value {
+					return f, fail(pc, "result register %d is not a Value register", r)
+				}
+				aux, _ := bytecode.ArraySetAux(bytecode.ArrayWriteFlags(in.Aux)&(bytecode.KeyLocation|bytecode.ValueLocation), dense[r])
+				out.aux = aux
+			}
+		case bytecode.OpFetchDim:
+			// Each destination gets a slot in the frame's element window.
+			if f.elemOf[decoded[0]] < 0 {
+				f.elemOf[decoded[0]] = int32(f.nelems)
+				f.nelems++
+			}
+		case bytecode.OpParamDefault:
+			if in.A >= uint32(f.params) {
+				return f, fail(pc, "register %d is not a parameter", in.A)
+			}
+			f.required = min(f.required, int(in.A))
 		}
 		out.a, out.b, out.c = decoded[0], decoded[1], decoded[2]
 		f.code[pc] = out
 	}
-	f.paramLocal, f.prologueEnd = parameterPrologue(f, code)
+	// The Store a ParamDefault skips to receives that parameter; its
+	// decoded c (zero in the image) is the parameter plus one, which tells
+	// the Store to cache an evaluated default (vmState.cacheDefault).
+	for _, in := range code {
+		if in.Op == bytecode.OpParamDefault && uint64(in.B) < uint64(len(code)) {
+			if st := code[in.B]; st.Op == bytecode.OpStore && st.B == in.A {
+				f.code[in.B].c = in.A + 1
+			}
+		}
+	}
+	f.paramLocal, f.paramPC = parameterPrologue(f, code)
 	if f.nvals > 0 {
 		vmLiveness(&f)
 	}
@@ -400,32 +464,39 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 }
 
 // parameterPrologue finds, in the leading run of Local and Store
-// instructions, which local receives each parameter register (conventions:
-// "Local Lk, k; Store Lk, r_i"). Backtraces show a parameter's current value
-// once the prologue stored it, as PHP shows the CV.
-func parameterPrologue(f vmFunction, code []bytecode.Instruction) ([]int32, int) {
-	pl := make([]int32, f.params)
-	for i := range pl {
-		pl[i] = -1
+// instructions, which local receives each parameter register and where
+// (conventions: "Local Lk, k; Store Lk, r_i", the Store of an optional
+// parameter preceded by "ParamDefault r_i, <its Store>" and the code of the
+// default, which the scan steps over). Backtraces show a parameter's current
+// value once the prologue stored it, as PHP shows the CV, and a missing
+// argument is reported at the Store that would have received it.
+func parameterPrologue(f vmFunction, code []bytecode.Instruction) (locals, stores []int32) {
+	locals, stores = make([]int32, f.params), make([]int32, f.params)
+	for i := range locals {
+		locals[i], stores[i] = -1, -1
 	}
 	locOf := map[uint32]uint32{} // raw Location register -> local
-	end := 0
-	for pc, in := range code {
-		if in.Op == bytecode.OpLocal {
+	for pc := 0; pc < len(code); {
+		in := code[pc]
+		switch {
+		case in.Op == bytecode.OpLocal:
 			locOf[in.A] = in.B
-			end = pc + 1
-			continue
-		}
-		if in.Op == bytecode.OpStore && in.B < uint32(f.params) {
-			if local, ok := locOf[in.A]; ok && pl[in.B] < 0 {
-				pl[in.B] = int32(local)
-				end = pc + 1
-				continue
+		case in.Op == bytecode.OpStore && in.B < uint32(f.params):
+			local, ok := locOf[in.A]
+			if !ok || locals[in.B] >= 0 {
+				return locals, stores
 			}
+			locals[in.B], stores[in.B] = int32(local), int32(pc)
+		case in.Op == bytecode.OpParamDefault && int(in.B) > pc && int(in.B) < len(code) &&
+			code[in.B].Op == bytecode.OpStore && code[in.B].B == in.A:
+			pc = int(in.B)
+			continue
+		default:
+			return locals, stores
 		}
-		break
+		pc++
 	}
-	return pl, end
+	return locals, stores
 }
 
 // vmLiveness computes, for each instruction, the Value registers that may
@@ -454,6 +525,11 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpCast:
 			if bytecode.CastKind(in.aux) == bytecode.CastArray {
 				composite[in.a] = true
+			}
+		case bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpArraySet:
+			// The iterator, a fetched element and an assignment's result.
+			if d, ok := vmDef(in); ok {
+				composite[d] = true
 			}
 		}
 	}
@@ -486,8 +562,9 @@ func vmLiveness(f *vmFunction) {
 			ra = roleValue
 		}
 		ops := [3]uint32{in.a, in.b, in.c}
+		dest := vmDefOperand(in)
 		for i, role := range [3]int{ra, rb, rc} {
-			isDest := i == 0 && definesA(in.op)
+			isDest := i == dest
 			if role == roleValue && !isDest {
 				visit(ops[i])
 			}
@@ -499,15 +576,7 @@ func vmLiveness(f *vmFunction) {
 			}
 		}
 	}
-	def := func(in vmInstr) (uint32, bool) {
-		if definesA(in.op) && in.op != bytecode.OpLocal {
-			if (in.op == bytecode.OpMove || in.op == bytecode.OpCall) && in.aux != 0 {
-				return 0, false
-			}
-			return in.a, true
-		}
-		return 0, false
-	}
+	def := vmDef
 	succ := func(pc int, visit func(int)) {
 		in := f.code[pc]
 		switch in.op {
@@ -516,6 +585,12 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpBranch:
 			visit(int(in.b))
 			visit(int(in.c))
+		case bytecode.OpIterInit, bytecode.OpIterNext:
+			visit(pc + 1)
+			visit(int(in.c))
+		case bytecode.OpParamDefault:
+			visit(pc + 1)
+			visit(int(in.b))
 		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpLeave, bytecode.OpEndFinally:
 		default:
 			if pc+1 < n {
@@ -540,6 +615,12 @@ func vmLiveness(f *vmFunction) {
 			in := f.code[pc]
 			if d, ok := def(in); ok {
 				out[d/64] &^= 1 << (d % 64)
+				if in.op == bytecode.OpIterNext {
+					// The element is written on the fall-through edge only:
+					// the exit edge still sees the register's old value.
+					exit := live[int(in.c)*words : (int(in.c)+1)*words]
+					out[d/64] |= exit[d/64] & (1 << (d % 64))
+				}
 			}
 			uses(in, func(r uint32) { set(out, r) })
 			cur := live[pc*words : (pc+1)*words]
@@ -596,8 +677,50 @@ func definesA(op bytecode.Opcode) bool {
 	switch op {
 	case bytecode.OpConst, bytecode.OpMove, bytecode.OpLocal, bytecode.OpLoad, bytecode.OpBinary, bytecode.OpCall, bytecode.OpCallValue,
 		bytecode.OpHostCall, bytecode.OpNewArray, bytecode.OpArrayGet, bytecode.OpInclude, bytecode.OpEval, bytecode.OpShell,
-		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset:
+		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit:
 		return true
 	}
 	return false
+}
+
+// vmDefOperand is the operand (0 for A, 1 for B) that names the Value
+// register a decoded instruction writes, or -1 when it writes none or
+// names it elsewhere (the result of ArraySet is in its aux).
+func vmDefOperand(in vmInstr) int {
+	switch in.op {
+	case bytecode.OpLocal, bytecode.OpArraySet:
+		return -1
+	case bytecode.OpMove, bytecode.OpCall:
+		if in.aux != 0 {
+			return -1 // a Location
+		}
+	case bytecode.OpIterNext:
+		if bytecode.IterFlags(in.aux) == bytecode.IterLocation {
+			return -1
+		}
+		return 1
+	case bytecode.OpIterKey:
+		if bytecode.IterFlags(in.aux) == bytecode.IterLocation {
+			return -1
+		}
+		return 0
+	}
+	if definesA(in.op) {
+		return 0
+	}
+	return -1
+}
+
+// vmDef is the Value register a decoded instruction writes.
+func vmDef(in vmInstr) (uint32, bool) {
+	if in.op == bytecode.OpArraySet {
+		return bytecode.ArraySetResult(in.aux)
+	}
+	switch vmDefOperand(in) {
+	case 0:
+		return in.a, true
+	case 1:
+		return in.b, true
+	}
+	return 0, false
 }

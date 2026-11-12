@@ -59,8 +59,11 @@ func (s *vmState) loop() {
 		case bytecode.OpLoad:
 			l := f.locs[in.b]
 			if l <= 0 || int(l) > len(f.locals) {
-				s.stop(s.internal("location register %d read before Local", in.b))
-				return
+				if err := s.loadElement(f, in); err != nil {
+					s.stop(err)
+					return
+				}
+				goto advance
 			}
 			v := f.locals[l-1]
 			if v.kind == valueReference {
@@ -83,10 +86,17 @@ func (s *vmState) loop() {
 			}
 			goto advance
 		case bytecode.OpStore:
+			if in.c != 0 {
+				// The Store that receives a parameter with a default.
+				s.cacheDefault(f, in)
+			}
 			l := f.locs[in.a]
 			if l <= 0 || int(l) > len(f.locals) {
-				s.stop(s.internal("location register %d read before Local", in.a))
-				return
+				if err := s.storeElement(f, in); err != nil {
+					s.stop(err)
+					return
+				}
+				goto advance
 			}
 			slot := &f.locals[l-1]
 			v := regs[in.b]
@@ -339,6 +349,67 @@ func (s *vmState) loop() {
 				s.stop(err)
 				return
 			}
+		case bytecode.OpFetchDim:
+			if err := s.fetchDim(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpIterInit, bytecode.OpIterNext:
+			var more bool
+			var err error
+			if in.op == bytecode.OpIterInit {
+				more, err = s.iterInit(f, in)
+			} else {
+				more, err = s.iterNext(f, in)
+			}
+			if err != nil {
+				s.stop(err)
+				return
+			}
+			if s.stopped() {
+				return
+			}
+			if more {
+				goto advance
+			}
+			if in.nkill != 0 {
+				if err := s.kill(f, in); err != nil {
+					s.stop(err)
+					return
+				}
+			}
+			target := int(in.c)
+			if target <= pc && s.poll() {
+				return
+			}
+			pc = target
+			continue
+		case bytecode.OpIterKey:
+			if err := s.iterKey(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpParamDefault:
+			// RECV_INIT: the default's code is skipped for a passed argument,
+			// and for a default an earlier call evaluated and cached.
+			passed := int(in.a) < f.nargs
+			if !passed {
+				hit, err := s.cachedDefault(f, in.a)
+				if err != nil {
+					s.stop(err)
+					return
+				}
+				passed = hit
+			}
+			if passed {
+				target := int(in.b)
+				if target <= pc && s.poll() {
+					return
+				}
+				pc = target
+				continue
+			}
+			goto advance
 		case bytecode.OpExit:
 			code := 0
 			if in.aux == 1 {

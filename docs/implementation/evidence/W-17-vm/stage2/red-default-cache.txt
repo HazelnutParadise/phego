@@ -1,0 +1,52 @@
+--- FAIL: TestW17Stage2Probes (0.11s)
+    --- FAIL: TestW17Stage2Probes/def_cached_first_omitted/display64 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 96
+              php:   "def_cached_first_omitted.php on line 2\nnnn\n"
+              phego: "def_cached_first_omitted.php on line 2\nn\nWarning: Undefined array key 6 in /w/cases/s2_def_cached_fi"
+    --- FAIL: TestW17Stage2Probes/def_cached_first_omitted/log64 (0.00s)
+        w17_stage2_probes_test.go:1020: stderr differs at byte 90
+              php:   "_def_cached_first_omitted.php on line 2\n"
+              phego: "_def_cached_first_omitted.php on line 2\nPHP Warning:  Undefined array key 6 in /w/cases/s2_def_cache"
+    --- FAIL: TestW17Stage2Probes/def_cached_kinds/display64 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 89
+              php:   "ases/s2_def_cached_kinds.php on line 2\n66|\nWarning: Undefined array key 5 in /w/cases/s2_def_cached_"
+              phego: "ases/s2_def_cached_kinds.php on line 2\n6\nWarning: A non-numeric value encountered in /w/cases/s2_def"
+    --- FAIL: TestW17Stage2Probes/def_cached_kinds/log64 (0.00s)
+        w17_stage2_probes_test.go:1020: stderr differs at byte 106
+              php:   "ached_kinds.php on line 2\nPHP Warning:  Undefined array key 5 in /w/cases/s2_def_cached_kinds.php on"
+              phego: "ached_kinds.php on line 2\nPHP Warning:  A non-numeric value encountered in /w/cases/s2_def_cached_ki"
+    --- FAIL: TestW17Stage2Probes/def_cached_null/display64 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 79
+              php:   "ases/s2_def_cached_null.php on line 2\n1N2N3?\n[y]\n\nWarning: Uninitialized string offset 7 in /w/cases"
+              phego: "ases/s2_def_cached_null.php on line 2\n1N\nWarning: Undefined array key 5 in /w/cases/s2_def_cached_nu"
+    --- FAIL: TestW17Stage2Probes/def_cached_null/log64 (0.00s)
+        w17_stage2_probes_test.go:1020: stderr differs at byte 97
+              php:   "ched_null.php on line 2\nPHP Warning:  Uninitialized string offset 7 in /w/cases/s2_def_cached_null.p"
+              phego: "ched_null.php on line 2\nPHP Warning:  Undefined array key 5 in /w/cases/s2_def_cached_null.php on li"
+    --- FAIL: TestW17Stage2Probes/def_cached_recursion/display64 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 90
+              php:   "s/s2_def_cached_recursion.php on line 2\n<t>123\n<t>1y<t>12\n"
+              phego: "s/s2_def_cached_recursion.php on line 2\n\nWarning: Uninitialized string offset 5 in /w/cases/s2_def_c"
+    --- FAIL: TestW17Stage2Probes/def_cached_recursion/log64 (0.00s)
+        w17_stage2_probes_test.go:1020: stderr differs at byte 94
+              php:   "s/s2_def_cached_recursion.php on line 2\n"
+              phego: "s/s2_def_cached_recursion.php on line 2\nPHP Warning:  Uninitialized string offset 5 in /w/cases/s2_d"
+    --- FAIL: TestW17Stage2Probes/def_cached_first_omitted/display32 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 96
+              php:   "def_cached_first_omitted.php on line 2\nnnn\n"
+              phego: "def_cached_first_omitted.php on line 2\nn\nWarning: Undefined array key 6 in /w/cases/s2_def_cached_fi"
+    --- FAIL: TestW17Stage2Probes/def_cached_kinds/display32 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 89
+              php:   "ases/s2_def_cached_kinds.php on line 2\n66|\nWarning: Undefined array key 5 in /w/cases/s2_def_cached_"
+              phego: "ases/s2_def_cached_kinds.php on line 2\n6\nWarning: A non-numeric value encountered in /w/cases/s2_def"
+    --- FAIL: TestW17Stage2Probes/def_cached_null/display32 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 79
+              php:   "ases/s2_def_cached_null.php on line 2\n1N2N3?\n[y]\n\nWarning: Uninitialized string offset 7 in /w/cases"
+              phego: "ases/s2_def_cached_null.php on line 2\n1N\nWarning: Undefined array key 5 in /w/cases/s2_def_cached_nu"
+    --- FAIL: TestW17Stage2Probes/def_cached_recursion/display32 (0.00s)
+        w17_stage2_probes_test.go:1015: stdout differs at byte 90
+              php:   "s/s2_def_cached_recursion.php on line 2\n<t>123\n<t>1y<t>12\n"
+              phego: "s/s2_def_cached_recursion.php on line 2\n\nWarning: Uninitialized string offset 5 in /w/cases/s2_def_c"
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.404s
+FAIL

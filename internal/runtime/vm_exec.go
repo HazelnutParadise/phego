@@ -17,7 +17,8 @@ const vmPollInterval = 1024
 
 // vmFrame is one PHP call. regs, locals and locs are windows of the
 // execution's slabs.
-// A location register holds local index + 1; zero is "not defined".
+// A location register holds local index + 1 for a variable, -(index + 1)
+// for an element in elems, and zero for "not defined".
 type vmFrame struct {
 	fn     *vmFunction
 	code   []vmInstr
@@ -25,32 +26,46 @@ type vmFrame struct {
 	regs   []value
 	locals []value
 	locs   []int32
-	base   int // offset of regs in the value slab
-	lbase  int // offset of locs in the location slab
-	dest   uint32
-	nargs  int
-	extra  []value // arguments beyond the declared parameters, for backtraces
+	// elems holds the elements FetchDim found for the frame's element
+	// locations; a location register names one as -(index + 1).
+	elems []*value
+	base  int // offset of regs in the value slab
+	lbase int // offset of locs in the location slab
+	ebase int // offset of elems in the element slab
+	dest  uint32
+	nargs int
+	// unreceived marks a frame whose call passed too few arguments: its pc
+	// names the parameter that is missing, but no prologue Store has run.
+	unreceived bool
+	extra      []value // arguments beyond the declared parameters, for backtraces
 }
 
 type vmState struct {
-	prog    *Program
-	x       *execution
-	h       *heap
-	frames  []vmFrame
-	slab    []value
-	top     int
-	lslab   []int32
-	ltop    int
-	args    []value
-	steps   int64
-	limit   int64
-	next    int64 // steps at which the next slow check runs
-	done    <-chan struct{}
-	scratch []byte
-	globals []Global
-	prelude []RunDiagnostic
-	end     completion
-	ended   bool
+	prog   *Program
+	x      *execution
+	h      *heap
+	frames []vmFrame
+	slab   []value
+	top    int
+	lslab  []int32
+	ltop   int
+	eslab  []*value
+	etop   int
+	// defaults is RECV_INIT's run-time cache: per function index, per
+	// parameter, the default value an earlier call evaluated and PHP keeps
+	// (vmDefaultCacheable). Allocated on first use; it lives with the run,
+	// never in the shared Program.
+	defaults [][]vmCachedDefault
+	args     []value
+	steps    int64
+	limit    int64
+	next     int64 // steps at which the next slow check runs
+	done     <-chan struct{}
+	scratch  []byte
+	globals  []Global
+	prelude  []RunDiagnostic
+	end      completion
+	ended    bool
 	// lastFile and lastLine locate diagnostics raised when no frame is
 	// active: the uncaught throwable reported after unwinding.
 	lastFile string
@@ -274,12 +289,12 @@ func (s *vmState) kill(f *vmFrame, in *vmInstr) error {
 	return first
 }
 
-// slot is the variable a location register names, or an internal error for
-// a register no Local defined on this path.
+// slot is the variable or the element a location register names, or an
+// internal error for a register no Local or FetchDim defined on this path.
 func (s *vmState) slot(f *vmFrame, r uint32) (*value, error) {
 	l := f.locs[r]
 	if l <= 0 || int(l) > len(f.locals) {
-		return nil, s.internal("location register %d read before Local", r)
+		return s.elementSlot(f, r)
 	}
 	return &f.locals[l-1], nil
 }
@@ -326,6 +341,12 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	fr.lbase = s.ltop
 	fr.locs = s.lslab[s.ltop : s.ltop+fn.nlocs : s.ltop+fn.nlocs]
 	s.ltop += fn.nlocs
+	if s.etop+fn.nelems > len(s.eslab) {
+		s.growElements(fn.nelems)
+	}
+	fr.ebase = s.etop
+	fr.elems = s.eslab[s.etop : s.etop+fn.nelems : s.etop+fn.nelems]
+	s.etop += fn.nelems
 	args := s.args[len(s.args)-argc:]
 	for i, a := range args {
 		if i < fn.params {
@@ -337,7 +358,7 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	clear(args)
 	s.args = s.args[:len(s.args)-argc]
 	s.frames = append(s.frames, fr)
-	if argc < fn.params {
+	if argc < fn.required {
 		return s.tooFewArguments(argc)
 	}
 	return nil
@@ -355,6 +376,17 @@ func (s *vmState) growSlab(n int) {
 		nv := f.fn.nvals
 		win := slab[f.base : f.base+nv+f.fn.locals : f.base+nv+f.fn.locals]
 		f.regs, f.locals = win[:nv:nv], win[nv:]
+	}
+}
+
+func (s *vmState) growElements(n int) {
+	size := max(2*len(s.eslab), s.etop+n, 4)
+	slab := make([]*value, size)
+	copy(slab, s.eslab[:s.etop])
+	s.eslab = slab
+	for i := range s.frames {
+		f := &s.frames[i]
+		f.elems = slab[f.ebase : f.ebase+f.fn.nelems : f.ebase+f.fn.nelems]
 	}
 }
 
@@ -401,8 +433,10 @@ func (s *vmState) pop(release bool) error {
 	}
 	clear(f.locals)
 	clear(f.locs)
+	clear(f.elems)
 	s.top = f.base
 	s.ltop = f.lbase
+	s.etop = f.ebase
 	s.frames[len(s.frames)-1] = vmFrame{}
 	s.frames = s.frames[:len(s.frames)-1]
 	return first
@@ -654,13 +688,23 @@ func (s *vmState) dropArgs(argc int) error {
 	return first
 }
 
-// tooFewArguments is zend_missing_arg_error, raised in the callee frame at
-// its first instruction (the declaration line), as PHP's RECV does.
+// tooFewArguments is zend_missing_arg_error, raised in the callee frame by
+// the RECV of the first missing parameter: the frame stands at the prologue
+// instruction that receives it, which carries the parameter's line. A
+// function with optional parameters expects "at least" its required ones.
 func (s *vmState) tooFewArguments(argc int) error {
 	callee := &s.frames[len(s.frames)-1]
 	caller := &s.frames[len(s.frames)-2]
-	return &Throwable{"ArgumentCountError", fmt.Sprintf("Too few arguments to function %s(), %d passed in %s on line %d and exactly %d expected",
-		callee.fn.name, argc, vmFileName(caller.fn.files[caller.pc]), caller.fn.lines[caller.pc], callee.fn.params)}
+	callee.unreceived = true
+	if pc := callee.fn.paramPC[argc]; pc >= 0 {
+		callee.pc = int(pc)
+	}
+	bound := "exactly"
+	if callee.fn.required < callee.fn.params {
+		bound = "at least"
+	}
+	return &Throwable{"ArgumentCountError", fmt.Sprintf("Too few arguments to function %s(), %d passed in %s on line %d and %s %d expected",
+		callee.fn.name, argc, vmFileName(caller.fn.files[caller.pc]), caller.fn.lines[caller.pc], bound, callee.fn.required)}
 }
 
 // ret returns v (owned) from the top frame to its caller.

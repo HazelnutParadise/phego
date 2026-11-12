@@ -22,6 +22,8 @@ var opNames = [...]string{
 	bytecode.OpIncDec: "IncDec", bytecode.OpArraySet: "ArraySet", bytecode.OpArrayAppend: "ArrayAppend",
 	bytecode.OpArrayUnset: "ArrayUnset", bytecode.OpIsset: "Isset", bytecode.OpArrayIsset: "ArrayIsset",
 	bytecode.OpUnset: "Unset", bytecode.OpExit: "Exit", bytecode.OpArrayAdd: "ArrayAdd",
+	bytecode.OpFetchDim: "FetchDim", bytecode.OpIterInit: "IterInit", bytecode.OpIterNext: "IterNext",
+	bytecode.OpIterKey: "IterKey", bytecode.OpParamDefault: "ParamDefault",
 }
 
 var binaryNames = [...]string{
@@ -61,8 +63,34 @@ func auxName(in bytecode.Instruction) string {
 		return name(castNames[:], a)
 	case bytecode.OpIncDec:
 		return name(incDecNames[:], a)
+	case bytecode.OpFetchDim:
+		return fetchName(bytecode.FetchFlags(in.Aux))
+	case bytecode.OpArraySet:
+		// The write flags, then the result register when there is one.
+		if r, ok := bytecode.ArraySetResult(in.Aux); ok {
+			return strconv.Itoa(a&int(bytecode.KeyLocation|bytecode.ValueLocation)) + "->r" + strconv.FormatUint(uint64(r), 10)
+		}
 	}
 	return strconv.Itoa(a)
+}
+
+// fetchName spells FetchFlags: the mode, then +key for a key the instruction
+// reads itself, +append for [], and the use.
+func fetchName(f bytecode.FetchFlags) string {
+	out := name([]string{bytecode.FetchWrite: "Write", bytecode.FetchReadWrite: "ReadWrite", bytecode.FetchUnset: "Unset"}, int(f.Mode()))
+	if f&bytecode.FetchKeyLocation != 0 {
+		out += "+key"
+	}
+	if f&bytecode.FetchAppend != 0 {
+		out += "+append"
+	}
+	switch f.Use() {
+	case bytecode.FetchForIncDec:
+		out += "+incdec"
+	case bytecode.FetchForAssignOp:
+		out += "+assignop"
+	}
+	return out
 }
 
 func constantText(c bytecode.Constant) string {
