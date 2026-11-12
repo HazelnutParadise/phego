@@ -349,7 +349,10 @@ func (e *Engine) compileTree(ctx context.Context, name, source string, tree *fro
 	}
 	image, err := vm.Compile(ctx, unit, []byte(source))
 	var vu *vm.UnsupportedError
+	var vc *vm.CompileError
 	switch {
+	case errors.As(err, &vc):
+		return nil, &PHPError{Kind: CompileError, Message: vc.Message, File: vc.File, Line: vc.Line}
 	case errors.As(err, &vu):
 		return nil, located(&UnsupportedError{Feature: vu.Feature, File: vu.File, Line: vu.Line}, source)
 	case err != nil && ctx.Err() != nil:

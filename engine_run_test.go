@@ -380,3 +380,17 @@ func TestRunFileExecutesMountedScript(t *testing.T) {
 		t.Fatal("RunFile kept its slot")
 	}
 }
+
+// Declaring a function under a builtin's name is PHP's compile-time fatal,
+// not an unsupported construct.
+func TestCompileRejectsRedeclaringABuiltin(t *testing.T) {
+	e, err := NewEngine(Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = e.Compile(context.Background(), "/w/r.php", "<?php\nfunction strlen() {}\n")
+	var pe *PHPError
+	if !errors.As(err, &pe) || pe.Kind != CompileError || pe.Message != "Cannot redeclare function strlen()" || pe.File != "/w/r.php" || pe.Line != 2 {
+		t.Fatalf("Compile error = %#v, want PHP's redeclare compile error on line 2", err)
+	}
+}
