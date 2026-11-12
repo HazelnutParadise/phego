@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // MaxNesting is the PHP 8.5.12 grammar-state stack limit. Go recursive calls
@@ -392,7 +394,7 @@ func (p *parser) statementContext(top, single bool) *Node {
 			level = p.expr()
 		}
 		p.endStatement()
-		return node(strings.ToLower(t.Text), t.Line, level)
+		return node(phpname.Lower(t.Text), t.Line, level)
 	case TReturn:
 		p.next()
 		var v *Node
@@ -751,7 +753,7 @@ func (p *parser) declareStatement() *Node {
 		name := p.identifier()
 		p.expect('=')
 		v := p.expr()
-		if strings.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
+		if phpname.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
 			invalidEncoding = true
 		}
 		n.Children = append(n.Children, node("directive", name.Line, name, v))
@@ -1164,7 +1166,7 @@ func (p *parser) classDecl(attrs *Node) *Node {
 		p.unexpected()
 	}
 	t := p.next()
-	n := &Node{Kind: strings.ToLower(t.Text), Line: line}
+	n := &Node{Kind: phpname.Lower(t.Text), Line: line}
 	name := p.className()
 	var backing, extends, implements *Node
 	if t.Kind == TEnum && p.accept(':') {

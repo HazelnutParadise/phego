@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // vmPollInterval bounds the straight-line instructions between two
@@ -428,6 +429,36 @@ var binaryOps = [...]string{
 	bytecode.BitAnd: "&", bytecode.BitOr: "|", bytecode.BitXor: "^", bytecode.ShiftLeft: "<<", bytecode.ShiftRight: ">>",
 }
 
+// vmCopyChunk is how many bytes of a large string are copied between two
+// cancellation polls.
+const vmCopyChunk = 4 << 20
+
+// join is a . b for two strings. A result larger than vmCopyChunk is built
+// in chunks with a cancellation poll between them, so a run that copies
+// very large strings still ends promptly; when the run was stopped the
+// result is unused.
+func (s *vmState) join(a, b string) value {
+	if len(a)+len(b) <= vmCopyChunk {
+		return stringValue(a + b)
+	}
+	if s.poll() {
+		return nullValue()
+	}
+	var out strings.Builder
+	out.Grow(len(a) + len(b))
+	for _, part := range [2]string{a, b} {
+		for len(part) > 0 {
+			n := min(len(part), vmCopyChunk)
+			out.WriteString(part[:n])
+			part = part[n:]
+			if len(part) > 0 && s.poll() {
+				return nullValue()
+			}
+		}
+	}
+	return stringValue(out.String())
+}
+
 // binary is PHP's binary operator op on a and b.
 func (s *vmState) binary(op bytecode.BinaryOp, a, b value) (value, error) {
 	h := s.h
@@ -438,7 +469,7 @@ func (s *vmState) binary(op bytecode.BinaryOp, a, b value) (value, error) {
 		return h.mod(a, b)
 	case bytecode.Concat:
 		if a.kind == valueString && b.kind == valueString {
-			return stringValue(a.text + b.text), nil
+			return s.join(a.text, b.text), nil
 		}
 		return h.concat(a, b)
 	case bytecode.Equal, bytecode.NotEqual:
@@ -583,7 +614,7 @@ func (s *vmState) callValue(callable value, argc int, dest uint32) error {
 		return s.unsupported("calling a non-string callable")
 	}
 	name := strings.TrimPrefix(callable.text, "\\")
-	idx, ok := s.prog.byName[strings.ToLower(name)]
+	idx, ok := s.prog.byName[phpname.Lower(name)]
 	if !ok {
 		// PHP throws when the name is resolved, before any argument is
 		// sent; the pending arguments are discarded.

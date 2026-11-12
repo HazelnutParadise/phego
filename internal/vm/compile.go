@@ -12,10 +12,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // UnsupportedError reports the first construct, in source order, that this
@@ -131,7 +131,7 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 		if isBuiltin(f.Name) {
 			return bytecode.Image{}, &CompileError{Message: "Cannot redeclare function " + f.Name + "()", File: unit.File, Line: positive(f.Line, 1)}
 		}
-		c.funcIndex[strings.ToLower(f.Name)] = uint32(i + 1)
+		c.funcIndex[phpname.Lower(f.Name)] = uint32(i + 1)
 	}
 	funcs := append([]*ir.Func{unit.Main}, unit.Functions...)
 	out := make([]bytecode.Function, len(funcs))

@@ -3,6 +3,7 @@ package ir
 import (
 	"strings"
 
+	"github.com/HazelnutParadise/phego/internal/phpname"
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
@@ -37,7 +38,7 @@ var coreClassMetadata = func() map[string]*Class {
 		for _, f := range cl.Methods {
 			f.Class = cl
 		}
-		out[strings.ToLower(cl.Name)] = cl
+		out[phpname.Lower(cl.Name)] = cl
 	}
 	return out
 }()
@@ -46,5 +47,5 @@ func builtinCoreClass(prof profile.Profile, name string) *Class {
 	if prof.Release != "8.5.12" || prof.IntWidth != 32 && prof.IntWidth != 64 {
 		return nil
 	}
-	return coreClassMetadata[strings.ToLower(strings.TrimPrefix(name, "\\"))]
+	return coreClassMetadata[phpname.Lower(strings.TrimPrefix(name, "\\"))]
 }

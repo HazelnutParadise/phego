@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 	"github.com/HazelnutParadise/phego/internal/phpnum"
 )
 
@@ -155,7 +156,7 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 		}
 		return l.syntaxChain(n, depth)
 	case "binary":
-		op := strings.ToLower(n.Text)
+		op := phpname.Lower(n.Text)
 		if op == "|>" {
 			return syntaxConstEntry{}
 		}
@@ -169,7 +170,7 @@ func (l *lowerer) syntaxConstantValue(n *frontend.Node, depth int) syntaxConstEn
 	case "ternary":
 		return l.syntaxChain(n, depth)
 	case "cast":
-		kind := castNames[strings.ToLower(strings.Trim(n.Text, "() \t"))]
+		kind := castNames[phpname.Lower(strings.Trim(n.Text, "() \t"))]
 		if kind == "unset" {
 			l.fail(n.Line, "The (unset) cast is no longer supported")
 		}
@@ -256,7 +257,7 @@ func syntaxChainOperand(n *frontend.Node) *frontend.Node {
 			return n.Children[0]
 		}
 	case "binary":
-		if op := strings.ToLower(n.Text); op != "??" && op != "|>" {
+		if op := phpname.Lower(n.Text); op != "??" && op != "|>" {
 			return n.Children[0]
 		}
 	case "ternary":
@@ -294,7 +295,7 @@ func (l *lowerer) syntaxChain(n *frontend.Node, depth int) syntaxConstEntry {
 	for i := len(spine) - 1; i >= 0; i-- {
 		nd := spine[i]
 		c := nd.Children
-		op := strings.ToLower(nd.Text)
+		op := phpname.Lower(nd.Text)
 		entry := syntaxConstEntry{} // this step's entry when it fails
 		ok := false
 		switch nd.Kind {
@@ -397,10 +398,10 @@ func (l *lowerer) syntaxChain(n *frontend.Node, depth int) syntaxConstEntry {
 // rightLink returns n's right operand when it continues a right-associative
 // chain of op (?? or **), or nil.
 func rightLink(n *frontend.Node, op string) *frontend.Node {
-	if n == nil || n.Kind != "binary" || strings.ToLower(n.Text) != op {
+	if n == nil || n.Kind != "binary" || phpname.Lower(n.Text) != op {
 		return nil
 	}
-	if r := unparen(n.Children[1]); r != nil && r.Kind == "binary" && strings.ToLower(r.Text) == op {
+	if r := unparen(n.Children[1]); r != nil && r.Kind == "binary" && phpname.Lower(r.Text) == op {
 		return r
 	}
 	return nil
@@ -412,7 +413,7 @@ func rightLink(n *frontend.Node, op string) *frontend.Node {
 // selects the rest of the chain.
 func (l *lowerer) syntaxRightChain(n *frontend.Node, depth int) syntaxConstEntry {
 	b := l.constants
-	op := strings.ToLower(n.Text)
+	op := phpname.Lower(n.Text)
 	spine := []*frontend.Node{n}
 	for r := rightLink(n, op); r != nil; r = rightLink(r, op) {
 		if _, ok := b.syntax[r]; ok {

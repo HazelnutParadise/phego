@@ -298,7 +298,9 @@ func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, er
 	work, done := e.observeClose(ctx)
 	defer done()
 	p, err := e.compile(work, name, source)
-	if err != nil && work.Err() != nil {
+	if work.Err() != nil {
+		// Also when the last, uninterruptible step finished after ctx
+		// ended: a cancelled compile does not hand out a program.
 		return nil, workErr(work)
 	}
 	return p, err
@@ -527,6 +529,9 @@ func (e *Engine) run(ctx context.Context, program *Program, release func(), opts
 			switch {
 			case errors.As(err, &re):
 				return &Result{Status: StatusPolicyDenied}, err
+			case errors.Is(err, ErrEngineClosed):
+				// Close ended the wait for a slot.
+				return &Result{Status: StatusCancelled}, errClosedDuringWork
 			case ctx.Err() != nil:
 				return &Result{Status: StatusCancelled}, err
 			}
@@ -554,6 +559,10 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
+	if e.policy.limits[policy.Memory] > 0 {
+		// Refused before anything is opened: see run.
+		return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "enforcing a memory limit", Option: "Limits.Memory"}
+	}
 	// Close also ends the open, the read and the compile.
 	ctx, done := e.observeClose(ctx)
 	defer done()
@@ -564,6 +573,8 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 		switch {
 		case errors.As(err, &re):
 			status = StatusPolicyDenied
+		case errors.Is(err, ErrEngineClosed):
+			return &Result{Status: StatusCancelled}, errClosedDuringWork
 		case ctx.Err() != nil:
 			status = StatusCancelled
 		}

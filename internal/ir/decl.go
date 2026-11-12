@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // builtinOrder is the order zend_type_to_string prints built-in types in,
@@ -129,7 +130,7 @@ func (l *lowerer) typeOf(n *frontend.Node, _ bool) *Type {
 				for _, e := range t.entries {
 					if e.inter != nil {
 						l.intersectionRedundantBy(e, se)
-					} else if strings.EqualFold(e.name, se.name) {
+					} else if phpname.EqualFold(e.name, se.name) {
 						l.fail(c.Line, "Duplicate type %s is redundant", se.name)
 					}
 				}
@@ -188,11 +189,11 @@ func (l *lowerer) intersection(n *frontend.Node) []string {
 			l.fail(c.Line, "Type %s cannot be part of an intersection type", single.String())
 		}
 		name := single.entries[0].name
-		if strings.EqualFold(name, "self") || strings.EqualFold(name, "parent") {
+		if phpname.EqualFold(name, "self") || phpname.EqualFold(name, "parent") {
 			l.fail(c.Line, "Type %s cannot be part of an intersection type", c.Text)
 		}
 		for _, prev := range names {
-			if strings.EqualFold(prev, name) {
+			if phpname.EqualFold(prev, name) {
 				l.fail(c.Line, "Duplicate type %s is redundant", name)
 			}
 		}
@@ -211,7 +212,7 @@ func (l *lowerer) intersectionsRedundant(a, b typeEntry) {
 	sum := 0
 	for _, o := range small.inter {
 		for _, i := range large.inter {
-			if strings.EqualFold(o, i) {
+			if phpname.EqualFold(o, i) {
 				sum++
 				break
 			}
@@ -232,7 +233,7 @@ func (l *lowerer) intersectionsRedundant(a, b typeEntry) {
 
 func (l *lowerer) intersectionRedundantBy(inter, single typeEntry) {
 	for _, name := range inter.inter {
-		if strings.EqualFold(name, single.name) {
+		if phpname.EqualFold(name, single.name) {
 			l.fail(l.cur, "Type %s is redundant as it is more restrictive than type %s", strings.Join(inter.inter, "&"), single.name)
 		}
 	}
@@ -242,7 +243,7 @@ func (l *lowerer) intersectionRedundantBy(inter, single typeEntry) {
 func (l *lowerer) singleType(t *frontend.Node) *typeSet {
 	set := &typeSet{mask: map[string]bool{}}
 	name := t.Text
-	lower := strings.ToLower(name)
+	lower := phpname.Lower(name)
 	if t.Token == frontend.TStatic && l.class == nil && l.scopeKnown() {
 		l.fail(t.Line, "Cannot use \"static\" when no class scope is active")
 	}
@@ -252,8 +253,8 @@ func (l *lowerer) singleType(t *frontend.Node) *typeSet {
 		return set
 	}
 	form, rest := formOf(name)
-	if (form == fullyQualified || form == relative) && builtinTypes[strings.ToLower(rest)] {
-		l.fail(t.Line, "Type declaration '%s' must be unqualified", strings.ToLower(rest))
+	if (form == fullyQualified || form == relative) && builtinTypes[phpname.Lower(rest)] {
+		l.fail(t.Line, "Type declaration '%s' must be unqualified", phpname.Lower(rest))
 	}
 	if form == unqualified {
 		switch lower {
@@ -332,7 +333,7 @@ func (l *lowerer) classDecl(s *frontend.Node, anonymous bool) *Class {
 		}
 		cl.Name = l.ns.prefix(short)
 		l.see("class", cl.Name)
-		if imp, ok := l.ns.classes[strings.ToLower(short)]; ok && !strings.EqualFold(imp, cl.Name) {
+		if imp, ok := l.ns.classes[phpname.Lower(short)]; ok && !phpname.EqualFold(imp, cl.Name) {
 			l.fail(s.Line, "Cannot redeclare class %s (previously declared as local import)", cl.Name)
 		}
 		mods, extends, implements, members = c[1], c[4], c[5], c[6]
@@ -342,7 +343,7 @@ func (l *lowerer) classDecl(s *frontend.Node, anonymous bool) *Class {
 	}
 	if mods != nil {
 		for _, m := range mods.Children {
-			cl.Modifiers = append(cl.Modifiers, strings.ToLower(m.Text))
+			cl.Modifiers = append(cl.Modifiers, phpname.Lower(m.Text))
 		}
 	}
 	savedClass := l.class
@@ -379,7 +380,7 @@ func (l *lowerer) classDecl(s *frontend.Node, anonymous bool) *Class {
 
 func hasClassMarker(attrs []Attribute, want string) bool {
 	for _, a := range attrs {
-		if a.Name != nil && globalAttributeName(a.Name.Resolved) == strings.ToLower(want) {
+		if a.Name != nil && globalAttributeName(a.Name.Resolved) == phpname.Lower(want) {
 			return true
 		}
 	}
@@ -400,7 +401,7 @@ func modifierList(n *frontend.Node) []string {
 		return nil
 	}
 	for _, m := range n.Children {
-		out = append(out, strings.ToLower(m.Text))
+		out = append(out, phpname.Lower(m.Text))
 	}
 	return out
 }
@@ -443,7 +444,7 @@ func (l *lowerer) member(cl *Class, m *frontend.Node) {
 					}
 				} else {
 					if a.Children[1] != nil {
-						rule.Modifier = strings.ToLower(a.Children[1].Text)
+						rule.Modifier = phpname.Lower(a.Children[1].Text)
 					}
 					if a.Children[2] != nil {
 						rule.Alias = a.Children[2].Text
@@ -565,7 +566,7 @@ func hooksBackProperty(hooks *frontend.Node, name string) bool {
 	}
 	for _, h := range hooks.Children {
 		// A short setter writes its expression into the property's storage.
-		if strings.EqualFold(h.Children[2].Text, "set") && h.Children[4] != nil && h.Children[4].Kind != "block" {
+		if phpname.EqualFold(h.Children[2].Text, "set") && h.Children[4] != nil && h.Children[4].Kind != "block" {
 			return true
 		}
 		if len(h.Children) > 4 && visit(h.Children[4]) {
@@ -597,7 +598,7 @@ func (l *lowerer) hooks(prop string, list *frontend.Node) []*Func {
 	var out []*Func
 	for _, h := range list.Children {
 		hc := h.Children
-		name := strings.ToLower(hc[2].Text)
+		name := phpname.Lower(hc[2].Text)
 		f := l.newFunc(FuncHook, "$"+prop+"::"+name, hc[2].Line)
 		f.Attributes = l.checkAttributes(hc[0], "property hook", hc[2].Line)
 		f.property = prop

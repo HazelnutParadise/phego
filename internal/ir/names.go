@@ -1,6 +1,10 @@
 package ir
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
+)
 
 // namespace holds the import tables of the namespace being compiled. PHP
 // resets them at each namespace declaration.
@@ -37,7 +41,7 @@ func formOf(text string) (nameForm, string) {
 	switch {
 	case strings.HasPrefix(text, "\\"):
 		return fullyQualified, text[1:]
-	case len(text) > 10 && strings.EqualFold(text[:10], "namespace\\"):
+	case len(text) > 10 && phpname.EqualFold(text[:10], "namespace\\"):
 		return relative, text[10:]
 	case strings.Contains(text, "\\"):
 		return qualified, text
@@ -47,7 +51,7 @@ func formOf(text string) (nameForm, string) {
 
 // specialClass returns the lower-case special class name, if any.
 func specialClass(name string) string {
-	switch l := strings.ToLower(name); l {
+	switch l := phpname.Lower(name); l {
 	case "self", "parent", "static":
 		return l
 	}
@@ -66,7 +70,7 @@ func (ns *namespace) resolveClass(text string) *Name {
 		if s := specialClass(name); s != "" {
 			return &Name{Kind: ClassName, Resolved: s, Special: s}
 		}
-		if full, ok := ns.classes[strings.ToLower(name)]; ok {
+		if full, ok := ns.classes[phpname.Lower(name)]; ok {
 			return &Name{Kind: ClassName, Resolved: full}
 		}
 		return &Name{Kind: ClassName, Resolved: ns.prefix(name)}
@@ -78,7 +82,7 @@ func (ns *namespace) resolveClass(text string) *Name {
 // first segment, which PHP applies to every symbol kind.
 func (ns *namespace) qualified(name string) string {
 	first, rest, _ := strings.Cut(name, "\\")
-	if full, ok := ns.classes[strings.ToLower(first)]; ok {
+	if full, ok := ns.classes[phpname.Lower(first)]; ok {
 		return full + "\\" + rest
 	}
 	return ns.prefix(name)
@@ -88,7 +92,7 @@ func (ns *namespace) qualified(name string) string {
 // namespace falls back to the global function at run time.
 func (ns *namespace) resolveFunction(text string) *Name {
 	return ns.resolveSymbol(FunctionName, text, func(n string) (string, bool) {
-		full, ok := ns.functions[strings.ToLower(n)]
+		full, ok := ns.functions[phpname.Lower(n)]
 		return full, ok
 	})
 }
@@ -98,7 +102,7 @@ func (ns *namespace) resolveFunction(text string) *Name {
 func (ns *namespace) resolveConstant(text string) *Name {
 	form, name := formOf(text)
 	if form == unqualified && isBuiltinConstant(name) {
-		return &Name{Kind: ConstantName, Resolved: strings.ToLower(name)}
+		return &Name{Kind: ConstantName, Resolved: phpname.Lower(name)}
 	}
 	return ns.resolveSymbol(ConstantName, text, func(n string) (string, bool) {
 		full, ok := ns.constants[n]
@@ -135,7 +139,7 @@ var reservedClassNames = map[string]bool{
 // isReservedClassName mirrors zend_is_reserved_class_name, which checks the
 // last segment of a name.
 func isReservedClassName(name string) bool {
-	return reservedClassNames[strings.ToLower(lastSegment(name))]
+	return reservedClassNames[phpname.Lower(lastSegment(name))]
 }
 
 func lastSegment(s string) string {

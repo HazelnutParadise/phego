@@ -2,7 +2,8 @@ package vm
 
 import (
 	"sort"
-	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // builtinFunctions (builtins_gen.go) lists PHP 8.5.12's internal functions
@@ -16,7 +17,7 @@ import (
 
 // isBuiltin reports whether name, in any case, is a PHP internal function.
 func isBuiltin(name string) bool {
-	n := strings.ToLower(name)
+	n := phpname.Lower(name)
 	i := sort.SearchStrings(builtinFunctions, n)
 	return i < len(builtinFunctions) && builtinFunctions[i] == n
 }

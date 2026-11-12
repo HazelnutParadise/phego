@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // checkAttributes validates arguments and retains bounded declaration metadata,
@@ -116,7 +117,7 @@ func globalAttributeName(name string) string {
 	if strings.Contains(name, "\\") {
 		return ""
 	}
-	return strings.ToLower(name)
+	return phpname.Lower(name)
 }
 
 func attributeDisplay(name string) string {
@@ -168,7 +169,7 @@ func hasASTAttribute(attrs *frontend.Node, want string) bool {
 	}
 	for _, group := range attrs.Children {
 		for _, attr := range group.Children {
-			if len(attr.Children) > 0 && strings.EqualFold(strings.TrimPrefix(attr.Children[0].Text, "\\"), want) {
+			if len(attr.Children) > 0 && phpname.EqualFold(strings.TrimPrefix(attr.Children[0].Text, "\\"), want) {
 				return true
 			}
 		}
@@ -204,7 +205,7 @@ func attributeClassTargets(attrs *frontend.Node) int {
 	}
 	for _, group := range attrs.Children {
 		for _, attr := range group.Children {
-			if len(attr.Children) == 0 || !strings.EqualFold(strings.TrimPrefix(attr.Children[0].Text, "\\"), "Attribute") {
+			if len(attr.Children) == 0 || !phpname.EqualFold(strings.TrimPrefix(attr.Children[0].Text, "\\"), "Attribute") {
 				continue
 			}
 			if len(attr.Children) < 2 || attr.Children[1] == nil || len(attr.Children[1].Children) == 0 {
@@ -243,7 +244,7 @@ func attributeFlags(n *frontend.Node) (int, bool) {
 			return 0, false
 		}
 		cls, constant := n.Children[0], strings.ToUpper(n.Children[1].Text)
-		if cls.Kind != "name" || !strings.EqualFold(strings.TrimPrefix(cls.Text, "\\"), "Attribute") {
+		if cls.Kind != "name" || !phpname.EqualFold(strings.TrimPrefix(cls.Text, "\\"), "Attribute") {
 			return 0, false
 		}
 		flags := map[string]int{"TARGET_CLASS": 1, "TARGET_FUNCTION": 2, "TARGET_METHOD": 4, "TARGET_PROPERTY": 8, "TARGET_CLASS_CONSTANT": 16, "TARGET_PARAMETER": 32, "TARGET_ALL": 63, "IS_REPEATABLE": 64}

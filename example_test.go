@@ -71,7 +71,8 @@ func ExampleConfig_policy() {
 				{Scheme: "https", Host: "api.example.com", Ports: []int{443}},
 			},
 		},
-		Limits:    phego.Limits{Steps: 50_000_000, Memory: 128 << 20},
+		// Limits.Memory is refused until memory is metered.
+		Limits:    phego.Limits{Steps: 50_000_000},
 		MaxActive: 64,
 		MaxQueued: 128,
 	})

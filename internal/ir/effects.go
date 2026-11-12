@@ -3,6 +3,8 @@ package ir
 import (
 	"math"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // Effect is the set of PHP-observable behaviours an operation may have.
@@ -372,7 +374,7 @@ func castEffects(n *Node) Effect {
 }
 
 func isBuiltinConstant(name string) bool {
-	switch strings.ToLower(name) {
+	switch phpname.Lower(name) {
 	case "true", "false", "null":
 		return true
 	}

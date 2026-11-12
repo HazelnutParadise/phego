@@ -7,6 +7,8 @@ import (
 	"math"
 	"regexp"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // LexOptions selects the profile-dependent lexing rules.
@@ -256,7 +258,7 @@ func (l *lexer) peek(off int) byte {
 }
 
 func (l *lexer) hasPrefixFold(s string) bool {
-	return len(l.src)-l.pos >= len(s) && strings.EqualFold(l.src[l.pos:l.pos+len(s)], s)
+	return len(l.src)-l.pos >= len(s) && phpname.EqualFold(l.src[l.pos:l.pos+len(s)], s)
 }
 
 func isLabelStart(c byte) bool {
@@ -306,7 +308,7 @@ func (l *lexer) openTagAt(i int) (Kind, int) {
 	if strings.HasPrefix(s, "<?=") {
 		return TOpenTagWithEcho, 3
 	}
-	if len(s) >= 5 && strings.EqualFold(s[2:5], "php") {
+	if len(s) >= 5 && phpname.EqualFold(s[2:5], "php") {
 		if len(s) == 5 {
 			return TOpenTag, 5
 		}
@@ -522,7 +524,7 @@ func (l *lexer) cast(start int) bool {
 	for j < len(l.src) && (l.src[j]|0x20 >= 'a' && l.src[j]|0x20 <= 'z') {
 		j++
 	}
-	word := strings.ToLower(l.src[i:j])
+	word := phpname.Lower(l.src[i:j])
 	k, ok := casts[word]
 	if !ok {
 		return false
@@ -589,7 +591,7 @@ func (l *lexer) name(start int) {
 	}
 	if segments > 1 {
 		l.pos = i
-		if strings.EqualFold(first, "namespace") {
+		if phpname.EqualFold(first, "namespace") {
 			l.emit(TNameRelative, start)
 		} else {
 			l.emit(TNameQualified, start)
@@ -597,11 +599,11 @@ func (l *lexer) name(start int) {
 		return
 	}
 	l.pos = i
-	lower := strings.ToLower(first)
+	lower := phpname.Lower(first)
 	switch lower {
 	case "yield":
 		j := l.skipTrivia(i)
-		if j > i && len(l.src)-j >= 4 && strings.EqualFold(l.src[j:j+4], "from") && (j+4 >= len(l.src) || !isLabelChar(l.src[j+4])) {
+		if j > i && len(l.src)-j >= 4 && phpname.EqualFold(l.src[j:j+4], "from") && (j+4 >= len(l.src) || !isLabelChar(l.src[j+4])) {
 			l.pos = j + 4
 			l.emit(TYieldFrom, start)
 			return
@@ -609,7 +611,7 @@ func (l *lexer) name(start int) {
 	case "enum":
 		j := l.skipTrivia(i)
 		if j > i && j < len(l.src) && isLabelStart(l.src[j]) {
-			word := strings.ToLower(l.src[j:l.labelEnd(j)])
+			word := phpname.Lower(l.src[j:l.labelEnd(j)])
 			if word != "extends" && word != "implements" {
 				l.emit(TEnum, start)
 				return
@@ -618,7 +620,7 @@ func (l *lexer) name(start int) {
 		l.emit(TString, start)
 		return
 	case "public", "protected", "private":
-		if len(l.src)-i >= 5 && strings.EqualFold(l.src[i:i+5], "(set)") {
+		if len(l.src)-i >= 5 && phpname.EqualFold(l.src[i:i+5], "(set)") {
 			l.pos = i + 5
 			l.emit(map[string]Kind{"public": TPublicSet, "protected": TProtectedSet, "private": TPrivateSet}[lower], start)
 			return

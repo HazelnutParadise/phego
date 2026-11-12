@@ -101,5 +101,12 @@ func (a *Admission) Close() {
 	a.mu.Unlock()
 }
 
+// Queued returns the number of executions waiting for a slot.
+func (a *Admission) Queued() int {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.queued
+}
+
 // Active returns the number of executions holding a slot.
 func (a *Admission) Active() int { return len(a.slots) }

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // W-17 stage 1: REQ-001, REQ-005, REQ-011, REQ-015, REQ-016, REQ-025, REQ-026;
@@ -215,7 +215,7 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 		}
 		prog.funcs[i] = f
 		if i != prog.entry {
-			key := strings.ToLower(f.name)
+			key := phpname.Lower(f.name)
 			if _, dup := prog.byName[key]; !dup {
 				prog.byName[key] = i
 			}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
@@ -78,7 +79,7 @@ func lowerContext(ctx stdcontext.Context, tree *frontend.Node, prof profile.Prof
 // castDeprecation is the deprecation PHP's scanner raises for a
 // non-canonical cast name (zend_language_scanner.l), if any.
 func castDeprecation(n *frontend.Node) (Diagnostic, bool) {
-	inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
+	inner := phpname.Lower(strings.Trim(n.Text, "() \t"))
 	switch inner {
 	case "integer", "boolean", "double", "binary":
 		return Diagnostic{Line: n.Line, Level: "Deprecated",
@@ -412,7 +413,7 @@ func (l *lowerer) namespaceDecl(s *frontend.Node) *Node {
 	nsName := ""
 	if name != nil {
 		nsName = name.Text
-		if strings.EqualFold(nsName, "namespace") {
+		if phpname.EqualFold(nsName, "namespace") {
 			l.fail(s.Line, "Cannot use '%s' as namespace name", nsName)
 		}
 	}
@@ -458,7 +459,7 @@ func (l *lowerer) see(kind, full string) {
 		l.seen = map[string]bool{}
 	}
 	if kind != "const" {
-		full = strings.ToLower(full)
+		full = phpname.Lower(full)
 	}
 	l.seen[kind+":"+full] = true
 }
@@ -481,7 +482,7 @@ func (l *lowerer) importName(kind, name string, alias *frontend.Node, line int) 
 		l.fail(line, "Cannot use%s %s as %s because the name is already in use", label, name, short)
 	}
 	ns := l.ns
-	key := strings.ToLower(short)
+	key := phpname.Lower(short)
 	if kind == "const" {
 		key = short
 	}
@@ -494,9 +495,9 @@ func (l *lowerer) importName(kind, name string, alias *frontend.Node, line int) 
 	}
 	check := key
 	if ns.name != "" {
-		check = strings.ToLower(ns.name) + "\\" + key
+		check = phpname.Lower(ns.name) + "\\" + key
 	}
-	if l.seen[symbol+":"+check] && !strings.EqualFold(strings.TrimPrefix(name, "\\"), check) {
+	if l.seen[symbol+":"+check] && !phpname.EqualFold(strings.TrimPrefix(name, "\\"), check) {
 		inUse()
 	}
 	table := ns.classes
@@ -851,7 +852,7 @@ func (l *lowerer) returnStmt(s *frontend.Node) *Node {
 }
 
 func isNullLiteral(n *frontend.Node) bool {
-	return n != nil && n.Kind == "name" && strings.EqualFold(n.Text, "null")
+	return n != nil && n.Kind == "name" && phpname.EqualFold(n.Text, "null")
 }
 
 func (l *lowerer) globalVar(v *frontend.Node) *Node {
@@ -909,7 +910,7 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		if value.Kind != "literal" && !isConstantLiteral(value) {
 			l.fail(s.Line, "declare(%s) value must be a literal", name)
 		}
-		switch strings.ToLower(name) {
+		switch phpname.Lower(name) {
 		case "ticks":
 		case "encoding":
 			if !l.isFirstStatement(s, false) {
@@ -934,11 +935,11 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		default:
 			l.diag(s.Line, "Warning", fmt.Sprintf("Unsupported declare '%s'", name))
 		}
-		n.Kids = append(n.Kids, l.seal(&Node{Op: OpDirective, Line: d.Line, Text: strings.ToLower(name), Value: l.constantValue(value)}))
+		n.Kids = append(n.Kids, l.seal(&Node{Op: OpDirective, Line: d.Line, Text: phpname.Lower(name), Value: l.constantValue(value)}))
 	}
 	ticks := false
 	for _, d := range directives {
-		if v := l.constantValue(d.Children[1]); strings.EqualFold(d.Children[0].Text, "ticks") && v != nil && v.Kind == LitInt && v.Int > 0 {
+		if v := l.constantValue(d.Children[1]); phpname.EqualFold(d.Children[0].Text, "ticks") && v != nil && v.Kind == LitInt && v.Int > 0 {
 			ticks = true
 		}
 	}
@@ -1043,7 +1044,7 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 	f := l.newFunc(FuncNamed, full, s.Line)
 	f.Attributes = l.checkAttributes(c[0], "function", s.Line)
 	f.ByRef = s.Text == "&"
-	lower := strings.ToLower(short)
+	lower := phpname.Lower(short)
 	switch lower {
 	case "__autoload":
 		l.fail(s.Line, "__autoload() is no longer supported, use spl_autoload_register() instead")
@@ -1052,7 +1053,7 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 			l.fail(s.Line, "Defining a custom assert() function is not allowed, as the function has special semantics")
 		}
 	}
-	if imp, ok := l.ns.functions[lower]; ok && !strings.EqualFold(imp, full) {
+	if imp, ok := l.ns.functions[lower]; ok && !phpname.EqualFold(imp, full) {
 		l.fail(s.Line, "Cannot redeclare function %s() (previously declared as local import)", full)
 	}
 	l.see("function", full)
@@ -1060,14 +1061,14 @@ func (l *lowerer) function(s *frontend.Node, top bool) *Func {
 	l.unit.Functions = append(l.unit.Functions, f)
 	l.functionBody(f, c[2], c[3], c[4], nil)
 	if f.Hoisted {
-		key := strings.ToLower(full)
+		key := phpname.Lower(full)
 		if prev, dup := l.hoisted[key]; dup {
 			l.fail(s.Line, "Cannot redeclare function %s() (previously declared in %s:%d)", full, l.unit.File, prev.Line)
 		}
 		l.hoisted[key] = f
 	}
-	if hasClassMarker(f.Attributes, "NoDiscard") && f.Return != nil && (strings.EqualFold(f.Return.zend, "void") || strings.EqualFold(f.Return.zend, "never")) {
-		if strings.EqualFold(f.Return.zend, "void") {
+	if hasClassMarker(f.Attributes, "NoDiscard") && f.Return != nil && (phpname.EqualFold(f.Return.zend, "void") || phpname.EqualFold(f.Return.zend, "never")) {
+		if phpname.EqualFold(f.Return.zend, "void") {
 			l.fail(f.Line, "A void function does not return a value, but #[\\NoDiscard] requires a return value")
 		}
 		l.fail(f.Line, "A never returning function does not return a value, but #[\\NoDiscard] requires a return value")
@@ -1156,7 +1157,7 @@ func generatorCompatible(t string) bool {
 		if strings.HasPrefix(m, "(") {
 			continue
 		}
-		switch strings.ToLower(m) {
+		switch phpname.Lower(m) {
 		case "mixed", "object", "traversable", "iterator", "generator":
 			return true
 		}
@@ -1206,7 +1207,7 @@ func (l *lowerer) params(f *Func, list *frontend.Node) {
 		}
 		if mods != nil {
 			for _, m := range mods.Children {
-				param.Promoted = append(param.Promoted, strings.ToLower(m.Text))
+				param.Promoted = append(param.Promoted, phpname.Lower(m.Text))
 			}
 		}
 		var defKind string // PHP type of a constant default, "" for an expression
@@ -1244,7 +1245,7 @@ func (l *lowerer) params(f *Func, list *frontend.Node) {
 			param.Var.Flags |= VarRef
 		}
 		if len(param.Promoted) > 0 {
-			if f.Kind != FuncMethod || !strings.EqualFold(f.Name, "__construct") {
+			if f.Kind != FuncMethod || !phpname.EqualFold(f.Name, "__construct") {
 				l.fail(p.Line, "Cannot declare promoted property outside a constructor")
 			}
 			if param.Variadic {

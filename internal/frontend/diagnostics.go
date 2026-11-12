@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 const diagnosticWorkPerToken = 128
@@ -169,7 +171,7 @@ func diagnosticEncoding(tokens []Token, line int) (diagnostic *SyntaxError, comp
 	// tree for declarations such as ticks that have no parse-time value check.
 	hasEncoding := false
 	for _, token := range tokens {
-		if token.Kind == TString && strings.EqualFold(token.Text, "encoding") {
+		if token.Kind == TString && phpname.EqualFold(token.Text, "encoding") {
 			hasEncoding = true
 			break
 		}
@@ -190,7 +192,7 @@ func diagnosticEncoding(tokens []Token, line int) (diagnostic *SyntaxError, comp
 		name := q.identifier()
 		q.expect('=')
 		value := q.expr()
-		if strings.EqualFold(name.Text, "encoding") && !encodingLiteral(value) {
+		if phpname.EqualFold(name.Text, "encoding") && !encodingLiteral(value) {
 			return &SyntaxError{Line: line, Message: "Encoding must be a literal", Compile: true}, true
 		}
 		if !q.accept(',') {

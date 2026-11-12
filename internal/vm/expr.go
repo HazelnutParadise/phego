@@ -2,10 +2,10 @@ package vm
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // operand is an expression result. A plain PHP variable is not read when it
@@ -722,11 +722,11 @@ func (fc *fnCompiler) undefinedCall(n *ir.Node) operand {
 // by the global fallback, case-insensitively. name is the spelling a
 // CallValue passes to the run time.
 func (fc *fnCompiler) resolve(n *ir.Name) (name string, index uint32, ok bool) {
-	if i, found := fc.c.funcIndex[strings.ToLower(n.Resolved)]; found {
+	if i, found := fc.c.funcIndex[phpname.Lower(n.Resolved)]; found {
 		return n.Resolved, i, true
 	}
 	if n.Fallback != "" {
-		if i, found := fc.c.funcIndex[strings.ToLower(n.Fallback)]; found {
+		if i, found := fc.c.funcIndex[phpname.Lower(n.Fallback)]; found {
 			return n.Fallback, i, true
 		}
 	}

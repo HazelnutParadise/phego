@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"iter"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // Modifier targets, named as PHP 8.5.12 names them in errors.
@@ -77,9 +79,9 @@ func validateModifiers(tokens iter.Seq[Token], target string, line int) *SyntaxE
 			return &SyntaxError{Line: m.Line, Message: fmt.Sprintf("syntax error, unexpected token %q", m.Text)}
 		}
 		if !allowed {
-			return fail("Cannot use the %s modifier on a %s", strings.ToLower(m.Text), target)
+			return fail("Cannot use the %s modifier on a %s", phpname.Lower(m.Text), target)
 		}
-		group := strings.ToLower(m.Text)
+		group := phpname.Lower(m.Text)
 		switch k {
 		case TPublic, TProtected, TPrivate:
 			group = "access"
@@ -121,7 +123,7 @@ func validateClassModifiers(tokens iter.Seq[Token], anonymous bool, line int) *S
 	}
 	seen := map[string]bool{}
 	for m := range tokens {
-		name := strings.ToLower(m.Text)
+		name := phpname.Lower(m.Text)
 		if anonymous && name != "readonly" {
 			return fail("Cannot use the %s modifier on an anonymous class", name)
 		}
@@ -137,7 +139,7 @@ func validateClassModifiers(tokens iter.Seq[Token], anonymous bool, line int) *S
 }
 
 func kindOfModifier(text string) Kind {
-	lower := strings.ToLower(text)
+	lower := phpname.Lower(text)
 	switch lower {
 	case "public(set)":
 		return TPublicSet
