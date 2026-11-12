@@ -14,28 +14,8 @@ import (
 // cancellation polls. Back-edges, calls, returns and Checkpoint always poll.
 const vmPollInterval = 1024
 
-// vmVariant selects benchmark candidates. The zero value is production.
-type vmVariant struct {
-	dispatch uint8 // 0 switch, 1 pre-decoded closures, 2 fused compare+branch
-	frames   uint8 // 0 one slab per execution, 1 fresh slice per call, 2 per-depth reuse
-	locals   uint8 // 0 frame-owned slots, 1 execution.local registration per slot
-	polling  uint8 // 0 back-edges, calls and every vmPollInterval steps; 1 every instruction
-}
-
-// vmClosure is one pre-decoded instruction of the closure dispatch
-// candidate. It returns the next pc, or a negative value to stop or to
-// switch frames.
-type vmClosure func(s *vmState, f *vmFrame) int
-
-// vmClosureCandidate is installed by the benchmark tests only, so the
-// production binary carries one dispatch loop.
-var vmClosureCandidate *struct {
-	build func(*Program) [][]vmClosure
-	loop  func(*vmState)
-}
-
 // vmFrame is one PHP call. regs, locals and locs are windows of the
-// execution's slabs (or private slices for the frame benchmark candidates).
+// execution's slabs.
 // A location register holds local index + 1; zero is "not defined".
 type vmFrame struct {
 	fn     *vmFunction
@@ -49,32 +29,27 @@ type vmFrame struct {
 	dest   uint32
 	nargs  int
 	extra  []value // arguments beyond the declared parameters, for backtraces
-	xframe bool    // pushed an executionFrame (locals benchmark candidate)
 }
 
 type vmState struct {
-	prog     *Program
-	x        *execution
-	h        *heap
-	frames   []vmFrame
-	slab     []value
-	top      int
-	lslab    []int32
-	ltop     int
-	depthWin [][]value // per-depth windows (frame candidate 2)
-	depthLoc [][]int32
-	args     []value
-	steps    int64
-	limit    int64
-	next     int64 // steps at which the next slow check runs
-	done     <-chan struct{}
-	scratch  []byte
-	globals  []Global
-	prelude  []RunDiagnostic
-	variant  vmVariant
-	closures [][]vmClosure // dispatch candidate 1, per function
-	end      completion
-	ended    bool
+	prog    *Program
+	x       *execution
+	h       *heap
+	frames  []vmFrame
+	slab    []value
+	top     int
+	lslab   []int32
+	ltop    int
+	args    []value
+	steps   int64
+	limit   int64
+	next    int64 // steps at which the next slow check runs
+	done    <-chan struct{}
+	scratch []byte
+	globals []Global
+	prelude []RunDiagnostic
+	end     completion
+	ended   bool
 	// lastFile and lastLine locate diagnostics raised when no frame is
 	// active: the uncaught throwable reported after unwinding.
 	lastFile string
@@ -82,21 +57,17 @@ type vmState struct {
 }
 
 func newVMState(p *Program, x *execution, cfg RunConfig) *vmState {
-	s := &vmState{prog: p, x: x, h: x.heap, globals: cfg.Globals, prelude: cfg.Prelude, variant: cfg.variant, done: cfg.Context.Done()}
-	s.limit = cfg.Steps
-	if s.limit == 0 {
-		s.limit = math.MaxInt64 - 1 // limit+1 must not overflow
+	s := &vmState{prog: p, x: x, h: x.heap, globals: cfg.Globals, prelude: cfg.Prelude, done: cfg.Context.Done()}
+	// Zero is unlimited. Every limit stays below MaxInt64 because slow
+	// computes limit+1.
+	s.limit = math.MaxInt64 - 1
+	if cfg.Steps > 0 {
+		s.limit = min(cfg.Steps, s.limit)
 	}
 	s.next = min(s.limit, vmPollInterval)
-	if s.variant.polling == 1 {
-		s.next = 0
-	}
 	excluded := ^cfg.ErrorReporting
 	x.errors = errorChannels{display: cfg.DisplayErrors, log: cfg.LogErrors, where: s.where, excluded: excluded}
 	x.heap.sink = s.warn
-	if s.variant.dispatch == 1 && vmClosureCandidate != nil {
-		s.closures = vmClosureCandidate.build(p)
-	}
 	return s
 }
 
@@ -133,33 +104,38 @@ func (s *vmState) internal(format string, args ...any) error {
 	return &InternalError{Detail: fmt.Sprintf(format, args...), Function: fn, PC: pc, File: file, Line: line}
 }
 
-// body is the execution action of the request: it runs {main} to completion.
-func (s *vmState) body(x *execution) completion {
+// body is the execution action of the request: it runs {main} to
+// completion with loop, the instruction loop.
+func (s *vmState) body(loop func(*vmState)) completion {
+	if s.enter() {
+		loop(s)
+	}
+	s.unwind()
+	return s.end
+}
+
+// enter reports the prelude and pushes {main} with its globals. It reports
+// false when the run ended before {main}'s first instruction.
+func (s *vmState) enter() bool {
 	// Compile-time diagnostics come first, located where PHP compiled them.
 	for _, d := range s.prelude {
 		s.lastFile, s.lastLine = d.File, d.Line
-		if c := x.report(d.Level, d.Message, false); c.kind != endNormal {
+		if c := s.x.report(d.Level, d.Message, false); c.kind != endNormal {
 			s.ended, s.end = true, c
-			return c
+			return false
 		}
 	}
 	s.lastFile, s.lastLine = "", 0
 	main := &s.prog.funcs[s.prog.entry]
 	if err := s.push(main, 0, 0); err != nil {
 		s.stop(err)
-		return s.end
+		return false
 	}
 	if err := s.bindGlobals(main); err != nil {
 		s.stop(err)
-	} else {
-		if s.variant.dispatch == 1 && vmClosureCandidate != nil {
-			vmClosureCandidate.loop(s)
-		} else {
-			s.loop()
-		}
+		return false
 	}
-	s.unwind()
-	return s.end
+	return true
 }
 
 // bindGlobals imports host values into the {main} locals of the same name.
@@ -248,11 +224,7 @@ func (s *vmState) slow() bool {
 	if s.poll() {
 		return true
 	}
-	if s.variant.polling == 1 {
-		s.next = s.steps + 1
-	} else {
-		s.next = min(s.limit+1, s.steps+vmPollInterval)
-	}
+	s.next = min(s.limit+1, s.steps+vmPollInterval)
 	return false
 }
 
@@ -340,48 +312,19 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	n := fn.nvals + fn.locals
 	fr := vmFrame{fn: fn, code: fn.code, dest: dest, nargs: argc}
-	if s.variant.dispatch == 2 && fn.fusedCode != nil {
-		fr.code = fn.fusedCode
+	if s.top+n > len(s.slab) {
+		s.growSlab(n)
 	}
-	mode := s.variant.frames
-	if s.variant.locals == 1 {
-		mode = 1 // registered slots need addresses that never move
+	fr.base = s.top
+	win := s.slab[s.top : s.top+n : s.top+n]
+	s.top += n
+	fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
+	if s.ltop+fn.nlocs > len(s.lslab) {
+		s.growLocations(fn.nlocs)
 	}
-	switch mode {
-	case 0:
-		if s.top+n > len(s.slab) {
-			s.growSlab(n)
-		}
-		fr.base = s.top
-		win := s.slab[s.top : s.top+n : s.top+n]
-		s.top += n
-		fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
-		if s.ltop+fn.nlocs > len(s.lslab) {
-			s.growLocations(fn.nlocs)
-		}
-		fr.lbase = s.ltop
-		fr.locs = s.lslab[s.ltop : s.ltop+fn.nlocs : s.ltop+fn.nlocs]
-		s.ltop += fn.nlocs
-	case 1:
-		win := make([]value, n)
-		fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
-		fr.locs = make([]int32, fn.nlocs)
-	case 2:
-		d := len(s.frames)
-		for len(s.depthWin) <= d {
-			s.depthWin = append(s.depthWin, nil)
-			s.depthLoc = append(s.depthLoc, nil)
-		}
-		if cap(s.depthWin[d]) < n {
-			s.depthWin[d] = make([]value, n, max(n, 2*cap(s.depthWin[d])))
-		}
-		if cap(s.depthLoc[d]) < fn.nlocs {
-			s.depthLoc[d] = make([]int32, fn.nlocs, max(fn.nlocs, 2*cap(s.depthLoc[d])))
-		}
-		win := s.depthWin[d][:n]
-		fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
-		fr.locs = s.depthLoc[d][:fn.nlocs]
-	}
+	fr.lbase = s.ltop
+	fr.locs = s.lslab[s.ltop : s.ltop+fn.nlocs : s.ltop+fn.nlocs]
+	s.ltop += fn.nlocs
 	args := s.args[len(s.args)-argc:]
 	for i, a := range args {
 		if i < fn.params {
@@ -392,15 +335,6 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	clear(args)
 	s.args = s.args[:len(s.args)-argc]
-	if s.variant.locals == 1 {
-		x.frames = append(x.frames, executionFrame{})
-		fr.xframe = true
-		for i := range fr.locals {
-			if err := x.local(&fr.locals[i]); err != nil {
-				return err
-			}
-		}
-	}
 	s.frames = append(s.frames, fr)
 	if argc < fn.params {
 		return s.tooFewArguments(argc)
@@ -417,9 +351,6 @@ func (s *vmState) growSlab(n int) {
 	s.slab = slab
 	for i := range s.frames {
 		f := &s.frames[i]
-		if s.variant.frames != 0 || s.variant.locals == 1 {
-			continue
-		}
 		nv := f.fn.nvals
 		win := slab[f.base : f.base+nv+f.fn.locals : f.base+nv+f.fn.locals]
 		f.regs, f.locals = win[:nv:nv], win[nv:]
@@ -433,9 +364,6 @@ func (s *vmState) growLocations(n int) {
 	s.lslab = slab
 	for i := range s.frames {
 		f := &s.frames[i]
-		if s.variant.frames != 0 || s.variant.locals == 1 {
-			continue
-		}
 		f.locs = slab[f.lbase : f.lbase+f.fn.nlocs : f.lbase+f.fn.nlocs]
 	}
 }
@@ -451,18 +379,7 @@ func (s *vmState) pop(release bool) error {
 			first = err
 		}
 	}
-	if f.xframe {
-		// Benchmark candidate: the registered slots are released by the
-		// execution frame, as callInScope does.
-		d := len(s.x.frames) - 1
-		for _, slot := range s.x.frames[d].locals {
-			if release {
-				keep(s.h.unset(slot))
-			}
-		}
-		clear(s.x.frames[d].locals)
-		s.x.frames = s.x.frames[:d]
-	} else if release {
+	if release {
 		for i := range f.locals {
 			v := f.locals[i]
 			f.locals[i] = value{}
@@ -483,10 +400,8 @@ func (s *vmState) pop(release bool) error {
 	}
 	clear(f.locals)
 	clear(f.locs)
-	if s.variant.frames == 0 && s.variant.locals == 0 {
-		s.top = f.base
-		s.ltop = f.lbase
-	}
+	s.top = f.base
+	s.ltop = f.lbase
 	s.frames[len(s.frames)-1] = vmFrame{}
 	s.frames = s.frames[:len(s.frames)-1]
 	return first

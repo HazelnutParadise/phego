@@ -126,11 +126,10 @@ func FuzzVMRunsVerifiedImages(f *testing.F) {
 		if err != nil {
 			t.Fatalf("NewProgram rejected a verified image: %v", err)
 		}
-		for _, variant := range []vmVariant{{}, {dispatch: 2}, {frames: 1}, {frames: 2}, {polling: 1}} {
+		for _, program := range []*Program{p, fusedProgram(p)} {
 			cfg := vmConfig(t, width)
 			cfg.Steps, cfg.Depth, cfg.Callbacks, cfg.OutputBytes = 3000, 16, 2000, 1<<16
-			cfg.variant = variant
-			res := p.Run(cfg)
+			res := program.Run(cfg)
 			if !vmRunEnds[res.End] {
 				t.Fatalf("undeclared end %v", res.End)
 			}

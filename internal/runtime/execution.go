@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 // W-14: REQ-009, REQ-020, REQ-022, REQ-030, REQ-040, REQ-044; T-017, T-018, T-039, T-040, T-043, T-044, T-059, T-060, T-079, T-080, T-087, T-088.
@@ -106,10 +107,13 @@ type execution struct {
 	// displayed text goes through write(), so output buffers and their
 	// handlers see it; the log copy is kept in diagnostics.
 	errors   errorChannels
-	reported int // diagnostics raised, against diagnosticLimit()
-	// diagnosticCap bounds reported diagnostics apart from calls; zero
-	// shares limits.callbacks with them.
-	diagnosticCap   int
+	reported int // diagnostics raised
+	// diagnosticCap bounds the log record (diagnostics) and nothing else;
+	// zero makes every raised diagnostic count against limits.callbacks.
+	diagnosticCap int
+	// cleanupTimeout, when positive, starts the teardown deadline when
+	// teardown starts (RunConfig.CleanupTimeout).
+	cleanupTimeout  time.Duration
 	started, closed bool
 	filtering       bool
 	// outputRunning is PHP's OG(running) left set by a fatal error inside a
@@ -149,7 +153,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	if cleanup == nil || body == nil {
 		return executionResult{end: completion{kind: endInternal, err: errors.New("body and cleanup context are required")}}
 	}
-	if _, ok := cleanup.Deadline(); !ok {
+	if _, ok := cleanup.Deadline(); !ok && x.cleanupTimeout <= 0 {
 		return executionResult{end: completion{kind: endInternal, err: errors.New("cleanup requires a deadline")}}
 	}
 	if err := x.request.Start(); err != nil {
@@ -161,11 +165,19 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	var returned any
 	if c.kind == endReturn {
 		var err error
-		returned, err = exportSnapshot(c.value)
-		if err != nil {
+		returned, err = exportSnapshotBounded(x.ctx, c.value)
+		var limit *LimitError
+		switch {
+		case errors.As(err, &limit):
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, err))
+		case err != nil && x.ctx.Err() != nil:
+			c = x.replaceOwnedCompletion(c, x.check())
+		case err != nil:
 			c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
-		} else if released := x.releaseReturn(&c); released.kind != endNormal {
-			c = x.replaceOwnedCompletion(c, released)
+		default:
+			if released := x.releaseReturn(&c); released.kind != endNormal {
+				c = x.replaceOwnedCompletion(c, released)
+			}
 		}
 	}
 	if stop := x.check(); stop.kind != endNormal {
@@ -245,6 +257,11 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 		transitionErr = x.request.Finish()
 	} else {
 		transitionErr = x.request.Abort()
+	}
+	if x.cleanupTimeout > 0 {
+		var cancel context.CancelFunc
+		cleanup, cancel = context.WithTimeout(cleanup, x.cleanupTimeout)
+		defer cancel()
 	}
 	resourceErr := x.heap.closeResources(cleanup)
 	cleanupErr := errors.Join(resourceErr, transitionErr, x.request.Close(cleanup))
@@ -543,16 +560,29 @@ func (x *execution) report(level, message string, skipRunning bool) completion {
 	if x.errors.excluded&diagnosticLevelBit(level) != 0 {
 		return completion{}
 	}
-	// The cap counts every diagnostic, displayed or logged.
-	if x.reported >= x.diagnosticLimit() {
-		return x.fail(endLimit, limitHit("diagnostics", x.diagnosticLimit(), x.reported, 1))
+	// After a host stop (a failed writer, a limit, cancellation) nothing
+	// more is displayed or logged: the writer is not written to again. A
+	// pending PHP fatal error is not a host stop and does not apply here.
+	if x.stop.kind != endNormal {
+		return x.stop
+	}
+	if err := x.ctx.Err(); err != nil {
+		return x.fail(endCancel, err)
+	}
+	// Without a diagnostic cap of its own, every diagnostic, displayed or
+	// logged, counts against the call budget and ends the run past it. With
+	// one (a VM run), the cap bounds only the log record: further
+	// diagnostics are not recorded and the run goes on, so PHP-visible
+	// behaviour does not depend on it.
+	if x.diagnosticCap == 0 && x.reported >= x.limits.callbacks {
+		return x.fail(endLimit, limitHit("diagnostics", x.limits.callbacks, x.reported, 1))
 	}
 	x.reported++
 	file, line := "", 0
 	if x.errors.where != nil {
 		file, line = x.errors.where()
 	}
-	if x.errors.log {
+	if x.errors.log && (x.diagnosticCap == 0 || len(x.diagnostics) < x.diagnosticCap) {
 		x.diagnostics = append(x.diagnostics, executionDiagnostic{level: level, message: message, file: file, line: line})
 	}
 	if !x.errors.display {
@@ -568,13 +598,6 @@ func (x *execution) report(level, message string, skipRunning bool) completion {
 		text = "\n" + level + ": " + message + " in Unknown on line 0\n"
 	}
 	return x.writeTo(len(x.buffers)-1-boolInt(skipRunning && x.filtering), []byte(text))
-}
-
-func (x *execution) diagnosticLimit() int {
-	if x.diagnosticCap > 0 {
-		return x.diagnosticCap
-	}
-	return x.limits.callbacks
 }
 
 func boolInt(b bool) int {
@@ -701,7 +724,7 @@ func (x *execution) recordEnd(c completion) {
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
 	x.phaseCompletion = completion{}
-	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.diagnosticLimit() {
+	if (c.kind == endThrow || c.kind == endFatal) && (x.diagnosticCap > 0 || x.reported < x.limits.callbacks) {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)

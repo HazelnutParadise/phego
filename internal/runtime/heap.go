@@ -354,25 +354,88 @@ func (h *heap) bufferedRoots() []gcNode {
 	return slices.Clone(h.rootSlots)
 }
 
+// freeArray releases a's elements in order and empties it. An element array
+// that reaches zero is freed completely before the next element, as a
+// recursive release would, but with a work list instead of Go recursion, so
+// an array nested a million levels deep cannot overflow the goroutine stack.
+// Objects and resources keep their own release paths; a destructor runs at
+// the point the recursive order reaches it.
 func (h *heap) freeArray(a *phpArray) error {
 	if err := h.claimValues(value{kind: valueArray, array: a}); err != nil {
 		return err
 	}
 	h.dropRoot(a)
+	type pending struct {
+		a   *phpArray
+		pos int
+	}
+	stack := []pending{{a: a}}
 	var first error
-	pos := 0
-	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
+	for len(stack) > 0 {
+		top := &stack[len(stack)-1]
+		b, ok := top.a.next(&top.pos)
+		if !ok {
+			done := top.a
+			stack = stack[:len(stack)-1]
+			for it := range done.cursors {
+				delete(it.arrays, done)
+			}
+			done.buckets, done.index, done.live, done.cursors = nil, nil, 0, nil
+			continue
+		}
 		v := b.val
 		// Chunks are shared, so a live neighbour would otherwise keep the
 		// freed value reachable by the Go collector.
 		*b = bucket{}
-		first = h.mergeObjectErrors(first, h.release(v))
+		child, err := h.releaseToArray(v)
+		first = h.mergeObjectErrors(first, err)
+		if child != nil {
+			if err := h.claimValues(value{kind: valueArray, array: child}); err != nil {
+				first = h.mergeObjectErrors(first, err)
+				continue
+			}
+			h.dropRoot(child)
+			stack = append(stack, pending{a: child})
+		}
 	}
-	for it := range a.cursors {
-		delete(it.arrays, a)
-	}
-	a.buckets, a.index, a.live, a.cursors = nil, nil, 0, nil
 	return first
+}
+
+// releaseToArray is release, except that an array reaching zero owners,
+// directly or as the target of a reference reaching zero, is returned for
+// the caller to free instead of being freed here.
+func (h *heap) releaseToArray(v value) (*phpArray, error) {
+	for {
+		switch v.kind {
+		case valueArray:
+			if err := h.claimValues(v); err != nil {
+				return nil, err
+			}
+			v.array.refcount--
+			if v.array.refcount == 0 {
+				return v.array, nil
+			}
+			h.possibleRoot(v.array)
+			return nil, nil
+		case valueReference:
+			if err := h.claimValues(v); err != nil {
+				return nil, err
+			}
+			v.ref.refcount--
+			if v.ref.refcount == 0 {
+				v = v.ref.target
+				continue
+			}
+			switch t := v.ref.target; t.kind {
+			case valueArray:
+				h.possibleRoot(t.array)
+			case valueObject:
+				h.possibleRoot(t.object)
+			}
+			return nil, nil
+		}
+		return nil, h.release(v)
+	}
 }
 
 // deleteObject follows the PHP 8.5.12 order: run the destructor once while the

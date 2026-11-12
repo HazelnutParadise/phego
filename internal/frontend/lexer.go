@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -70,6 +71,15 @@ type heredocLabel struct {
 // TOKEN_PARSE. Every byte of src belongs to exactly one token. Lexing never
 // panics; problems are reported as diagnostics with their line.
 func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
+	return lexContext(nil, src, opts)
+}
+
+// ctxCheckEvery is how many tokens or parser steps pass between checks of a
+// context given to ParseContext.
+const ctxCheckEvery = 4096
+
+// lexContext is Lex that stops with ctx's error when ctx, if not nil, ends.
+func lexContext(ctx context.Context, src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 	if opts.IntWidth != 32 && opts.IntWidth != 64 {
 		return nil, nil, fmt.Errorf("invalid PHP integer width %d: expected 32 or 64", opts.IntWidth)
 	}
@@ -86,6 +96,11 @@ func Lex(src []byte, opts LexOptions) ([]Token, []Diagnostic, error) {
 		l.next()
 		if len(l.out) > opts.MaxTokens || l.overBudget {
 			return nil, nil, ErrTooManyTokens
+		}
+		if ctx != nil && len(l.out)%ctxCheckEvery == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, nil, err
+			}
 		}
 		if l.pos == start {
 			// Only a state pop may consume nothing; anything else would loop.

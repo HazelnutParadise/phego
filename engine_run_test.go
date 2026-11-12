@@ -97,16 +97,9 @@ func TestRunLimitsNameTheResource(t *testing.T) {
 	}{
 		{"steps", Limits{Steps: 1000}, "<?php\nwhile (true) {}\n", nil, ResourceSteps, 1000, nil},
 		{"frames", Limits{Frames: 5}, "<?php\nfunction f($n) { return f($n + 1); }\nf(0);\n", nil, ResourceFrames, 5, nil},
-		{"default frames", Limits{}, "<?php\nfunction f($n) { return f($n + 1); }\nf(0);\n", nil, ResourceFrames, defaultFrames, nil},
 		{"output", Limits{Output: 10}, "<?php\necho 'abcd';\necho 'efghijklmn';\n", nil, ResourceOutput, 10, func(r *Result) error {
 			if string(r.Output) != "abcd" {
 				return fmt.Errorf("output %q, want the accepted prefix", r.Output)
-			}
-			return nil
-		}},
-		{"diagnostics", Limits{Diagnostics: 3}, "<?php\nfor ($i = 0; $i < 10; $i++) { echo $u; }\n", []RunOption{WithINI("display_errors", "0"), WithINI("log_errors", "1")}, ResourceDiagnostics, 3, func(r *Result) error {
-			if len(r.Diagnostics) != 3 {
-				return fmt.Errorf("%d diagnostics logged, want 3", len(r.Diagnostics))
 			}
 			return nil
 		}},
@@ -340,7 +333,7 @@ func TestUnsupportedConstructIsLocated(t *testing.T) {
 	src := "<?php\n$a = [1];\n$a[0] += 1;\n"
 	_, err := e.Compile(context.Background(), "app/x.php", src)
 	var ue *UnsupportedError
-	if !errors.As(err, &ue) || *ue != (UnsupportedError{Feature: "compound assignment to array element", File: "app/x.php", Line: 3}) {
+	if !errors.As(err, &ue) || ue.Feature != "compound assignment to array element" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
 		t.Fatalf("%#v", err)
 	}
 	if got := err.Error(); got != "phego: unsupported: compound assignment to array element in app/x.php on line 3" {

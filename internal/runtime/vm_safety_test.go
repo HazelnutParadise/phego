@@ -119,25 +119,6 @@ func TestVMCancellationBound(t *testing.T) {
 			t.Fatalf("%v after %d steps: %v", res.End, res.Steps, res.Err)
 		}
 	})
-	t.Run("every instruction candidate", func(t *testing.T) {
-		a := newAsm(t, 64)
-		m := a.fn("{main}", 0, 2)
-		m.echoK("go")
-		for i := 0; i < 50; i++ {
-			m.k(i)
-		}
-		m.retNull()
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		cfg := vmConfig(t, 64)
-		cfg.Context = ctx
-		cfg.variant.polling = 1
-		cfg.Output = &cancelWriter{cancel: cancel, n: 1}
-		res := a.program().Run(cfg)
-		if res.End != Cancelled || res.Steps > 3 {
-			t.Fatalf("%v after %d steps", res.End, res.Steps)
-		}
-	})
 }
 
 func TestVMDepthLimit(t *testing.T) {

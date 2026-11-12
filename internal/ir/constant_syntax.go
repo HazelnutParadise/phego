@@ -25,7 +25,7 @@ func (l *lowerer) preEvaluateSyntax(n *frontend.Node) syntaxConstEntry {
 	defer func() { l.foldLine = saved }()
 	e := l.syntaxConstant(n, 0)
 	if l.constants.exhausted {
-		panic(compileFailure{&constantLimitError{line: n.Line}})
+		panic(compileFailure{&LimitError{Line: n.Line}})
 	}
 	return e
 }
@@ -617,7 +617,7 @@ func (l *lowerer) selectedSyntax(n *frontend.Node) *frontend.Node {
 func (l *lowerer) constantValueNode(value compileConst, line, depth int) *Node {
 	b := l.constants
 	if !b.depth(depth) || !b.spendWork(1) {
-		panic(compileFailure{&constantLimitError{line: line}})
+		panic(compileFailure{&LimitError{Line: line}})
 	}
 	if !value.array {
 		return l.seal(&Node{Op: OpLiteral, Line: line, Value: value.value})

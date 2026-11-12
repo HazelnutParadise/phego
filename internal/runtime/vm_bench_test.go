@@ -96,9 +96,51 @@ var vmWorkloads = []struct {
 	}},
 }
 
+// vmCandidate is one interpreter layout. prepare returns the function
+// that runs one execution of p under it.
 type vmCandidate struct {
 	name    string
-	variant vmVariant
+	prepare func(p *Program) func(RunConfig) RunResult
+}
+
+// The production layout and the two dispatch candidates that can be built
+// outside production code: pre-decoded closures and fused compare+branch.
+// The frame, local slot and polling candidates measured for
+// docs/decisions/W-17-vm.md changed push, pop and the step check inside the
+// interpreter; they cannot be kept without carrying them in production
+// code, so their families measure the production layout alone. Their
+// results are kept in docs/implementation/evidence/W-17-vm/benchstat/.
+var (
+	switchCandidate  = vmCandidate{"switch", func(p *Program) func(RunConfig) RunResult { return p.Run }}
+	closureCandidate = vmCandidate{"closures", func(p *Program) func(RunConfig) RunResult {
+		return func(cfg RunConfig) RunResult { return p.run(cfg, loopClosures) }
+	}}
+	fusedCandidate = vmCandidate{"fused", func(p *Program) func(RunConfig) RunResult { return fusedProgram(p).Run }}
+)
+
+// fusedProgram is a copy of p whose functions replace each comparison
+// Binary whose result is the condition of the next Branch with
+// opFusedCompareBranch (the superinstruction candidate).
+func fusedProgram(p *Program) *Program {
+	q := *p
+	q.funcs = append([]vmFunction(nil), p.funcs...)
+	for i := range q.funcs {
+		f := &q.funcs[i]
+		code := append([]vmInstr(nil), f.code...)
+		for pc := 0; pc+1 < len(code); pc++ {
+			in, next := code[pc], code[pc+1]
+			switch bytecode.BinaryOp(in.aux) {
+			case bytecode.Less, bytecode.LessOrEqual, bytecode.Equal, bytecode.NotEqual, bytecode.Identical, bytecode.NotIdentical:
+			default:
+				continue
+			}
+			if in.op == bytecode.OpBinary && next.op == bytecode.OpBranch && next.a == in.a && in.nkill == 0 {
+				code[pc].op = opFusedCompareBranch
+			}
+		}
+		f.code = code
+	}
+	return &q
 }
 
 func benchCandidates(b *testing.B, candidates []vmCandidate) {
@@ -107,10 +149,10 @@ func benchCandidates(b *testing.B, candidates []vmCandidate) {
 		w.build(a)
 		p := a.program()
 		var ref RunResult
+		runs := make([]func(RunConfig) RunResult, len(candidates))
 		for i, c := range candidates {
-			cfg := vmConfig(b, 64)
-			cfg.variant = c.variant
-			res := p.Run(cfg)
+			runs[i] = c.prepare(p)
+			res := runs[i](vmConfig(b, 64))
 			if res.End != Completed {
 				b.Fatalf("%s/%s: %v %v", w.name, c.name, res.End, res.Err)
 			}
@@ -120,7 +162,8 @@ func benchCandidates(b *testing.B, candidates []vmCandidate) {
 				b.Fatalf("%s/%s differs from %s: steps %d vs %d", w.name, c.name, candidates[0].name, res.Steps, ref.Steps)
 			}
 		}
-		for _, c := range candidates {
+		for i, c := range candidates {
+			run := runs[i]
 			b.Run(w.name+"/"+c.name, func(b *testing.B) {
 				b.ReportAllocs()
 				req := make([]*Request, b.N)
@@ -128,7 +171,6 @@ func benchCandidates(b *testing.B, candidates []vmCandidate) {
 					req[i] = readyRequest(b)
 				}
 				cfg := vmConfig(b, 64)
-				cfg.variant = c.variant
 				// Hosts pass cancellable contexts; Background has no Done channel
 				// and would make polling free.
 				ctx, cancel := context.WithCancel(context.Background())
@@ -137,7 +179,7 @@ func benchCandidates(b *testing.B, candidates []vmCandidate) {
 				b.ResetTimer()
 				for i := 0; i < b.N; i++ {
 					cfg.Request = req[i]
-					p.Run(cfg)
+					run(cfg)
 				}
 				b.ReportMetric(float64(ref.Steps), "steps/op")
 			})
@@ -146,20 +188,24 @@ func benchCandidates(b *testing.B, candidates []vmCandidate) {
 }
 
 func BenchmarkVMDispatch(b *testing.B) {
-	benchCandidates(b, []vmCandidate{{"switch", vmVariant{}}, {"closures", vmVariant{dispatch: 1}}, {"fused", vmVariant{dispatch: 2}}})
+	benchCandidates(b, []vmCandidate{switchCandidate, closureCandidate, fusedCandidate})
 }
 
+// BenchmarkVMFrames measures the production frame layout, one slab per
+// execution; see vmCandidate for the dropped candidates.
 func BenchmarkVMFrames(b *testing.B) {
-	benchCandidates(b, []vmCandidate{{"slab", vmVariant{}}, {"fresh", vmVariant{frames: 1}}, {"perdepth", vmVariant{frames: 2}}})
+	benchCandidates(b, []vmCandidate{{"slab", switchCandidate.prepare}})
 }
 
+// BenchmarkVMPolling measures the production polling: back-edges, calls and
+// every vmPollInterval steps.
 func BenchmarkVMPolling(b *testing.B) {
-	benchCandidates(b, []vmCandidate{{"backedge1024", vmVariant{}}, {"every", vmVariant{polling: 1}}})
+	benchCandidates(b, []vmCandidate{{"backedge1024", switchCandidate.prepare}})
 }
 
-// BenchmarkVMLocals compares frame-owned local slots with registering each
-// slot through execution.local, which scans every frame's locals, on a
-// call-heavy program with eight locals per frame.
+// BenchmarkVMLocals measures frame-owned local slots on a call-heavy program
+// with eight locals per frame. The candidate that registered each slot
+// through execution.local was dropped (see vmCandidate).
 func BenchmarkVMLocals(b *testing.B) {
 	a := newAsm(b, 64)
 	m := a.fn("{main}", 0, 2, "i")
@@ -172,10 +218,10 @@ func BenchmarkVMLocals(b *testing.B) {
 	f.ret(f.load("a"))
 	f.ret(f.call(1, f.bin(bytecode.Subtract, f.load("n"), f.k(1))))
 	p := a.program()
-	for _, c := range []vmCandidate{{"slots", vmVariant{}}, {"registered", vmVariant{locals: 1}}} {
+	for _, c := range []vmCandidate{{"slots", switchCandidate.prepare}} {
 		cfg := vmConfig(b, 64)
-		cfg.variant = c.variant
-		if res := p.Run(cfg); res.End != Completed {
+		run := c.prepare(p)
+		if res := run(cfg); res.End != Completed {
 			b.Fatalf("%s: %v %v", c.name, res.End, res.Err)
 		}
 		b.Run(c.name, func(b *testing.B) {
@@ -197,13 +243,12 @@ func BenchmarkVMLocals(b *testing.B) {
 }
 
 // The closure dispatch candidate: one pre-decoded Go closure per
-// instruction, covering the opcodes of the benchmark workloads.
-func init() {
-	vmClosureCandidate = &struct {
-		build func(*Program) [][]vmClosure
-		loop  func(*vmState)
-	}{build: buildClosures, loop: loopClosures}
-}
+// instruction, covering the opcodes of the benchmark workloads, built for
+// every run as a per-run decoder would.
+
+// vmClosure is one pre-decoded instruction. It returns the next pc, or a
+// negative value to stop or to switch frames.
+type vmClosure func(s *vmState, f *vmFrame) int
 
 const (
 	closureStop   = -1
@@ -211,8 +256,9 @@ const (
 )
 
 func loopClosures(s *vmState) {
+	closures := buildClosures(s.prog)
 	f := &s.frames[len(s.frames)-1]
-	cl := s.closures[f.fn.index]
+	cl := closures[f.fn.index]
 	pc := 0
 	for {
 		f.pc = pc
@@ -229,7 +275,7 @@ func loopClosures(s *vmState) {
 			return
 		}
 		f = &s.frames[len(s.frames)-1]
-		cl = s.closures[f.fn.index]
+		cl = closures[f.fn.index]
 		pc = f.pc
 	}
 }
@@ -408,25 +454,23 @@ func closureFor(p *Program, in vmInstr, pc int) vmClosure {
 // TestVMCandidatesAgree runs every workload under every candidate once, so
 // the candidates stay equivalent outside benchmark runs too.
 func TestVMCandidatesAgree(t *testing.T) {
-	variants := []vmVariant{{}, {dispatch: 1}, {dispatch: 2}, {frames: 1}, {frames: 2}, {locals: 1}, {polling: 1}}
+	candidates := []vmCandidate{switchCandidate, closureCandidate, fusedCandidate}
 	for _, w := range vmWorkloads {
 		a := newAsm(t, 64)
 		w.build(a)
 		p := a.program()
 		var ref RunResult
-		for i, v := range variants {
-			cfg := vmConfig(t, 64)
-			cfg.variant = v
-			res := p.Run(cfg)
+		for i, c := range candidates {
+			res := c.prepare(p)(vmConfig(t, 64))
 			if res.End != Completed {
-				t.Fatalf("%s %+v: %v %v", w.name, v, res.End, res.Err)
+				t.Fatalf("%s %s: %v %v", w.name, c.name, res.End, res.Err)
 			}
 			if i == 0 {
 				ref = res
 				continue
 			}
 			if string(res.Output) != string(ref.Output) || encodeSnapshot(res.Return) != encodeSnapshot(ref.Return) || res.Steps != ref.Steps {
-				t.Fatalf("%s %+v differs", w.name, v)
+				t.Fatalf("%s %s differs", w.name, c.name)
 			}
 		}
 		t.Logf("%s: %d steps, return %s", w.name, ref.Steps, encodeSnapshot(ref.Return))

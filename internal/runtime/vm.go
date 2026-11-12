@@ -5,20 +5,25 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 )
 
 // RunConfig configures one execution of a Program.
 type RunConfig struct {
-	Context        context.Context // cancellation of the run
-	Cleanup        context.Context // must have a deadline; bounds teardown (see execution.run)
-	Request        *Request        // in state Ready
-	IntWidth       int             // 32 or 64; must equal the program's profile
-	Output         io.Writer       // nil captures output
-	Depth          int             // call depth limit (>0); {main} counts as one
-	Callbacks      int             // call and diagnostic budget (>0), as executionLimits.callbacks
-	Diagnostics    int             // diagnostic budget apart from calls; 0 shares Callbacks
-	OutputBytes    int             // output limit (>0)
-	Steps          int64           // instruction step budget; 0 means unlimited
+	Context context.Context // cancellation of the run
+	Cleanup context.Context // must have a deadline unless CleanupTimeout is set; bounds teardown (see execution.run)
+	// CleanupTimeout, when positive, bounds teardown from the moment it
+	// starts, under Cleanup, which then needs no deadline of its own. A
+	// deadline set before the run would be spent by a long run.
+	CleanupTimeout time.Duration
+	Request        *Request  // in state Ready
+	IntWidth       int       // 32 or 64; must equal the program's profile
+	Output         io.Writer // nil captures output
+	Depth          int       // call depth limit (>0); {main} counts as one
+	Callbacks      int       // call and diagnostic budget (>0), as executionLimits.callbacks
+	Diagnostics    int       // diagnostic budget apart from calls; 0 shares Callbacks
+	OutputBytes    int       // output limit (>0)
+	Steps          int64     // instruction step budget; 0 means unlimited
 	DisplayErrors  bool
 	LogErrors      bool
 	ErrorReporting int      // PHP error_reporting bitmask; diagnostics outside it are neither displayed nor logged
@@ -27,10 +32,6 @@ type RunConfig struct {
 	// are reported, in order and at their own File and Line, before {main}
 	// starts, so display_errors, log_errors and ErrorReporting apply to them.
 	Prelude []RunDiagnostic
-
-	// variant selects a benchmark candidate layout; the zero value is the
-	// production path. Only tests in this package set it.
-	variant vmVariant
 }
 
 // Global is a host-supplied top-level variable. Value has exportSnapshot's
@@ -132,7 +133,11 @@ func limitHit(resource string, limit, used, requested int) error {
 }
 
 // Run executes the program once. All mutable state belongs to the run.
-func (p *Program) Run(cfg RunConfig) RunResult {
+func (p *Program) Run(cfg RunConfig) RunResult { return p.run(cfg, (*vmState).loop) }
+
+// run is Run with the instruction loop given; the dispatch benchmark
+// (vm_bench_test.go) passes its candidate loop.
+func (p *Program) run(cfg RunConfig, loop func(*vmState)) RunResult {
 	if err := p.checkConfig(cfg); err != nil {
 		return RunResult{End: Internal, ExitCode: 255, Err: err}
 	}
@@ -141,8 +146,9 @@ func (p *Program) Run(cfg RunConfig) RunResult {
 		return RunResult{End: Internal, ExitCode: 255, Err: err}
 	}
 	x.diagnosticCap = cfg.Diagnostics
+	x.cleanupTimeout = cfg.CleanupTimeout
 	s := newVMState(p, x, cfg)
-	res := x.run(cfg.Cleanup, s.body)
+	res := x.run(cfg.Cleanup, func(*execution) completion { return s.body(loop) })
 	return s.result(res)
 }
 

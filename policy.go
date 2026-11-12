@@ -93,24 +93,37 @@ type NetworkGrant struct {
 type Limits struct {
 	// Steps bounds VM instructions and loop iterations. Zero: unlimited.
 	Steps int64
-	// Memory bounds the logical size of PHP values. Zero: unlimited.
+	// Memory is meant to bound the logical size of PHP values. This build
+	// does not meter memory yet, so a positive value makes every Run and
+	// RunFile fail with an UnsupportedError (Option "Limits.Memory")
+	// instead of running unbounded. Zero: unlimited.
 	Memory int64
 	// Output bounds bytes written to the output. Zero: 8 MiB, or
 	// Config.OutputLimit when that is set.
 	Output int64
-	// Diagnostics bounds recorded notices, warnings and errors. Zero: 10000.
+	// Diagnostics bounds the notices, warnings and errors recorded in
+	// Result.Diagnostics. Past it, further diagnostics are not recorded and
+	// the run goes on unchanged; displayed diagnostics are output, bounded
+	// by Output. A Result.Diagnostics holding exactly this many entries may
+	// have been cut short. Zero: 10000.
 	Diagnostics int
 	// Frames bounds the PHP call depth; the script's top level counts as
-	// one frame. Zero: 10000, until frames are charged against Memory.
+	// one frame. A call beyond it ends the run with a ResourceError naming
+	// frames. Zero: unlimited, as in PHP. Frames are not charged against
+	// Memory yet, so with zero only Steps or the context stops unbounded
+	// recursion.
 	Frames int
-	// OpenFiles bounds files open at once. Zero: unlimited.
+	// OpenFiles bounds files open at once. Zero: unlimited. This build's
+	// VM cannot open files from PHP code yet, so a run never reaches it.
 	OpenFiles int
 	// Connections bounds network and database connections open at once.
-	// Zero: unlimited.
+	// Zero: unlimited. This build's VM cannot open connections from PHP
+	// code yet, so a run never reaches it.
 	Connections int
 	// CompileBytes bounds source compiled at run time by include and eval,
 	// summed over the execution. Each source is also bounded by
-	// Config.MaxSourceBytes. Zero: unlimited.
+	// Config.MaxSourceBytes. Zero: unlimited. This build's VM refuses
+	// include and eval at compile time, so a run never reaches it.
 	CompileBytes int64
 }
 
@@ -138,6 +151,13 @@ const (
 	ResourceConnections  Resource = "connections"
 	ResourceCompileBytes Resource = "compile-bytes"
 	ResourceExecutions   Resource = "executions"
+	// ResourceReturnDepth and ResourceReturnElements bound the copy of a
+	// script's return value into Result.Return: arrays nested at most 256
+	// levels and 1048576 elements in all, each copy of an array PHP shares
+	// counted again. They are the bounds WithGlobal accepts, so a returned
+	// value can be passed back in. They are this build's, not Limits.
+	ResourceReturnDepth    Resource = "return-depth"
+	ResourceReturnElements Resource = "return-elements"
 )
 
 // Common rule codes carried by PolicyError.

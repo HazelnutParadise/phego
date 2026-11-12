@@ -1,6 +1,7 @@
 package ir
 
 import (
+	stdcontext "context"
 	"fmt"
 	"path"
 	"strings"
@@ -20,10 +21,28 @@ type Options struct {
 // PHP reports; compile warnings are recorded in Unit.Diagnostics. Host resource
 // limits return a separate error and are never classified as PHP diagnostics.
 func Lower(tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit, err error) {
+	return lowerContext(nil, tree, prof, opts)
+}
+
+// LowerContext is Lower that checks ctx while it lowers and returns ctx's
+// error when ctx ends first.
+func LowerContext(ctx stdcontext.Context, tree *frontend.Node, prof profile.Profile, opts Options) (*Unit, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return lowerContext(ctx, tree, prof, opts)
+}
+
+// ctxCheckEvery is how many expressions are lowered between checks of a
+// LowerContext context.
+const ctxCheckEvery = 4096
+
+func lowerContext(ctx stdcontext.Context, tree *frontend.Node, prof profile.Profile, opts Options) (unit *Unit, err error) {
 	if tree == nil || tree.Kind != "file" {
 		return nil, fmt.Errorf("ir: Lower needs a file syntax tree")
 	}
 	l := &lowerer{
+		ctx:       ctx,
 		unit:      &Unit{File: opts.File, Profile: prof},
 		ns:        newNamespace(""),
 		top:       tree.Children,
@@ -90,10 +109,14 @@ func (l *lowerer) decodeScanned(n *frontend.Node, decode func(stringDecoder) str
 // deprecations, including those in code compilation never reaches.
 func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
 	var out []Diagnostic
-	var walk func(*frontend.Node)
-	walk = func(n *frontend.Node) {
+	// A work list in token (pre-)order instead of recursion: a long
+	// operator chain is as deep as it is long.
+	stack := []*frontend.Node{tree}
+	for len(stack) > 0 {
+		n := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
 		if n == nil {
-			return
+			continue
 		}
 		if n.Kind == "cast" {
 			if d, ok := castDeprecation(n); ok {
@@ -104,11 +127,10 @@ func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
 			l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })
 		}
 		out = append(out, l.decoded[n]...)
-		for _, c := range n.Children {
-			walk(c)
+		for i := len(n.Children) - 1; i >= 0; i-- {
+			stack = append(stack, n.Children[i])
 		}
 	}
-	walk(tree)
 	return out
 }
 
@@ -193,6 +215,45 @@ type lowerer struct {
 	// nameWarnings records names converted with a compile warning, which a
 	// second compilation of the same target repeats at the same line.
 	nameWarnings map[*Node]nameWarning
+	// nesting is the depth of expressions being lowered; see
+	// MaxExpressionNesting.
+	nesting int
+	// ctx, when not nil, is checked every ctxCheckEvery expressions.
+	ctx   stdcontext.Context
+	steps int
+}
+
+// MaxExpressionNesting bounds how deeply expressions nest in one file,
+// counting every operator of a chain such as 1+1+…+1 and every link of a
+// chain such as $a[0][0]…[0]. PHP 8.5.12 compiles expressions recursively
+// and stops with the fatal error stackLimitMessage once the C stack is
+// spent; with php -n and an 8 MiB stack on linux/arm64 that happened
+// between 55,000 and 60,000 terms of a + chain and between 30,000 and 50,000
+// links of a [0] chain, and every form tried failed at 100,000. The depth
+// depends on PHP's build, platform and zend.max_allowed_stack_size, so
+// Phego uses one fixed bound above all of those and reports PHP's message
+// with PHP's default stack size. The bound also keeps the recursive parts of
+// lowering and code generation far below the goroutine stack limit.
+const MaxExpressionNesting = 100_000
+
+// stackLimitMessage is PHP 8.5.12's compile-time stack limit fatal error
+// with the default zend.max_allowed_stack_size on an 8 MiB stack.
+const stackLimitMessage = "Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached during compilation. Try splitting expression"
+
+// nest enters one level of expression nesting. It also checks the
+// context, since every expression and operator link passes here.
+func (l *lowerer) nest() {
+	if l.ctx != nil {
+		if l.steps++; l.steps%ctxCheckEvery == 0 {
+			if err := l.ctx.Err(); err != nil {
+				panic(compileFailure{err})
+			}
+		}
+	}
+	l.nesting++
+	if l.nesting > MaxExpressionNesting {
+		l.fail(l.cur, stackLimitMessage)
+	}
 }
 
 func (l *lowerer) newFunc(kind FuncKind, name string, line int) *Func {

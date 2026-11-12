@@ -4,7 +4,7 @@ Generated from `diag/codes/codes.go` by `go generate ./diag/codes`; do not edit 
 
 These codes cover Phego's own diagnostics only. PHP warnings, fatal errors and exception messages keep PHP 8.5.12's exact text and carry no PHG code.
 
-A published code is never renumbered or reused. `PHG1xxx` covers Engine configuration and run options, `PHG2xxx` bytecode loading and verification, `PHG3xxx` features this build does not implement.
+A published code is never renumbered or reused. `PHG1xxx` covers Engine configuration and run options, `PHG2xxx` bytecode loading and verification, `PHG3xxx` features this build does not implement, `PHG9xxx` faults inside Phego.
 
 ## PHG1000: configuration error without a specific code
 
@@ -200,3 +200,8 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 
 - note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly
 - help: run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages
+
+## PHG9000: internal engine error
+
+- note: a Phego invariant failed; this is a defect in Phego, not in the PHP program or the host
+- help: report it with the program and the Phego version; the run or compile did not succeed

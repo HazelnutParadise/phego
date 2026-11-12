@@ -52,6 +52,20 @@ var w17Unsupported = map[string]UnsupportedError{
 	"isset_unset":               {Feature: "nested array unset", File: "/w/cases/isset_unset.php", Line: 22},
 }
 
+// w17Cases is the number of programs in tests/vm/w17/cases; every
+// reference file holds one entry per program.
+const w17Cases = 90
+
+// w17Profile is one PHP build the reference was recorded on.
+type w17Profile struct {
+	name, file string
+	intSize    int
+}
+
+// w17ProfileEnv, when set, names the profile a CI job selects, which must
+// exist.
+const w17ProfileEnv = "PHEGO_W17_PROFILE"
+
 func TestW17PHP8512Programs(t *testing.T) {
 	dir := filepath.Join("tests", "vm", "w17")
 	files, err := filepath.Glob(filepath.Join(dir, "cases", "*.php"))
@@ -62,14 +76,17 @@ func TestW17PHP8512Programs(t *testing.T) {
 	for _, f := range files {
 		names = append(names, strings.TrimSuffix(filepath.Base(f), ".php"))
 	}
-	for _, profile := range []struct {
-		name, file string
-		intSize    int
-	}{
+	profiles := []w17Profile{
 		{"64", "reference-64.json", 64},
 		{"amd64", "reference-64-amd64.json", 64},
 		{"32", "reference-32.json", 32},
-	} {
+	}
+	// CI selects one profile with -run; naming it here too makes a
+	// misspelt or removed profile a failure instead of a run of nothing.
+	if want := os.Getenv(w17ProfileEnv); want != "" && !slices.ContainsFunc(profiles, func(p w17Profile) bool { return p.name == want }) {
+		t.Fatalf("%s=%q names no profile of this test", w17ProfileEnv, want)
+	}
+	for _, profile := range profiles {
 		t.Run(profile.name, func(t *testing.T) {
 			raw, err := os.ReadFile(filepath.Join(dir, profile.file))
 			if err != nil {
@@ -88,6 +105,9 @@ func TestW17PHP8512Programs(t *testing.T) {
 			}
 			if !slices.Equal(refNames, names) {
 				t.Fatalf("%s covers %v, the fixtures are %v", profile.file, refNames, names)
+			}
+			if len(ref.Cases) != w17Cases {
+				t.Fatalf("%s holds %d cases, want %d", profile.file, len(ref.Cases), w17Cases)
 			}
 			e, err := NewEngine(Config{IntSize: profile.intSize})
 			if err != nil {
@@ -117,7 +137,7 @@ func TestW17PHP8512Programs(t *testing.T) {
 							WithINI("html_errors", "0"), WithINI("error_reporting", "-1"))
 						if isUnsupported {
 							var ue *UnsupportedError
-							if !errors.As(got.err, &ue) || *ue != want {
+							if !errors.As(got.err, &ue) || ue.Feature != want.Feature || ue.File != want.File || ue.Line != want.Line || ue.Option != "" {
 								t.Fatalf("want the located %#v, got %#v", want, got.err)
 							}
 							unsupported++
@@ -147,6 +167,9 @@ func TestW17PHP8512Programs(t *testing.T) {
 			t.Logf("profile %s: %d pass, %d unsupported, %d fail of %d", profile.name, pass, unsupported, fail, 3*len(ref.Cases))
 			if pass+unsupported+fail != 3*len(ref.Cases) {
 				t.Errorf("counted %d runs, want %d", pass+unsupported+fail, 3*len(ref.Cases))
+			}
+			if pass == 0 {
+				t.Errorf("profile %s: no case passed", profile.name)
 			}
 		})
 	}

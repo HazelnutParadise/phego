@@ -155,6 +155,19 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		l.constants = l.syntaxBudget(n)
 		defer func() { l.constants = nil }()
 	}
+	l.nest()
+	defer func() { l.nesting-- }()
+	n, folded := l.exprHead(n, ctx)
+	if folded != nil {
+		return folded
+	}
+	return l.exprBody(n, ctx)
+}
+
+// exprHead is the part of exprCtx every expression passes before its kind
+// is lowered: it follows a branch the syntax pass selected, sets the line
+// and returns the folded value when the syntax pass knows it.
+func (l *lowerer) exprHead(n *frontend.Node, ctx context) (*frontend.Node, *Node) {
 	n = l.selectedSyntax(n)
 	l.cur = l.zline(n)
 	if entry := l.constants.syntax[n]; entry.known && (ctx == ctxRead || ctx == ctxQuiet) && n.Kind != "array" {
@@ -162,8 +175,13 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		if entry.line != 0 {
 			l.cur = entry.line
 		}
-		return l.constantValueNode(entry.value, n.Line, 0)
+		return n, l.constantValueNode(entry.value, n.Line, 0)
 	}
+	return n, nil
+}
+
+// exprBody lowers n by kind once exprHead has passed it.
+func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	c := n.Children
 	switch n.Kind {
 	case "literal":
@@ -1068,12 +1086,56 @@ func (l *lowerer) cast(n *frontend.Node) *Node {
 	return l.seal(&Node{Op: OpCast, Line: n.Line, Text: target, Kids: []*Node{l.expr(n.Children[0])}})
 }
 
+// binary lowers a chain of binary operations nested through their left
+// operand, such as 1+1+…+1, with a loop instead of one Go frame per
+// operator, so a long chain cannot overflow the goroutine stack. Every link
+// passes exprHead and its own checks in the order recursive lowering takes
+// them: the operator's checks and the left operand first, then, from the
+// innermost link out, each right operand.
 func (l *lowerer) binary(n *frontend.Node) *Node {
+	var spine []*frontend.Node
+	var left *Node
+	base := l.nesting
+	defer func() { l.nesting = base }() // also when a link fails
+	for {
+		if strings.ToLower(n.Text) == "|>" && n.Children[1].Kind == "arrow_function" {
+			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
+		}
+		if len(spine) > 0 {
+			l.nest() // the link n is the left operand of the one above it
+		}
+		spine = append(spine, n)
+		if strings.ToLower(n.Text) == "??" {
+			left = l.exprCtx(n.Children[0], ctxQuiet)
+			break
+		}
+		next, folded := l.exprHead(n.Children[0], ctxRead)
+		if folded != nil {
+			left = folded
+			break
+		}
+		if next.Kind != "binary" {
+			left = l.exprBody(next, ctxRead)
+			break
+		}
+		n = next
+	}
+	for i := len(spine) - 1; i >= 0; i-- {
+		left = l.binaryLink(spine[i], left)
+		if i > 0 {
+			l.nesting--
+		}
+	}
+	return left
+}
+
+// binaryLink lowers one binary operation whose left operand is lowered.
+func (l *lowerer) binaryLink(n *frontend.Node, left *Node) *Node {
 	c := n.Children
 	op := strings.ToLower(n.Text)
 	switch op {
 	case "??":
-		return l.node(OpCoalesce, n.Line, l.exprCtx(c[0], ctxQuiet), l.expr(c[1]))
+		return l.node(OpCoalesce, n.Line, left, l.expr(c[1]))
 	case "&&", "||", "and", "or", "xor":
 		switch op {
 		case "and":
@@ -1081,7 +1143,6 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 		case "or":
 			op = "||"
 		}
-		left := l.expr(c[0])
 		v, known := l.evaluateConstant(left)
 		if known && op != "xor" {
 			if value, ok := l.compileTruth(v); ok && value == (op == "||") {
@@ -1099,14 +1160,10 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 			}
 		}
 		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, right}})
-	case "|>":
-		if c[1].Kind == "arrow_function" {
-			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
-		}
 	case "<>":
 		op = "!="
 	}
-	left, right := l.expr(c[0]), l.expr(c[1])
+	right := l.expr(c[1])
 	if op == "." && !l.inConstExpr {
 		// zend_compile_binary_op converts each constant operand to a string
 		// at compile time, whether or not the whole expression folds.

@@ -142,7 +142,11 @@ type Engine struct {
 	runs    sync.WaitGroup
 	shut    bool
 	drain   chan struct{}
-	ready   bool // set by NewEngine; a zero Engine is unusable
+	// closing ends when Close is called; every compile and run observes
+	// it besides its own context.
+	closing      context.Context
+	closeRunning context.CancelCauseFunc
+	ready        bool // set by NewEngine; a zero Engine is unusable
 }
 
 // errZeroEngine rejects use of an Engine not created by NewEngine.
@@ -212,7 +216,9 @@ func NewEngine(cfg Config) (*Engine, error) {
 		return nil, err
 	}
 	cfg.HostFunctions = nil
-	return &Engine{cfg: cfg, profile: prof, host: host, policy: pol, drain: make(chan struct{}), ready: true}, nil
+	closing, closeRunning := context.WithCancelCause(context.Background())
+	return &Engine{cfg: cfg, profile: prof, host: host, policy: pol, drain: make(chan struct{}),
+		closing: closing, closeRunning: closeRunning, ready: true}, nil
 }
 
 // Program is an immutable compiled program bound to the engine that made it.
@@ -234,6 +240,27 @@ type Program struct {
 // Name returns the source name used in diagnostics.
 func (p *Program) Name() string { return p.name }
 
+// errClosedDuringWork is the cause of compiles and runs that Close ended. It
+// matches both ErrEngineClosed and context.Canceled.
+var errClosedDuringWork = fmt.Errorf("%w: %w", ErrEngineClosed, context.Canceled)
+
+// observeClose returns a context that also ends, with errClosedDuringWork
+// as its cause, when Close is called. stop releases it.
+func (e *Engine) observeClose(ctx context.Context) (context.Context, func()) {
+	work, cancel := context.WithCancelCause(ctx)
+	stop := context.AfterFunc(e.closing, func() { cancel(errClosedDuringWork) })
+	return work, func() { stop(); cancel(nil) }
+}
+
+// workErr is the error of work that ctx, from observeClose, ended: the
+// caller's own context error, or errClosedDuringWork when Close ended it.
+func workErr(ctx context.Context) error {
+	if cause := context.Cause(ctx); errors.Is(cause, errClosedDuringWork) {
+		return cause
+	}
+	return ctx.Err()
+}
+
 // begin registers a run or compile so Close can wait for it.
 func (e *Engine) begin() error {
 	e.mu.Lock()
@@ -252,8 +279,11 @@ func (e *Engine) begin() error {
 // name identifies the source in diagnostics. The size limit applies before
 // parsing starts. A syntax error is a PHPError of kind ParseError and a fatal
 // error PHP raises while compiling is one of kind CompileError. A construct
-// this build cannot run yet is an UnsupportedError located at its file and
-// line; no partial program is returned.
+// this build cannot run yet, or source beyond this build's compiler limits,
+// is an UnsupportedError located at its file and line; no partial program
+// is returned. Compiling observes ctx and Close throughout: it returns ctx's
+// error, or an error matching ErrEngineClosed and context.Canceled when
+// Close ended it.
 func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, error) {
 	if err := e.begin(); err != nil {
 		return nil, err
@@ -265,19 +295,34 @@ func (e *Engine) Compile(ctx context.Context, name, source string) (*Program, er
 	if len(source) > e.cfg.MaxSourceBytes {
 		return nil, &LimitError{Limit: "source size", Max: e.cfg.MaxSourceBytes, Got: len(source)}
 	}
-	tree, err := frontend.Parse([]byte(source), frontend.LexOptions{
+	work, done := e.observeClose(ctx)
+	defer done()
+	p, err := e.compile(work, name, source)
+	if err != nil && work.Err() != nil {
+		return nil, workErr(work)
+	}
+	return p, err
+}
+
+// compile parses source and prepares it for the interpreter.
+func (e *Engine) compile(ctx context.Context, name, source string) (*Program, error) {
+	tree, err := frontend.ParseContext(ctx, []byte(source), frontend.LexOptions{
 		ShortOpenTag: e.cfg.ShortOpenTag, IntWidth: e.cfg.IntSize, MaxBytes: e.cfg.MaxSourceBytes,
 	})
 	var se *frontend.SyntaxError
-	if errors.As(err, &se) {
+	switch {
+	case errors.As(err, &se):
 		kind := ParseError
 		if se.Compile {
 			kind = CompileError
 		}
 		return nil, &PHPError{Kind: kind, Message: se.Message, File: name, Line: se.Line}
-	}
-	if err != nil {
-		return nil, err
+	case err != nil && ctx.Err() != nil:
+		return nil, ctx.Err()
+	case err != nil:
+		// The sizes are checked before parsing, so what remains is the
+		// parser's own work and nesting bound, which PHP does not have.
+		return nil, &UnsupportedError{Feature: "source beyond this build's parser limits (" + err.Error() + ")", File: name}
 	}
 	return e.compileTree(ctx, name, source, tree)
 }
@@ -287,19 +332,26 @@ func (e *Engine) compileTree(ctx context.Context, name, source string, tree *fro
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	unit, err := ir.Lower(tree, e.profile, ir.Options{File: name})
+	unit, err := ir.LowerContext(ctx, tree, e.profile, ir.Options{File: name})
 	var ce *ir.CompileError
-	if errors.As(err, &ce) {
+	var le *ir.LimitError
+	switch {
+	case errors.As(err, &ce):
 		return nil, &PHPError{Kind: CompileError, Message: ce.Message, File: name, Line: ce.Line}
-	}
-	if err != nil {
-		return nil, err
+	case errors.As(err, &le):
+		// The constant evaluation budget is this build's, as the bytecode
+		// limits below are.
+		return nil, located(&UnsupportedError{Feature: "a constant expression beyond this build's evaluation limits", File: name, Line: le.Line}, source)
+	case err != nil && ctx.Err() != nil:
+		return nil, ctx.Err()
+	case err != nil:
+		return nil, internalError("lowering "+name, err)
 	}
 	image, err := vm.Compile(ctx, unit, []byte(source))
 	var vu *vm.UnsupportedError
 	switch {
 	case errors.As(err, &vu):
-		return nil, &UnsupportedError{Feature: vu.Feature, File: vu.File, Line: vu.Line}
+		return nil, located(&UnsupportedError{Feature: vu.Feature, File: vu.File, Line: vu.Line}, source)
 	case err != nil && ctx.Err() != nil:
 		return nil, ctx.Err()
 	case err != nil:
@@ -322,7 +374,7 @@ func (e *Engine) compileTree(ctx context.Context, name, source string, tree *fro
 				u.Line = int(be.Pos.Line)
 			}
 		}
-		return nil, u
+		return nil, located(u, source)
 	case err != nil:
 		return nil, internalError("verifying "+name, err)
 	}
@@ -369,7 +421,10 @@ type Result struct {
 	Output []byte
 	// Diagnostics are PHP's log_errors channel: notices, warnings and
 	// errors in order, each with the file and line PHP reports. It is empty
-	// unless log_errors is on (see WithINI).
+	// by default, because log_errors is off by default as with php -n;
+	// turn it on with WithINI("log_errors", "1"). It holds at most
+	// Limits.Diagnostics entries: later diagnostics are not recorded, so a
+	// record of exactly that many may have been cut short.
 	Diagnostics []Diagnostic
 }
 
@@ -421,10 +476,12 @@ func WithGlobal(name string, v Value) RunOption {
 // failure is kept in Result.Output (or was written to WithOutput's writer).
 // The error says why a run did not complete: a PHPError for an uncaught
 // throwable (ExitCode 255, as PHP exits), a ResourceError for a limit, the
-// context's error when ctx ends the run, the writer's error, or an
-// UnsupportedError for a construct this build cannot run. A failed request
-// cleanup after the script ended is also an error; Status still says how the
-// script ended.
+// context's error when ctx ends the run (one matching ErrEngineClosed and
+// context.Canceled when Close ended it), the writer's error, an
+// UnsupportedError for a construct this build cannot run or for a
+// Limits.Memory it cannot enforce, or an InternalError for a fault inside
+// Phego. A failed request cleanup after the script ended is also an error,
+// joined to any other; Status still says how the script ended.
 func (e *Engine) Run(ctx context.Context, program *Program, opts ...RunOption) (*Result, error) {
 	return e.run(ctx, program, nil, opts...)
 }
@@ -441,6 +498,11 @@ func (e *Engine) run(ctx context.Context, program *Program, release func(), opts
 	if program.profile != e.profile {
 		return &Result{Status: StatusFailed}, &ConfigError{Code: codes.ProgramProfile, Field: "program",
 			Reason: "was compiled for " + program.profile.String() + ", not " + e.profile.String()}
+	}
+	if e.policy.limits[policy.Memory] > 0 {
+		// The interpreter does not account memory yet, so a run that the
+		// host bounded by memory is refused instead of running unbounded.
+		return &Result{Status: StatusFailed}, &UnsupportedError{Feature: "enforcing a memory limit", Option: "Limits.Memory"}
 	}
 	rc := runConfig{ini: defaultINI}
 	for _, opt := range opts {
@@ -489,6 +551,9 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	if err := ctx.Err(); err != nil {
 		return &Result{Status: StatusCancelled}, err
 	}
+	// Close also ends the open, the read and the compile.
+	ctx, done := e.observeClose(ctx)
+	defer done()
 	release, err := e.admit(ctx)
 	if err != nil {
 		status := StatusFailed
@@ -558,16 +623,20 @@ func (e *Engine) RunFile(ctx context.Context, path string, opts ...RunOption) (*
 	program, err := e.Compile(ctx, path, string(data))
 	if err != nil {
 		if ctx.Err() != nil {
-			return &Result{Status: StatusCancelled}, ctx.Err()
+			return &Result{Status: StatusCancelled}, workErr(ctx)
 		}
 		return &Result{Status: StatusFailed}, err
 	}
 	return e.run(ctx, program, release, opts...)
 }
 
-// Close stops new work and waits for running work until ctx ends. It does
-// not cancel work in progress; cancel the runs' contexts to stop them. It is
-// safe to call more than once; later calls wait the same way.
+// Close stops admitting work, cancels the compiles and runs in progress and
+// waits until they have finished, or until ctx ends, which returns ctx's
+// error. Cancelled work ends as when its own context ends: a run reports
+// StatusCancelled with an error matching both ErrEngineClosed and
+// context.Canceled, and its request cleanup, bounded in time, releases its
+// execution slot. Later work returns ErrEngineClosed. Close is safe to call
+// more than once; later calls wait the same way.
 func (e *Engine) Close(ctx context.Context) error {
 	e.mu.Lock()
 	if !e.ready {
@@ -579,6 +648,7 @@ func (e *Engine) Close(ctx context.Context) error {
 		if e.policy.admission != nil {
 			e.policy.admission.Close()
 		}
+		e.closeRunning(ErrEngineClosed)
 		go func() {
 			e.runs.Wait()
 			close(e.drain)

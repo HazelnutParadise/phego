@@ -8,7 +8,8 @@
 // code stays listed with Retired set.
 //
 // Ranges: PHG1xxx Engine configuration and run options, PHG2xxx bytecode
-// loading and verification, PHG3xxx features this build does not implement.
+// loading and verification, PHG3xxx features this build does not implement,
+// PHG9xxx faults inside Phego.
 package codes
 
 //go:generate go run ./gen
@@ -68,6 +69,7 @@ const (
 	BytecodeCapability   diag.Code = "PHG2007"
 	Unsupported          diag.Code = "PHG3000"
 	UnsupportedConstruct diag.Code = "PHG3001"
+	Internal             diag.Code = "PHG9000"
 )
 
 // registry holds every code. Constant keys make a duplicate a compile error.
@@ -190,6 +192,9 @@ var registry = map[diag.Code]Entry{
 	UnsupportedConstruct: {Title: "this PHP construct cannot run in this build yet",
 		Note: "this build's first VM stage does not run that construct yet, so the program is refused instead of running partly",
 		Help: "run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages"},
+	Internal: {Title: "internal engine error",
+		Note: "a Phego invariant failed; this is a defect in Phego, not in the PHP program or the host",
+		Help: "report it with the program and the Phego version; the run or compile did not succeed"},
 }
 
 // Lookup returns the documentation of a code.

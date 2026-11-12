@@ -25,6 +25,12 @@ func (p *parser) diagnoseSyntax() (diagnostic *SyntaxError, complete bool) {
 	// chains independently of hostile input, while stack depth is capped too.
 	work := diagnosticWorkPerToken * (len(p.toks) + 1)
 	for work > 0 {
+		if p.ctx != nil && work%(64*ctxCheckEvery) == 0 {
+			if err := p.ctx.Err(); err != nil {
+				p.ctxErr = err
+				return nil, false
+			}
+		}
 		// PHP checks immediately after either kind of push, before the next
 		// state action or accepting the parse.
 		if len(states) >= MaxNesting {

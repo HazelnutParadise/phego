@@ -28,10 +28,14 @@ func sizedCompileBudget(size, sourceBytes int64) *compileBudget {
 	return &compileBudget{work: clamp(8 * (size + (sourceBytes+63)/64)), bytes: clamp(8*sourceBytes + 64*size)}
 }
 
-type constantLimitError struct{ line int }
+// LimitError reports source whose compile-time constant evaluation exceeds
+// this build's work, memory or nesting budget (see compilePoolWork and
+// compileConstMaxDepth). It is a host limit, not a PHP diagnostic; Line is
+// the PHP line being compiled.
+type LimitError struct{ Line int }
 
-func (e *constantLimitError) Error() string {
-	return fmt.Sprintf("ir: constant evaluation resource limit exceeded at line %d", e.line)
+func (e *LimitError) Error() string {
+	return fmt.Sprintf("ir: constant evaluation resource limit exceeded at line %d", e.Line)
 }
 
 type compileBudget struct {
@@ -177,7 +181,7 @@ func (l *lowerer) evaluateConstant(n *Node) (compileConst, bool) {
 	}
 	v, known := l.compileConst(n, 0, b)
 	if b.exhausted {
-		panic(compileFailure{&constantLimitError{line: n.Line}})
+		panic(compileFailure{&LimitError{Line: n.Line}})
 	}
 	return v, known
 }

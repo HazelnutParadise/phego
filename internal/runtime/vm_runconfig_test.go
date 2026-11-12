@@ -45,7 +45,6 @@ func TestVMLimitErrorsNameTheResource(t *testing.T) {
 		{"frames", recursion(), func(c *RunConfig) { c.Depth = 10 }, LimitError{"frames", 10, 10, 1}},
 		{"calls", recursion(), func(c *RunConfig) { c.Callbacks = 5 }, LimitError{"calls", 5, 5, 1}},
 		{"output", echoLoopAsm(t), func(c *RunConfig) { c.OutputBytes = 10 }, LimitError{"output", 10, 10, 1}},
-		{"diagnostics", warnings(5, true), func(c *RunConfig) { c.Diagnostics = 2 }, LimitError{"diagnostics", 2, 2, 1}},
 		{"diagnostics share calls", warnings(5, false), func(c *RunConfig) { c.Callbacks = 3 }, LimitError{"diagnostics", 3, 3, 1}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -64,6 +63,14 @@ func TestVMLimitErrorsNameTheResource(t *testing.T) {
 	cfg.Callbacks, cfg.Diagnostics = 2, 10
 	if res := warnings(5, false).program().Run(cfg); res.End != Completed || len(res.Diagnostics) != 5 {
 		t.Fatalf("%v %v %v", res.End, res.Err, res.Diagnostics)
+	}
+	// That budget bounds only the record: the run goes on past it, and
+	// every diagnostic is still displayed.
+	cfg = vmConfig(t, 64)
+	cfg.Diagnostics, cfg.DisplayErrors, cfg.LogErrors = 2, true, true
+	res := warnings(5, true).program().Run(cfg)
+	if res.End != Completed || len(res.Diagnostics) != 2 || strings.Count(string(res.Output), "Warning: Undefined variable $u") != 5 {
+		t.Fatalf("%v %v %d recorded, output %q", res.End, res.Err, len(res.Diagnostics), res.Output)
 	}
 }
 
@@ -101,11 +108,12 @@ func TestVMPreludeIsReportedFirst(t *testing.T) {
 	if res.End != Completed || !strings.HasPrefix(string(res.Output), "\nDeprecated: old") || len(res.Diagnostics) != 1 {
 		t.Fatalf("error_reporting: %v %q %+v", res.End, res.Output, res.Diagnostics)
 	}
-	// A prelude that exceeds the diagnostic budget stops before {main}.
+	// A prelude beyond the diagnostic record bound is still displayed and
+	// {main} still runs; only the record stops at the bound.
 	cfg = vmConfig(t, 64)
 	cfg.Prelude, cfg.Diagnostics = prelude, 1
 	res = a.program().Run(cfg)
-	if res.End != LimitExceeded || strings.Contains(string(res.Output), "main") {
-		t.Fatalf("budget: %v %q", res.End, res.Output)
+	if res.End != Completed || string(res.Output) != want || len(res.Diagnostics) != 1 || res.Diagnostics[0] != prelude[0] {
+		t.Fatalf("budget: %v %q %+v", res.End, res.Output, res.Diagnostics)
 	}
 }

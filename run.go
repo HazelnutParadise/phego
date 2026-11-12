@@ -1,7 +1,6 @@
 package phego
 
 import (
-	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -16,23 +15,19 @@ import (
 )
 
 const (
-	// defaultFrames bounds the call depth when Limits.Frames is zero. The
-	// interpreter keeps PHP frames on its own stack, not on the Go stack,
-	// so no depth overflows the goroutine. The bound keeps runaway recursion
-	// from growing memory while Limits.Memory is not yet charged: 100000
-	// frames of a one-argument function allocated about 230 MB, 10000 about
-	// a tenth of that.
-	defaultFrames = 10_000
-	// cleanupTimeout bounds request teardown after a run, including one
-	// whose context has ended. Past it the slot is released and the run's
-	// cleanup error says that teardown did not finish.
-	cleanupTimeout = 5 * time.Second
 	// eAll is PHP 8.5.12's E_ALL, the error_reporting of php -n.
 	eAll = 30719
-	// Limits of one WithGlobal value; they equal the runtime's import limits.
-	maxGlobalDepth    = 256
-	maxGlobalElements = 1 << 20
+	// Limits of one WithGlobal value and of Result.Return; they equal the
+	// runtime's snapshot limits, so a returned value can be passed back.
+	maxGlobalDepth    = runtime.SnapshotMaxDepth
+	maxGlobalElements = runtime.SnapshotMaxElements
 )
+
+// cleanupTimeout bounds request teardown after a run, including one whose
+// context has ended, from the moment teardown starts. Past it the slot is
+// released and the run's cleanup error says that teardown did not finish.
+// It is a variable only so tests can shorten it.
+var cleanupTimeout = 5 * time.Second
 
 // iniSettings are the INI values one run uses.
 type iniSettings struct {
@@ -83,7 +78,7 @@ func WithINI(name, value string) RunOption {
 			case !ok:
 				return invalid("expected 0, 1, on, off, true, false, yes or no")
 			case on:
-				return &UnsupportedError{Feature: "html_errors=" + value + " (HTML error text is not implemented)"}
+				return &UnsupportedError{Feature: "HTML error text (html_errors=" + value + ")", Option: "WithINI"}
 			}
 		case "error_reporting":
 			n, ok := iniInt(value)
@@ -127,6 +122,8 @@ func (e *Engine) execute(ctx context.Context, program *Program, rc *runConfig, r
 	// The request's cleanup releases the slot; this covers runs that end
 	// before the request starts. A second release is a no-op.
 	defer release()
+	ctx, done := e.observeClose(ctx)
+	defer done()
 	globals, err := e.globals(rc.inputs)
 	if err != nil {
 		return &Result{Status: StatusFailed}, err
@@ -144,16 +141,21 @@ func (e *Engine) execute(ctx context.Context, program *Program, rc *runConfig, r
 	if err != nil {
 		return &Result{Status: StatusFailed}, internalError("starting the request", err)
 	}
-	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), cleanupTimeout)
-	defer cancel()
 	limits := e.policy.limits
+	// Zero is no limit, as PHP has none. The interpreter keeps PHP frames
+	// on its own stack, not the Go stack, so no depth overflows the
+	// goroutine; until memory is metered only Steps, the context and the
+	// process's memory stop runaway recursion.
 	frames := int(min(limits[policy.Frames], int64(maxInt)))
 	if frames == 0 {
-		frames = defaultFrames
+		frames = maxInt
 	}
 	res := program.code.Run(runtime.RunConfig{
-		Context:        ctx,
-		Cleanup:        cleanup,
+		Context: ctx,
+		// Teardown runs after ctx may have ended, so it has its own
+		// deadline, which starts when teardown starts.
+		Cleanup:        context.WithoutCancel(ctx),
+		CleanupTimeout: cleanupTimeout,
 		Request:        req,
 		IntWidth:       e.profile.IntWidth,
 		Output:         rc.output,
@@ -168,11 +170,12 @@ func (e *Engine) execute(ctx context.Context, program *Program, rc *runConfig, r
 		Globals:        globals,
 		Prelude:        program.prelude,
 	})
-	return e.result(res)
+	return e.result(ctx, res)
 }
 
-// result maps the interpreter's outcome to the public Result and error.
-func (e *Engine) result(res runtime.RunResult) (*Result, error) {
+// result maps the interpreter's outcome to the public Result and error. ctx
+// is the run's context from observeClose.
+func (e *Engine) result(ctx context.Context, res runtime.RunResult) (*Result, error) {
 	r := &Result{Status: StatusFailed, ExitCode: res.ExitCode, Output: res.Output}
 	for _, d := range res.Diagnostics {
 		r.Diagnostics = append(r.Diagnostics, Diagnostic{Level: d.Level, Message: d.Message, File: d.File, Line: d.Line})
@@ -190,11 +193,15 @@ func (e *Engine) result(res runtime.RunResult) (*Result, error) {
 			err = internalError("an uncaught throwable without a description", res.Err)
 		}
 	case runtime.Fatal:
-		// PHPErrorKind has no kind for a run-time fatal error yet; stage 1
-		// raises none, and one is never reported as success.
-		err = fmt.Errorf("phego: PHP Fatal error: %w", cmp.Or(res.Err, errors.New("no message recorded")))
+		// PHPErrorKind has no kind for a run-time fatal error yet and stage
+		// 1 raises none, so reaching one is an engine fault; it is never
+		// reported as success.
+		err = internalError("running the program (a PHP fatal error without a reportable kind)", res.Err)
 	case runtime.Cancelled:
 		r.Status, err = StatusCancelled, res.Err
+		if errors.Is(context.Cause(ctx), errClosedDuringWork) {
+			err = errClosedDuringWork
+		}
 	case runtime.LimitExceeded:
 		r.Status, err = StatusPolicyDenied, e.limitError(res)
 	case runtime.OutputFailed:
@@ -209,8 +216,10 @@ func (e *Engine) result(res runtime.RunResult) (*Result, error) {
 	default:
 		err = internalError("running the program", res.Err)
 	}
-	if err == nil && res.CleanupErr != nil {
-		err = internalError("cleaning up after the run", res.CleanupErr)
+	if res.CleanupErr != nil {
+		// Status still says how the script ended; the error says both why
+		// it did not complete and that teardown failed.
+		err = errors.Join(err, internalError("cleaning up after the run", res.CleanupErr))
 	}
 	return r, err
 }
@@ -222,7 +231,8 @@ func (e *Engine) limitError(res runtime.RunResult) error {
 	}
 	var le *runtime.LimitError
 	if errors.As(res.Err, &le) {
-		resource := map[string]Resource{"frames": ResourceFrames, "output": ResourceOutput, "diagnostics": ResourceDiagnostics}[le.Resource]
+		resource := map[string]Resource{"frames": ResourceFrames, "output": ResourceOutput, "diagnostics": ResourceDiagnostics,
+			"return-depth": ResourceReturnDepth, "return-elements": ResourceReturnElements}[le.Resource]
 		if resource != "" {
 			return &ResourceError{Resource: resource, Limit: le.Limit, Used: le.Used, Requested: le.Requested}
 		}
@@ -235,7 +245,7 @@ func internalError(during string, err error) error {
 	if err == nil {
 		err = errors.New("no cause recorded")
 	}
-	return fmt.Errorf("phego: internal error while %s: %w", during, err)
+	return &InternalError{Op: during, Err: err}
 }
 
 // globals converts WithGlobal values to the runtime's snapshot shape and

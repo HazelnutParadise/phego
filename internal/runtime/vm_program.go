@@ -54,15 +54,13 @@ type vmFunction struct {
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
-	// fusedCode is code with each comparison Binary whose result is the
-	// condition of the next Branch replaced by opFusedCompareBranch (the
-	// superinstruction benchmark candidate); nil when nothing fuses.
-	fusedCode []vmInstr
 }
 
 // opFusedCompareBranch is an internal opcode outside the format's range. It
 // runs a comparison Binary and the Branch after it as one dispatch, keeping
-// both steps' charges, polls and locations.
+// both steps' charges, polls and locations. NewProgram never emits it; only
+// the superinstruction benchmark candidate (vm_bench_test.go) rewrites a
+// test program's code to use it.
 const opFusedCompareBranch bytecode.Opcode = 0xff00
 
 // UnsupportedError is a construct that compiled but that the stage-1
@@ -367,23 +365,9 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 		out.a, out.b, out.c = decoded[0], decoded[1], decoded[2]
 		f.code[pc] = out
 	}
-	f.paramLocal, f.prologueEnd = parameterPrologue(f, kinds, dense, code)
+	f.paramLocal, f.prologueEnd = parameterPrologue(f, code)
 	if f.nvals > 0 {
-		vmLiveness(&f, code, kinds)
-	}
-	for pc := 0; pc+1 < len(f.code); pc++ {
-		in, next := f.code[pc], f.code[pc+1]
-		switch bytecode.BinaryOp(in.aux) {
-		case bytecode.Less, bytecode.LessOrEqual, bytecode.Equal, bytecode.NotEqual, bytecode.Identical, bytecode.NotIdentical:
-		default:
-			continue
-		}
-		if in.op == bytecode.OpBinary && next.op == bytecode.OpBranch && next.a == in.a && in.nkill == 0 {
-			if f.fusedCode == nil {
-				f.fusedCode = append([]vmInstr(nil), f.code...)
-			}
-			f.fusedCode[pc].op = opFusedCompareBranch
-		}
+		vmLiveness(&f)
 	}
 	return f, nil
 }
@@ -392,7 +376,7 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 // instructions, which local receives each parameter register (conventions:
 // "Local Lk, k; Store Lk, r_i"). Backtraces show a parameter's current value
 // once the prologue stored it, as PHP shows the CV.
-func parameterPrologue(f vmFunction, kinds []bytecode.RegisterKind, dense []uint32, code []bytecode.Instruction) ([]int32, int) {
+func parameterPrologue(f vmFunction, code []bytecode.Instruction) ([]int32, int) {
 	pl := make([]int32, f.params)
 	for i := range pl {
 		pl[i] = -1
@@ -414,8 +398,6 @@ func parameterPrologue(f vmFunction, kinds []bytecode.RegisterKind, dense []uint
 		}
 		break
 	}
-	_ = kinds
-	_ = dense
 	return pl, end
 }
 
@@ -426,7 +408,7 @@ func parameterPrologue(f vmFunction, kinds []bytecode.RegisterKind, dense []uint
 // Release timing is not observable by PHP code in stage 1 (no objects or
 // destructors). Functions whose dataflow would need more than vmLivenessWords
 // bitset words keep registers until they are overwritten or the frame ends.
-func vmLiveness(f *vmFunction, raw []bytecode.Instruction, kinds []bytecode.RegisterKind) {
+func vmLiveness(f *vmFunction) {
 	n := len(f.code)
 	// Registers that may hold a composite value: written by an instruction
 	// that can produce one (or a Move from such a register).
@@ -577,8 +559,6 @@ func vmLiveness(f *vmFunction, raw []bytecode.Instruction, kinds []bytecode.Regi
 			f.kills = f.kills[:start]
 		}
 	}
-	_ = raw
-	_ = kinds
 }
 
 // vmLivenessWords bounds the liveness bitsets of one function (8 MiB).
