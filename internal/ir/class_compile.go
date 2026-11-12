@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // checkClass checks declaration-local rules with source locations. Linking
@@ -93,7 +94,7 @@ func (l *lowerer) checkClass(cl *Class, source *frontend.Node) {
 		}
 		seenHooks := map[string]bool{}
 		for _, h := range p.Hooks {
-			name := strings.ToLower(h.Name)
+			name := phpname.Lower(h.Name)
 			if seenHooks[name] {
 				l.fail(h.Line, "Cannot redeclare property hook \"%s\"", hookName(h))
 			}
@@ -146,7 +147,7 @@ func (l *lowerer) checkClass(cl *Class, source *frontend.Node) {
 		}
 	}
 	for _, c := range cl.Consts {
-		if strings.EqualFold(c.Name, "class") {
+		if phpname.EqualFold(c.Name, "class") {
 			l.fail(c.Line, "A class constant must not be called 'class'; it is reserved for class name fetching")
 		}
 		key := c.Name
@@ -179,7 +180,7 @@ func (l *lowerer) checkClass(cl *Class, source *frontend.Node) {
 		}
 	}
 	for _, f := range cl.Methods {
-		key := strings.ToLower(f.Name)
+		key := phpname.Lower(f.Name)
 		if prev := methods[key]; prev != nil {
 			l.fail(f.Line, "Cannot redeclare %s::%s()", cl.Name, f.Name)
 		}
@@ -217,13 +218,13 @@ func (l *lowerer) checkClass(cl *Class, source *frontend.Node) {
 			}
 		}
 		l.checkMagicMethod(cl, f)
-		if hasClassMarker(f.Attributes, "NoDiscard") && (f.Return != nil && (strings.EqualFold(f.Return.zend, "void") || strings.EqualFold(f.Return.zend, "never"))) {
-			if strings.EqualFold(f.Return.zend, "void") {
+		if hasClassMarker(f.Attributes, "NoDiscard") && (f.Return != nil && (phpname.EqualFold(f.Return.zend, "void") || phpname.EqualFold(f.Return.zend, "never"))) {
+			if phpname.EqualFold(f.Return.zend, "void") {
 				l.fail(f.Line, "A void method does not return a value, but #[\\NoDiscard] requires a return value")
 			}
 			l.fail(f.Line, "A never returning method does not return a value, but #[\\NoDiscard] requires a return value")
 		}
-		if hasModifier(f.Modifiers, "final") && hasModifier(f.Modifiers, "private") && !strings.EqualFold(f.Name, "__construct") {
+		if hasModifier(f.Modifiers, "final") && hasModifier(f.Modifiers, "private") && !phpname.EqualFold(f.Name, "__construct") {
 			l.diag(f.Line, "Warning", "Private methods cannot be final as they are never overridden by other classes")
 		}
 	}
@@ -267,7 +268,7 @@ func plural(n int) string {
 
 func hasPropertyHook(p *Prop, name string) bool {
 	for _, h := range p.Hooks {
-		if strings.HasSuffix(strings.ToLower(h.Name), "::"+name) {
+		if strings.HasSuffix(phpname.Lower(h.Name), "::"+name) {
 			return true
 		}
 	}
@@ -277,7 +278,7 @@ func hasPropertyHook(p *Prop, name string) bool {
 func typeContainsAtom(typ, want string) bool {
 	for _, clause := range typeDNF(typ) {
 		for _, atom := range clause {
-			if strings.EqualFold(strings.TrimPrefix(atom, "\\"), want) {
+			if phpname.EqualFold(strings.TrimPrefix(atom, "\\"), want) {
 				return true
 			}
 		}
@@ -286,7 +287,7 @@ func typeContainsAtom(typ, want string) bool {
 }
 
 func (l *lowerer) typeAllowsNull(typ string) bool {
-	if strings.EqualFold(typ, "mixed") {
+	if phpname.EqualFold(typ, "mixed") {
 		return true
 	}
 	for _, clause := range typeDNF(typ) {
@@ -300,7 +301,7 @@ func (l *lowerer) typeAllowsNull(typ string) bool {
 }
 
 func (l *lowerer) checkMagicMethod(cl *Class, f *Func) {
-	name := strings.ToLower(f.Name)
+	name := phpname.Lower(f.Name)
 	display := cl.Name + "::" + f.Name + "()"
 	if !strings.HasPrefix(name, "__") {
 		return

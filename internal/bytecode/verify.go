@@ -3,6 +3,7 @@ package bytecode
 import (
 	"cmp"
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/HazelnutParadise/phego/internal/profile"
@@ -21,7 +22,9 @@ func validateIdentity(id Identity) error {
 	return nil
 }
 
-func verifyImage(b *budget, image Image, cloneCost bool) (CapabilitySet, error) {
+// verifyImage checks image as format version 1.minor. Minor 0 files may not
+// use any format 1.1 opcode, Aux value or binary operator.
+func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (CapabilitySet, error) {
 	if err := b.poll(); err != nil {
 		return 0, err
 	}
@@ -143,6 +146,9 @@ func verifyImage(b *budget, image Image, cloneCost bool) (CapabilitySet, error) 
 				return 0, err
 			}
 		}
+		if err := verifyLocalNames(b, image, f, cloneCost); err != nil {
+			return 0, functionError(err, fi, -1)
+		}
 		for _, k := range f.Registers {
 			if err := b.chargeWork(1); err != nil {
 				return 0, err
@@ -172,7 +178,7 @@ func verifyImage(b *budget, image Image, cloneCost bool) (CapabilitySet, error) 
 				return 0, functionError(invalid("source position outside source"), fi, pc)
 			}
 		}
-		caps, err := verifyFunction(b, image, uint32(fi), f)
+		caps, err := verifyFunction(b, image, minor, uint32(fi), f)
 		if err != nil {
 			return 0, err
 		}
@@ -187,6 +193,34 @@ func verifyImage(b *budget, image Image, cloneCost bool) (CapabilitySet, error) 
 	return image.Required, nil
 }
 
+// verifyLocalNames checks the count first, so the loop is bounded by
+// Locals and MaxLocals before any entry is read.
+func verifyLocalNames(b *budget, image Image, f *Function, cloneCost bool) error {
+	if len(f.LocalNames) == 0 {
+		return nil
+	}
+	if uint64(len(f.LocalNames)) != uint64(f.Locals) {
+		return invalid(fmt.Sprintf("local name count %d must be 0 or the function's Locals (%d)", len(f.LocalNames), f.Locals))
+	}
+	if cloneCost {
+		if err := b.reserveMul(uint64(len(f.LocalNames)), 4); err != nil {
+			return err
+		}
+	}
+	if err := b.chargeWork(uint64(len(f.LocalNames))); err != nil {
+		return err
+	}
+	for i, c := range f.LocalNames {
+		if uint64(c) >= uint64(len(image.Constants)) {
+			return invalid(fmt.Sprintf("local name index %d for local %d is outside the %d constants", c, i, len(image.Constants)))
+		}
+		if image.Constants[c].Kind != String {
+			return invalid(fmt.Sprintf("local name constant %d for local %d is not a string", c, i))
+		}
+	}
+	return nil
+}
+
 type argShape struct {
 	kind  RegisterKind
 	named bool
@@ -197,7 +231,7 @@ type flowState struct {
 	stack []argShape
 }
 
-func verifyFunction(b *budget, image Image, index uint32, f *Function) (CapabilitySet, error) {
+func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Function) (CapabilitySet, error) {
 	n := len(f.Code)
 	if err := verifyHandlers(b, f); err != nil {
 		return 0, functionError(err, int(index), -1)
@@ -216,7 +250,7 @@ func verifyFunction(b *budget, image Image, index uint32, f *Function) (Capabili
 			return 0, functionError(invalid("unknown opcode"), int(index), pc)
 		}
 		caps |= safety.Capabilities
-		if err := verifyInstruction(image, f, uint32(index), uint32(pc), in); err != nil {
+		if err := verifyInstruction(image, f, minor, in); err != nil {
 			return 0, functionError(err, int(index), pc)
 		}
 		for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
@@ -237,13 +271,41 @@ func verifyFunction(b *budget, image Image, index uint32, f *Function) (Capabili
 	return caps, nil
 }
 
-func verifyInstruction(image Image, f *Function, fi, pc uint32, in Instruction) error {
+// format11 reports whether a known instruction needs format 1.1: a 1.1
+// opcode, a 1.1 binary operator, or the quiet Aux of Load or ArrayGet.
+func format11(in Instruction) bool {
+	switch in.Op {
+	case OpUnary, OpCast, OpIncDec, OpArraySet, OpArrayAppend, OpArrayUnset, OpIsset, OpArrayIsset, OpUnset, OpExit, OpArrayAdd:
+		return true
+	case OpBinary:
+		return in.Aux >= uint16(Modulo)
+	case OpLoad, OpArrayGet:
+		return in.Aux != 0
+	}
+	return false
+}
+
+func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
+	if err := checkOperands(image, f, in); err != nil {
+		return err
+	}
+	if minor == 0 && format11(in) {
+		return invalid("instruction needs bytecode format 1.1, but the file declares format 1.0")
+	}
+	return nil
+}
+
+func checkOperands(image Image, f *Function, in Instruction) error {
 	reg := func(n uint32, k RegisterKind) bool {
 		return uint64(n) < uint64(len(f.Registers)) && f.Registers[n] == k
 	}
 	zero := in.B == 0 && in.C == 0
-	if in.Op != OpBinary && in.Op != OpInclude && in.Aux != 0 {
-		return invalid("unused aux field")
+	switch in.Op {
+	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd:
+	default:
+		if in.Aux != 0 {
+			return invalid("unused aux field")
+		}
 	}
 	switch in.Op {
 	case OpCheckpoint, OpEndFinally:
@@ -263,7 +325,7 @@ func verifyInstruction(image Image, f *Function, fi, pc uint32, in Instruction) 
 			return invalid("invalid local operands")
 		}
 	case OpLoad:
-		if !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
+		if in.Aux > 1 || !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
 			return invalid("invalid load operands")
 		}
 	case OpStore:
@@ -271,7 +333,7 @@ func verifyInstruction(image Image, f *Function, fi, pc uint32, in Instruction) 
 			return invalid("invalid store operands")
 		}
 	case OpBinary:
-		if in.Aux < uint16(Add) || in.Aux > uint16(BitXor) || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
+		if in.Aux < uint16(Add) || in.Aux > uint16(BoolXor) || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
 			return invalid("invalid binary operands")
 		}
 	case OpJump, OpLeave:
@@ -318,7 +380,7 @@ func verifyInstruction(image Image, f *Function, fi, pc uint32, in Instruction) 
 			return invalid("invalid new-array operands")
 		}
 	case OpArrayGet:
-		if !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
+		if in.Aux > 1 || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
 			return invalid("invalid array-get operands")
 		}
 	case OpInclude:
@@ -333,11 +395,76 @@ func verifyInstruction(image Image, f *Function, fi, pc uint32, in Instruction) 
 		if uint64(in.A) >= uint64(len(f.Registers)) || !zero {
 			return invalid("invalid drop operands")
 		}
+	case OpUnary:
+		if in.Aux < uint16(Not) || in.Aux > uint16(BitNot) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid unary operands: A and B must be Value registers, C zero, Aux Not to BitNot")
+		}
+	case OpCast:
+		if in.Aux < uint16(CastBool) || in.Aux > uint16(CastArray) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid cast operands: A and B must be Value registers, C zero, Aux CastBool to CastArray")
+		}
+	case OpIncDec:
+		if in.Aux < uint16(PreInc) || in.Aux > uint16(PostDec) || !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
+			return invalid("invalid increment operands: A must be a Value, B a Location, C zero, Aux PreInc to PostDec")
+		}
+	case OpArraySet:
+		key, val := Value, Value
+		if ArrayWriteFlags(in.Aux)&KeyLocation != 0 {
+			key = Location
+		}
+		if ArrayWriteFlags(in.Aux)&ValueLocation != 0 {
+			val = Location
+		}
+		if in.Aux > uint16(ValueLocation|KeyLocation) || !reg(in.A, Location) || !reg(in.B, key) || !reg(in.C, val) {
+			return invalid("invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation")
+		}
+	case OpArrayAppend:
+		val := Value
+		if ArrayWriteFlags(in.Aux)&ValueLocation != 0 {
+			val = Location
+		}
+		if in.Aux > uint16(ValueLocation) || !reg(in.A, Location) || !reg(in.B, val) || in.C != 0 {
+			return invalid("invalid array-append operands: A must be a Location, B a Value (a Location where Aux is ValueLocation), C zero")
+		}
+	case OpArrayUnset:
+		key := Value
+		if ArrayWriteFlags(in.Aux) == KeyLocation {
+			key = Location
+		}
+		if (in.Aux != 0 && ArrayWriteFlags(in.Aux) != KeyLocation) || !reg(in.A, Location) || !reg(in.B, key) || in.C != 0 {
+			return invalid("invalid array-unset operands: A must be a Location, B a Value (a Location where Aux is KeyLocation), C zero")
+		}
+	case OpArrayAdd:
+		flags := ArrayAddFlags(in.Aux)
+		key := Value
+		if flags&AddKeyLocation != 0 {
+			key = Location
+		}
+		switch {
+		case in.Aux > uint16(AddKey|AddKeyLocation) || flags == AddKeyLocation || !reg(in.A, Value) || !reg(in.B, Value):
+		case flags&AddKey == 0 && in.C == 0, flags&AddKey != 0 && reg(in.C, key):
+			return nil
+		}
+		return invalid("invalid array-add operands: A and B must be Value registers, C a key Value (a Location where Aux has AddKeyLocation) when Aux has AddKey, otherwise zero")
+	case OpIsset:
+		if !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
+			return invalid("invalid isset operands: A must be a Value, B a Location, C zero")
+		}
+	case OpArrayIsset:
+		if !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
+			return invalid("invalid array-isset operands: A, B and C must be Value registers")
+		}
+	case OpUnset:
+		if !reg(in.A, Location) || !zero {
+			return invalid("invalid unset operands: A must be a Location, B and C zero")
+		}
+	case OpExit:
+		if !zero || in.Aux > 1 || (in.Aux == 0 && in.A != 0) || (in.Aux == 1 && !reg(in.A, Value)) {
+			return invalid("invalid exit operands: Aux 0 needs A, B and C zero, Aux 1 a status Value in A and B, C zero")
+		}
 	default:
 		return invalid("unknown opcode")
 	}
-	_ = fi
-	_ = pc
 	return nil
 }
 
@@ -348,7 +475,7 @@ type edge struct {
 
 func successorCount(in Instruction, pc, n uint32) int {
 	switch in.Op {
-	case OpReturn, OpReturnRef, OpThrow, OpEndFinally:
+	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit:
 		return 0
 	case OpBranch:
 		return 2
@@ -832,12 +959,64 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			write(in.A)
 		case OpDrop:
 			clear(in.A)
+		case OpUnary, OpCast, OpIncDec, OpIsset:
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			write(in.A)
+		case OpArrayIsset:
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.C); err != nil {
+				return flowError(err, fi, pc)
+			}
+			write(in.A)
+		case OpArraySet:
+			for _, r := range [...]uint32{in.A, in.B, in.C} {
+				if err := read(r); err != nil {
+					return flowError(err, fi, pc)
+				}
+			}
+		case OpArrayAppend, OpArrayUnset:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+		case OpArrayAdd:
+			// A is read and stays defined: the element is added in place.
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if ArrayAddFlags(in.Aux)&AddKey != 0 {
+				if err := read(in.C); err != nil {
+					return flowError(err, fi, pc)
+				}
+			}
+		case OpUnset:
+			// The Location stays defined; only the PHP variable is unset.
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+		case OpExit:
+			// Exit may run while call arguments are pending, so unlike
+			// Return it does not require an empty argument stack.
+			if in.Aux == 1 {
+				if err := read(in.A); err != nil {
+					return flowError(err, fi, pc)
+				}
+			}
 		case OpLeave, OpEndFinally:
 			if len(stack) != 0 {
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
 		}
-		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally) {
+		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit) {
 			for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 				e := successor(in, uint32(pc), uint32(n), ei)
 				d := scratchDefs

@@ -14,10 +14,10 @@ func build(ctx context.Context, image Image, opts Options) (*Program, error) {
 		return nil, invalid("unknown supported capability")
 	}
 	b.supported = opts.Supported
-	if _, err = verifyImage(b, image, true); err != nil {
+	if _, err = verifyImage(b, image, FormatMinor, true); err != nil {
 		return nil, err
 	}
-	size, err := encodedSize(b, image)
+	size, err := encodedSize(b, image, FormatMinor)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +100,9 @@ func cloneImage(b *budget, src Image) (Image, error) {
 		if dst.Functions[i].Handlers, ok = cloneHandlers(b, f.Handlers); !ok {
 			return Image{}, b.pollOrLimit()
 		}
+		if dst.Functions[i].LocalNames, ok = cloneLocalNames(b, f.LocalNames); !ok {
+			return Image{}, b.pollOrLimit()
+		}
 	}
 	return dst, nil
 }
@@ -149,6 +152,16 @@ func cloneHandlers(b *budget, src []Handler) ([]Handler, bool) {
 	dst := make([]Handler, len(src))
 	return dst, copyChunks(b, dst, src)
 }
+func cloneLocalNames(b *budget, src []uint32) ([]uint32, bool) {
+	if len(src) == 0 {
+		return nil, true
+	}
+	if b.chargeWork(uint64(len(src))) != nil {
+		return nil, false
+	}
+	dst := make([]uint32, len(src))
+	return dst, copyChunks(b, dst, src)
+}
 func copyChunks[T any](b *budget, dst, src []T) bool {
 	const chunk = 4096
 	for off := 0; off < len(src); {
@@ -168,7 +181,7 @@ func (b *budget) pollOrLimit() error {
 	return ErrLimit
 }
 
-func encodedSize(b *budget, image Image) (uint64, error) {
+func encodedSize(b *budget, image Image, minor uint16) (uint64, error) {
 	size := uint64(64 + 2 + 4 + 12)
 	add := func(n uint64) bool {
 		if n > ^uint64(0)-size {
@@ -215,6 +228,9 @@ func encodedSize(b *budget, image Image) (uint64, error) {
 			return 0, ErrLimit
 		}
 		if !add(4 + uint64(len(f.Registers)) + 4 + uint64(len(f.Code))*16 + 4 + uint64(len(f.Positions))*16 + 4 + uint64(len(f.Handlers))*28) {
+			return 0, ErrLimit
+		}
+		if minor >= 1 && (uint64(len(f.LocalNames)) > uint64(^uint32(0)) || !add(4+uint64(len(f.LocalNames))*4)) {
 			return 0, ErrLimit
 		}
 	}

@@ -1,0 +1,23 @@
+<?php
+$a = [-5 => "a"];
+$a[] = "b";
+echo isset($a[-4]) ? "-4 " . $a[-4] : "no -4", "\n";
+echo isset($a[0]) ? "0 set" : "0 unset", "\n";
+$b = [-10 => "x", -20 => "y"];
+$b[] = "z";
+echo isset($b[-9]) ? "-9 " . $b[-9] : "no -9", "\n";
+$c = ["s" => 1];
+$c[] = "first int";
+echo $c[0], "\n";
+$d = [7 => "seven"];
+unset($d[7]);
+$d[] = "after unset";
+echo isset($d[8]) ? "8 " . $d[8] : "no 8", "\n";
+$e = [3 => "x"];
+$e["10"] = "ten";
+$e[] = "eleven";
+echo $e[11], "\n";
+$f = [];
+$f[-3] = "m3";
+$f[] = "next";
+echo isset($f[-2]) ? "-2 " . $f[-2] : "no -2", "\n";

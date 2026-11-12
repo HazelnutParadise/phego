@@ -1,0 +1,47 @@
+-- source --
+<?php
+if ($a) exit;
+if ($b) exit(1);
+if ($c) die('bye');
+echo 'x' . exit(2);
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=77 lines=6
+const 0: int 1
+const 1: string "bye"
+const 2: string "x"
+const 3: int 2
+const 4: null
+const 5: string "a"
+const 6: string "b"
+const 7: string "c"
+func 0 "{main}" params=0 locals=3 registers=6 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  local 2 "c"
+  registers LLLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Load 0 3 0 0 ; line 2
+  4: Branch 0 3 5 7 ; line 2
+  5: Exit 0 0 0 0 ; line 2
+  6: Jump 0 7 0 0 ; line 2
+  7: Load 0 3 1 0 ; line 3
+  8: Branch 0 3 9 12 ; line 3
+  9: Const 0 3 0 0 ; line 3 ; int 1
+  10: Exit 1 3 0 0 ; line 3
+  11: Jump 0 12 0 0 ; line 3
+  12: Load 0 3 2 0 ; line 4
+  13: Branch 0 3 14 17 ; line 4
+  14: Const 0 3 1 0 ; line 4 ; string "bye"
+  15: Exit 1 3 0 0 ; line 4
+  16: Jump 0 17 0 0 ; line 4
+  17: Const 0 3 2 0 ; line 5 ; string "x"
+  18: Const 0 4 3 0 ; line 5 ; int 2
+  19: Exit 1 4 0 0 ; line 5
+  20: Binary Concat 4 3 5 ; line 5
+  21: Output 0 4 0 0 ; line 5
+  22: Const 0 3 4 0 ; line 6 ; null
+  23: Return 0 3 0 0 ; line 6

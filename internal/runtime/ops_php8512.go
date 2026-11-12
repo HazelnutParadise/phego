@@ -29,7 +29,15 @@ type Throwable struct {
 
 func (t *Throwable) Error() string { return t.Class + ": " + t.Message }
 
+// warn raises a PHP diagnostic from a modeled operation. Under the VM, sink
+// reports it at once through execution.report with the current instruction's
+// file and line, in the order PHP raises it relative to the operation's
+// effects; without a VM it is kept in h.diagnostics.
 func (h *heap) warn(level int, message string) {
+	if h.sink != nil {
+		h.sink(level, message)
+		return
+	}
 	h.diagnostics = append(h.diagnostics, diagnostic{level, message})
 }
 
@@ -766,25 +774,59 @@ func (h *heap) compareIn(a, b value, active map[*phpArray]bool) (int, error) {
 // compareArrays is PHP's unordered array comparison: element count first,
 // then each element of a against the same key in b.
 func (h *heap) compareArrays(a, b *phpArray, active map[*phpArray]bool) (int, error) {
-	if a == b {
-		return 0, nil
+	if active == nil {
+		active = map[*phpArray]bool{}
 	}
-	if active[a] {
-		return 1, &Throwable{"Error", ErrRecursiveDependency.Error()}
+	// Nested array pairs are compared with a work list instead of Go
+	// recursion; see MaxComparisonNesting.
+	type pair struct {
+		a, b *phpArray
+		pos  int
 	}
-	if a.count() != b.count() {
-		if a.count() > b.count() {
-			return 1, nil
+	var stack []pair
+	defer func() {
+		for _, p := range stack {
+			delete(active, p.a)
 		}
-		return -1, nil
+	}()
+	// enter decides a pair without descending, or pushes it.
+	enter := func(a, b *phpArray) (c int, decided bool, err error) {
+		switch {
+		case a == b:
+			return 0, true, nil
+		case active[a]:
+			return 1, true, &Throwable{"Error", ErrRecursiveDependency.Error()}
+		case a.count() > b.count():
+			return 1, true, nil
+		case a.count() < b.count():
+			return -1, true, nil
+		case len(active) >= MaxComparisonNesting:
+			return 1, true, errComparisonNesting()
+		}
+		active[a] = true
+		stack = append(stack, pair{a: a, b: b})
+		return 0, false, nil
 	}
-	active[a] = true
-	defer delete(active, a)
-	pos := 0
-	for e, ok := a.next(&pos); ok; e, ok = a.next(&pos) {
-		other, found := b.lookup(e.key)
+	if c, decided, err := enter(a, b); decided {
+		return c, err
+	}
+	for len(stack) > 0 {
+		top := &stack[len(stack)-1]
+		e, ok := top.a.next(&top.pos)
+		if !ok {
+			delete(active, top.a)
+			stack = stack[:len(stack)-1]
+			continue
+		}
+		other, found := top.b.lookup(e.key)
 		if !found {
 			return 1, nil
+		}
+		if x, y := e.val.deref(), other.val.deref(); x.kind == valueArray && y.kind == valueArray {
+			if c, decided, err := enter(x.array, y.array); decided && (err != nil || c != 0) {
+				return c, err
+			}
+			continue
 		}
 		if c, err := h.compareIn(e.val, other.val, active); err != nil || c != 0 {
 			return c, err

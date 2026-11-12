@@ -1,0 +1,85 @@
+-- source --
+<?php
+$a += 1; $a -= 2; $a *= 3; $a /= 4; $a %= 5; $a **= 2;
+$a .= 'x'; $a <<= 1; $a >>= 1; $a &= 7; $a |= 8; $a ^= 9;
+$b ??= 'default';
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=137 lines=5
+const 0: int 1
+const 1: int 2
+const 2: int 3
+const 3: int 4
+const 4: int 5
+const 5: string "x"
+const 6: int 7
+const 7: int 8
+const 8: int 9
+const 9: string "default"
+const 10: null
+const 11: string "a"
+const 12: string "b"
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  registers LLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Const 0 2 0 0 ; line 2 ; int 1
+  3: Load 0 3 0 0 ; line 2
+  4: Binary Add 4 3 2 ; line 2
+  5: Store 0 0 4 0 ; line 2
+  6: Const 0 2 1 0 ; line 2 ; int 2
+  7: Load 0 3 0 0 ; line 2
+  8: Binary Subtract 4 3 2 ; line 2
+  9: Store 0 0 4 0 ; line 2
+  10: Const 0 2 2 0 ; line 2 ; int 3
+  11: Load 0 3 0 0 ; line 2
+  12: Binary Multiply 4 3 2 ; line 2
+  13: Store 0 0 4 0 ; line 2
+  14: Const 0 2 3 0 ; line 2 ; int 4
+  15: Load 0 3 0 0 ; line 2
+  16: Binary Divide 4 3 2 ; line 2
+  17: Store 0 0 4 0 ; line 2
+  18: Const 0 2 4 0 ; line 2 ; int 5
+  19: Load 0 3 0 0 ; line 2
+  20: Binary Modulo 4 3 2 ; line 2
+  21: Store 0 0 4 0 ; line 2
+  22: Const 0 2 1 0 ; line 2 ; int 2
+  23: Load 0 3 0 0 ; line 2
+  24: Binary Power 4 3 2 ; line 2
+  25: Store 0 0 4 0 ; line 2
+  26: Const 0 2 5 0 ; line 3 ; string "x"
+  27: Load 0 3 0 0 ; line 3
+  28: Binary Concat 4 3 2 ; line 3
+  29: Store 0 0 4 0 ; line 3
+  30: Const 0 2 0 0 ; line 3 ; int 1
+  31: Load 0 3 0 0 ; line 3
+  32: Binary ShiftLeft 4 3 2 ; line 3
+  33: Store 0 0 4 0 ; line 3
+  34: Const 0 2 0 0 ; line 3 ; int 1
+  35: Load 0 3 0 0 ; line 3
+  36: Binary ShiftRight 4 3 2 ; line 3
+  37: Store 0 0 4 0 ; line 3
+  38: Const 0 2 6 0 ; line 3 ; int 7
+  39: Load 0 3 0 0 ; line 3
+  40: Binary BitAnd 4 3 2 ; line 3
+  41: Store 0 0 4 0 ; line 3
+  42: Const 0 2 7 0 ; line 3 ; int 8
+  43: Load 0 3 0 0 ; line 3
+  44: Binary BitOr 4 3 2 ; line 3
+  45: Store 0 0 4 0 ; line 3
+  46: Const 0 2 8 0 ; line 3 ; int 9
+  47: Load 0 3 0 0 ; line 3
+  48: Binary BitXor 4 3 2 ; line 3
+  49: Store 0 0 4 0 ; line 3
+  50: Isset 0 3 1 0 ; line 4
+  51: Branch 0 3 52 54 ; line 4
+  52: Load 1 2 1 0 ; line 4
+  53: Jump 0 57 0 0 ; line 4
+  54: Const 0 3 9 0 ; line 4 ; string "default"
+  55: Store 0 1 3 0 ; line 4
+  56: Move 0 2 3 0 ; line 4
+  57: Const 0 2 10 0 ; line 5 ; null
+  58: Return 0 2 0 0 ; line 5

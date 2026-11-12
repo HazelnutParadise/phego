@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HazelnutParadise/phego/internal/phpname"
 	"github.com/HazelnutParadise/phego/internal/phpnum"
 )
 
@@ -41,7 +42,7 @@ func (l *lowerer) bindClass(cl *Class, top bool) {
 	}
 	l.checkBoundOverrides(cl)
 	if top && !cl.Anonymous && cl.Name != "" {
-		key := strings.ToLower(strings.TrimPrefix(cl.Name, "\\"))
+		key := phpname.Lower(strings.TrimPrefix(cl.Name, "\\"))
 		if l.boundClasses[key] == nil {
 			l.boundClasses[key] = cl
 		}
@@ -53,7 +54,7 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 	parentProps := make(map[string]*Prop)
 	for current := parent; current != nil; current = l.boundClass(parentName(current)) {
 		for _, f := range current.Methods {
-			key := strings.ToLower(f.Name)
+			key := phpname.Lower(f.Name)
 			if parentMethods[key] == nil {
 				parentMethods[key] = f
 			}
@@ -65,8 +66,8 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 		}
 	}
 	for _, f := range cl.Methods {
-		base := parentMethods[strings.ToLower(f.Name)]
-		if base == nil || (hasModifier(base.Modifiers, "private") && !hasModifier(base.Modifiers, "abstract") && !strings.EqualFold(base.Name, "__construct")) {
+		base := parentMethods[phpname.Lower(f.Name)]
+		if base == nil || (hasModifier(base.Modifiers, "private") && !hasModifier(base.Modifiers, "abstract") && !phpname.EqualFold(base.Name, "__construct")) {
 			continue
 		}
 		baseClass := parent.Name
@@ -86,7 +87,7 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 			l.fail(f.Line, "Cannot make non abstract method %s::%s() abstract in class %s", baseClass, base.Name, cl.Name)
 		}
 		concreteConstructor := false
-		if strings.EqualFold(f.Name, "__construct") {
+		if phpname.EqualFold(f.Name, "__construct") {
 			if proto := l.constructorPrototype(parent); proto != nil {
 				base = proto
 				if base.Class != nil {
@@ -97,7 +98,7 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 			}
 		}
 		if !concreteConstructor && !methodVisibilityCompatible(f, base) {
-			if strings.EqualFold(f.Name, "__construct") || strings.HasPrefix(strings.ToLower(f.Name), "__") {
+			if phpname.EqualFold(f.Name, "__construct") || strings.HasPrefix(phpname.Lower(f.Name), "__") {
 				l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s)", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass)
 			}
 			l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s) or weaker", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass)
@@ -226,7 +227,7 @@ func parentName(cl *Class) string {
 func (l *lowerer) hasAbstractParentConstructor(parent *Class) bool {
 	for current := parent; current != nil; current = l.boundClass(parentName(current)) {
 		for _, method := range current.Methods {
-			if strings.EqualFold(method.Name, "__construct") && hasModifier(method.Modifiers, "abstract") {
+			if phpname.EqualFold(method.Name, "__construct") && hasModifier(method.Modifiers, "abstract") {
 				return true
 			}
 		}
@@ -247,7 +248,7 @@ func (l *lowerer) hasUnresolvedInterface(cl *Class) bool {
 }
 
 func hookName(f *Func) string {
-	return strings.ToLower(f.Name[strings.LastIndex(f.Name, "::")+2:])
+	return phpname.Lower(f.Name[strings.LastIndex(f.Name, "::")+2:])
 }
 
 func visibilityName(mods []string) string {
@@ -330,7 +331,7 @@ func (l *lowerer) checkAbstractImplementations(cl, parent *Class) {
 	seenMethods := map[string]bool{}
 	for current := cl; current != nil; current = l.boundClass(parentName(current)) {
 		for _, method := range current.Methods {
-			key := strings.ToLower(method.Name)
+			key := phpname.Lower(method.Name)
 			if seenMethods[key] {
 				continue
 			}
@@ -470,7 +471,7 @@ func sameTypeClause(a, b []string) bool {
 	for _, atom := range a {
 		found := false
 		for i, other := range b {
-			if !used[i] && strings.EqualFold(atom, other) {
+			if !used[i] && phpname.EqualFold(atom, other) {
 				used[i], found = true, true
 				break
 			}
@@ -486,13 +487,13 @@ func (l *lowerer) methodOrigin(parent *Class, name string) (*Class, *Func) {
 	originClass, origin := parent, (*Func)(nil)
 	seen := map[string]bool{}
 	for class := parent; class != nil; {
-		key := strings.ToLower(class.Name)
+		key := phpname.Lower(class.Name)
 		if seen[key] {
 			break
 		}
 		seen[key] = true
 		for _, f := range class.Methods {
-			if strings.EqualFold(f.Name, name) {
+			if phpname.EqualFold(f.Name, name) {
 				if origin == nil {
 					originClass, origin = class, f
 				} else if !sameFuncSignature(f, origin) {
@@ -563,7 +564,7 @@ func typeDNF(t string) [][]string {
 		union = stripTypeParens(strings.TrimSpace(union))
 		var clause []string
 		for _, atom := range splitTypeTopLevel(union, '&') {
-			atom = strings.ToLower(strings.TrimSpace(stripTypeParens(strings.TrimSpace(atom))))
+			atom = phpname.Lower(strings.TrimSpace(stripTypeParens(strings.TrimSpace(atom))))
 			if atom != "" {
 				clause = append(clause, atom)
 			}
@@ -645,12 +646,12 @@ func (l *lowerer) atomSubtype(child, parent string) bool {
 func (l *lowerer) classSubtype(child, parent string) bool {
 	child = strings.TrimPrefix(child, "\\")
 	parent = strings.TrimPrefix(parent, "\\")
-	if strings.EqualFold(child, parent) {
+	if phpname.EqualFold(child, parent) {
 		return true
 	}
 	builtins := map[string][]string{"arrayobject": {"traversable", "iteratoraggregate"}, "iterator": {"traversable"}, "generator": {"iterator", "traversable"}, "closure": {"callable"}}
-	for _, p := range builtins[strings.ToLower(child)] {
-		if strings.EqualFold(p, parent) {
+	for _, p := range builtins[phpname.Lower(child)] {
+		if phpname.EqualFold(p, parent) {
 			return true
 		}
 	}
@@ -660,16 +661,16 @@ func (l *lowerer) classSubtype(child, parent string) bool {
 		name := queue[0]
 		queue = queue[1:]
 		name = strings.TrimPrefix(name, "\\")
-		key := strings.ToLower(name)
+		key := phpname.Lower(name)
 		if seen[key] {
 			continue
 		}
 		seen[key] = true
-		if strings.EqualFold(name, parent) {
+		if phpname.EqualFold(name, parent) {
 			return true
 		}
 		c := l.boundClass(key)
-		if c == nil && l.class != nil && strings.EqualFold(key, l.class.Name) {
+		if c == nil && l.class != nil && phpname.EqualFold(key, l.class.Name) {
 			c = l.class
 		}
 		if c == nil {
@@ -689,7 +690,7 @@ func (l *lowerer) boundClass(name string) *Class {
 	if cl := builtinCoreClass(l.unit.Profile, name); cl != nil {
 		return cl
 	}
-	return l.boundClasses[strings.ToLower(strings.TrimPrefix(name, "\\"))]
+	return l.boundClasses[phpname.Lower(strings.TrimPrefix(name, "\\"))]
 }
 
 func (l *lowerer) typesKnown(a, b string) bool {
@@ -698,7 +699,7 @@ func (l *lowerer) typesKnown(a, b string) bool {
 		for _, clause := range typeDNF(t) {
 			for _, atom := range clause {
 				atom = strings.TrimPrefix(atom, "\\")
-				if knownBuiltin[atom] || l.boundClass(atom) != nil || l.class != nil && strings.EqualFold(atom, l.class.Name) {
+				if knownBuiltin[atom] || l.boundClass(atom) != nil || l.class != nil && phpname.EqualFold(atom, l.class.Name) {
 					continue
 				}
 				return false
@@ -799,7 +800,7 @@ func arrayPreview(n *Node) string {
 
 func hasStringableMethod(cl *Class) bool {
 	for _, f := range cl.Methods {
-		if strings.EqualFold(f.Name, "__tostring") {
+		if phpname.EqualFold(f.Name, "__tostring") {
 			return true
 		}
 	}
@@ -810,7 +811,7 @@ func (l *lowerer) constructorPrototype(parent *Class) *Func {
 	var proto *Func
 	for current := parent; current != nil; current = l.boundClass(parentName(current)) {
 		for _, f := range current.Methods {
-			if strings.EqualFold(f.Name, "__construct") && hasModifier(f.Modifiers, "abstract") {
+			if phpname.EqualFold(f.Name, "__construct") && hasModifier(f.Modifiers, "abstract") {
 				proto = f
 			}
 		}

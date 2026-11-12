@@ -1,0 +1,53 @@
+-- source --
+<?php
+$a = ['k' => 1];
+echo isset($a), isset($a, $b), isset($a['k']), isset($a['k']['j']);
+unset($a, $b);
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=106 lines=5
+const 0: string "k"
+const 1: int 1
+const 2: bool false
+const 3: string "j"
+const 4: null
+const 5: string "a"
+const 6: string "b"
+func 0 "{main}" params=0 locals=2 registers=7 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  registers LLVVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: NewArray 0 2 0 0 ; line 2
+  3: Const 0 3 0 0 ; line 2 ; string "k"
+  4: Const 0 4 1 0 ; line 2 ; int 1
+  5: ArrayAdd 1 2 4 3 ; line 2
+  6: Store 0 0 2 0 ; line 2
+  7: Isset 0 3 0 0 ; line 3
+  8: Move 0 2 3 0 ; line 3
+  9: Output 0 2 0 0 ; line 3
+  10: Isset 0 3 0 0 ; line 3
+  11: Branch 0 3 12 15 ; line 3
+  12: Isset 0 3 1 0 ; line 3
+  13: Move 0 2 3 0 ; line 3
+  14: Jump 0 16 0 0 ; line 3
+  15: Const 0 2 2 0 ; line 3 ; bool false
+  16: Output 0 2 0 0 ; line 3
+  17: Const 0 3 0 0 ; line 3 ; string "k"
+  18: Load 1 4 0 0 ; line 3
+  19: ArrayIsset 0 5 4 3 ; line 3
+  20: Move 0 2 5 0 ; line 3
+  21: Output 0 2 0 0 ; line 3
+  22: Const 0 3 0 0 ; line 3 ; string "k"
+  23: Load 1 4 0 0 ; line 3
+  24: ArrayGet 1 5 4 3 ; line 3
+  25: Const 0 6 3 0 ; line 3 ; string "j"
+  26: ArrayIsset 0 3 5 6 ; line 3
+  27: Move 0 2 3 0 ; line 3
+  28: Output 0 2 0 0 ; line 3
+  29: Unset 0 0 0 0 ; line 4
+  30: Unset 0 1 0 0 ; line 4
+  31: Const 0 2 4 0 ; line 5 ; null
+  32: Return 0 2 0 0 ; line 5

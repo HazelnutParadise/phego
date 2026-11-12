@@ -8,7 +8,8 @@
 // code stays listed with Retired set.
 //
 // Ranges: PHG1xxx Engine configuration and run options, PHG2xxx bytecode
-// loading and verification.
+// loading and verification, PHG3xxx features this build does not implement,
+// PHG9xxx faults inside Phego.
 package codes
 
 //go:generate go run ./gen
@@ -29,40 +30,46 @@ type Entry struct {
 }
 
 const (
-	ConfigOther         diag.Code = "PHG1000"
-	ConfigNegative      diag.Code = "PHG1001"
-	ConfigIntSize       diag.Code = "PHG1002"
-	ConfigRelease       diag.Code = "PHG1003"
-	HostFuncName        diag.Code = "PHG1004"
-	HostFuncNil         diag.Code = "PHG1005"
-	HostFuncArgs        diag.Code = "PHG1006"
-	HostFuncCapability  diag.Code = "PHG1007"
-	HostFuncDuplicate   diag.Code = "PHG1008"
-	PolicyMode          diag.Code = "PHG1009"
-	FilesRootConflict   diag.Code = "PHG1010"
-	OutputLimitConflict diag.Code = "PHG1011"
-	QueueWithoutActive  diag.Code = "PHG1012"
-	RunOutputNil        diag.Code = "PHG1013"
-	RunGlobalName       diag.Code = "PHG1014"
-	ProgramForeign      diag.Code = "PHG1015"
-	ProgramProfile      diag.Code = "PHG1016"
-	RunOptionNil        diag.Code = "PHG1017"
-	EngineZero          diag.Code = "PHG1018"
-	MountPath           diag.Code = "PHG1019"
-	MountSource         diag.Code = "PHG1020"
-	MountRoot           diag.Code = "PHG1021"
-	MountReadOnly       diag.Code = "PHG1022"
-	MountTwice          diag.Code = "PHG1023"
-	NetworkScheme       diag.Code = "PHG1024"
-	NetworkHost         diag.Code = "PHG1025"
-	NetworkPorts        diag.Code = "PHG1026"
-	BytecodeInvalid     diag.Code = "PHG2001"
-	BytecodeLimit       diag.Code = "PHG2002"
-	BytecodeVersion     diag.Code = "PHG2003"
-	BytecodeProfile     diag.Code = "PHG2004"
-	BytecodeIntegrity   diag.Code = "PHG2005"
-	BytecodeTrust       diag.Code = "PHG2006"
-	BytecodeCapability  diag.Code = "PHG2007"
+	ConfigOther          diag.Code = "PHG1000"
+	ConfigNegative       diag.Code = "PHG1001"
+	ConfigIntSize        diag.Code = "PHG1002"
+	ConfigRelease        diag.Code = "PHG1003"
+	HostFuncName         diag.Code = "PHG1004"
+	HostFuncNil          diag.Code = "PHG1005"
+	HostFuncArgs         diag.Code = "PHG1006"
+	HostFuncCapability   diag.Code = "PHG1007"
+	HostFuncDuplicate    diag.Code = "PHG1008"
+	PolicyMode           diag.Code = "PHG1009"
+	FilesRootConflict    diag.Code = "PHG1010"
+	OutputLimitConflict  diag.Code = "PHG1011"
+	QueueWithoutActive   diag.Code = "PHG1012"
+	RunOutputNil         diag.Code = "PHG1013"
+	RunGlobalName        diag.Code = "PHG1014"
+	ProgramForeign       diag.Code = "PHG1015"
+	ProgramProfile       diag.Code = "PHG1016"
+	RunOptionNil         diag.Code = "PHG1017"
+	EngineZero           diag.Code = "PHG1018"
+	MountPath            diag.Code = "PHG1019"
+	MountSource          diag.Code = "PHG1020"
+	MountRoot            diag.Code = "PHG1021"
+	MountReadOnly        diag.Code = "PHG1022"
+	MountTwice           diag.Code = "PHG1023"
+	NetworkScheme        diag.Code = "PHG1024"
+	NetworkHost          diag.Code = "PHG1025"
+	NetworkPorts         diag.Code = "PHG1026"
+	RunININame           diag.Code = "PHG1027"
+	RunINIValue          diag.Code = "PHG1028"
+	RunGlobalValue       diag.Code = "PHG1029"
+	BytecodeInvalid      diag.Code = "PHG2001"
+	BytecodeLimit        diag.Code = "PHG2002"
+	BytecodeVersion      diag.Code = "PHG2003"
+	BytecodeProfile      diag.Code = "PHG2004"
+	BytecodeIntegrity    diag.Code = "PHG2005"
+	BytecodeTrust        diag.Code = "PHG2006"
+	BytecodeCapability   diag.Code = "PHG2007"
+	Unsupported          diag.Code = "PHG3000"
+	UnsupportedConstruct diag.Code = "PHG3001"
+	Internal             diag.Code = "PHG9000"
 )
 
 // registry holds every code. Constant keys make a duplicate a compile error.
@@ -149,6 +156,15 @@ var registry = map[diag.Code]Entry{
 	NetworkPorts: {Title: "a network grant has no valid ports",
 		Note: "ports are 1 to 65535 and at least one is required",
 		Help: "list the ports the grant allows"},
+	RunININame: {Title: "WithINI names a setting this build does not accept",
+		Note: "a run accepts display_errors, log_errors, html_errors and error_reporting; other settings are not silently ignored",
+		Help: "remove the option, or use one of the accepted settings"},
+	RunINIValue: {Title: "WithINI was given a value the setting does not accept",
+		Note: "display_errors, log_errors and html_errors take 0, 1, on, off, true, false, yes or no; error_reporting takes a decimal integer such as 32767 or -1",
+		Help: "write the value in one of the accepted forms"},
+	RunGlobalValue: {Title: "WithGlobal was given a value the PHP profile cannot hold",
+		Note: "integers must fit the engine's IntSize, and arrays may nest at most 256 levels and hold at most 1048576 elements in all",
+		Help: "convert the value, or pass a smaller array"},
 	BytecodeInvalid: {Title: "the bytecode is malformed or fails verification",
 		Note: "all bytecode is untrusted and verified before it can run",
 		Help: "regenerate the artifact with this Phego build"},
@@ -170,6 +186,15 @@ var registry = map[diag.Code]Entry{
 	BytecodeCapability: {Title: "the bytecode capabilities are unsupported or incomplete",
 		Note: "the artifact needs an operation this build does not provide, or its declared capabilities do not cover its opcodes",
 		Help: "rebuild the artifact for this Phego build"},
+	Unsupported: {Title: "this build does not implement the requested feature",
+		Note: "an unimplemented feature or PHP release is refused instead of being approximated",
+		Help: "see the message for the feature; use what this build supports or a later Phego build"},
+	UnsupportedConstruct: {Title: "this PHP construct cannot run in this build yet",
+		Note: "this build's first VM stage does not run that construct yet, so the program is refused instead of running partly",
+		Help: "run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages"},
+	Internal: {Title: "internal engine error",
+		Note: "a Phego invariant failed; this is a defect in Phego, not in the PHP program or the host",
+		Help: "report it with the program and the Phego version; the run or compile did not succeed"},
 }
 
 // Lookup returns the documentation of a code.

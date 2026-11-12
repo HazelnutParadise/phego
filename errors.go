@@ -52,9 +52,87 @@ func (e *PHPError) Error() string {
 // unimplemented feature or PHP release. It is never reported as success.
 type UnsupportedError struct {
 	Feature string
+	// File and Line locate a PHP construct this build cannot run yet, with
+	// the file name given to Compile and PHP's line number. They are empty
+	// and zero for a request without a source location, such as a release.
+	// Line is zero when only the file is known.
+	File string
+	Line int
+	// Option names the Config field or run option that asked for the
+	// feature, such as "Limits.Memory" or "WithINI", when the request came
+	// from one. It is empty otherwise.
+	Option string
+	// lineLength is the byte length of line Line of File when the engine
+	// knew the source; zero marks the span to the end of the line.
+	lineLength int
 }
 
-func (e *UnsupportedError) Error() string { return "phego: unsupported: " + e.Feature }
+func (e *UnsupportedError) Error() string {
+	switch {
+	case e.Option != "":
+		return "phego: unsupported: " + e.Feature + " (" + e.Option + ")"
+	case e.File == "" && e.Line == 0:
+		return "phego: unsupported: " + e.Feature
+	case e.Line == 0:
+		return fmt.Sprintf("phego: unsupported: %s in %s", e.Feature, e.File)
+	}
+	return fmt.Sprintf("phego: unsupported: %s in %s on line %d", e.Feature, e.File, e.Line)
+}
+
+// Diagnostic describes the error in rustc style for diag.Render. A located
+// construct reports PHG3001 with its file and line as the primary span; the
+// compiler records lines but not columns, so the span covers the whole line
+// from column 1. Pass the source through diag.Options.Source to show it.
+// Anything else reports PHG3000: a request from a Config field or run option
+// has that option as the span, as ConfigError has its field, and one without
+// any location, such as a PHP release, has the feature.
+func (e *UnsupportedError) Diagnostic() diag.Diagnostic {
+	code, primary := codes.Unsupported, diag.Span{File: e.Feature}
+	message := e.Feature + " is not supported by this build"
+	switch {
+	case e.Option != "":
+		primary = diag.Span{File: e.Option}
+	case e.File != "" || e.Line != 0:
+		code = codes.UnsupportedConstruct
+		primary = diag.Span{File: e.File, Line: e.Line, Label: "this build's VM cannot run this yet"}
+		if e.Line > 0 {
+			primary.Column = 1
+			primary.Length = e.lineLength
+		}
+		message = "unsupported PHP construct: " + e.Feature
+	}
+	entry, _ := codes.Lookup(code)
+	return diag.Diagnostic{Code: code, Message: message, Primary: primary, Notes: []string{entry.Note}, Help: []string{entry.Help}}
+}
+
+// InternalError reports a fault inside Phego itself: a broken invariant of
+// the compiler, verifier or interpreter. It is never a PHP result and never
+// the host's mistake; report it with the program that caused it. Op says
+// what the engine was doing and Err is the cause.
+type InternalError struct {
+	Op  string
+	Err error
+}
+
+func (e *InternalError) Error() string {
+	return "phego: internal error while " + e.Op + ": " + e.Err.Error()
+}
+
+func (e *InternalError) Unwrap() error { return e.Err }
+
+// Diagnostic describes the error in rustc style for diag.Render, with code
+// PHG9000. An internal fault has no source location, so the span names
+// what the engine was doing and its label is the cause.
+func (e *InternalError) Diagnostic() diag.Diagnostic {
+	entry, _ := codes.Lookup(codes.Internal)
+	return diag.Diagnostic{
+		Code:    codes.Internal,
+		Message: entry.Title,
+		Primary: diag.Span{File: e.Op, Label: e.Err.Error()},
+		Notes:   []string{entry.Note},
+		Help:    []string{entry.Help},
+	}
+}
 
 // ConfigError reports an invalid Config, option, or host function. Code is
 // the stable diagnostic code (docs/diagnostics/codes.md). Errors built by
@@ -172,4 +250,25 @@ type ResourceError struct {
 
 func (e *ResourceError) Error() string {
 	return fmt.Sprintf("phego: %s limit %d exceeded (used %d, requested %d)", e.Resource, e.Limit, e.Used, e.Requested)
+}
+
+// located records the byte length of u's line in source, so the diagnostic
+// marks that line exactly. Lines end at \n, \r\n or \r, as diag counts them.
+func located(u *UnsupportedError, source string) *UnsupportedError {
+	line, start := 1, 0
+	for i := 0; i <= len(source) && line <= u.Line; i++ {
+		end := i == len(source) || source[i] == '\n' || source[i] == '\r'
+		if !end {
+			continue
+		}
+		if line == u.Line {
+			u.lineLength = i - start
+			return u
+		}
+		if i+1 < len(source) && source[i] == '\r' && source[i+1] == '\n' {
+			i++
+		}
+		line, start = line+1, i+1
+	}
+	return u
 }

@@ -105,47 +105,110 @@ func identicalIn(a, b value, active map[*phpArray]bool) (bool, error) {
 	if a.kind != b.kind {
 		return false, nil
 	}
+	if a.kind == valueArray {
+		return identicalArrays(a.array, b.array, active)
+	}
+	return identicalScalars(a, b), nil
+}
+
+// identicalScalars is === for two values of the same kind other than array.
+func identicalScalars(a, b value) bool {
 	switch a.kind {
 	case valueUndefined, valueNull:
-		return true, nil
+		return true
 	case valueBool:
-		return a.boolean == b.boolean, nil
+		return a.boolean == b.boolean
 	case valueInt:
-		return a.integer == b.integer, nil
+		return a.integer == b.integer
 	case valueFloat:
-		return a.floating == b.floating, nil
+		return a.floating == b.floating
 	case valueString:
-		return a.text == b.text, nil
-	case valueObject:
-		return a.object == b.object, nil
-	case valueResource:
-		return a.object == b.object, nil
-	case valueArray:
-		if a.array == b.array {
-			return true, nil
+		return a.text == b.text
+	case valueObject, valueResource:
+		return a.object == b.object
+	}
+	return false
+}
+
+// MaxComparisonNesting is the array nesting at which comparison and ===
+// throw PHP's Error "Maximum call stack size reached during comparison".
+// PHP 8.5.12 compares nested arrays recursively and throws that Error when
+// the C stack runs low: with php -n and an 8 MiB stack on linux/arm64, ==, <
+// and <=> threw between 30,000 and 40,000 levels and === between 60,000 and
+// 70,000. The depth depends on PHP's build and platform, so Phego throws at
+// one fixed depth above those, which every program PHP compares completes
+// within. Phego compares with a work list, not Go recursion, so no depth can
+// overflow the goroutine stack.
+const MaxComparisonNesting = 100_000
+
+// errComparisonNesting is the Error past MaxComparisonNesting.
+func errComparisonNesting() error {
+	return &Throwable{"Error", "Maximum call stack size reached during comparison"}
+}
+
+// identicalArrays compares a and b in order, element by element, descending
+// into nested array pairs with a work list.
+func identicalArrays(a, b *phpArray, active map[*phpArray]bool) (bool, error) {
+	if active == nil {
+		active = map[*phpArray]bool{}
+	}
+	type pair struct {
+		a, b   *phpArray
+		ai, bi int
+	}
+	var stack []pair
+	defer func() {
+		for _, p := range stack {
+			delete(active, p.a)
 		}
-		if a.array.count() != b.array.count() {
-			return false, nil
+	}()
+	// enter decides a pair without descending, or pushes it.
+	enter := func(a, b *phpArray) (same, decided bool, err error) {
+		switch {
+		case a == b:
+			return true, true, nil
+		case a.count() != b.count():
+			return false, true, nil
+		case active[a]:
+			return false, true, ErrRecursiveDependency
+		case len(active) >= MaxComparisonNesting:
+			return false, true, errComparisonNesting()
 		}
-		if active[a.array] {
-			return false, ErrRecursiveDependency
-		}
-		active[a.array] = true
-		defer delete(active, a.array)
-		ai, bi := 0, 0
-		for {
-			ab, aok := a.array.next(&ai)
-			bb, bok := b.array.next(&bi)
-			if !aok || !bok {
-				return aok == bok, nil
-			}
-			if ab.key != bb.key {
+		active[a] = true
+		stack = append(stack, pair{a: a, b: b})
+		return false, false, nil
+	}
+	if same, decided, err := enter(a, b); decided {
+		return same, err
+	}
+	for len(stack) > 0 {
+		top := &stack[len(stack)-1]
+		ab, aok := top.a.next(&top.ai)
+		bb, bok := top.b.next(&top.bi)
+		if !aok || !bok {
+			if aok != bok {
 				return false, nil
 			}
-			if same, err := identicalIn(ab.val, bb.val, active); err != nil || !same {
-				return false, err
+			delete(active, top.a)
+			stack = stack[:len(stack)-1]
+			continue
+		}
+		if ab.key != bb.key {
+			return false, nil
+		}
+		x, y := ab.val.deref(), bb.val.deref()
+		if x.kind != y.kind {
+			return false, nil
+		}
+		if x.kind != valueArray {
+			if !identicalScalars(x, y) {
+				return false, nil
 			}
+			continue
+		}
+		if same, decided, err := enter(x.array, y.array); decided && (err != nil || !same) {
+			return false, err
 		}
 	}
-	return false, nil
+	return true, nil
 }

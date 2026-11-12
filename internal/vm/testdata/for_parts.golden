@@ -1,0 +1,42 @@
+-- source --
+<?php
+for ($i = 0, $j = 9; $i < $j; $i++, $j--) {
+    echo $i;
+}
+for (;;) {
+    break;
+}
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=89 lines=8
+const 0: int 0
+const 1: int 9
+const 2: null
+const 3: string "i"
+const 4: string "j"
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+  local 0 "i"
+  local 1 "j"
+  registers LLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Const 0 2 0 0 ; line 2 ; int 0
+  3: Store 0 0 2 0 ; line 2
+  4: Const 0 2 1 0 ; line 2 ; int 9
+  5: Store 0 1 2 0 ; line 2
+  6: Checkpoint 0 0 0 0 ; line 2
+  7: Load 0 2 0 0 ; line 2
+  8: Load 0 3 1 0 ; line 2
+  9: Binary Less 4 2 3 ; line 2
+  10: Branch 0 4 11 16 ; line 2
+  11: Load 0 2 0 0 ; line 3
+  12: Output 0 2 0 0 ; line 3
+  13: IncDec PostInc 2 0 0 ; line 2
+  14: IncDec PostDec 2 1 0 ; line 2
+  15: Jump 0 6 0 0 ; line 2
+  16: Checkpoint 0 0 0 0 ; line 5
+  17: Jump 0 19 0 0 ; line 6
+  18: Jump 0 16 0 0 ; line 6
+  19: Const 0 2 2 0 ; line 8 ; null
+  20: Return 0 2 0 0 ; line 8

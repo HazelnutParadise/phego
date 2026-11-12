@@ -1,0 +1,42 @@
+-- source --
+<?php
+function f() { return 1; }
+function g() { return 2; }
+function h() { return 3; }
+echo f() + g() * h();
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=109 lines=6
+const 0: null
+const 1: int 1
+const 2: int 2
+const 3: int 3
+func 0 "{main}" params=0 locals=0 registers=4 maxstack=0
+  registers VVVV
+  0: Call 0 0 1 0 ; line 5 ; f
+  1: Call 0 1 2 0 ; line 5 ; g
+  2: Call 0 2 3 0 ; line 5 ; h
+  3: Binary Multiply 3 1 2 ; line 5
+  4: Binary Add 1 0 3 ; line 5
+  5: Output 0 1 0 0 ; line 5
+  6: Const 0 0 0 0 ; line 6 ; null
+  7: Return 0 0 0 0 ; line 6
+func 1 "f" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 1 0 ; line 2 ; int 1
+  1: Return 0 0 0 0 ; line 2
+  2: Const 0 0 0 0 ; line 2 ; null
+  3: Return 0 0 0 0 ; line 2
+func 2 "g" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 2 0 ; line 3 ; int 2
+  1: Return 0 0 0 0 ; line 3
+  2: Const 0 0 0 0 ; line 3 ; null
+  3: Return 0 0 0 0 ; line 3
+func 3 "h" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 3 0 ; line 4 ; int 3
+  1: Return 0 0 0 0 ; line 4
+  2: Const 0 0 0 0 ; line 4 ; null
+  3: Return 0 0 0 0 ; line 4

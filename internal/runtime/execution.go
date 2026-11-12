@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
+	"time"
 )
 
 // W-14: REQ-009, REQ-020, REQ-022, REQ-030, REQ-040, REQ-044; T-017, T-018, T-039, T-040, T-043, T-044, T-059, T-060, T-079, T-080, T-087, T-088.
@@ -62,7 +64,14 @@ type executionBuffer struct {
 	// PHP's PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT does.
 	produced bool
 }
-type executionDiagnostic struct{ level, message string }
+
+// executionDiagnostic is one logged PHP diagnostic with the location the VM
+// reported it at; file is empty and line 0 without a VM (PHP's "Unknown").
+type executionDiagnostic struct {
+	level, message string
+	file           string
+	line           int
+}
 
 type executionResult struct {
 	end             completion
@@ -97,8 +106,14 @@ type execution struct {
 	// errors routes each PHP diagnostic as display_errors and log_errors do:
 	// displayed text goes through write(), so output buffers and their
 	// handlers see it; the log copy is kept in diagnostics.
-	errors          errorChannels
-	reported        int // diagnostics raised, against limits.callbacks
+	errors   errorChannels
+	reported int // diagnostics raised
+	// diagnosticCap bounds the log record (diagnostics) and nothing else;
+	// zero makes every raised diagnostic count against limits.callbacks.
+	diagnosticCap int
+	// cleanupTimeout, when positive, starts the teardown deadline when
+	// teardown starts (RunConfig.CleanupTimeout).
+	cleanupTimeout  time.Duration
 	started, closed bool
 	filtering       bool
 	// outputRunning is PHP's OG(running) left set by a fatal error inside a
@@ -138,7 +153,7 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	if cleanup == nil || body == nil {
 		return executionResult{end: completion{kind: endInternal, err: errors.New("body and cleanup context are required")}}
 	}
-	if _, ok := cleanup.Deadline(); !ok {
+	if _, ok := cleanup.Deadline(); !ok && x.cleanupTimeout <= 0 {
 		return executionResult{end: completion{kind: endInternal, err: errors.New("cleanup requires a deadline")}}
 	}
 	if err := x.request.Start(); err != nil {
@@ -150,11 +165,19 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	var returned any
 	if c.kind == endReturn {
 		var err error
-		returned, err = exportSnapshot(c.value)
-		if err != nil {
+		returned, err = exportSnapshotBounded(x.ctx, c.value)
+		var limit *LimitError
+		switch {
+		case errors.As(err, &limit):
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, err))
+		case err != nil && x.ctx.Err() != nil:
+			c = x.replaceOwnedCompletion(c, x.check())
+		case err != nil:
 			c = x.replaceOwnedCompletion(c, x.fail(endInternal, err))
-		} else if released := x.releaseReturn(&c); released.kind != endNormal {
-			c = x.replaceOwnedCompletion(c, released)
+		default:
+			if released := x.releaseReturn(&c); released.kind != endNormal {
+				c = x.replaceOwnedCompletion(c, released)
+			}
 		}
 	}
 	if stop := x.check(); stop.kind != endNormal {
@@ -235,6 +258,11 @@ func (x *execution) run(cleanup context.Context, body executionAction) execution
 	} else {
 		transitionErr = x.request.Abort()
 	}
+	if x.cleanupTimeout > 0 {
+		var cancel context.CancelFunc
+		cleanup, cancel = context.WithTimeout(cleanup, x.cleanupTimeout)
+		defer cancel()
+	}
 	resourceErr := x.heap.closeResources(cleanup)
 	cleanupErr := errors.Join(resourceErr, transitionErr, x.request.Close(cleanup))
 	x.result = executionResult{end: c, returned: returned, output: append([]byte(nil), x.output...), accepted: x.accepted, diagnostics: append([]executionDiagnostic(nil), x.diagnostics...), cleanupErr: cleanupErr, cleanupComplete: x.request.State() == Closed}
@@ -254,8 +282,11 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	if c := x.check(); c.kind != endNormal {
 		return c
 	}
-	if len(x.frames) >= x.limits.depth || x.calls >= x.limits.callbacks {
-		return x.fail(endLimit, errExecutionLimit)
+	if len(x.frames) >= x.limits.depth {
+		return x.fail(endLimit, limitHit("frames", x.limits.depth, len(x.frames), 1))
+	}
+	if x.calls >= x.limits.callbacks {
+		return x.fail(endLimit, limitHit("calls", x.limits.callbacks, x.calls, 1))
 	}
 	x.calls++
 	previousHook := x.heap.currentHook
@@ -277,7 +308,7 @@ func (x *execution) callInScope(body, finally executionAction, called *class) co
 	}
 	if (c.kind == endNormal || c.kind == endReturn || c.kind == endThrow) && finally != nil {
 		if x.calls >= x.limits.callbacks {
-			c = x.replaceOwnedCompletion(c, x.fail(endLimit, errExecutionLimit))
+			c = x.replaceOwnedCompletion(c, x.fail(endLimit, limitHit("calls", x.limits.callbacks, x.calls, 1)))
 		} else {
 			x.calls++
 			if next := x.invoke(finally); next.kind != endNormal {
@@ -485,6 +516,40 @@ func (x *execution) warning(message string) completion {
 type errorChannels struct {
 	display, log bool
 	text         func(level, message string) string
+	// where is the VM's current PHP file and line; displayed text then
+	// follows php_error_cb with html_errors off.
+	where func() (file string, line int)
+	// excluded holds the error_reporting bits that are off; a diagnostic of
+	// such a level is neither displayed nor logged.
+	excluded int
+}
+
+// diagnosticLevelBit is the E_* constant of a PHP diagnostic level.
+func diagnosticLevelBit(level string) int {
+	switch level {
+	case "Fatal error":
+		return 1 // E_ERROR
+	case "Warning":
+		return levelWarning
+	case "Notice":
+		return levelNotice
+	case "Deprecated":
+		return levelDeprecated
+	}
+	return 0
+}
+
+// diagnosticLevelName is PHP's spelling of an E_* level raised by the heap.
+func diagnosticLevelName(level int) string {
+	switch level {
+	case levelWarning:
+		return "Warning"
+	case levelNotice:
+		return "Notice"
+	case levelDeprecated:
+		return "Deprecated"
+	}
+	return "Fatal error"
 }
 
 // report raises one PHP diagnostic, as php_error_cb does: the log copy is
@@ -492,20 +557,45 @@ type errorChannels struct {
 // layer. skipRunning is the handler-output deprecation, raised while the
 // running handler is disabled, so its text bypasses that handler's buffer.
 func (x *execution) report(level, message string, skipRunning bool) completion {
-	// The cap counts every diagnostic, displayed or logged.
-	if x.reported >= x.limits.callbacks {
-		return x.fail(endLimit, errExecutionLimit)
+	if x.errors.excluded&diagnosticLevelBit(level) != 0 {
+		return completion{}
+	}
+	// After a host stop (a failed writer, a limit, cancellation) nothing
+	// more is displayed or logged: the writer is not written to again. A
+	// pending PHP fatal error is not a host stop and does not apply here.
+	if x.stop.kind != endNormal {
+		return x.stop
+	}
+	if err := x.ctx.Err(); err != nil {
+		return x.fail(endCancel, err)
+	}
+	// Without a diagnostic cap of its own, every diagnostic, displayed or
+	// logged, counts against the call budget and ends the run past it. With
+	// one (a VM run), the cap bounds only the log record: further
+	// diagnostics are not recorded and the run goes on, so PHP-visible
+	// behaviour does not depend on it.
+	if x.diagnosticCap == 0 && x.reported >= x.limits.callbacks {
+		return x.fail(endLimit, limitHit("diagnostics", x.limits.callbacks, x.reported, 1))
 	}
 	x.reported++
-	if x.errors.log {
-		x.diagnostics = append(x.diagnostics, executionDiagnostic{level, message})
+	file, line := "", 0
+	if x.errors.where != nil {
+		file, line = x.errors.where()
+	}
+	if x.errors.log && (x.diagnosticCap == 0 || len(x.diagnostics) < x.diagnosticCap) {
+		x.diagnostics = append(x.diagnostics, executionDiagnostic{level: level, message: message, file: file, line: line})
 	}
 	if !x.errors.display {
 		return completion{}
 	}
-	text := "\n" + level + ": " + message + " in Unknown on line 0\n"
-	if x.errors.text != nil {
+	var text string
+	switch {
+	case x.errors.text != nil:
 		text = x.errors.text(level, message)
+	case x.errors.where != nil:
+		text = "\n" + level + ": " + message + " in " + vmFileName(file) + " on line " + strconv.Itoa(line) + "\n"
+	default:
+		text = "\n" + level + ": " + message + " in Unknown on line 0\n"
 	}
 	return x.writeTo(len(x.buffers)-1-boolInt(skipRunning && x.filtering), []byte(text))
 }
@@ -634,7 +724,7 @@ func (x *execution) recordEnd(c completion) {
 	// destructor, or output phase may execute new PHP callbacks.
 	x.phaseFatal = completion{}
 	x.phaseCompletion = completion{}
-	if (c.kind == endThrow || c.kind == endFatal) && x.reported < x.limits.callbacks {
+	if (c.kind == endThrow || c.kind == endFatal) && (x.diagnosticCap > 0 || x.reported < x.limits.callbacks) {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)

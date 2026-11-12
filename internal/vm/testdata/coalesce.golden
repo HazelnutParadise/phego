@@ -1,0 +1,73 @@
+-- source --
+<?php
+$a = ['k' => ['j' => 1]];
+echo $u ?? 'u', $a['k']['j'] ?? 'n', $a['x'] ?? $u ?? 'chain';
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=95 lines=4
+const 0: string "k"
+const 1: string "j"
+const 2: int 1
+const 3: null
+const 4: string "u"
+const 5: string "n"
+const 6: string "x"
+const 7: string "chain"
+const 8: string "a"
+func 0 "{main}" params=0 locals=2 registers=8 maxstack=0
+  local 0 "a"
+  local 1 "u"
+  registers LLVVVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: NewArray 0 2 0 0 ; line 2
+  3: Const 0 3 0 0 ; line 2 ; string "k"
+  4: NewArray 0 4 0 0 ; line 2
+  5: Const 0 5 1 0 ; line 2 ; string "j"
+  6: Const 0 6 2 0 ; line 2 ; int 1
+  7: ArrayAdd 1 4 6 5 ; line 2
+  8: ArrayAdd 1 2 4 3 ; line 2
+  9: Store 0 0 2 0 ; line 2
+  10: Load 1 3 1 0 ; line 3
+  11: Const 0 4 3 0 ; line 3 ; null
+  12: Binary NotIdentical 5 3 4 ; line 3
+  13: Branch 0 5 14 16 ; line 3
+  14: Move 0 2 3 0 ; line 3
+  15: Jump 0 18 0 0 ; line 3
+  16: Const 0 3 4 0 ; line 3 ; string "u"
+  17: Move 0 2 3 0 ; line 3
+  18: Output 0 2 0 0 ; line 3
+  19: Const 0 3 0 0 ; line 3 ; string "k"
+  20: Load 1 4 0 0 ; line 3
+  21: ArrayGet 1 5 4 3 ; line 3
+  22: Const 0 6 1 0 ; line 3 ; string "j"
+  23: ArrayGet 1 3 5 6 ; line 3
+  24: Const 0 4 3 0 ; line 3 ; null
+  25: Binary NotIdentical 5 3 4 ; line 3
+  26: Branch 0 5 27 29 ; line 3
+  27: Move 0 2 3 0 ; line 3
+  28: Jump 0 31 0 0 ; line 3
+  29: Const 0 3 5 0 ; line 3 ; string "n"
+  30: Move 0 2 3 0 ; line 3
+  31: Output 0 2 0 0 ; line 3
+  32: Const 0 3 6 0 ; line 3 ; string "x"
+  33: Load 1 4 0 0 ; line 3
+  34: ArrayGet 1 5 4 3 ; line 3
+  35: Const 0 6 3 0 ; line 3 ; null
+  36: Binary NotIdentical 7 5 6 ; line 3
+  37: Branch 0 7 38 40 ; line 3
+  38: Move 0 2 5 0 ; line 3
+  39: Jump 0 49 0 0 ; line 3
+  40: Load 1 4 1 0 ; line 3
+  41: Const 0 5 3 0 ; line 3 ; null
+  42: Binary NotIdentical 6 4 5 ; line 3
+  43: Branch 0 6 44 46 ; line 3
+  44: Move 0 3 4 0 ; line 3
+  45: Jump 0 48 0 0 ; line 3
+  46: Const 0 4 7 0 ; line 3 ; string "chain"
+  47: Move 0 3 4 0 ; line 3
+  48: Move 0 2 3 0 ; line 3
+  49: Output 0 2 0 0 ; line 3
+  50: Const 0 2 3 0 ; line 4 ; null
+  51: Return 0 2 0 0 ; line 4

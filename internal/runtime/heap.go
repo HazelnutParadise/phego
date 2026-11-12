@@ -66,6 +66,8 @@ type heap struct {
 	// diagnostics are the PHP warnings and deprecations raised by modeled
 	// operations, in order.
 	diagnostics []diagnostic
+	// sink, when set by the VM, receives each diagnostic instead.
+	sink func(level int, message string)
 	// PHP 8.5.12 array user-sort deprecation state is request-local. A nested
 	// user sort resets it; returning from that sort does not restore it.
 	// REQ-017; T-033/T-034.
@@ -352,25 +354,88 @@ func (h *heap) bufferedRoots() []gcNode {
 	return slices.Clone(h.rootSlots)
 }
 
+// freeArray releases a's elements in order and empties it. An element array
+// that reaches zero is freed completely before the next element, as a
+// recursive release would, but with a work list instead of Go recursion, so
+// an array nested a million levels deep cannot overflow the goroutine stack.
+// Objects and resources keep their own release paths; a destructor runs at
+// the point the recursive order reaches it.
 func (h *heap) freeArray(a *phpArray) error {
 	if err := h.claimValues(value{kind: valueArray, array: a}); err != nil {
 		return err
 	}
 	h.dropRoot(a)
+	type pending struct {
+		a   *phpArray
+		pos int
+	}
+	stack := []pending{{a: a}}
 	var first error
-	pos := 0
-	for b, ok := a.next(&pos); ok; b, ok = a.next(&pos) {
+	for len(stack) > 0 {
+		top := &stack[len(stack)-1]
+		b, ok := top.a.next(&top.pos)
+		if !ok {
+			done := top.a
+			stack = stack[:len(stack)-1]
+			for it := range done.cursors {
+				delete(it.arrays, done)
+			}
+			done.buckets, done.index, done.live, done.cursors = nil, nil, 0, nil
+			continue
+		}
 		v := b.val
 		// Chunks are shared, so a live neighbour would otherwise keep the
 		// freed value reachable by the Go collector.
 		*b = bucket{}
-		first = h.mergeObjectErrors(first, h.release(v))
+		child, err := h.releaseToArray(v)
+		first = h.mergeObjectErrors(first, err)
+		if child != nil {
+			if err := h.claimValues(value{kind: valueArray, array: child}); err != nil {
+				first = h.mergeObjectErrors(first, err)
+				continue
+			}
+			h.dropRoot(child)
+			stack = append(stack, pending{a: child})
+		}
 	}
-	for it := range a.cursors {
-		delete(it.arrays, a)
-	}
-	a.buckets, a.index, a.live, a.cursors = nil, nil, 0, nil
 	return first
+}
+
+// releaseToArray is release, except that an array reaching zero owners,
+// directly or as the target of a reference reaching zero, is returned for
+// the caller to free instead of being freed here.
+func (h *heap) releaseToArray(v value) (*phpArray, error) {
+	for {
+		switch v.kind {
+		case valueArray:
+			if err := h.claimValues(v); err != nil {
+				return nil, err
+			}
+			v.array.refcount--
+			if v.array.refcount == 0 {
+				return v.array, nil
+			}
+			h.possibleRoot(v.array)
+			return nil, nil
+		case valueReference:
+			if err := h.claimValues(v); err != nil {
+				return nil, err
+			}
+			v.ref.refcount--
+			if v.ref.refcount == 0 {
+				v = v.ref.target
+				continue
+			}
+			switch t := v.ref.target; t.kind {
+			case valueArray:
+				h.possibleRoot(t.array)
+			case valueObject:
+				h.possibleRoot(t.object)
+			}
+			return nil, nil
+		}
+		return nil, h.release(v)
+	}
 }
 
 // deleteObject follows the PHP 8.5.12 order: run the destructor once while the
@@ -631,7 +696,10 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 		if slot.array.refcount == 1 {
 			return slot.array, nil
 		}
-		dup := h.duplicate(slot.array)
+		dup, err := h.duplicateChecked(slot.array)
+		if err != nil {
+			return nil, err
+		}
 		dup.refcount = 1
 		old := *slot
 		*slot = value{kind: valueArray, array: dup}
@@ -643,6 +711,23 @@ func (h *heap) separate(slot *value) (*phpArray, error) {
 // duplicate copies an array. As in PHP 8.5.12, a reference element with no
 // other owner is copied as its value, while shared references stay shared.
 func (h *heap) duplicate(src *phpArray) *phpArray {
+	dup, _ := h.copyArray(src, false)
+	return dup
+}
+
+// copyCheckInterval is how many elements of an array are copied between two
+// checks for a host stop.
+const copyCheckInterval = 1 << 16
+
+// duplicateChecked is duplicate for a write that separates a shared array:
+// a large copy checks for cancellation and other host stops as it goes, so
+// one instruction cannot hold a cancelled run for the whole copy. When it
+// stops, the partial copy is released and the error is the stop.
+func (h *heap) duplicateChecked(src *phpArray) (*phpArray, error) {
+	return h.copyArray(src, true)
+}
+
+func (h *heap) copyArray(src *phpArray, checked bool) (*phpArray, error) {
 	// Callers validate the source first; copying only preserves same-heap edges.
 	// REQ-017; T-033/T-034. An empty COW copy is uninitialized even if the
 	// source was allocated. It keeps nextFree, but not capacity or iterators.
@@ -650,7 +735,7 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		dup := newArray()
 		dup.owner = h
 		dup.nextFree = src.nextFree
-		return dup
+		return dup, nil
 	}
 	dup := &phpArray{owner: h, nextFree: src.nextFree, limit: src.limit, pointer: src.pointer}
 	if !src.packed() {
@@ -676,6 +761,11 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 			dup.buckets[pos-1] = dup.newBucket(b.key, v)
 		}
 		dup.live++
+		if checked && dup.live%copyCheckInterval == 0 {
+			if err := h.runtimeCheck(); err != nil {
+				return nil, errors.Join(err, h.discard(value{kind: valueArray, array: dup}))
+			}
+		}
 	}
 	// REQ-017; T-033/034: PHP resets an invalid internal pointer on COW.
 	if src.pointer >= len(src.buckets) {
@@ -697,7 +787,7 @@ func (h *heap) duplicate(src *phpArray) *phpArray {
 		dup.cursors[it] = copiedPos
 		it.arrays[dup] = struct{}{}
 	}
-	return dup
+	return dup, nil
 }
 
 // element returns a writable element slot, creating it as null when absent.

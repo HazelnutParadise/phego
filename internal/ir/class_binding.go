@@ -3,6 +3,8 @@ package ir
 import (
 	"slices"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // An unresolved subtype obligation defers the declaration as a whole. It is
@@ -41,7 +43,7 @@ func (l *lowerer) classBindingStatus(cl, parent *Class) bindingResult {
 	mi, pi, ci := map[string]int{}, map[string]int{}, map[string]int{}
 	for i := len(chain) - 1; i >= 0; i-- {
 		for _, f := range chain[i].Methods {
-			key := strings.ToLower(f.Name)
+			key := phpname.Lower(f.Name)
 			if j, ok := mi[key]; ok {
 				methods[j] = f
 			} else {
@@ -68,20 +70,20 @@ func (l *lowerer) classBindingStatus(cl, parent *Class) bindingResult {
 	}
 	children := map[string]*Func{}
 	for _, f := range cl.Methods {
-		children[strings.ToLower(f.Name)] = f
+		children[phpname.Lower(f.Name)] = f
 	}
 	for _, base := range methods {
-		f := children[strings.ToLower(base.Name)]
+		f := children[phpname.Lower(base.Name)]
 		if f == nil {
 			continue
 		}
-		if hasModifier(base.Modifiers, "private") && !hasModifier(base.Modifiers, "abstract") && !strings.EqualFold(base.Name, "__construct") {
+		if hasModifier(base.Modifiers, "private") && !hasModifier(base.Modifiers, "abstract") && !phpname.EqualFold(base.Name, "__construct") {
 			continue
 		}
 		if hasModifier(base.Modifiers, "final") || f.Static != base.Static || hasModifier(f.Modifiers, "abstract") && !hasModifier(base.Modifiers, "abstract") {
 			return bindingIncompatible
 		}
-		if strings.EqualFold(base.Name, "__construct") {
+		if phpname.EqualFold(base.Name, "__construct") {
 			if proto := l.constructorPrototype(parent); proto != nil {
 				base = proto
 			} else {
@@ -305,7 +307,7 @@ func (l *lowerer) bindingAtom(child, parent string) bindingResult {
 		if l.class == nil || !hasModifier(l.class.Modifiers, "final") {
 			return bindingIncompatible
 		}
-		if strings.EqualFold(child, l.class.Name) {
+		if phpname.EqualFold(child, l.class.Name) {
 			return bindingCompatible
 		}
 		if !l.typesKnown(child, child) {
@@ -351,12 +353,12 @@ func (l *lowerer) checkBoundOverrides(cl *Class) {
 }
 
 func (l *lowerer) boundParentMethod(cl *Class, name string) bool {
-	if strings.EqualFold(name, "__construct") {
+	if phpname.EqualFold(name, "__construct") {
 		return l.hasAbstractParentConstructor(l.boundClass(parentName(cl)))
 	}
 	for p := l.boundClass(parentName(cl)); p != nil; p = l.boundClass(parentName(p)) {
 		for _, f := range p.Methods {
-			if strings.EqualFold(f.Name, name) && !hasModifier(f.Modifiers, "private") {
+			if phpname.EqualFold(f.Name, name) && !hasModifier(f.Modifiers, "private") {
 				return true
 			}
 		}

@@ -1,0 +1,10 @@
+commit 44f03ac52bbf71fd2a1e49305a6cfaaebe9d9621
+$ go test -race -count=1 -timeout 40m <package> (one package at a time)
+ok  	github.com/HazelnutParadise/phego	26.486s
+ok  	github.com/HazelnutParadise/phego/internal/vm	3.299s
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	22.430s
+ok  	github.com/HazelnutParadise/phego/internal/ir	10.330s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.970s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	6.746s
+ok  	github.com/HazelnutParadise/phego/internal/policy	4.620s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	117.661s

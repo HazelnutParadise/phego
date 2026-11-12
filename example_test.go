@@ -11,21 +11,38 @@ import (
 	"github.com/HazelnutParadise/phego"
 )
 
-// The specification's single-function example. Until the VM exists, Run
-// reports that execution is unsupported instead of inventing a result.
+// The specification's single-function example. A construct this build
+// cannot run yet is an UnsupportedError with its location, never a guess.
 func ExampleRun() {
 	result, err := phego.Run(context.Background(), `<?php return 10 + 20;`)
 	var unsupported *phego.UnsupportedError
 	switch {
 	case errors.As(err, &unsupported):
-		fmt.Println("not yet executable:", unsupported.Feature)
+		fmt.Println("not yet executable:", unsupported.Feature, "on line", unsupported.Line)
 	case err != nil:
 		fmt.Println("error:", err)
 	default:
 		value, _ := result.Return.Int64()
 		fmt.Println(value)
 	}
-	// Output: not yet executable: PHP execution
+	// Output: 30
+}
+
+// Displayed errors go into the output, as PHP prints them; the log channel
+// is Result.Diagnostics. This run displays nothing and logs every warning.
+func ExampleWithINI() {
+	result, err := phego.Run(context.Background(), "<?php\necho \"total: \", $missing + 2, \"\\n\";\n",
+		phego.WithINI("display_errors", "0"), phego.WithINI("log_errors", "1"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", result.Output)
+	for _, d := range result.Diagnostics {
+		fmt.Printf("%s: %s in %s on line %d\n", d.Level, d.Message, d.File, d.Line)
+	}
+	// Output:
+	// total: 2
+	// Warning: Undefined variable $missing in Standard input code on line 2
 }
 
 // Syntax errors are located like PHP's.
@@ -54,7 +71,8 @@ func ExampleConfig_policy() {
 				{Scheme: "https", Host: "api.example.com", Ports: []int{443}},
 			},
 		},
-		Limits:    phego.Limits{Steps: 50_000_000, Memory: 128 << 20},
+		// Limits.Memory is refused until memory is metered.
+		Limits:    phego.Limits{Steps: 50_000_000},
 		MaxActive: 64,
 		MaxQueued: 128,
 	})
@@ -86,17 +104,18 @@ func ExampleFileGrant_root() {
 		panic(err)
 	}
 	defer engine.Close(context.Background())
-	_, err = engine.RunFile(context.Background(), "/app/index.php")
-	var unsupported *phego.UnsupportedError
-	if errors.As(err, &unsupported) {
-		fmt.Println("read and compile succeeded; execution is not yet implemented")
+	result, err := engine.RunFile(context.Background(), "/app/index.php")
+	if err != nil {
+		panic(err)
 	}
+	value, _ := result.Return.Int64()
+	fmt.Println("returned", value)
 	_, err = engine.RunFile(context.Background(), "/outside.php")
 	var denied *phego.PolicyError
 	if errors.As(err, &denied) {
 		fmt.Println(denied.Capability, denied.Rule)
 	}
 	// Output:
-	// read and compile succeeded; execution is not yet implemented
+	// returned 1
 	// file-read outside-root
 }

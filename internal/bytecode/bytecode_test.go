@@ -105,7 +105,7 @@ func TestBuildEncodeLoadRoundTripAndInputOwnership(t *testing.T) {
 	if !bytes.Equal(encoded[:8], []byte{'P', 'H', 'E', 'G', 'O', 'B', 'C', 0}) {
 		t.Fatalf("magic = %q", encoded[:8])
 	}
-	if binary.LittleEndian.Uint16(encoded[8:10]) != 1 || binary.LittleEndian.Uint16(encoded[10:12]) != 0 {
+	if binary.LittleEndian.Uint16(encoded[8:10]) != 1 || binary.LittleEndian.Uint16(encoded[10:12]) != FormatMinor {
 		t.Fatal("unexpected format version")
 	}
 	if binary.LittleEndian.Uint32(encoded[12:16]) != 64 || binary.LittleEndian.Uint64(encoded[16:24]) != uint64(len(encoded)) {
@@ -367,13 +367,13 @@ func repairWireIntegrity(b []byte) {
 }
 
 func TestSafetyMetadataIsIntrinsic(t *testing.T) {
-	for op := OpCheckpoint; op <= OpEndFinally; op++ {
+	for op := OpCheckpoint; op <= OpArrayAdd; op++ {
 		s, ok := op.Safety()
 		if !ok || s.Steps < 1 || !s.CheckCancel {
 			t.Errorf("opcode %d safety=%+v known=%v", op, s, ok)
 		}
 	}
-	for _, op := range []Opcode{0, 0xffff} {
+	for _, op := range []Opcode{0, OpArrayAdd + 1, 0xffff} {
 		if _, ok := op.Safety(); ok {
 			t.Errorf("unknown opcode %d reported known", op)
 		}

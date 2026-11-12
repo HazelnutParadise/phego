@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // context is how an expression's value is used.
@@ -155,6 +156,19 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		l.constants = l.syntaxBudget(n)
 		defer func() { l.constants = nil }()
 	}
+	l.nest()
+	defer func() { l.nesting-- }()
+	n, folded := l.exprHead(n, ctx)
+	if folded != nil {
+		return folded
+	}
+	return l.exprBody(n, ctx)
+}
+
+// exprHead is the part of exprCtx every expression passes before its kind
+// is lowered: it follows a branch the syntax pass selected, sets the line
+// and returns the folded value when the syntax pass knows it.
+func (l *lowerer) exprHead(n *frontend.Node, ctx context) (*frontend.Node, *Node) {
 	n = l.selectedSyntax(n)
 	l.cur = l.zline(n)
 	if entry := l.constants.syntax[n]; entry.known && (ctx == ctxRead || ctx == ctxQuiet) && n.Kind != "array" {
@@ -162,8 +176,13 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		if entry.line != 0 {
 			l.cur = entry.line
 		}
-		return l.constantValueNode(entry.value, n.Line, 0)
+		return n, l.constantValueNode(entry.value, n.Line, 0)
 	}
+	return n, nil
+}
+
+// exprBody lowers n by kind once exprHead has passed it.
+func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	c := n.Children
 	switch n.Kind {
 	case "literal":
@@ -341,14 +360,14 @@ func (l *lowerer) exprCtx(n *frontend.Node, ctx context) *Node {
 		}
 		return l.seal(nd)
 	case "builtin":
-		if strings.EqualFold(n.Text, "empty") {
+		if phpname.EqualFold(n.Text, "empty") {
 			return l.node(OpEmpty, n.Line, l.exprCtx(c[0], ctxQuiet))
 		}
 		l.fn.DynamicScope = true
 		return l.node(OpEval, n.Line, l.expr(c[0]))
 	case "include":
 		l.fn.DynamicScope = true
-		return l.seal(&Node{Op: OpInclude, Line: n.Line, Text: strings.ToLower(n.Text), Kids: []*Node{l.expr(c[0])}})
+		return l.seal(&Node{Op: OpInclude, Line: n.Line, Text: phpname.Lower(n.Text), Kids: []*Node{l.expr(c[0])}})
 	case "exit":
 		nd := &Node{Op: OpExit, Line: n.Line}
 		if len(c) > 0 {
@@ -725,7 +744,7 @@ func (l *lowerer) scopeKnown() bool {
 func (l *lowerer) constant(n *frontend.Node) *Node {
 	name := l.ns.resolveConstant(n.Text)
 	if name.Fallback == "" {
-		switch strings.ToLower(name.Resolved) {
+		switch phpname.Lower(name.Resolved) {
 		case "true":
 			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: true}})
 		case "false":
@@ -827,7 +846,7 @@ func (l *lowerer) constantValue(n *frontend.Node) *Literal {
 	case "literal":
 		return l.literal(n)
 	case "name":
-		switch strings.ToLower(n.Text) {
+		switch phpname.Lower(n.Text) {
 		case "true":
 			return &Literal{Kind: LitBool, Bool: true}
 		case "false":
@@ -1059,7 +1078,7 @@ var castNames = map[string]string{
 }
 
 func (l *lowerer) cast(n *frontend.Node) *Node {
-	inner := strings.ToLower(strings.Trim(n.Text, "() \t"))
+	inner := phpname.Lower(strings.Trim(n.Text, "() \t"))
 	target := castNames[inner]
 	switch inner {
 	case "unset":
@@ -1068,12 +1087,56 @@ func (l *lowerer) cast(n *frontend.Node) *Node {
 	return l.seal(&Node{Op: OpCast, Line: n.Line, Text: target, Kids: []*Node{l.expr(n.Children[0])}})
 }
 
+// binary lowers a chain of binary operations nested through their left
+// operand, such as 1+1+…+1, with a loop instead of one Go frame per
+// operator, so a long chain cannot overflow the goroutine stack. Every link
+// passes exprHead and its own checks in the order recursive lowering takes
+// them: the operator's checks and the left operand first, then, from the
+// innermost link out, each right operand.
 func (l *lowerer) binary(n *frontend.Node) *Node {
+	var spine []*frontend.Node
+	var left *Node
+	base := l.nesting
+	defer func() { l.nesting = base }() // also when a link fails
+	for {
+		if phpname.Lower(n.Text) == "|>" && n.Children[1].Kind == "arrow_function" {
+			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
+		}
+		if len(spine) > 0 {
+			l.nest() // the link n is the left operand of the one above it
+		}
+		spine = append(spine, n)
+		if phpname.Lower(n.Text) == "??" {
+			left = l.exprCtx(n.Children[0], ctxQuiet)
+			break
+		}
+		next, folded := l.exprHead(n.Children[0], ctxRead)
+		if folded != nil {
+			left = folded
+			break
+		}
+		if next.Kind != "binary" {
+			left = l.exprBody(next, ctxRead)
+			break
+		}
+		n = next
+	}
+	for i := len(spine) - 1; i >= 0; i-- {
+		left = l.binaryLink(spine[i], left)
+		if i > 0 {
+			l.nesting--
+		}
+	}
+	return left
+}
+
+// binaryLink lowers one binary operation whose left operand is lowered.
+func (l *lowerer) binaryLink(n *frontend.Node, left *Node) *Node {
 	c := n.Children
-	op := strings.ToLower(n.Text)
+	op := phpname.Lower(n.Text)
 	switch op {
 	case "??":
-		return l.node(OpCoalesce, n.Line, l.exprCtx(c[0], ctxQuiet), l.expr(c[1]))
+		return l.node(OpCoalesce, n.Line, left, l.expr(c[1]))
 	case "&&", "||", "and", "or", "xor":
 		switch op {
 		case "and":
@@ -1081,7 +1144,6 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 		case "or":
 			op = "||"
 		}
-		left := l.expr(c[0])
 		v, known := l.evaluateConstant(left)
 		if known && op != "xor" {
 			if value, ok := l.compileTruth(v); ok && value == (op == "||") {
@@ -1099,14 +1161,10 @@ func (l *lowerer) binary(n *frontend.Node) *Node {
 			}
 		}
 		return l.seal(&Node{Op: OpLogical, Line: n.Line, Text: op, Kids: []*Node{left, right}})
-	case "|>":
-		if c[1].Kind == "arrow_function" {
-			l.fail(zline(n), "Arrow functions on the right hand side of |> must be parenthesized")
-		}
 	case "<>":
 		op = "!="
 	}
-	left, right := l.expr(c[0]), l.expr(c[1])
+	right := l.expr(c[1])
 	if op == "." && !l.inConstExpr {
 		// zend_compile_binary_op converts each constant operand to a string
 		// at compile time, whether or not the whole expression folds.
@@ -1228,9 +1286,9 @@ func (l *lowerer) call(n *frontend.Node) *Node {
 	if callee.Kind == "name" {
 		nd.Op = OpCall
 		nd.Name = l.ns.resolveFunction(callee.Text)
-		base := strings.ToLower(nd.Name.Resolved)
+		base := phpname.Lower(nd.Name.Resolved)
 		if nd.Name.Fallback != "" {
-			base = strings.ToLower(nd.Name.Fallback)
+			base = phpname.Lower(nd.Name.Fallback)
 		}
 		switch scopeFunctions[base] {
 		case "scope":
@@ -1247,7 +1305,7 @@ func (l *lowerer) call(n *frontend.Node) *Node {
 	}
 	var known *Func
 	if nd.Name != nil {
-		known = l.hoisted[strings.ToLower(nd.Name.Resolved)]
+		known = l.hoisted[phpname.Lower(nd.Name.Resolved)]
 	}
 	nd.Args = l.argsFor(argList, n.Line, known)
 	return l.seal(nd)
@@ -1457,7 +1515,7 @@ func (l *lowerer) parentHookCall(n *frontend.Node) *Node {
 			return nil
 		}
 	}
-	method := strings.ToLower(ref.Children[1].Text)
+	method := phpname.Lower(ref.Children[1].Text)
 	if method != "get" && method != "set" {
 		return nil
 	}
@@ -1578,7 +1636,7 @@ func (l *lowerer) checkConstExpr(n *frontend.Node, dynamic bool) {
 		}
 		return
 	case "cast":
-		if castNames[strings.ToLower(strings.Trim(n.Text, "() \t"))] == "object" && !dynamic {
+		if castNames[phpname.Lower(strings.Trim(n.Text, "() \t"))] == "object" && !dynamic {
 			l.fail(n.Line, "Object casts are not supported in this context")
 		}
 	case "new":
@@ -1819,7 +1877,7 @@ func constKind(n *Node) string {
 func validDefault(typ string, v *Literal, kind string) bool {
 	parts := map[string]bool{}
 	for _, p := range strings.Split(strings.TrimPrefix(typ, "?"), "|") {
-		parts[strings.ToLower(strings.Trim(p, "()"))] = true
+		parts[phpname.Lower(strings.Trim(p, "()"))] = true
 	}
 	if strings.HasPrefix(typ, "?") {
 		parts["null"] = true

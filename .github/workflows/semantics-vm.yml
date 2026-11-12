@@ -1,0 +1,51 @@
+name: PHP 8.5.12 program semantics
+
+# REQ-005/011/015/016/026; T-009/010/029-032/051/052. Runs the stage-1 PHP
+# programs in the pinned PHP 8.5.12 image of each profile, requires the
+# committed references to match, and then requires Phego to produce the same
+# output, error text and exit codes for the same sources.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    name: Program reference (${{ matrix.profile }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: "64"
+            width: 64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - profile: "32"
+            width: 32
+            arch: "386"
+            runner: ubuntu-24.04
+          - profile: amd64
+            width: 64
+            arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Test reference runner
+        run: python3 -m unittest discover -s tools -p test_w17_reference.py
+      - name: Regenerate and compare pinned PHP observations
+        run: python3 tests/vm/w17/reference.py --width ${{ matrix.width }} --arch ${{ matrix.arch }}
+      - name: Compare with Phego
+        env:
+          CGO_ENABLED: '0'
+          PHEGO_W17_PROFILE: ${{ matrix.profile }}
+        run: go test -count=1 -run '^TestW17PHP8512Programs$' -v .

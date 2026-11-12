@@ -1,9 +1,12 @@
 package frontend
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // MaxNesting is the PHP 8.5.12 grammar-state stack limit. Go recursive calls
@@ -20,11 +23,24 @@ const tEOF Kind = -1
 // error returns *SyntaxError with a source line. CallerLocation marks the
 // exceptions whose displayed PHP location comes from its execution frame.
 func Parse(src []byte, opts LexOptions) (*Node, error) {
-	toks, diags, err := Lex(src, opts)
+	return parseContext(nil, src, opts)
+}
+
+// ParseContext is Parse that checks ctx while it lexes and parses and
+// returns ctx's error when ctx ends first.
+func ParseContext(ctx context.Context, src []byte, opts LexOptions) (*Node, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return parseContext(ctx, src, opts)
+}
+
+func parseContext(ctx context.Context, src []byte, opts LexOptions) (*Node, error) {
+	toks, diags, err := lexContext(ctx, src, opts)
 	if err != nil {
 		return nil, err
 	}
-	p := &parser{fatal: map[int]Diagnostic{}}
+	p := &parser{fatal: map[int]Diagnostic{}, ctx: ctx}
 	eofLine := 1
 	// kept[i] is the parser index of lexer token i, or of the next kept
 	// token when i is trivia; a lexer error surfaces when PHP's parser
@@ -59,6 +75,9 @@ func Parse(src []byte, opts LexOptions) (*Node, error) {
 		if diagnostic != nil {
 			return nil, diagnostic
 		}
+		if p.ctxErr != nil {
+			return nil, p.ctxErr
+		}
 		if !complete {
 			return nil, errParserResourceLimit
 		}
@@ -69,15 +88,23 @@ func Parse(src []byte, opts LexOptions) (*Node, error) {
 			err = detailed
 		}
 	}
+	if p.ctxErr != nil {
+		return nil, p.ctxErr
+	}
 	return root, err
 }
 
 type parser struct {
-	toks  []Token
-	pos   int
-	depth int
-	eof   Token
-	fatal map[int]Diagnostic // token index -> lexer error raised when reached
+	// ctx, when not nil, is checked every ctxCheckEvery steps; ctxErr
+	// keeps the error that stopped the parse.
+	ctx    context.Context
+	ctxErr error
+	steps  int
+	toks   []Token
+	pos    int
+	depth  int
+	eof    Token
+	fatal  map[int]Diagnostic // token index -> lexer error raised when reached
 	// inTarget is set while parsing a foreach target, where list() needs
 	// no following assignment.
 	inTarget bool
@@ -135,7 +162,21 @@ func (p *parser) atAny(ks ...Kind) bool {
 	return false
 }
 
+// checkContext stops the parse when its context has ended.
+func (p *parser) checkContext() {
+	if p.ctx == nil {
+		return
+	}
+	if p.steps++; p.steps%ctxCheckEvery == 0 {
+		if err := p.ctx.Err(); err != nil {
+			p.ctxErr = err
+			panic(parseFailure{err})
+		}
+	}
+}
+
 func (p *parser) next() Token {
+	p.checkContext()
 	t := p.peek()
 	if p.pos < len(p.toks) {
 		p.pos++
@@ -353,7 +394,7 @@ func (p *parser) statementContext(top, single bool) *Node {
 			level = p.expr()
 		}
 		p.endStatement()
-		return node(strings.ToLower(t.Text), t.Line, level)
+		return node(phpname.Lower(t.Text), t.Line, level)
 	case TReturn:
 		p.next()
 		var v *Node
@@ -712,7 +753,7 @@ func (p *parser) declareStatement() *Node {
 		name := p.identifier()
 		p.expect('=')
 		v := p.expr()
-		if strings.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
+		if phpname.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
 			invalidEncoding = true
 		}
 		n.Children = append(n.Children, node("directive", name.Line, name, v))
@@ -1125,7 +1166,7 @@ func (p *parser) classDecl(attrs *Node) *Node {
 		p.unexpected()
 	}
 	t := p.next()
-	n := &Node{Kind: strings.ToLower(t.Text), Line: line}
+	n := &Node{Kind: phpname.Lower(t.Text), Line: line}
 	name := p.className()
 	var backing, extends, implements *Node
 	if t.Kind == TEnum && p.accept(':') {

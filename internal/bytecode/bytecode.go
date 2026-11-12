@@ -13,7 +13,13 @@ import (
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
-const FormatVersion uint16 = 1
+// FormatVersion is the major format version. FormatMinor is the minor
+// version Encode writes. Load accepts minor 0 (format 1.0) and minor 1
+// (format 1.1, added by W-17); a minor-0 file may not use 1.1 operations.
+const (
+	FormatVersion uint16 = 1
+	FormatMinor   uint16 = 1
+)
 
 // Identity is compared in full against a trusted host expectation. Digests are
 // of canonical manifests, not filenames or mtimes. Empty manifests still have
@@ -108,6 +114,73 @@ const (
 	OpDrop
 	OpLeave
 	OpEndFinally
+	// Format 1.1 (W-17). Operands are in docs/decisions/W-16-bytecode.md.
+	OpUnary       // A dest Value, B operand Value; Aux is a UnaryOp
+	OpCast        // A dest Value, B operand Value; Aux is a CastKind
+	OpIncDec      // A result Value, B target Location; Aux is an IncDecOp
+	OpArraySet    // A container Location, B key, C value: $a[k] = v; Aux is ArrayWriteFlags
+	OpArrayAppend // A container Location, B value: $a[] = v; Aux is ArrayWriteFlags (ValueLocation only)
+	OpArrayUnset  // A container Location, B key: unset($a[k]); Aux is 0 or KeyLocation
+	OpIsset       // A dest Value (bool), B Location: isset($x)
+	OpArrayIsset  // A dest Value (bool), B container Value, C key Value: isset($a[k])
+	OpUnset       // A Location: unset($x)
+	OpExit        // A status Value when Aux is 1; Aux 0 is exit without a status
+	OpArrayAdd    // A array Value (updated in place), B value Value, C key when Aux has AddKey; Aux is ArrayAddFlags
+)
+
+// ArrayWriteFlags is the Aux of OpArraySet, OpArrayAppend and OpArrayUnset
+// (KeyLocation only; ZEND_UNSET_DIM reads the key after reporting an
+// undefined container). Without a flag
+// the operand is a Value register read before the instruction; with it, the
+// operand is a Location the instruction reads itself, with PHP's undefined
+// variable warning, at the point ZEND_ASSIGN_DIM reads that CV: the key after
+// the container check, the value (OP_DATA) after the key is converted.
+type ArrayWriteFlags uint16
+
+const (
+	ValueLocation ArrayWriteFlags = 1 << iota // the value operand is a Location
+	KeyLocation                               // OpArraySet: the key operand B is a Location
+)
+
+// ArrayAddFlags is the Aux of OpArrayAdd, which adds one element of an
+// array literal (ZEND_INIT_ARRAY / ZEND_ADD_ARRAY_ELEMENT).
+type ArrayAddFlags uint16
+
+const (
+	AddKey         ArrayAddFlags = 1 << iota // C is the key; without it the value is appended
+	AddKeyLocation                           // with AddKey: C is a Location read by the instruction; undefined is the key ""
+)
+
+// UnaryOp is the Aux of OpUnary.
+type UnaryOp uint16
+
+const (
+	Not UnaryOp = iota + 1
+	Negate
+	Plus
+	BitNot
+)
+
+// CastKind is the Aux of OpCast.
+type CastKind uint16
+
+const (
+	CastBool CastKind = iota + 1
+	CastInt
+	CastFloat
+	CastString
+	CastArray
+)
+
+// IncDecOp is the Aux of OpIncDec. The result is the new value for the pre
+// forms and the old value for the post forms.
+type IncDecOp uint16
+
+const (
+	PreInc IncDecOp = iota + 1
+	PreDec
+	PostInc
+	PostDec
 )
 
 type BinaryOp uint16
@@ -124,6 +197,16 @@ const (
 	BitAnd
 	BitOr
 	BitXor
+	// Format 1.1 (W-17).
+	Modulo
+	Power
+	ShiftLeft
+	ShiftRight
+	NotEqual
+	NotIdentical
+	LessOrEqual
+	Spaceship
+	BoolXor
 )
 
 // Instruction is a pointer-free 16-byte record in memory and on disk. Jump
@@ -165,6 +248,9 @@ type Position struct{ Source, Start, End, Line uint32 }
 // Function describes one frame. Parameter registers are the first Params
 // registers and are Value class. Locals are request-owned PHP locations.
 // Code has one Position per instruction. ReturnKind governs direct call results.
+// LocalNames is empty (no names, as in every format 1.0 function) or has
+// exactly Locals entries, each the index of a String constant holding the
+// variable name without "$". Names need not be unique or non-empty.
 type Function struct {
 	Name                     string
 	Params, Locals, MaxStack uint32
@@ -173,6 +259,7 @@ type Function struct {
 	Code                     []Instruction
 	Positions                []Position
 	Handlers                 []Handler
+	LocalNames               []uint32
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged
@@ -268,14 +355,35 @@ func (p *Program) Constant(index uint32) (Constant, bool) {
 	return p.image.Constants[index], true
 }
 
-// FunctionView has no mutating operations or exposed slices.
-type FunctionView struct{ function *Function }
+// Constants appends a copy of the constant table to dst and returns it.
+// Changing the result never affects p.
+func (p *Program) Constants(dst []Constant) []Constant {
+	return append(dst, p.image.Constants...)
+}
+
+// Instructions appends a copy of the code of function to dst. It reports
+// false, returning dst unchanged, when function is out of range. A VM may use
+// it to build its own private decoded form once per Program; changing the
+// result never affects p.
+func (p *Program) Instructions(function uint32, dst []Instruction) ([]Instruction, bool) {
+	if uint64(function) >= uint64(len(p.image.Functions)) {
+		return dst, false
+	}
+	return append(dst, p.image.Functions[function].Code...), true
+}
+
+// FunctionView has no mutating operations or exposed slices. constants is
+// the Program's own pool, read only to resolve local names.
+type FunctionView struct {
+	function  *Function
+	constants []Constant
+}
 
 func (p *Program) Function(index uint32) (FunctionView, bool) {
 	if uint64(index) >= uint64(len(p.image.Functions)) {
 		return FunctionView{}, false
 	}
-	return FunctionView{&p.image.Functions[index]}, true
+	return FunctionView{&p.image.Functions[index], p.image.Constants}, true
 }
 func (f FunctionView) Len() int {
 	if f.function == nil {
@@ -306,6 +414,19 @@ func (f FunctionView) RegisterKind(index uint32) (RegisterKind, bool) {
 		return 0, false
 	}
 	return f.function.Registers[index], true
+}
+
+// LocalName is the PHP name, without "$", of local index. ok is false when
+// the function has no names or index is out of range.
+func (f FunctionView) LocalName(index uint32) (name string, ok bool) {
+	if f.function == nil || uint64(index) >= uint64(len(f.function.LocalNames)) {
+		return "", false
+	}
+	c := f.function.LocalNames[index]
+	if uint64(c) >= uint64(len(f.constants)) {
+		return "", false // unreachable for a verified Program
+	}
+	return f.constants[c].Bytes, true
 }
 func (f FunctionView) HandlerCount() int {
 	if f.function == nil {

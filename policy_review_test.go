@@ -48,10 +48,8 @@ func TestReviewRunFileAdmitsBeforeOpening(t *testing.T) {
 		if f.opens.Load() != 0 {
 			t.Fatalf("source opened %d times before admission", f.opens.Load())
 		}
-		_, err = e.RunFile(context.Background(), name)
-		var ue *UnsupportedError
-		if !errors.As(err, &ue) {
-			t.Fatalf("one slot must suffice through file execution: %v", err)
+		if r, err := e.RunFile(context.Background(), name); !ranToCompletion(r, err) {
+			t.Fatalf("one slot must suffice through file execution: %+v %v", r, err)
 		}
 		if e.policy.admission.Active() != 0 {
 			t.Fatal("RunFile leaked slot")
@@ -113,20 +111,17 @@ func TestReviewLegacyFilesMixedMountsRequireVerifiableDirectories(t *testing.T) 
 	files := fstest.MapFS{"a.php": {Data: []byte("<?php return 1;")}, "protected/hidden.php": {Data: []byte("<?php function HIDDEN_SENTINEL( {")}}
 	opaque := reviewOpaqueFS{files}
 	only := newPolicyEngine(t, Config{Files: opaque})
-	_, err := only.RunFile(context.Background(), "a.php")
-	var unsupported *UnsupportedError
-	if !errors.As(err, &unsupported) {
-		t.Fatalf("standalone legacy Files changed: %v", err)
+	if r, err := only.RunFile(context.Background(), "a.php"); !ranToCompletion(r, err) {
+		t.Fatalf("standalone legacy Files changed: %+v %v", r, err)
 	}
 	mixed := newPolicyEngine(t, Config{Files: opaque, Policy: Policy{Files: []FileGrant{{Path: "/protected", FS: fstest.MapFS{}}}}})
-	_, err = mixed.RunFile(context.Background(), "/a.php")
+	_, err := mixed.RunFile(context.Background(), "/a.php")
 	if !errors.Is(err, fs.ErrPermission) {
 		t.Fatalf("unverifiable mixed parent=%v, want permission denial", err)
 	}
 	verified := newPolicyEngine(t, Config{Files: files, Policy: Policy{Files: []FileGrant{{Path: "/protected", FS: fstest.MapFS{}}}}})
-	_, err = verified.RunFile(context.Background(), "/a.php")
-	if !errors.As(err, &unsupported) {
-		t.Fatalf("verified mixed parent refused: %v", err)
+	if r, err := verified.RunFile(context.Background(), "/a.php"); !ranToCompletion(r, err) {
+		t.Fatalf("verified mixed parent refused: %+v %v", r, err)
 	}
 	_, err = verified.RunFile(context.Background(), "/protected/hidden.php")
 	if !errors.Is(err, fs.ErrNotExist) {
@@ -168,11 +163,10 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 			if !errors.As(err, &denied) || denied.Rule != RuleNotGranted || result.Status != StatusPolicyDenied {
 				t.Fatalf("hidden hardlink not denied: %+v %v", result, err)
 			}
-			_, err = e.RunFile(context.Background(), "/public.php")
+			result, err = e.RunFile(context.Background(), "/public.php")
 			if useRoot {
-				var unsupported *UnsupportedError
-				if !errors.As(err, &unsupported) {
-					t.Fatalf("ordinary Root file refused: %v", err)
+				if !ranToCompletion(result, err) {
+					t.Fatalf("ordinary Root file refused: %+v %v", result, err)
 				}
 			} else if !errors.As(err, &denied) {
 				t.Fatalf("overlapping disk FS should require Root: %v", err)
@@ -187,18 +181,14 @@ func TestReviewOverlappingDiskFSRequiresRoot(t *testing.T) {
 			name = "public.php"
 		}
 		e := newPolicyEngine(t, cfg)
-		_, err := e.RunFile(context.Background(), name)
-		var unsupported *UnsupportedError
-		if !errors.As(err, &unsupported) {
-			t.Fatalf("standalone source changed: %v", err)
+		if r, err := e.RunFile(context.Background(), name); !ranToCompletion(r, err) {
+			t.Fatalf("standalone source changed: %+v %v", r, err)
 		}
 	}
 	virtual := fstest.MapFS{"public.php": {Data: []byte("<?php return 1;"), Sys: struct{}{}}}
 	e := newPolicyEngine(t, Config{Policy: Policy{Files: []FileGrant{{Path: "/", FS: virtual}, {Path: "/protected", FS: fstest.MapFS{}}}}})
-	_, err = e.RunFile(context.Background(), "/public.php")
-	var unsupported *UnsupportedError
-	if !errors.As(err, &unsupported) {
-		t.Fatalf("virtual metadata mistaken for disk: %v", err)
+	if r, err := e.RunFile(context.Background(), "/public.php"); !ranToCompletion(r, err) {
+		t.Fatalf("virtual metadata mistaken for disk: %+v %v", r, err)
 	}
 }
 
@@ -243,11 +233,10 @@ func TestRunFileReadsDevicesLikePHP(t *testing.T) {
 			ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
 			defer cancel()
 			res, err := newPolicyEngine(t, tc.cfg).RunFile(ctx, tc.path)
-			var unsupported *UnsupportedError
 			var limit *LimitError
 			var pe *PolicyError
 			switch {
-			case want == "compiled" && errors.As(err, &unsupported) && unsupported.Feature == "PHP execution":
+			case want == "compiled" && ranToCompletion(res, err):
 			case want == "source limit" && errors.As(err, &limit) && limit.Limit == "source size":
 			case want == "cancelled" && res != nil && res.Status == StatusCancelled && errors.Is(err, context.DeadlineExceeded):
 			case want == "kernel" && res != nil && res.Status == StatusFailed && !errors.As(err, &pe) && errors.Is(err, kernel):

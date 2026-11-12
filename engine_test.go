@@ -11,8 +11,6 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
-
-	"github.com/HazelnutParadise/phego/internal/frontend"
 )
 
 func TestRunReportsParseErrorsWithLocation(t *testing.T) {
@@ -29,8 +27,14 @@ func TestRunReportsParseErrorsWithLocation(t *testing.T) {
 
 func TestRunNeverClaimsSuccessWithoutExecution(t *testing.T) {
 	result, err := Run(context.Background(), `<?php return 10 + 20;`)
+	if n, _ := result.Return.Int64(); !ranToCompletion(result, err) || n != 30 {
+		t.Fatalf("result %+v error %v", result, err)
+	}
+	// A construct the VM cannot run is refused with its location, never run
+	// partly or reported as success.
+	result, err = Run(context.Background(), "<?php\necho 1;\nforeach ([1] as $v) {}\n")
 	var ue *UnsupportedError
-	if !errors.As(err, &ue) || result == nil || result.Status != StatusFailed {
+	if !errors.As(err, &ue) || ue.Line != 3 || ue.File != "Standard input code" || result == nil || result.Status != StatusFailed || len(result.Output) != 0 {
 		t.Fatalf("result %+v error %v", result, err)
 	}
 }
@@ -89,9 +93,8 @@ func TestProgramsAreBoundToTheirEngineAndShareable(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			var ue *UnsupportedError
-			if _, err := a.Run(context.Background(), p); !errors.As(err, &ue) {
-				t.Errorf("concurrent run: %v", err)
+			if r, err := a.Run(context.Background(), p); !ranToCompletion(r, err) || string(r.Output) != "1" {
+				t.Errorf("concurrent run: %+v %v", r, err)
 			}
 		}()
 	}
@@ -121,8 +124,9 @@ func TestRunOptionsAreValidated(t *testing.T) {
 			t.Errorf("option accepted: %v", err)
 		}
 	}
-	if _, err := e.Run(context.Background(), p, WithOutput(&bytes.Buffer{}), WithGlobal("x", Int64(1))); err == nil {
-		t.Fatal("run without execution reported success")
+	var out bytes.Buffer
+	if r, err := e.Run(context.Background(), p, WithOutput(&out), WithGlobal("x", Int64(1))); !ranToCompletion(r, err) || out.String() != "1" || r.Output != nil {
+		t.Fatalf("valid options: %+v %v, output %q", r, err, out.String())
 	}
 }
 
@@ -264,37 +268,26 @@ func TestProfilesGiveTheirOwnResults(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		p, err := e.Compile(ctx, "w.php", `<?php echo 2147483648;`)
+		p, err := e.Compile(ctx, "w.php", `<?php return 2147483648;`)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if p.profile != e.profile || p.profile.IntWidth != width {
 			t.Fatalf("program profile %+v, engine %+v", p.profile, e.profile)
 		}
-		kinds[width] = literalKind(p.tree)
+		res, err := e.Run(ctx, p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, ok := res.Return.Int64(); ok {
+			kinds[width] = "int"
+		} else if _, ok := res.Return.Float64(); ok {
+			kinds[width] = "float"
+		}
 	}
 	if kinds[32] != "float" || kinds[64] != "int" {
 		t.Fatalf("literal kinds %v", kinds)
 	}
-}
-
-// literalKind finds the first numeric literal of a tree.
-func literalKind(n *frontend.Node) string {
-	if n == nil {
-		return ""
-	}
-	switch n.Token {
-	case frontend.TLNumber:
-		return "int"
-	case frontend.TDNumber:
-		return "float"
-	}
-	for _, c := range n.Children {
-		if k := literalKind(c); k != "" {
-			return k
-		}
-	}
-	return ""
 }
 
 // TestProgramNeverRunsUnderAnotherProfile models a cache that hands a program

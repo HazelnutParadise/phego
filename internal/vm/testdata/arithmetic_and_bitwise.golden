@@ -1,0 +1,74 @@
+-- source --
+<?php
+$a = 6; $b = 4;
+echo $a + $b, $a - $b, $a * $b, $a / $b, $a % $b, $a ** $b, $a . $b;
+echo $a << $b, $a >> $b, $a & $b, $a | $b, $a ^ $b;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=143 lines=5
+const 0: int 6
+const 1: int 4
+const 2: null
+const 3: string "a"
+const 4: string "b"
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  registers LLVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Const 0 2 0 0 ; line 2 ; int 6
+  3: Store 0 0 2 0 ; line 2
+  4: Const 0 2 1 0 ; line 2 ; int 4
+  5: Store 0 1 2 0 ; line 2
+  6: Load 0 2 0 0 ; line 3
+  7: Load 0 3 1 0 ; line 3
+  8: Binary Add 4 2 3 ; line 3
+  9: Output 0 4 0 0 ; line 3
+  10: Load 0 2 0 0 ; line 3
+  11: Load 0 3 1 0 ; line 3
+  12: Binary Subtract 4 2 3 ; line 3
+  13: Output 0 4 0 0 ; line 3
+  14: Load 0 2 0 0 ; line 3
+  15: Load 0 3 1 0 ; line 3
+  16: Binary Multiply 4 2 3 ; line 3
+  17: Output 0 4 0 0 ; line 3
+  18: Load 0 2 0 0 ; line 3
+  19: Load 0 3 1 0 ; line 3
+  20: Binary Divide 4 2 3 ; line 3
+  21: Output 0 4 0 0 ; line 3
+  22: Load 0 2 0 0 ; line 3
+  23: Load 0 3 1 0 ; line 3
+  24: Binary Modulo 4 2 3 ; line 3
+  25: Output 0 4 0 0 ; line 3
+  26: Load 0 2 0 0 ; line 3
+  27: Load 0 3 1 0 ; line 3
+  28: Binary Power 4 2 3 ; line 3
+  29: Output 0 4 0 0 ; line 3
+  30: Load 0 2 0 0 ; line 3
+  31: Load 0 3 1 0 ; line 3
+  32: Binary Concat 4 2 3 ; line 3
+  33: Output 0 4 0 0 ; line 3
+  34: Load 0 2 0 0 ; line 4
+  35: Load 0 3 1 0 ; line 4
+  36: Binary ShiftLeft 4 2 3 ; line 4
+  37: Output 0 4 0 0 ; line 4
+  38: Load 0 2 0 0 ; line 4
+  39: Load 0 3 1 0 ; line 4
+  40: Binary ShiftRight 4 2 3 ; line 4
+  41: Output 0 4 0 0 ; line 4
+  42: Load 0 2 0 0 ; line 4
+  43: Load 0 3 1 0 ; line 4
+  44: Binary BitAnd 4 2 3 ; line 4
+  45: Output 0 4 0 0 ; line 4
+  46: Load 0 2 0 0 ; line 4
+  47: Load 0 3 1 0 ; line 4
+  48: Binary BitOr 4 2 3 ; line 4
+  49: Output 0 4 0 0 ; line 4
+  50: Load 0 2 0 0 ; line 4
+  51: Load 0 3 1 0 ; line 4
+  52: Binary BitXor 4 2 3 ; line 4
+  53: Output 0 4 0 0 ; line 4
+  54: Const 0 2 2 0 ; line 5 ; null
+  55: Return 0 2 0 0 ; line 5

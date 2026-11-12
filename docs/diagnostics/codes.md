@@ -4,7 +4,7 @@ Generated from `diag/codes/codes.go` by `go generate ./diag/codes`; do not edit 
 
 These codes cover Phego's own diagnostics only. PHP warnings, fatal errors and exception messages keep PHP 8.5.12's exact text and carry no PHG code.
 
-A published code is never renumbered or reused. `PHG1xxx` covers Engine configuration and run options, `PHG2xxx` bytecode loading and verification.
+A published code is never renumbered or reused. `PHG1xxx` covers Engine configuration and run options, `PHG2xxx` bytecode loading and verification, `PHG3xxx` features this build does not implement, `PHG9xxx` faults inside Phego.
 
 ## PHG1000: configuration error without a specific code
 
@@ -141,6 +141,21 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 - note: ports are 1 to 65535 and at least one is required
 - help: list the ports the grant allows
 
+## PHG1027: WithINI names a setting this build does not accept
+
+- note: a run accepts display_errors, log_errors, html_errors and error_reporting; other settings are not silently ignored
+- help: remove the option, or use one of the accepted settings
+
+## PHG1028: WithINI was given a value the setting does not accept
+
+- note: display_errors, log_errors and html_errors take 0, 1, on, off, true, false, yes or no; error_reporting takes a decimal integer such as 32767 or -1
+- help: write the value in one of the accepted forms
+
+## PHG1029: WithGlobal was given a value the PHP profile cannot hold
+
+- note: integers must fit the engine's IntSize, and arrays may nest at most 256 levels and hold at most 1048576 elements in all
+- help: convert the value, or pass a smaller array
+
 ## PHG2001: the bytecode is malformed or fails verification
 
 - note: all bytecode is untrusted and verified before it can run
@@ -175,3 +190,18 @@ A published code is never renumbered or reused. `PHG1xxx` covers Engine configur
 
 - note: the artifact needs an operation this build does not provide, or its declared capabilities do not cover its opcodes
 - help: rebuild the artifact for this Phego build
+
+## PHG3000: this build does not implement the requested feature
+
+- note: an unimplemented feature or PHP release is refused instead of being approximated
+- help: see the message for the feature; use what this build supports or a later Phego build
+
+## PHG3001: this PHP construct cannot run in this build yet
+
+- note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly
+- help: run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages
+
+## PHG9000: internal engine error
+
+- note: a Phego invariant failed; this is a defect in Phego, not in the PHP program or the host
+- help: report it with the program and the Phego version; the run or compile did not succeed
