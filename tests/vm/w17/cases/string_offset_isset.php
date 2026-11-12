@@ -1,0 +1,20 @@
+<?php
+$s = "abc";
+echo isset($s[0]) ? "y" : "n", isset($s[2]) ? "y" : "n", isset($s[3]) ? "y" : "n", "\n";
+echo isset($s[-1]) ? "y" : "n", isset($s[-3]) ? "y" : "n", isset($s[-4]) ? "y" : "n", "\n";
+echo isset($s["1"]) ? "y" : "n", isset($s["x"]) ? "y" : "n", isset($s["1.0"]) ? "y" : "n", isset($s["1x"]) ? "y" : "n", isset($s[""]) ? "y" : "n", "\n";
+echo isset($s[1.5]) ? "y" : "n", isset($s[true]) ? "y" : "n", isset($s[null]) ? "y" : "n", isset($s[" 1"]) ? "y" : "n", isset($s["-1"]) ? "y" : "n", "\n";
+echo isset($s[0][0]) ? "y" : "n", isset($s[0][1]) ? "y" : "n", isset($s[0][-1]) ? "y" : "n", isset($s[0][0][0]) ? "y" : "n", "\n";
+$e = "";
+echo isset($e[0]) ? "y" : "n", isset($e[-1]) ? "y" : "n", "\n";
+$i = 5;
+echo isset($i[0]) ? "y" : "n", "\n";
+$n = null;
+echo isset($n[0]) ? "y" : "n", "\n";
+echo isset($undefined[0]) ? "y" : "n", "\n";
+$z = "0";
+echo isset($z[0]) ? "y" : "n", "\n";
+$k = 1;
+echo isset($s[$k]) ? "y" : "n", isset($s[$k + 2]) ? "y" : "n", isset($s[$nokey]) ? "y" : "n", "\n";
+$a = ["k" => "str"];
+echo isset($a["k"][0]) ? "y" : "n", isset($a["k"][3]) ? "y" : "n", isset($a["q"][0]) ? "y" : "n", "\n";

@@ -1,0 +1,21 @@
+<?php
+$a = [[1, 2, 3], "k" => ["x" => ["y" => 1, "z" => 2]]];
+unset($a[0][1]);
+echo isset($a[0][1]) ? "set" : "unset", isset($a[0][2]) ? "set" : "unset", "\n";
+$a[0][] = "appended";
+echo $a[0][3], "\n";
+unset($a["k"]["x"]["y"]);
+echo isset($a["k"]["x"]["y"]) ? "set" : "unset", $a["k"]["x"]["z"], "\n";
+unset($a["k"]["missing"]["deeper"]);
+unset($a["nope"]["deeper"]);
+unset($nothing["a"]["b"]);
+unset($a[5][6][7]);
+echo isset($a["k"]["missing"]) ? "created" : "not created", "\n";
+echo isset($a["nope"]) ? "created" : "not created", "\n";
+echo isset($nothing) ? "created" : "not created", "\n";
+unset($a["k"]["x"]);
+echo isset($a["k"]["x"]) ? "set" : "unset", isset($a["k"]) ? "set" : "unset", "\n";
+$n = null;
+unset($n["a"]["b"]);
+unset($n[1]);
+echo $n === null ? "still null" : "changed", "\n";

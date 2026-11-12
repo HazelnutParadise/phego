@@ -1,0 +1,22 @@
+<?php
+$a = ["n" => null, "t" => true, "f" => false];
+$a["n"]++;
+echo $a["n"], "\n";
+$a["n2"] = null;
+$a["n2"]--;
+echo $a["n2"] === null ? "null" : $a["n2"], "\n";
+$a["t"]++;
+echo $a["t"] === true ? "true" : $a["t"], "\n";
+$a["f"]--;
+echo $a["f"] === false ? "false" : $a["f"], "\n";
+$a["m1"]++;
+echo $a["m1"], "\n";
+++$a["m2"];
+echo $a["m2"], "\n";
+$a["m3"]--;
+echo $a["m3"] === null ? "null" : $a["m3"], "\n";
+--$a["m4"];
+echo $a["m4"] === null ? "null" : $a["m4"], "\n";
+echo $a["m5"]++ === null ? "post null" : "post other", "\n";
+echo $a["m5"], "\n";
+echo ++$a["m6"], "\n";
