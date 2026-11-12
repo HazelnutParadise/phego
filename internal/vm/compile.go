@@ -30,6 +30,19 @@ func (e *UnsupportedError) Error() string {
 	return fmt.Sprintf("%s:%d: unsupported PHP construct: %s", e.File, e.Line, e.Feature)
 }
 
+// CompileError is an error PHP 8.5.12 raises while compiling the file, such
+// as declaring a function whose name is a builtin. PHP prints it as
+// "Fatal error: <Message> in <File> on line <Line>" before running anything.
+type CompileError struct {
+	Message string // e.g. "Cannot redeclare function strlen()"
+	File    string
+	Line    int
+}
+
+func (e *CompileError) Error() string {
+	return fmt.Sprintf("%s:%d: %s", e.File, e.Line, e.Message)
+}
+
 // Identity placeholders of stage 1 (docs/decisions/W-17-vm.md); cache keys
 // arrive with W-23.
 const (
@@ -107,9 +120,18 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 		return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}
 	}
 	for i, f := range unit.Functions {
-		if f.Hoisted {
-			c.funcIndex[strings.ToLower(f.Name)] = uint32(i + 1)
+		if !f.Hoisted {
+			continue
 		}
+		// zend_begin_func_decl: a hoisted declaration of an internal
+		// function's name (any case, declared spelling in the message)
+		// fails the whole file at compile time, ahead of anything stage 1
+		// cannot translate. Functions declared in a namespace never match,
+		// as their names carry the namespace.
+		if isBuiltin(f.Name) {
+			return bytecode.Image{}, &CompileError{Message: "Cannot redeclare function " + f.Name + "()", File: unit.File, Line: positive(f.Line, 1)}
+		}
+		c.funcIndex[strings.ToLower(f.Name)] = uint32(i + 1)
 	}
 	funcs := append([]*ir.Func{unit.Main}, unit.Functions...)
 	out := make([]bytecode.Function, len(funcs))

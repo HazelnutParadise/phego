@@ -365,10 +365,40 @@ func (m *miniVM) call(fi uint32, args []any) any {
 				a = &miniArray{vals: map[any]any{}}
 				fr.locals[l] = a
 			}
+			flags := bytecode.ArrayWriteFlags(in.Aux)
+			operand := func(r uint32, isLoc bool) any {
+				if !isLoc {
+					return fr.regs[r]
+				}
+				v := fr.locals[loc(r)]
+				if _, undef := v.(undefined); undef {
+					failf("undefined variable read")
+				}
+				return v
+			}
 			if in.Op == bytecode.OpArraySet {
-				a.set(key(fr.regs[in.B]), copyValue(fr.regs[in.C]))
+				k := operand(in.B, flags&bytecode.KeyLocation != 0)
+				a.set(key(k), copyValue(operand(in.C, flags&bytecode.ValueLocation != 0)))
 			} else {
-				a.set(a.next, copyValue(fr.regs[in.B]))
+				a.set(a.next, copyValue(operand(in.B, flags&bytecode.ValueLocation != 0)))
+			}
+		case bytecode.OpArrayAdd:
+			a, ok := fr.regs[in.A].(*miniArray)
+			if !ok {
+				failf("array add on %T", fr.regs[in.A])
+			}
+			v := copyValue(fr.regs[in.B])
+			switch flags := bytecode.ArrayAddFlags(in.Aux); {
+			case flags&bytecode.AddKeyLocation != 0:
+				k := fr.locals[loc(in.C)]
+				if _, undef := k.(undefined); undef {
+					failf("undefined variable read")
+				}
+				a.set(key(k), v)
+			case flags&bytecode.AddKey != 0:
+				a.set(key(fr.regs[in.C]), v)
+			default:
+				a.set(a.next, v)
 			}
 		case bytecode.OpArrayUnset:
 			if a, ok := fr.locals[loc(in.A)].(*miniArray); ok {

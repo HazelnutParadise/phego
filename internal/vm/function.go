@@ -13,16 +13,13 @@ import (
 //	[P, P+L)        one Location register per local, bound by the prologue
 //	[P+L, ...)      Value temporaries, allocated as a stack per statement
 //
-// L counts the PHP variables (Func.Vars order) followed by the hidden
-// locals that hold array literals under construction, one per nesting level.
+// L counts the PHP variables, in Func.Vars order.
 type fnCompiler struct {
 	c *compiler
 	f *ir.Func
 
 	vars    map[*ir.Var]int
 	nvars   int
-	hidden  int // hidden locals reserved by the prescan
-	hdepth  int // hidden locals in use
 	params  int
 	base    uint32 // first temporary register
 	top     uint32 // temporaries in use
@@ -73,8 +70,7 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 		fc.vars[v] = i
 	}
 	fc.signature()
-	fc.hidden = arrayDepth(f.Body)
-	locals := fc.nvars + fc.hidden
+	locals := fc.nvars
 	if uint64(locals) > uint64(limits.MaxLocals) {
 		fc.unsupported("too many variables", f.Line)
 	}
@@ -108,9 +104,9 @@ func (fc *fnCompiler) signature() {
 		fc.unsupported("function attribute", positive(f.Attributes[0].Line, f.Line))
 	}
 	if isBuiltin(f.Name) {
-		// PHP fails with "Cannot redeclare function name()" at compile time;
-		// ir.Lower does not report it, and calling the user function instead
-		// would be wrong.
+		// A hoisted declaration is a CompileError (compiler.compile). A
+		// conditional one fails in PHP when it runs, which stage 1 cannot
+		// compile anyway.
 		fc.unsupported("declaration of builtin function "+f.Name+"()", f.Line)
 	}
 	if f.ByRef {
@@ -145,30 +141,6 @@ func positive(line, fallback int) int {
 		return line
 	}
 	return fallback
-}
-
-// arrayDepth is the deepest nesting of non-empty array literals, which
-// bounds the hidden locals alive at the same time.
-func arrayDepth(nodes []*ir.Node) int {
-	d := 0
-	for _, n := range nodes {
-		d = max(d, nodeArrayDepth(n))
-	}
-	return d
-}
-
-func nodeArrayDepth(n *ir.Node) int {
-	if n == nil {
-		return 0
-	}
-	d := arrayDepth(n.Kids)
-	for _, a := range n.Args {
-		d = max(d, nodeArrayDepth(a.Value))
-	}
-	if n.Op == ir.OpArray && len(n.Kids) > 0 && n.Flags&ir.FlagWrite == 0 {
-		d++
-	}
-	return d
 }
 
 func (fc *fnCompiler) unsupported(feature string, line int) {
@@ -295,11 +267,7 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	}
 	names := make([]uint32, locals)
 	for i := range names {
-		if i < fc.nvars {
-			names[i] = c.stringConst(f.Vars[i].Name)
-		} else {
-			names[i] = c.stringConst("")
-		}
+		names[i] = c.stringConst(f.Vars[i].Name)
 	}
 	name := f.Name
 	if f.Kind == ir.FuncMain {

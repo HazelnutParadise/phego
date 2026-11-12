@@ -275,7 +275,7 @@ func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Funct
 // opcode, a 1.1 binary operator, or the quiet Aux of Load or ArrayGet.
 func format11(in Instruction) bool {
 	switch in.Op {
-	case OpUnary, OpCast, OpIncDec, OpArraySet, OpArrayAppend, OpArrayUnset, OpIsset, OpArrayIsset, OpUnset, OpExit:
+	case OpUnary, OpCast, OpIncDec, OpArraySet, OpArrayAppend, OpArrayUnset, OpIsset, OpArrayIsset, OpUnset, OpExit, OpArrayAdd:
 		return true
 	case OpBinary:
 		return in.Aux >= uint16(Modulo)
@@ -301,7 +301,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	}
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
-	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit:
+	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayAdd:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -408,13 +408,40 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid increment operands: A must be a Value, B a Location, C zero, Aux PreInc to PostDec")
 		}
 	case OpArraySet:
-		if !reg(in.A, Location) || !reg(in.B, Value) || !reg(in.C, Value) {
-			return invalid("invalid array-set operands: A must be a Location, B and C Value registers")
+		key, val := Value, Value
+		if ArrayWriteFlags(in.Aux)&KeyLocation != 0 {
+			key = Location
 		}
-	case OpArrayAppend, OpArrayUnset:
+		if ArrayWriteFlags(in.Aux)&ValueLocation != 0 {
+			val = Location
+		}
+		if in.Aux > uint16(ValueLocation|KeyLocation) || !reg(in.A, Location) || !reg(in.B, key) || !reg(in.C, val) {
+			return invalid("invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation")
+		}
+	case OpArrayAppend:
+		val := Value
+		if ArrayWriteFlags(in.Aux)&ValueLocation != 0 {
+			val = Location
+		}
+		if in.Aux > uint16(ValueLocation) || !reg(in.A, Location) || !reg(in.B, val) || in.C != 0 {
+			return invalid("invalid array-append operands: A must be a Location, B a Value (a Location where Aux is ValueLocation), C zero")
+		}
+	case OpArrayUnset:
 		if !reg(in.A, Location) || !reg(in.B, Value) || in.C != 0 {
 			return invalid("invalid array write operands: A must be a Location, B a Value, C zero")
 		}
+	case OpArrayAdd:
+		flags := ArrayAddFlags(in.Aux)
+		key := Value
+		if flags&AddKeyLocation != 0 {
+			key = Location
+		}
+		switch {
+		case in.Aux > uint16(AddKey|AddKeyLocation) || flags == AddKeyLocation || !reg(in.A, Value) || !reg(in.B, Value):
+		case flags&AddKey == 0 && in.C == 0, flags&AddKey != 0 && reg(in.C, key):
+			return nil
+		}
+		return invalid("invalid array-add operands: A and B must be Value registers, C a key Value (a Location where Aux has AddKeyLocation) when Aux has AddKey, otherwise zero")
 	case OpIsset:
 		if !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
 			return invalid("invalid isset operands: A must be a Value, B a Location, C zero")
@@ -953,6 +980,19 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			}
 			if err := read(in.B); err != nil {
 				return flowError(err, fi, pc)
+			}
+		case OpArrayAdd:
+			// A is read and stays defined: the element is added in place.
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if ArrayAddFlags(in.Aux)&AddKey != 0 {
+				if err := read(in.C); err != nil {
+					return flowError(err, fi, pc)
+				}
 			}
 		case OpUnset:
 			// The Location stays defined; only the PHP variable is unset.

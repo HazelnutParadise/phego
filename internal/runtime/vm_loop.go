@@ -324,6 +324,11 @@ func (s *vmState) loop() {
 				s.stop(err)
 				return
 			}
+		case bytecode.OpArrayAdd:
+			if err := s.arrayAdd(f, in); err != nil {
+				s.stop(err)
+				return
+			}
 		case bytecode.OpArrayIsset:
 			if err := s.arrayIsset(regs, in); err != nil {
 				s.stop(err)

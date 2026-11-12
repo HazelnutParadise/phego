@@ -257,19 +257,44 @@ func (f *vmFn) patch(pc int, b, c uint32) {
 	}
 }
 
-// arrayLit builds an array literal from key/value register pairs (key
-// math.MaxUint32 means append) through a hidden local named "".
+// arrayOf builds a list literal as the compiler does: NewArray, then one
+// ArrayAdd per value.
 func (f *vmFn) arrayOf(values ...uint32) uint32 {
-	tmp := f.hidden()
 	r := f.newArray()
-	f.emit(bytecode.OpStore, 0, tmp, r, 0)
 	for _, v := range values {
-		f.emit(bytecode.OpArrayAppend, 0, tmp, v, 0)
+		f.emit(bytecode.OpArrayAdd, 0, r, v, 0)
 	}
-	out := f.reg(bytecode.Value)
-	f.emit(bytecode.OpLoad, 0, out, tmp, 0)
-	f.emit(bytecode.OpUnset, 0, tmp, 0, 0)
-	return out
+	return r
+}
+
+// add adds key => v to the literal in register arr (ArrayAdd with AddKey).
+func (f *vmFn) add(arr, key, v uint32) {
+	f.emit(bytecode.OpArrayAdd, uint16(bytecode.AddKey), arr, v, key)
+}
+
+// addVarKey adds $name => v, the key read by the instruction itself.
+func (f *vmFn) addVarKey(arr uint32, name string, v uint32) {
+	f.emit(bytecode.OpArrayAdd, uint16(bytecode.AddKey|bytecode.AddKeyLocation), arr, v, f.loc(name))
+}
+
+// setVars is $name[key] = value where the key and/or the value are variables
+// read by ArraySet itself; an empty keyVar or valueVar uses the register.
+func (f *vmFn) setVars(name, keyVar string, key uint32, valueVar string, v uint32) {
+	var flags bytecode.ArrayWriteFlags
+	if keyVar != "" {
+		flags |= bytecode.KeyLocation
+		key = f.loc(keyVar)
+	}
+	if valueVar != "" {
+		flags |= bytecode.ValueLocation
+		v = f.loc(valueVar)
+	}
+	f.emit(bytecode.OpArraySet, uint16(flags), f.loc(name), key, v)
+}
+
+// pushVar is $name[] = $valueVar, the value read by ArrayAppend itself.
+func (f *vmFn) pushVar(name, valueVar string) {
+	f.emit(bytecode.OpArrayAppend, uint16(bytecode.ValueLocation), f.loc(name), f.loc(valueVar), 0)
 }
 
 // hidden adds a compiler temporary local; it needs its Local at the call

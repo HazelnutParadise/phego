@@ -32,11 +32,23 @@ func (fc *fnCompiler) materialize(o operand) uint32 {
 // value compiles n and reads a variable operand right away.
 func (fc *fnCompiler) value(n *ir.Node) uint32 { return fc.materialize(fc.expr(n)) }
 
-// discard compiles an expression whose value is unused. A bare variable is
-// still read, as PHP's CHECK_VAR warns about an undefined one.
+// discard compiles an expression whose value is unused. A bare variable
+// emits nothing: zend_do_free drops an unused CV without reading it, so
+// "$u;" and the discarded parts of a for loop never warn.
 func (fc *fnCompiler) discard(n *ir.Node) {
 	mark := fc.top
-	fc.value(n)
+	switch {
+	case n != nil && n.Op == ir.OpVar:
+		fc.c.line = n.Line
+		fc.at(n.Line)
+		if _, ok := fc.vars[n.Var]; !ok {
+			panic(internalError{"variable not in the function's table"})
+		}
+	case n != nil && n.Op == ir.OpAssign:
+		fc.assign(n, false)
+	default:
+		fc.value(n)
+	}
 	fc.top = mark
 }
 
@@ -93,7 +105,7 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		}
 		return fc.unaryLike(n, bytecode.OpCast, uint16(kind))
 	case ir.OpAssign:
-		return fc.assign(n)
+		return fc.assign(n, true)
 	case ir.OpAssignOp:
 		return fc.assignOp(n)
 	case ir.OpCoalesceSet:
@@ -354,7 +366,9 @@ func (fc *fnCompiler) dimRead(n *ir.Node) operand {
 	return reg(r)
 }
 
-func (fc *fnCompiler) assign(n *ir.Node) operand {
+// assign compiles "=". used is false when the value of the assignment is
+// discarded, which spares the read-back of an element write's value.
+func (fc *fnCompiler) assign(n *ir.Node, used bool) operand {
 	target, value := n.Kids[0], n.Kids[1]
 	switch target.Op {
 	case ir.OpVar:
@@ -366,32 +380,69 @@ func (fc *fnCompiler) assign(n *ir.Node) operand {
 		fc.emit(bytecode.OpStore, 0, l, rv, 0)
 		return reg(rv)
 	case ir.OpDim:
-		// ASSIGN_DIM is created when its target is compiled, so it carries
-		// the line reached after the key (or the base for []), and the value
-		// read by its OP_DATA shares it.
-		l := fc.plainBase(target.Kids[0], n.Line)
-		var k operand
-		if target.Kids[1] != nil {
-			k = fc.expr(target.Kids[1])
-		}
-		opLine := fc.cur
-		v := fc.expr(value)
-		after := fc.cur
-		fc.cur = opLine
-		if target.Kids[1] == nil {
-			rv := fc.materialize(v)
-			fc.emit(bytecode.OpArrayAppend, 0, l, rv, 0)
-			fc.cur = after
-			return reg(rv)
-		}
-		rk := fc.materialize(k)
-		rv := fc.materialize(v)
-		fc.emit(bytecode.OpArraySet, 0, l, rk, rv)
-		fc.cur = after
-		return reg(rv)
+		return fc.assignDim(n, used)
 	}
 	fc.unsupportedNode(target)
 	return operand{}
+}
+
+// assignDim compiles $a[k] = v and $a[] = v. ASSIGN_DIM is created when its
+// target is compiled, so it carries the line reached after the key (or the
+// base for []), and the value read by its OP_DATA shares it. A key or value
+// that is a plain variable is passed as its Location: ASSIGN_DIM reads such a
+// CV itself, the key after the container check and the value after the key
+// conversion. The one exception is a value that is the container variable
+// itself ($a[k] = $a): zend_compile_expr_with_potential_assign_to_self copies
+// it first, so it is read before the write.
+func (fc *fnCompiler) assignDim(n *ir.Node, used bool) operand {
+	target, value := n.Kids[0], n.Kids[1]
+	base := target.Kids[0]
+	l := fc.plainBase(base, n.Line)
+	var k operand
+	if target.Kids[1] != nil {
+		k = fc.expr(target.Kids[1])
+	}
+	opLine := fc.cur
+	v := fc.expr(value)
+	after := fc.cur
+	fc.cur = opLine
+	var flags bytecode.ArrayWriteFlags
+	var rk, rv uint32
+	if target.Kids[1] != nil {
+		if k.cv >= 0 && !k.quiet {
+			flags |= bytecode.KeyLocation
+			rk = fc.loc(k.cv)
+		} else {
+			rk = fc.materialize(k)
+		}
+	}
+	self := value.Op == ir.OpVar && value.Var == base.Var
+	if v.cv >= 0 && !v.quiet && !self {
+		flags |= bytecode.ValueLocation
+		rv = fc.loc(v.cv)
+	} else {
+		rv = fc.materialize(v)
+	}
+	if target.Kids[1] == nil {
+		fc.emit(bytecode.OpArrayAppend, uint16(flags), l, rv, 0)
+	} else {
+		fc.emit(bytecode.OpArraySet, uint16(flags), l, rk, rv)
+	}
+	if flags&bytecode.ValueLocation != 0 {
+		// The assigned value, read back quietly: the write cannot change a
+		// variable other than the container, and an undefined one is null.
+		if !used {
+			// discard drops it; a register no instruction wrote fails
+			// verification if it were ever read.
+			fc.cur = after
+			return reg(fc.alloc())
+		}
+		r := fc.alloc()
+		fc.emit(bytecode.OpLoad, 1, r, rv, 0)
+		rv = r
+	}
+	fc.cur = after
+	return reg(rv)
 }
 
 // assignOp compiles $x op= e: e first, then $x is read, as PHP's ASSIGN_OP.
@@ -441,7 +492,11 @@ func (fc *fnCompiler) coalesceSet(n *ir.Node) operand {
 	fc.jump(end)
 	fc.top = mark
 	fc.bind(assign)
-	v := fc.value(n.Kids[1])
+	// As for "=", the assignment and a plain variable it reads carry the
+	// target's line.
+	ve := fc.expr(n.Kids[1])
+	fc.at(target.Line)
+	v := fc.materialize(ve)
 	fc.emit(bytecode.OpStore, 0, l, v, 0)
 	fc.emit(bytecode.OpMove, 0, res, v, 0)
 	fc.top = mark
@@ -477,20 +532,14 @@ func (fc *fnCompiler) incDec(n *ir.Node) operand {
 	return reg(r)
 }
 
-// array builds a literal in a hidden local: ArraySet and ArrayAppend need a
-// Location, and the hidden local is unset once the value is loaded.
+// array builds a literal in its result register: NewArray, then one
+// ArrayAdd per element (INIT_ARRAY / ADD_ARRAY_ELEMENT), each value read
+// before its key. A key that is a plain variable is passed as its Location
+// so that an undefined one is the key "" with only its warning, as
+// ADD_ARRAY_ELEMENT treats an undefined CV.
 func (fc *fnCompiler) array(n *ir.Node) operand {
 	res := fc.alloc()
 	fc.emit(bytecode.OpNewArray, 0, res, 0, 0)
-	if len(n.Kids) == 0 {
-		return reg(res)
-	}
-	if fc.hdepth >= fc.hidden {
-		panic(internalError{"array nesting deeper than the prescan"})
-	}
-	l := fc.loc(fc.nvars + fc.hdepth)
-	fc.hdepth++
-	fc.emit(bytecode.OpStore, 0, l, res, 0)
 	mark := fc.top
 	for _, it := range n.Kids {
 		if it == nil {
@@ -506,41 +555,88 @@ func (fc *fnCompiler) array(n *ir.Node) operand {
 		}
 		if key := it.Kids[0]; key == nil {
 			v := fc.value(it.Kids[1])
-			fc.emit(bytecode.OpArrayAppend, 0, l, v, 0)
+			fc.emit(bytecode.OpArrayAdd, 0, res, v, 0)
 		} else {
 			k := fc.expr(key)
 			v := fc.expr(it.Kids[1])
-			// ADD_ARRAY_ELEMENT reads its value operand before its key.
 			rv := fc.materialize(v)
-			rk := fc.materialize(k)
-			fc.emit(bytecode.OpArraySet, 0, l, rk, rv)
+			if k.cv >= 0 && !k.quiet {
+				fc.emit(bytecode.OpArrayAdd, uint16(bytecode.AddKey|bytecode.AddKeyLocation), res, rv, fc.loc(k.cv))
+			} else {
+				fc.emit(bytecode.OpArrayAdd, uint16(bytecode.AddKey), res, rv, fc.materialize(k))
+			}
 		}
 		fc.top = mark
 	}
-	fc.emit(bytecode.OpLoad, 0, res, l, 0)
-	fc.emit(bytecode.OpUnset, 0, l, 0, 0)
-	fc.hdepth--
 	return reg(res)
 }
 
-// interp joins the parts left to right; a lone part is cast to string.
-func (fc *fnCompiler) interp(n *ir.Node) operand {
-	if len(n.Kids) == 0 {
-		panic(internalError{"empty interpolation"})
+// interpPart is one part of an interpolated string after adjacent literals
+// are merged and empty ones dropped: n is nil for a literal.
+type interpPart struct {
+	n    *ir.Node
+	text string
+	line int
+}
+
+func interpParts(kids []*ir.Node) []interpPart {
+	var out []interpPart
+	for _, k := range kids {
+		if k == nil {
+			panic(internalError{"empty interpolation part"})
+		}
+		if k.Op != ir.OpLiteral || k.Value == nil || k.Value.Kind != ir.LitString {
+			out = append(out, interpPart{n: k, line: k.Line})
+			continue
+		}
+		if last := len(out) - 1; last >= 0 && out[last].n == nil {
+			out[last].text += k.Value.Str
+			out[last].line = positive(k.Line, out[last].line)
+		} else if k.Value.Str != "" {
+			out = append(out, interpPart{text: k.Value.Str, line: k.Line})
+		}
 	}
+	return out
+}
+
+// interp joins the parts of an interpolated string. One part is cast to
+// string. Two parts are PHP's FAST_CONCAT, which reads both operands when it
+// runs, so a variable part is read after the other part is evaluated. Three
+// or more are a rope (ROPE_INIT, ROPE_ADD, ROPE_END) that converts each part
+// as soon as it is compiled: the first part is converted before the second
+// is evaluated, and each later part by the Concat right after it.
+func (fc *fnCompiler) interp(n *ir.Node) operand {
+	parts := interpParts(n.Kids)
 	mark := fc.top
-	first := n.Kids[0]
-	if len(n.Kids) == 1 {
-		v := fc.value(first)
+	part := func(p interpPart) operand {
+		if p.n != nil {
+			return fc.expr(p.n)
+		}
+		fc.at(p.line)
+		r := fc.alloc()
+		fc.emit(bytecode.OpConst, 0, r, fc.c.stringConst(p.text), 0)
+		return reg(r)
+	}
+	switch len(parts) {
+	case 0:
+		panic(internalError{"empty interpolation"})
+	case 1:
+		v := fc.materialize(part(parts[0]))
 		r := fc.allocNot(mark, v)
 		fc.emit(bytecode.OpCast, uint16(bytecode.CastString), r, v, 0)
 		return reg(r)
 	}
-	acc := fc.expr(first)
-	for _, p := range n.Kids[1:] {
-		part := fc.expr(p)
+	acc := part(parts[0])
+	if len(parts) > 2 && parts[0].n != nil {
+		v := fc.materialize(acc)
+		r := fc.allocNot(mark, v)
+		fc.emit(bytecode.OpCast, uint16(bytecode.CastString), r, v, 0)
+		acc = reg(r)
+	}
+	for _, p := range parts[1:] {
+		next := part(p)
 		ra := fc.materialize(acc)
-		rp := fc.materialize(part)
+		rp := fc.materialize(next)
 		r := fc.allocNot(mark, ra, rp)
 		fc.emit(bytecode.OpBinary, uint16(bytecode.Concat), r, ra, rp)
 		acc = reg(r)

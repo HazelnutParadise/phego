@@ -118,13 +118,35 @@ const (
 	OpUnary       // A dest Value, B operand Value; Aux is a UnaryOp
 	OpCast        // A dest Value, B operand Value; Aux is a CastKind
 	OpIncDec      // A result Value, B target Location; Aux is an IncDecOp
-	OpArraySet    // A container Location, B key Value, C value Value: $a[k] = v
-	OpArrayAppend // A container Location, B value Value: $a[] = v
+	OpArraySet    // A container Location, B key, C value: $a[k] = v; Aux is ArrayWriteFlags
+	OpArrayAppend // A container Location, B value: $a[] = v; Aux is ArrayWriteFlags (ValueLocation only)
 	OpArrayUnset  // A container Location, B key Value: unset($a[k])
 	OpIsset       // A dest Value (bool), B Location: isset($x)
 	OpArrayIsset  // A dest Value (bool), B container Value, C key Value: isset($a[k])
 	OpUnset       // A Location: unset($x)
 	OpExit        // A status Value when Aux is 1; Aux 0 is exit without a status
+	OpArrayAdd    // A array Value (updated in place), B value Value, C key when Aux has AddKey; Aux is ArrayAddFlags
+)
+
+// ArrayWriteFlags is the Aux of OpArraySet and OpArrayAppend. Without a flag
+// the operand is a Value register read before the instruction; with it, the
+// operand is a Location the instruction reads itself, with PHP's undefined
+// variable warning, at the point ZEND_ASSIGN_DIM reads that CV: the key after
+// the container check, the value (OP_DATA) after the key is converted.
+type ArrayWriteFlags uint16
+
+const (
+	ValueLocation ArrayWriteFlags = 1 << iota // the value operand is a Location
+	KeyLocation                               // OpArraySet: the key operand B is a Location
+)
+
+// ArrayAddFlags is the Aux of OpArrayAdd, which adds one element of an
+// array literal (ZEND_INIT_ARRAY / ZEND_ADD_ARRAY_ELEMENT).
+type ArrayAddFlags uint16
+
+const (
+	AddKey         ArrayAddFlags = 1 << iota // C is the key; without it the value is appended
+	AddKeyLocation                           // with AddKey: C is a Location read by the instruction; undefined is the key ""
 )
 
 // UnaryOp is the Aux of OpUnary.
