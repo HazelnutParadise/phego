@@ -28,7 +28,12 @@ type elementWindow struct {
 //     the register, which ends the sequence; a value it reads itself
 //     (ValueLocation) is a variable other than the base;
 //   - or Load of the register, then Const and Binary, then Store to the
-//     register, which ends the sequence (an assign-op).
+//     register, which ends the sequence (an assign-op);
+//   - or, from format 1.3, one of these, which ends the sequence: Bind of
+//     the register to or from a variable, or to a reference in a Value
+//     register; MakeRef or a by-reference IterInit of the register. A
+//     reference does not point into the array, so nothing stale is left
+//     behind.
 //
 // A jump target, a handler target or any other instruction ends the
 // sequence, and the register may not appear in any instruction outside a
@@ -159,6 +164,21 @@ func (w *elementWindow) step(in Instruction, elem []bool, other func(r, base uin
 			w.open = false
 			return true, nil
 		}
+	case OpBind:
+		// $x =& <element>, <element> =& $x, or <element> =& a reference
+		// in a register (MakeRef, a by-reference IterNext).
+		value := BindFlags(in.Aux) == BindValue
+		if !w.loaded && (in.A == e && (value || !elem[in.B]) || in.B == e && !value && !elem[in.A]) {
+			w.open = false
+			return true, nil
+		}
+	case OpMakeRef, OpIterInit:
+		// MakeRef replaces the element by a reference before anything else
+		// can reach the array; a by-reference IterInit binds the loop to it.
+		if in.B == e && !w.loaded && (in.Op == OpMakeRef || IterFlags(in.Aux) == IterByRef) {
+			w.open = false
+			return true, nil
+		}
 	case OpArraySet, OpArrayAppend, OpArrayUnset:
 		if in.A != e || w.loaded {
 			break
@@ -218,9 +238,18 @@ func locationOperands(in Instruction, f *Function) (regs [3]uint32, n int) {
 			add(in.C)
 		}
 	case OpIterNext:
-		if IterFlags(in.Aux) == IterLocation {
+		if IterFlags(in.Aux)&IterLocation != 0 {
 			add(in.B)
 		}
+	case OpIterInit, OpBind:
+		if in.Op == OpBind {
+			add(in.A)
+		}
+		if isLoc(in.B) {
+			add(in.B)
+		}
+	case OpMakeRef:
+		add(in.B)
 	case OpIterKey:
 		if IterFlags(in.Aux) == IterLocation {
 			add(in.A)

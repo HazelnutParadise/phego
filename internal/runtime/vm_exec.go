@@ -56,16 +56,20 @@ type vmState struct {
 	// (vmDefaultCacheable). Allocated on first use; it lives with the run,
 	// never in the shared Program.
 	defaults [][]vmCachedDefault
-	args     []value
-	steps    int64
-	limit    int64
-	next     int64 // steps at which the next slow check runs
-	done     <-chan struct{}
-	scratch  []byte
-	globals  []Global
-	prelude  []RunDiagnostic
-	end      completion
-	ended    bool
+	// refIters are the run's foreach-by-reference iterations; an iterator
+	// register names one (vmRefIter). freeIters are reusable indexes.
+	refIters  []vmRefIter
+	freeIters []int
+	args      []value
+	steps     int64
+	limit     int64
+	next      int64 // steps at which the next slow check runs
+	done      <-chan struct{}
+	scratch   []byte
+	globals   []Global
+	prelude   []RunDiagnostic
+	end       completion
+	ended     bool
 
 	// offsetBuf holds the bytes of offsetLast, the string the last string
 	// offset write built, when offsetValid is set, so that a write
@@ -279,6 +283,9 @@ func (s *vmState) setReg(regs []value, r uint32, v value) error {
 }
 
 func (s *vmState) releaseValue(v value) error {
+	if v.kind == valueReference && v.integer != 0 {
+		s.endRefIter(v)
+	}
 	if v.kind >= valueArray {
 		return s.h.release(v)
 	}

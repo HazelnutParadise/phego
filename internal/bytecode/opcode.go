@@ -19,6 +19,10 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case OpParamDefault:
 		// A branch on the frame's argument count.
+	case OpBind, OpMakeRef:
+		// Format 1.3. Binding releases the destination's old value, and
+		// making a reference can create an element or a null variable.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:

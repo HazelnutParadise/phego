@@ -301,9 +301,26 @@ func format12(in Instruction) bool {
 	return false
 }
 
+// format13 reports whether a known instruction needs format 1.3: a 1.3
+// opcode, or a by-reference iterator instruction.
+func format13(in Instruction) bool {
+	switch in.Op {
+	case OpBind, OpMakeRef:
+		return true
+	case OpIterInit, OpIterNext:
+		return IterFlags(in.Aux)&IterByRef != 0
+	case OpFetchDim:
+		return FetchFlags(in.Aux).Use() == FetchForRef
+	}
+	return false
+}
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 3 && format13(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.3, but the file declares format 1.%d", minor))
 	}
 	if minor < 2 && format12(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.2, but the file declares format 1.%d", minor))
@@ -321,7 +338,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
-		OpFetchDim, OpIterNext, OpIterKey:
+		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -492,7 +509,8 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			key = Location
 		}
 		switch {
-		case flags&^fetchKnown != 0 || flags.Mode() > FetchUnset || flags.Use() > FetchForAssignOp:
+		case flags&^fetchKnown != 0 || flags.Mode() > FetchUnset:
+		case flags.Use() == FetchForRef && flags.Mode() != FetchWrite:
 		case flags.Mode() == FetchUnset && (flags.Use() != 0 || flags&FetchAppend != 0):
 		case !reg(in.A, Location) || !reg(in.B, Location):
 		case flags&FetchAppend != 0 && flags&FetchKeyLocation == 0 && in.C == 0, flags&FetchAppend == 0 && reg(in.C, key):
@@ -500,16 +518,20 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		}
 		return invalid("invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use")
 	case OpIterInit:
-		if !reg(in.A, Value) || !reg(in.B, Value) || uint64(in.C) >= uint64(len(f.Code)) {
-			return invalid("invalid iter-init operands: A and B must be Value registers, C an instruction index")
+		subject := reg(in.B, Value)
+		if in.Aux == uint16(IterByRef) {
+			subject = subject || reg(in.B, Location)
+		}
+		if (in.Aux != 0 && in.Aux != uint16(IterByRef)) || !reg(in.A, Value) || !subject || uint64(in.C) >= uint64(len(f.Code)) {
+			return invalid("invalid iter-init operands: A and B must be Value registers (B may be a Location where Aux is IterByRef), C an instruction index")
 		}
 	case OpIterNext:
 		dest := Value
-		if IterFlags(in.Aux) == IterLocation {
+		if IterFlags(in.Aux)&IterLocation != 0 {
 			dest = Location
 		}
-		if in.Aux > uint16(IterLocation) || !reg(in.A, Value) || !reg(in.B, dest) || uint64(in.C) >= uint64(len(f.Code)) {
-			return invalid("invalid iter-next operands: A must be a Value, B a Value (a Location where Aux is IterLocation), C an instruction index")
+		if in.Aux > uint16(IterLocation|IterByRef) || !reg(in.A, Value) || !reg(in.B, dest) || uint64(in.C) >= uint64(len(f.Code)) {
+			return invalid("invalid iter-next operands: A must be a Value, B a Value (a Location where Aux has IterLocation), C an instruction index; Aux is IterLocation and IterByRef")
 		}
 	case OpIterKey:
 		dest := Value
@@ -522,6 +544,18 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	case OpParamDefault:
 		if in.A >= f.Params || uint64(in.B) >= uint64(len(f.Code)) || in.C != 0 {
 			return invalid("invalid param-default operands: A must be a parameter register, B an instruction index, C zero")
+		}
+	case OpBind:
+		source := Location
+		if in.Aux == uint16(BindValue) {
+			source = Value
+		}
+		if in.Aux > uint16(BindValue) || !reg(in.A, Location) || !reg(in.B, source) || in.C != 0 {
+			return invalid("invalid bind operands: A must be a Location, B a Location (a Value where Aux is BindValue), C zero")
+		}
+	case OpMakeRef:
+		if !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
+			return invalid("invalid make-ref operands: A must be a Value, B a Location, C zero")
 		}
 	default:
 		return invalid("unknown opcode")
@@ -1080,7 +1114,7 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
 			}
-			if IterFlags(in.Aux) == IterLocation {
+			if IterFlags(in.Aux)&IterLocation != 0 {
 				if err := read(in.B); err != nil {
 					return flowError(err, fi, pc)
 				}
@@ -1101,6 +1135,21 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			}
 		case OpParamDefault:
 			// Reads no register: it tests the frame's argument count.
+		case OpBind:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if BindFlags(in.Aux) == BindValue {
+				clear(in.B) // the instruction empties it
+			}
+		case OpMakeRef:
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			write(in.A)
 		case OpArrayAppend, OpArrayUnset:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)

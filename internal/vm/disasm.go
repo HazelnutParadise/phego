@@ -24,6 +24,7 @@ var opNames = [...]string{
 	bytecode.OpUnset: "Unset", bytecode.OpExit: "Exit", bytecode.OpArrayAdd: "ArrayAdd",
 	bytecode.OpFetchDim: "FetchDim", bytecode.OpIterInit: "IterInit", bytecode.OpIterNext: "IterNext",
 	bytecode.OpIterKey: "IterKey", bytecode.OpParamDefault: "ParamDefault",
+	bytecode.OpBind: "Bind", bytecode.OpMakeRef: "MakeRef",
 }
 
 var binaryNames = [...]string{
@@ -65,6 +66,14 @@ func auxName(in bytecode.Instruction) string {
 		return name(incDecNames[:], a)
 	case bytecode.OpFetchDim:
 		return fetchName(bytecode.FetchFlags(in.Aux))
+	case bytecode.OpBind:
+		if bytecode.BindFlags(in.Aux) == bytecode.BindValue {
+			return "value"
+		}
+	case bytecode.OpIterInit, bytecode.OpIterNext:
+		if bytecode.IterFlags(in.Aux)&bytecode.IterByRef != 0 {
+			return "ref+" + strconv.Itoa(a&int(bytecode.IterLocation))
+		}
 	case bytecode.OpArraySet:
 		// The write flags, then the result register when there is one.
 		if r, ok := bytecode.ArraySetResult(in.Aux); ok {
@@ -89,6 +98,8 @@ func fetchName(f bytecode.FetchFlags) string {
 		out += "+incdec"
 	case bytecode.FetchForAssignOp:
 		out += "+assignop"
+	case bytecode.FetchForRef:
+		out += "+ref"
 	}
 	return out
 }

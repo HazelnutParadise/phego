@@ -465,7 +465,6 @@ func TestUnsupportedConstructs(t *testing.T) {
 		feature, src string
 		line         int
 	}{
-		{"by-reference parameter", "echo 1;\nfunction f(&$a) {}", 3},
 		{"typed parameter", "echo 1;\nfunction f(int $a) {}", 3},
 		{"variadic parameter", "echo 1;\nfunction f(...$a) {}", 3},
 		{"return type", "echo 1;\nfunction f(): int { return 1; }", 3},
@@ -508,7 +507,10 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"$this", "echo 1;\necho $this;", 3},
 		{"@ error suppression", "echo 1;\necho @$x;", 3},
 		{"empty()", "echo 1;\necho empty($x);", 3},
-		{"reference assignment", "echo 1;\n$a = &$b;", 3},
+		{"reference to the result of a call", "echo 1;\nfunction f() {}\n$a = &f();", 4},
+		{"passing a value that is not a variable by reference", "echo 1;\nfunction f(&$a) {}\nf(1);", 4},
+		{"value of an assignment by reference between two elements", "echo 1;\n$x = ($a[0] = &$b[0]);", 3},
+		{"property access", "echo 1;\n$a = &$o->p;", 3},
 		{"by-reference array element", "echo 1;\n$a = [&$b];", 3},
 		{"first-class callable", "echo 1;\nfunction f() {}\n$g = f(...);", 4},
 		{"object cast", "echo 1;\n$o = (object)$a;", 3},
@@ -608,10 +610,10 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		feature string
 		line    int
 	}{
-		// A function body before the main code that uses foreach by reference.
-		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\nforeach ($a as &$b) {}\n", "constant lookup", 2},
+		// A function body before the main code that destructures.
+		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\n[$b] = $a;\n", "constant lookup", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\nforeach ($a as &$b) {}\nfunction f() { return PHP_EOL; }\n", "foreach by reference", 3},
+		{"<?php\necho 1;\n[$b] = $a;\nfunction f() { return PHP_EOL; }\n", "list() destructuring", 3},
 		// Within a statement, the left operand first.
 		{"<?php\necho PHP_EOL . $o->p;\n", "constant lookup", 2},
 	}
@@ -640,8 +642,8 @@ var compileFatal = map[string]string{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 192 {
-		t.Fatalf("want 192 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 219 {
+		t.Fatalf("want 219 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

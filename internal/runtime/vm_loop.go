@@ -205,8 +205,11 @@ func (s *vmState) loop() {
 				return
 			}
 			if in.aux == 1 {
-				s.stop(s.unsupported("passing a location as an argument"))
-				return
+				if err := s.pushRef(f, in); err != nil {
+					s.stop(err)
+					return
+				}
+				goto advance
 			}
 			v := regs[in.a]
 			if v.kind == valueUndefined {
@@ -357,9 +360,18 @@ func (s *vmState) loop() {
 		case bytecode.OpIterInit, bytecode.OpIterNext:
 			var more bool
 			var err error
-			if in.op == bytecode.OpIterInit {
+			switch {
+			case in.op == bytecode.OpIterInit && in.aux&uint16(bytecode.IterByRef) != 0:
+				more, err = s.iterInitRef(f, in)
+			case in.op == bytecode.OpIterInit:
 				more, err = s.iterInit(f, in)
-			} else {
+			case regs[in.a].kind == valueReference:
+				if ri := s.refIter(regs[in.a]); ri != nil {
+					more, err = s.iterNextRef(f, in, ri)
+				} else {
+					err = s.unsupported("advancing an iterator that IterInit did not create")
+				}
+			default:
 				more, err = s.iterNext(f, in)
 			}
 			if err != nil {
@@ -384,7 +396,24 @@ func (s *vmState) loop() {
 			}
 			pc = target
 			continue
+		case bytecode.OpBind:
+			if err := s.bind(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpMakeRef:
+			if err := s.makeRef(f, in); err != nil {
+				s.stop(err)
+				return
+			}
 		case bytecode.OpIterKey:
+			if ri := s.refIter(regs[in.b]); ri != nil {
+				if err := s.iterKeyRef(f, in, ri); err != nil {
+					s.stop(err)
+					return
+				}
+				goto advance
+			}
 			if err := s.iterKey(f, in); err != nil {
 				s.stop(err)
 				return
