@@ -39,7 +39,7 @@ func (s *vmState) loop() {
 			old := regs[in.a]
 			regs[in.a] = s.prog.consts[in.b]
 			if old.kind >= valueArray {
-				if err := h.release(old); err != nil {
+				if err := s.releaseValue(old); err != nil {
 					s.stop(err)
 					return
 				}
@@ -212,10 +212,15 @@ func (s *vmState) loop() {
 				goto advance
 			}
 			v := regs[in.a]
-			if v.kind == valueUndefined {
+			switch {
+			case v.kind == valueUndefined:
 				v = nullValue()
-			}
-			if v.kind >= valueArray {
+			case v.kind == valueReference:
+				// A by-reference argument (SEND_REF): the reference MakeRef
+				// put in the register moves to the argument stack, so no
+				// extra owner is left behind whether or not liveness runs.
+				regs[in.a] = value{}
+			case v.kind >= valueArray:
 				retain(v)
 			}
 			s.args = append(s.args, v)

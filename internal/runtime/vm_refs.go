@@ -14,15 +14,24 @@ const vmIterSubjectLocation uint16 = 4
 
 // vmRefIter is the state of one foreach by reference, FE_RESET_RW's
 // iterator. The iterator register holds the loop's own reference to the
-// subject, with this state's index plus one in its integer field.
+// subject; its integer field names this state (vmRefIterID). A copy of the
+// register that hand-written bytecode kept after the loop ended names no
+// state: the state checks the reference and a generation that every reuse
+// of its slot increments.
 type vmRefIter struct {
 	it      *arrayIterator
+	loop    *reference
 	current *phpArray
 	first   bool
 	key     arrayKey
 	hasKey  bool
 	live    bool
+	gen     uint32
 }
+
+// vmRefIterID is the integer field of an iterator register: the slot plus
+// one in the low 32 bits, the slot's generation in the high 32 bits.
+func vmRefIterID(index int, gen uint32) int64 { return int64(gen)<<32 | int64(index+1) }
 
 // nullIfUndefined is what ASSIGN_REF, MAKE_REF and SEND_REF do to a
 // variable or an element that holds nothing: the reference they create
@@ -78,7 +87,19 @@ func (s *vmState) makeRef(f *vmFrame, in *vmInstr) error {
 		return err
 	}
 	nullIfUndefined(src)
+	// The register's old value goes through releaseValue, which ends an
+	// iteration it may name.
+	if err := s.clearReg(f, in.a); err != nil {
+		return err
+	}
 	return s.h.bind(&f.regs[in.a], src)
+}
+
+// clearReg empties the Value register r.
+func (s *vmState) clearReg(f *vmFrame, r uint32) error {
+	old := f.regs[r]
+	f.regs[r] = value{}
+	return s.releaseValue(old)
 }
 
 // pushRef is ZEND_SEND_REF: the variable or element becomes a reference
@@ -103,10 +124,14 @@ func (s *vmState) pushRef(f *vmFrame, in *vmInstr) error {
 // refIter is the by-reference iteration an iterator register names, or nil
 // for a by-value iterator.
 func (s *vmState) refIter(v value) *vmRefIter {
-	if v.kind != valueReference || v.integer <= 0 || v.integer > int64(len(s.refIters)) {
+	if v.kind != valueReference || v.integer <= 0 {
 		return nil
 	}
-	if it := &s.refIters[v.integer-1]; it.live {
+	slot := int64(uint32(v.integer)) - 1
+	if slot < 0 || slot >= int64(len(s.refIters)) {
+		return nil
+	}
+	if it := &s.refIters[slot]; it.live && it.loop == v.ref && it.gen == uint32(v.integer>>32) {
 		return it
 	}
 	return nil
@@ -123,8 +148,8 @@ func (s *vmState) endRefIter(v value) {
 	for a := range it.it.arrays {
 		delete(a.cursors, it.it)
 	}
-	*it = vmRefIter{}
-	s.freeIters = append(s.freeIters, int(v.integer-1))
+	*it = vmRefIter{gen: it.gen}
+	s.freeIters = append(s.freeIters, int(uint32(v.integer))-1)
 }
 
 // iterInitRef is ZEND_FE_RESET_RW: the loop takes its own reference to the
@@ -173,8 +198,9 @@ func (s *vmState) iterInitRef(f *vmFrame, in *vmInstr) (iterable bool, err error
 		index = len(s.refIters)
 		s.refIters = append(s.refIters, vmRefIter{})
 	}
-	s.refIters[index] = vmRefIter{it: &arrayIterator{arrays: make(map[*phpArray]struct{})}, first: true, live: true}
-	loop.integer = int64(index + 1)
+	gen := s.refIters[index].gen + 1
+	s.refIters[index] = vmRefIter{it: &arrayIterator{arrays: make(map[*phpArray]struct{})}, loop: loop.ref, first: true, live: true, gen: gen}
+	loop.integer = vmRefIterID(index, gen)
 	old := f.regs[in.a]
 	f.regs[in.a] = loop // the loop's reference moves into the register
 	return true, s.releaseValue(old)
@@ -236,6 +262,12 @@ func (s *vmState) iterNextRef(f *vmFrame, in *vmInstr, ri *vmRefIter) (more bool
 	// release may run a destructor that removes this bucket.
 	ri.key, ri.hasKey = b.key, true
 	if bytecode.IterFlags(in.aux)&bytecode.IterLocation == 0 {
+		if in.b == in.a {
+			return false, s.unsupported("fetching an element into its own iterator")
+		}
+		if err := s.clearReg(f, in.b); err != nil {
+			return false, err
+		}
 		return true, h.bind(&f.regs[in.b], &b.val)
 	}
 	dst, err := s.slot(f, in.b)

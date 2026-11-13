@@ -523,9 +523,13 @@ func parameterPrologue(f vmFunction, code []bytecode.Instruction) (locals, store
 // hold an array and are dead after it, so the interpreter releases them at
 // once. Holding a dead copy would make the next write to the same array copy
 // it (copy on write), turning "$x = $a[$i]; $a[$i] = ..." loops quadratic.
-// Release timing is not observable by PHP code in stage 1 (no objects or
-// destructors). Functions whose dataflow would need more than vmLivenessWords
-// bitset words keep registers until they are overwritten or the frame ends.
+// Release timing is not observable by PHP code here (no objects or
+// destructors), except through the owner count of a reference, which decides
+// whether copying an array copies its element or shares it; so no register
+// keeps a reference past its use without liveness: Push and Bind move the
+// references MakeRef and IterNext put in registers. Functions whose dataflow
+// would need more than vmLivenessWords bitset words keep registers until
+// they are overwritten or the frame ends.
 func vmLiveness(f *vmFunction) {
 	n := len(f.code)
 	// Registers that may hold a composite value: written by an instruction
