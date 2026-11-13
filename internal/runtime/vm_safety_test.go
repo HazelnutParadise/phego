@@ -311,16 +311,6 @@ func TestVMUnsupportedConstructs(t *testing.T) {
 			f := a.fn("f", 1, 3, "x")
 			f.retNull()
 		},
-		"string offset read": func(a *vmAsm) {
-			m := a.fn("{main}", 0, 2)
-			m.ret(m.get(m.k("abc"), m.k(0), false))
-		},
-		"string offset write": func(a *vmAsm) {
-			m := a.fn("{main}", 0, 2, "s")
-			m.store("s", m.k("abc"))
-			m.set("s", m.k(0), m.k("x"))
-			m.retNull()
-		},
 	}
 	for name, build := range cases {
 		t.Run(name, func(t *testing.T) {

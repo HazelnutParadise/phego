@@ -49,7 +49,7 @@ func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 		}
 		return s.setReg(regs, in.a, nullValue())
 	case valueString:
-		return s.unsupported("reading a string offset")
+		return s.stringOffsetGet(regs, in, c.text, k)
 	case valueObject, valueResource:
 		return s.unsupported("reading an offset of an object or resource")
 	}
@@ -86,7 +86,9 @@ func (s *vmState) writable(slot *value, appending bool) error {
 		if appending {
 			return &Throwable{"Error", "[] operator not supported for strings"}
 		}
-		return s.unsupported("writing a string offset")
+		// ArraySet and FetchDim handle a string container before they
+		// prepare the container.
+		return s.internal("string container reached the array write path")
 	case valueObject, valueResource:
 		return s.unsupported("writing an offset of an object or resource")
 	}
@@ -116,7 +118,8 @@ func operandValue(regs []value, r uint32) value {
 	return nullValue()
 }
 
-// arraySet is ZEND_ASSIGN_DIM on a variable: the container check (with PHP
+// arraySet is ZEND_ASSIGN_DIM on a variable or an element: the container
+// check (with PHP
 // 8.1's false deprecation), then the key, then the OP_DATA value, then the
 // write. A key or value given as a Location (bytecode.KeyLocation,
 // bytecode.ValueLocation) is read at that point, so its undefined-variable
@@ -126,6 +129,9 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	slot, err := s.slot(f, in.a)
 	if err != nil {
 		return err
+	}
+	if slot.deref().kind == valueString {
+		return s.stringOffsetSet(f, in, slot)
 	}
 	if err := s.writable(slot, false); err != nil || s.stopped() {
 		return err
@@ -138,7 +144,11 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 		return err
 	}
 	if flags&bytecode.ValueLocation == 0 {
-		return s.h.setElement(slot, k, operandValue(f.regs, in.c))
+		v := operandValue(f.regs, in.c)
+		if err := s.h.setElement(slot, k, v); err != nil {
+			return err
+		}
+		return s.arraySetResult(f, in, v)
 	}
 	// The value is taken now but its warning waits for the key conversion,
 	// where zend_fetch_dimension_address_inner_W ends and OP_DATA is read.
@@ -169,6 +179,9 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	}
 	if err == nil && !s.stopped() {
 		err = s.h.assign(e, v)
+	}
+	if err == nil && !s.stopped() {
+		err = s.arraySetResult(f, in, v)
 	}
 	if rerr := s.h.release(v); err == nil {
 		err = rerr
@@ -246,9 +259,13 @@ func (s *vmState) arrayUnset(f *vmFrame, in *vmInstr) error {
 	// undefined key reads as null, which unset treats as "" silently.
 	c := slot.deref()
 	if c.kind == valueUndefined {
-		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.a))
-		if s.stopped() {
-			return nil
+		// An element location is never undefined: FETCH_DIM_UNSET reported
+		// its variable already.
+		if name, ok := s.variableName(f, in.a); ok {
+			s.h.warn(levelWarning, "Undefined variable $"+name)
+			if s.stopped() {
+				return nil
+			}
 		}
 	}
 	var k value
@@ -423,9 +440,11 @@ func (s *vmState) incDec(f *vmFrame, in *vmInstr) error {
 		if err := s.h.assign(slot, nullValue()); err != nil {
 			return err
 		}
-		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.b))
-		if s.stopped() {
-			return nil
+		if name, ok := s.variableName(f, in.b); ok {
+			s.h.warn(levelWarning, "Undefined variable $"+name)
+			if s.stopped() {
+				return nil
+			}
 		}
 		old = nullValue()
 	}

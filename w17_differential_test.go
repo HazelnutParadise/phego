@@ -46,15 +46,11 @@ type w17Run struct {
 // w17Unsupported lists the cases this build's first VM stage cannot run,
 // with the located error Compile must return. They count as unsupported in
 // the summary, never as passes.
-var w17Unsupported = map[string]UnsupportedError{
-	"compound_assign":           {Feature: "compound assignment to array element", File: "/w/cases/compound_assign.php", Line: 61},
-	"compound_assign_undefined": {Feature: "compound assignment to array element", File: "/w/cases/compound_assign_undefined.php", Line: 34},
-	"isset_unset":               {Feature: "nested array unset", File: "/w/cases/isset_unset.php", Line: 22},
-}
+var w17Unsupported = map[string]UnsupportedError{}
 
 // w17Cases is the number of programs in tests/vm/w17/cases; every
 // reference file holds one entry per program.
-const w17Cases = 90
+const w17Cases = 192
 
 // w17Profile is one PHP build the reference was recorded on.
 type w17Profile struct {
@@ -184,13 +180,14 @@ type w17Observed struct {
 }
 
 // w17Execute compiles and runs one case as php -n /w/cases/<case>.php does.
-// A compile-time fatal error is rendered the way PHP 8.5.12 prints it.
+// A compile-time fatal error or a parse error is rendered the way PHP 8.5.12
+// prints it.
 func w17Execute(t *testing.T, e *Engine, name, src string, opts ...RunOption) w17Observed {
 	t.Helper()
 	ctx := context.Background()
 	p, err := e.Compile(ctx, "/w/cases/"+name+".php", src)
 	var pe *PHPError
-	if errors.As(err, &pe) && pe.Kind == CompileError {
+	if errors.As(err, &pe) && (pe.Kind == CompileError || pe.Kind == ParseError) {
 		var rc runConfig
 		rc.ini = defaultINI
 		for _, opt := range opts {
@@ -201,8 +198,11 @@ func w17Execute(t *testing.T, e *Engine, name, src string, opts ...RunOption) w1
 		obs := w17Observed{exitCode: 255, err: err, compileFatal: pe}
 		// PHP 8.5's fatal_error_backtraces (on by default) appends the
 		// backtrace after the location; while the file is compiled it is
-		// {main} alone.
+		// {main} alone. A parse error has no backtrace.
 		text := "Fatal error: " + pe.Message + " in " + pe.File + " on line " + strconv.Itoa(pe.Line) + "\nStack trace:\n#0 {main}\n"
+		if pe.Kind == ParseError {
+			text = "Parse error: " + pe.Message + " in " + pe.File + " on line " + strconv.Itoa(pe.Line) + "\n"
+		}
 		if rc.ini.display {
 			obs.stdout = []byte("\n" + text)
 		}

@@ -1,0 +1,16 @@
+--- FAIL: TestW17Stage2Probes (0.01s)
+    --- FAIL: TestW17Stage2Probes/nested_concat_const_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:1021: stdout differs at byte 12
+              php:   "a\n\nWarning: Array to string conversion in /w/cases/s2_nested_concat_cons"
+              phego: "a\n\nWarning: Undefined variable $a in /w/cases/s2_nested_concat_const_arr"
+    --- FAIL: TestW17Stage2Probes/nested_concat_const_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:1026: stderr differs at byte 14
+              php:   "PHP Warning:  Array to string conversion in /w/cases/s2_nested_concat_cons"
+              phego: "PHP Warning:  Undefined variable $a in /w/cases/s2_nested_concat_const_arr"
+    --- FAIL: TestW17Stage2Probes/nested_concat_const_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:1021: stdout differs at byte 12
+              php:   "a\n\nWarning: Array to string conversion in /w/cases/s2_nested_concat_cons"
+              phego: "a\n\nWarning: Undefined variable $a in /w/cases/s2_nested_concat_const_arr"
+FAIL
+FAIL	github.com/HazelnutParadise/phego	0.598s
+FAIL

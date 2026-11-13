@@ -27,6 +27,14 @@ func FuzzLoadRejectsMalformedAndRepairedPayloads(f *testing.F) {
 	} else {
 		f.Fatalf("cannot construct format 1.1 fuzz seed: %v", err)
 	}
+	// A format 1.2 seed does the same for the 1.2 opcodes and Aux values.
+	if p12, err := Build(context.Background(), format12Everything(), testOptions()); err == nil {
+		if e12, err := p12.Encode(context.Background()); err == nil {
+			f.Add(append([]byte(nil), e12[64:]...))
+		}
+	} else {
+		f.Fatalf("cannot construct format 1.2 fuzz seed: %v", err)
+	}
 	if pn, err := Build(context.Background(), localNamesImage(), testOptions()); err == nil {
 		if en, err := pn.Encode(context.Background()); err == nil {
 			f.Add(append([]byte(nil), en[64:]...))
@@ -88,9 +96,9 @@ func FuzzLoadRejectsMalformedAndRepairedPayloads(f *testing.F) {
 		if len(payload) > 4032 {
 			payload = payload[:4032]
 		}
-		// Both supported minor versions see the same payload, so the 1.0
-		// gate and the 1.1 verifier are both exercised.
-		for _, minor := range []uint16{0, FormatMinor} {
+		// Every supported minor version sees the same payload, so the 1.0
+		// and 1.1 gates and the 1.2 verifier are all exercised.
+		for _, minor := range []uint16{0, 1, FormatMinor} {
 			repaired := make([]byte, 64+len(payload))
 			copy(repaired[:8], []byte{'P', 'H', 'E', 'G', 'O', 'B', 'C', 0})
 			binary.LittleEndian.PutUint16(repaired[8:10], 1)

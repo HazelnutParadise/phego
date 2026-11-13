@@ -1,0 +1,98 @@
+DIFF s2_def_escape_elsewhere (exit phego 0 php 0)
+1,2d0
+< b
+< b
+4,7c2
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_elsewhere.php on line 4
+< b
+< b
+< b
+---
+> <<phego error phego: unsupported: parameter default whose string value PHP may intern in /w/cases/s2_def_escape_elsewhere.php on line 2>>
+\ No newline at end of file
+DIFF s2_def_escape_folds (exit phego 0 php 0)
+1,2d0
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 2
+4,27c2
+< ][
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 2
+< 
+< ]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 4
+< 	][
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 4
+< 	]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 6
+< \][
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 6
+< \]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 8
+< A][
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 8
+< A]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_escape_folds.php on line 10
+< 
+< ][
+< ]
+---
+> <<phego error phego: unsupported: parameter default whose string value PHP may intern in /w/cases/s2_def_escape_folds.php on line 2>>
+\ No newline at end of file
+DIFF s2_def_int_operators (exit phego 0 php 0)
+1,26c1,2
+< [
+< Deprecated: Implicit conversion from float 1.5 to int loses precision in /w/cases/s2_def_int_operators.php on line 2
+< 1][1]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 4
+< 0][0]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 6
+< x0][
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 6
+< x0]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 8
+< 1][1]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 10
+< 1][1]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 12
+< 5][5]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 14
+< 1][1]
+< [
+< Warning: Undefined array key 5 in /w/cases/s2_def_int_operators.php on line 16
+< 0][0]
+---
+> 
+> <<phego error phego: unsupported: parameter default whose string value PHP may intern in /w/cases/s2_def_int_operators.php on line 2>>
+\ No newline at end of file
+DIFF s2_def_nowdoc_byte (exit phego 0 php 0)
+3,7c3
+< a][
+< Warning: Undefined array key 5 in /w/cases/s2_def_nowdoc_byte.php on line 2
+< a][
+< Warning: Undefined array key 5 in /w/cases/s2_def_nowdoc_byte.php on line 2
+< a]
+---
+> a][a][a]
+DIFF s2_def_string_bitwise (exit phego 0 php 0)
+3,5c3
+< a][
+< Warning: Undefined array key 5 in /w/cases/s2_def_string_bitwise.php on line 2
+< a]
+---
+> a][a]
+11,13c9
+< ][
+< Warning: Undefined array key 5 in /w/cases/s2_def_string_bitwise.php on line 6
+< ]
+---
+> ][]

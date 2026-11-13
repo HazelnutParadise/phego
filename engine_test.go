@@ -32,7 +32,8 @@ func TestRunNeverClaimsSuccessWithoutExecution(t *testing.T) {
 	}
 	// A construct the VM cannot run is refused with its location, never run
 	// partly or reported as success.
-	result, err = Run(context.Background(), "<?php\necho 1;\nforeach ([1] as $v) {}\n")
+	// (Stage 2 runs a by-value foreach; by reference is still outside it.)
+	result, err = Run(context.Background(), "<?php\necho 1;\nforeach ([1] as &$v) {}\n")
 	var ue *UnsupportedError
 	if !errors.As(err, &ue) || ue.Line != 3 || ue.File != "Standard input code" || result == nil || result.Status != StatusFailed || len(result.Output) != 0 {
 		t.Fatalf("result %+v error %v", result, err)

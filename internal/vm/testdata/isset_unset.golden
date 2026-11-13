@@ -40,11 +40,11 @@ func 0 "{main}" params=0 locals=2 registers=7 maxstack=0
   19: ArrayIsset 0 5 4 3 ; line 3
   20: Move 0 2 5 0 ; line 3
   21: Output 0 2 0 0 ; line 3
-  22: Const 0 3 0 0 ; line 3 ; string "k"
-  23: Load 1 4 0 0 ; line 3
-  24: ArrayGet 1 5 4 3 ; line 3
+  22: Load 1 3 0 0 ; line 3
+  23: Const 0 6 0 0 ; line 3 ; string "k"
+  24: ArrayGet 1 4 3 6 ; line 3
   25: Const 0 6 3 0 ; line 3 ; string "j"
-  26: ArrayIsset 0 3 5 6 ; line 3
+  26: ArrayIsset 0 3 4 6 ; line 3
   27: Move 0 2 3 0 ; line 3
   28: Output 0 2 0 0 ; line 3
   29: Unset 0 0 0 0 ; line 4

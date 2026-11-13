@@ -23,7 +23,8 @@ func validateIdentity(id Identity) error {
 }
 
 // verifyImage checks image as format version 1.minor. Minor 0 files may not
-// use any format 1.1 opcode, Aux value or binary operator.
+// use any format 1.1 opcode, Aux value or binary operator, and files below
+// minor 2 may not use any format 1.2 opcode or Aux value.
 func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (CapabilitySet, error) {
 	if err := b.poll(); err != nil {
 		return 0, err
@@ -265,6 +266,9 @@ func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Funct
 			}
 		}
 	}
+	if err := verifyElementLocations(b, f); err != nil {
+		return 0, functionError(err, int(index), -1)
+	}
 	if err := verifyFlow(b, image, f, uint32(index)); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}
@@ -285,9 +289,24 @@ func format11(in Instruction) bool {
 	return false
 }
 
+// format12 reports whether a known instruction needs format 1.2: a 1.2
+// opcode, or an ArraySet whose Aux names a result register.
+func format12(in Instruction) bool {
+	switch in.Op {
+	case OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpParamDefault:
+		return true
+	case OpArraySet:
+		return in.Aux > uint16(ValueLocation|KeyLocation)
+	}
+	return false
+}
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 2 && format12(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.2, but the file declares format 1.%d", minor))
 	}
 	if minor == 0 && format11(in) {
 		return invalid("instruction needs bytecode format 1.1, but the file declares format 1.0")
@@ -301,7 +320,8 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	}
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
-	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd:
+	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
+		OpFetchDim, OpIterNext, OpIterKey:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -415,8 +435,11 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if ArrayWriteFlags(in.Aux)&ValueLocation != 0 {
 			val = Location
 		}
-		if in.Aux > uint16(ValueLocation|KeyLocation) || !reg(in.A, Location) || !reg(in.B, key) || !reg(in.C, val) {
-			return invalid("invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation")
+		if in.Aux&(1<<2) != 0 || !reg(in.A, Location) || !reg(in.B, key) || !reg(in.C, val) {
+			return invalid("invalid array-set operands: A must be a Location, B and C Value registers, or Locations where Aux has KeyLocation or ValueLocation; Aux bit 2 is zero")
+		}
+		if r, ok := ArraySetResult(in.Aux); ok && !reg(r, Value) {
+			return invalid("invalid array-set result: Aux bits 3 to 15 must be zero or the index of a Value register plus one")
 		}
 	case OpArrayAppend:
 		val := Value
@@ -462,6 +485,44 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if !zero || in.Aux > 1 || (in.Aux == 0 && in.A != 0) || (in.Aux == 1 && !reg(in.A, Value)) {
 			return invalid("invalid exit operands: Aux 0 needs A, B and C zero, Aux 1 a status Value in A and B, C zero")
 		}
+	case OpFetchDim:
+		flags := FetchFlags(in.Aux)
+		key := Value
+		if flags&FetchKeyLocation != 0 {
+			key = Location
+		}
+		switch {
+		case flags&^fetchKnown != 0 || flags.Mode() > FetchUnset || flags.Use() > FetchForAssignOp:
+		case flags.Mode() == FetchUnset && (flags.Use() != 0 || flags&FetchAppend != 0):
+		case !reg(in.A, Location) || !reg(in.B, Location):
+		case flags&FetchAppend != 0 && flags&FetchKeyLocation == 0 && in.C == 0, flags&FetchAppend == 0 && reg(in.C, key):
+			return nil
+		}
+		return invalid("invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use")
+	case OpIterInit:
+		if !reg(in.A, Value) || !reg(in.B, Value) || uint64(in.C) >= uint64(len(f.Code)) {
+			return invalid("invalid iter-init operands: A and B must be Value registers, C an instruction index")
+		}
+	case OpIterNext:
+		dest := Value
+		if IterFlags(in.Aux) == IterLocation {
+			dest = Location
+		}
+		if in.Aux > uint16(IterLocation) || !reg(in.A, Value) || !reg(in.B, dest) || uint64(in.C) >= uint64(len(f.Code)) {
+			return invalid("invalid iter-next operands: A must be a Value, B a Value (a Location where Aux is IterLocation), C an instruction index")
+		}
+	case OpIterKey:
+		dest := Value
+		if IterFlags(in.Aux) == IterLocation {
+			dest = Location
+		}
+		if in.Aux > uint16(IterLocation) || !reg(in.A, dest) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid iter-key operands: A must be a Value (a Location where Aux is IterLocation), B a Value, C zero")
+		}
+	case OpParamDefault:
+		if in.A >= f.Params || uint64(in.B) >= uint64(len(f.Code)) || in.C != 0 {
+			return invalid("invalid param-default operands: A must be a parameter register, B an instruction index, C zero")
+		}
 	default:
 		return invalid("unknown opcode")
 	}
@@ -477,7 +538,7 @@ func successorCount(in Instruction, pc, n uint32) int {
 	switch in.Op {
 	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit:
 		return 0
-	case OpBranch:
+	case OpBranch, OpIterInit, OpIterNext, OpParamDefault:
 		return 2
 	default:
 		return 1
@@ -494,6 +555,18 @@ func successor(in Instruction, pc, n uint32, which int) edge {
 			return edge{pc: in.B}
 		}
 		return edge{pc: in.C}
+	case OpIterInit, OpIterNext:
+		// Edge 0 falls through; edge 1 is taken for a subject that cannot
+		// be iterated, or when the iteration is over.
+		if which == 1 {
+			return edge{pc: in.C}
+		}
+		return edge{pc: pc + 1}
+	case OpParamDefault:
+		if which == 1 {
+			return edge{pc: in.B}
+		}
+		return edge{pc: pc + 1}
 	default:
 		return edge{pc: pc + 1}
 	}
@@ -857,6 +930,10 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		}
 		write := func(r uint32) { scratchDefs[r/64] |= uint64(1) << (r % 64) }
 		clear := func(r uint32) { scratchDefs[r/64] &^= uint64(1) << (r % 64) }
+		// fallDef is a register the instruction defines on its fall-through
+		// edge (edge 0) only.
+		var fallDef uint32
+		hasFallDef := false
 		if err := b.chargeWork(uint64(len(stack)) + uint64(words) + 1); err != nil {
 			return err
 		}
@@ -978,6 +1055,52 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 					return flowError(err, fi, pc)
 				}
 			}
+			if r, ok := ArraySetResult(in.Aux); ok {
+				write(r)
+			}
+		case OpFetchDim:
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if FetchFlags(in.Aux)&FetchAppend == 0 {
+				if err := read(in.C); err != nil {
+					return flowError(err, fi, pc)
+				}
+			}
+			write(in.A)
+		case OpIterInit:
+			// The iterator is written on the fall-through edge only; the
+			// jump for a subject that cannot be iterated leaves it cleared.
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			clear(in.A)
+			fallDef, hasFallDef = in.A, true
+		case OpIterNext:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if IterFlags(in.Aux) == IterLocation {
+				if err := read(in.B); err != nil {
+					return flowError(err, fi, pc)
+				}
+			} else {
+				// The element is written only when there is one.
+				fallDef, hasFallDef = in.B, true
+			}
+		case OpIterKey:
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if IterFlags(in.Aux) == IterLocation {
+				if err := read(in.A); err != nil {
+					return flowError(err, fi, pc)
+				}
+			} else {
+				write(in.A)
+			}
+		case OpParamDefault:
+			// Reads no register: it tests the frame's argument count.
 		case OpArrayAppend, OpArrayUnset:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
@@ -1017,6 +1140,18 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			}
 		}
 		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit) {
+			if hasFallDef {
+				// The jump edge is merged before the fall-through
+				// definition is added.
+				if _, err := merge(int(successor(in, uint32(pc), uint32(n), 1).pc), scratchDefs, stack); err != nil {
+					return flowError(err, fi, pc)
+				}
+				write(fallDef)
+				if _, err := merge(pc+1, scratchDefs, stack); err != nil {
+					return flowError(err, fi, pc)
+				}
+				continue
+			}
 			for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 				e := successor(in, uint32(pc), uint32(n), ei)
 				d := scratchDefs

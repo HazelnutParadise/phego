@@ -1,0 +1,41 @@
+W-17 stage 2 random differential against the pinned PHP 8.5.12 images (2026-11-12)
+
+Programs: w17Stage2Gen (w17_stage2_probes_test.go), written with Phego's
+display-mode output by TestW17Stage2OracleDump:
+
+  PHEGO_DUMP=<dir> PHEGO_DUMP_SEED=<seed> PHEGO_DUMP_WIDTH=<64|32> \
+    CGO_ENABLED=0 go test -count=1 -run TestW17Stage2OracleDump .
+
+(Steps limit 2,000,000; PHEGO_DUMP_FILES=1 reruns the programs already in
+<dir>/cases.) PHP ran each program with
+
+  docker run --rm --pull=never --network none --cap-drop ALL -v <dir>:/w:ro -v <dir>/php:/out \
+    php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 \
+    php -n -d display_errors=1 -d log_errors=0 -d error_reporting=-1 -d html_errors=0 /w/cases/<case>.php
+
+and, for width 32, i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049
+with --platform linux/386. stdout and the exit code were compared byte for byte.
+
+Before the fixes of this round (seeds 12345, 777 at 64-bit; 999 at 32-bit):
+  1800 programs; 2 differed outside PHP's memory limit. Seed 777 r0454 is
+  the order of "Array to string conversion" and "Undefined variable" for
+  `$v . []`: PHP compiles a constant array operand of CONCAT through a CAST
+  emitted before the CONCAT (zend_compile_binary_op). Seed 999 r0296 showed
+  identical stdout and was flagged on the exit-code file while two PHP runs
+  were writing the same output directory; it is identical in the rerun
+  below, so it is not counted as an engine difference.
+
+After the fixes:
+  seed 4444  width 64: 600 programs, 592 identical, 8 PHP memory-limit, 0 differ
+  seed 5555  width 32: 600 programs, 590 identical, 10 PHP memory-limit, 0 differ
+  seed 6666  width 64: 600 programs, 593 identical, 7 PHP memory-limit, 0 differ
+  seed 777   width 64: 600 programs, 591 identical, 9 PHP memory-limit, 0 differ
+  seed 999   width 32: 600 programs, 596 identical, 4 PHP memory-limit, 0 differ
+
+"PHP memory-limit" programs recurse without bound; PHP ends them with
+"Allowed memory size of 134217728 bytes exhausted" and Phego, which does not
+meter memory, ends them at its frame or step limit. In every such program
+Phego's output is a prefix of PHP's (checked with head -c | cmp).
+
+The generator's parameter defaults never warn, so the RECV_INIT cache is
+covered by the s2_def_cached_* and s2_def_uncached_kinds probes instead.

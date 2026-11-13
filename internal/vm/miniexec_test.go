@@ -214,6 +214,74 @@ type miniFrame struct {
 	regs   []any
 	locals []any
 	stack  []any
+	nargs  int
+}
+
+// miniElem is the element a Location register names after FetchDim: key
+// in arr, or a detached null (arr is nil) when unset mode found nothing.
+type miniElem struct {
+	arr *miniArray
+	key any
+}
+
+// miniIter is a foreach iterator over a copy of its array.
+type miniIter struct {
+	arr *miniArray
+	pos int
+}
+
+// get and set read and write the variable or element a Location names.
+func (fr *miniFrame) get(l any) any {
+	switch x := l.(type) {
+	case int:
+		return fr.locals[x]
+	case *miniElem:
+		if x.arr == nil {
+			return nil
+		}
+		return x.arr.vals[x.key]
+	}
+	failf("location %T", l)
+	return nil
+}
+
+func (fr *miniFrame) set(l, v any) {
+	switch x := l.(type) {
+	case int:
+		fr.locals[x] = v
+	case *miniElem:
+		if x.arr != nil {
+			x.arr.set(x.key, v)
+		}
+	default:
+		failf("location %T", l)
+	}
+}
+
+// array returns the array in location l for a write, creating it for an
+// undefined or null one.
+func (fr *miniFrame) array(l any) *miniArray {
+	v := fr.get(l)
+	if a, ok := v.(*miniArray); ok {
+		return a
+	}
+	if _, undef := v.(undefined); !undef && v != nil {
+		failf("array write on %T", v)
+	}
+	a := &miniArray{vals: map[any]any{}}
+	fr.set(l, a)
+	return a
+}
+
+// function finds a function by name, as CallValue does.
+func (m *miniVM) function(name string) uint32 {
+	for i, f := range m.img.Functions {
+		if i != int(m.img.Entry) && strings.EqualFold(f.Name, name) {
+			return uint32(i)
+		}
+	}
+	failf("call to undefined function %s", name)
+	return 0
 }
 
 func (m *miniVM) call(fi uint32, args []any) any {
@@ -223,8 +291,23 @@ func (m *miniVM) call(fi uint32, args []any) any {
 		fr.locals[i] = undefined{}
 	}
 	copy(fr.regs, args)
+	fr.nargs = len(args)
 	pc := 0
-	loc := func(r uint32) int { return fr.regs[r].(int) }
+	loc := func(r uint32) any { return fr.regs[r] }
+	variable := func(r uint32) any {
+		v := fr.get(loc(r))
+		if _, undef := v.(undefined); undef {
+			failf("undefined variable read")
+		}
+		return v
+	}
+	store := func(aux uint16, r uint32, v any) {
+		if bytecode.IterFlags(aux) == bytecode.IterLocation {
+			fr.set(loc(r), v)
+		} else {
+			fr.regs[r] = v
+		}
+	}
 	for {
 		m.steps++
 		if m.steps > 1_000_000 {
@@ -253,7 +336,7 @@ func (m *miniVM) call(fi uint32, args []any) any {
 		case bytecode.OpLocal:
 			fr.regs[in.A] = int(in.B)
 		case bytecode.OpLoad:
-			v := fr.locals[loc(in.B)]
+			v := fr.get(loc(in.B))
 			if _, ok := v.(undefined); ok {
 				if in.Aux == 0 {
 					failf("undefined variable read")
@@ -262,7 +345,7 @@ func (m *miniVM) call(fi uint32, args []any) any {
 			}
 			fr.regs[in.A] = copyValue(v)
 		case bytecode.OpStore:
-			fr.locals[loc(in.A)] = copyValue(fr.regs[in.B])
+			fr.set(loc(in.A), copyValue(fr.regs[in.B]))
 		case bytecode.OpBinary:
 			fr.regs[in.A] = m.binary(bytecode.BinaryOp(in.Aux), fr.regs[in.B], fr.regs[in.C])
 		case bytecode.OpUnary:
@@ -287,7 +370,7 @@ func (m *miniVM) call(fi uint32, args []any) any {
 			}
 		case bytecode.OpIncDec:
 			l := loc(in.B)
-			old := fr.locals[l]
+			old := fr.get(l)
 			if _, ok := old.(undefined); ok {
 				failf("increment of undefined")
 			}
@@ -306,7 +389,7 @@ func (m *miniVM) call(fi uint32, args []any) any {
 					nv = old.(int64) - 1
 				}
 			}
-			fr.locals[l] = nv
+			fr.set(l, nv)
 			if in.Aux == uint16(bytecode.PreInc) || in.Aux == uint16(bytecode.PreDec) {
 				fr.regs[in.A] = nv
 			} else {
@@ -331,6 +414,25 @@ func (m *miniVM) call(fi uint32, args []any) any {
 				return nil
 			}
 			fr.regs[in.A] = v
+		case bytecode.OpCallValue:
+			name, ok := fr.regs[in.B].(string)
+			if !ok {
+				failf("callable %T", fr.regs[in.B])
+			}
+			n := len(fr.stack) - int(in.C)
+			args := append([]any(nil), fr.stack[n:]...)
+			fr.stack = fr.stack[:n]
+			v := m.call(m.function(name), args)
+			if m.exit {
+				return nil
+			}
+			fr.regs[in.A] = v
+		case bytecode.OpParamDefault:
+			if int(in.A) < fr.nargs {
+				pc = int(in.B)
+			}
+		case bytecode.OpDrop:
+			fr.regs[in.A] = nil
 		case bytecode.OpReturn:
 			return fr.regs[in.A]
 		case bytecode.OpOutput:
@@ -346,6 +448,17 @@ func (m *miniVM) call(fi uint32, args []any) any {
 		case bytecode.OpNewArray:
 			fr.regs[in.A] = &miniArray{vals: map[any]any{}}
 		case bytecode.OpArrayGet:
+			if s, ok := fr.regs[in.B].(string); ok {
+				i := num(fr.regs[in.C])
+				if i < 0 {
+					i += int64(len(s))
+				}
+				if i < 0 || i >= int64(len(s)) {
+					failf("string offset %d outside %q", i, s)
+				}
+				fr.regs[in.A] = s[i : i+1]
+				break
+			}
 			a, ok := fr.regs[in.B].(*miniArray)
 			if !ok {
 				failf("array read on %T", fr.regs[in.B])
@@ -356,32 +469,78 @@ func (m *miniVM) call(fi uint32, args []any) any {
 			}
 			fr.regs[in.A] = copyValue(v)
 		case bytecode.OpArraySet, bytecode.OpArrayAppend:
-			l := loc(in.A)
-			a, ok := fr.locals[l].(*miniArray)
-			if !ok {
-				if _, undef := fr.locals[l].(undefined); !undef && fr.locals[l] != nil {
-					failf("array write on %T", fr.locals[l])
-				}
-				a = &miniArray{vals: map[any]any{}}
-				fr.locals[l] = a
-			}
+			a := fr.array(loc(in.A))
 			flags := bytecode.ArrayWriteFlags(in.Aux)
 			operand := func(r uint32, isLoc bool) any {
 				if !isLoc {
 					return fr.regs[r]
 				}
-				v := fr.locals[loc(r)]
-				if _, undef := v.(undefined); undef {
-					failf("undefined variable read")
-				}
-				return v
+				return variable(r)
 			}
 			if in.Op == bytecode.OpArraySet {
 				k := operand(in.B, flags&bytecode.KeyLocation != 0)
-				a.set(key(k), copyValue(operand(in.C, flags&bytecode.ValueLocation != 0)))
+				v := copyValue(operand(in.C, flags&bytecode.ValueLocation != 0))
+				a.set(key(k), v)
+				if r, ok := bytecode.ArraySetResult(in.Aux); ok {
+					fr.regs[r] = copyValue(v)
+				}
 			} else {
 				a.set(a.next, copyValue(operand(in.B, flags&bytecode.ValueLocation != 0)))
 			}
+		case bytecode.OpFetchDim:
+			// The container is separated from other holders by the copies
+			// Load and Store make, so the element is written in place.
+			flags := bytecode.FetchFlags(in.Aux)
+			l := loc(in.B)
+			var a *miniArray
+			if flags.Mode() == bytecode.FetchUnset {
+				if a, _ = fr.get(l).(*miniArray); a == nil {
+					fr.regs[in.A] = &miniElem{}
+					break
+				}
+			} else {
+				a = fr.array(l)
+			}
+			var k any
+			switch {
+			case flags&bytecode.FetchAppend != 0:
+				k = a.next
+			case flags&bytecode.FetchKeyLocation != 0:
+				k = key(variable(in.C))
+			default:
+				k = key(fr.regs[in.C])
+			}
+			if _, ok := a.vals[k]; !ok {
+				if flags.Mode() == bytecode.FetchUnset {
+					fr.regs[in.A] = &miniElem{}
+					break
+				}
+				a.set(k, nil)
+			}
+			fr.regs[in.A] = &miniElem{arr: a, key: k}
+		case bytecode.OpIterInit:
+			a, ok := fr.regs[in.B].(*miniArray)
+			if !ok {
+				failf("foreach over %T", fr.regs[in.B])
+			}
+			fr.regs[in.A] = &miniIter{arr: a.clone()}
+		case bytecode.OpIterNext:
+			it, ok := fr.regs[in.A].(*miniIter)
+			if !ok {
+				failf("IterNext on %T", fr.regs[in.A])
+			}
+			if it.pos >= len(it.arr.keys) {
+				pc = int(in.C)
+				break
+			}
+			it.pos++
+			store(in.Aux, in.B, copyValue(it.arr.vals[it.arr.keys[it.pos-1]]))
+		case bytecode.OpIterKey:
+			it, ok := fr.regs[in.B].(*miniIter)
+			if !ok || it.pos == 0 {
+				failf("IterKey on %T", fr.regs[in.B])
+			}
+			store(in.Aux, in.A, it.arr.keys[it.pos-1])
 		case bytecode.OpArrayAdd:
 			a, ok := fr.regs[in.A].(*miniArray)
 			if !ok {
@@ -390,11 +549,7 @@ func (m *miniVM) call(fi uint32, args []any) any {
 			v := copyValue(fr.regs[in.B])
 			switch flags := bytecode.ArrayAddFlags(in.Aux); {
 			case flags&bytecode.AddKeyLocation != 0:
-				k := fr.locals[loc(in.C)]
-				if _, undef := k.(undefined); undef {
-					failf("undefined variable read")
-				}
-				a.set(key(k), v)
+				a.set(key(variable(in.C)), v)
 			case flags&bytecode.AddKey != 0:
 				a.set(key(fr.regs[in.C]), v)
 			default:
@@ -403,15 +558,17 @@ func (m *miniVM) call(fi uint32, args []any) any {
 		case bytecode.OpArrayUnset:
 			k := fr.regs[in.B]
 			if bytecode.ArrayWriteFlags(in.Aux)&bytecode.KeyLocation != 0 {
-				k = fr.locals[loc(in.B)]
-				if _, undef := k.(undefined); undef {
-					failf("undefined variable read")
-				}
+				k = variable(in.B)
 			}
-			if a, ok := fr.locals[loc(in.A)].(*miniArray); ok {
+			if a, ok := fr.get(loc(in.A)).(*miniArray); ok {
 				a.unset(key(k))
 			}
 		case bytecode.OpArrayIsset:
+			if str, ok := fr.regs[in.B].(string); ok {
+				i := num(fr.regs[in.C])
+				fr.regs[in.A] = i >= -int64(len(str)) && i < int64(len(str))
+				break
+			}
 			a, ok := fr.regs[in.B].(*miniArray)
 			v, has := any(nil), false
 			if ok {
@@ -419,11 +576,11 @@ func (m *miniVM) call(fi uint32, args []any) any {
 			}
 			fr.regs[in.A] = has && v != nil
 		case bytecode.OpIsset:
-			v := fr.locals[loc(in.B)]
+			v := fr.get(loc(in.B))
 			_, undef := v.(undefined)
 			fr.regs[in.A] = !undef && v != nil
 		case bytecode.OpUnset:
-			fr.locals[loc(in.A)] = undefined{}
+			fr.set(loc(in.A), undefined{})
 		default:
 			failf("opcode %d outside the mini VM", in.Op)
 		}

@@ -302,26 +302,59 @@ func (f *binaryFold) value() compileConst {
 }
 
 // concatBuilder accumulates the operands of a constant concatenation.
+// fresh is Literal.Uninterned of the result so far.
 type concatBuilder struct {
 	text      strings.Builder
 	className bool
+	fresh     bool
 }
 
 func (c *concatBuilder) add(v compileConst, budget *compileBudget) bool {
 	if v.array || v.value == nil || !budget.scan(v.value) {
 		return false
 	}
-	s, ok := constString(v.value)
+	s, fresh, ok := constStringFresh(v.value)
 	if !ok || !budget.spendBytes(len(s)) {
 		return false
 	}
+	c.fresh = concatFresh(c.text.Len() == 0, c.fresh, s == "", fresh)
 	c.text.WriteString(s)
 	c.className = c.className && v.className
 	return true
 }
 
 func (c *concatBuilder) result() compileConst {
-	return compileConst{value: &Literal{Kind: LitString, Str: c.text.String()}, className: c.className}
+	return compileConst{value: &Literal{Kind: LitString, Str: c.text.String(), Uninterned: c.fresh}, className: c.className}
+}
+
+// concatFresh is Literal.Uninterned of x . y: concat_function returns the
+// other operand's string when one side is empty and allocates the result
+// otherwise.
+func concatFresh(xEmpty, xFresh, yEmpty, yFresh bool) bool {
+	switch {
+	case xEmpty:
+		return yFresh
+	case yEmpty:
+		return xFresh
+	}
+	return true
+}
+
+// constStringFresh is constString and whether PHP's conversion
+// (zval_get_string) yields a new string: a string keeps its own mark, null,
+// false, true and an integer from 0 to 9 become interned strings, and other
+// integers and every float are converted into a new one.
+func constStringFresh(v *Literal) (s string, fresh, ok bool) {
+	s, ok = constString(v)
+	switch v.Kind {
+	case LitString:
+		fresh = v.Uninterned
+	case LitInt:
+		fresh = v.Int < 0 || v.Int > 9
+	case LitFloat:
+		fresh = true
+	}
+	return s, fresh, ok
 }
 
 func compileUnary(op string, a *Literal, width int, budget *compileBudget) (compileConst, bool) {
@@ -352,7 +385,8 @@ func compileUnary(op string, a *Literal, width int, budget *compileBudget) (comp
 			for i := 0; i < len(a.Str); i++ {
 				out[i] = ^a.Str[i]
 			}
-			return scalarConst(&Literal{Kind: LitString, Str: string(out)}), true
+			// bitwise_not_function interns a one-byte result only.
+			return scalarConst(&Literal{Kind: LitString, Str: string(out), Uninterned: len(out) != 1}), true
 		}
 	case "+", "-":
 		if !budget.scan(a) {
@@ -399,18 +433,18 @@ func compileBinary(op string, a, b *Literal, width int, budget *compileBudget) (
 		return compileConst{}, false
 	}
 	if op == "." {
-		x, ok := constString(a)
+		x, xFresh, ok := constStringFresh(a)
 		if !ok {
 			return compileConst{}, false
 		}
-		y, ok := constString(b)
+		y, yFresh, ok := constStringFresh(b)
 		if !ok {
 			return compileConst{}, false
 		}
 		if !budget.spendBytes(len(x)) || !budget.spendBytes(len(y)) {
 			return compileConst{}, false
 		}
-		return scalarConst(&Literal{Kind: LitString, Str: x + y}), true
+		return scalarConst(&Literal{Kind: LitString, Str: x + y, Uninterned: concatFresh(x == "", xFresh, y == "", yFresh)}), true
 	}
 	if op == "===" || op == "!==" || op == "==" || op == "!=" || op == "<>" || op == "<" || op == "<=" || op == ">" || op == ">=" || op == "<=>" {
 		// PHP compares greater-than by reversing less-than, including NaN.
@@ -473,7 +507,10 @@ func compileBinary(op string, a, b *Literal, width int, budget *compileBudget) (
 				out[i] = x ^ y
 			}
 		}
-		return scalarConst(&Literal{Kind: LitString, Str: string(out)}), true
+		// The string forms of bitwise_or_function and its siblings intern
+		// the result of two one-byte operands only.
+		fresh := len(a.Str) != 1 || len(b.Str) != 1
+		return scalarConst(&Literal{Kind: LitString, Str: string(out), Uninterned: fresh}), true
 	}
 	if op == "&" || op == "|" || op == "^" || op == "<<" || op == ">>" || op == "%" {
 		x, ok := constInteger(a, width)

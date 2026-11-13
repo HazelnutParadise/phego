@@ -1,0 +1,1074 @@
+--- FAIL: TestW17Stage2Probes (0.16s)
+    --- FAIL: TestW17Stage2Probes/assign_dim_result_chain/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_assign_dim_result_chain.php on line 2
+    --- FAIL: TestW17Stage2Probes/assign_dim_result_chain/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_assign_dim_result_chain.php on line 2
+    --- FAIL: TestW17Stage2Probes/cas_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_append_overflow/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_append_overflow/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key_rw_undefined/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key_rw_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key_rw_undefined/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key_rw_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_div_zero/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_div_zero.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_div_zero/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_div_zero.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_ops/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_ops.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_ops/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_ops.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_order_calls/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_calls.php on line 4
+    --- FAIL: TestW17Stage2Probes/cas_order_calls/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_calls.php on line 4
+    --- FAIL: TestW17Stage2Probes/cas_order_undefined/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_order_undefined/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_result/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_result.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_result/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_result.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_container/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_container/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_self/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_self/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container_badkey/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container_badkey.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container_badkey/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container_badkey.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_array/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_array/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_leading/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_leading/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_true_container/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_true_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_true_container/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_true_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_types/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_types/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_undefined_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_undefined_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_append_mid/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append_mid.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_append_mid/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append_mid.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_lines.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_lines.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_scalar/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_scalar/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_undefined/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_undefined.php on line 2
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_undefined/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_undefined.php on line 2
+    --- FAIL: TestW17Stage2Probes/coalesce_key_reread/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_key_reread.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_key_reread/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_key_reread.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_string_nested/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_string_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_string_nested/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_string_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/def_basic/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_basic.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_basic/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_basic.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_case_and_recursion/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_case_and_recursion.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_case_and_recursion/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_case_and_recursion.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_const_expr_forms/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_const_expr_forms.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_const_expr_forms/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_const_expr_forms.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_div_zero/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_div_zero.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_div_zero/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_div_zero.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_mutation/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_mutation.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_mutation/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_mutation.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_null_explicit/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_null_explicit.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_null_explicit/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_null_explicit.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_optional_before_required2/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_optional_before_required2.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_optional_before_required2/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_optional_before_required2.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_string_offset_default/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_string_offset_default.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_string_offset_default/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_string_offset_default.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_at_least/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_at_least.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_at_least/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_at_least.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/def_too_few_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/def_too_few_nested/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_nested.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_nested/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_nested.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_none/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_none.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_none/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_none.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_many_passed/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_many_passed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_many_passed/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_many_passed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace_param_changed/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace_param_changed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace_param_changed/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace_param_changed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_undefined_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/def_undefined_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/def_warn_expr/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_warn_expr.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_warn_expr/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_warn_expr.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_basic/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_basic.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_basic/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_basic.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_break_continue/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_break_continue.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_break_continue/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_break_continue.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_copy_semantics/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_copy_semantics.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_copy_semantics/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_copy_semantics.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_empty_vars/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_empty_vars.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_empty_vars/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_empty_vars.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_function/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_function.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_function/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_function.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_holes/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_holes.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_holes/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_holes.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_iter_large_holes/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_iter_large_holes.php on line 6
+    --- FAIL: TestW17Stage2Probes/fe_iter_large_holes/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_iter_large_holes.php on line 6
+    --- FAIL: TestW17Stage2Probes/fe_key_only_dim/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_key_only_dim.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_key_only_dim/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_key_only_dim.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_lines.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_lines.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_modify_inside/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_modify_inside.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_modify_inside/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_modify_inside.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_nested_break_cow/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_nested_break_cow.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_nested_break_cow/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_nested_break_cow.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_non_array/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_non_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_non_array/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_non_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_subjects/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_subjects.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_subjects/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_subjects.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_target_error/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_target_error.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_target_error/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_target_error.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_targets/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_targets.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_targets/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_targets.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_types/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_types.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_types/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_types.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_value_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_value_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_value_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_value_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_array/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_array/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_float/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_float.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_float/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_float.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_leading/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_leading/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_nonnumeric_incdec/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_nonnumeric_incdec.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_nonnumeric_incdec/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_nonnumeric_incdec.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_numeric/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_fetch_string_key_numeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_numeric/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_fetch_string_key_numeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim_array_elem/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_array_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_array_elem/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_array_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_containers/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_containers.php on line 2
+    --- FAIL: TestW17Stage2Probes/incdec_dim_containers/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_containers.php on line 2
+    --- FAIL: TestW17Stage2Probes/incdec_dim_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim_result_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_result_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/incdec_dim_result_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_result_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/incdec_dim_scalar/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_scalar/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_elem_types/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_elem_types.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_elem_types/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_elem_types.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_scalar_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_scalar_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_string_append/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_string_append/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_append_overflow/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_append_overflow/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_compound_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_compound_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_through_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_through_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_cow/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_cow/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_incdec_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_incdec_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_incdec_through_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_incdec_through_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_lines.php on line 6
+    --- FAIL: TestW17Stage2Probes/nested_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_lines.php on line 6
+    --- FAIL: TestW17Stage2Probes/nested_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_rw_missing_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_rw_missing_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_rw_missing_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_rw_missing_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_self/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_self/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_false/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_false/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar_var/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar_var/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string_var/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string_var/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write.php on line 2
+    --- FAIL: TestW17Stage2Probes/nested_write/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write.php on line 2
+    --- FAIL: TestW17Stage2Probes/nested_write_false/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_false/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar_outer/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar_outer.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar_outer/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar_outer.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_append_mid/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_append_mid.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_append_mid/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_append_mid.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_deep/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_deep.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_deep/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_deep.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_elem/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_elem/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_var/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_var/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_basic/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_basic.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_basic/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_basic.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_coalesce_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_coalesce_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_coalesce_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_coalesce_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_in_ops/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_so_in_ops.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_in_ops/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_so_in_ops.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_interp/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_interp/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_interp_bare_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp_bare_key.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_interp_bare_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp_bare_key.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_isset_coalesce/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_isset_coalesce.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_isset_coalesce/log64 (0.01s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_isset_coalesce.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_key_array/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_array/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_big_float/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_big_float.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_big_float/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_big_float.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_empty_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_empty_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_empty_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_empty_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_exp_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_exp_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_exp_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_exp_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_float_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_float_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_float_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_float_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_overflow_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_overflow_string.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_overflow_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_overflow_string.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_string/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_string/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_types/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_types/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_lines/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_lines/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_nested/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_nested/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_out_of_range/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_out_of_range.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_out_of_range/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_out_of_range.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_scalar_base/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_scalar_base.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_scalar_base/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_scalar_base.php on line 6
+    --- FAIL: TestW17Stage2Probes/str_write/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_value/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_value/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_bad_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_bad_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_bad_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_bad_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_cow/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/str_write_cow/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/str_write_empty/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_empty.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_empty/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_empty.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_float_string_key/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_float_string_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_float_string_key/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_float_string_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_keys/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_keys.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_keys/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_keys.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_null/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_null.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_null/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_null.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_order/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_order/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_result/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_result.php on line 5
+    --- FAIL: TestW17Stage2Probes/str_write_result/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_result.php on line 5
+    --- FAIL: TestW17Stage2Probes/str_write_undefined_value/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_undefined_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_undefined_value/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_undefined_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_array/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_array/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_leading/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_leading/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_nonnumeric/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_nonnumeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_nonnumeric/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_nonnumeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/width_elements/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_width_elements.php on line 5
+    --- FAIL: TestW17Stage2Probes/width_elements/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: increment of array element in /w/cases/s2_width_elements.php on line 5
+    --- FAIL: TestW17Stage2Probes/width_foreach_keys/display64 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_width_foreach_keys.php on line 5
+    --- FAIL: TestW17Stage2Probes/width_foreach_keys/log64 (0.00s)
+        w17_stage2_probes_test.go:947: unsupported: phego: unsupported: foreach in /w/cases/s2_width_foreach_keys.php on line 5
+    --- FAIL: TestW17Stage2Probes/assign_dim_result_chain/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_assign_dim_result_chain.php on line 2
+    --- FAIL: TestW17Stage2Probes/cas_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_append_overflow/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_array_key_rw_undefined/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key_rw_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_div_zero/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_div_zero.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_ops/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_ops.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_order_calls/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_calls.php on line 4
+    --- FAIL: TestW17Stage2Probes/cas_order_undefined/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_undefined.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_result/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_result.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_scalar_container/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_self/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_container_badkey/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container_badkey.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_array/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_string_key_leading/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_true_container/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_true_container.php on line 3
+    --- FAIL: TestW17Stage2Probes/cas_types/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/cas_undefined_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_append_mid/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append_mid.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_lines.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_scalar/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/coalesce_dim_undefined/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_undefined.php on line 2
+    --- FAIL: TestW17Stage2Probes/coalesce_key_reread/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_key_reread.php on line 4
+    --- FAIL: TestW17Stage2Probes/coalesce_string_nested/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_string_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/def_basic/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_basic.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_case_and_recursion/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_case_and_recursion.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_const_expr_forms/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_const_expr_forms.php on line 4
+    --- FAIL: TestW17Stage2Probes/def_div_zero/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_div_zero.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_mutation/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_mutation.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_null_explicit/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_null_explicit.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_optional_before_required2/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_optional_before_required2.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_string_offset_default/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_string_offset_default.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_at_least/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_at_least.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/def_too_few_nested/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_nested.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_few_none/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_none.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_too_many_passed/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_too_many_passed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_trace_param_changed/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_trace_param_changed.php on line 2
+    --- FAIL: TestW17Stage2Probes/def_undefined_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_undefined_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/def_warn_expr/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: parameter default value in /w/cases/s2_def_warn_expr.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_basic/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_basic.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_break_continue/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_break_continue.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_copy_semantics/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_copy_semantics.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_empty_vars/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_empty_vars.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_function/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_function.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_holes/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_holes.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_iter_large_holes/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_iter_large_holes.php on line 6
+    --- FAIL: TestW17Stage2Probes/fe_key_only_dim/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_key_only_dim.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_lines.php on line 2
+    --- FAIL: TestW17Stage2Probes/fe_modify_inside/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_modify_inside.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_nested_break_cow/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_nested_break_cow.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_non_array/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_non_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_subjects/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_subjects.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_target_error/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_target_error.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_targets/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_targets.php on line 3
+    --- FAIL: TestW17Stage2Probes/fe_types/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_types.php on line 4
+    --- FAIL: TestW17Stage2Probes/fe_value_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_fe_value_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_array/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_float/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_float.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_leading/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_nonnumeric_incdec/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_nonnumeric_incdec.php on line 3
+    --- FAIL: TestW17Stage2Probes/fetch_string_key_numeric/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_fetch_string_key_numeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim_array_elem/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_array_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_containers/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_containers.php on line 2
+    --- FAIL: TestW17Stage2Probes/incdec_dim_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/incdec_dim_result_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_result_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/incdec_dim_scalar/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_dim_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_elem_types/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_elem_types.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_scalar_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_scalar_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/incdec_string_append/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_incdec_string_append.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_append_overflow/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_append_overflow.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_compound_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_compound_through_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_cow/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_incdec_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_incdec_through_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_through_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_lines.php on line 6
+    --- FAIL: TestW17Stage2Probes/nested_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/nested_rw_missing_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_nested_rw_missing_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_self/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_self.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_false/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_scalar_var/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_unset_string_var/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write.php on line 2
+    --- FAIL: TestW17Stage2Probes/nested_write_false/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_false.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_scalar_outer/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar_outer.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_append_mid/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_append_mid.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_deep/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_deep.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_elem/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_elem.php on line 3
+    --- FAIL: TestW17Stage2Probes/nested_write_string_var/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_var.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_basic/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_basic.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_coalesce_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_coalesce_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_in_ops/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_so_in_ops.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_interp/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_interp_bare_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_interp_bare_key.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_isset_coalesce/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_isset_coalesce.php on line 6
+    --- FAIL: TestW17Stage2Probes/so_key_array/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_big_float/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_big_float.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_empty_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_empty_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_exp_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_exp_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_float_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_float_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_overflow_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_overflow_string.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_key_string/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_string.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_key_types/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_key_types.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_lines/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_lines.php on line 5
+    --- FAIL: TestW17Stage2Probes/so_nested/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_nested.php on line 3
+    --- FAIL: TestW17Stage2Probes/so_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: reading a string offset in /w/cases/s2_so_order.php on line 4
+    --- FAIL: TestW17Stage2Probes/so_out_of_range/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_out_of_range.php on line 10
+    --- FAIL: TestW17Stage2Probes/so_scalar_base/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: string offset on a literal in /w/cases/s2_so_scalar_base.php on line 6
+    --- FAIL: TestW17Stage2Probes/str_write/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_array_value/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_bad_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_bad_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_cow/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_cow.php on line 4
+    --- FAIL: TestW17Stage2Probes/str_write_empty/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_empty.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_float_string_key/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_float_string_key.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_keys/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_keys.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_null/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_null.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_order/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_order.php on line 3
+    --- FAIL: TestW17Stage2Probes/str_write_result/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_result.php on line 5
+    --- FAIL: TestW17Stage2Probes/str_write_undefined_value/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: writing a string offset in /w/cases/s2_str_write_undefined_value.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_array/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_array.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_leading/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_leading.php on line 3
+    --- FAIL: TestW17Stage2Probes/unset_string_key_nonnumeric/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_nonnumeric.php on line 3
+    --- FAIL: TestW17Stage2Probes/width_elements/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: increment of array element in /w/cases/s2_width_elements.php on line 5
+    --- FAIL: TestW17Stage2Probes/width_foreach_keys/display32 (0.00s)
+        w17_stage2_probes_test.go:942: unsupported: phego: unsupported: foreach in /w/cases/s2_width_foreach_keys.php on line 5
+--- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile (0.01s)
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/fe_by_ref_literal (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_fe_by_ref_literal.php", Line:3, Option:"", lineLength:36}, want feature "foreach by reference" at /w/cases/s2_fe_by_ref_literal.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_by_ref (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_by_ref.php", Line:4, Option:"", lineLength:28}, want feature "foreach by reference" at /w/cases/s2_u_fe_by_ref.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_list (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_list.php", Line:3, Option:"", lineLength:33}, want feature "list() destructuring" at /w/cases/s2_u_fe_list.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_list_keyed (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_list_keyed.php", Line:4, Option:"", lineLength:43}, want feature "list() destructuring" at /w/cases/s2_u_fe_list_keyed.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_property_target (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_property_target.php", Line:3, Option:"", lineLength:25}, want feature "property access" at /w/cases/s2_u_fe_property_target.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_body (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_body.php", Line:3, Option:"", lineLength:21}, want feature "static variable" at /w/cases/s2_u_fe_body.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_cas_non_variable (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"compound assignment to array element", File:"/w/cases/s2_u_cas_non_variable.php", Line:4, Option:"", lineLength:12}, want feature "array write through a non-variable" at /w/cases/s2_u_cas_non_variable.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_incdec_non_variable (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"increment of array element", File:"/w/cases/s2_u_incdec_non_variable.php", Line:5, Option:"", lineLength:9}, want feature "array write through a non-variable" at /w/cases/s2_u_incdec_non_variable.php:5
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_nested_non_variable (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"nested array write", File:"/w/cases/s2_u_nested_non_variable.php", Line:4, Option:"", lineLength:14}, want feature "array write through a non-variable" at /w/cases/s2_u_nested_non_variable.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_unset_non_variable (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"nested array unset", File:"/w/cases/s2_u_unset_non_variable.php", Line:3, Option:"", lineLength:19}, want feature "property access" at /w/cases/s2_u_unset_non_variable.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_coalesce_non_variable (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"??= on array element", File:"/w/cases/s2_u_coalesce_non_variable.php", Line:3, Option:"", lineLength:15}, want feature "property access" at /w/cases/s2_u_coalesce_non_variable.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_constant (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_constant.php", Line:3, Option:"", lineLength:18}, want feature "constant lookup" at /w/cases/s2_u_default_constant.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_variadic (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_variadic.php", Line:3, Option:"", lineLength:28}, want feature "variadic parameter" at /w/cases/s2_u_default_variadic.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_class_constant (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_class_constant.php", Line:3, Option:"", lineLength:27}, want feature "class constant" at /w/cases/s2_u_default_class_constant.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_named_argument (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_named_argument.php", Line:3, Option:"", lineLength:29}, want feature "named arguments" at /w/cases/s2_u_named_argument.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/fe_by_ref_literal#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_fe_by_ref_literal.php", Line:3, Option:"", lineLength:36}, want feature "foreach by reference" at /w/cases/s2_fe_by_ref_literal.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_by_ref#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_by_ref.php", Line:4, Option:"", lineLength:28}, want feature "foreach by reference" at /w/cases/s2_u_fe_by_ref.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_list#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_list.php", Line:3, Option:"", lineLength:33}, want feature "list() destructuring" at /w/cases/s2_u_fe_list.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_list_keyed#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_list_keyed.php", Line:4, Option:"", lineLength:43}, want feature "list() destructuring" at /w/cases/s2_u_fe_list_keyed.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_property_target#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_property_target.php", Line:3, Option:"", lineLength:25}, want feature "property access" at /w/cases/s2_u_fe_property_target.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_fe_body#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"foreach", File:"/w/cases/s2_u_fe_body.php", Line:3, Option:"", lineLength:21}, want feature "static variable" at /w/cases/s2_u_fe_body.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_cas_non_variable#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"compound assignment to array element", File:"/w/cases/s2_u_cas_non_variable.php", Line:4, Option:"", lineLength:12}, want feature "array write through a non-variable" at /w/cases/s2_u_cas_non_variable.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_incdec_non_variable#01 (0.01s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"increment of array element", File:"/w/cases/s2_u_incdec_non_variable.php", Line:5, Option:"", lineLength:9}, want feature "array write through a non-variable" at /w/cases/s2_u_incdec_non_variable.php:5
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_nested_non_variable#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"nested array write", File:"/w/cases/s2_u_nested_non_variable.php", Line:4, Option:"", lineLength:14}, want feature "array write through a non-variable" at /w/cases/s2_u_nested_non_variable.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_unset_non_variable#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"nested array unset", File:"/w/cases/s2_u_unset_non_variable.php", Line:3, Option:"", lineLength:19}, want feature "property access" at /w/cases/s2_u_unset_non_variable.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_coalesce_non_variable#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"??= on array element", File:"/w/cases/s2_u_coalesce_non_variable.php", Line:3, Option:"", lineLength:15}, want feature "property access" at /w/cases/s2_u_coalesce_non_variable.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_constant#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_constant.php", Line:3, Option:"", lineLength:18}, want feature "constant lookup" at /w/cases/s2_u_default_constant.php:4
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_variadic#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_variadic.php", Line:3, Option:"", lineLength:28}, want feature "variadic parameter" at /w/cases/s2_u_default_variadic.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_default_class_constant#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_default_class_constant.php", Line:3, Option:"", lineLength:27}, want feature "class constant" at /w/cases/s2_u_default_class_constant.php:3
+    --- FAIL: TestW17Stage2UnsupportedIsRefusedAtCompile/u_named_argument#01 (0.00s)
+        w17_stage2_probes_test.go:1055: Compile refused &phego.UnsupportedError{Feature:"parameter default value", File:"/w/cases/s2_u_named_argument.php", Line:3, Option:"", lineLength:29}, want feature "named arguments" at /w/cases/s2_u_named_argument.php:4
+--- FAIL: TestW17Stage2NothingIsUnsupportedAtRunTime (0.02s)
+    w17_stage2_probes_test.go:1073: s2_assign_dim_result_chain: phego: unsupported: nested array write in /w/cases/s2_assign_dim_result_chain.php on line 2
+    w17_stage2_probes_test.go:1073: s2_cas_append: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_append_overflow: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_append_overflow.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_array_key: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_array_key_rw_undefined: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_array_key_rw_undefined.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_div_zero: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_div_zero.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_lines: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_lines.php on line 5
+    w17_stage2_probes_test.go:1073: s2_cas_ops: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_ops.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_order_calls: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_calls.php on line 4
+    w17_stage2_probes_test.go:1073: s2_cas_order_undefined: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_order_undefined.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_result: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_result.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_scalar_append: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_append.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_scalar_container: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_scalar_container.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_self: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_self.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_string_append: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_append.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_string_container: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_string_container_badkey: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_container_badkey.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_string_key_array: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_array.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_string_key_leading: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_string_key_leading.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_true_container: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_true_container.php on line 3
+    w17_stage2_probes_test.go:1073: s2_cas_types: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_types.php on line 5
+    w17_stage2_probes_test.go:1073: s2_cas_undefined_key: phego: unsupported: compound assignment to array element in /w/cases/s2_cas_undefined_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_coalesce_append: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append.php on line 4
+    w17_stage2_probes_test.go:1073: s2_coalesce_append_mid: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_append_mid.php on line 4
+    w17_stage2_probes_test.go:1073: s2_coalesce_dim: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim.php on line 4
+    w17_stage2_probes_test.go:1073: s2_coalesce_dim_lines: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_lines.php on line 4
+    w17_stage2_probes_test.go:1073: s2_coalesce_dim_scalar: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_scalar.php on line 3
+    w17_stage2_probes_test.go:1073: s2_coalesce_dim_string: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_coalesce_dim_undefined: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_dim_undefined.php on line 2
+    w17_stage2_probes_test.go:1073: s2_coalesce_key_reread: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_key_reread.php on line 4
+    w17_stage2_probes_test.go:1073: s2_coalesce_string_nested: phego: unsupported: ??= on array element in /w/cases/s2_coalesce_string_nested.php on line 3
+    w17_stage2_probes_test.go:1073: s2_def_basic: phego: unsupported: parameter default value in /w/cases/s2_def_basic.php on line 4
+    w17_stage2_probes_test.go:1073: s2_def_case_and_recursion: phego: unsupported: parameter default value in /w/cases/s2_def_case_and_recursion.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_const_expr_forms: phego: unsupported: parameter default value in /w/cases/s2_def_const_expr_forms.php on line 4
+    w17_stage2_probes_test.go:1073: s2_def_div_zero: phego: unsupported: parameter default value in /w/cases/s2_def_div_zero.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_mutation: phego: unsupported: parameter default value in /w/cases/s2_def_mutation.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_null_explicit: phego: unsupported: parameter default value in /w/cases/s2_def_null_explicit.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_optional_before_required2: phego: unsupported: parameter default value in /w/cases/s2_def_optional_before_required2.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_string_offset_default: phego: unsupported: parameter default value in /w/cases/s2_def_string_offset_default.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_too_few_at_least: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_at_least.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_too_few_lines: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_lines.php on line 5
+    w17_stage2_probes_test.go:1073: s2_def_too_few_nested: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_nested.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_too_few_none: phego: unsupported: parameter default value in /w/cases/s2_def_too_few_none.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_too_many_passed: phego: unsupported: parameter default value in /w/cases/s2_def_too_many_passed.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_trace: phego: unsupported: parameter default value in /w/cases/s2_def_trace.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_trace_param_changed: phego: unsupported: parameter default value in /w/cases/s2_def_trace_param_changed.php on line 2
+    w17_stage2_probes_test.go:1073: s2_def_undefined_key: phego: unsupported: parameter default value in /w/cases/s2_def_undefined_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_def_warn_expr: phego: unsupported: parameter default value in /w/cases/s2_def_warn_expr.php on line 2
+    w17_stage2_probes_test.go:1073: s2_fe_basic: phego: unsupported: foreach in /w/cases/s2_fe_basic.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_break_continue: phego: unsupported: foreach in /w/cases/s2_fe_break_continue.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_copy_semantics: phego: unsupported: foreach in /w/cases/s2_fe_copy_semantics.php on line 4
+    w17_stage2_probes_test.go:1073: s2_fe_empty_vars: phego: unsupported: foreach in /w/cases/s2_fe_empty_vars.php on line 2
+    w17_stage2_probes_test.go:1073: s2_fe_function: phego: unsupported: foreach in /w/cases/s2_fe_function.php on line 2
+    w17_stage2_probes_test.go:1073: s2_fe_holes: phego: unsupported: foreach in /w/cases/s2_fe_holes.php on line 4
+    w17_stage2_probes_test.go:1073: s2_fe_iter_large_holes: phego: unsupported: foreach in /w/cases/s2_fe_iter_large_holes.php on line 6
+    w17_stage2_probes_test.go:1073: s2_fe_key_only_dim: phego: unsupported: foreach in /w/cases/s2_fe_key_only_dim.php on line 2
+    w17_stage2_probes_test.go:1073: s2_fe_lines: phego: unsupported: foreach in /w/cases/s2_fe_lines.php on line 2
+    w17_stage2_probes_test.go:1073: s2_fe_modify_inside: phego: unsupported: foreach in /w/cases/s2_fe_modify_inside.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_nested_break_cow: phego: unsupported: foreach in /w/cases/s2_fe_nested_break_cow.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_non_array: phego: unsupported: foreach in /w/cases/s2_fe_non_array.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_subjects: phego: unsupported: foreach in /w/cases/s2_fe_subjects.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_target_error: phego: unsupported: foreach in /w/cases/s2_fe_target_error.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_targets: phego: unsupported: foreach in /w/cases/s2_fe_targets.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fe_types: phego: unsupported: foreach in /w/cases/s2_fe_types.php on line 4
+    w17_stage2_probes_test.go:1073: s2_fe_value_order: phego: unsupported: foreach in /w/cases/s2_fe_value_order.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fetch_string_key_array: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_array.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fetch_string_key_float: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_float.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fetch_string_key_leading: phego: unsupported: nested array write in /w/cases/s2_fetch_string_key_leading.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fetch_string_key_nonnumeric_incdec: phego: unsupported: increment of array element in /w/cases/s2_fetch_string_key_nonnumeric_incdec.php on line 3
+    w17_stage2_probes_test.go:1073: s2_fetch_string_key_numeric: phego: unsupported: compound assignment to array element in /w/cases/s2_fetch_string_key_numeric.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_dim: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim.php on line 5
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_array_elem: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_array_elem.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_containers: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_containers.php on line 2
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_lines: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_lines.php on line 5
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_result_order: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_result_order.php on line 4
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_scalar: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_scalar.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_dim_string: phego: unsupported: increment of array element in /w/cases/s2_incdec_dim_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_elem_types: phego: unsupported: increment of array element in /w/cases/s2_incdec_elem_types.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_scalar_append: phego: unsupported: increment of array element in /w/cases/s2_incdec_scalar_append.php on line 3
+    w17_stage2_probes_test.go:1073: s2_incdec_string_append: phego: unsupported: increment of array element in /w/cases/s2_incdec_string_append.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_append_overflow: phego: unsupported: nested array write in /w/cases/s2_nested_append_overflow.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_array_key: phego: unsupported: nested array write in /w/cases/s2_nested_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_compound: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_compound_order: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_order.php on line 4
+    w17_stage2_probes_test.go:1073: s2_nested_compound_string: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_compound_through_string: phego: unsupported: compound assignment to array element in /w/cases/s2_nested_compound_through_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_cow: phego: unsupported: nested array write in /w/cases/s2_nested_cow.php on line 4
+    w17_stage2_probes_test.go:1073: s2_nested_incdec_string: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_incdec_through_string: phego: unsupported: increment of array element in /w/cases/s2_nested_incdec_through_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_lines: phego: unsupported: nested array write in /w/cases/s2_nested_lines.php on line 6
+    w17_stage2_probes_test.go:1073: s2_nested_order: phego: unsupported: nested array write in /w/cases/s2_nested_order.php on line 4
+    w17_stage2_probes_test.go:1073: s2_nested_rw_missing_array_key: phego: unsupported: increment of array element in /w/cases/s2_nested_rw_missing_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_self: phego: unsupported: nested array write in /w/cases/s2_nested_self.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset: phego: unsupported: nested array unset in /w/cases/s2_nested_unset.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_array_key: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_false: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_false.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_scalar: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_scalar_var: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_scalar_var.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_string: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_unset_string_var: phego: unsupported: nested array unset in /w/cases/s2_nested_unset_string_var.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write: phego: unsupported: nested array write in /w/cases/s2_nested_write.php on line 2
+    w17_stage2_probes_test.go:1073: s2_nested_write_false: phego: unsupported: nested array write in /w/cases/s2_nested_write_false.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_scalar: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_scalar_outer: phego: unsupported: nested array write in /w/cases/s2_nested_write_scalar_outer.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_string_append_mid: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_append_mid.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_string_deep: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_deep.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_string_elem: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_elem.php on line 3
+    w17_stage2_probes_test.go:1073: s2_nested_write_string_var: phego: unsupported: nested array write in /w/cases/s2_nested_write_string_var.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_basic: phego: unsupported: string offset on a literal in /w/cases/s2_so_basic.php on line 6
+    w17_stage2_probes_test.go:1073: s2_so_coalesce_array_key: phego: unsupported: reading a string offset in /w/cases/s2_so_coalesce_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_in_ops: phego: unsupported: foreach in /w/cases/s2_so_in_ops.php on line 10
+    w17_stage2_probes_test.go:1073: s2_so_interp: phego: unsupported: reading a string offset in /w/cases/s2_so_interp.php on line 4
+    w17_stage2_probes_test.go:1073: s2_so_interp_bare_key: phego: unsupported: reading a string offset in /w/cases/s2_so_interp_bare_key.php on line 4
+    w17_stage2_probes_test.go:1073: s2_so_isset_coalesce: phego: unsupported: reading a string offset in /w/cases/s2_so_isset_coalesce.php on line 6
+    w17_stage2_probes_test.go:1073: s2_so_key_array: phego: unsupported: reading a string offset in /w/cases/s2_so_key_array.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_key_big_float: phego: unsupported: reading a string offset in /w/cases/s2_so_key_big_float.php on line 5
+    w17_stage2_probes_test.go:1073: s2_so_key_empty_string: phego: unsupported: reading a string offset in /w/cases/s2_so_key_empty_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_key_exp_string: phego: unsupported: reading a string offset in /w/cases/s2_so_key_exp_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_key_float_string: phego: unsupported: reading a string offset in /w/cases/s2_so_key_float_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_key_overflow_string: phego: unsupported: reading a string offset in /w/cases/s2_so_key_overflow_string.php on line 5
+    w17_stage2_probes_test.go:1073: s2_so_key_string: phego: unsupported: reading a string offset in /w/cases/s2_so_key_string.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_key_types: phego: unsupported: reading a string offset in /w/cases/s2_so_key_types.php on line 5
+    w17_stage2_probes_test.go:1073: s2_so_lines: phego: unsupported: reading a string offset in /w/cases/s2_so_lines.php on line 5
+    w17_stage2_probes_test.go:1073: s2_so_nested: phego: unsupported: reading a string offset in /w/cases/s2_so_nested.php on line 3
+    w17_stage2_probes_test.go:1073: s2_so_order: phego: unsupported: reading a string offset in /w/cases/s2_so_order.php on line 4
+    w17_stage2_probes_test.go:1073: s2_so_out_of_range: phego: unsupported: string offset on a literal in /w/cases/s2_so_out_of_range.php on line 10
+    w17_stage2_probes_test.go:1073: s2_so_scalar_base: phego: unsupported: string offset on a literal in /w/cases/s2_so_scalar_base.php on line 6
+    w17_stage2_probes_test.go:1073: s2_str_write: phego: unsupported: writing a string offset in /w/cases/s2_str_write.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_array_key: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_array_value: phego: unsupported: writing a string offset in /w/cases/s2_str_write_array_value.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_bad_key: phego: unsupported: writing a string offset in /w/cases/s2_str_write_bad_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_cow: phego: unsupported: writing a string offset in /w/cases/s2_str_write_cow.php on line 4
+    w17_stage2_probes_test.go:1073: s2_str_write_empty: phego: unsupported: writing a string offset in /w/cases/s2_str_write_empty.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_float_string_key: phego: unsupported: writing a string offset in /w/cases/s2_str_write_float_string_key.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_keys: phego: unsupported: writing a string offset in /w/cases/s2_str_write_keys.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_null: phego: unsupported: writing a string offset in /w/cases/s2_str_write_null.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_order: phego: unsupported: writing a string offset in /w/cases/s2_str_write_order.php on line 3
+    w17_stage2_probes_test.go:1073: s2_str_write_result: phego: unsupported: writing a string offset in /w/cases/s2_str_write_result.php on line 5
+    w17_stage2_probes_test.go:1073: s2_str_write_undefined_value: phego: unsupported: writing a string offset in /w/cases/s2_str_write_undefined_value.php on line 3
+    w17_stage2_probes_test.go:1073: s2_unset_string_key_array: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_array.php on line 3
+    w17_stage2_probes_test.go:1073: s2_unset_string_key_leading: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_leading.php on line 3
+    w17_stage2_probes_test.go:1073: s2_unset_string_key_nonnumeric: phego: unsupported: nested array unset in /w/cases/s2_unset_string_key_nonnumeric.php on line 3
+    w17_stage2_probes_test.go:1073: s2_width_elements: phego: unsupported: increment of array element in /w/cases/s2_width_elements.php on line 5
+    w17_stage2_probes_test.go:1073: s2_width_foreach_keys: phego: unsupported: foreach in /w/cases/s2_width_foreach_keys.php on line 5
+FAIL
+FAIL	github.com/HazelnutParadise/phego	1.350s
+FAIL

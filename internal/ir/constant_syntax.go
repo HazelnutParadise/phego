@@ -518,8 +518,8 @@ func compileConstantCast(kind string, a compileConst, width int, b *compileBudge
 		if v.Kind == LitFloat {
 			return compileConst{}, false
 		}
-		s, ok := constString(v)
-		return scalarConst(&Literal{Kind: LitString, Str: s}), ok
+		s, fresh, ok := constStringFresh(v)
+		return scalarConst(&Literal{Kind: LitString, Str: s, Uninterned: fresh}), ok
 	case "int", "float":
 		if v.Kind == LitString {
 			n := phpnum.Parse(v.Str, width, true)

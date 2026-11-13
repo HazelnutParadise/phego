@@ -1,0 +1,111 @@
+-- source --
+<?php
+function f(
+    $a,
+    $b = 5,
+    $c = 'x',
+    $d = [1, 'k' => [2]],
+    $e = 1 + 2
+) {
+    return $b;
+}
+echo f(1), f(1, 2), f(1, 2, 3, 4, 5), f(1, 2, 3, 4, 5, 6);
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=173 lines=12
+const 0: string "f"
+const 1: int 1
+const 2: int 2
+const 3: int 3
+const 4: int 4
+const 5: int 5
+const 6: int 6
+const 7: null
+const 8: string "x"
+const 9: string "k"
+const 10: string "a"
+const 11: string "b"
+const 12: string "c"
+const 13: string "d"
+const 14: string "e"
+func 0 "{main}" params=0 locals=0 registers=8 maxstack=6
+  registers VVVVVVVV
+  0: Const 0 1 0 0 ; line 11 ; string "f"
+  1: Const 0 2 1 0 ; line 11 ; int 1
+  2: Push 0 2 0 0 ; line 11
+  3: CallValue 0 0 1 1 ; line 11
+  4: Output 0 0 0 0 ; line 11
+  5: Const 0 1 0 0 ; line 11 ; string "f"
+  6: Const 0 2 1 0 ; line 11 ; int 1
+  7: Const 0 3 2 0 ; line 11 ; int 2
+  8: Push 0 2 0 0 ; line 11
+  9: Push 0 3 0 0 ; line 11
+  10: CallValue 0 0 1 2 ; line 11
+  11: Output 0 0 0 0 ; line 11
+  12: Const 0 1 1 0 ; line 11 ; int 1
+  13: Const 0 2 2 0 ; line 11 ; int 2
+  14: Const 0 3 3 0 ; line 11 ; int 3
+  15: Const 0 4 4 0 ; line 11 ; int 4
+  16: Const 0 5 5 0 ; line 11 ; int 5
+  17: Push 0 1 0 0 ; line 11
+  18: Push 0 2 0 0 ; line 11
+  19: Push 0 3 0 0 ; line 11
+  20: Push 0 4 0 0 ; line 11
+  21: Push 0 5 0 0 ; line 11
+  22: Call 0 0 1 5 ; line 11 ; f
+  23: Output 0 0 0 0 ; line 11
+  24: Const 0 1 0 0 ; line 11 ; string "f"
+  25: Const 0 2 1 0 ; line 11 ; int 1
+  26: Const 0 3 2 0 ; line 11 ; int 2
+  27: Const 0 4 3 0 ; line 11 ; int 3
+  28: Const 0 5 4 0 ; line 11 ; int 4
+  29: Const 0 6 5 0 ; line 11 ; int 5
+  30: Const 0 7 6 0 ; line 11 ; int 6
+  31: Push 0 2 0 0 ; line 11
+  32: Push 0 3 0 0 ; line 11
+  33: Push 0 4 0 0 ; line 11
+  34: Push 0 5 0 0 ; line 11
+  35: Push 0 6 0 0 ; line 11
+  36: Push 0 7 0 0 ; line 11
+  37: CallValue 0 0 1 6 ; line 11
+  38: Output 0 0 0 0 ; line 11
+  39: Const 0 0 7 0 ; line 12 ; null
+  40: Return 0 0 0 0 ; line 12
+func 1 "f" params=5 locals=5 registers=14 maxstack=0
+  local 0 "a"
+  local 1 "b"
+  local 2 "c"
+  local 3 "d"
+  local 4 "e"
+  registers VVVVVLLLLLVVVV
+  0: Local 0 5 0 0 ; line 2
+  1: Local 0 6 1 0 ; line 2
+  2: Local 0 7 2 0 ; line 2
+  3: Local 0 8 3 0 ; line 2
+  4: Local 0 9 4 0 ; line 2
+  5: Store 0 5 0 0 ; line 3
+  6: ParamDefault 0 1 8 0 ; line 4
+  7: Const 0 1 5 0 ; line 4 ; int 5
+  8: Store 0 6 1 0 ; line 4
+  9: ParamDefault 0 2 11 0 ; line 5
+  10: Const 0 2 8 0 ; line 5 ; string "x"
+  11: Store 0 7 2 0 ; line 5
+  12: ParamDefault 0 3 22 0 ; line 6
+  13: NewArray 0 10 0 0 ; line 6
+  14: Const 0 11 1 0 ; line 6 ; int 1
+  15: ArrayAdd 0 10 11 0 ; line 6
+  16: Const 0 11 9 0 ; line 6 ; string "k"
+  17: NewArray 0 12 0 0 ; line 6
+  18: Const 0 13 2 0 ; line 6 ; int 2
+  19: ArrayAdd 0 12 13 0 ; line 6
+  20: ArrayAdd 1 10 12 11 ; line 6
+  21: Move 0 3 10 0 ; line 6
+  22: Store 0 8 3 0 ; line 6
+  23: ParamDefault 0 4 25 0 ; line 7
+  24: Const 0 4 3 0 ; line 7 ; int 3
+  25: Store 0 9 4 0 ; line 7
+  26: Load 0 10 6 0 ; line 9
+  27: Return 0 10 0 0 ; line 9
+  28: Const 0 10 7 0 ; line 9 ; null
+  29: Return 0 10 0 0 ; line 9

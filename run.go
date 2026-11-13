@@ -232,7 +232,7 @@ func (e *Engine) limitError(res runtime.RunResult) error {
 	var le *runtime.LimitError
 	if errors.As(res.Err, &le) {
 		resource := map[string]Resource{"frames": ResourceFrames, "output": ResourceOutput, "diagnostics": ResourceDiagnostics,
-			"return-depth": ResourceReturnDepth, "return-elements": ResourceReturnElements}[le.Resource]
+			"return-depth": ResourceReturnDepth, "return-elements": ResourceReturnElements, "memory": ResourceMemory}[le.Resource]
 		if resource != "" {
 			return &ResourceError{Resource: resource, Limit: le.Limit, Used: le.Used, Requested: le.Requested}
 		}

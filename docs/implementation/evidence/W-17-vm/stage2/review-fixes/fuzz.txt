@@ -1,0 +1,17 @@
+== CGO_ENABLED=0 go test -run '^$' -fuzz '^FuzzCompileSubset$' -fuzztime 60s ./internal/vm
+fuzz: elapsed: 1m30s, execs: 3352865 (0/sec), new interesting: 134 (total: 802)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/vm	90.575s
+== CGO_ENABLED=0 go test -run '^$' -fuzz '^FuzzLoadRejectsMalformedAndRepairedPayloads$' -fuzztime 60s ./internal/bytecode
+fuzz: elapsed: 1m8s, execs: 12592475 (0/sec), new interesting: 28 (total: 132)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	68.424s
+== CGO_ENABLED=0 go test -run '^$' -fuzz '^FuzzVMRunsVerifiedImages$' -fuzztime 60s ./internal/runtime
+FAIL
+exit status 1
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	62.758s
+== (rerun after adding a 1 s run deadline to the fuzz target; the first run found seed 444 slow: 'fuzzing process hung or terminated unexpectedly: exit status 2')
+== CGO_ENABLED=0 go test -run '^$' -fuzz '^FuzzVMRunsVerifiedImages$' -fuzztime 60s ./internal/runtime
+fuzz: elapsed: 2m0s, execs: 349328 (0/sec), new interesting: 138 (total: 1208)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	120.673s

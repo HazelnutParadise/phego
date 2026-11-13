@@ -14,11 +14,12 @@ import (
 )
 
 // FormatVersion is the major format version. FormatMinor is the minor
-// version Encode writes. Load accepts minor 0 (format 1.0) and minor 1
-// (format 1.1, added by W-17); a minor-0 file may not use 1.1 operations.
+// version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
+// 1.1, the first W-17 stage) and minor 2 (format 1.2, the second W-17
+// stage); a file may not use operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 1
+	FormatMinor   uint16 = 2
 )
 
 // Identity is compared in full against a trusted host expectation. Digests are
@@ -126,7 +127,84 @@ const (
 	OpUnset       // A Location: unset($x)
 	OpExit        // A status Value when Aux is 1; Aux 0 is exit without a status
 	OpArrayAdd    // A array Value (updated in place), B value Value, C key when Aux has AddKey; Aux is ArrayAddFlags
+	// Format 1.2 (W-17 stage 2). Operands are in docs/decisions/W-16-bytecode.md.
+	OpFetchDim     // A dest Location (the element), B container Location, C key; Aux is FetchFlags
+	OpIterInit     // A iterator Value, B subject Value, C target taken when the subject is not iterable
+	OpIterNext     // A iterator Value, B element dest (Value, or Location with IterLocation), C target taken when exhausted
+	OpIterKey      // A key dest (Value, or Location with IterLocation), B iterator Value
+	OpParamDefault // A parameter register, B target taken when the call passed that argument
 )
+
+// FetchFlags is the Aux of OpFetchDim, PHP's FETCH_DIM_W, FETCH_DIM_RW and
+// FETCH_DIM_UNSET: it makes A name the element of the container B, so that
+// the next instruction can write, increment or unset through it.
+//
+// The mode is the low two bits. FetchWrite creates a missing element as
+// null; FetchReadWrite does the same after an "Undefined array key"
+// warning; FetchUnset creates nothing and names a null scratch location
+// when the element or the container is missing.
+//
+// FetchForIncDec and FetchForAssignOp say what consumes the element, which
+// PHP shows in the Error for a string container and in when a scalar
+// container's key variable is read; without either the element is the
+// container of a further element operation.
+type FetchFlags uint16
+
+const (
+	FetchWrite     FetchFlags = 0
+	FetchReadWrite FetchFlags = 1
+	FetchUnset     FetchFlags = 2
+	fetchModeMask  FetchFlags = 3
+
+	FetchKeyLocation FetchFlags = 1 << 2 // C is a Location the instruction reads itself
+	FetchAppend      FetchFlags = 1 << 3 // no key ($a[]): C is zero
+
+	FetchForIncDec   FetchFlags = 1 << 4
+	FetchForAssignOp FetchFlags = 2 << 4
+	fetchUseMask     FetchFlags = 3 << 4
+
+	fetchKnown = fetchModeMask | FetchKeyLocation | FetchAppend | fetchUseMask
+)
+
+// Mode is FetchWrite, FetchReadWrite or FetchUnset.
+func (f FetchFlags) Mode() FetchFlags { return f & fetchModeMask }
+
+// Use is zero, FetchForIncDec or FetchForAssignOp.
+func (f FetchFlags) Use() FetchFlags { return f & fetchUseMask }
+
+// IterFlags is the Aux of OpIterNext and OpIterKey.
+type IterFlags uint16
+
+// IterLocation makes the destination a Location the instruction assigns to,
+// as FE_FETCH_R writes a plain variable itself.
+const IterLocation IterFlags = 1
+
+// ArraySetResultShift is where the Aux of OpArraySet holds its result
+// register: (Aux >> ArraySetResultShift) is zero for no result, or the
+// index of a Value register plus one. The low bits are ArrayWriteFlags and
+// bit 2 is zero. Only registers below ArraySetMaxResult can be named.
+const (
+	ArraySetResultShift        = 3
+	ArraySetMaxResult   uint32 = 1<<(16-ArraySetResultShift) - 1
+)
+
+// ArraySetAux is the Aux of an OpArraySet that stores its result, the value
+// of the PHP assignment expression, in the Value register result. ok is
+// false when the register cannot be named.
+func ArraySetAux(flags ArrayWriteFlags, result uint32) (aux uint16, ok bool) {
+	if result >= ArraySetMaxResult {
+		return 0, false
+	}
+	return uint16(flags) | uint16(result+1)<<ArraySetResultShift, true
+}
+
+// ArraySetResult decodes the result register of an OpArraySet Aux.
+func ArraySetResult(aux uint16) (result uint32, ok bool) {
+	if r := aux >> ArraySetResultShift; r != 0 {
+		return uint32(r - 1), true
+	}
+	return 0, false
+}
 
 // ArrayWriteFlags is the Aux of OpArraySet, OpArrayAppend and OpArrayUnset
 // (KeyLocation only; ZEND_UNSET_DIM reads the key after reporting an

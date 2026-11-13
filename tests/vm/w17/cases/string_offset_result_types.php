@@ -1,0 +1,20 @@
+<?php
+$s = "a1";
+echo $s[0] === "a" ? "string" : "other", $s[1] === "1" ? "string" : "int", "\n";
+$d = "123";
+echo $d[0] + $d[1], $d[0] . $d[1], $d[2] * 2, "\n";
+echo (int) $d[1], (float) $d[2], (bool) $d[0] ? "T" : "F", "\n";
+echo $d[0] == 1 ? "eq" : "ne", $d[0] === 1 ? "same" : "diff", "\n";
+echo $d[1] <=> $d[2], $d[2] <=> $d[1], $d[0] <=> $d[0], "\n";
+echo $d[0] . $d[1] == "12" ? "joined" : "no", "\n";
+$a = "abc";
+echo $a[0] < $a[1] ? "lt" : "ge", $a[2] > $a[0] ? "gt" : "le", "\n";
+echo -$d[0], +$d[1], !$d[2] ? "not" : "yes", "\n";
+$z = "0";
+echo $z[0] . "", $z[0] + 0, $z[0] ?: "falsy", "\n";
+$x = $d[0];
+$x .= "!";
+echo $x, $d, "\n";
+$x = $d[1];
+$x++;
+echo $x, $d, "\n";

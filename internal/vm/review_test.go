@@ -88,7 +88,10 @@ func TestElementWriteOperands(t *testing.T) {
 		{"expression value", "$a[$k] = $v + 1;", bytecode.OpArraySet, uint16(bytecode.KeyLocation), 1},
 		{"self assignment", "$a[$k] = $a;", bytecode.OpArraySet, uint16(bytecode.KeyLocation), 1},
 		{"self append", "$a[] = $a;", bytecode.OpArrayAppend, 0, 1},
-		{"used value is read back quietly", "echo $a[$k] = $v;", bytecode.OpArraySet, uint16(bytecode.KeyLocation | bytecode.ValueLocation), 1},
+		// Stage 2: the value of the expression is the write's result register
+		// (Aux bits 3 and up), not a quiet read-back of $v, because a write
+		// to a string offset yields the byte written.
+		{"used value is the write's result", "echo $a[$k] = $v;", bytecode.OpArraySet, uint16(bytecode.KeyLocation|bytecode.ValueLocation) | 4<<bytecode.ArraySetResultShift, 0},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			img := compile(t, "<?php\n"+tc.src+"\n")

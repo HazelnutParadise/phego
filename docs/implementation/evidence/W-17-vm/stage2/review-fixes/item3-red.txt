@@ -1,0 +1,32 @@
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+    vm_stage2_elements_test.go:113: Build = <nil>, want a located ErrInvalid for the element location
+--- FAIL: TestVMStaleElementLocationsAreRejected (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/write_after_a_load_of_the_base (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/write_during_a_foreach_over_the_array (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/isset_of_the_element (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/the_base_as_the_value_of_the_write (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/the_element_moved_to_another_register (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/a_use_after_the_write_that_ended_the_sequence (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/a_use_reached_by_a_jump (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/write_after_the_array_is_copied (0.00s)
+    --- FAIL: TestVMStaleElementLocationsAreRejected/unset_of_the_element (0.00s)
+    zz_stale_scratch_test.go:18: a use after the write that ended the sequence: end Completed, output "", return [0=>s:"y"], err <nil>
+    zz_stale_scratch_test.go:18: a use reached by a jump: end Completed, output "", return [0=>s:"x"], err <nil>
+    zz_stale_scratch_test.go:18: isset of the element: end Completed, output "", return b:1, err <nil>
+    zz_stale_scratch_test.go:18: the base as the value of the write: end Internal, output "", return N, err snapshot cannot represent a recursive array
+    zz_stale_scratch_test.go:18: the element moved to another register: end Completed, output "", return [0=>s:"x"], err <nil>
+    zz_stale_scratch_test.go:18: unset of the element: end Internal, output "", return N, err snapshot cannot export an undefined value
+    zz_stale_scratch_test.go:18: write after a load of the base: end Completed, output "", return [0=>[0=>s:"x",1=>i:2],1=>[0=>s:"x",1=>i:2]], err <nil>
+    zz_stale_scratch_test.go:18: write after the array is copied: end Completed, output "", return [0=>[0=>s:"x"],1=>[0=>s:"x"]], err <nil>
+    zz_stale_scratch_test.go:18: write during a foreach over the array: end Completed, output "px", return [0=>s:"p",1=>s:"x"], err <nil>
+--- PASS: TestZZStaleElementRed (0.00s)
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.924s
+FAIL

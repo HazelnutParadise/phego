@@ -51,11 +51,27 @@ func (l *lowerer) unsetTarget(n *frontend.Node) *Node {
 	if isThis(n) {
 		l.fail(n.Line, "Cannot unset $this")
 	}
-	if n.Kind == "dim" && n.Children[1] == nil {
-		l.fail(n.Line, "Cannot use [] for unsetting")
-	}
 	l.ensureWritable(n, n.Line)
 	return l.exprCtx(n, ctxUnset)
+}
+
+// markUnsetBase records, before baseOf lowers n as the container of a level
+// of an unset target, that n is itself such a level: PHP compiles the whole
+// dim and property chain of unset() with BP_VAR_UNSET, so "[]" fails at any
+// level, not only the outermost.
+func (l *lowerer) markUnsetBase(n *frontend.Node, unset bool) {
+	switch unparen(n).Kind {
+	case "dim", "prop":
+		l.unsetBase = unset
+	}
+}
+
+// takeUnsetBase reports whether the dim or property being lowered belongs to
+// an unset target, and clears the mark for the expressions below it.
+func (l *lowerer) takeUnsetBase(ctx context) bool {
+	unset := ctx == ctxUnset || l.unsetBase
+	l.unsetBase = false
+	return unset
 }
 
 // ensureWritable mirrors zend_ensure_writable_variable.
@@ -203,7 +219,15 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 		if b := unparen(c[0]); c[1] == nil && b.Kind == "variable" && b.Text == "$GLOBALS" {
 			l.fail(n.Line, "Cannot append to $GLOBALS")
 		}
+		unset := l.takeUnsetBase(ctx)
+		l.markUnsetBase(c[0], unset)
 		base := l.baseOf(c[0], ctx, n.Line)
+		if unset && c[1] == nil {
+			// zend_delayed_compile_dim checks each level of an unset
+			// target, innermost first, after compiling its container: the
+			// line is where that left off.
+			l.fail(l.cur, "Cannot use [] for unsetting")
+		}
 		var idx *Node
 		if c[1] != nil {
 			idx = l.dimIndex(c[1])
@@ -217,16 +241,23 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 			op = OpNullsafe
 		}
 		obj := c[0]
+		unset := l.takeUnsetBase(ctx)
 		var base *Node
 		if isThis(unparen(obj)) {
 			base = l.thisNode(obj.Line)
 		} else if ctx == ctxWrite || ctx == ctxRef || ctx == ctxUnset {
+			l.markUnsetBase(obj, unset)
 			base = l.baseOf(obj, ctxWrite, n.Line)
 		} else {
 			base = l.exprCtx(obj, ctx)
 		}
 		nd := &Node{Op: op, Line: n.Line, Kids: []*Node{base, nil}}
 		l.memberName(nd, c[1])
+		if unset {
+			// zend_delayed_compile_prop compiles the name as an expression,
+			// which moves the line an outer "[]" is reported on.
+			l.cur = l.zline(c[1])
+		}
 		l.flag(nd, ctx)
 		return l.seal(nd)
 	case "static_prop":
@@ -836,7 +867,18 @@ func (l *lowerer) literal(n *frontend.Node) *Literal {
 	case frontend.TLNumber, frontend.TDNumber:
 		return numberLiteral(n.Text, n.Token)
 	}
-	return &Literal{Kind: LitString, Str: l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) })}
+	return &Literal{Kind: LitString, Str: l.decodeScanned(n, func(d stringDecoder) string { return d.constant(n.Text, n.Line) }), Uninterned: constantBodyLen(n.Text) > 1}
+}
+
+// constantBodyLen is the length of a T_CONSTANT_ENCAPSED_STRING between its
+// quotes. zend_scan_escape_string and the single-quoted scanner intern a
+// body of at most one byte and allocate any longer one, even when escape
+// sequences decode it to a single byte.
+func constantBodyLen(text string) int {
+	if text != "" && (text[0] == 'b' || text[0] == 'B') {
+		text = text[1:]
+	}
+	return len(text) - 2
 }
 
 // constantValue returns the literal value of a declare directive.
@@ -903,11 +945,14 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 			}
 			text = stripIndentation(text, indent, i == 0, last)
 		}
+		// The scanner interns a heredoc or quoted part of at most one byte
+		// (after the indentation is removed); a nowdoc is always copied.
+		fresh := len(text) > 1 || nowdoc && text != ""
 		if !nowdoc {
 			raw := text
 			text = l.decodeScanned(p, func(d stringDecoder) string { return d.escapes(raw, quote, p.Line) })
 		}
-		nd.Kids = append(nd.Kids, l.seal(&Node{Op: OpLiteral, Line: p.Line, Value: &Literal{Kind: LitString, Str: text}}))
+		nd.Kids = append(nd.Kids, l.seal(&Node{Op: OpLiteral, Line: p.Line, Value: &Literal{Kind: LitString, Str: text, Uninterned: fresh}}))
 	}
 	if nd.Op == OpInterp {
 		folded := true
@@ -920,7 +965,9 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 			sb.WriteString(k.Value.Str)
 		}
 		if folded {
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: sb.String()}})
+			// One part is the scanner's string itself.
+			fresh := len(nd.Kids) > 1 || len(nd.Kids) == 1 && nd.Kids[0].Value.Uninterned
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: sb.String(), Uninterned: fresh}})
 		}
 	}
 	return l.seal(nd)

@@ -1,0 +1,11 @@
+== go test -race -count=1 -timeout 40m .
+ok  	github.com/HazelnutParadise/phego	68.401s
+== go test -race -count=1 -timeout 40m ./internal/vm
+ok  	github.com/HazelnutParadise/phego/internal/vm	4.312s
+== go test -race -count=1 -timeout 40m ./internal/bytecode
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	23.691s
+== go test -race -count=1 -timeout 40m ./internal/runtime
+ok  	github.com/HazelnutParadise/phego/internal/runtime	125.576s
+== (rerun after the last test edit) go test -race -count=1 -timeout 40m ./internal/runtime
+ok  	github.com/HazelnutParadise/phego/internal/runtime	136.743s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	15.694s

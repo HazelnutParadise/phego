@@ -1,0 +1,73 @@
+-- source --
+<?php
+$s = 'abc';
+echo $s[0], $s[-1], 'lit'[1], "$s[2]", $s[9] ?? 'd', isset($s[1]);
+$s[0] = 'X';
+$r = $s[1] = 'Y';
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=116 lines=6
+const 0: string "abc"
+const 1: int 0
+const 2: int 1
+const 3: string "lit"
+const 4: int 2
+const 5: int 9
+const 6: null
+const 7: string "d"
+const 8: string "X"
+const 9: string "Y"
+const 10: string "s"
+const 11: string "r"
+func 0 "{main}" params=0 locals=2 registers=8 maxstack=0
+  local 0 "s"
+  local 1 "r"
+  registers LLVVVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Const 0 2 0 0 ; line 2 ; string "abc"
+  3: Store 0 0 2 0 ; line 2
+  4: Const 0 2 1 0 ; line 3 ; int 0
+  5: Load 0 3 0 0 ; line 3
+  6: ArrayGet 0 4 3 2 ; line 3
+  7: Output 0 4 0 0 ; line 3
+  8: Const 0 2 2 0 ; line 3 ; int 1
+  9: Unary Negate 3 2 0 ; line 3
+  10: Load 0 4 0 0 ; line 3
+  11: ArrayGet 0 2 4 3 ; line 3
+  12: Output 0 2 0 0 ; line 3
+  13: Const 0 2 3 0 ; line 3 ; string "lit"
+  14: Const 0 3 2 0 ; line 3 ; int 1
+  15: ArrayGet 0 4 2 3 ; line 3
+  16: Output 0 4 0 0 ; line 3
+  17: Const 0 2 4 0 ; line 3 ; int 2
+  18: Load 0 3 0 0 ; line 3
+  19: ArrayGet 0 4 3 2 ; line 3
+  20: Cast CastString 2 4 0 ; line 3
+  21: Output 0 2 0 0 ; line 3
+  22: Const 0 3 5 0 ; line 3 ; int 9
+  23: Load 1 4 0 0 ; line 3
+  24: ArrayGet 1 5 4 3 ; line 3
+  25: Const 0 6 6 0 ; line 3 ; null
+  26: Binary NotIdentical 7 5 6 ; line 3
+  27: Branch 0 7 28 30 ; line 3
+  28: Move 0 2 5 0 ; line 3
+  29: Jump 0 32 0 0 ; line 3
+  30: Const 0 3 7 0 ; line 3 ; string "d"
+  31: Move 0 2 3 0 ; line 3
+  32: Output 0 2 0 0 ; line 3
+  33: Const 0 3 2 0 ; line 3 ; int 1
+  34: Load 1 4 0 0 ; line 3
+  35: ArrayIsset 0 5 4 3 ; line 3
+  36: Move 0 2 5 0 ; line 3
+  37: Output 0 2 0 0 ; line 3
+  38: Const 0 2 8 0 ; line 4 ; string "X"
+  39: Const 0 3 1 0 ; line 4 ; int 0
+  40: ArraySet 0 0 3 2 ; line 4
+  41: Const 0 2 9 0 ; line 5 ; string "Y"
+  42: Const 0 3 2 0 ; line 5 ; int 1
+  43: ArraySet 0->r2 0 3 2 ; line 5
+  44: Store 0 1 2 0 ; line 5
+  45: Const 0 2 6 0 ; line 6 ; null
+  46: Return 0 2 0 0 ; line 6

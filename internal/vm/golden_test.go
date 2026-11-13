@@ -49,6 +49,17 @@ var goldenPrograms = []struct{ name, src string }{
 	{"order_nested_ternary", "<?php\n" + fgh + "echo f() ? (g() ? 1 : 2) : (h() ? 3 : 4);\n"},
 	{"order_greater_swap", "<?php\n" + fgh + "echo f() > g(), f() >= g(), $a > $b;\n"},
 	{"order_variable_read_late", "<?php\n$k = 5;\necho $k + $k++ + $k;\n$a[$k] = $k++;\n"},
+	// Stage 2.
+	{"element_nested_writes", "<?php\n$a[1][2] = 3;\n$a[][] = $v;\n$a['x'][$k]['z'] = $a;\n$r = $a[1][$k] = $v;\n"},
+	{"element_compound_assignments", "<?php\n$a[$k] += $v;\n$a[1]['x'] .= 's';\n$a[] -= 1;\necho $a[0] *= 2;\n"},
+	{"element_increment_decrement", "<?php\n$a[$i]++;\n--$a[1][2];\n$a[]++;\necho $a[0]--, ++$a['k'];\n"},
+	{"element_coalesce_assignment", "<?php\n$a['k'] ??= 1;\n$a[1][$k] ??= $v;\necho $a[0] ??= 'd';\n"},
+	{"element_nested_unset", "<?php\nunset($a[1][2], $a['x'][$k]['z']);\n"},
+	{"foreach_forms", "<?php\nforeach ($a as $v) {\n    echo $v;\n}\nforeach ($a as $k => $v) {\n    echo $k;\n}\nforeach ([1, 2] as $out[]) {\n}\nforeach ($a as $ks['k'] => $m[1][2]) {\n}\n"},
+	{"foreach_break_continue_levels", "<?php\nforeach ($a as $x) {\n    foreach ($b as $y) {\n        if ($y) {\n            continue 2;\n        }\n        if ($x) {\n            break 2;\n        }\n        continue;\n    }\n    break;\n}\n"},
+	{"foreach_in_function", "<?php\nfunction first($xs, $want) {\n    foreach ($xs as $k => $x) {\n        if ($x == $want) {\n            return $k;\n        }\n    }\n    return null;\n}\n"},
+	{"parameter_defaults", "<?php\nfunction f(\n    $a,\n    $b = 5,\n    $c = 'x',\n    $d = [1, 'k' => [2]],\n    $e = 1 + 2\n) {\n    return $b;\n}\necho f(1), f(1, 2), f(1, 2, 3, 4, 5), f(1, 2, 3, 4, 5, 6);\n"},
+	{"string_offsets", "<?php\n$s = 'abc';\necho $s[0], $s[-1], 'lit'[1], \"$s[2]\", $s[9] ?? 'd', isset($s[1]);\n$s[0] = 'X';\n$r = $s[1] = 'Y';\n"},
 }
 
 func TestGoldenDisassembly(t *testing.T) {

@@ -465,9 +465,7 @@ func TestUnsupportedConstructs(t *testing.T) {
 		feature, src string
 		line         int
 	}{
-		{"foreach", "echo 1;\nforeach ([1] as $v) {}", 3},
 		{"by-reference parameter", "echo 1;\nfunction f(&$a) {}", 3},
-		{"parameter default value", "echo 1;\nfunction f($a = 1) {}", 3},
 		{"typed parameter", "echo 1;\nfunction f(int $a) {}", 3},
 		{"variadic parameter", "echo 1;\nfunction f(...$a) {}", 3},
 		{"return type", "echo 1;\nfunction f(): int { return 1; }", 3},
@@ -489,13 +487,6 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"eval", "echo 1;\neval('echo 1;');", 3},
 		{"match", "echo 1;\necho match ($x) { 1 => 2, default => 3 };", 3},
 		{"list() destructuring", "echo 1;\n[$a, $b] = $c;", 3},
-		{"nested array write", "echo 1;\n$a[1][2] = 3;", 3},
-		{"nested array write", "echo 1;\n$a[1][] = 3;", 3},
-		{"nested array unset", "echo 1;\nunset($a[1][2]);", 3},
-		{"increment of array element", "echo 1;\n$a[0]++;", 3},
-		{"increment of array element", "echo 1;\n--$a['k'];", 3},
-		{"compound assignment to array element", "echo 1;\n$a['k'] += 1;", 3},
-		{"??= on array element", "echo 1;\n$a['k'] ??= 1;", 3},
 		{"variable variables", "echo 1;\n$$n = 1;", 3},
 		{"named arguments", "echo 1;\nfunction f($a) {}\nf(a: 1);", 4},
 		{"argument unpacking", "echo 1;\nfunction f($a) {}\nf(...$x);", 4},
@@ -617,10 +608,10 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		feature string
 		line    int
 	}{
-		// A function body before the main code that uses foreach.
-		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\nforeach ($a as $b) {}\n", "constant lookup", 2},
+		// A function body before the main code that uses foreach by reference.
+		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\nforeach ($a as &$b) {}\n", "constant lookup", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\nforeach ($a as $b) {}\nfunction f() { return PHP_EOL; }\n", "foreach", 3},
+		{"<?php\necho 1;\nforeach ($a as &$b) {}\nfunction f() { return PHP_EOL; }\n", "foreach by reference", 3},
 		// Within a statement, the left operand first.
 		{"<?php\necho PHP_EOL . $o->p;\n", "constant lookup", 2},
 	}
@@ -635,24 +626,22 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 
 // --- the W-17 reference fixtures ---
 
-// Fixtures that need a construct outside the stage-1 subset in
-// conventions.md. They are reported, not compiled by approximation.
-var outsideSubset = map[string]UnsupportedError{
-	"compound_assign":           {Feature: "compound assignment to array element", Line: 61},
-	"compound_assign_undefined": {Feature: "compound assignment to array element", Line: 34},
-	"isset_unset":               {Feature: "nested array unset", Line: 22},
-}
+// Fixtures that need a construct outside the compiled subset. They are
+// reported, not compiled by approximation. Stage 2 compiles the three that
+// stage 1 listed here (element compound assignment and nested unset).
+var outsideSubset = map[string]UnsupportedError{}
 
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
 var compileFatal = map[string]string{
-	"fatal_redeclare_function": "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
+	"fatal_redeclare_function":             "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
+	"fatal_param_default_redeclared_param": "Redefinition of parameter $a",
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 90 {
-		t.Fatalf("want 90 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 192 {
+		t.Fatalf("want 192 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

@@ -1,0 +1,27 @@
+<?php
+$i = 12345;
+echo $i[0], "|\n";
+echo $i[0][1], "|\n";
+$f = 1.5;
+echo $f[0], "|\n";
+$t = true;
+echo $t[0], "|\n";
+$fa = false;
+echo $fa[0], "|\n";
+$n = null;
+echo $n[0], "|\n";
+echo $n[0][1], "|\n";
+echo $i["k"], "|\n";
+echo isset($i[0]) ? "y" : "n", "\n";
+echo $i[0] ?? "dflt", "\n";
+$a = ["int" => 5, "null" => null, "false" => false, "true" => true, "float" => 2.5, "str" => "str"];
+echo $a["int"][0], "|\n";
+echo $a["null"][0], "|\n";
+echo $a["false"][0], "|\n";
+echo $a["true"][0], "|\n";
+echo $a["float"][0], "|\n";
+echo $a["str"][0], "|\n";
+echo $a["str"][5], "|\n";
+$x = "was string";
+$x = 99;
+echo $x[1], "|\n";

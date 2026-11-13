@@ -1,0 +1,21 @@
+<?php
+$s = "abc";
+echo $s[0] ?? "d", "\n";
+echo $s[10] ?? "d", "\n";
+echo $s[-1] ?? "d", "\n";
+echo $s[-10] ?? "d", "\n";
+echo $s["x"] ?? "d", "\n";
+echo $s["1"] ?? "d", "\n";
+echo $s[1.5] ?? "d", "\n";
+echo $s[0][0] ?? "d", "\n";
+echo $s[0][1] ?? "d", "\n";
+echo $u[0] ?? "undef", "\n";
+$i = 5;
+echo $i[0] ?? "int", "\n";
+$n = null;
+echo $n[0] ?? "null", "\n";
+$e = "";
+echo $e[0] ?? "empty", "\n";
+echo $s[$undef] ?? "undefkey", "\n";
+$k = 2;
+echo $s[$k] ?? "d", $s[$k + 1] ?? "d", "\n";

@@ -1,0 +1,78 @@
+-- source --
+<?php
+foreach ($a as $v) {
+    echo $v;
+}
+foreach ($a as $k => $v) {
+    echo $k;
+}
+foreach ([1, 2] as $out[]) {
+}
+foreach ($a as $ks['k'] => $m[1][2]) {
+}
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=156 lines=12
+const 0: int 1
+const 1: int 2
+const 2: string "k"
+const 3: null
+const 4: string "a"
+const 5: string "v"
+const 6: string "out"
+const 7: string "ks"
+const 8: string "m"
+func 0 "{main}" params=0 locals=6 registers=10 maxstack=0
+  local 0 "a"
+  local 1 "v"
+  local 2 "k"
+  local 3 "out"
+  local 4 "ks"
+  local 5 "m"
+  registers LLLLLLVVVL
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Local 0 3 3 0 ; line 1
+  4: Local 0 4 4 0 ; line 1
+  5: Local 0 5 5 0 ; line 1
+  6: Load 0 7 0 0 ; line 2
+  7: IterInit 0 6 7 13 ; line 2
+  8: IterNext 1 6 1 12 ; line 2
+  9: Load 0 7 1 0 ; line 3
+  10: Output 0 7 0 0 ; line 3
+  11: Jump 0 8 0 0 ; line 3
+  12: Drop 0 6 0 0 ; line 3
+  13: Load 0 7 0 0 ; line 5
+  14: IterInit 0 6 7 21 ; line 5
+  15: IterNext 1 6 1 20 ; line 5
+  16: IterKey 1 2 6 0 ; line 5
+  17: Load 0 7 2 0 ; line 6
+  18: Output 0 7 0 0 ; line 6
+  19: Jump 0 15 0 0 ; line 6
+  20: Drop 0 6 0 0 ; line 6
+  21: NewArray 0 7 0 0 ; line 8
+  22: Const 0 8 0 0 ; line 8 ; int 1
+  23: ArrayAdd 0 7 8 0 ; line 8
+  24: Const 0 8 1 0 ; line 8 ; int 2
+  25: ArrayAdd 0 7 8 0 ; line 8
+  26: IterInit 0 6 7 31 ; line 8
+  27: IterNext 0 6 7 30 ; line 8
+  28: ArrayAppend 0 3 7 0 ; line 8
+  29: Jump 0 27 0 0 ; line 8
+  30: Drop 0 6 0 0 ; line 8
+  31: Load 0 7 0 0 ; line 10
+  32: IterInit 0 6 7 43 ; line 10
+  33: IterNext 0 6 7 42 ; line 10
+  34: Const 0 8 0 0 ; line 10 ; int 1
+  35: FetchDim Write 9 5 8 ; line 10
+  36: Const 0 8 1 0 ; line 10 ; int 2
+  37: ArraySet 0 9 8 7 ; line 10
+  38: IterKey 0 7 6 0 ; line 10
+  39: Const 0 8 2 0 ; line 10 ; string "k"
+  40: ArraySet 0 4 8 7 ; line 10
+  41: Jump 0 33 0 0 ; line 10
+  42: Drop 0 6 0 0 ; line 10
+  43: Const 0 6 3 0 ; line 12 ; null
+  44: Return 0 6 0 0 ; line 12

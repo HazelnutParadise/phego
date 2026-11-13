@@ -1,0 +1,19 @@
+--- PASS: TestVMStringOffsetAppendsAreLinear (0.28s)
+--- PASS: TestVMStringOffsetWritesKeepOtherHoldersUnchanged (0.00s)
+--- PASS: TestVMStringOffsetPaddingStopsAfterCancellation (0.02s)
+    zz_latency_scratch_test.go:26: end Cancelled after 5.364625ms total; 66.417µs after cancel
+    zz_latency_scratch_test.go:26: end Cancelled after 5.479292ms total; 292.542µs after cancel
+    zz_latency_scratch_test.go:26: end Completed after 5.748792ms total; -7.917µs after cancel
+    zz_latency_scratch_test.go:26: end Completed after 6.317459ms total; -4.25µs after cancel
+    zz_latency_scratch_test.go:26: end Completed after 5.877125ms total; -12.5µs after cancel
+--- PASS: TestZZOffsetPadCancelLatency (0.08s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.770s
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMStringOffsetAppend-8      	       3	  31376320 ns/op	  528872 B/op	      53 allocs/op
+BenchmarkVMStringOffsetOverwrite-8   	       3	3613487194 ns/op	80288862757 B/op	  407672 allocs/op
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	15.072s

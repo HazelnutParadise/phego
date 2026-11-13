@@ -64,14 +64,17 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 
 // frameArgs is debug_backtrace's view of a user frame's arguments: the
 // current value of each passed parameter (NULL once unset), then the extra
-// arguments. During the parameter prologue the values are still in the
-// parameter registers.
+// arguments. A parameter's value is in its variable once the prologue's
+// Store has run, and until then still in its parameter register: that is
+// the case while the default of a later parameter is evaluated, and for
+// every parameter of a call that passed too few arguments, which stops
+// before the prologue runs.
 func (s *vmState) frameArgs(f *vmFrame) []value {
 	passed := min(f.nargs, f.fn.params)
 	out := make([]value, 0, f.nargs)
 	for i := 0; i < passed; i++ {
 		v := f.regs[i]
-		if l := f.fn.paramLocal[i]; l >= 0 && f.pc >= f.fn.prologueEnd {
+		if l := f.fn.paramLocal[i]; l >= 0 && !f.unreceived && f.pc > int(f.fn.paramPC[i]) {
 			v = f.locals[l].deref()
 		}
 		out = append(out, v)
