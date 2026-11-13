@@ -1,6 +1,10 @@
 package runtime
 
-import "github.com/HazelnutParadise/phego/internal/bytecode"
+import (
+	"math"
+
+	"github.com/HazelnutParadise/phego/internal/bytecode"
+)
 
 // W-17 stage 3: references. REQ-001, REQ-016, REQ-017, REQ-025, REQ-026;
 // T-009, T-010, T-031..T-034. The format 1.3 instructions Bind and MakeRef,
@@ -124,7 +128,7 @@ func (s *vmState) pushRef(f *vmFrame, in *vmInstr) error {
 // refIter is the by-reference iteration an iterator register names, or nil
 // for a by-value iterator.
 func (s *vmState) refIter(v value) *vmRefIter {
-	if v.kind != valueReference || v.integer <= 0 {
+	if v.kind != valueReference || uint32(v.integer) == 0 {
 		return nil
 	}
 	slot := int64(uint32(v.integer)) - 1
@@ -149,7 +153,11 @@ func (s *vmState) endRefIter(v value) {
 		delete(a.cursors, it.it)
 	}
 	*it = vmRefIter{gen: it.gen}
-	s.freeIters = append(s.freeIters, int(uint32(v.integer))-1)
+	if it.gen != math.MaxUint32 {
+		// A slot whose generation would wrap is retired instead, so no
+		// old copy of an iterator register can ever name a new iteration.
+		s.freeIters = append(s.freeIters, int(uint32(v.integer))-1)
+	}
 }
 
 // iterInitRef is ZEND_FE_RESET_RW: the loop takes its own reference to the

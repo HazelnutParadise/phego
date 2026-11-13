@@ -131,3 +131,90 @@ func TestCallValueDereferencesItsCallable(t *testing.T) {
 		t.Fatalf("output %q, err %v; want \"g\"", res.Output, res.Err)
 	}
 }
+
+// refLoop emits "foreach ($name as &$v) echo $v;" as the compiler does.
+func refLoop(m *vmFn, name string) {
+	it := m.reg(bytecode.Value)
+	init := m.emit(bytecode.OpIterInit, uint16(bytecode.IterByRef), it, m.loc(name), 0)
+	next := m.emit(bytecode.OpIterNext, uint16(bytecode.IterByRef|bytecode.IterLocation), it, m.loc("v"), 0)
+	m.echo(m.load("v"))
+	m.jump(uint32(next))
+	brk := m.emit(bytecode.OpDrop, 0, it, 0, 0)
+	m.code[next].C, m.code[init].C = uint32(brk), uint32(brk+1)
+}
+
+// The generation of an iteration slot is unsigned: past 2^31 reuses a slot
+// still works, and a slot whose generation would wrap is retired rather
+// than reused. Before the fix, a slot at generation 2^31 named no
+// iteration and every later loop on it stopped as unsupported.
+func TestRefIterGenerationBounds(t *testing.T) {
+	for _, tc := range []struct {
+		gen   uint32
+		slots int
+	}{
+		{1<<31 - 2, 1},
+		{1<<32 - 2, 2},
+	} {
+		a := newAsm(t, 64)
+		m := a.fn("{main}", 0, 1, "a", "v")
+		m.store("a", m.arrayOf(m.k(1), m.k(2)))
+		refLoop(m, "a")
+		refLoop(m, "a")
+		m.retNull()
+		var slots int
+		res := a.program().run(vmConfig(t, 64), func(s *vmState) {
+			s.refIters, s.freeIters = []vmRefIter{{gen: tc.gen}}, []int{0}
+			s.loop()
+			slots = len(s.refIters)
+		})
+		if res.Err != nil || string(res.Output) != "1212" || slots != tc.slots {
+			t.Fatalf("generation %d: output %q, err %v, %d slots; want \"1212\" and %d slots", tc.gen, res.Output, res.Err, slots, tc.slots)
+		}
+	}
+}
+
+// An iterator register pushed as an argument moves to the callee, which
+// releases it, ending the iteration; IterNext into its own iterator fails
+// closed.
+func TestRefIteratorMovedOrOverwrittenByIterNext(t *testing.T) {
+	t.Run("push", func(t *testing.T) {
+		a := newAsm(t, 64)
+		m := a.fn("{main}", 0, 1, "a")
+		g := a.fn("g", 1, 1, "p")
+		g.retNull()
+		m.store("a", m.arrayOf(m.k(1)))
+		it := m.reg(bytecode.Value)
+		init := m.emit(bytecode.OpIterInit, uint16(bytecode.IterByRef), it, m.loc("a"), 0)
+		m.call(1, it)
+		m.code[init].C = m.pc()
+		m.retNull()
+		live := -1
+		res := a.program().run(vmConfig(t, 64), func(s *vmState) {
+			s.loop()
+			live = 0
+			for _, ri := range s.refIters {
+				if ri.live {
+					live++
+				}
+			}
+		})
+		if res.Err != nil || live != 0 {
+			t.Fatalf("err %v, %d live iterations; want none", res.Err, live)
+		}
+	})
+	t.Run("iter next into its iterator", func(t *testing.T) {
+		a := newAsm(t, 64)
+		m := a.fn("{main}", 0, 1, "a")
+		m.store("a", m.arrayOf(m.k(1)))
+		it := m.reg(bytecode.Value)
+		init := m.emit(bytecode.OpIterInit, uint16(bytecode.IterByRef), it, m.loc("a"), 0)
+		next := m.emit(bytecode.OpIterNext, uint16(bytecode.IterByRef), it, it, 0)
+		m.code[init].C, m.code[next].C = m.pc(), m.pc()
+		m.retNull()
+		res := runAsm(t, a)
+		var ue *UnsupportedError
+		if !errors.As(res.Err, &ue) {
+			t.Fatalf("err %v; want an UnsupportedError", res.Err)
+		}
+	})
+}
