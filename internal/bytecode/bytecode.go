@@ -15,11 +15,12 @@ import (
 
 // FormatVersion is the major format version. FormatMinor is the minor
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
-// 1.1, the first W-17 stage) and minor 2 (format 1.2, the second W-17
-// stage); a file may not use operations newer than the minor it declares.
+// 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage)
+// and minor 3 (format 1.3, the third); a file may not use operations newer
+// than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 2
+	FormatMinor   uint16 = 3
 )
 
 // Identity is compared in full against a trusted host expectation. Digests are
@@ -133,7 +134,19 @@ const (
 	OpIterNext     // A iterator Value, B element dest (Value, or Location with IterLocation), C target taken when exhausted
 	OpIterKey      // A key dest (Value, or Location with IterLocation), B iterator Value
 	OpParamDefault // A parameter register, B target taken when the call passed that argument
+	// Format 1.3 (W-17 stage 3). Operands are in docs/decisions/W-16-bytecode.md.
+	OpBind    // A dest Location, B source Location (a Value with BindValue): $a =& $b; Aux is BindFlags
+	OpMakeRef // A dest Value, B Location: the location becomes a reference, which A then holds
 )
+
+// BindFlags is the Aux of OpBind.
+type BindFlags uint16
+
+// BindValue makes the source B a Value register, which the instruction
+// empties: a reference OpMakeRef, a by-reference IterNext or a
+// by-reference argument put there is bound to A; any other value, a
+// by-reference parameter's default, is assigned to A.
+const BindValue BindFlags = 1
 
 // FetchFlags is the Aux of OpFetchDim, PHP's FETCH_DIM_W, FETCH_DIM_RW and
 // FETCH_DIM_UNSET: it makes A name the element of the container B, so that
@@ -161,6 +174,7 @@ const (
 
 	FetchForIncDec   FetchFlags = 1 << 4
 	FetchForAssignOp FetchFlags = 2 << 4
+	FetchForRef      FetchFlags = 3 << 4 // format 1.3: the element is bound by reference (ZEND_FETCH_DIM_REF)
 	fetchUseMask     FetchFlags = 3 << 4
 
 	fetchKnown = fetchModeMask | FetchKeyLocation | FetchAppend | fetchUseMask
@@ -169,15 +183,24 @@ const (
 // Mode is FetchWrite, FetchReadWrite or FetchUnset.
 func (f FetchFlags) Mode() FetchFlags { return f & fetchModeMask }
 
-// Use is zero, FetchForIncDec or FetchForAssignOp.
+// Use is zero, FetchForIncDec, FetchForAssignOp or FetchForRef.
 func (f FetchFlags) Use() FetchFlags { return f & fetchUseMask }
 
-// IterFlags is the Aux of OpIterNext and OpIterKey.
+// IterFlags is the Aux of OpIterInit, OpIterNext and OpIterKey.
 type IterFlags uint16
 
-// IterLocation makes the destination a Location the instruction assigns to,
-// as FE_FETCH_R writes a plain variable itself.
-const IterLocation IterFlags = 1
+const (
+	// IterLocation makes the destination of IterNext or IterKey a Location
+	// the instruction assigns to, as FE_FETCH_R writes a plain variable
+	// itself.
+	IterLocation IterFlags = 1
+	// IterByRef (format 1.3) is foreach by reference, FE_RESET_RW and
+	// FE_FETCH_RW. On IterInit the subject B is a Location, or a Value
+	// register holding a temporary; on IterNext the element is bound to the
+	// Location B (with IterLocation) or put as a reference into the Value
+	// register B for a following Bind.
+	IterByRef IterFlags = 2
+)
 
 // ArraySetResultShift is where the Aux of OpArraySet holds its result
 // register: (Aux >> ArraySetResultShift) is zero for no result, or the

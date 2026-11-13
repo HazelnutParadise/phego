@@ -146,7 +146,13 @@ func (fc *fnCompiler) receive() {
 			fc.top = mark
 			fc.bind(passed)
 		}
-		fc.emit(bytecode.OpStore, 0, fc.varLoc(p.Var), uint32(i), 0)
+		if p.ByRef {
+			// RECV of a by-reference parameter: the argument is a
+			// reference, or the default's value.
+			fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), fc.varLoc(p.Var), uint32(i), 0)
+		} else {
+			fc.emit(bytecode.OpStore, 0, fc.varLoc(p.Var), uint32(i), 0)
+		}
 	}
 }
 
@@ -343,8 +349,6 @@ func (fc *fnCompiler) signature() {
 			fc.unsupported("parameter attribute", positive(p.Attributes[0].Line, line))
 		case p.Type != nil:
 			fc.unsupported("typed parameter", line)
-		case p.ByRef:
-			fc.unsupported("by-reference parameter", line)
 		case p.Variadic:
 			fc.unsupported("variadic parameter", line)
 		case len(p.Promoted) > 0:
@@ -788,22 +792,28 @@ func (fc *fnCompiler) switchStmt(n *ir.Node) {
 //	brk:  Drop it             ; break jumps here
 //	end:
 func (fc *fnCompiler) foreachStmt(n *ir.Node) {
-	if n.Flags&ir.FlagRef != 0 {
-		fc.unsupported("foreach by reference", n.Line)
-	}
+	byRef := n.Flags&ir.FlagRef != 0
 	subject, key, val, body := n.Kids[0], n.Kids[1], n.Kids[2], n.Kids[3]
 	it := fc.alloc()
 	inner := fc.top
-	rs := fc.value(subject)
 	next, brk, end := fc.label(), fc.label(), fc.label()
-	pc := fc.emit(bytecode.OpIterInit, 0, it, rs, 0)
+	var pc int
+	if byRef {
+		pc = fc.foreachRefInit(it, subject)
+	} else {
+		pc = fc.emit(bytecode.OpIterInit, 0, it, fc.value(subject), 0)
+	}
 	fc.fixups = append(fc.fixups, fixup{pc, 2, end})
 	fc.top = inner
 	fc.bind(next)
-	fc.iterTarget(val, func(dest uint32, flags bytecode.IterFlags) {
-		pc := fc.emit(bytecode.OpIterNext, uint16(flags), it, dest, 0)
-		fc.fixups = append(fc.fixups, fixup{pc, 2, brk})
-	})
+	if byRef {
+		fc.iterRefTarget(it, val, brk)
+	} else {
+		fc.iterTarget(val, func(dest uint32, flags bytecode.IterFlags) {
+			pc := fc.emit(bytecode.OpIterNext, uint16(flags), it, dest, 0)
+			fc.fixups = append(fc.fixups, fixup{pc, 2, brk})
+		})
+	}
 	fc.top = inner
 	if key != nil {
 		fc.iterTarget(key, func(dest uint32, flags bytecode.IterFlags) {

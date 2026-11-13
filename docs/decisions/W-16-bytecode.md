@@ -70,11 +70,13 @@ Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。
 
 RegisterKind 的 Value／Location 分別是 1／2。ConstantKind 的 Null／Bool／Int／Float／String 分別是 1–5。HandlerKind 的 Catch／Finally 分別是 1／2。CapabilitySet 的 HostCallbacks／DynamicCode／FileRead／Shell 分別為 bit 0–3。
 
-Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41。零與其他編號均為未知指令，目前第一個未知編號是 42。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2）。IterFlags 只有 IterLocation=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
+Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41，格式 1.3 再加入 Bind=42、MakeRef=43。零與其他編號均為未知指令，目前第一個未知編號是 44。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2，格式 1.3 的 FetchForRef=3 表示元素要被綁成參照，只能搭配 FetchWrite）。IterFlags 的 IterLocation=1，格式 1.3 加入 IterByRef=2。BindFlags 只有 BindValue=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
 
 格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令（包含 ArraySet、ArrayAppend、ArrayUnset 與 ArrayAdd 的任何 Aux）、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。1.1 的每個函式在例外表後多一張 local 名稱表，筆數為 0 或恰好等於 Locals，每筆指向存放不含 `$` 變數名稱的 String 常數，讓 VM 能印出 PHP 的未定義變數警告並依名稱接收宿主提供的全域變數。minor 0 檔案沒有這張表，載入後沒有名稱。筆數不符、索引超出範圍或常數不是 String 時以 `ErrInvalid` 拒絕並指出函式。
 
-格式 1.2 由 W-17 第二階段加入，payload 的版面和 1.1 相同，只新增五個指令與 ArraySet 的結果暫存器。`Encode` 一律寫入 minor 2。minor 0 與 minor 1 的檔案照樣能載入，但只要出現 1.2 的指令或帶結果暫存器的 ArraySet，`Load` 就以 `ErrInvalid` 拒絕、指出該指令，並說明它需要 1.2 而檔案宣告的是哪一版。
+格式 1.2 由 W-17 第二階段加入，payload 的版面和 1.1 相同，只新增五個指令與 ArraySet 的結果暫存器。minor 0 與 minor 1 的檔案照樣能載入，但只要出現 1.2 的指令或帶結果暫存器的 ArraySet，`Load` 就以 `ErrInvalid` 拒絕、指出該指令，並說明它需要 1.2 而檔案宣告的是哪一版。
+
+格式 1.3 由 W-17 第三階段加入，用來表達 PHP 的參照，payload 的版面也不變。新增的是 Bind、MakeRef 兩個指令，IterInit 與 IterNext 的 IterByRef，以及 FetchDim 的 FetchForRef 用途。`Encode` 一律寫入 minor 3。minor 0 到 2 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.3。
 
 ## 固定指令與純量常數
 
@@ -86,7 +88,7 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 
 ## 指令操作數
 
-下表省略的操作數必須為零。除 Binary、Include、Load、ArrayGet、Unary、Cast、IncDec、Exit、ArraySet、ArrayAppend、ArrayUnset、ArrayAdd、FetchDim、IterNext 與 IterKey 外，Aux 必須為零。暫存器索引從零開始。
+下表省略的操作數必須為零。除 Binary、Include、Load、ArrayGet、Unary、Cast、IncDec、Exit、ArraySet、ArrayAppend、ArrayUnset、ArrayAdd、FetchDim、IterInit、IterNext、IterKey 與 Bind 外，Aux 必須為零。暫存器索引從零開始。
 
 | 指令 | A | B | C |
 |---|---|---|---|
@@ -123,10 +125,12 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 | Exit | Aux 1 時為狀態 Value | — | — |
 | ArrayAdd | 就地加入元素的陣列 Value | 值 Value | Aux 有 AddKey 時為 key Value，同時有 AddKeyLocation 時為 Location |
 | FetchDim | 目的 Location（元素位置） | 容器 Location | key Value，Aux 有 FetchKeyLocation 時為 Location，有 FetchAppend 時為零 |
-| IterInit | 迭代器 Value | 被迭代的 Value | 不能迭代時的目標指令索引 |
-| IterNext | 迭代器 Value | 元素的目的 Value，Aux 為 IterLocation 時為 Location | 迭代結束時的目標指令索引 |
+| IterInit | 迭代器 Value | 被迭代的 Value；Aux 為 IterByRef 時可以是 Location | 不能迭代時的目標指令索引 |
+| IterNext | 迭代器 Value | 元素的目的 Value，Aux 有 IterLocation 時為 Location | 迭代結束時的目標指令索引 |
 | IterKey | key 的目的 Value，Aux 為 IterLocation 時為 Location | 迭代器 Value | — |
 | ParamDefault | 參數暫存器（索引小於 Params） | 呼叫有傳這個引數時的目標指令索引 | — |
+| Bind | 目的 Location | 來源 Location，Aux 為 BindValue 時為 Value | — |
+| MakeRef | 目的 Value | 來源 Location | — |
 
 Binary 的 Aux 為 Add 至 BoolXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。Load 與 ArrayGet 的 Aux 為 0 或 1，1 表示安靜讀取，Load 不發出未定義變數警告，ArrayGet 不發出未定義 key 或 offset 警告。Unary、Cast、IncDec 的 Aux 分別是 UnaryOp、CastKind、IncDecOp 的有效值。Exit 的 Aux 為 0 時沒有狀態且 A 為零，為 1 時 A 是狀態 Value。
 

@@ -254,6 +254,9 @@ func TestCompileErrorsCarryPHPLines(t *testing.T) {
 		{"<?php\ngoto x;\nwhile (1) { x: }", "'goto' into loop or switch statement is disallowed", 2},
 		{"<?php\ntry {} finally {\n  goto out;\n}\nout:", "jump out of a finally block is disallowed", 3},
 		{"<?php\n$a[];", "Cannot use [] for reading", 2},
+		// A by-value foreach reads its subject; by reference it writes it
+		// (pinned image, 2026-11-14; foreach_ref_append_subject.php).
+		{"<?php\nforeach ($a[] as $v) {}", "Cannot use [] for reading", 2},
 		{"<?php\nfunction f(): void { return 1; }", "A void function must not return a value", 2},
 		{"<?php\nyield 1;", "The \"yield\" expression can only be used inside a function", 2},
 		{"<?php\n$f = function () use ($this) {};", "Cannot use $this as lexical variable", 2},

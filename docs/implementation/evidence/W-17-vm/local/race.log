@@ -1,11 +1,19 @@
-commit 62ebd51acc2dbca147b8155528b83b5bcb056efa
-$ go test -race -count=1 -timeout 40m <package> (one package at a time)
-ok  	github.com/HazelnutParadise/phego	89.924s
-ok  	github.com/HazelnutParadise/phego/internal/phpname	1.539s
-ok  	github.com/HazelnutParadise/phego/internal/vm	4.326s
-ok  	github.com/HazelnutParadise/phego/internal/bytecode	25.270s
-ok  	github.com/HazelnutParadise/phego/internal/ir	18.959s
-ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.554s
-ok  	github.com/HazelnutParadise/phego/internal/frontend	6.315s
-ok  	github.com/HazelnutParadise/phego/internal/policy	4.889s
-ok  	github.com/HazelnutParadise/phego/internal/runtime	122.995s
+$ go test -race -count=1 -timeout 40m, one package at a time
+ok  	github.com/HazelnutParadise/phego
+exit 0 .
+ok  	github.com/HazelnutParadise/phego/internal/phpname
+exit 0 ./internal/phpname
+ok  	github.com/HazelnutParadise/phego/internal/vm
+exit 0 ./internal/vm
+ok  	github.com/HazelnutParadise/phego/internal/bytecode
+exit 0 ./internal/bytecode
+ok  	github.com/HazelnutParadise/phego/internal/ir
+exit 0 ./internal/ir
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa
+exit 0 ./internal/ir/ssa
+ok  	github.com/HazelnutParadise/phego/internal/frontend
+exit 0 ./internal/frontend
+ok  	github.com/HazelnutParadise/phego/internal/policy
+exit 0 ./internal/policy
+ok  	github.com/HazelnutParadise/phego/internal/runtime
+exit 0 ./internal/runtime

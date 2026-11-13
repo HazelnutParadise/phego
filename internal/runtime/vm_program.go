@@ -197,12 +197,22 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		}
 		return roleLocation, roleLocation, roleValue
 	case bytecode.OpIterInit:
+		if in.Aux&uint16(bytecode.IterByRef) != 0 {
+			return roleValue, roleAny, roleTarget
+		}
 		return roleValue, roleValue, roleTarget
 	case bytecode.OpIterNext:
-		if bytecode.IterFlags(in.Aux) == bytecode.IterLocation {
+		if bytecode.IterFlags(in.Aux)&bytecode.IterLocation != 0 {
 			return roleValue, roleLocation, roleTarget
 		}
 		return roleValue, roleValue, roleTarget
+	case bytecode.OpBind:
+		if in.Aux == uint16(bytecode.BindValue) {
+			return roleLocation, roleValue, roleNone
+		}
+		return roleLocation, roleLocation, roleNone
+	case bytecode.OpMakeRef:
+		return roleValue, roleLocation, roleNone
 	case bytecode.OpIterKey:
 		if bytecode.IterFlags(in.Aux) == bytecode.IterLocation {
 			return roleLocation, roleValue, roleNone
@@ -420,6 +430,11 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			if kinds[in.A] == bytecode.Location {
 				out.aux = 1
 			}
+		case bytecode.OpIterInit:
+			// A by-reference subject that is a variable or an element.
+			if in.Aux == uint16(bytecode.IterByRef) && kinds[in.B] == bytecode.Location {
+				out.aux |= vmIterSubjectLocation
+			}
 		case bytecode.OpCall:
 			if kinds[in.A] != bytecode.Value {
 				out.aux = 1 // a Location result: a by-reference callee
@@ -456,7 +471,7 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	// the Store to cache an evaluated default (vmState.cacheDefault).
 	for _, in := range code {
 		if in.Op == bytecode.OpParamDefault && uint64(in.B) < uint64(len(code)) {
-			if st := code[in.B]; st.Op == bytecode.OpStore && st.B == in.A {
+			if st := code[in.B]; (st.Op == bytecode.OpStore || st.Op == bytecode.OpBind && st.Aux == uint16(bytecode.BindValue)) && st.B == in.A {
 				f.code[in.B].c = in.A + 1
 			}
 		}
@@ -486,14 +501,14 @@ func parameterPrologue(f vmFunction, code []bytecode.Instruction) (locals, store
 		switch {
 		case in.Op == bytecode.OpLocal:
 			locOf[in.A] = in.B
-		case in.Op == bytecode.OpStore && in.B < uint32(f.params):
+		case (in.Op == bytecode.OpStore || in.Op == bytecode.OpBind && in.Aux == uint16(bytecode.BindValue)) && in.B < uint32(f.params):
 			local, ok := locOf[in.A]
 			if !ok || locals[in.B] >= 0 {
 				return locals, stores
 			}
 			locals[in.B], stores[in.B] = int32(local), int32(pc)
 		case in.Op == bytecode.OpParamDefault && int(in.B) > pc && int(in.B) < len(code) &&
-			code[in.B].Op == bytecode.OpStore && code[in.B].B == in.A:
+			(code[in.B].Op == bytecode.OpStore || code[in.B].Op == bytecode.OpBind && code[in.B].Aux == uint16(bytecode.BindValue)) && code[in.B].B == in.A:
 			pc = int(in.B)
 			continue
 		default:
@@ -508,9 +523,13 @@ func parameterPrologue(f vmFunction, code []bytecode.Instruction) (locals, store
 // hold an array and are dead after it, so the interpreter releases them at
 // once. Holding a dead copy would make the next write to the same array copy
 // it (copy on write), turning "$x = $a[$i]; $a[$i] = ..." loops quadratic.
-// Release timing is not observable by PHP code in stage 1 (no objects or
-// destructors). Functions whose dataflow would need more than vmLivenessWords
-// bitset words keep registers until they are overwritten or the frame ends.
+// Release timing is not observable by PHP code here (no objects or
+// destructors), except through the owner count of a reference, which decides
+// whether copying an array copies its element or shares it; so no register
+// keeps a reference past its use without liveness: Push and Bind move the
+// references MakeRef and IterNext put in registers. Functions whose dataflow
+// would need more than vmLivenessWords bitset words keep registers until
+// they are overwritten or the frame ends.
 func vmLiveness(f *vmFunction) {
 	n := len(f.code)
 	// Registers that may hold a composite value: written by an instruction
@@ -531,8 +550,9 @@ func vmLiveness(f *vmFunction) {
 			if bytecode.CastKind(in.aux) == bytecode.CastArray {
 				composite[in.a] = true
 			}
-		case bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpArraySet:
-			// The iterator, a fetched element and an assignment's result.
+		case bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpArraySet, bytecode.OpMakeRef:
+			// The iterator, a fetched element, an assignment's result and a
+			// reference.
 			if d, ok := vmDef(in); ok {
 				composite[d] = true
 			}
@@ -577,6 +597,9 @@ func vmLiveness(f *vmFunction) {
 				visit(ops[i])
 			}
 			if role == roleAny && i == 0 && (in.op == bytecode.OpPush || in.op == bytecode.OpDrop) && in.aux == 0 {
+				visit(ops[i])
+			}
+			if role == roleAny && i == 1 && in.op == bytecode.OpIterInit && in.aux&vmIterSubjectLocation == 0 {
 				visit(ops[i])
 			}
 		}
@@ -682,7 +705,7 @@ func definesA(op bytecode.Opcode) bool {
 	switch op {
 	case bytecode.OpConst, bytecode.OpMove, bytecode.OpLocal, bytecode.OpLoad, bytecode.OpBinary, bytecode.OpCall, bytecode.OpCallValue,
 		bytecode.OpHostCall, bytecode.OpNewArray, bytecode.OpArrayGet, bytecode.OpInclude, bytecode.OpEval, bytecode.OpShell,
-		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit:
+		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef:
 		return true
 	}
 	return false
@@ -700,7 +723,7 @@ func vmDefOperand(in vmInstr) int {
 			return -1 // a Location
 		}
 	case bytecode.OpIterNext:
-		if bytecode.IterFlags(in.aux) == bytecode.IterLocation {
+		if bytecode.IterFlags(in.aux)&bytecode.IterLocation != 0 {
 			return -1
 		}
 		return 1

@@ -46,6 +46,8 @@ func (fc *fnCompiler) discard(n *ir.Node) {
 		}
 	case n != nil && n.Op == ir.OpAssign:
 		fc.assign(n, false)
+	case n != nil && n.Op == ir.OpAssignRef:
+		fc.assignRef(n, false)
 	default:
 		fc.value(n)
 	}
@@ -106,6 +108,8 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.unaryLike(n, bytecode.OpCast, uint16(kind))
 	case ir.OpAssign:
 		return fc.assign(n, true)
+	case ir.OpAssignRef:
+		return fc.assignRef(n, true)
 	case ir.OpAssignOp:
 		return fc.assignOp(n)
 	case ir.OpCoalesceSet:
@@ -992,9 +996,14 @@ func (fc *fnCompiler) call(n *ir.Node) operand {
 		callee = fc.alloc()
 		fc.emit(bytecode.OpConst, 0, callee, fc.c.stringConst(name), 0)
 	}
+	params := fc.c.unit.Functions[index-1].Params
 	args := make([]uint32, len(n.Args))
 	for i, a := range n.Args {
-		args[i] = fc.value(a.Value)
+		if i < len(params) && params[i].ByRef {
+			args[i] = fc.refArg(a.Value, n.Line)
+		} else {
+			args[i] = fc.value(a.Value)
+		}
 	}
 	for _, r := range args {
 		fc.emit(bytecode.OpPush, 0, r, 0, 0)

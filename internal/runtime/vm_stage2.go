@@ -201,6 +201,8 @@ func (s *vmState) fetchDimString(f *vmFrame, in *vmInstr, flags bytecode.FetchFl
 		return &Throwable{"Error", "Cannot increment/decrement string offsets"}
 	case bytecode.FetchForAssignOp:
 		return &Throwable{"Error", "Cannot use assign-op operators with string offsets"}
+	case bytecode.FetchForRef:
+		return &Throwable{"Error", "Cannot create references to/from string offsets"}
 	}
 	return &Throwable{"Error", "Cannot use string offset as an array"}
 }

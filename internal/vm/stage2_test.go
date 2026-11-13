@@ -509,14 +509,13 @@ func TestStage2DeepElementChainsAreIterative(t *testing.T) {
 	}
 }
 
-// What stage 2 still refuses, with the construct's own line.
+// What stage 2 still refuses, with the construct's own line. Stage 3 runs
+// foreach by reference and by-reference parameters (refs_test.go).
 func TestStage2Unsupported(t *testing.T) {
 	for _, tc := range []struct {
 		feature, src string
 		line         int
 	}{
-		{"foreach by reference", "echo 1;\nforeach ($a as &$v) {}", 3},
-		{"foreach by reference", "echo 1;\nforeach ($a as $k => &$v) {}", 3},
 		{"list() destructuring", "echo 1;\nforeach ($a as [$x, $y]) {}", 3},
 		{"list() destructuring", "echo 1;\nforeach ($a as $k => list($x)) {}", 3},
 		{"property access", "echo 1;\nforeach ($a as $o->p) {}", 3},
@@ -530,7 +529,7 @@ func TestStage2Unsupported(t *testing.T) {
 		{"constant lookup", "echo 1;\nfunction f($a = 1,\n  $b = PHP_EOL) {}", 4},
 		{"class constant", "echo 1;\nfunction f($a = self::X) {}", 3},
 		{"typed parameter", "echo 1;\nfunction f(int $a = 1) {}", 3},
-		{"by-reference parameter", "echo 1;\nfunction f(&$a = 1) {}", 3},
+		{"variadic parameter", "echo 1;\nfunction f(&...$a) {}", 3},
 	} {
 		t.Run(tc.feature, func(t *testing.T) {
 			img, err := compileWidth(t, "<?php\n"+tc.src+"\n", 64, testFile)

@@ -690,7 +690,15 @@ func (l *lowerer) stmt(s *frontend.Node, top bool) *Node {
 
 func (l *lowerer) foreach(s *frontend.Node) *Node {
 	c := s.Children
-	subject := l.expr(c[0])
+	// zend_compile_foreach compiles a variable subject of a foreach by
+	// reference for writing (BP_VAR_W), so "$a[]" appends there instead of
+	// failing as a read; anything else is an ordinary expression.
+	var subject *Node
+	if c[2].Kind == "by_ref" && isVariableLike(c[0]) && canWrite(c[0]) {
+		subject = l.exprCtx(unparen(c[0]), ctxRef)
+	} else {
+		subject = l.expr(c[0])
+	}
 	n := &Node{Op: OpForeach, Line: s.Line, Kids: []*Node{subject, nil, nil, nil}}
 	if k := c[1]; k != nil {
 		if k.Kind == "by_ref" {

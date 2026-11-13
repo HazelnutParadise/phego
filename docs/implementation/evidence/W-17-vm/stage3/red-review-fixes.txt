@@ -1,0 +1,43 @@
+# commit 257ae82 (before the review fixes) with internal/runtime/vm_refs_test.go from e85eb1f
+$ go test -count=1 -run 'TestPushMoves|TestCopiedRefIterator|TestOverwrittenRefIterator|TestCallValueDeref' ./internal/runtime
+--- FAIL: TestPushMovesAByReferenceArgument (0.02s)
+    vm_refs_test.go:36: output "[5]5", err <nil>; want "[]5"
+--- FAIL: TestCopiedRefIteratorFailsClosed (0.01s)
+    vm_refs_test.go:78: output "a1end", err <nil>; want no output and an UnsupportedError
+--- FAIL: TestOverwrittenRefIteratorIsReleased (0.01s)
+    vm_refs_test.go:112: err <nil>: 5 live iterations in 5 slots, 5 cursors; want 0 in 1 slot, 0 cursors
+--- FAIL: TestCallValueDereferencesItsCallable (0.00s)
+    vm_refs_test.go:131: output "", err unsupported in the stage-1 VM: calling a non-string callable at /w/t.php:1 (function {main}, pc 4); want "g"
+FAIL
+FAIL	github.com/HazelnutParadise/phego/internal/runtime	0.646s
+FAIL
+exit 1
+# commit 257ae82 (before the review fixes) with the foreach_ref_append_subject fixture and references from e01f7f9
+$ PHEGO_W17_PROFILE=64 go test -count=1 -run 'TestW17PHP8512Programs/64/foreach_ref_append_subject' .
+--- FAIL: TestW17PHP8512Programs (0.04s)
+    --- FAIL: TestW17PHP8512Programs/64 (0.02s)
+        --- FAIL: TestW17PHP8512Programs/64/foreach_ref_append_subject/display (0.00s)
+            w17_differential_test.go:145: stdout differs at byte 1
+                  php:   "\nWarning: foreach() argument must be of type array|object, nu"
+                  phego: "\nFatal error: Cannot use [] for reading in /w/cases/foreach_r"
+            w17_differential_test.go:148: exit code 255, want 0 (error phego: PHP CompileError: Cannot use [] for reading in /w/cases/foreach_ref_append_subject.php on line 3)
+        --- FAIL: TestW17PHP8512Programs/64/foreach_ref_append_subject/log (0.00s)
+            w17_differential_test.go:145: stdout differs at byte 0
+                  php:   "0\nnull null\n2null\n"
+                  phego: ""
+            w17_differential_test.go:146: stderr differs at byte 4
+                  php:   "PHP Warning:  foreach() argument must be of type array|object, n"
+                  phego: "PHP Fatal error:  Cannot use [] for reading in /w/cases/foreach_"
+            w17_differential_test.go:148: exit code 255, want 0 (error phego: PHP CompileError: Cannot use [] for reading in /w/cases/foreach_ref_append_subject.php on line 3)
+        --- FAIL: TestW17PHP8512Programs/64/foreach_ref_append_subject/both (0.00s)
+            w17_differential_test.go:145: stdout differs at byte 1
+                  php:   "\nWarning: foreach() argument must be of type array|object, nu"
+                  phego: "\nFatal error: Cannot use [] for reading in /w/cases/foreach_r"
+            w17_differential_test.go:146: stderr differs at byte 4
+exit 1
+
+# commit e01f7f9 (before the generation fix) with the TestRefIterGenerationBounds test
+$ go test -count=1 -run TestRefIterGeneration ./internal/runtime
+    vm_refs_test.go:171: generation 2147483646: output "12", err unsupported in the stage-1 VM: advancing an iterator that IterInit did not create at /w/t.php:1 (function {main}, pc 15), 1 slots; want "1212" and 1 slots
+FAIL
+exit 1

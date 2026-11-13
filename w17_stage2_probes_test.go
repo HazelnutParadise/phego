@@ -1164,9 +1164,6 @@ var w17Stage2Unsupported = []struct {
 }{
 	{"s2_dim_write_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0] = 1;\necho \"end\\n\";\n",
 		"array write through a non-variable", 4, "a\nend\n"},
-	{"s2_fe_by_ref_literal", "<?php\necho \"a\\n\";\nforeach ([1, 2] as &$v) { echo $v; }\necho \"\\n\";\n",
-		"foreach by reference", 3, "a\n12\n"},
-	{"s2_u_fe_by_ref", "<?php\necho \"a\\n\";\n$a = [1];\nforeach ($a as $k => &$v) {}\n", "foreach by reference", 4, ""},
 	{"s2_u_fe_list", "<?php\necho \"a\\n\";\nforeach ([[1, 2]] as [$x, $y]) {}\n", "list() destructuring", 3, ""},
 	{"s2_u_fe_list_keyed", "<?php\necho \"a\\n\";\n\nforeach ([[1, 2]] as $k => list($x, $y)) {}\n", "list() destructuring", 4, ""},
 	{"s2_u_fe_property_target", "<?php\necho \"a\\n\";\nforeach ([1] as $o->p) {}\n", "property access", 3, ""},
@@ -1176,10 +1173,8 @@ var w17Stage2Unsupported = []struct {
 	{"s2_u_nested_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0][1] = 2;\n", "array write through a non-variable", 4, ""},
 	{"s2_u_unset_non_variable", "<?php\necho \"a\\n\";\nunset($o->p[1][2]);\n", "property access", 3, ""},
 	{"s2_u_coalesce_non_variable", "<?php\necho \"a\\n\";\n$o->p[1] ??= 2;\n", "property access", 3, ""},
-	{"s2_u_dim_reference", "<?php\necho \"a\\n\";\n$a[0][1] = &$b;\n", "reference assignment", 3, ""},
 	{"s2_u_default_constant", "<?php\necho \"a\\n\";\nfunction f($a = 1,\n  $b = PHP_EOL) {}\n", "constant lookup", 4, ""},
 	{"s2_u_default_typed", "<?php\necho \"a\\n\";\nfunction f(int $a = 1) {}\n", "typed parameter", 3, ""},
-	{"s2_u_default_by_ref", "<?php\necho \"a\\n\";\nfunction f(&$a = 1) {}\n", "by-reference parameter", 3, ""},
 	{"s2_u_default_variadic", "<?php\necho \"a\\n\";\nfunction f($a = 1, ...$r) {}\n", "variadic parameter", 3, ""},
 	{"s2_u_default_class_constant", "<?php\necho \"a\\n\";\nfunction f($a = self::X) {}\n", "class constant", 3, ""},
 	{"s2_u_default_float_concat", "<?php\necho \"a\\n\";\nfunction f($a = 1,\n  $b = 1.5 . [1][5]) {}\n", "parameter default whose string value PHP may intern", 4, ""},
@@ -1191,6 +1186,31 @@ var w17Stage2Unsupported = []struct {
 	{"s2_u_default_string_bitwise", "<?php\necho \"a\\n\";\nfunction f($a = ([1][5] ?: \"a\") | \"\") {}\n", "parameter default whose string value PHP may intern", 3, ""},
 	{"s2_u_default_bitnot_empty", "<?php\necho \"a\\n\";\nfunction f($a = [1][5] ?: ~\"\") {}\n", "parameter default whose string value PHP may intern", 3, ""},
 	{"s2_u_named_argument", "<?php\necho \"a\\n\";\nfunction f($a = 1, $b = 2) {}\nf(b: 3);\n", "named arguments", 4, ""},
+}
+
+// w17Stage3Supported are probes the table above refused until stage 3,
+// with the output PHP 8.5.12 gives them (the first recorded there before).
+var w17Stage3Supported = []struct{ name, src, php string }{
+	{"s2_fe_by_ref_literal", "<?php\necho \"a\\n\";\nforeach ([1, 2] as &$v) { echo $v; }\necho \"\\n\";\n", "a\n12\n"},
+	{"s2_u_fe_by_ref", "<?php\necho \"a\\n\";\n$a = [1];\nforeach ($a as $k => &$v) {}\n", "a\n"},
+	{"s2_u_dim_reference", "<?php\necho \"a\\n\";\n$a[0][1] = &$b;\n", "a\n"},
+	{"s2_u_default_by_ref", "<?php\necho \"a\\n\";\nfunction f(&$a = 1) {}\n", "a\n"},
+}
+
+func TestW17Stage3RunsFormerlyUnsupportedProbes(t *testing.T) {
+	e := mustEngine(t, Config{})
+	for _, c := range w17Stage3Supported {
+		t.Run(strings.TrimPrefix(c.name, "s2_"), func(t *testing.T) {
+			p, err := e.Compile(context.Background(), "/w/cases/"+c.name+".php", c.src)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := e.Run(context.Background(), p)
+			if err != nil || r.Status != StatusCompleted || string(r.Output) != c.php {
+				t.Fatalf("Run = %+v, %v; want output %q", r, err, c.php)
+			}
+		})
+	}
 }
 
 func TestW17Stage2UnsupportedIsRefusedAtCompile(t *testing.T) {
