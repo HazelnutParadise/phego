@@ -482,6 +482,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"builtin function define()", "echo 1;\ndefine('A', 1);", 3},
 		{"builtin function constant()", "echo 1;\necho constant('A');", 3},
 		{"the constant STDIN (a resource)", "echo 1;\necho STDIN;", 3},
+		{"the constant STDIN (a resource)", "namespace A;\necho 1;\necho STDIN;", 4},
+		{"the platform-dependent constant CHAR_MAX", "namespace A;\necho 1;\nfunction f($d = CHAR_MAX) {}", 4},
+		{"the constant STDERR (a resource)", "namespace A;\necho 1;\nconst Y = STDERR;", 4},
 		{"the platform-dependent constant CHAR_MAX", "echo 1;\necho CHAR_MAX;", 3},
 		{"the constant STDERR (a resource)", "echo 1;\nconst A = STDERR;", 3},
 		{"include", "echo 1;\ninclude 'x.php';", 3},
@@ -668,8 +671,8 @@ var compileFatal = map[string]string{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 323 {
-		t.Fatalf("want 323 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 326 {
+		t.Fatalf("want 326 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
