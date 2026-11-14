@@ -111,6 +111,13 @@ func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 		if c.kind == valueBool && c.boolean {
 			return s.fetchDimScalar(f, in, flags)
 		}
+		// zend_fetch_dimension_address reaches a false container through
+		// a reference by its IS_REFERENCE branch, which makes the array
+		// (or, for unset, fetches nothing) without the deprecation that
+		// zend_fetch_dimension_address_W raises for a plain variable.
+		// ZEND_ASSIGN_DIM_OP (the last level of an assign-op) and
+		// ZEND_ASSIGN_DIM (arraySet) dereference first and warn either way.
+		viaRef := slot.kind == valueReference && flags.Use() != bytecode.FetchForAssignOp
 		if c.kind == valueUndefined && mode != bytecode.FetchWrite && flags&bytecode.FetchContainerValue == 0 {
 			if name, ok := s.variableName(f, in.b); ok {
 				s.h.warn(levelWarning, "Undefined variable $"+name)
@@ -122,12 +129,16 @@ func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 		if mode == bytecode.FetchUnset {
 			// Nothing is created: the element is a null that belongs to
 			// no array, which the following unset leaves alone.
-			if c.kind == valueBool {
+			if c.kind == valueBool && !viaRef {
 				s.h.warn(levelDeprecated, "Automatic conversion of false to array is deprecated")
 			}
 			return s.setElementLocation(f, in.a, &value{kind: valueNull})
 		}
-		if err := s.writable(slot, flags&bytecode.FetchAppend != 0); err != nil || s.stopped() {
+		if viaRef && c.kind == valueBool {
+			if err := s.h.assign(slot, s.h.newArrayValue()); err != nil {
+				return err
+			}
+		} else if err := s.writable(slot, flags&bytecode.FetchAppend != 0); err != nil || s.stopped() {
 			return err
 		}
 	default:

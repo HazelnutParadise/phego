@@ -1084,11 +1084,19 @@ func (l *lowerer) destructurePattern(n *frontend.Node, line int) *Node {
 		if item.Children[0] != nil {
 			key = l.expr(item.Children[0])
 		}
+		// CG(zend_lineno) rests at the element's fetch; an element target
+		// or a by-reference target leaves it there (zend_emit_assign_znode
+		// compiles a ZNODE on that line), a variable target moves it to
+		// the variable, and a nested pattern leaves it where its last
+		// element did. The line reported for a later element's compile
+		// error, and the one the VM gives its fetch, follow this.
+		fetchLine := l.cur
 		it := &Node{Op: OpItem, Line: item.Line}
 		v := item.Children[1]
 		if v.Kind == "by_ref" {
 			it.Flags |= FlagRef
 			it.Kids = []*Node{key, l.refTarget(v.Children[0])}
+			l.cur = fetchLine
 		} else {
 			v = unparen(v)
 			switch {
@@ -1104,6 +1112,11 @@ func (l *lowerer) destructurePattern(n *frontend.Node, line int) *Node {
 				l.fail(zline(v), "Assignments can only happen to writable values")
 			default:
 				it.Kids = []*Node{key, l.target(v, line)}
+				if v.Kind == "variable" {
+					l.cur = l.zline(v)
+				} else {
+					l.cur = fetchLine
+				}
 			}
 		}
 		nd.Kids = append(nd.Kids, l.seal(it))
@@ -1112,6 +1125,33 @@ func (l *lowerer) destructurePattern(n *frontend.Node, line int) *Node {
 		l.fail(l.cur, "Cannot use empty list")
 	}
 	return l.seal(nd)
+}
+
+// patternFirstLine is the line PHP's AST gives a destructuring pattern:
+// that of its first element's target, down to the base variable of an
+// element target or the first leaf of a nested pattern. QM_ASSIGN of a
+// variable right-hand side, and the first fetch after it, carry this line.
+func (l *lowerer) patternFirstLine(n *frontend.Node) int {
+	for _, item := range n.Children {
+		if item == nil || item.Kind != "item" {
+			continue
+		}
+		v := unparen(item.Children[1])
+		for {
+			switch v.Kind {
+			case "by_ref":
+				v = unparen(v.Children[0])
+				continue
+			case "dim":
+				v = unparen(v.Children[0])
+				continue
+			case "array", "list":
+				return l.patternFirstLine(v)
+			}
+			return l.zline(v)
+		}
+	}
+	return l.zline(n)
 }
 
 func (l *lowerer) assign(n *frontend.Node) *Node {
@@ -1131,6 +1171,10 @@ func (l *lowerer) assign(n *frontend.Node) *Node {
 			value = l.refTarget(r)
 		} else {
 			value = l.expr(right)
+			if unparen(right).Kind == "variable" {
+				// QM_ASSIGN copies the variable on the pattern's line.
+				l.cur = l.patternFirstLine(left)
+			}
 		}
 		pattern := l.destructurePattern(left, n.Line)
 		return l.node(OpDestructure, n.Line, pattern, value)
@@ -1256,6 +1300,9 @@ func (l *lowerer) binaryLink(n *frontend.Node, left *Node) *Node {
 	// PHP's parser folds a concatenation of two literals into one string
 	// (zend_ast_create_concat_op) on the line of the token after it; the
 	// node keeps that line so the code after the operation reports it.
+	if n.FoldLine != 0 {
+		l.cur = n.FoldLine
+	}
 	return l.seal(&Node{Op: OpBinary, Line: n.Line, FoldLine: n.FoldLine, Text: op, Kids: []*Node{left, right}})
 }
 

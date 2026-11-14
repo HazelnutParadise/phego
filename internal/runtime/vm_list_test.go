@@ -154,3 +154,62 @@ func TestDroppedListReferenceIsReleased(t *testing.T) {
 		t.Fatalf("without Drop: %q, want \"K\" (the leaked owner keeps the element shared)", got)
 	}
 }
+
+// A false container reached through a reference becomes an array without
+// PHP 8.1's deprecation (zend_fetch_dimension_address's IS_REFERENCE branch),
+// which is how every by-reference destructuring fetches; unset through the
+// reference fetches nothing, also silently. The last level of an assign-op
+// (ZEND_ASSIGN_DIM_OP) dereferences first and still warns. Found by the
+// stage 4 review; the fixtures are list_ref_false_container.php and
+// ref_false_container_no_deprecation.php.
+func TestFetchDimThroughReferenceToFalse(t *testing.T) {
+	const deprecated = "\nDeprecated: Automatic conversion of false to array is deprecated in /w/t.php on line 1\n"
+	for _, tc := range []struct {
+		name string
+		body func(m *vmFn)
+		want string
+	}{
+		{"write", func(m *vmFn) {
+			el := m.reg(bytecode.Location)
+			m.emit(bytecode.OpFetchDim, uint16(bytecode.FetchWrite), el, m.loc("h"), m.k(0))
+			m.emit(bytecode.OpStore, 0, el, m.k(1), 0)
+		}, "1"},
+		{"unset", func(m *vmFn) {
+			el := m.reg(bytecode.Location)
+			m.emit(bytecode.OpFetchDim, uint16(bytecode.FetchUnset), el, m.loc("h"), m.k(0))
+			m.emit(bytecode.OpArrayUnset, 0, el, m.k(1), 0)
+		}, ""},
+		{"assign-op", func(m *vmFn) {
+			el := m.reg(bytecode.Location)
+			m.emit(bytecode.OpFetchDim, uint16(bytecode.FetchReadWrite|bytecode.FetchForAssignOp), el, m.loc("h"), m.k(0))
+			old := m.reg(bytecode.Value)
+			m.emit(bytecode.OpLoad, 1, old, el, 0)
+			m.emit(bytecode.OpStore, 0, el, m.bin(bytecode.Concat, old, m.k("x")), 0)
+		}, deprecated + "\nWarning: Undefined array key 0 in /w/t.php on line 1\n1"},
+		{"value container", func(m *vmFn) {
+			rr := m.reg(bytecode.Value)
+			m.emit(bytecode.OpMakeRef, 0, rr, m.loc("h"), 0)
+			el := m.reg(bytecode.Location)
+			m.emit(bytecode.OpFetchDim, uint16(bytecode.FetchWrite|bytecode.FetchForRef|bytecode.FetchContainerValue), el, rr, m.k(0))
+			r := m.reg(bytecode.Value)
+			m.emit(bytecode.OpMakeRef, 0, r, el, 0)
+			m.emit(bytecode.OpDrop, 0, r, 0, 0)
+			m.emit(bytecode.OpDrop, 0, rr, 0, 0)
+		}, "1"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := newAsm(t, 64)
+			m := a.fn("{main}", 0, 1, "h", "r")
+			m.store("h", m.k(false))
+			m.emit(bytecode.OpBind, 0, m.loc("r"), m.loc("h"), 0) // $r = &$h
+			tc.body(m)
+			// "1" for an array, "" for false.
+			m.echo(m.cast(bytecode.CastString, m.cast(bytecode.CastBool, m.load("h"))))
+			m.retNull()
+			res := runAsm(t, a)
+			if res.Err != nil || string(res.Output) != tc.want {
+				t.Fatalf("output %q, err %v; want %q", res.Output, res.Err, tc.want)
+			}
+		})
+	}
+}

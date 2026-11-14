@@ -638,20 +638,27 @@ var outsideSubset = map[string]UnsupportedError{}
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
 var compileFatal = map[string]string{
-	"fatal_redeclare_function":             "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
-	"fatal_param_default_redeclared_param": "Redefinition of parameter $a",
-	"fatal_list_spread":                    "Spread operator is not supported in assignments",
-	"fatal_list_empty":                     "Cannot use empty list",
-	"fatal_list_mixed_keys":                "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_mix_syntax":                "Cannot mix [] and list()",
-	"fatal_list_ref_non_referenceable":     "Cannot assign reference to non referenceable value",
-	"fatal_list_foreach_key_list":          "Cannot use list as key element",
+	"fatal_redeclare_function":                 "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
+	"fatal_param_default_redeclared_param":     "Redefinition of parameter $a",
+	"fatal_list_spread":                        "Spread operator is not supported in assignments",
+	"fatal_list_empty":                         "Cannot use empty list",
+	"fatal_list_mixed_keys":                    "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_mix_syntax":                    "Cannot mix [] and list()",
+	"fatal_list_ref_non_referenceable":         "Cannot assign reference to non referenceable value",
+	"fatal_list_foreach_key_list":              "Cannot use list as key element",
+	"fatal_list_lines_mixed_after_ref":         "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_spread_after_ref":        "Spread operator is not supported in assignments",
+	"fatal_list_lines_empty_after_ref_element": "Cannot use empty array entries in keyed array assignment",
+	"fatal_list_lines_mixed_after_ref_element": "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_element":     "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_foreach_mixed_after_ref": "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_var":         "Cannot mix keyed and unkeyed array entries in assignments",
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 253 {
-		t.Fatalf("want 253 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 263 {
+		t.Fatalf("want 263 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
