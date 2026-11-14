@@ -80,9 +80,22 @@ func (s *vmState) storeElement(f *vmFrame, in *vmInstr) error {
 func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 	flags := bytecode.FetchFlags(in.aux)
 	mode := flags.Mode()
-	slot, err := s.slot(f, in.b)
-	if err != nil {
-		return err
+	var slot *value
+	if flags&bytecode.FetchContainerValue != 0 {
+		// ZEND_FETCH_DIM_W on a VAR: the container is the reference the
+		// right-hand side of a destructuring assignment became (MakeRef,
+		// or a by-reference IterNext). The compiler never fetches from a
+		// register holding anything else; FETCH_LIST_W's notice for that
+		// case is not modeled, the run fails closed.
+		slot = &f.regs[in.b]
+		if slot.kind != valueReference {
+			return s.unsupported("fetching an element of a temporary that is not a reference")
+		}
+	} else {
+		var err error
+		if slot, err = s.slot(f, in.b); err != nil {
+			return err
+		}
 	}
 	if err := s.h.runtimeCheck(); err != nil {
 		return err
@@ -98,7 +111,14 @@ func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 		if c.kind == valueBool && c.boolean {
 			return s.fetchDimScalar(f, in, flags)
 		}
-		if c.kind == valueUndefined && mode != bytecode.FetchWrite {
+		// zend_fetch_dimension_address reaches a false container through
+		// a reference by its IS_REFERENCE branch, which makes the array
+		// (or, for unset, fetches nothing) without the deprecation that
+		// zend_fetch_dimension_address_W raises for a plain variable.
+		// ZEND_ASSIGN_DIM_OP (the last level of an assign-op) and
+		// ZEND_ASSIGN_DIM (arraySet) dereference first and warn either way.
+		viaRef := slot.kind == valueReference && flags.Use() != bytecode.FetchForAssignOp
+		if c.kind == valueUndefined && mode != bytecode.FetchWrite && flags&bytecode.FetchContainerValue == 0 {
 			if name, ok := s.variableName(f, in.b); ok {
 				s.h.warn(levelWarning, "Undefined variable $"+name)
 				if s.stopped() {
@@ -109,12 +129,16 @@ func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 		if mode == bytecode.FetchUnset {
 			// Nothing is created: the element is a null that belongs to
 			// no array, which the following unset leaves alone.
-			if c.kind == valueBool {
+			if c.kind == valueBool && !viaRef {
 				s.h.warn(levelDeprecated, "Automatic conversion of false to array is deprecated")
 			}
 			return s.setElementLocation(f, in.a, &value{kind: valueNull})
 		}
-		if err := s.writable(slot, flags&bytecode.FetchAppend != 0); err != nil || s.stopped() {
+		if viaRef && c.kind == valueBool {
+			if err := s.h.assign(slot, s.h.newArrayValue()); err != nil {
+				return err
+			}
+		} else if err := s.writable(slot, flags&bytecode.FetchAppend != 0); err != nil || s.stopped() {
 			return err
 		}
 	default:
@@ -130,8 +154,10 @@ func (s *vmState) fetchDim(f *vmFrame, in *vmInstr) error {
 	var k value
 	if flags&bytecode.FetchKeyLocation == 0 {
 		k = operandValue(f.regs, in.c)
-	} else if k, _, err = s.readVar(f, in.c); err != nil || s.stopped() {
+	} else if kv, _, err := s.readVar(f, in.c); err != nil || s.stopped() {
 		return err
+	} else {
+		k = kv
 	}
 	if err := s.h.claimValues(*slot, k); err != nil {
 		return err

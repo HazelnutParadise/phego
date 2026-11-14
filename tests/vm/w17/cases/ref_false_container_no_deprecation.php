@@ -1,0 +1,37 @@
+<?php
+$h = false;
+$r = &$h;
+$h[0] = 1;
+echo "a\n";
+$k = false;
+$r2 = &$k;
+$k[0][1] = 1;
+echo "b\n";
+$m = false;
+$r3 = &$m;
+$x = &$m[0];
+echo "c\n";
+$n = false;
+$r4 = &$n;
+unset($n[0][1]);
+echo "d\n";
+$o = false;
+unset($o[0][1]);
+echo "e\n";
+$p = false;
+$r5 = &$p;
+$p[0] .= 'x';
+echo "f\n";
+$q = false;
+$r6 = &$q;
+$q[0][1] .= 'x';
+echo "g\n";
+$s = false;
+$r7 = &$s;
+$s[0]++;
+echo "h\n";
+$t = false;
+$r8 = &$t;
+foreach ($t as &$v) {}
+echo "i\n";
+echo $k[0][1], $x === null ? "null" : "?", $n === false ? "false" : "?", $p[0], $q[0][1], $s[0], "\n";

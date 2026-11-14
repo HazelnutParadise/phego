@@ -1,0 +1,47 @@
+<?php
+$x = [1, 2];
+[&$a, $b] = $x;
+$copy = $x;
+$copy[0] = 'shared';
+$copy[1] = 'own';
+echo $x[0], " ", $x[1], "\n";
+unset($a);
+$copy2 = $x;
+$copy2[0] = 'separate';
+echo $x[0], "\n";
+$y = [[1]];
+[&$c] = $y;
+$inner = $y[0];
+$inner[0] = 'changed';
+echo $y[0][0], "\n";
+unset($c);
+$copy3 = $y;
+$copy3[0] = 'z';
+echo $y[0][0], "\n";
+$z = [5];
+[&$d] = $z;
+unset($d);
+$copy4 = $z;
+$copy4[0] = 6;
+echo $z[0], "\n";
+$w = [[7]];
+[[&$e]] = $w;
+unset($e);
+$copy5 = $w;
+$copy5[0][0] = 8;
+echo $w[0][0], "\n";
+$v = [1, 2];
+foreach ([[0]] as [&$f]) {
+}
+unset($f);
+$z2 = ['k' => [1]];
+[&$g] = $z2['k'];
+unset($g);
+$copy6 = $z2;
+$copy6['k'] = 'K';
+echo $z2['k'][0], "\n";
+$z3 = ['k' => [1]];
+[&$h] = $z3['k'];
+$copy7 = $z3;
+$copy7['k'] = 'K';
+echo $z3['k'][0], "\n";

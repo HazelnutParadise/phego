@@ -516,8 +516,8 @@ func TestStage2Unsupported(t *testing.T) {
 		feature, src string
 		line         int
 	}{
-		{"list() destructuring", "echo 1;\nforeach ($a as [$x, $y]) {}", 3},
-		{"list() destructuring", "echo 1;\nforeach ($a as $k => list($x)) {}", 3},
+		{"property access", "echo 1;\nforeach ($a as [$x, $o->p]) {}", 3},
+		{"static property access", "echo 1;\nforeach ($a as $k => list(A::$s)) {}", 3},
 		{"property access", "echo 1;\nforeach ($a as $o->p) {}", 3},
 		{"property access", "echo 1;\nforeach ($a as\n $o->p[1]) {}", 4},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0][1] = 1;", 4},

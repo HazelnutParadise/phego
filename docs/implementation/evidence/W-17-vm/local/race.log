@@ -1,19 +1,17 @@
 $ go test -race -count=1 -timeout 40m, one package at a time
-ok  	github.com/HazelnutParadise/phego
-exit 0 .
-ok  	github.com/HazelnutParadise/phego/internal/phpname
-exit 0 ./internal/phpname
-ok  	github.com/HazelnutParadise/phego/internal/vm
-exit 0 ./internal/vm
-ok  	github.com/HazelnutParadise/phego/internal/bytecode
-exit 0 ./internal/bytecode
-ok  	github.com/HazelnutParadise/phego/internal/ir
-exit 0 ./internal/ir
-ok  	github.com/HazelnutParadise/phego/internal/ir/ssa
-exit 0 ./internal/ir/ssa
-ok  	github.com/HazelnutParadise/phego/internal/frontend
-exit 0 ./internal/frontend
-ok  	github.com/HazelnutParadise/phego/internal/policy
-exit 0 ./internal/policy
-ok  	github.com/HazelnutParadise/phego/internal/runtime
-exit 0 ./internal/runtime
+ok  	github.com/HazelnutParadise/phego	98.316s
+ok  	github.com/HazelnutParadise/phego/diag	1.021s
+ok  	github.com/HazelnutParadise/phego/diag/codes	1.397s
+?   	github.com/HazelnutParadise/phego/diag/codes/gen	[no test files]
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	32.804s
+ok  	github.com/HazelnutParadise/phego/internal/compat	1.013s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	6.979s
+ok  	github.com/HazelnutParadise/phego/internal/ir	19.191s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	1.012s
+ok  	github.com/HazelnutParadise/phego/internal/phpname	1.009s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	1.008s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	3.515s
+ok  	github.com/HazelnutParadise/phego/internal/profile	1.968s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	176.448s
+ok  	github.com/HazelnutParadise/phego/internal/vm	5.925s
+exit 0

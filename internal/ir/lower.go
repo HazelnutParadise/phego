@@ -699,6 +699,9 @@ func (l *lowerer) foreach(s *frontend.Node) *Node {
 	} else {
 		subject = l.expr(c[0])
 	}
+	// zend_compile_foreach assigns the value before the key, so a pattern
+	// is compiled with the line where the subject left it.
+	subjectLine := l.cur
 	n := &Node{Op: OpForeach, Line: s.Line, Kids: []*Node{subject, nil, nil, nil}}
 	if k := c[1]; k != nil {
 		if k.Kind == "by_ref" {
@@ -723,6 +726,7 @@ func (l *lowerer) foreach(s *frontend.Node) *Node {
 			l.fail(s.Line, "Cannot re-assign $this")
 		}
 		if value.Kind == "list" || value.Kind == "array" {
+			l.cur = subjectLine
 			n.Kids[2] = l.destructurePattern(value, s.Line)
 		} else {
 			n.Kids[2] = l.target(value, s.Line)

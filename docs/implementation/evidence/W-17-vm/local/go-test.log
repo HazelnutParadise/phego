@@ -1,17 +1,17 @@
 $ CGO_ENABLED=0 go test -count=1 ./...
-ok  	github.com/HazelnutParadise/phego
-ok  	github.com/HazelnutParadise/phego/diag
-ok  	github.com/HazelnutParadise/phego/diag/codes
+ok  	github.com/HazelnutParadise/phego	27.993s
+ok  	github.com/HazelnutParadise/phego/diag	0.007s
+ok  	github.com/HazelnutParadise/phego/diag/codes	0.047s
 ?   	github.com/HazelnutParadise/phego/diag/codes/gen	[no test files]
-ok  	github.com/HazelnutParadise/phego/internal/bytecode
-ok  	github.com/HazelnutParadise/phego/internal/compat
-ok  	github.com/HazelnutParadise/phego/internal/frontend
-ok  	github.com/HazelnutParadise/phego/internal/ir
-ok  	github.com/HazelnutParadise/phego/internal/ir/ssa
-ok  	github.com/HazelnutParadise/phego/internal/phpname
-ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.509s [no tests to run]
-ok  	github.com/HazelnutParadise/phego/internal/policy
-ok  	github.com/HazelnutParadise/phego/internal/profile
-ok  	github.com/HazelnutParadise/phego/internal/runtime
-ok  	github.com/HazelnutParadise/phego/internal/vm
+ok  	github.com/HazelnutParadise/phego/internal/bytecode	3.227s
+ok  	github.com/HazelnutParadise/phego/internal/compat	0.003s
+ok  	github.com/HazelnutParadise/phego/internal/frontend	0.602s
+ok  	github.com/HazelnutParadise/phego/internal/ir	3.720s
+ok  	github.com/HazelnutParadise/phego/internal/ir/ssa	0.070s
+ok  	github.com/HazelnutParadise/phego/internal/phpname	0.003s
+ok  	github.com/HazelnutParadise/phego/internal/phpnum	0.002s [no tests to run]
+ok  	github.com/HazelnutParadise/phego/internal/policy	2.628s
+ok  	github.com/HazelnutParadise/phego/internal/profile	0.051s
+ok  	github.com/HazelnutParadise/phego/internal/runtime	16.892s
+ok  	github.com/HazelnutParadise/phego/internal/vm	0.809s
 exit 0

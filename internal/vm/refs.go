@@ -130,8 +130,6 @@ func (fc *fnCompiler) iterRefTarget(it uint32, target *ir.Node, exit int) {
 		t := fc.dimTarget(target, target.Line)
 		dst := fc.fetchPath(t, len(t.keys), bytecode.FetchWrite, bytecode.FetchForRef)
 		fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), dst, tmp, 0)
-	case ir.OpDestructure, ir.OpArray:
-		fc.unsupported("list() destructuring", target.Line)
 	default:
 		fc.unsupportedNode(target)
 	}

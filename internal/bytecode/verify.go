@@ -23,8 +23,9 @@ func validateIdentity(id Identity) error {
 }
 
 // verifyImage checks image as format version 1.minor. Minor 0 files may not
-// use any format 1.1 opcode, Aux value or binary operator, and files below
-// minor 2 may not use any format 1.2 opcode or Aux value.
+// use any format 1.1 opcode, Aux value or binary operator, files below minor
+// 2 may not use any format 1.2 opcode or Aux value, and so on for 1.3 and
+// 1.4 (format13, format14).
 func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (CapabilitySet, error) {
 	if err := b.poll(); err != nil {
 		return 0, err
@@ -315,9 +316,24 @@ func format13(in Instruction) bool {
 	return false
 }
 
+// format14 reports whether a known instruction needs format 1.4: a list
+// read (ArrayGet with ArrayGetList) or a FetchDim from a Value container.
+func format14(in Instruction) bool {
+	switch in.Op {
+	case OpArrayGet:
+		return in.Aux == ArrayGetList
+	case OpFetchDim:
+		return FetchFlags(in.Aux)&FetchContainerValue != 0
+	}
+	return false
+}
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 4 && format14(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.4, but the file declares format 1.%d", minor))
 	}
 	if minor < 3 && format13(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.3, but the file declares format 1.%d", minor))
@@ -417,7 +433,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid new-array operands")
 		}
 	case OpArrayGet:
-		if in.Aux > 1 || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
+		if in.Aux > ArrayGetList || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
 			return invalid("invalid array-get operands")
 		}
 	case OpInclude:
@@ -508,15 +524,20 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if flags&FetchKeyLocation != 0 {
 			key = Location
 		}
+		container := Location
+		if flags&FetchContainerValue != 0 {
+			container = Value
+		}
 		switch {
 		case flags&^fetchKnown != 0 || flags.Mode() > FetchUnset:
 		case flags.Use() == FetchForRef && flags.Mode() != FetchWrite:
+		case flags&FetchContainerValue != 0 && flags.Use() != FetchForRef:
 		case flags.Mode() == FetchUnset && (flags.Use() != 0 || flags&FetchAppend != 0):
-		case !reg(in.A, Location) || !reg(in.B, Location):
+		case !reg(in.A, Location) || !reg(in.B, container):
 		case flags&FetchAppend != 0 && flags&FetchKeyLocation == 0 && in.C == 0, flags&FetchAppend == 0 && reg(in.C, key):
 			return nil
 		}
-		return invalid("invalid fetch-dim operands: A and B must be Locations, C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use")
+		return invalid("invalid fetch-dim operands: A and B must be Locations (B a Value where Aux has FetchContainerValue, which needs FetchForRef), C a key Value (a Location where Aux has FetchKeyLocation, zero with FetchAppend); Aux is a mode, FetchKeyLocation, FetchAppend and a use, and FetchUnset takes neither FetchAppend nor a use")
 	case OpIterInit:
 		subject := reg(in.B, Value)
 		if in.Aux == uint16(IterByRef) {

@@ -485,7 +485,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"require_once", "echo 1;\nrequire_once 'x.php';", 3},
 		{"eval", "echo 1;\neval('echo 1;');", 3},
 		{"match", "echo 1;\necho match ($x) { 1 => 2, default => 3 };", 3},
-		{"list() destructuring", "echo 1;\n[$a, $b] = $c;", 3},
+		{"property access", "echo 1;\n[$a, $o->p] = $c;", 3},
+		{"static property access", "echo 1;\n['k' => A::$s] = $c;", 3},
+		{"property access", "echo 1;\n[&$o->p] = $c;", 3},
 		{"variable variables", "echo 1;\n$$n = 1;", 3},
 		{"named arguments", "echo 1;\nfunction f($a) {}\nf(a: 1);", 4},
 		{"argument unpacking", "echo 1;\nfunction f($a) {}\nf(...$x);", 4},
@@ -610,10 +612,10 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		feature string
 		line    int
 	}{
-		// A function body before the main code that destructures.
-		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\n[$b] = $a;\n", "constant lookup", 2},
+		// A function body before the main code that writes a property.
+		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\n$o->p = 1;\n", "constant lookup", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\n[$b] = $a;\nfunction f() { return PHP_EOL; }\n", "list() destructuring", 3},
+		{"<?php\necho 1;\n$o->p = 1;\nfunction f() { return PHP_EOL; }\n", "property access", 3},
 		// Within a statement, the left operand first.
 		{"<?php\necho PHP_EOL . $o->p;\n", "constant lookup", 2},
 	}
@@ -636,14 +638,27 @@ var outsideSubset = map[string]UnsupportedError{}
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
 var compileFatal = map[string]string{
-	"fatal_redeclare_function":             "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
-	"fatal_param_default_redeclared_param": "Redefinition of parameter $a",
+	"fatal_redeclare_function":                 "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
+	"fatal_param_default_redeclared_param":     "Redefinition of parameter $a",
+	"fatal_list_spread":                        "Spread operator is not supported in assignments",
+	"fatal_list_empty":                         "Cannot use empty list",
+	"fatal_list_mixed_keys":                    "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_mix_syntax":                    "Cannot mix [] and list()",
+	"fatal_list_ref_non_referenceable":         "Cannot assign reference to non referenceable value",
+	"fatal_list_foreach_key_list":              "Cannot use list as key element",
+	"fatal_list_lines_mixed_after_ref":         "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_spread_after_ref":        "Spread operator is not supported in assignments",
+	"fatal_list_lines_empty_after_ref_element": "Cannot use empty array entries in keyed array assignment",
+	"fatal_list_lines_mixed_after_ref_element": "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_element":     "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_foreach_mixed_after_ref": "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_var":         "Cannot mix keyed and unkeyed array entries in assignments",
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 220 {
-		t.Fatalf("want 220 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 263 {
+		t.Fatalf("want 263 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

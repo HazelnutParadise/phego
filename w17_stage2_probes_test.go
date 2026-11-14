@@ -1164,8 +1164,6 @@ var w17Stage2Unsupported = []struct {
 }{
 	{"s2_dim_write_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0] = 1;\necho \"end\\n\";\n",
 		"array write through a non-variable", 4, "a\nend\n"},
-	{"s2_u_fe_list", "<?php\necho \"a\\n\";\nforeach ([[1, 2]] as [$x, $y]) {}\n", "list() destructuring", 3, ""},
-	{"s2_u_fe_list_keyed", "<?php\necho \"a\\n\";\n\nforeach ([[1, 2]] as $k => list($x, $y)) {}\n", "list() destructuring", 4, ""},
 	{"s2_u_fe_property_target", "<?php\necho \"a\\n\";\nforeach ([1] as $o->p) {}\n", "property access", 3, ""},
 	{"s2_u_fe_body", "<?php\necho \"a\\n\";\nforeach ([1] as $v) {\n  static $s;\n}\n", "static variable", 4, ""},
 	{"s2_u_cas_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0] .= 1;\n", "array write through a non-variable", 4, ""},
@@ -1197,9 +1195,16 @@ var w17Stage3Supported = []struct{ name, src, php string }{
 	{"s2_u_default_by_ref", "<?php\necho \"a\\n\";\nfunction f(&$a = 1) {}\n", "a\n"},
 }
 
+// w17Stage4Supported are probes the table above refused until stage 4
+// (destructuring), with the output PHP 8.5.12 gives them.
+var w17Stage4Supported = []struct{ name, src, php string }{
+	{"s2_u_fe_list", "<?php\necho \"a\\n\";\nforeach ([[1, 2]] as [$x, $y]) {}\necho $x, $y, \"\\n\";\n", "a\n12\n"},
+	{"s2_u_fe_list_keyed", "<?php\necho \"a\\n\";\n\nforeach ([[1, 2]] as $k => list($x, $y)) {}\necho $k, $x, $y, \"\\n\";\n", "a\n012\n"},
+}
+
 func TestW17Stage3RunsFormerlyUnsupportedProbes(t *testing.T) {
 	e := mustEngine(t, Config{})
-	for _, c := range w17Stage3Supported {
+	for _, c := range append(append([]struct{ name, src, php string }(nil), w17Stage3Supported...), w17Stage4Supported...) {
 		t.Run(strings.TrimPrefix(c.name, "s2_"), func(t *testing.T) {
 			p, err := e.Compile(context.Background(), "/w/cases/"+c.name+".php", c.src)
 			if err != nil {

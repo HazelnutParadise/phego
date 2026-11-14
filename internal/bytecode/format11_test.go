@@ -187,7 +187,7 @@ func TestFormat11RejectsInvalidOperands(t *testing.T) {
 		"binary aux high":                    {Op: OpBinary, Aux: uint16(BoolXor) + 1, A: 3, B: 0, C: 0},
 		"exit aux high":                      {Op: OpExit, Aux: 2, A: 0},
 		"load aux high":                      {Op: OpLoad, Aux: 2, A: 3, B: 2},
-		"array get aux 2":                    {Op: OpArrayGet, Aux: 2, A: 3, B: 1, C: 0},
+		"array get aux 3":                    {Op: OpArrayGet, Aux: 3, A: 3, B: 1, C: 0},
 		"first unknown op":                   {Op: OpArrayAdd + 1},
 		"unknown op status":                  {Op: OpArrayAdd + 1, A: 0},
 	}

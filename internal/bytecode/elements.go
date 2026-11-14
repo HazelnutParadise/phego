@@ -35,6 +35,11 @@ type elementWindow struct {
 //     reference does not point into the array, so nothing stale is left
 //     behind.
 //
+// From format 1.4 a FetchDim may fetch from a Value register that holds a
+// reference (FetchContainerValue); it opens a sequence like a fetch from a
+// variable, and since its container is not a Location no key or value
+// Location can be the base.
+//
 // A jump target, a handler target or any other instruction ends the
 // sequence, and the register may not appear in any instruction outside a
 // sequence: not in Local, Move, Drop, Push, Call, Isset, Unset, the
@@ -233,7 +238,9 @@ func locationOperands(in Instruction, f *Function) (regs [3]uint32, n int) {
 		}
 	case OpFetchDim:
 		add(in.A)
-		add(in.B)
+		if FetchFlags(in.Aux)&FetchContainerValue == 0 {
+			add(in.B)
+		}
 		if FetchFlags(in.Aux)&FetchKeyLocation != 0 {
 			add(in.C)
 		}

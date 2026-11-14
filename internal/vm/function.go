@@ -792,8 +792,10 @@ func (fc *fnCompiler) switchStmt(n *ir.Node) {
 //	brk:  Drop it             ; break jumps here
 //	end:
 func (fc *fnCompiler) foreachStmt(n *ir.Node) {
-	byRef := n.Flags&ir.FlagRef != 0
 	subject, key, val, body := n.Kids[0], n.Kids[1], n.Kids[2], n.Kids[3]
+	// A pattern with a by-reference element makes the loop iterate by
+	// reference (zend_compile_foreach after zend_propagate_list_refs).
+	byRef := n.Flags&ir.FlagRef != 0 || val.Op == ir.OpArray && patternHasRef(val)
 	it := fc.alloc()
 	inner := fc.top
 	next, brk, end := fc.label(), fc.label(), fc.label()
@@ -806,7 +808,9 @@ func (fc *fnCompiler) foreachStmt(n *ir.Node) {
 	fc.fixups = append(fc.fixups, fixup{pc, 2, end})
 	fc.top = inner
 	fc.bind(next)
-	if byRef {
+	if val.Op == ir.OpArray {
+		fc.foreachList(it, val, byRef, brk)
+	} else if byRef {
 		fc.iterRefTarget(it, val, brk)
 	} else {
 		fc.iterTarget(val, func(dest uint32, flags bytecode.IterFlags) {
@@ -847,8 +851,6 @@ func (fc *fnCompiler) iterTarget(target *ir.Node, fetch func(dest uint32, flags 
 		fetch(tmp, 0)
 		t := fc.dimTarget(target, target.Line)
 		fc.writeDim(t, reg(tmp), false, false)
-	case ir.OpDestructure, ir.OpArray:
-		fc.unsupported("list() destructuring", target.Line)
 	default:
 		fc.unsupportedNode(target)
 	}

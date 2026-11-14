@@ -1,0 +1,121 @@
+# commit d392342 (before the review fixes): Phego output of the regression fixtures added after the independent review
+# PHP 8.5.12 output is in tests/vm/w17/reference-*.json; the lines marked PHP below are what the amd64 image printed
+
+$ PHEGO_PROBE=tests/vm/w17/cases/list_ref_false_container.php go test -run TestZZProbe -v .
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 3
+a
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 6
+b
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 10
+c
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 13
+d
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 16
+e
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 19
+f
+ABCDE
+    zz_probe_test.go:29: exit 0
+
+$ PHEGO_PROBE=tests/vm/w17/cases/ref_false_container_no_deprecation.php go test -run TestZZProbe -v .
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 4
+a
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 8
+b
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 12
+c
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 16
+d
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 19
+e
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 23
+
+Warning: Undefined array key 0 in /w/cases/probe.php on line 23
+f
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 27
+
+Warning: Undefined array key 0 in /w/cases/probe.php on line 27
+
+Warning: Undefined array key 1 in /w/cases/probe.php on line 27
+g
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/cases/probe.php on line 31
+
+Warning: Undefined array key 0 in /w/cases/probe.php on line 31
+h
+
+Warning: foreach() argument must be of type array|object, false given in /w/cases/probe.php on line 35
+i
+1nullfalsexx1
+    zz_probe_test.go:29: exit 0
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_mixed_after_ref.php go test -run TestZZProbe -v .
+
+Fatal error: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 4
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 4
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_spread_after_ref.php go test -run TestZZProbe -v .
+
+Fatal error: Spread operator is not supported in assignments in /w/cases/probe.php on line 4
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Spread operator is not supported in assignments in /w/cases/probe.php on line 4
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_empty_after_ref_element.php go test -run TestZZProbe -v .
+
+Fatal error: Cannot use empty array entries in keyed array assignment in /w/cases/probe.php on line 5
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Cannot use empty array entries in keyed array assignment in /w/cases/probe.php on line 5
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_mixed_after_ref_element.php go test -run TestZZProbe -v .
+
+Fatal error: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 5
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 5
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_mixed_after_element.php go test -run TestZZProbe -v .
+
+Fatal error: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 5
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 5
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/fatal_list_lines_foreach_mixed_after_ref.php go test -run TestZZProbe -v .
+
+Fatal error: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 4
+Stack trace:
+#0 {main}
+    zz_probe_test.go:27: err: phego: PHP CompileError: Cannot mix keyed and unkeyed array entries in assignments in /w/cases/probe.php on line 4
+    zz_probe_test.go:29: exit 255
+
+$ PHEGO_PROBE=tests/vm/w17/cases/list_lines_after_folded_concat.php go test -run TestZZProbe -v .
+
+Warning: Cannot use string as array in /w/cases/probe.php on line 6
+
+Warning: Cannot use string as array in /w/cases/probe.php on line 12
+
+Warning: Cannot use string as array in /w/cases/probe.php on line 8
+done
+    zz_probe_test.go:29: exit 0

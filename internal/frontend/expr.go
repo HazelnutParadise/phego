@@ -97,13 +97,26 @@ func (p *parser) exprRest(left *Node, min int) *Node {
 			next = op.prec
 		}
 		right := p.exprPrec(next)
-		left = &Node{Kind: "binary", Text: t.Text, Line: t.Line, Children: []*Node{left, right}}
+		fold := 0
+		if t.Kind == '.' && isParserFoldedZval(left) && isParserFoldedZval(right) {
+			fold = p.peek().Line
+		}
+		left = &Node{Kind: "binary", Text: t.Text, Line: t.Line, FoldLine: fold, Children: []*Node{left, right}}
 		if op.none {
 			if n, ok := binaryOps[p.peek().Kind]; ok && n.none && n.prec == op.prec {
 				p.unexpected()
 			}
 		}
 	}
+}
+
+// isParserFoldedZval reports whether n is a zval AST in PHP's parser: a
+// literal, or a concatenation the parser folded, possibly in parentheses.
+func isParserFoldedZval(n *Node) bool {
+	for n.Kind == "paren" {
+		n = n.Children[0]
+	}
+	return n.Kind == "literal" || n.Kind == "binary" && n.FoldLine != 0
 }
 
 func isAssignable(n *Node) bool {
@@ -547,7 +560,7 @@ func (p *parser) arrayLiteral(open, close Kind, kind string) *Node {
 			break
 		}
 	}
-	p.expect(close)
+	n.CloseLine = p.expect(close).Line
 	return n
 }
 

@@ -330,15 +330,16 @@ func TestRunRefusesClosedAndForeignEngines(t *testing.T) {
 // location and a rustc-style diagnostic.
 func TestUnsupportedConstructIsLocated(t *testing.T) {
 	e := mustEngine(t, Config{})
-	// Stage 2 runs "$a[0] += 1" and stage 3 "$a[0] = &$b", the constructs
-	// this test used before; destructuring is still outside the VM.
-	src := "<?php\n$a = [1];\n[$x] = $a;\n"
+	// Stage 2 runs "$a[0] += 1", stage 3 "$a[0] = &$b" and stage 4
+	// "[$x] = $a", the constructs this test used before; objects are still
+	// outside the VM.
+	src := "<?php\n$a = [1];\n$o->p = 1;\n"
 	_, err := e.Compile(context.Background(), "app/x.php", src)
 	var ue *UnsupportedError
-	if !errors.As(err, &ue) || ue.Feature != "list() destructuring" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
+	if !errors.As(err, &ue) || ue.Feature != "property access" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
 		t.Fatalf("%#v", err)
 	}
-	if got := err.Error(); got != "phego: unsupported: list() destructuring in app/x.php on line 3" {
+	if got := err.Error(); got != "phego: unsupported: property access in app/x.php on line 3" {
 		t.Fatalf("Error() = %q", got)
 	}
 	d, ok := Diagnose(err)
@@ -349,10 +350,10 @@ func TestUnsupportedConstructIsLocated(t *testing.T) {
 	if err := diag.Render(&b, d, diag.Options{Source: func(string) ([]byte, bool) { return []byte(src), true }}); err != nil {
 		t.Fatal(err)
 	}
-	const golden = `error[PHG3001]: unsupported PHP construct: list() destructuring
+	const golden = `error[PHG3001]: unsupported PHP construct: property access
  --> app/x.php:3:1
   |
-3 | [$x] = $a;
+3 | $o->p = 1;
   | ^^^^^^^^^^ this build's VM cannot run this yet
   |
   = note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly

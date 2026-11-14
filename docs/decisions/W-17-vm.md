@@ -32,6 +32,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 一 | 純量與字串、所有算術、比較、位元與邏輯運算、型別轉換、`++`／`--`、區域變數、陣列的建立、讀取、單層寫入、`isset`、`unset`、if、迴圈、switch、`exit`、固定位置參數的使用者函式、頂層 `return` | foreach、參照、物件與類別、try／catch、closure、常數、include、eval、內建函式、參數預設值與型別 |
 | 二 | 陣列元素的複合指定、`??=`、`++`／`--`，任意層的巢狀寫入與 `unset`，`foreach` 傳值，參數預設值，讀寫字串位移 | foreach 傳參照、解構、走訪物件，透過非變數寫入陣列，參照，參數型別、傳參照與不定參數，具名引數，以常數為預設值，PHP 不 intern 的字串預設值 |
 | 三 | 參照指定 `$a = &$b`（變數與任意層元素都可以當來源或目標），`foreach` 傳參照，傳參照的參數（含預設值） | 解構、走訪物件，參照到函式呼叫結果或屬性，把不是變數的值傳給傳參照參數，兩個元素之間參照指定的運算式值，`global`、`static`，陣列字面值裡的 `&$x`，回傳參照，參數型別與不定參數，具名引數 |
+| 四 | 解構：`[$a, $b] = $x`、`list()`、跳過的位置、任意運算式的 key、巢狀樣式、元素目標（含 `$a[]`）、解構運算式的值、`foreach` 搭配樣式（含 key）、傳參照的元素 `[&$a]`（含巢狀與 foreach）、右邊不是陣列、缺少的 key、左右互相影響的寫法 | 物件與靜態屬性目標，`[...$rest]`（PHP 的編譯錯誤），`[&$a] = f()`，從元素解構參照的運算式值，走訪物件，其他第三階段右欄的項目 |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -111,6 +112,24 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 
 測試程式加到 220 個，三個 profile 各 660 項全部和 PHP 8.5.12 逐位元組相同。
 
+## 階段四
+
+格式升到 1.4，沒有新增指令：ArrayGet 多一個 Aux 2（ZEND_FETCH_LIST_R），FetchDim 多一個 FetchContainerValue 旗標（ZEND_FETCH_LIST_W 對 VAR 容器的寫入取元素）。1.0 到 1.3 的檔案照樣能載入，其中出現 1.4 的內容時以 `ErrInvalid` 拒絕並指出需要 1.4。操作數規則在 [W-16 文件](W-16-bytecode.md)。因為只是現有指令的新 Aux，沒有做布局量測。
+
+- **順序**照 zend_compile_assign 的 ZEND_AST_ARRAY 分支與 zend_compile_list_assign。右邊是變數時先複製（QM_ASSIGN），所以 `[$a, $b] = $a` 與 `[$a[0], $a[1]] = $a` 讀的是原本的陣列；其他右邊只求值一次。每個元素依序：有 key 就先算 key（key 是變數時由讀取指令自己讀），用 FETCH_LIST_R 取出元素，再指定給目標；元素目標的 key 在取出元素之後才算；巢狀樣式從取出的元素再解構。PHP 8.5.12 的原始碼裡沒有 `zend_list_has_assign_to_self`，變數右邊一律複製，Phego 照做。
+- **右邊不是陣列**：null 安靜讀到 null；int、float、bool、string 發出 `Cannot use T as array`（T 是型別名稱，true 與 false 都是 bool）並讀到 null；字串不當成字串位移。缺少的 key 發出 `Undefined array key`。
+- **傳參照的元素**：右邊先變成參照（MakeRef）放進暫存器，整個指定期間持有；要綁參照的元素（以及含參照的巢狀樣式）用 FetchDim（FetchWrite、FetchForRef、FetchContainerValue）從這個參照取元素，再 MakeRef、Bind；其他元素透過參照用 FETCH_LIST_R 讀。指定結束時以 Drop 釋放暫存器裡的參照，不等 liveness：PHP 在陳述式結束時釋放 VAR，之後複製陣列時參照計數為 1 的元素會被拆開，`internal/runtime/vm_list_test.go` 用跳過 liveness 的函式證明少了 Drop 時複製會共用元素。巢狀含參照的子樣式的 VAR 也一樣在子樣式結束時 Drop。`foreach` 的樣式裡有參照時整個迴圈變成傳參照（zend_propagate_list_refs），IterNext 把元素的參照放進暫存器，樣式綁完後 Drop。
+- **行號**照 zend_compile_list_assign 留下的 `CG(zend_lineno)`：第一個元素的 FETCH 在右邊結束的行；變數目標指定後，行移到那個變數的行；元素目標與參照目標留在 FETCH 的行；右邊是變數時，複製發生在樣式第一個元素的行。為了讓多行的寫法逐位元組相同，另外修正兩個前端與 HIR 的行號：空的陣列字面值取右括號那一行（zend_ast_create_list 沒有子節點時取當時的行），兩個字面值的 `.` 由 PHP 的 parser 折疊成一個字串（zend_ast_create_concat_op），行號是右運算元後面那個 token 的行，HIR 以 `FoldLine` 記下，VM 在 Concat 之後把行停在那裡。
+- **編譯期拒絕**：`[...$rest]`、空樣式、混用 key、混用 `[]` 與 `list()`、`array()` 當目標、對不能參照的值取參照、`foreach` 的 key 是樣式，都照 PHP 的編譯錯誤訊息，由 lowering 回報。物件與靜態屬性目標回報帶位置的 `UnsupportedError`。
+
+獨立審查跑了 118 個 PHP 探測程式，另以 1,300 層巢狀的超大函式確認關閉 liveness 時暫存器沒有殘留可見的參照。沒有 P0 或 P1；找到的問題都已修正並加上修正前會失敗的回歸 fixture（修正前的輸出在 [stage4/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage4/red-review-fixes.txt)）：
+
+- **透過參照碰到 false 容器時多印 Deprecated**（P2）。zend_fetch_dimension_address 的 IS_REFERENCE 分支對 null 與 false 直接 array_init，unset 模式直接回 null，都不呼叫 zend_false_to_array_deprecated；只有 ASSIGN_DIM 與 ASSIGN_DIM_OP 會先解參照再警告。傳參照解構的容器一定是參照，所以 `[&$a] = $f`（`$f = false`）每次都多一行；`$r = &$h; $h[0][1] = 1`、`$x = &$m[0]`、`unset($m[0][1])` 從第二階段起就有同樣的問題。現在 FetchDim 的容器是參照時不發這個通知，ASSIGN_DIM_OP 的最後一層除外。
+- **樣式裡的編譯錯誤行號**（P3）。lowering 在每個元素之後把目前行停在目標的行，PHP 則是元素目標與參照目標都留在取值那一行、變數目標移到變數那一行；foreach 的樣式從主體結束的行開始。七個 `fatal_list_lines_*` fixture 的 `Cannot mix`、`Spread operator` 與 `Cannot use empty array entries` 行號現在和 PHP 相同。
+- **從元素解構參照的運算式值與 `[&$a] = f()`**（P3）在 `Compile` 回報帶位置的不支援，不會跑出錯的輸出；列在已知缺口。審查者建議的做法是 Drop 之前先從參照讀值，但目前沒有把 Value 暫存器裡的參照解開複製的指令，留給之後的階段。
+
+測試程式加到 263 個（新增 24 個 `list_*`、`foreach_list_*`、`ref_*` 與 18 個 `fatal_list_*`），三個 profile 各 789 項全部和 PHP 8.5.12 逐位元組相同。
+
 ## 階段一的對照結果
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
@@ -167,5 +186,7 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **編譯期 fatal 之前的編譯期警告會遺失**：`Compile` 只回傳 `PHPError`。
 - **函式隱含的 return 行號**：使用函式內出現過的最大行號，PHP 使用右大括號那一行。階段一觀察不到差別。
 - **兩個元素之間參照指定的運算式值**：`$x = ($a[0] = &$b[0])` 在 `Compile` 回報不支援。單獨成為陳述式的 `$a[0] = &$b[0];` 可以執行。
+- **從元素解構參照的運算式值**：`$y = ([&$a] = $x[0])` 在 `Compile` 回報不支援；`$y = ([&$a] = $x)` 與單獨成為陳述式的寫法可以執行。
+- **`[&$a] = f()`**：PHP 會發出 `Attempting to set reference to non referenceable value` 的 notice 再照值讀取；Phego 沿用第三階段「參照到函式呼叫結果」的不支援回報。執行期 FetchDim 的容器暫存器不是參照時也以 Unsupported 結束，編譯器不會產生這種 bytecode。
 - **傳參照的引數只檢查到編譯時已知的函式**：直接呼叫時以 MakeRef 傳入；bytecode 的函式表沒有記錄哪些參數傳參照，所以驗證器無法檢查手寫的 bytecode 有沒有對傳值參數傳入參照。被呼叫端的 Store 會解開參照，不會造成記憶體問題。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。

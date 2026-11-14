@@ -70,13 +70,15 @@ Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。
 
 RegisterKind 的 Value／Location 分別是 1／2。ConstantKind 的 Null／Bool／Int／Float／String 分別是 1–5。HandlerKind 的 Catch／Finally 分別是 1／2。CapabilitySet 的 HostCallbacks／DynamicCode／FileRead／Shell 分別為 bit 0–3。
 
-Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41，格式 1.3 再加入 Bind=42、MakeRef=43。零與其他編號均為未知指令，目前第一個未知編號是 44。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2，格式 1.3 的 FetchForRef=3 表示元素要被綁成參照，只能搭配 FetchWrite）。IterFlags 的 IterLocation=1，格式 1.3 加入 IterByRef=2。BindFlags 只有 BindValue=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
+Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41，格式 1.3 再加入 Bind=42、MakeRef=43。零與其他編號均為未知指令，目前第一個未知編號是 44。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2，格式 1.3 的 FetchForRef=3 表示元素要被綁成參照，只能搭配 FetchWrite），格式 1.4 的 bit 6 是 FetchContainerValue（容器 B 是存放參照的 Value 暫存器，只能搭配 FetchWrite 與 FetchForRef）。ArrayGet 的 Aux 為 0、1（格式 1.1 的安靜讀取）或 2（格式 1.4 的 FETCH_LIST_R）。IterFlags 的 IterLocation=1，格式 1.3 加入 IterByRef=2。BindFlags 只有 BindValue=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
 
 格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令（包含 ArraySet、ArrayAppend、ArrayUnset 與 ArrayAdd 的任何 Aux）、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。1.1 的每個函式在例外表後多一張 local 名稱表，筆數為 0 或恰好等於 Locals，每筆指向存放不含 `$` 變數名稱的 String 常數，讓 VM 能印出 PHP 的未定義變數警告並依名稱接收宿主提供的全域變數。minor 0 檔案沒有這張表，載入後沒有名稱。筆數不符、索引超出範圍或常數不是 String 時以 `ErrInvalid` 拒絕並指出函式。
 
 格式 1.2 由 W-17 第二階段加入，payload 的版面和 1.1 相同，只新增五個指令與 ArraySet 的結果暫存器。minor 0 與 minor 1 的檔案照樣能載入，但只要出現 1.2 的指令或帶結果暫存器的 ArraySet，`Load` 就以 `ErrInvalid` 拒絕、指出該指令，並說明它需要 1.2 而檔案宣告的是哪一版。
 
-格式 1.3 由 W-17 第三階段加入，用來表達 PHP 的參照，payload 的版面也不變。新增的是 Bind、MakeRef 兩個指令，IterInit 與 IterNext 的 IterByRef，以及 FetchDim 的 FetchForRef 用途。`Encode` 一律寫入 minor 3。minor 0 到 2 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.3。
+格式 1.3 由 W-17 第三階段加入，用來表達 PHP 的參照，payload 的版面也不變。新增的是 Bind、MakeRef 兩個指令，IterInit 與 IterNext 的 IterByRef，以及 FetchDim 的 FetchForRef 用途。minor 0 到 2 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.3。
+
+格式 1.4 由 W-17 第四階段加入，用來表達 PHP 的解構，沒有新增指令，payload 的版面也不變。新增的是 ArrayGet 的 Aux 2（ZEND_FETCH_LIST_R）與 FetchDim 的 FetchContainerValue（ZEND_FETCH_DIM_W 的容器是 VAR）。`Encode` 一律寫入 minor 4。minor 0 到 3 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.4。
 
 ## 固定指令與純量常數
 
@@ -124,7 +126,7 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 | Unset | 要 unset 的 Location | — | — |
 | Exit | Aux 1 時為狀態 Value | — | — |
 | ArrayAdd | 就地加入元素的陣列 Value | 值 Value | Aux 有 AddKey 時為 key Value，同時有 AddKeyLocation 時為 Location |
-| FetchDim | 目的 Location（元素位置） | 容器 Location | key Value，Aux 有 FetchKeyLocation 時為 Location，有 FetchAppend 時為零 |
+| FetchDim | 目的 Location（元素位置） | 容器 Location，Aux 有 FetchContainerValue 時為存放參照的 Value | key Value，Aux 有 FetchKeyLocation 時為 Location，有 FetchAppend 時為零 |
 | IterInit | 迭代器 Value | 被迭代的 Value；Aux 為 IterByRef 時可以是 Location | 不能迭代時的目標指令索引 |
 | IterNext | 迭代器 Value | 元素的目的 Value，Aux 有 IterLocation 時為 Location | 迭代結束時的目標指令索引 |
 | IterKey | key 的目的 Value，Aux 為 IterLocation 時為 Location | 迭代器 Value | — |
@@ -132,7 +134,7 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 | Bind | 目的 Location | 來源 Location，Aux 為 BindValue 時為 Value | — |
 | MakeRef | 目的 Value | 來源 Location | — |
 
-Binary 的 Aux 為 Add 至 BoolXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。Load 與 ArrayGet 的 Aux 為 0 或 1，1 表示安靜讀取，Load 不發出未定義變數警告，ArrayGet 不發出未定義 key 或 offset 警告。Unary、Cast、IncDec 的 Aux 分別是 UnaryOp、CastKind、IncDecOp 的有效值。Exit 的 Aux 為 0 時沒有狀態且 A 為零，為 1 時 A 是狀態 Value。
+Binary 的 Aux 為 Add 至 BoolXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。Load 的 Aux 為 0 或 1，ArrayGet 的為 0、1 或 2。1 表示安靜讀取，Load 不發出未定義變數警告，ArrayGet 不發出未定義 key 或 offset 警告。ArrayGet 的 2 是解構的元素讀取（zend_fetch_dimension_address_read 的 is_list）：陣列照一般讀取，缺少的 key 發出警告並讀到 null；容器是 null 時安靜讀到 null；其他型別（字串也算，不當成字串位移）發出 `Cannot use T as array` 並讀到 null，T 是型別名稱（true 與 false 都是 bool）。Unary、Cast、IncDec 的 Aux 分別是 UnaryOp、CastKind、IncDecOp 的有效值。Exit 的 Aux 為 0 時沒有狀態且 A 為零，為 1 時 A 是狀態 Value。
 
 ArraySet 的 Aux 為 ArrayWriteFlags 的組合（0–3），ArrayAppend 的 Aux 為 0 或 ValueLocation。沒有旗標的操作數是指令執行前已讀好的 Value。有旗標的操作數是 Location，由指令在 PHP ZEND_ASSIGN_DIM 讀取該 CV 的時點自行讀取，未定義時發出未定義變數警告並視為 null：先檢查容器（undefined 與 null 直接變成空陣列，false 先發出棄用通知再變成空陣列，true、數字與字串依 PHP 拋出錯誤），再讀 key 並轉換，然後讀 OP_DATA 的值，最後寫入；append 在容器檢查後讀值，再插入，下一個索引已被占用時才拋出錯誤。ArrayUnset 的 Aux 為 0 或 KeyLocation，對應 ZEND_UNSET_DIM：容器是未定義變數時先發出它的警告，再讀 key（有 KeyLocation 時由指令自行讀取，未定義時發出警告並視為 null，unset 把它當成空字串 key 且不發出 null key 的棄用通知），最後依容器類型處理：陣列刪除元素，null 不做事，false 發出棄用通知但不轉成陣列，字串拋出 `Cannot unset string offsets`，其他純量拋出 `Cannot unset offset in a non-array variable`。
 
@@ -140,7 +142,7 @@ Location 操作數在格式 1.2 可以是變數，也可以是 FetchDim 取得�
 
 ArraySet 在格式 1.2 可以指名一個結果暫存器，寫入這個指定運算式的值。容器是陣列時結果就是寫入的值。容器是字串時這條指令就是字串位移寫入（zend_assign_to_string_offset），結果是實際寫入的那一個 byte，位移非法而沒有寫入時是 null，所以結果不能由值推得。字串容器的順序是：讀 key（KeyLocation 時發出未定義變數警告），轉換位移（null、bool、浮點發出 `String offset cast occurred`，數字開頭的字串發出 `Illegal string offset "…"`，其他字串與陣列拋出 `Cannot access offset of type T on string`），位移小於負的字串長度時發出 `Illegal string offset N` 並結束，接著才讀值（ValueLocation 時發出未定義變數警告），把值轉成字串，空字串拋出 `Cannot assign an empty string to a string offset`，超過一個 byte 發出 `Only the first byte will be assigned to the string offset`，位移超出字串尾端時以空白補齊。ArrayGet 讀字串位移時回傳一個 byte 的字串，超出範圍時發出 `Uninitialized string offset N` 並回傳空字串，安靜讀取則回傳 null。
 
-FetchDim 對應 ZEND_FETCH_DIM_W、ZEND_FETCH_DIM_RW 與 ZEND_FETCH_DIM_UNSET，以及 ZEND_ASSIGN_DIM_OP 取得元素的部分。它讓 A 這個 Location 暫存器指向「容器 B 裡 key 為 C 的元素」，巢狀寫入因此不需要隱藏的區域變數。A 可以和 B 相同，一串巢狀層級共用同一個暫存器。執行順序是：檢查容器，讀 key，轉換 key，找到或建立元素。
+FetchDim 對應 ZEND_FETCH_DIM_W、ZEND_FETCH_DIM_RW 與 ZEND_FETCH_DIM_UNSET，以及 ZEND_ASSIGN_DIM_OP 取得元素的部分。它讓 A 這個 Location 暫存器指向「容器 B 裡 key 為 C 的元素」，巢狀寫入因此不需要隱藏的區域變數。格式 1.4 的 FetchContainerValue 讓 B 是一個存放參照的 Value 暫存器（MakeRef 或傳參照 IterNext 的結果），對應解構時 ZEND_FETCH_LIST_W 對 VAR 容器的寫入取元素；暫存器裡不是參照時執行期以 Unsupported 結束，PHP 對這種情況的 notice 沒有建模，因為編譯器不會產生它。A 可以和 B 相同，一串巢狀層級共用同一個暫存器。執行順序是：檢查容器，讀 key，轉換 key，找到或建立元素。
 
 | 容器 | FetchWrite | FetchReadWrite | FetchUnset |
 |---|---|---|---|

@@ -1,0 +1,23 @@
+<?php
+[$a, $b] = [1, 2];
+echo $a, " ", $b, "\n";
+list($c, $d) = [3, 4];
+echo $c, " ", $d, "\n";
+[, $e] = [5, 6];
+echo $e, "\n";
+list(, $f) = [7, 8];
+echo $f, "\n";
+[$g, , $h] = [9, 10, 11];
+echo $g, " ", $h, "\n";
+[$i, $j,] = [12, 13, 14];
+echo $i, " ", $j, "\n";
+list($k) = [15, 16];
+echo $k, "\n";
+$src = ["x", "y", "z"];
+[$l, $m, $n] = $src;
+echo $l, $m, $n, "\n";
+echo $src[0], $src[1], $src[2], "\n";
+[$o, $p] = [true, null];
+echo $o ? "t" : "f", $p === null ? "n" : "?", "\n";
+[$q, $r] = [1.5, "s"];
+echo $q, $r, "\n";
