@@ -1,0 +1,21 @@
+<?php
+[[$a, $b], $c] = [[1, 2], 3];
+echo $a, $b, $c, "\n";
+['k' => [$d, ['n' => $e]]] = ['k' => [4, ['n' => 5]]];
+echo $d, $e, "\n";
+list($f, list($g, list($h))) = [6, [7, [8]]];
+echo $f, $g, $h, "\n";
+[[, $i], [$j]] = [[9, 10], [11]];
+echo $i, $j, "\n";
+[[$k]] = [null];
+echo $k === null ? "null" : "?", "\n";
+[[$l]] = [[]];
+echo $l === null ? "null" : "?", "\n";
+[[$m]] = [5];
+echo $m === null ? "null" : "?", "\n";
+[[$n]] = ["str"];
+echo $n === null ? "null" : "?", "\n";
+['a' => ['b' => ['c' => $o]]] = ['a' => ['b' => ['c' => 'deep']]];
+echo $o, "\n";
+[$p, [$q, $r]] = [1, [2]];
+echo $p, $q, $r === null ? "null" : "?", "\n";

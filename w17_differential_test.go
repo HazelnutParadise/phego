@@ -50,7 +50,7 @@ var w17Unsupported = map[string]UnsupportedError{}
 
 // w17Cases is the number of programs in tests/vm/w17/cases; every
 // reference file holds one entry per program.
-const w17Cases = 220
+const w17Cases = 253
 
 // w17Profile is one PHP build the reference was recorded on.
 type w17Profile struct {
