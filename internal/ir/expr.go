@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpconst"
 	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
@@ -1554,9 +1555,19 @@ func (l *lowerer) closure(n *frontend.Node) *Node {
 	return l.seal(&Node{Op: op, Line: n.Line, Func: f})
 }
 
+// match lowers a match expression. Before compiling the arms, PHP folds the
+// conditions one by one (can_match_use_jumptable, zend_eval_const_expr) to
+// decide whether a jump table applies, and stops at the first one that is
+// not an int or string. A condition that folding builds anew (a constant
+// name, a magic constant, an operator on constants, an array literal) is a
+// zval created on the line PHP's line counter rests at, the subject's; a
+// scalar the scanner produced and a concatenation the parser folded keep
+// their own lines. The lowering replaces such conditions by literals on the
+// subject's line, so the compiler's comparisons report what PHP reports.
 func (l *lowerer) match(n *frontend.Node) *Node {
 	nd := &Node{Op: OpMatch, Line: n.Line, Kids: []*Node{l.expr(n.Children[0])}}
-	seenDefault := false
+	subjectLine := l.cur
+	seenDefault, stopped := false, false
 	for _, arm := range n.Children[1:] {
 		a := &Node{Op: OpArm, Line: arm.Line}
 		if arm.Children[0] == nil {
@@ -1568,13 +1579,72 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 		a.Kids = []*Node{nil}
 		if conds := arm.Children[0]; conds != nil {
 			for _, e := range conds.Children {
-				a.Kids = append(a.Kids, l.expr(e))
+				cond := l.expr(e)
+				if !stopped {
+					keyed, recreated := l.matchCondition(e, cond)
+					if recreated {
+						cond = l.refoldCondition(cond, subjectLine)
+					}
+					stopped = !keyed
+				}
+				a.Kids = append(a.Kids, cond)
 			}
 		}
 		a.Kids[0] = l.expr(arm.Children[1])
 		nd.Kids = append(nd.Kids, l.seal(a))
 	}
 	return l.seal(nd)
+}
+
+// matchCondition classifies a match condition as can_match_use_jumptable
+// sees it after zend_eval_const_expr: keyed when it is an int or string PHP
+// knows while compiling, recreated when folding gave it a new zval. A
+// constant name is known when it is a predefined constant that needs no
+// run-time fallback and is not deprecated (zend_try_ct_eval_const); a
+// user constant stays a name and stops the walk.
+func (l *lowerer) matchCondition(src *frontend.Node, cond *Node) (keyed, recreated bool) {
+	src = unparen(src)
+	switch {
+	case src.Kind == "literal":
+		return cond.Op == OpLiteral && cond.Value != nil && (cond.Value.Kind == LitInt || cond.Value.Kind == LitString), false
+	case src.Kind == "binary" && src.FoldLine != 0:
+		// A concatenation of two literals is one string zval since parsing.
+		return true, false
+	case cond.Op == OpConst:
+		if cond.Name == nil || cond.Name.Fallback != "" {
+			return false, false
+		}
+		c, ok := phpconst.Lookup(l.unit.Profile.IntWidth, phpconst.Key(cond.Name.Resolved))
+		if !ok || c.Deprecated != "" {
+			return false, false
+		}
+		return c.Kind == phpconst.Int || c.Kind == phpconst.String, true
+	}
+	v, known := l.evaluateConstant(cond)
+	if !known {
+		return false, false
+	}
+	return !v.array && v.value != nil && (v.value.Kind == LitInt || v.value.Kind == LitString), true
+}
+
+// refoldCondition is the zval zend_eval_const_expr creates for a folded
+// match condition: the condition's value as a literal on the given line, or
+// the constant name itself moved there when the lowering cannot evaluate it.
+func (l *lowerer) refoldCondition(cond *Node, line int) *Node {
+	if cond.Op == OpConst {
+		cond.Line = line
+		return cond
+	}
+	v, known := l.evaluateConstant(cond)
+	if !known {
+		return cond
+	}
+	if l.constants == nil {
+		l.constants = newCompileBudget(cond)
+		l.constants.pool = l.constPool
+		defer func() { l.constants = nil }()
+	}
+	return l.constantValueNode(v, line, 0)
 }
 
 // constExpr lowers a default value or constant initializer after checking
