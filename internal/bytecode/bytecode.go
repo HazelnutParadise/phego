@@ -16,11 +16,12 @@ import (
 // FormatVersion is the major format version. FormatMinor is the minor
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
 // 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
-// minor 3 (format 1.3, the third) and minor 4 (format 1.4, the fourth); a
-// file may not use operations newer than the minor it declares.
+// minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth) and
+// minor 5 (format 1.5, the fifth); a file may not use operations newer than
+// the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 4
+	FormatMinor   uint16 = 5
 )
 
 // The Aux of OpArrayGet. ArrayGetQuiet (format 1.1) is FETCH_DIM_IS: no
@@ -33,6 +34,18 @@ const (
 	ArrayGetQuiet uint16 = 1
 	ArrayGetList  uint16 = 2
 )
+
+// ArrayIssetEmpty (format 1.5) is the Aux of OpArrayIsset for empty($a[k]),
+// ZEND_ISSET_ISEMPTY_DIM_OBJ with ZEND_ISEMPTY: the result is true when the
+// element is missing or its value is false when converted to bool. A string
+// container is tested as zend_isempty_dim_slow does.
+const ArrayIssetEmpty uint16 = 1
+
+// FetchConstUnqualified (format 1.5) is the Aux of OpFetchConst for an
+// unqualified constant name used inside a namespace
+// (IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE): when the namespaced name B is not
+// defined, the lookup falls back to its unqualified part.
+const FetchConstUnqualified uint16 = 1
 
 // Identity is compared in full against a trusted host expectation. Digests are
 // of canonical manifests, not filenames or mtimes. Empty manifests still have
@@ -148,6 +161,12 @@ const (
 	// Format 1.3 (W-17 stage 3). Operands are in engineering/decisions/W-16-bytecode.md.
 	OpBind    // A dest Location, B source Location (a Value with BindValue): $a =& $b; Aux is BindFlags
 	OpMakeRef // A dest Value, B Location: the location becomes a reference, which A then holds
+	// Format 1.5 (W-17 stage 5).
+	OpFetchConst   // A dest Value, B string constant (the lookup name), C string constant (the name as written); Aux is 0 or FetchConstUnqualified
+	OpDeclareConst // A value Value, B string constant (the name as registered): const NAME = value
+	OpBeginSilence // A dest Value: saves error_reporting and keeps only its fatal levels (@)
+	OpEndSilence   // A Value saved by BeginSilence: restores error_reporting
+	OpMatchError   // A subject Value: throws UnhandledMatchError for it; a terminal instruction
 )
 
 // BindFlags is the Aux of OpBind.
