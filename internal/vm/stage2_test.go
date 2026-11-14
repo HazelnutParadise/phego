@@ -526,7 +526,7 @@ func TestStage2Unsupported(t *testing.T) {
 		{"property access", "echo 1;\nunset($o->p[1][2]);", 3},
 		{"property access", "echo 1;\n$o->p[1] ??= 2;", 3},
 		{"static property access", "echo 1;\nA::$b[1][2] = 3;", 3},
-		{"constant lookup", "echo 1;\nfunction f($a = 1,\n  $b = PHP_EOL) {}", 4},
+		{"class constant", "echo 1;\nfunction f($a = 1,\n  $b = A::X) {}", 4},
 		{"class constant", "echo 1;\nfunction f($a = self::X) {}", 3},
 		{"typed parameter", "echo 1;\nfunction f(int $a = 1) {}", 3},
 		{"variadic parameter", "echo 1;\nfunction f(&...$a) {}", 3},

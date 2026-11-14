@@ -540,6 +540,12 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 	defer func() { fc.top = mark }()
 	switch n.Op {
 	case ir.OpBlock:
+		if len(n.Kids) > 0 && n.Kids[0] != nil && n.Kids[0].Op == ir.OpConstDef {
+			// The lowering wraps the constants of one const statement in
+			// a block of their own.
+			fc.constDecl(n)
+			break
+		}
 		for _, k := range n.Kids {
 			fc.stmt(k)
 		}

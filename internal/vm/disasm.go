@@ -25,6 +25,8 @@ var opNames = [...]string{
 	bytecode.OpFetchDim: "FetchDim", bytecode.OpIterInit: "IterInit", bytecode.OpIterNext: "IterNext",
 	bytecode.OpIterKey: "IterKey", bytecode.OpParamDefault: "ParamDefault",
 	bytecode.OpBind: "Bind", bytecode.OpMakeRef: "MakeRef",
+	bytecode.OpFetchConst: "FetchConst", bytecode.OpDeclareConst: "DeclareConst",
+	bytecode.OpBeginSilence: "BeginSilence", bytecode.OpEndSilence: "EndSilence", bytecode.OpMatchError: "MatchError",
 }
 
 var binaryNames = [...]string{
@@ -69,6 +71,14 @@ func auxName(in bytecode.Instruction) string {
 	case bytecode.OpArrayGet:
 		if in.Aux == bytecode.ArrayGetList {
 			return "list"
+		}
+	case bytecode.OpArrayIsset:
+		if in.Aux == bytecode.ArrayIssetEmpty {
+			return "empty"
+		}
+	case bytecode.OpFetchConst:
+		if in.Aux == bytecode.FetchConstUnqualified {
+			return "unqualified"
 		}
 	case bytecode.OpBind:
 		if bytecode.BindFlags(in.Aux) == bytecode.BindValue {

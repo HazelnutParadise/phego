@@ -60,6 +60,12 @@ var goldenPrograms = []struct{ name, src string }{
 	{"foreach_in_function", "<?php\nfunction first($xs, $want) {\n    foreach ($xs as $k => $x) {\n        if ($x == $want) {\n            return $k;\n        }\n    }\n    return null;\n}\n"},
 	{"parameter_defaults", "<?php\nfunction f(\n    $a,\n    $b = 5,\n    $c = 'x',\n    $d = [1, 'k' => [2]],\n    $e = 1 + 2\n) {\n    return $b;\n}\necho f(1), f(1, 2), f(1, 2, 3, 4, 5), f(1, 2, 3, 4, 5, 6);\n"},
 	{"string_offsets", "<?php\n$s = 'abc';\necho $s[0], $s[-1], 'lit'[1], \"$s[2]\", $s[9] ?? 'd', isset($s[1]);\n$s[0] = 'X';\n$r = $s[1] = 'Y';\n"},
+	// Stage 5.
+	{"constants", "<?php\nnamespace ns;\nconst A = 1, B = A + 1;\necho A, B, \\ns\\A, E_ALL, \\PHP_EOL, PHP_EOL, E_STRICT, UNDEF, \\UNDEF;\n"},
+	{"constant_declaration_lines", "<?php\nconst A = 1,\n  B = A\n  . [],\n  C = [1, 'k' => 2];\necho C['k'];\n"},
+	{"match_forms", "<?php\necho match ($x) { 1, 2 => 'a', 3 => 'b', default => 'c' };\necho match ($x) { 1 => 'a', $y => 'b' };\necho match (true) { $x > 1 => 'big', default => 'small' };\necho match (f()) {};\nfunction f() { return 1; }\n"},
+	{"empty_forms", "<?php\n$a = ['k' => ['j' => 0]];\necho empty($u), empty($a['k']['j']), empty($a['k']['x']['y']), empty(f()), empty(1 + 1);\nfunction f() { return 0; }\n"},
+	{"silence", "<?php\necho @$u, @$a['k'], @(1 + $v), @f();\n@$w;\n$r = @$x++;\nfunction f() { return @$y; }\n"},
 }
 
 func TestGoldenDisassembly(t *testing.T) {

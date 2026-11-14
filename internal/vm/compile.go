@@ -47,7 +47,7 @@ func (e *CompileError) Error() string {
 const (
 	guestPlatform    = "php-8.5.12"
 	target           = "portable-go"
-	compilerManifest = "phego/internal/vm stage-2 format-1.2"
+	compilerManifest = "phego/internal/vm stage-5 format-1.5"
 	modulesManifest  = "phego/modules/none"
 	runtimeManifest  = "phego/runtime-abi/w17-1"
 	policyManifest   = "phego/policy/unbound"
