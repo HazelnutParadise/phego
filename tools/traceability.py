@@ -45,7 +45,7 @@ def _load_json(path: Path, label: str) -> object:
 
 
 def _registry_ids(root: Path) -> list[str]:
-    registry_path = root / "docs/data/phego-acceptance-tests.json"
+    registry_path = root / "engineering/data/phego-acceptance-tests.json"
     registry = _load_json(registry_path, "acceptance registry")
     if not isinstance(registry, dict) or not isinstance(registry.get("items"), list):
         raise ValueError("acceptance registry must be an object with an items list")

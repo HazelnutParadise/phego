@@ -84,7 +84,7 @@ _STUB_MODIFIERS = frozenset({
 # build/gen_stub.php tags that change generated arginfo, flags or constant
 # registration. Documentation-only tags (@param, @return, @link,
 # @undocumentable) and optimizer-only tags (@refcount, @compile-time-eval,
-# @frameless-function) are not PHP-visible; see docs/implementation/W-45.md.
+# @frameless-function) are not PHP-visible; see engineering/implementation/W-45.md.
 _STUB_DOC_TAGS = frozenset({
     "tentative-return-type", "readonly", "virtual", "strict-properties",
     "not-serializable", "prefer-ref", "deprecated", "alias",

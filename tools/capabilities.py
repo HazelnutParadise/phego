@@ -13,7 +13,7 @@ import traceability
 
 _MAX_INPUT = 1024 * 1024
 _MAX_EVIDENCE = 64 * 1024 * 1024
-_REGISTRY = Path("docs/data/phego-acceptance-tests.json")
+_REGISTRY = Path("engineering/data/phego-acceptance-tests.json")
 _PROFILE_FIELDS = {"release", "platform", "build"}
 _KINDS = {"function", "class", "constant", "extension", "ini", "sapi"}
 _STATUSES = {"supported", "unsupported", "unverified", "policy_denied", "semantic_difference", "failed"}

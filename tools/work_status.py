@@ -102,10 +102,10 @@ def _snapshot_tree(root: Path, destination: Path) -> None:
                     raise ValueError(f"planning input must be a regular file: {name}")
                 relative = (Path(directory).relative_to(root) / name).as_posix()
                 required_content = name.endswith(".md") or relative in {
-                    "LICENSE", "docs/data/phego-requirements.json", "docs/data/phego-acceptance-tests.json",
-                    "docs/data/phego-work-packages.json", "docs/data/phego-sources.json",
-                    "docs/data/php-history-policy.json", "docs/data/competitor-catalog.json",
-                    "docs/data/application-catalog.json", "docs/implementation/github-index.json",
+                    "LICENSE", "engineering/data/phego-requirements.json", "engineering/data/phego-acceptance-tests.json",
+                    "engineering/data/phego-work-packages.json", "engineering/data/phego-sources.json",
+                    "engineering/data/php-history-policy.json", "engineering/data/competitor-catalog.json",
+                    "engineering/data/application-catalog.json", "engineering/implementation/github-index.json",
                 }
                 if not required_content:
                     # The documentation validator only checks that these paths
@@ -151,8 +151,8 @@ def _snapshot_tree(root: Path, destination: Path) -> None:
 
 
 def _plan_fingerprints(root: Path) -> dict[str, str]:
-    paths = ("docs/data/phego-requirements.json", "docs/data/phego-acceptance-tests.json",
-             "docs/data/phego-work-packages.json", "docs/implementation/github-index.json")
+    paths = ("engineering/data/phego-requirements.json", "engineering/data/phego-acceptance-tests.json",
+             "engineering/data/phego-work-packages.json", "engineering/implementation/github-index.json")
     return {name: hashlib.sha256(_read_regular(root / name, _MAX_PLAN_FILE_SIZE, name)).hexdigest() for name in paths}
 
 
@@ -211,7 +211,7 @@ def _validate_planning(root: Path) -> None:
 
 
 def _registry_ids(root: Path, filename: str, label: str) -> set[str]:
-    data = _load_json(root / "docs/data" / filename, label)
+    data = _load_json(root / "engineering/data" / filename, label)
     if not isinstance(data, dict) or not isinstance(data.get("items"), list):
         raise ValueError(f"{label} must contain an items array")
     result: set[str] = set()
@@ -233,8 +233,8 @@ def _dependencies(value: object, package: str, field: str) -> list[str]:
 
 
 def _load_plan(root: Path) -> tuple[dict[str, dict], dict[str, dict[str, list[str]]]]:
-    plan = _load_json(root / "docs/data/phego-work-packages.json", "work-package plan")
-    index = _load_json(root / "docs/implementation/github-index.json", "GitHub integration index")
+    plan = _load_json(root / "engineering/data/phego-work-packages.json", "work-package plan")
+    index = _load_json(root / "engineering/implementation/github-index.json", "GitHub integration index")
     if not isinstance(plan, dict) or not isinstance(plan.get("items"), list):
         raise ValueError("work-package plan must contain an items array")
     if not isinstance(index, dict) or not isinstance(index.get("items"), list):

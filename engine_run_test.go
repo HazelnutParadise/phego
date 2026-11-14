@@ -357,7 +357,7 @@ func TestUnsupportedConstructIsLocated(t *testing.T) {
   | ^^^^^^^^^^ this build's VM cannot run this yet
   |
   = note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly
-  = help: run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages
+  = help: run the program on a Phego build whose VM implements the construct; engineering/decisions/W-17-vm.md lists the stages
 `
 	if b.String() != golden {
 		t.Fatalf("rendered:\n%s\nwant:\n%s", b.String(), golden)

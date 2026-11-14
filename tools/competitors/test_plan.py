@@ -11,7 +11,7 @@ class FrozenPlanTests(unittest.TestCase):
         self.plan = json.loads((ROOT / "benchmarks/plan.json").read_text(encoding="utf-8"))
 
     def test_every_inventoried_competitor_has_every_cell(self):
-        inventory = json.loads((ROOT / "docs/implementation/evidence/W-54-discovered-inventory.json").read_text(encoding="utf-8"))
+        inventory = json.loads((ROOT / "engineering/implementation/evidence/W-54-discovered-inventory.json").read_text(encoding="utf-8"))
         self.assertEqual(self.plan["competitors"], [item["id"] for item in inventory["items"]])
         expected = (len(self.plan["competitors"]) * len(self.plan["workloads"])
                     * len(self.plan["platforms"]) * len(self.plan["modes"]))

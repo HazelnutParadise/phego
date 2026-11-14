@@ -15,15 +15,15 @@ SCHEMA_VERSION = 1
 MAX_INPUT_BYTES = 10 * 1024 * 1024
 INPUT_PATHS = (
     "compat.lock.json",
-    "docs/implementation/evidence/W-02-php-license-files.json",
-    "docs/implementation/evidence/W-02-go-source-license-files.json",
-    "docs/implementation/evidence/W-02-build-image-packages.json",
-    "docs/implementation/evidence/W-02-binary-license-files.json",
-    "docs/implementation/evidence/W-02-probe-image-packages.json",
-    "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
-    "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
-    "docs/implementation/evidence/W-02-php-reference-index.json",
-    "docs/implementation/evidence/W-02-python-local-20261029/local-1.json",
+    "engineering/implementation/evidence/W-02-php-license-files.json",
+    "engineering/implementation/evidence/W-02-go-source-license-files.json",
+    "engineering/implementation/evidence/W-02-build-image-packages.json",
+    "engineering/implementation/evidence/W-02-binary-license-files.json",
+    "engineering/implementation/evidence/W-02-probe-image-packages.json",
+    "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+    "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+    "engineering/implementation/evidence/W-02-php-reference-index.json",
+    "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json",
 )
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 IMAGE_RE = re.compile(r"^([^@\s]+)@sha256:([0-9a-fA-F]{64})$")

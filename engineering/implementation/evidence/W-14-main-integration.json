@@ -1,0 +1,202 @@
+{
+  "scope": "W-14 integration with merged W-12 main a636f685",
+  "product_test_status": "not_run",
+  "local_status": "pass",
+  "baseline_commit": "a170cc8e5e99884230c3e3fb65ea33b544cf9d0a",
+  "integrated_main_commit": "a636f685f510a8fe96534fbdaff4f08e7a44f032",
+  "requirements": [
+    "REQ-020",
+    "REQ-040"
+  ],
+  "acceptance_scenarios": [
+    "T-039",
+    "T-040",
+    "T-079",
+    "T-080"
+  ],
+  "profiles": [
+    {
+      "width": 64,
+      "cases": 46,
+      "image": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9",
+      "reference": "tests/lifecycle/w14/reference.json",
+      "sha256": "972158ffc1dd38bbe1fdc2140a149adb0c5e6bff664531b40d7ffd73bfc0c180"
+    },
+    {
+      "width": 32,
+      "cases": 46,
+      "image": "i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049",
+      "reference": "tests/lifecycle/w14/reference-32.json",
+      "sha256": "dba01df0dfcd520fa1dbff08e6ec99738fde96e01d47af691df4cb24aa7041ab"
+    }
+  ],
+  "width_comparison": {
+    "cases": 46,
+    "differences": [],
+    "fields": [
+      "case",
+      "exit_code",
+      "stdout",
+      "stderr",
+      "combined"
+    ]
+  },
+  "security_assessment": "needs_regression; no VM acceptance",
+  "remaining_gaps": [
+    "PHP source execution and VM integration remain not_run.",
+    "This is a pre-push snapshot. Latest remote CI and Codex review are linked from W-14.md and must be verified separately."
+  ],
+  "environment": {
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.9.6",
+    "go": "go version go1.26.5 darwin/arm64",
+    "docker": "29.8.2 / 29.8.2"
+  },
+  "input_sha256": {
+    ".github/workflows/semantics-lifecycle.yml": "268d6659d26b45959100022e5b50442b1ea1f3a3faef1e8e36e2c173d24c778a",
+    "tools/lifecycle_reference.py": "1115aec71f1dac4378299db45b405d98676c3fb6bfdca819456ca2ceda5d944e",
+    "tools/test_lifecycle_reference.py": "a742909f87e3bdea915052613089341d35dc5270712e0757c649c6c455ddcd10",
+    "engineering/implementation/W-14.md": "56022ee09a4af3dee7f0a0b6b6bb779d62f85683ccbb0a36fcbeb0d89e137f17",
+    "internal/runtime/array.go": "92b7dc8467ee553088372ede35fde3936fd1d19d9135bb90d1cf5d816a0aef3a",
+    "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
+    "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
+    "internal/runtime/array_key_php8512_test.go": "66fe15830e337242ddcacd650cb0309133ccbc3d606aef93dd0bc955c2cac9f9",
+    "internal/runtime/array_sort_bench_test.go": "fa801a85983588a2d341a3436795a61a30cf8261b62d04fd3c060089745b6433",
+    "internal/runtime/array_sort_php8512.go": "b408c4432667de42ecde470cfa86ea43feb5e388a2f1bc03f92cf962925077d1",
+    "internal/runtime/array_sort_php8512_test.go": "a54bcc4981662513d877ccc5bab04040ebc37975992bb8752fdfd4ee5e08ec3f",
+    "internal/runtime/array_sort_regression_test.go": "a223d1263d0caf32f44ffa35788ab0024dfd45bbe7b18e5bbc7e6fe314902da0",
+    "internal/runtime/array_sort_user_php8512.go": "88795809c5306f56f478a2ccf56e73896b043c9558d73bc0172065f3dd7b5d06",
+    "internal/runtime/array_sort_user_php8512_test.go": "3c2c10c4eeb176d48dbb5fad2f26d4cc47a73195b5cafc6a6633778b96081700",
+    "internal/runtime/array_w12.go": "1c56debd9518d7fbc139ea28fb679e5c7f643ad16a58931fb230b0879937a44b",
+    "internal/runtime/array_w12_fuzz_test.go": "dd5d0ef510143dcd3243aa34141672802a4a260a99af6eb37d4f9ed9549e6823",
+    "internal/runtime/array_w12_safety_test.go": "e050d8904e93d09838f7dd814f0d837fb2da7fbef8e6e04d4292ff7f5c086e24",
+    "internal/runtime/array_w12_test.go": "628865cd3db20da9f7a8d73f79a8c08c66b5b184ac1fab80e75b9e05d5239259",
+    "internal/runtime/contract_test.go": "912be238ef131b18ffe814ed2f4351800f6b56bd1c3e02389a03efd7b8954046",
+    "internal/runtime/execution.go": "f181975daa46b62f7469d2127a52c14992a8e75def68ac2b93ea94e49313b227",
+    "internal/runtime/execution_catch_test.go": "0c5ebd40864748ec491e3b203a6290dd939f87ca2ca058e796feff41d73421e3",
+    "internal/runtime/execution_ci_review_test.go": "7e451a7e0ac37cf84981d9497f7b504c2df3f2cb8ce7990e0cd256beba429d97",
+    "internal/runtime/execution_destruct.go": "9229047299a8e8930ce92c44b21986ac935ba244ec8d835745f25998bb81ee42",
+    "internal/runtime/execution_finally_review_test.go": "cbb5e793aacf5a9a92e5fe09e1387e0b51685816de6b4854bb8708ee0c14863e",
+    "internal/runtime/execution_oracle_test.go": "e63615eff969c7f782412c2769875529b481bb83753553b9a545db832c7292c5",
+    "internal/runtime/execution_output.go": "e12e3313985d5085430e1078a90529ff897256911dd8f3aef216dd1236fe2694",
+    "internal/runtime/execution_review_test.go": "8996f23e22fe173f18279fa2d31828afb4542a4468235e2e31a457cbae26104c",
+    "internal/runtime/execution_slots_review_test.go": "0fda6de66c8eb02446cc7a36965272ac1a5b5652877fc1831439a504c3db0f1c",
+    "internal/runtime/execution_snapshot_test.go": "62801091c1acb8f2065e2cd414ef1d5f8d6a72102cdb6f4b186ce31f3aad3259",
+    "internal/runtime/execution_test.go": "6b84a0a59450e25d157102241bbe26ccb41e330ccad4b709808b2c9e8685113c",
+    "internal/runtime/faults_test.go": "42cf65a62881302695e3e236c5fd2bacde91007fb8184512fe5bb176a2f4ea29",
+    "internal/runtime/heap.go": "7eaf7d85f91fc67f35328e7cc94ee3067f45cb8803e1748cc05d0877795b34af",
+    "internal/runtime/import_snapshot.go": "31845e1003c06ded6de3ffc140be3b814be309c39bd2cd9502cd968036c07154",
+    "internal/runtime/import_snapshot_test.go": "b33b36faacf7bd69b9ceb56e5c06311ecc72687856ae12fad0a7353fe1ce9a0d",
+    "internal/runtime/lifecycle.go": "50e23318a8e9e10081819dd5387e2baacc373de85ac91085453c7a0a56e70eb9",
+    "internal/runtime/lifecycle_test.go": "b352d534a26d8e4bfe97483a07b474281aeafb2bc2df2468a1972194baeeedf1",
+    "internal/runtime/model_test.go": "6aec176f59e274c1bab196a9749495a4c348e6b51f0910bcc4d7f6eae5459228",
+    "internal/runtime/numeric_php8512.go": "d45511fb06f6faa7f6cce35cb2c902a4ad4d23823b4931afe6bcc0b9eb7d105c",
+    "internal/runtime/numeric_php8512_fuzz_test.go": "44e5366621e66b2526a751da33b82dac01766c412ebf9d480cca8bce263eb74d",
+    "internal/runtime/ops_php8512.go": "f18b1e88aeb65506b4bf58c6823e76324dfd6db037a0441ce3688ea0780add0a",
+    "internal/runtime/ops_php8512_test.go": "db4932ace89fe1ef6b48a25895e4622e8990812d8793ba70d0cb5abb5068e7d3",
+    "internal/runtime/pow.go": "6a0442719d893f4d9e9acd647cf7361060e5752ab4500365e494a68e6fdad4a2",
+    "internal/runtime/pow_data.go": "74b1059512d472e92638cadbb473199525aece1dac716851e4d06fac9fc23272",
+    "internal/runtime/pow_test.go": "e88ea1b58d322e4f539454759a30141da35c3a07d11ae088cb9b670e28ff4d8a",
+    "internal/runtime/snapshot.go": "e08c01ba33ab1288ac4265d651521cf8a860882ea14b0b2633ec5af1f7837506",
+    "internal/runtime/test_helpers_test.go": "67b1382083977e497c7cbd4c46a0e35519e6b9bdc7e7dd028d961bf592988154",
+    "internal/runtime/value.go": "70ff5c9b5e8cc4b001584bada266f3036058bf7a29aee284e4fd79c7e1f6daa4",
+    "internal/runtime/value_bench_test.go": "3693542660be8c0ba76963d987b0e1b0c11b4c0565f9a1947d85a0548c61f420",
+    "internal/runtime/value_test.go": "423bd4c06db7f27d78283c3488657eb09a691aa904dfb51ff0606e4e3bef195b"
+  },
+  "w12_compatibility": {
+    "state": "W-12 PR #72 merged into main and integrated without changes to W-12 runtime files",
+    "merge_commit": "a636f685f510a8fe96534fbdaff4f08e7a44f032",
+    "head": "e86e2fe362ebc7b7464df32af23919dad6fa2164"
+  },
+  "behavior": [
+    "W-14 runtime code is unchanged from a170cc8e5e99884230c3e3fb65ea33b544cf9d0a.",
+    "All W-12 runtime files match the integrated main commit.",
+    "Only engineering/data/document-validation.json conflicted; selected main and regenerated with tools/validate_docs.py."
+  ],
+  "commands": [
+    {
+      "command": "gofmt -l internal",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/go.txt",
+      "sha256": "d1ab74cda64589516ccdfbc739c99d574e68fa22498fea132be78cd1325ff2e9"
+    },
+    {
+      "command": "go test -race ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/race.txt",
+      "sha256": "b86a87c495fc81bf135407be3e9d91f3cf0f4fca7b6386863284d79b7a50ae36"
+    },
+    {
+      "command": "go vet ./...",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/vet.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/python.txt",
+      "sha256": "0364b64685da456731ac8912f3079f076e083d2a8175cb3aa263012eb1208ad9",
+      "output_note": "The checksum rejection, malformed CLI argument and container cleanup errors are expected negative-test output. The PHP/FI exit code 23 is explicitly injected by test_execute_cleans_started_container_by_cidfile_id_and_preserves_nonzero_result. Suite outcome is Ran 530 tests / OK and process exit_code 0; the original log is preserved.",
+      "output_sources": [
+        "tools/test_frontend_corpus.py::CorpusTests.test_extracts_only_file_sections_from_selected_tests",
+        "tools/test_history_inventory.py::BuildTests.test_oversized_or_invalid_inputs_are_rejected",
+        "tools/test_reference_php_cleanup_signal.py::test_cleanup_failure_restores_signal_handlers",
+        "tools/test_history_fi2.py::ExecuteAndMainTests.test_execute_cleans_started_container_by_cidfile_id_and_preserves_nonzero_result"
+      ]
+    },
+    {
+      "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/replay.txt",
+      "sha256": "285e7b2b509b3dbf1aff8e4006cdeb2246d67e7bdf9206f7988e408849b0d406"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/oracle64.txt",
+      "sha256": "0cb91feecad17790eb03de6c76567e98ac99ccb5f2fa4d33e3288bee0e9431b5"
+    },
+    {
+      "command": "python3 tools/lifecycle_reference.py --width 32",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/oracle32.txt",
+      "sha256": "676543e19e0a3e8c3047fa22fdac61e2910468395092e616ecd165ffbf1fd305"
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/docs.txt",
+      "sha256": "91968e2687d0fb86a36b40b93d32a6fb7eeda56d618f1b9472c8eb2222eb267c"
+    },
+    {
+      "command": "python3 tools/validate_docs.py --no-write",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "engineering/implementation/evidence/W-14-main-integration/docs-readonly.txt",
+      "sha256": "91968e2687d0fb86a36b40b93d32a6fb7eeda56d618f1b9472c8eb2222eb267c"
+    }
+  ],
+  "recorded_at_utc": "2026-11-01T17:53:01.880628+00:00",
+  "review": {
+    "remote_latest_head": "pending merge commit, push, CI and re-review"
+  },
+  "snapshot_commit": "c4447b3881c0c9415ec1eec9c942cedfce5dfae7",
+  "snapshot_note": "Full local validation snapshot for the W-12 integration commit c4447b3881c0c9415ec1eec9c942cedfce5dfae7. Input hashes and raw logs refer to that commit. Later documentation edits do not replace these historical inputs; remote CI and review fields preserve their pre-push state. Check the latest PR #74 head separately."
+}

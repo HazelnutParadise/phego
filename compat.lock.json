@@ -48,7 +48,7 @@
         "source_status": "downloaded_and_digest_verified",
         "probe_status": "isolated_pure_go_build_passed",
         "probe_scope": "GitHub-hosted Intel macOS VM; restricted source rebuild and minimal Go program, not full Go tests",
-        "probe_evidence": "docs/implementation/evidence/W-02-macos-intel-go-source-20261029.md"
+        "probe_evidence": "engineering/implementation/evidence/W-02-macos-intel-go-source-20261029.md"
       },
       {
         "platform": "darwin/arm64",
@@ -64,7 +64,7 @@
         "source_status": "downloaded_and_digest_verified",
         "probe_status": "native_vm_pure_go_build_passed",
         "probe_scope": "GitHub-hosted disposable Windows VM; minimal Go program and source rebuild, network was not denied",
-        "probe_evidence": "docs/implementation/evidence/W-02-windows-go-source-20261029.md"
+        "probe_evidence": "engineering/implementation/evidence/W-02-windows-go-source-20261029.md"
       }
     ]
   },

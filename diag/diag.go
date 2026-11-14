@@ -20,7 +20,7 @@ import (
 )
 
 // Code is a stable diagnostic identifier such as "PHG1001". A published code
-// is never renumbered or reused; docs/diagnostics/codes.md lists them all.
+// is never renumbered or reused; engineering/diagnostics/codes.md lists them all.
 type Code string
 
 // Severity is the level shown before the code. The zero value is Error.

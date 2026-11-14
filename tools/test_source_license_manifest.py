@@ -14,24 +14,24 @@ REPO = Path(__file__).resolve().parents[1]
 CLI = REPO / "tools" / "source_license_manifest.py"
 INPUTS = {
     "compat.lock.json": REPO / "compat.lock.json",
-    "docs/implementation/evidence/W-02-php-license-files.json": REPO
-    / "docs/implementation/evidence/W-02-php-license-files.json",
-    "docs/implementation/evidence/W-02-go-source-license-files.json": REPO
-    / "docs/implementation/evidence/W-02-go-source-license-files.json",
-    "docs/implementation/evidence/W-02-binary-license-files.json": REPO
-    / "docs/implementation/evidence/W-02-binary-license-files.json",
-    "docs/implementation/evidence/W-02-probe-image-packages.json": REPO
-    / "docs/implementation/evidence/W-02-probe-image-packages.json",
-    "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json": REPO
-    / "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
-    "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json": REPO
-    / "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
-    "docs/implementation/evidence/W-02-php-reference-index.json": REPO
-    / "docs/implementation/evidence/W-02-php-reference-index.json",
-    "docs/implementation/evidence/W-02-python-local-20261029/local-1.json": REPO
-    / "docs/implementation/evidence/W-02-python-local-20261029/local-1.json",
-    "docs/implementation/evidence/W-02-build-image-packages.json": REPO
-    / "docs/implementation/evidence/W-02-build-image-packages.json",
+    "engineering/implementation/evidence/W-02-php-license-files.json": REPO
+    / "engineering/implementation/evidence/W-02-php-license-files.json",
+    "engineering/implementation/evidence/W-02-go-source-license-files.json": REPO
+    / "engineering/implementation/evidence/W-02-go-source-license-files.json",
+    "engineering/implementation/evidence/W-02-binary-license-files.json": REPO
+    / "engineering/implementation/evidence/W-02-binary-license-files.json",
+    "engineering/implementation/evidence/W-02-probe-image-packages.json": REPO
+    / "engineering/implementation/evidence/W-02-probe-image-packages.json",
+    "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json": REPO
+    / "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+    "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json": REPO
+    / "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+    "engineering/implementation/evidence/W-02-php-reference-index.json": REPO
+    / "engineering/implementation/evidence/W-02-php-reference-index.json",
+    "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json": REPO
+    / "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json",
+    "engineering/implementation/evidence/W-02-build-image-packages.json": REPO
+    / "engineering/implementation/evidence/W-02-build-image-packages.json",
 }
 
 
@@ -50,12 +50,12 @@ class SourceLicenseManifestTests(unittest.TestCase):
             shutil.copyfile(source, target)
 
         # Keep the real evidence shapes while making each fixture small.
-        php_path = repo / "docs/implementation/evidence/W-02-php-license-files.json"
+        php_path = repo / "engineering/implementation/evidence/W-02-php-license-files.json"
         php = json.loads(php_path.read_text(encoding="utf-8"))
         php["files"] = php["files"][:3]
         php_path.write_text(json.dumps(php), encoding="utf-8")
 
-        go_path = repo / "docs/implementation/evidence/W-02-go-source-license-files.json"
+        go_path = repo / "engineering/implementation/evidence/W-02-go-source-license-files.json"
         go = json.loads(go_path.read_text(encoding="utf-8"))
         go["files"] = go["files"][:3]
         go_path.write_text(json.dumps(go), encoding="utf-8")
@@ -63,7 +63,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         # Binary inventories are archive captures. Keep their complete real
         # records so fixture identities and candidate files remain evidence-backed.
 
-        packages_path = repo / "docs/implementation/evidence/W-02-build-image-packages.json"
+        packages_path = repo / "engineering/implementation/evidence/W-02-build-image-packages.json"
         packages = json.loads(packages_path.read_text(encoding="utf-8"))
         for profile in packages["profiles"].values():
             profile["packages"] = profile["packages"][:2]
@@ -186,8 +186,8 @@ class SourceLicenseManifestTests(unittest.TestCase):
             self.assertIn(image, rendered)
 
         for relative in (
-            "docs/implementation/evidence/W-02-php-license-files.json",
-            "docs/implementation/evidence/W-02-go-source-license-files.json",
+            "engineering/implementation/evidence/W-02-php-license-files.json",
+            "engineering/implementation/evidence/W-02-go-source-license-files.json",
         ):
             evidence = self.read_json(relative)
             for record in evidence["files"]:
@@ -195,10 +195,10 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(record["sha256"], rendered)
 
         package_evidence = self.read_json(
-            "docs/implementation/evidence/W-02-build-image-packages.json"
+            "engineering/implementation/evidence/W-02-build-image-packages.json"
         )
         probe_package_evidence = self.read_json(
-            "docs/implementation/evidence/W-02-probe-image-packages.json"
+            "engineering/implementation/evidence/W-02-probe-image-packages.json"
         )
         recorded_probe_images = {
             (item["image"], item["platform"])
@@ -215,7 +215,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(record["copyright"]["sha256"], rendered)
 
         gaps = manifest["gaps"]
-        binary_evidence = self.read_json("docs/implementation/evidence/W-02-binary-license-files.json")
+        binary_evidence = self.read_json("engineering/implementation/evidence/W-02-binary-license-files.json")
         recorded = {
             (item["component"], item["platform"], item["archive_url"], item["archive_sha256"])
             for item in binary_evidence["inventories"]
@@ -266,8 +266,8 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
         manifest = json.loads(result.stdout)
         lock = self.read_json("compat.lock.json")
-        package_evidence = self.read_json("docs/implementation/evidence/W-02-build-image-packages.json")
-        index_relative = "docs/implementation/evidence/W-02-php-reference-index.json"
+        package_evidence = self.read_json("engineering/implementation/evidence/W-02-build-image-packages.json")
+        index_relative = "engineering/implementation/evidence/W-02-php-reference-index.json"
         index_bytes = (self.repo / index_relative).read_bytes()
         index = json.loads(index_bytes)
         locked_image = lock["reference_build"]["image"]
@@ -295,8 +295,8 @@ class SourceLicenseManifestTests(unittest.TestCase):
         ))
 
     def test_rejects_invalid_php_reference_index_evidence_independently(self):
-        index_relative = "docs/implementation/evidence/W-02-php-reference-index.json"
-        package_relative = "docs/implementation/evidence/W-02-build-image-packages.json"
+        index_relative = "engineering/implementation/evidence/W-02-php-reference-index.json"
+        package_relative = "engineering/implementation/evidence/W-02-build-image-packages.json"
 
         # Mutating bytes without updating the lock must fail at the raw index digest gate.
         repo = Path(self.temp.name) / "php-index-bytes-changed"
@@ -366,7 +366,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
         manifest = json.loads(result.stdout)
         lock = self.read_json("compat.lock.json")
-        evidence = self.read_json("docs/implementation/evidence/W-02-binary-license-files.json")
+        evidence = self.read_json("engineering/implementation/evidence/W-02-binary-license-files.json")
         self.assertEqual(evidence["schema_version"], 1)
         self.assertEqual(evidence["status"], "partial")
         self.assertEqual(len(evidence["inventories"]), 7)
@@ -407,7 +407,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertFalse(old_inventory_gaps)
 
     def test_rejects_binary_license_inventory_omissions_duplicates_unknown_and_mismatches(self):
-        relative = "docs/implementation/evidence/W-02-binary-license-files.json"
+        relative = "engineering/implementation/evidence/W-02-binary-license-files.json"
         original = self.read_json(relative)
         cases = []
         cases.append(("missing inventory", {**original, "inventories": original["inventories"][:-1]}))
@@ -424,7 +424,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assert_rejected_without_json()
 
     def test_rejects_invalid_binary_license_inventory_candidate_records_and_totals(self):
-        relative = "docs/implementation/evidence/W-02-binary-license-files.json"
+        relative = "engineering/implementation/evidence/W-02-binary-license-files.json"
         original = self.read_json(relative)
 
         # The captured evidence itself must remain a valid input before each
@@ -470,7 +470,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
         manifest = json.loads(result.stdout)
         lock = self.read_json("compat.lock.json")
-        evidence = self.read_json("docs/implementation/evidence/W-02-probe-image-packages.json")
+        evidence = self.read_json("engineering/implementation/evidence/W-02-probe-image-packages.json")
         self.assertEqual(evidence["schema_version"], 1)
         self.assertEqual(evidence["status"], "partial")
 
@@ -509,12 +509,12 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(len(inventory_tool_outputs), 1)
         self.assertEqual(inventory_tool_outputs[0]["image"], tool_inventory["image"])
         self.assertEqual(inventory_tool_outputs[0]["platform"], tool_inventory["platform"])
-        self.assertIn("docs/implementation/evidence/W-02-probe-image-packages.json", {
+        self.assertIn("engineering/implementation/evidence/W-02-probe-image-packages.json", {
             item["path"] for item in manifest["inputs"]
         })
         for relative in (
-            "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
-            "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+            "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+            "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
         ):
             self.assertIn(relative, {item["path"] for item in manifest["inputs"]})
 
@@ -533,7 +533,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
             ))
 
     def test_rejects_invalid_probe_image_package_evidence(self):
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         original = self.read_json(relative)
         cases = []
 
@@ -570,11 +570,11 @@ class SourceLicenseManifestTests(unittest.TestCase):
     def test_rejects_changed_probe_image_indexes_and_wrong_platform_descriptors(self):
         index_cases = (
             (
-                "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+                "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
                 "probe image index digest",
             ),
             (
-                "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+                "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
                 "probe image index digest",
             ),
         )
@@ -590,7 +590,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertNotIn(b"Traceback", result.stderr)
                 self.assertIn(expected_error.encode(), result.stderr)
 
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         repo = Path(self.temp.name) / "wrong-platform-descriptor"
         self.make_repo(repo)
         evidence = self.read_json(relative)
@@ -609,13 +609,13 @@ class SourceLicenseManifestTests(unittest.TestCase):
     def test_rejects_mutated_index_relabelled_as_its_own_direct_manifest(self):
         repo = Path(self.temp.name) / "mutated-index-as-manifest"
         self.make_repo(repo)
-        index_relative = "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json"
+        index_relative = "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json"
         index_path = repo / index_relative
         modified = index_path.read_bytes() + b" "
         index_path.write_bytes(modified)
         modified_digest = hashlib.sha256(modified).hexdigest()
 
-        evidence_relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        evidence_relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         evidence_path = repo / evidence_relative
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         go_probe = next(item for item in evidence["inventories"] if item["role"] == "go_probe")
@@ -629,7 +629,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertIn(b"index", result.stderr.lower())
 
     def test_probe_package_copyright_gaps_keep_packages_without_fabricated_metadata(self):
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         original = self.read_json(relative)
         inventory = next(item for item in original["inventories"] if item["role"] == "go_probe")
         image, platform = inventory["image"], inventory["platform"]
@@ -690,7 +690,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 ))
 
     def test_rejects_invalid_probe_package_copyright_statuses_and_shapes(self):
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         original = self.read_json(relative)
         cases = []
 
@@ -716,7 +716,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assert_rejected_without_json(repo)
 
     def test_rejects_probe_package_content_changed_without_stdout_digest_update(self):
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         original = self.read_json(relative)
         cases = []
         for field, value in (("version", "999.0"), ("sha256", "0" * 64)):
@@ -740,7 +740,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(b"stdout", result.stderr.lower())
 
     def test_rejects_inventory_tool_identity_changed_with_matching_manifest_digest(self):
-        relative = "docs/implementation/evidence/W-02-probe-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-probe-image-packages.json"
         original = self.read_json(relative)
         for field, value in (
             ("image", "python@sha256:" + "0" * 64),
@@ -764,7 +764,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(b"inventory tool", result.stderr.lower())
 
     def test_python_local_candidates_are_preserved_with_unknown_non_dpkg_gap(self):
-        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        relative = "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json"
         result = self.generate()
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
         manifest = json.loads(result.stdout)
@@ -810,7 +810,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         ))
 
     def test_rejects_invalid_python_local_candidate_evidence(self):
-        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        relative = "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json"
         original = self.read_json(relative)
         cases = []
 
@@ -852,7 +852,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assert_rejected_without_json(repo)
 
     def test_rejects_invalid_python_local_symlink_and_candidate_paths_independently(self):
-        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        relative = "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json"
         original = self.read_json(relative)
         cases = (
             ("symlink object", lambda data: data.update(unfollowed_symlinks=[{"path": "/usr/local/man"}])),
@@ -876,7 +876,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertNotIn(b"Traceback", result.stderr)
 
     def test_rejects_python_local_symlink_nul_and_candidate_path_collision(self):
-        relative = "docs/implementation/evidence/W-02-python-local-20261029/local-1.json"
+        relative = "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json"
         original = self.read_json(relative)
         cases = (
             ("NUL symlink path", lambda data: data.update(unfollowed_symlinks=["/usr/local/man\0"]), b"invalid Python local symlink path"),
@@ -896,7 +896,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 self.assertIn(expected_error, result.stderr)
 
     def test_rejects_cross_source_archive_mismatch(self):
-        php_path = "docs/implementation/evidence/W-02-php-license-files.json"
+        php_path = "engineering/implementation/evidence/W-02-php-license-files.json"
         php = self.read_json(php_path)
         php["archive_sha256"] = "0" * 64
         self.write_json(php_path, php)
@@ -905,7 +905,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         lock = self.read_json("compat.lock.json")
         php["archive_sha256"] = lock["php"]["archive_sha256"]
         self.write_json(php_path, php)
-        go_path = "docs/implementation/evidence/W-02-go-source-license-files.json"
+        go_path = "engineering/implementation/evidence/W-02-go-source-license-files.json"
         go = self.read_json(go_path)
         go["archive_sha256"] = "1" * 64
         self.write_json(go_path, go)
@@ -913,7 +913,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
 
         go["archive_sha256"] = lock["go"]["source_build"]["archive_sha256"]
         self.write_json(go_path, go)
-        relative = "docs/implementation/evidence/W-02-build-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-build-image-packages.json"
         original_packages = self.read_json(relative)
 
         packages = json.loads(json.dumps(original_packages))
@@ -933,7 +933,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
             self.assert_rejected_without_json()
 
     def test_rejects_empty_duplicate_and_invalid_file_records(self):
-        php_path = "docs/implementation/evidence/W-02-php-license-files.json"
+        php_path = "engineering/implementation/evidence/W-02-php-license-files.json"
         original = self.read_json(php_path)
 
         for files in ([], [original["files"][0], original["files"][0]]):
@@ -968,7 +968,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assert_rejected_without_json()
         lock_path.write_text(json.dumps(original), encoding="utf-8")
 
-        php_path = self.repo / "docs/implementation/evidence/W-02-php-license-files.json"
+        php_path = self.repo / "engineering/implementation/evidence/W-02-php-license-files.json"
         php_path.write_bytes(b" " * (10 * 1024 * 1024 + 1))
         self.assert_rejected_without_json()
 
@@ -985,7 +985,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                     target.unlink()
                     target.symlink_to(outside)
                 elif case == "directory":
-                    target = repo / "docs/implementation/evidence"
+                    target = repo / "engineering/implementation/evidence"
                     shutil.move(str(target), str(outside))
                     target.symlink_to(outside, target_is_directory=True)
                 else:
@@ -1011,7 +1011,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         self.assertEqual(checked.stdout, b"")
 
     def test_rejects_package_profile_count_and_duplicate_packages(self):
-        relative = "docs/implementation/evidence/W-02-build-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-build-image-packages.json"
         original = self.read_json(relative)
 
         for profile in original["profiles"].values():
@@ -1040,7 +1040,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
                 repo = Path(self.temp.name) / f"invalid-{name.replace(' ', '-')}"
                 self.make_repo(repo)
                 if name.startswith("php"):
-                    path = repo / "docs/implementation/evidence/W-02-php-license-files.json"
+                    path = repo / "engineering/implementation/evidence/W-02-php-license-files.json"
                     evidence = json.loads(path.read_text(encoding="utf-8"))
                     evidence["files"][0]["encoding"] = invalid_value
                     path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -1124,7 +1124,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         ))
 
     def test_records_non_utf8_candidates_as_gaps_and_keeps_future_platforms(self):
-        go_path = "docs/implementation/evidence/W-02-go-source-license-files.json"
+        go_path = "engineering/implementation/evidence/W-02-go-source-license-files.json"
         go = self.read_json(go_path)
         non_utf8_path = "go/src/vendor/THIRD_PARTY_LICENSE"
         non_utf8_digest = "a" * 64
@@ -1199,7 +1199,7 @@ class SourceLicenseManifestTests(unittest.TestCase):
         ))
 
     def test_allows_same_copyright_digest_at_distinct_paths(self):
-        relative = "docs/implementation/evidence/W-02-build-image-packages.json"
+        relative = "engineering/implementation/evidence/W-02-build-image-packages.json"
         evidence = self.read_json(relative)
         profiles = list(evidence["profiles"].values())
         records = [record for profile in profiles for record in profile["packages"]]

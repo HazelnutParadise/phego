@@ -17,7 +17,7 @@ class CompareEvidenceTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        registry = self.root / "docs/data/phego-acceptance-tests.json"
+        registry = self.root / "engineering/data/phego-acceptance-tests.json"
         registry.parent.mkdir(parents=True)
         registry.write_text(json.dumps({"items": [{"id": f"T-{index:03d}"} for index in range(1, 11)]}))
 
@@ -137,7 +137,7 @@ class CompareEvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             compare(self.root, previous, current)
 
-        duplicate_registry = self.root / "docs/data/phego-acceptance-tests.json"
+        duplicate_registry = self.root / "engineering/data/phego-acceptance-tests.json"
         duplicate_registry.write_text(json.dumps({"items": [{"id": "T-001"}, {"id": "T-001"}]}))
         with self.assertRaises(ValueError):
             compare(self.root, previous, previous)

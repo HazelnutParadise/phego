@@ -13,7 +13,7 @@ import traceability
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = PROJECT_ROOT / "docs/data/phego-acceptance-tests.json"
+REGISTRY = PROJECT_ROOT / "engineering/data/phego-acceptance-tests.json"
 TEST_IDS = [item["id"] for item in json.loads(REGISTRY.read_text())["items"]]
 COMMIT = "a" * 40
 
@@ -22,8 +22,8 @@ class ReportContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        (self.root / "docs/data").mkdir(parents=True)
-        (self.root / "docs/data/phego-acceptance-tests.json").write_text(
+        (self.root / "engineering/data").mkdir(parents=True)
+        (self.root / "engineering/data/phego-acceptance-tests.json").write_text(
             json.dumps({"items": [{"id": test_id} for test_id in TEST_IDS]})
         )
         self.evidence = self.root / "evidence.txt"
@@ -159,8 +159,8 @@ class CommandLineTests(unittest.TestCase):
     def test_cli_returns_zero_for_valid_results_and_nonzero_for_invalid_results(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            (root / "docs/data").mkdir(parents=True)
-            (root / "docs/data/phego-acceptance-tests.json").write_text(
+            (root / "engineering/data").mkdir(parents=True)
+            (root / "engineering/data/phego-acceptance-tests.json").write_text(
                 json.dumps({"items": [{"id": "T-001"}]})
             )
             evidence = root / "evidence.txt"

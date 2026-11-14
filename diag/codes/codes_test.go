@@ -15,12 +15,12 @@ import (
 )
 
 func TestCodesDocumentMatchesRegistry(t *testing.T) {
-	got, err := os.ReadFile(filepath.Join("..", "..", "docs", "diagnostics", "codes.md"))
+	got, err := os.ReadFile(filepath.Join("..", "..", "engineering", "diagnostics", "codes.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if string(got) != Markdown() {
-		t.Fatal("docs/diagnostics/codes.md is stale; run go generate ./diag/codes")
+		t.Fatal("engineering/diagnostics/codes.md is stale; run go generate ./diag/codes")
 	}
 }
 

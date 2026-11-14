@@ -110,13 +110,13 @@ func definedTests(t *testing.T, root string) map[string]bool {
 }
 
 // TestEveryImplementedProfileHasRegressionSuites keeps
-// docs/compatibility/profile-matrix.json complete: every implemented
+// engineering/compatibility/profile-matrix.json complete: every implemented
 // release has an entry for both integer widths, every entry lists suites,
 // and every suite names Go tests that exist. Adding a release without its
 // regression matrix fails here (REQ-066, T-131, T-132).
 func TestEveryImplementedProfileHasRegressionSuites(t *testing.T) {
 	root := filepath.Join("..", "..")
-	raw, err := os.ReadFile(filepath.Join(root, "docs", "compatibility", "profile-matrix.json"))
+	raw, err := os.ReadFile(filepath.Join(root, "engineering", "compatibility", "profile-matrix.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

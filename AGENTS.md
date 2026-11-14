@@ -2,9 +2,9 @@
 
 ## Read before changing the project
 
-Read `docs/spec/specification.zh-TW.md`, especially chapters 01-11, 22-28, and 36-40. Load the requirement, acceptance-test, and work-package JSON records under `docs/data/`. This repository is at the specification stage; do not mistake planned APIs for implemented APIs.
+Read `engineering/spec/specification.zh-TW.md`, especially chapters 01-11, 22-28, and 36-40. Load the requirement, acceptance-test, and work-package JSON records under `engineering/data/`. This repository is at the specification stage; do not mistake planned APIs for implemented APIs.
 
-Before selecting a work package, read `docs/implementation/README.md` and `docs/implementation/github-index.json` for its issue, draft PR, integration dependencies, and acceptance owner. Read the package plan on its draft branch before implementing it.
+Before selecting a work package, read `engineering/implementation/README.md` and `engineering/implementation/github-index.json` for its issue, draft PR, integration dependencies, and acceptance owner. Read the package plan on its draft branch before implementing it.
 
 ## Fixed product direction
 

@@ -74,8 +74,8 @@ class WorkStatusTest(unittest.TestCase):
         self.assertTrue(all(status == "not_started" for status in report["statuses"].values()))
         self.assertEqual(report["events"], [])
         self.assertEqual(report["status_basis"], "planning_defaults_and_unverified_claims")
-        plan = self.root / "docs/data/phego-work-packages.json"
-        self.assertEqual(report["planning_input_sha256"]["docs/data/phego-work-packages.json"], hashlib.sha256(plan.read_bytes()).hexdigest())
+        plan = self.root / "engineering/data/phego-work-packages.json"
+        self.assertEqual(report["planning_input_sha256"]["engineering/data/phego-work-packages.json"], hashlib.sha256(plan.read_bytes()).hexdigest())
         self.assertEqual(report["verification_status"], "not_verified")
         self.assertEqual(report["product_acceptance"], "not_claimed")
         self.assertEqual(report["prerequisites"]["W-03"]["dependencies"], ["W-01", "W-02"])
@@ -106,8 +106,8 @@ class WorkStatusTest(unittest.TestCase):
             ])
 
     def test_integration_prerequisites_cannot_be_omitted(self) -> None:
-        plan = json.loads((self.root / "docs/data/phego-work-packages.json").read_text())
-        index = json.loads((self.root / "docs/implementation/github-index.json").read_text())
+        plan = json.loads((self.root / "engineering/data/phego-work-packages.json").read_text())
+        index = json.loads((self.root / "engineering/implementation/github-index.json").read_text())
         packages = {item["id"]: item for item in plan["items"]}
         indexed = {item["id"]: item for item in index["items"]}
         events = []
@@ -247,7 +247,7 @@ class WorkStatusTest(unittest.TestCase):
         self.assertEqual(self.status(self.report(events), "W-03"), "claimed_complete")
 
     def test_requirement_with_missing_test_is_rejected(self) -> None:
-        path = self.root / "docs/data/phego-requirements.json"
+        path = self.root / "engineering/data/phego-requirements.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         data["items"][0]["tests"].pop()
         path.write_text(json.dumps(data), encoding="utf-8")
@@ -263,7 +263,7 @@ class WorkStatusTest(unittest.TestCase):
         self.assertEqual(self.status(self.report(claims), "W-02"), "claimed_complete")
 
     def test_dependency_cycle_in_plan_is_rejected(self) -> None:
-        plan_path = self.root / "docs/data/phego-work-packages.json"
+        plan_path = self.root / "engineering/data/phego-work-packages.json"
         plan = json.loads(plan_path.read_text(encoding="utf-8"))
         packages = {item["id"]: item for item in plan["items"]}
         packages["W-01"]["dependencies"] = ["W-02"]
@@ -272,7 +272,7 @@ class WorkStatusTest(unittest.TestCase):
             work_status.status_report(self.root, None)
 
     def test_malformed_catalog_reports_input_error_without_traceback(self) -> None:
-        path = self.root / "docs/data/competitor-catalog.json"
+        path = self.root / "engineering/data/competitor-catalog.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         data["items"] = [None]
         path.write_text(json.dumps(data), encoding="utf-8")
@@ -305,7 +305,7 @@ import work_status
 original = work_status._validate_planning
 def replace_plan(root):
     original(root)
-    path = root / "docs/data/phego-work-packages.json"
+    path = root / "engineering/data/phego-work-packages.json"
     path.read_bytes()
     path.unlink()
     os.mkfifo(path)
@@ -324,7 +324,7 @@ sys.exit(0)
         original = work_status._validate_planning
         def replace_requirements(root):
             original(root)
-            path = root / "docs/data/phego-requirements.json"
+            path = root / "engineering/data/phego-requirements.json"
             data = json.loads(path.read_text(encoding="utf-8"))
             data["items"][0]["tests"] = []
             path.write_text(json.dumps(data), encoding="utf-8")

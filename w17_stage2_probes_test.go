@@ -1259,7 +1259,7 @@ func TestW17Stage2NothingIsUnsupportedAtRunTime(t *testing.T) {
 // A chain of element levels costs no Go stack in the compiler or the VM,
 // and the nested arrays it builds are released without recursion: 20 000
 // levels, which PHP 8.5.12 also compiles (its own limit lies between 30 000
-// and 50 000 levels, docs/decisions/W-17-vm.md).
+// and 50 000 levels, engineering/decisions/W-17-vm.md).
 func TestW17Stage2DeepElementChains(t *testing.T) {
 	const depth = 20000
 	chain := strings.Repeat("[0]", depth)
@@ -1510,7 +1510,7 @@ func TestW17Stage2DefaultCacheIsPerRun(t *testing.T) {
 // width PHEGO_DUMP_WIDTH); with PHEGO_DUMP_FILES set it runs the programs
 // already in cases/ instead. PHP's output for each case is then compared
 // byte for byte with phego/<case>.out and .code (the stage 2 evidence in
-// docs/implementation/evidence/W-17-vm/stage2/random-differential.txt).
+// engineering/implementation/evidence/W-17-vm/stage2/random-differential.txt).
 func TestW17Stage2OracleDump(t *testing.T) {
 	dir := os.Getenv("PHEGO_DUMP")
 	if dir == "" {

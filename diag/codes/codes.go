@@ -3,7 +3,7 @@
 // and Lookup for its title, note and help.
 //
 // It is the single registry of the codes.
-// docs/diagnostics/codes.md is generated from it (go generate) and a test
+// engineering/diagnostics/codes.md is generated from it (go generate) and a test
 // keeps the two identical. Codes are never renumbered or reused; a retired
 // code stays listed with Retired set.
 //
@@ -191,7 +191,7 @@ var registry = map[diag.Code]Entry{
 		Help: "see the message for the feature; use what this build supports or a later Phego build"},
 	UnsupportedConstruct: {Title: "this PHP construct cannot run in this build yet",
 		Note: "this build's first VM stage does not run that construct yet, so the program is refused instead of running partly",
-		Help: "run the program on a Phego build whose VM implements the construct; docs/decisions/W-17-vm.md lists the stages"},
+		Help: "run the program on a Phego build whose VM implements the construct; engineering/decisions/W-17-vm.md lists the stages"},
 	Internal: {Title: "internal engine error",
 		Note: "a Phego invariant failed; this is a defect in Phego, not in the PHP program or the host",
 		Help: "report it with the program and the Phego version; the run or compile did not succeed"},

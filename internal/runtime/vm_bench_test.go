@@ -106,10 +106,10 @@ type vmCandidate struct {
 // The production layout and the two dispatch candidates that can be built
 // outside production code: pre-decoded closures and fused compare+branch.
 // The frame, local slot and polling candidates measured for
-// docs/decisions/W-17-vm.md changed push, pop and the step check inside the
+// engineering/decisions/W-17-vm.md changed push, pop and the step check inside the
 // interpreter; they cannot be kept without carrying them in production
 // code, so their families measure the production layout alone. Their
-// results are kept in docs/implementation/evidence/W-17-vm/benchstat/.
+// results are kept in engineering/implementation/evidence/W-17-vm/benchstat/.
 var (
 	switchCandidate  = vmCandidate{"switch", func(p *Program) func(RunConfig) RunResult { return p.Run }}
 	closureCandidate = vmCandidate{"closures", func(p *Program) func(RunConfig) RunResult {

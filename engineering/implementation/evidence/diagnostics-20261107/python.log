@@ -1,0 +1,27 @@
+.............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source
+......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases
+.........................................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+..................................................................................................................................................................................................................................................................................................................................E..........
+======================================================================
+ERROR: test_plan_swapped_to_fifo_after_validation_is_rejected_without_hanging (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/phego-wt/diag/tools/test_work_status.py", line 319, in test_plan_swapped_to_fifo_after_validation_is_rejected_without_hanging
+    result = subprocess.run([sys.executable, "-c", code, str(TOOL.parent), str(self.root)],
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 507, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1134, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1980, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1178, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/Applications/Xcode.app/Contents/Developer/usr/bin/python3', '-c', '\nimport os, pathlib, sys\nsys.path.insert(0, sys.argv[1])\nimport work_status\noriginal = work_status._validate_planning\ndef replace_plan(root):\n    original(root)\n    path = root / "engineering/data/phego-work-packages.json"\n    path.read_bytes()\n    path.unlink()\n    os.mkfifo(path)\nwork_status._validate_planning = replace_plan\ntry:\n    work_status.status_report(pathlib.Path(sys.argv[2]), None)\nexcept ValueError:\n    sys.exit(2)\nsys.exit(0)\n', '/Users/timlai/phego-wt/diag/tools', '/var/folders/1m/qxhd6mg10158sb5ft6bltlwc0000gn/T/tmph9hf7iiv/project']' timed out after 5 seconds
+
+----------------------------------------------------------------------
+Ran 553 tests in 467.898s
+
+FAILED (errors=1)
+
+[PHP/FI build and engine exit code: 23]
+python exit 1

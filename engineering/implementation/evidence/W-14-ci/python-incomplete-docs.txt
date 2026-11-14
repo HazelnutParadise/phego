@@ -1,0 +1,239 @@
+.............................................................................................error: archive sha256 57c023780d953dfd1fde5d5a50b3705919e4a12ccc1c8899c2775e5ff37a63e5 does not match the locked PHP 8.5.12 source
+......................error: expected URL=PATH for --museum and MAJOR=PATH for --releases
+....................................................................................................Error: failed to clean up reference container aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+.................................................................................................................................................................................................................................................................................................FFE.E.....EE...EEE.EE.FEE
+======================================================================
+ERROR: test_all_supported_initial_transitions_require_reason_and_real_evidence (test_work_status.WorkStatusTest) (status='in_progress')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 88, in test_all_supported_initial_transitions_require_reason_and_real_evidence
+    report = self.report([self.event(status=status)])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_all_supported_initial_transitions_require_reason_and_real_evidence (test_work_status.WorkStatusTest) (status='blocked')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 88, in test_all_supported_initial_transitions_require_reason_and_real_evidence
+    report = self.report([self.event(status=status)])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_all_supported_initial_transitions_require_reason_and_real_evidence (test_work_status.WorkStatusTest) (status='claimed_complete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 88, in test_all_supported_initial_transitions_require_reason_and_real_evidence
+    report = self.report([self.event(status=status)])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_dependency_completion_and_claimed_completion_require_all_dependencies (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 95, in test_dependency_completion_and_claimed_completion_require_all_dependencies
+    report = self.report([
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_empty_ledger_reports_plan_as_not_started_without_claiming_current_state (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 72, in test_empty_ledger_reports_plan_as_not_started_without_claiming_current_state
+    report = self.report([])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_git_environment_cannot_redirect_evidence_to_another_repository (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 215, in test_git_environment_cannot_redirect_evidence_to_another_repository
+    report = self.report([self.event()])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_integration_prerequisites_cannot_be_omitted (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 130, in test_integration_prerequisites_cannot_be_omitted
+    self.assertEqual(self.status(self.report(events + [self.event("W-35", "claimed_complete")]), "W-35"), "claimed_complete")
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_planning_snapshot_does_not_read_unrelated_secret_file (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 343, in test_planning_snapshot_does_not_read_unrelated_secret_file
+    report = self.report([])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_planning_snapshot_preserves_linked_nonmarkdown_chapter_anchor (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 350, in test_planning_snapshot_preserves_linked_nonmarkdown_chapter_anchor
+    self.assertEqual(self.report([])["verification_status"], "not_verified")
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_recompleted_dependency_does_not_revalidate_stale_downstream_claim (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 263, in test_recompleted_dependency_does_not_revalidate_stale_downstream_claim
+    self.assertEqual(self.status(self.report(claims), "W-02"), "claimed_complete")
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_reopening_dependency_requires_downstream_claims_to_be_reopened_too (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 234, in test_reopening_dependency_requires_downstream_claims_to_be_reopened_too
+    report = self.report(claims)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_reopening_invalidates_transitive_claims_until_each_is_reopened (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 247, in test_reopening_invalidates_transitive_claims_until_each_is_reopened
+    self.assertEqual(self.status(self.report(events), "W-03"), "claimed_complete")
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_transitions_reject_duplicates_and_allow_only_documented_reopens (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 140, in test_transitions_reject_duplicates_and_allow_only_documented_reopens
+    self.assertEqual(self.status(self.report(valid), "W-01"), "in_progress")
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+ERROR: test_worktree_changes_do_not_change_commit_evidence_validation (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 220, in test_worktree_changes_do_not_change_commit_evidence_validation
+    report = self.report([self.event()])
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 65, in report
+    return work_status.status_report(self.root, ledger)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 376, in status_report
+    _validate_planning(snapshot)
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/work_status.py", line 210, in _validate_planning
+    raise ValueError("invalid planning records" + (": " + detail if detail else ""))
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+======================================================================
+FAIL: test_cli_valid_json_exits_zero_and_invalid_ledger_exits_two (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 375, in test_cli_valid_json_exits_zero_and_invalid_ledger_exits_two
+    self.assertEqual(valid.returncode, 0, valid.stderr)
+AssertionError: 2 != 0 : work_status: error: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+
+======================================================================
+FAIL: test_committed_evidence_larger_than_limit_is_rejected (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 368, in test_committed_evidence_larger_than_limit_is_rejected
+    self.report([self.event(evidence=evidence)])
+AssertionError: "8 MiB" does not match "invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json"
+
+======================================================================
+FAIL: test_status_ledger_rejects_excessive_bytes_and_event_count (test_work_status.WorkStatusTest)
+----------------------------------------------------------------------
+ValueError: invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/timlai/.codex/worktrees/w05-lifecycle-fixtures/phego/tools/test_work_status.py", line 355, in test_status_ledger_rejects_excessive_bytes_and_event_count
+    work_status.status_report(self.root, self.ledger_path)
+AssertionError: "1 MiB" does not match "invalid planning records: local Markdown links: engineering/implementation/W-14.md -> evidence/W-14-ci.json"
+
+----------------------------------------------------------------------
+Ran 530 tests in 147.855s
+
+FAILED (failures=3, errors=14)
+
+[PHP/FI build and engine exit code: 23]

@@ -1,0 +1,698 @@
+{
+  "scope": "PHP 8.5.12 compatibility repairs in already implemented frontend, numeric runtime and declaration/constant lowering; no VM or full product acceptance",
+  "requirements": [
+    "REQ-010",
+    "REQ-011",
+    "REQ-012",
+    "REQ-015",
+    "REQ-018",
+    "REQ-024"
+  ],
+  "tests": [
+    "T-019",
+    "T-020",
+    "T-021",
+    "T-022",
+    "T-023",
+    "T-024",
+    "T-029",
+    "T-030",
+    "T-035",
+    "T-036",
+    "T-047",
+    "T-048"
+  ],
+  "source_base": "e6db8e6225b1ada6180185577b7ba9399ce7169d",
+  "captured_at": "2026-11-04T03:04:25.166903+00:00",
+  "source_sha256": {
+    ".gitattributes": "e80394fcd8cc3f0407a92378816fa5c9a4e67d4ca31310dc94058d50f1693757",
+    ".github/workflows/semantics-hir.yml": "4e0b03756aa363b5dc1aacb862a9c5d29c1e76338b5eef11ecb7c452de3729ec",
+    ".github/workflows/semantics-ops.yml": "2bb91a7239cbb75954fa7ac79cc5a0ed00974874b0c3c5d02ac02370fc11df9f",
+    "THIRD_PARTY_NOTICES.md": "b845a967fa3611d9c1d59278de1721dca2a418b092a92132a4dca5680b4f77f7",
+    "engineering/compatibility/php-8.5.12-syntax.md": "f7ffcb0bad4ee2b5ba92589e728a67b100d81e02be58c793323be2bfea1ee412",
+    "engineering/decisions/compatibility-php8512.md": "153c31e8c7d75c6a4afb8e26d9955dae53bd980fd0e4fa17cac5c669708ecee6",
+    "engineering/implementation/W-09.md": "91e47448b7a4506ba66bda4ce2a9cb4c830845cc9c3ac005f551647526523a82",
+    "engineering/implementation/W-10.md": "69b5e1692e14716ee52c5ac8e4b505be6c1bfe56a19e2e807816ceb3a333bda8",
+    "engineering/implementation/W-11.md": "651a50716c24e5690d39d0234ab727e3eb1cc40415371f804438f0141ef147be",
+    "engineering/implementation/W-13.md": "c0682358c92fd45b665bc73b0c7ad1468d9d93bb1d5eda5c6e10e8c1e1584fbe",
+    "engine_heredoc_test.go": "7576f46476c6368f480300e48989b19ad03fb2baec396b480ae7c862fa88157c",
+    "internal/frontend/ast.go": "96d8e619b1a431c71cf2799c69392fb3c6d89392a354b7118dcd8b6162ab1beb",
+    "internal/frontend/diagnostics.go": "6eefe8dbd444991c2d2aa16b1516884c5c4f906b81842bbf07d6092ff04036f3",
+    "internal/frontend/diagnostics_generated.go": "2228cbce45468909c95e9ee2b4ffd435c8b72dcbea69d815be07a0457dfdcee6",
+    "internal/frontend/diagnostics_test.go": "ec919f380fb73b9682c22892b5c280eff605706489362e329b7affeb5a49a805",
+    "internal/frontend/encoding_test.go": "aa998ba5328dfe3a023c8d9232ecd1df7ccbc0f5075a187c65472564259873b1",
+    "internal/frontend/encoding_timing_test.go": "3722c49be315eac9facc18aa44fab8e1b38ff34a864a5a6e56ffe138b282a988",
+    "internal/frontend/expr.go": "5e22a340a1900fe9581987f44a223bd6efe9b0d8e275c13f9637d8dc81cbd68d",
+    "internal/frontend/heredoc_location_test.go": "4fac2b015128f2bfe12253de95eb37092a52a67dfcf3447d21b782e8d0cad458",
+    "internal/frontend/hooks_validation_test.go": "2f4c2e5e3b832cb763ff894c6623e022680c6465a11eaf0902021e75967ffb3f",
+    "internal/frontend/lexer.go": "5ff8add25a655a6039382436de623b4bb1a8e6c8c29247189ac063a6e8be8916",
+    "internal/frontend/lexer_corpus_test.go": "d1a6344ef02d760026a5a0110e588ea0d9a0acce8eb9ea7cafbc3574b75e8952",
+    "internal/frontend/modifiers.go": "74b62fd993f488e3e56de2f90133dad1ae83f163c42475f6f82a2f41ef2b9724",
+    "internal/frontend/nesting_test.go": "786f8a454cddccc61d3c3d3ab51cbf8f58a719eecf57460bb4eec17ade23bf6a",
+    "internal/frontend/parser.go": "ce3be076ed44ea04b21f2f2d8230a551f85c11fb3901275b8fed86428a333158",
+    "internal/frontend/parser_corpus_test.go": "b54a41e084f6ba576dc5ec65eb841b328733f8afae8d6c44175358a4f5409c48",
+    "internal/frontend/parser_location_corpus_test.go": "bab45ff4fca451f3a898c2ddfd48200148db1d47fd5199ae022015babe407d92",
+    "internal/frontend/parser_test.go": "aa576fe4762622c70ca79dfda8f9579449fb70fd5a82bc6d8702b3bfca6aec95",
+    "internal/frontend/php8512_diagnostics.bin": "8928a884da896fb7ead38f41045c3745503248a768539c24348118bfe23be51e",
+    "internal/frontend/token.go": "c67ab6e4154c45f340fbc7169c966979bd08ee1b49d0c08fc3fb95e9941a9f3c",
+    "internal/ir/attributes_compile.go": "b57cb94a30a5a1d949e229380fb1069662786f5848464e84fc1c74758f611fbd",
+    "internal/ir/class_binding.go": "1d5f7869ce2fb50160fa23098b91a8df219864a08f7ad72e82475ccc34069531",
+    "internal/ir/class_compile.go": "db244e2004cc1819bb6e7ae233d13af207f89eb7697ec7078693b824a3bf4a95",
+    "internal/ir/class_link.go": "4fb48403f4a3d40b27f51932b9ae0089603a2ce97cdb307b757188e91f55466b",
+    "internal/ir/compat_array_lines_test.go": "35f568779a59ea4c111844054c5cf98e627b29e0154e42d88a82a2ccc98c3ddf",
+    "internal/ir/compat_binding_test.go": "917470c7069c2f7d37e3353b91bfc47f35d687f99c367cacce1366c454243487",
+    "internal/ir/compat_constant_arrays_test.go": "b916a27940589d4ae30295621a44650dd74aeaf1975135658ab3a7ad12140eaa",
+    "internal/ir/compat_constant_edges_test.go": "cfa383d2d0719bc073e4a7fbf34db4ebbc94cc024f2f818634e6a969648ea0e7",
+    "internal/ir/compat_constant_flow_test.go": "f9bbae62113973931b8815edf3ef8db8bcff22e9fc539c3d8c6105e40d0e9418",
+    "internal/ir/compat_constant_oracle_test.go": "eb6c860a74b1d9d492f1c768680fc38df09b58ab035f025a44897edf0d0d460a",
+    "internal/ir/compat_constant_warnings_test.go": "1bcb42990ddf12ff893a3821f6f4a0397a087b4ac197ae41ebca635e0fa8866e",
+    "internal/ir/compat_core_classes_test.go": "1819f24d663ac555919d739b2ac4229b2ece4586b197849515761b4cec583164",
+    "internal/ir/compat_declaration_review_test.go": "aa02b8130a84cb0b0e3cf50e61f7201a21956e76411de0f30ea30f1c74529f2d",
+    "internal/ir/compat_declarations_test.go": "48898d8857c357c43faedb29808c60d6fac8a82edd6ff2627f9b1472976a0086",
+    "internal/ir/compat_expressions_test.go": "4b68c073a30e6eec7521acfc3a5cb3f94c7ed42bf972fa50cfe4f1f30b29e7ce",
+    "internal/ir/compat_numeric_limits_test.go": "bc728144a1a3d0f4bec214608269693d5beb23c0abec1ce3c6604db15f80d0ef",
+    "internal/ir/compat_syntax_constants_test.go": "daba00e07e2d35c1e52d633f4d8dfd270269a2a264bdcd02b15ae7284b6564c3",
+    "internal/ir/constant_array.go": "b7eb2f37a33f7dd7947333bde49b5ac76fd9931a02d575b774a783dbb0813d00",
+    "internal/ir/constant_budget.go": "4de3c9572d7c27176d9ca6703552466fe17b6d6ecbb30058bcf53e8827ebb659",
+    "internal/ir/constant_budget_test.go": "00d17f4087ef03ec849c103db1f0f2261ac0aa19f5e9ef732dd69735833c00f8",
+    "internal/ir/constant_compile.go": "aee165b9c7566f512220bad532aecb126ff520b7efbcb3a4907266588b7c38a5",
+    "internal/ir/constant_syntax.go": "db08d8c69fe23b5b722239e24b44cbe22db5328dafd11385875187ad9764d3aa",
+    "internal/ir/core_classes.go": "7564a49bb8718a81e9d3262190873b38a8d7657807d769cf616b4d1d1c699fbf",
+    "internal/ir/corpus_gaps_test.go": "ed5502156f7bd78ffb185dfbe0546f6f148378c3b3c6217f22e8f63583efe6fe",
+    "internal/ir/corpus_test.go": "c7b504000451e020615817abfe7437acf13972fa14e44ddfb3dc84d3f5783918",
+    "internal/ir/decl.go": "e8c77a403d2f3f28c9ce86d7389597b0fa6b2aeb6ef25af432b8ddd151b9f7c1",
+    "internal/ir/expr.go": "add51f5b431d05c451d4ef2a8b1842b4efd31b306d909a699f56f5ef935476d1",
+    "internal/ir/hir.go": "3c784cbcd6750deec773bee417420980d84d99c1dd1442228c5f038c7394d00b",
+    "internal/ir/lower.go": "6e35da1a6ab308ce993e4e4d81a98972390139d4e1b5a7b94006fff6a485256e",
+    "internal/ir/testdata/php8512-constant-compile.json.gz": "43004ee0bc3e37dd482e8b1dbba3451de2360f0bc928e31a13a33fe1397e5e90",
+    "internal/ir/testdata/php8512-syntax-constant-compile.json.gz": "865e2bab141b7351a0ef020cf708f857a236dc424f6f7c631dd2d99c34f6031e",
+    "internal/phpnum/arithmetic.go": "86c0e126d1193ece185e69c103dc5d2f67a15ca3edc5b409a0c7243e20a1f7d0",
+    "internal/phpnum/arithmetic_bench_test.go": "946227051c151c3f005eb4e2db3149cf1d89787cfe0fbe978fb5a017abae6ca2",
+    "internal/phpnum/compare.go": "83b26531ce32efc85b4284fd9c73235796c8585f374ece0fd5eff8641671fce0",
+    "internal/phpnum/numeric.go": "18cb8e9b32000ef2c1f6fa67a6106d699503c61f4c12f1c249e7110d2a6ca095",
+    "internal/phpnum/pow.go": "914df9ac88368a3f051298f1ce2c013badc5a01e963e306e583d46e0007a8fb9",
+    "internal/phpnum/pow_data.go": "928b3cc23a3ab488ed3b45484c7dbf7b3369c522039e779c010bfa14feb7229b",
+    "internal/phpnum/pow_i386.go": "8cfdd1c810a9b175f74bb3af066ee8c9c157ddce94f0a0d23c7705b40ab6e14e",
+    "internal/runtime/numeric_php8512.go": "994c4a535802a899507efaf4bb16bc782fe831f072c46039003b8a145364a33e",
+    "internal/runtime/ops_php8512.go": "8b68e49cbbf0c8ea9cb5655e38029944e63dce21864593cb8ab66afdaa06a0c9",
+    "internal/runtime/ops_php8512_test.go": "59065cf23b6bf684812f5d83e44fe357676b20d56b5c623029a098c9392a79ca",
+    "internal/runtime/pow.go": "b9d1e94a8f4f54cf92b559c1684a155d65577ad97c70035eb7da69d382c148ea",
+    "internal/runtime/pow_i386.go": "a90238221ed45ec11d23a37cf8a1dc27b896c3aa1b5a3e4eecf52395c55f2d28",
+    "internal/runtime/pow_i386_test.go": "b97509186e22e5327c6fee4f9e54517a777c31a943449f4fe2f643b6a231cc56",
+    "internal/runtime/testdata/php8512-pow-32.txt.gz": "a389ad05084f4478a6e447ed09390e8dfdabd9581e5d6f53a7023cda1a547ec2",
+    "tests/frontend/parse_dump.php": "1bc7195c198f05a5ac06113e18993e148ff2419d386cb38f54100e6cea2142a9",
+    "third_party/php-diagnostics/UPSTREAM.json": "4a61316a2e2cc3ea3a845216d56dbe5125fdc302fb2b468939cf0d308ef0a950",
+    "tools/php_diagnostics.py": "c9ad5e8fc885b487335e81a1abb966fc90f308e2c4c9e9cb571ec85a8bfc6eb5",
+    "tools/test_php_diagnostics.py": "75a9df42b6f751d8d36a5b554dae0ab3540cd2a864d17528398f97abf87282e1",
+    "tools/test_verify_compile_fixtures.py": "2b8a5f2307a9a4c1104226b9121b224b2ba93dbceb4336045905c3c70d68a59c",
+    "tools/verify_compile_fixtures.py": "a36d4ad33515391f81d0aa7a242c00a6b2e36158691e24448862e79bddc6127d",
+    "tools/w03-local-checks.json": "f1a98b0b4f86f9b900671bc5125c1d31cef4323b859d6d0269c72c1eb70bf877"
+  },
+  "environment": {
+    "go": "go version go1.26.5 darwin/arm64",
+    "host": "macOS-27.0.1-arm64-arm-64bit",
+    "architecture": "arm64",
+    "cpu": "Apple M3",
+    "default_core_cgo": false,
+    "race_build_cgo": true,
+    "reference_note": "Pinned Linux 386/amd64 images executed through OrbStack on this arm64 host; native x86-64 CI is a separate delivery check."
+  },
+  "local_status": "pass",
+  "product_test_status": "not_run",
+  "commands": [
+    {
+      "command": "go test ./...",
+      "environment": {
+        "CGO_ENABLED": "0"
+      },
+      "exit_code": 0,
+      "seconds": 23.452,
+      "log": "compatibility-php8512-20261104/go.log"
+    },
+    {
+      "command": "go test -race ./...",
+      "environment": {},
+      "exit_code": 1,
+      "seconds": 137.018,
+      "log": "compatibility-php8512-20261104/race.log"
+    },
+    {
+      "command": "go vet ./...",
+      "environment": {},
+      "exit_code": 0,
+      "seconds": 1.85,
+      "log": "compatibility-php8512-20261104/vet.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^$' -fuzz '^FuzzParse$' -fuzztime 30s",
+      "environment": {},
+      "exit_code": 0,
+      "seconds": 32.853,
+      "log": "compatibility-php8512-20261104/frontend-fuzz.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp",
+        "PHEGO_LEXER_INT_WIDTH": "32",
+        "PHEGO_LEXER_SHORT_OPEN_TAG": "0",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location-32-short0.jsonl"
+      },
+      "exit_code": 0,
+      "seconds": 1.831,
+      "log": "compatibility-php8512-20261104/parser-32-0.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp",
+        "PHEGO_LEXER_INT_WIDTH": "32",
+        "PHEGO_LEXER_SHORT_OPEN_TAG": "1",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location-32-short1.jsonl"
+      },
+      "exit_code": 0,
+      "seconds": 1.041,
+      "log": "compatibility-php8512-20261104/parser-32-1.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp",
+        "PHEGO_LEXER_INT_WIDTH": "64",
+        "PHEGO_LEXER_SHORT_OPEN_TAG": "0",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location-64-short0.jsonl"
+      },
+      "exit_code": 0,
+      "seconds": 1.067,
+      "log": "compatibility-php8512-20261104/parser-64-0.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp",
+        "PHEGO_LEXER_INT_WIDTH": "64",
+        "PHEGO_LEXER_SHORT_OPEN_TAG": "1",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location-64-short1.jsonl"
+      },
+      "exit_code": 0,
+      "seconds": 0.994,
+      "log": "compatibility-php8512-20261104/parser-64-1.log"
+    },
+    {
+      "command": "go test ./internal/ir -run '^TestLowerMatchesCompileReference$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp"
+      },
+      "exit_code": 0,
+      "seconds": 1.182,
+      "log": "compatibility-php8512-20261104/compile-corpus.log"
+    },
+    {
+      "command": "go test -race ./internal/frontend -run '^TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically$' -count=3 -v",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/heredoc-isolated.log"
+    },
+    {
+      "command": "go test -race ./...",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/race-serial.log"
+    },
+    {
+      "command": "python3 tools/verify_compile_fixtures.py",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/compile-fixtures.log",
+      "result": "10762 cases: 4681 + 700 source cases per integer width"
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/python.log",
+      "result": "545 tests passed in 137.736s",
+      "output_note": "Intentional failure-path fixtures print error messages and PHP/FI exit code 23; the unittest process exits 0 and its summary is OK."
+    },
+    {
+      "command": "go test ./internal/ir -run '^$' -fuzz '^FuzzLower$' -fuzztime 30s",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/ir-fuzz.log"
+    },
+    {
+      "command": "go test ./internal/phpnum -run '^$' -bench '^BenchmarkPow$' -benchmem -benchtime=100ms -count=5",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/pow-benchmark-after.log",
+      "result": "Synthetic numeric-path samples, not VM or application performance."
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/97f09fea-d579-4a65-8675-937460ea2e92/scratchpad/w09/mutB",
+        "PHEGO_LEXER_INT_WIDTH": "32",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location-32.jsonl"
+      },
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/mutants-32.log"
+    },
+    {
+      "command": "go test ./internal/frontend -run '^TestParseMatchesReferenceCorpus$' -count=1 -v",
+      "environment": {
+        "CGO_ENABLED": "0",
+        "PHEGO_LEXER_CORPUS": "/tmp/claude-501/-Volumes-SSD-Developer-phego/97f09fea-d579-4a65-8675-937460ea2e92/scratchpad/w09/mutB",
+        "PHEGO_LEXER_INT_WIDTH": "64",
+        "PHEGO_PARSER_REFERENCE": "parse-reference-location.jsonl"
+      },
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/mutants-64.log"
+    },
+    {
+      "command": "python3 tools/php_diagnostics.py --source /tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/src/php-8.5.12/Zend/zend_language_parser.c --check",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/generator.log"
+    },
+    {
+      "command": "python3 tools/validate_docs.py",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/docs.log"
+    },
+    {
+      "command": "CGO_ENABLED=0 go test ./internal/frontend -run TestPHP8512EncodingDirectiveTiming -count=1",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/encoding-control.log"
+    },
+    {
+      "command": "gofmt -l internal",
+      "exit_code": 0,
+      "result": "No output, explicitly asserted."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "No output."
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "result": "545 tests passed in 135.830s",
+      "log": "compatibility-php8512-20261104/python-final.log",
+      "output_note": "Expected negative-path diagnostic output; unittest reports OK and exits 0."
+    },
+    {
+      "command": "python3 engineering/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /opt/homebrew/lib/libmpfr.6.dylib",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/instruction-reproduced.log",
+      "result": "200000 deterministic inputs; 46 F2XM1 differences versus MPFR 4.2.2 RN64; 0 final RN53 differences; 46 native PHP controls match."
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p test_verify_compile_fixtures.py",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/ci-runner-green.log",
+      "result": "6 tests passed, including private workspace ownership and bounded failure diagnostics."
+    },
+    {
+      "command": "python3 tools/verify_compile_fixtures.py",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/ci-runner-native.log",
+      "result": "10762 native reference cases passed with the host UID/GID."
+    },
+    {
+      "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/ci-python.log",
+      "result": "547 tests passed in 137.216s."
+    },
+    {
+      "command": "python3 engineering/implementation/evidence/compatibility-php8512-20261104/ci-private-workspace-probe.py.txt",
+      "exit_code": 0,
+      "log": "compatibility-php8512-20261104/ci-permissions.log",
+      "result": "Prepared Linux workspace has owner 1001:1001 and mode 0700; capability-free root fails to open run.php, matching UID succeeds."
+    }
+  ],
+  "artifacts": {
+    "compile-fixtures.log": {
+      "path": "compatibility-php8512-20261104/compile-fixtures.log",
+      "sha256": "3914be7a088026b88eee43971dffe23c68cf812fac89a392a24c9133bd33c7f9"
+    },
+    "python.log": {
+      "path": "compatibility-php8512-20261104/python.log",
+      "sha256": "02bb8a4d6c7e5a5b885bb42ab4ba0d1fa69b8aba6410c21866cc22d636902bbe"
+    },
+    "ir-fuzz.log": {
+      "path": "compatibility-php8512-20261104/ir-fuzz.log",
+      "sha256": "f83859f35fb620abef13d28a304d2a6d7736b87875c915c916bd980fdf852f30"
+    },
+    "encoding-red.log": {
+      "path": "compatibility-php8512-20261104/encoding-red.log",
+      "sha256": "aeab82756a2ffa66211303fa74172592654c202d3086a07ce25145fe0f28da45"
+    },
+    "encoding-timing-red.log": {
+      "path": "compatibility-php8512-20261104/encoding-timing-red.log",
+      "sha256": "674b6fcb2090c95ee6e01ef832581bf2f1f900412671e906e48e3bde76a398f7"
+    },
+    "encoding-native.log": {
+      "path": "compatibility-php8512-20261104/encoding-native.log",
+      "sha256": "af60af46ce3a0723cb83747bf06828ff0e234866c61348c37b2c31882b4d1b7f"
+    },
+    "encoding-control-green.log": {
+      "path": "compatibility-php8512-20261104/encoding-control-green.log",
+      "sha256": "ffdbc96e4ba45028b799f5f6e9d00d711313044b7f636755e3c852d5b2b99ca6"
+    },
+    "nesting-red.log": {
+      "path": "compatibility-php8512-20261104/nesting-red.log",
+      "sha256": "c9da0cefabf93bd20b35e8fd7c20ce77e2f290696bef050dddd1d1bfbcdb1a93"
+    },
+    "pow-red.log": {
+      "path": "compatibility-php8512-20261104/pow-red.log",
+      "sha256": "bc2f3af88c9d31190b070ab78c1410bd6090bd69e866e5999efae847d84a246c"
+    },
+    "pow-extra-green.log": {
+      "path": "compatibility-php8512-20261104/pow-extra-green.log",
+      "sha256": "ceeed06564912a472ca92aeb5a98c57ce8b32e2e70528f8e632d3ae5ff174467"
+    },
+    "pow-benchmark-before.log": {
+      "path": "compatibility-php8512-20261104/pow-benchmark-before.log",
+      "sha256": "4faec00f1d5905dfa4d1b076cc84b2554b569c7ee53b2f6390291c970ee2e04d"
+    },
+    "pow-benchmark-after.log": {
+      "path": "compatibility-php8512-20261104/pow-benchmark-after.log",
+      "sha256": "ddeec47d76c8211e08d77a4d769be2ba4b28d825389e2bf95b83a2e293802405"
+    },
+    "syntax-constants-red.log": {
+      "path": "compatibility-php8512-20261104/syntax-constants-red.log",
+      "sha256": "9ad885b2b8597a65a6118b29d49e421626b088e5da3f7fbc6844cb3f3402bea9"
+    },
+    "declaration-red.log": {
+      "path": "compatibility-php8512-20261104/declaration-red.log",
+      "sha256": "2c0c3bae555ca16a8c858757a636f4e2dab90b6be615ac4ad516fcabb2f2abc8"
+    },
+    "syntax-review-green.log": {
+      "path": "compatibility-php8512-20261104/syntax-review-green.log",
+      "sha256": "0b9701572c7ed29c8378726cc450d4ed0f20eb45367c51767ea626fc88c9a18d"
+    },
+    "nesting-review-32.log": {
+      "path": "compatibility-php8512-20261104/nesting-review-32.log",
+      "sha256": "d559f8b689f26f191125c0cf9eb16822f536bbb584078df17f70c4a2f00dcf27"
+    },
+    "nesting-review-64.log": {
+      "path": "compatibility-php8512-20261104/nesting-review-64.log",
+      "sha256": "d109a7c1d9aaf2189f71433d296c1839b158baa2ffc0baa6ed9bb022cb1002a7"
+    },
+    "encoding-reference-32": {
+      "path": "compatibility-php8512-20261104/encoding-reference-32.jsonl",
+      "sha256": "97b10b459d0a1d508fc261b046d0a13e134d471e8ba6ddb34af4130bba3a57c9"
+    },
+    "nesting-reference-32": {
+      "path": "compatibility-php8512-20261104/nesting-reference-32.jsonl",
+      "sha256": "a79679efd60d4c1775479799df732c736e553db78e497fd3d63d6b04854a2db3"
+    },
+    "encoding-reference-64": {
+      "path": "compatibility-php8512-20261104/encoding-reference-64.jsonl",
+      "sha256": "97b10b459d0a1d508fc261b046d0a13e134d471e8ba6ddb34af4130bba3a57c9"
+    },
+    "nesting-reference-64": {
+      "path": "compatibility-php8512-20261104/nesting-reference-64.jsonl",
+      "sha256": "a79679efd60d4c1775479799df732c736e553db78e497fd3d63d6b04854a2db3"
+    },
+    "encoding-cases": {
+      "path": "compatibility-php8512-20261104/encoding-cases.json.gz",
+      "sha256": "ed13a5958290399fd0f8726f7851fe07c552ae72ef4a2938e58e8e0d1dc54d14",
+      "uncompressed_sha256": "c42a8a655a829b46aa4cc0793257e6ae1cd3d5700feadfa0a708c60ce42a64a9"
+    },
+    "nesting-cases": {
+      "path": "compatibility-php8512-20261104/nesting-cases.json.gz",
+      "sha256": "e64e12886c60e67d9eb24f199fab247b1cf33b6b9fe26dff2205e471506f543b",
+      "uncompressed_sha256": "a45accdcf65a7952589a2ee0c9bfbe4a72c2662ca434e970e0fa2edc9d197663"
+    },
+    "encoding-timing-reference": {
+      "path": "compatibility-php8512-20261104/encoding-timing-reference.jsonl",
+      "sha256": "9d9531fbed36110627fdc9e7c96832f32ff96fd76f34a41682426d417498c074"
+    },
+    "encoding-control-reference": {
+      "path": "compatibility-php8512-20261104/encoding-control-reference.jsonl",
+      "sha256": "69c36f9e2d369d6740a377deafe75940a13a2b9af550708d9441efbc2db80ea0"
+    },
+    "readonly-reference": {
+      "path": "compatibility-php8512-20261104/readonly-reference.json",
+      "sha256": "d0bc52ca598df49e3d09198512e09727d4c5bf6e7462ebb5b541ad76aad854f1"
+    },
+    "newpairs.txt": {
+      "path": "compatibility-php8512-20261104/newpairs.txt.gz",
+      "sha256": "7634185778980148649ba2339c39a4aaba8d20d677db94423b88423c86acc751",
+      "uncompressed_sha256": "5c4dde1802839afd4ec9187b8bec105bb7998fa879a375e992f8ccd8f59640ab"
+    },
+    "newpow32.txt": {
+      "path": "compatibility-php8512-20261104/newpow32.txt.gz",
+      "sha256": "4dadace355ce3a17c985b03b8beedca4f8735a41d26aa6fa263e2c05c929e0de",
+      "uncompressed_sha256": "fee9fa0a93427eba5397defeeea099952da42192fb1cf3bbb5aedff1ffaf3608"
+    },
+    "intpairs.txt": {
+      "path": "compatibility-php8512-20261104/intpairs.txt.gz",
+      "sha256": "56de7781b4399fcbcf4283a843b812df2db6f23076e50d6fd7d9000a5c4b850e",
+      "uncompressed_sha256": "6a4b5ad538845de550904153ebf77c593a449c4496dd45eba3587e8c1e0c6a8d"
+    },
+    "intpow32.txt": {
+      "path": "compatibility-php8512-20261104/intpow32.txt.gz",
+      "sha256": "88a797d5d21f93128a06688a0961404caf7267a1c80cff880404236764fd7790",
+      "uncompressed_sha256": "bf6fb4151044e3ec0adefe47c52d795233b87c75891d76559e62add321775c62"
+    },
+    "newpairs.py": {
+      "path": "compatibility-php8512-20261104/newpairs.py.txt",
+      "sha256": "3f04c4fa5321a67c43200ced0e116ff70014ffd83c718e690c41639a208ba543"
+    },
+    "intpairs.py": {
+      "path": "compatibility-php8512-20261104/intpairs.py.txt",
+      "sha256": "862b1187374f59433ee0469413aed7ffd5cfddb68059a553b1d3e4df64d51fa0"
+    },
+    "intpow.php": {
+      "path": "compatibility-php8512-20261104/intpow.php.txt",
+      "sha256": "78f49b6d2e45544c61f2b8e54f2ed41c3e22e9e44c1bf3a8791b6840ba9a5234"
+    },
+    "go_verify_test.go": {
+      "path": "compatibility-php8512-20261104/go_verify_test.go.txt",
+      "sha256": "db2008157dbf630781538c4cd82c992e5fad5b12e8b4f558a1f9ee1fa07dc302"
+    },
+    "fraccheck.json": {
+      "path": "compatibility-php8512-20261104/fraccheck.json",
+      "sha256": "d3845279decfc15cfd157e8a7521f81d0b8652858eb889db077d9615c557df2a"
+    },
+    "mpfrinstructions.json": {
+      "path": "compatibility-php8512-20261104/mpfrinstructions.json",
+      "sha256": "8c9020961eed9d376c97947345d4849acaa93aaae9b9286a3398ba281a82d0d4"
+    },
+    "go.log": {
+      "path": "compatibility-php8512-20261104/go.log",
+      "sha256": "cb210630d8fca1b32bef1010c26564f01971aa86aa78843a016266cacac1aab1"
+    },
+    "race.log": {
+      "path": "compatibility-php8512-20261104/race.log",
+      "sha256": "7585a864229856725293f2b48269fd461376be52ff7910900c3069fc9b4471ac"
+    },
+    "vet.log": {
+      "path": "compatibility-php8512-20261104/vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "frontend-fuzz.log": {
+      "path": "compatibility-php8512-20261104/frontend-fuzz.log",
+      "sha256": "5f632b45b849878aab595b077a41f20d2e055b57eddc304159609432b021e4e2"
+    },
+    "parser-32-0.log": {
+      "path": "compatibility-php8512-20261104/parser-32-0.log",
+      "sha256": "4c7a285bfde89211d79d612d4025c51bea117eb41699ce896820f09d1864fe92"
+    },
+    "parser-32-1.log": {
+      "path": "compatibility-php8512-20261104/parser-32-1.log",
+      "sha256": "fafaae9d6dfff0195e49c7da01e06b778b47dc6616729b024f815286c811e790"
+    },
+    "parser-64-0.log": {
+      "path": "compatibility-php8512-20261104/parser-64-0.log",
+      "sha256": "63e9f98d8ceb23e46e9130d752edf714c77a26ada8770bd91fb24f1ff6aefcc0"
+    },
+    "parser-64-1.log": {
+      "path": "compatibility-php8512-20261104/parser-64-1.log",
+      "sha256": "163bf529d8c4b999b68af1d90837dc55cf2db215b1d49581e27189d82a33ca61"
+    },
+    "compile-corpus.log": {
+      "path": "compatibility-php8512-20261104/compile-corpus.log",
+      "sha256": "0fe5b178bd748b8420911b39cd37dd1d0eb747998ef52319a4ad72f2b3f3b1af"
+    },
+    "heredoc-isolated.log": {
+      "path": "compatibility-php8512-20261104/heredoc-isolated.log",
+      "sha256": "b8d1b6a624adbb3abe98ae58ac0052b582e5d2ef91f5b14d6cd95a3d14556c47"
+    },
+    "race-serial.log": {
+      "path": "compatibility-php8512-20261104/race-serial.log",
+      "sha256": "7b0bb32d4667f42e1bb3fbddbd57d15ffa21c15522fd7470fb101f8cb7677b8d"
+    },
+    "mutants-32.log": {
+      "path": "compatibility-php8512-20261104/mutants-32.log",
+      "sha256": "1501aac371aaee0e82da321a4cb741bb338301b7a897459772b38f5f56a298ac"
+    },
+    "mutants-64.log": {
+      "path": "compatibility-php8512-20261104/mutants-64.log",
+      "sha256": "0fcb24a55dbdcefdef0bb669158324fc10285cf76c85ebc1f040d14d4c2eda5f"
+    },
+    "generator.log": {
+      "path": "compatibility-php8512-20261104/generator.log",
+      "sha256": "7aefad2f8c08bf637c6429fce242e286bf8ff178d41304c404378a0e77ba2a22"
+    },
+    "docs.log": {
+      "path": "compatibility-php8512-20261104/docs.log",
+      "sha256": "11fc58da3e15b92bb6e65ac292f48e46492fe4b5eb91cdfc4d4d4632390ef13e"
+    },
+    "encoding-control.log": {
+      "path": "compatibility-php8512-20261104/encoding-control.log",
+      "sha256": "ffdbc96e4ba45028b799f5f6e9d00d711313044b7f636755e3c852d5b2b99ca6"
+    },
+    "python-final.log": {
+      "path": "compatibility-php8512-20261104/python-final.log",
+      "sha256": "954deae6a226812097a0aa9a5b58393874b01808b169bc30b8f74d97c41d1242"
+    },
+    "nesting-root.log": {
+      "path": "compatibility-php8512-20261104/nesting-root.log",
+      "sha256": "54c9e41c480f63d804a422027fbbaff3a583dbee15938df1257e6fb38e2ce43c"
+    },
+    "instructionsfrac.c.txt": {
+      "path": "compatibility-php8512-20261104/instructionsfrac.c.txt",
+      "sha256": "57dd16b1ae4b36580a6a4d9fd4d4a24b06f6790abfb84b19fce3c58bf1083769"
+    },
+    "instruction-verify.py.txt": {
+      "path": "compatibility-php8512-20261104/instruction-verify.py.txt",
+      "sha256": "dc8bde0c937ce5b4ded797cab50c17c3ff9b288211fd56983ead7acfcc9cf730"
+    },
+    "instruction-reproduce.py.txt": {
+      "path": "compatibility-php8512-20261104/instruction-reproduce.py.txt",
+      "sha256": "3f53a221baf4d90666d80ae537cf3de32128e29a6f29d353fc654d9526dd1ab5"
+    },
+    "instruction-reproduced.log": {
+      "path": "compatibility-php8512-20261104/instruction-reproduced.log",
+      "sha256": "fa3737d071ad6885cf8fb6549e6fdb4fdf1aa90ec8f1983f9e426765f5b65542"
+    },
+    "ci-runner-red.log": {
+      "path": "compatibility-php8512-20261104/ci-runner-red.log",
+      "sha256": "c79aa6167d0c5df5cb7237bb62ab2f9357952e927dc4e858c3892e8256caeb3c"
+    },
+    "ci-runner-green.log": {
+      "path": "compatibility-php8512-20261104/ci-runner-green.log",
+      "sha256": "b95b5805bef96b568b1b2424b637003cd6f306e6312d682e4f2e4e23f635b26a"
+    },
+    "ci-runner-native.log": {
+      "path": "compatibility-php8512-20261104/ci-runner-native.log",
+      "sha256": "3914be7a088026b88eee43971dffe23c68cf812fac89a392a24c9133bd33c7f9"
+    },
+    "ci-python.log": {
+      "path": "compatibility-php8512-20261104/ci-python.log",
+      "sha256": "a5a691758d3b30f5299b727be12f49a40b3ad0b01806f87549413815d0afb6d5"
+    },
+    "ci-hir-failure.log": {
+      "path": "compatibility-php8512-20261104/ci-hir-failure.log",
+      "sha256": "febf41774090fd397a31fce2268a54059091b2320b8446af7289fcd29cd1a9ae"
+    },
+    "ci-permissions.log": {
+      "path": "compatibility-php8512-20261104/ci-permissions.log",
+      "sha256": "a0c296714a8997c4d0ad78bfcbfaa0016c99a8982f905e297649e2ad7a3bcc79"
+    },
+    "ci-private-workspace-probe.py.txt": {
+      "path": "compatibility-php8512-20261104/ci-private-workspace-probe.py.txt",
+      "sha256": "cae7717f6faaad209cdbbb0f7929d3aacd1415f5e6e77228b2919170d204ed9d"
+    }
+  },
+  "results": {
+    "frontend_corpus": {
+      "files_per_profile": 5449,
+      "integer_widths": [
+        32,
+        64
+      ],
+      "short_open_tag": [
+        false,
+        true
+      ],
+      "different": 0,
+      "caller_location_errors_per_profile": 1
+    },
+    "compile_corpus": {
+      "files": 5307,
+      "matched_fatal_errors": 647,
+      "warning_files": 48,
+      "matched_warning_files": 46,
+      "remaining_gaps": 12,
+      "gap_owner": "W-29",
+      "gap_definition": "internal/ir/corpus_gaps_test.go"
+    },
+    "constant_reference_cases": 10762,
+    "encoding_native_cases_per_width": 90,
+    "parser_depth_limits": {
+      "parentheses": 9995,
+      "unary": 9996,
+      "variable_variables": 9997,
+      "if": 2499,
+      "closures": 768,
+      "mixed_if_while": 833
+    },
+    "pow_i386": {
+      "fixed_matrix_differences": 51,
+      "committed_pairs": 30000,
+      "additional_float_pairs": 60000,
+      "additional_integer_pairs": 20000,
+      "different": 0,
+      "nan_rule": "NaN payload and sign are treated as equivalent, matching the existing operator oracle."
+    },
+    "mutant_corpus": {
+      "files_per_integer_width": 16320,
+      "integer_widths": [
+        32,
+        64
+      ],
+      "different": 0,
+      "caller_location_errors_per_width": 4
+    }
+  },
+  "limits": [
+    "Only the fixed PHP 8.5.12 profile is implemented. Other public PHP versions remain work-package obligations.",
+    "The 12 exact built-in and extension declaration gaps require W-29 metadata and remain visible.",
+    "i386 pow matches executed oracle cases, not a proof for every x87 CPU or every input. 46 of 200000 instruction-level F2XM1 probes differed from correctly rounded RN64 exp2m1; these differences disappeared after the final RN53 step in tested pow controls.",
+    "The i386 fractional path costs about 48 microseconds and 71 KiB per call on this Apple M3 microbenchmark. The existing 64-bit path costs about 6.4 nanoseconds with no allocations. No whole-program performance claim is made.",
+    "Existing unsafe reference cases remain blocked in W-13 evidence. No crash, timeout or unexecuted scenario was counted as matching PHP.",
+    "Host compile/replay resource errors remain distinct from PHP diagnostics and never become successful parses or unknown constants.",
+    "W-17 must integrate these compiler/runtime components before end-to-end PHP and application acceptance."
+  ],
+  "reproduction": {
+    "compile_fixtures": "python3 tools/verify_compile_fixtures.py; fixed images, no network, read-only root, bounded memory/PIDs, exact diagnostics and order",
+    "frontend": "tools/frontend_corpus.py extracts the corpus outside the repository; tests/frontend/parse_dump.php produces paired call/source locations. Exact replay environments and local paths are recorded per command.",
+    "pow_extra": "Decompress the newpairs.txt.gz, newpow32.txt.gz, intpairs.txt.gz and intpow32.txt.gz artifacts into /tmp/phego-compat-pow-research and restore go_verify_test.go.txt there as go_verify_test.go. Use a Go overlay mapping an absent internal/phpnum/research_verify_test.go to that file, then go test -overlay <overlay.json> ./internal/phpnum -run TestResearchOracle -v. The saved Python generators reproduce the two input sets at that same sandbox path. intpow.php.txt and tests/semantics/w10-ops/pow.php produce corresponding outputs in the pinned i386 image.",
+    "encoding_and_depth": "The compressed case files retain source and expected observations; write each source to a uniquely named external corpus/*.php and run tests/frontend/parse_dump.php in each pinned image. Corresponding Go tests are encoding_test.go, encoding_timing_test.go and nesting_test.go.",
+    "instruction_probe": "From the repository root: python3 engineering/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /path/to/libmpfr.6.dylib (Linux: path to libmpfr.so.6). Requires the existing Docker CLI, the pinned i386 PHP image and MPFR 4.2.2; these are research dependencies only. The script creates a fresh external sandbox, regenerates all 200000 inputs (seed 876532019, exact SHA256 asserted), compiles the saved C probe inside the restricted container, compares every F2XM1 result with MPFR exp2m1 at 64 bits, checks the final +1/RN53 step, and runs all 46 targeted PHP pow controls. A different CPU or translator may produce a different instruction result; the script rejects a different mismatch set instead of declaring equivalence."
+  },
+  "review_status": "Independent code review findings reproduced and fixed locally; remote latest-head checks and review are separate delivery gates.",
+  "transient_failure": {
+    "command": "go test -race ./...",
+    "log": "compatibility-php8512-20261104/race.log",
+    "test": "TestNestedHeredocAfterQuotedTextDoesNotRescanQuadratically",
+    "observed": "The wall-clock assertion failed when run concurrently with other checks: 1000 levels took 4.78225 ms, 10000 levels took 262.785416 ms. The threshold is 30 * small + 100 ms.",
+    "followup": "Unchanged test passed three consecutive isolated race runs; a following full race run passed. The implementation and threshold were not changed. The precise timing cause is unresolved.",
+    "isolated_log": "compatibility-php8512-20261104/heredoc-isolated.log",
+    "full_retry_log": "compatibility-php8512-20261104/race-serial.log"
+  },
+  "external_references": {
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp/parse-reference-location-32-short0.jsonl": "a0a94778eb94473625158bc5fada9cc73846226bc09956939b3ca0f66934c21b",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp/parse-reference-location-32-short1.jsonl": "a0a94778eb94473625158bc5fada9cc73846226bc09956939b3ca0f66934c21b",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp/parse-reference-location-64-short0.jsonl": "a0a94778eb94473625158bc5fada9cc73846226bc09956939b3ca0f66934c21b",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp/parse-reference-location-64-short1.jsonl": "a0a94778eb94473625158bc5fada9cc73846226bc09956939b3ca0f66934c21b",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/3c5d0cee-35c6-434e-8090-1308409cc3e8/scratchpad/corp/compile-reference.jsonl": "29eac7274603fe82ce0d15cfdce8206b114bbc224f1d1d0dc10c3173a9cd7166",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/97f09fea-d579-4a65-8675-937460ea2e92/scratchpad/w09/mutB/parse-reference-location-32.jsonl": "b2aebe4ff5d2011ad27d8673b3830435b0e1e70af603481445048493f9657bd5",
+    "/tmp/claude-501/-Volumes-SSD-Developer-phego/97f09fea-d579-4a65-8675-937460ea2e92/scratchpad/w09/mutB/parse-reference-location.jsonl": "7905ea434b47c60e3f60295ee9d2875186d95283df1822de71f0e8045d51805f"
+  },
+  "verification_note": "Go production code is unchanged since the full local Go/race/vet/fuzz checks. The CI follow-up changes only the compilation-reference runner, its tests and the W-03 test inventory; 547 Python tests and all 10762 native reference cases passed afterward. Original raw logs and their hashes are preserved.",
+  "ci_runner": {
+    "failed_head": "0b78b5489eeedf74e537f9e1bc7374cc373f3e0f",
+    "failed_run": "https://github.com/HazelnutParadise/phego/actions/runs/41767345058",
+    "failed_log": "compatibility-php8512-20261104/ci-hir-failure.log",
+    "cause": "The default container root cannot traverse a Linux runner-owned 0700 temporary directory after DAC_OVERRIDE is dropped. The controlled Linux-filesystem probe reproduces the denial and matching-owner success. macOS OrbStack rewrites bind ownership to the selected container UID, masking the mismatch locally.",
+    "repair": "Run the oracle under the numeric host UID/GID; preserve mode 0700, read-only bind, network isolation and all dropped capabilities. Preserve bounded stdout/stderr on process failure.",
+    "scope": "Current POSIX/rootful Docker runner contract. Rootless and userns-remap ownership configurations are not validated.",
+    "manifest_cases": 547
+  }
+}

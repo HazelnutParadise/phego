@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class EvidenceSchemaContract(unittest.TestCase):
     def test_outcomes_and_profile_fields_match_validator(self):
-        schema = json.loads((ROOT / "docs/data/evidence-records.schema.json").read_text())
+        schema = json.loads((ROOT / "engineering/data/evidence-records.schema.json").read_text())
         self.assertEqual(schema["$schema"], "https://json-schema.org/draft/2020-12/schema")
         record = schema["$defs"]["record"]
         self.assertEqual(set(record["properties"]["status"]["enum"]), set(traceability._OUTCOMES))

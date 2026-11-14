@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "description": "Regression suites every implemented PHP profile must pass. Adding a release to internal/profile requires an entry here for both integer widths; internal/profile TestEveryImplementedProfileHasRegressionSuites enforces it. Suites name Go test functions that must exist in the repository.",
+  "profiles": [
+    {
+      "release": "8.5.12",
+      "int_width": 64,
+      "suites": [
+        {
+          "id": "lexer-corpus",
+          "tests": [
+            "TestLexMatchesReferenceCorpus"
+          ],
+          "requires": "PHEGO_LEXER_CORPUS"
+        },
+        {
+          "id": "parser-corpus",
+          "tests": [
+            "TestParseMatchesReferenceCorpus"
+          ],
+          "requires": "PHEGO_LEXER_CORPUS"
+        },
+        {
+          "id": "operators",
+          "tests": [
+            "TestPHP8512OperatorsMatchReference",
+            "TestPHP8512NumericStringsMatchReference"
+          ]
+        },
+        {
+          "id": "runtime-objects",
+          "tests": [
+            "TestW13PHP8512Objects",
+            "TestW13ParallelRequestIsolation",
+            "TestW13LargeGraphCancellation",
+            "TestW13ResourceExecutionPaths",
+            "TestW13ResourceOperationCancellationCleanup",
+            "TestW13NestedRequestOwnership",
+            "TestW13ForeignDestinationOwnership",
+            "TestW13UnclaimedGraphOwnershipAtomic",
+            "TestW13TemporaryArrayMutationOwnership",
+            "TestW13TemporaryReferenceLocationOwnership",
+            "TestW13LazyRollbackConsecutiveSafety",
+            "TestW13ZeroLazyInitializerOwnership",
+            "TestW13EnumDescriptorValidation",
+            "TestW13PendingArgumentDestructorSafety",
+            "TestW13R5PHP8512Regression",
+            "TestW13PendingReferenceCloneSafety",
+            "TestW13R6PHP8512Regression",
+            "TestW13ExplicitResourceCloseAfterCancellation",
+            "TestW13CalledScopeExecutionFrames",
+            "TestW13R7PHP8512Regression",
+            "TestW13R7RawControls",
+            "TestW13R7LazyPropertyState",
+            "TestW13R7FreshDefaults",
+            "TestW13R8PHP8512Regression",
+            "TestW13R9PHP8512Regression",
+            "TestW13R9DynamicChurnBounded",
+            "TestW13R9ReentrantTable",
+            "TestW13R9DetachedStorage",
+            "TestW13R9ComparisonCursorProtection",
+            "TestW13R9RollbackCursorTransfer",
+            "TestW13R10ComparisonHoldOwners",
+            "TestW13R10HookHoldOwners",
+            "TestW13R10HookCleanupOrder",
+            "TestW13R10ProxyMetadata",
+            "TestW13R10LazyReleasedReceiver",
+            "TestW13R10PropertyAliasStrictness",
+            "TestW13R10ProxyControls",
+            "TestW13R11ClassRegistration",
+            "TestW13R11EnumScalarComparison",
+            "TestW13R11TraitProperties",
+            "TestW13R11TraitDescriptorCollisions",
+            "TestW13R11TraitSnapshotAndTypeEquivalence",
+            "TestW13R11RelativeCallables",
+            "TestW13R11TraitIgnoredUntypedInitial",
+            "TestW13R11TraitInheritance",
+            "TestW13R11TraitDefaultIsolation",
+            "TestW13R12MagicHandlers",
+            "TestW13R12HookReferences",
+            "TestW13R12SetterParameters",
+            "TestW13R12SetterMetadataIsolation",
+            "TestW13R12SetterDescriptorValidation",
+            "TestW13R13InterfaceGraph",
+            "TestW13R13ClassTraversalControls",
+            "TestW13R13GetterFastPathAllocations",
+            "TestW13R13SuccessfulGraphAllocations",
+            "TestW13R13ResourceCloseReentry"
+          ]
+        },
+        {
+          "id": "hir-compile-errors",
+          "tests": [
+            "TestLowerMatchesCompileReference"
+          ],
+          "requires": "PHEGO_LEXER_CORPUS"
+        },
+        {
+          "id": "hir-reflection-effects",
+          "tests": [
+            "TestLowerMatchesReflection",
+            "TestEffectsCoverObservedBehaviour"
+          ]
+        }
+      ],
+      "security_exceptions": [],
+      "known_gaps": [
+        "Cross-cycle WeakReference resurrection remains compatibility-blocked: pinned arm64 PHP exits 139 and i386 exposes an invalid externally held object. The user approved keeping Go owner safety and merging PR #73 with this explicit limit. This diagnostic is never a compatibility pass (engineering/implementation/evidence/W-13-gc-weak-diagnostic.json).",
+        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (engineering/implementation/evidence/W-13-lazy-rollback-diagnostic.json).",
+        "Stringable argument source destruction before a conditional method body is compatibility-blocked with explicit user approval on 2026-11-03 to merge after remaining gates: pinned arm64 PHP exits139 and i386 times out120s; Go safely preserves the exception. This diagnostic is not a compatibility pass (engineering/implementation/evidence/W-13-argument-destructor-diagnostic.json).",
+        "Stringable reference assignment that unsets its global alias then clones the source object is compatibility-blocked with explicit user approval on 2026-11-03 to merge after remaining gates: pinned arm64 PHP exits139; i386 emits qemu target SIGSEGV then times out120s. Go preserves valid owners and never counts this input as a compatibility pass (engineering/implementation/evidence/W-13-reference-clone-diagnostic.json)."
+      ]
+    },
+    {
+      "release": "8.5.12",
+      "int_width": 32,
+      "suites": [
+        {
+          "id": "lexer-corpus",
+          "tests": [
+            "TestLexMatchesReferenceCorpus"
+          ],
+          "requires": "PHEGO_LEXER_CORPUS"
+        },
+        {
+          "id": "parser-corpus",
+          "tests": [
+            "TestParseMatchesReferenceCorpus"
+          ],
+          "requires": "PHEGO_LEXER_CORPUS"
+        },
+        {
+          "id": "operators",
+          "tests": [
+            "TestPHP8512OperatorsMatchReference",
+            "TestPHP8512NumericStringsMatchReference"
+          ]
+        },
+        {
+          "id": "runtime-objects",
+          "tests": [
+            "TestW13PHP8512Objects",
+            "TestW13ParallelRequestIsolation",
+            "TestW13LargeGraphCancellation",
+            "TestW13ResourceExecutionPaths",
+            "TestW13ResourceOperationCancellationCleanup",
+            "TestW13NestedRequestOwnership",
+            "TestW13ForeignDestinationOwnership",
+            "TestW13UnclaimedGraphOwnershipAtomic",
+            "TestW13TemporaryArrayMutationOwnership",
+            "TestW13TemporaryReferenceLocationOwnership",
+            "TestW13LazyRollbackConsecutiveSafety",
+            "TestW13ZeroLazyInitializerOwnership",
+            "TestW13EnumDescriptorValidation",
+            "TestW13PendingArgumentDestructorSafety",
+            "TestW13R5PHP8512Regression",
+            "TestW13PendingReferenceCloneSafety",
+            "TestW13R6PHP8512Regression",
+            "TestW13ExplicitResourceCloseAfterCancellation",
+            "TestW13CalledScopeExecutionFrames",
+            "TestW13R7PHP8512Regression",
+            "TestW13R7RawControls",
+            "TestW13R7LazyPropertyState",
+            "TestW13R7FreshDefaults",
+            "TestW13R8PHP8512Regression",
+            "TestW13R9PHP8512Regression",
+            "TestW13R9DynamicChurnBounded",
+            "TestW13R9ReentrantTable",
+            "TestW13R9DetachedStorage",
+            "TestW13R9ComparisonCursorProtection",
+            "TestW13R9RollbackCursorTransfer",
+            "TestW13R10ComparisonHoldOwners",
+            "TestW13R10HookHoldOwners",
+            "TestW13R10HookCleanupOrder",
+            "TestW13R10ProxyMetadata",
+            "TestW13R10LazyReleasedReceiver",
+            "TestW13R10PropertyAliasStrictness",
+            "TestW13R10ProxyControls",
+            "TestW13R11ClassRegistration",
+            "TestW13R11EnumScalarComparison",
+            "TestW13R11TraitProperties",
+            "TestW13R11TraitDescriptorCollisions",
+            "TestW13R11TraitSnapshotAndTypeEquivalence",
+            "TestW13R11RelativeCallables",
+            "TestW13R11TraitIgnoredUntypedInitial",
+            "TestW13R11TraitInheritance",
+            "TestW13R11TraitDefaultIsolation",
+            "TestW13R12MagicHandlers",
+            "TestW13R12HookReferences",
+            "TestW13R12SetterParameters",
+            "TestW13R12SetterMetadataIsolation",
+            "TestW13R12SetterDescriptorValidation",
+            "TestW13R13InterfaceGraph",
+            "TestW13R13ClassTraversalControls",
+            "TestW13R13GetterFastPathAllocations",
+            "TestW13R13SuccessfulGraphAllocations",
+            "TestW13R13ResourceCloseReentry"
+          ]
+        }
+      ],
+      "security_exceptions": [],
+      "known_gaps": [
+        "The ** operator does not reproduce i386 glibc x87 pow results (engineering/implementation/W-10.md).",
+        "Cross-cycle WeakReference resurrection remains compatibility-blocked: pinned arm64 PHP exits 139 and i386 exposes an invalid externally held object. The user approved keeping Go owner safety and merging PR #73 with this explicit limit. This diagnostic is never a compatibility pass (engineering/implementation/evidence/W-13-gc-weak-diagnostic.json).",
+        "Consecutive lazy rollback reentrant writes remain compatibility-blocked: pinned arm64 PHP exits 133 with zend_mm_heap corrupted; i386 also corrupts memory and times out under local emulation. Independent declared/dynamic cases match exactly. The user approved merging with this explicit limit; the consecutive diagnostic is never a pass (engineering/implementation/evidence/W-13-lazy-rollback-diagnostic.json).",
+        "Stringable argument source destruction before a conditional method body is compatibility-blocked with explicit user approval on 2026-11-03 to merge after remaining gates: pinned arm64 PHP exits139 and i386 times out120s; Go safely preserves the exception. This diagnostic is not a compatibility pass (engineering/implementation/evidence/W-13-argument-destructor-diagnostic.json).",
+        "Stringable reference assignment that unsets its global alias then clones the source object is compatibility-blocked with explicit user approval on 2026-11-03 to merge after remaining gates: pinned arm64 PHP exits139; i386 emits qemu target SIGSEGV then times out120s. Go preserves valid owners and never counts this input as a compatibility pass (engineering/implementation/evidence/W-13-reference-clone-diagnostic.json)."
+      ]
+    }
+  ]
+}

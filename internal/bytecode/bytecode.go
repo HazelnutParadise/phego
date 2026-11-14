@@ -1,6 +1,6 @@
 // Package bytecode defines Phego's versioned register bytecode and bounded
 // verifier. It does not execute PHP. Only a successfully built or loaded Program
-// may be handed to a backend. See docs/decisions/W-16-bytecode.md.
+// may be handed to a backend. See engineering/decisions/W-16-bytecode.md.
 //
 // REQ-025, REQ-061, REQ-064; T-049, T-050, T-121, T-122, T-127, T-128.
 package bytecode
@@ -127,7 +127,7 @@ const (
 	OpDrop
 	OpLeave
 	OpEndFinally
-	// Format 1.1 (W-17). Operands are in docs/decisions/W-16-bytecode.md.
+	// Format 1.1 (W-17). Operands are in engineering/decisions/W-16-bytecode.md.
 	OpUnary       // A dest Value, B operand Value; Aux is a UnaryOp
 	OpCast        // A dest Value, B operand Value; Aux is a CastKind
 	OpIncDec      // A result Value, B target Location; Aux is an IncDecOp
@@ -139,13 +139,13 @@ const (
 	OpUnset       // A Location: unset($x)
 	OpExit        // A status Value when Aux is 1; Aux 0 is exit without a status
 	OpArrayAdd    // A array Value (updated in place), B value Value, C key when Aux has AddKey; Aux is ArrayAddFlags
-	// Format 1.2 (W-17 stage 2). Operands are in docs/decisions/W-16-bytecode.md.
+	// Format 1.2 (W-17 stage 2). Operands are in engineering/decisions/W-16-bytecode.md.
 	OpFetchDim     // A dest Location (the element), B container Location, C key; Aux is FetchFlags
 	OpIterInit     // A iterator Value, B subject Value, C target taken when the subject is not iterable
 	OpIterNext     // A iterator Value, B element dest (Value, or Location with IterLocation), C target taken when exhausted
 	OpIterKey      // A key dest (Value, or Location with IterLocation), B iterator Value
 	OpParamDefault // A parameter register, B target taken when the call passed that argument
-	// Format 1.3 (W-17 stage 3). Operands are in docs/decisions/W-16-bytecode.md.
+	// Format 1.3 (W-17 stage 3). Operands are in engineering/decisions/W-16-bytecode.md.
 	OpBind    // A dest Location, B source Location (a Value with BindValue): $a =& $b; Aux is BindFlags
 	OpMakeRef // A dest Value, B Location: the location becomes a reference, which A then holds
 )
