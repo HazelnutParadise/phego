@@ -192,9 +192,35 @@ func (l *lowerer) exprHead(n *frontend.Node, ctx context) (*frontend.Node, *Node
 		if entry.line != 0 {
 			l.cur = entry.line
 		}
-		return n, l.constantValueNode(entry.value, n.Line, 0)
+		// The node carries the line PHP's line counter rests at after the
+		// folded expression: the last operand's, or for a concatenation the
+		// parser folded, the token after it.
+		return n, l.constantValueNode(entry.value, foldedLine(n), 0)
 	}
 	return n, nil
+}
+
+// foldedLine is the line CG(zend_lineno) rests at after PHP compiles the
+// constant expression n: each zend_compile_expr sets it to its node's line,
+// so a binary operation leaves it at its right operand's last line and
+// parentheses at their content's; a concatenation of literals is already
+// one zval when it is compiled, created by the parser on the line of the
+// token after it (frontend.Node.FoldLine); every other node leaves its own
+// line.
+func foldedLine(n *frontend.Node) int {
+	for n != nil {
+		switch {
+		case n.Kind == "binary" && n.FoldLine != 0:
+			return n.FoldLine
+		case n.Kind == "binary":
+			n = n.Children[1]
+		case n.Kind == "paren":
+			n = n.Children[0]
+		default:
+			return n.Line
+		}
+	}
+	return 0
 }
 
 // exprBody lowers n by kind once exprHead has passed it.
@@ -976,6 +1002,12 @@ func (l *lowerer) interpolation(n *frontend.Node) *Node {
 func (l *lowerer) arrayLiteral(n *frontend.Node) *Node {
 	entry := l.preEvaluateSyntax(n)
 	nd := &Node{Op: OpArray, Line: n.Line}
+	if len(n.Children) == 0 && n.CloseLine != 0 {
+		// zend_ast_create_list with no child takes the current line, which
+		// is the closing bracket's: "[\n][0]" and "[$a] = [\n]" report
+		// that line.
+		nd.Line = n.CloseLine
+	}
 	for _, item := range n.Children {
 		if item == nil {
 			l.fail(l.cur, "Cannot use empty array elements in arrays")
@@ -1221,7 +1253,10 @@ func (l *lowerer) binaryLink(n *frontend.Node, left *Node) *Node {
 			}
 		}
 	}
-	return l.seal(&Node{Op: OpBinary, Line: n.Line, Text: op, Kids: []*Node{left, right}})
+	// PHP's parser folds a concatenation of two literals into one string
+	// (zend_ast_create_concat_op) on the line of the token after it; the
+	// node keeps that line so the code after the operation reports it.
+	return l.seal(&Node{Op: OpBinary, Line: n.Line, FoldLine: n.FoldLine, Text: op, Kids: []*Node{left, right}})
 }
 
 // --- calls ---

@@ -124,6 +124,10 @@ type Node struct {
 	Kids       []*Node
 	Flags      NodeFlag
 	Effects    Effect // effects of this node, including its operands
+	// FoldLine, on a "." of two literals, is the line PHP's parser gives
+	// the folded string: that of the token after the right operand. The
+	// compiler leaves the current line there after the operation.
+	FoldLine int
 }
 
 // NodeFlag records how a node is used.

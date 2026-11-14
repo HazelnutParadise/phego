@@ -66,6 +66,10 @@ func auxName(in bytecode.Instruction) string {
 		return name(incDecNames[:], a)
 	case bytecode.OpFetchDim:
 		return fetchName(bytecode.FetchFlags(in.Aux))
+	case bytecode.OpArrayGet:
+		if in.Aux == bytecode.ArrayGetList {
+			return "list"
+		}
 	case bytecode.OpBind:
 		if bytecode.BindFlags(in.Aux) == bytecode.BindValue {
 			return "value"
@@ -92,6 +96,9 @@ func fetchName(f bytecode.FetchFlags) string {
 	}
 	if f&bytecode.FetchAppend != 0 {
 		out += "+append"
+	}
+	if f&bytecode.FetchContainerValue != 0 {
+		out += "+value"
 	}
 	switch f.Use() {
 	case bytecode.FetchForIncDec:

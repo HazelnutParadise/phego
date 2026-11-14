@@ -15,12 +15,23 @@ import (
 
 // FormatVersion is the major format version. FormatMinor is the minor
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
-// 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage)
-// and minor 3 (format 1.3, the third); a file may not use operations newer
-// than the minor it declares.
+// 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
+// minor 3 (format 1.3, the third) and minor 4 (format 1.4, the fourth); a
+// file may not use operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 3
+	FormatMinor   uint16 = 4
+)
+
+// The Aux of OpArrayGet. ArrayGetQuiet (format 1.1) is FETCH_DIM_IS: no
+// warning for a missing key or a non-array container. ArrayGetList (format
+// 1.4) is FETCH_LIST_R, the element read of a destructuring assignment: an
+// array is read as with Aux 0, but a string is not a string container and
+// a container that is neither array nor null warns "Cannot use T as array"
+// instead of "Trying to access array offset"; the result is then null.
+const (
+	ArrayGetQuiet uint16 = 1
+	ArrayGetList  uint16 = 2
 )
 
 // Identity is compared in full against a trusted host expectation. Digests are
@@ -177,7 +188,15 @@ const (
 	FetchForRef      FetchFlags = 3 << 4 // format 1.3: the element is bound by reference (ZEND_FETCH_DIM_REF)
 	fetchUseMask     FetchFlags = 3 << 4
 
-	fetchKnown = fetchModeMask | FetchKeyLocation | FetchAppend | fetchUseMask
+	// FetchContainerValue (format 1.4) makes the container B a Value
+	// register that holds a reference (the result of MakeRef or of a
+	// by-reference IterNext), as ZEND_FETCH_DIM_W on a VAR operand: the
+	// element of a destructuring assignment by reference is fetched from
+	// the reference the right-hand side became. Only with FetchWrite and
+	// FetchForRef.
+	FetchContainerValue FetchFlags = 1 << 6
+
+	fetchKnown = fetchModeMask | FetchKeyLocation | FetchAppend | fetchUseMask | FetchContainerValue
 )
 
 // Mode is FetchWrite, FetchReadWrite or FetchUnset.

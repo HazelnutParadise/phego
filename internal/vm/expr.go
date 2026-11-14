@@ -48,6 +48,8 @@ func (fc *fnCompiler) discard(n *ir.Node) {
 		fc.assign(n, false)
 	case n != nil && n.Op == ir.OpAssignRef:
 		fc.assignRef(n, false)
+	case n != nil && n.Op == ir.OpDestructure:
+		fc.destructure(n, false)
 	default:
 		fc.value(n)
 	}
@@ -110,6 +112,8 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.assign(n, true)
 	case ir.OpAssignRef:
 		return fc.assignRef(n, true)
+	case ir.OpDestructure:
+		return fc.destructure(n, true)
 	case ir.OpAssignOp:
 		return fc.assignOp(n)
 	case ir.OpCoalesceSet:
@@ -150,7 +154,7 @@ func (fc *fnCompiler) unsupportedNode(n *ir.Node) {
 		ir.OpTry: "try", ir.OpThrow: "throw", ir.OpStatic: "static variable",
 		ir.OpGlobal: "global statement", ir.OpConstDef: "const declaration",
 		ir.OpConst: "constant lookup", ir.OpMagic: "magic constant", ir.OpEval: "eval",
-		ir.OpMatch: "match", ir.OpDestructure: "list() destructuring",
+		ir.OpMatch:  "match",
 		ir.OpVarVar: "variable variables", ir.OpSuperGlobal: "superglobal", ir.OpThis: "$this",
 		ir.OpProp: "property access", ir.OpNullsafe: "nullsafe property access",
 		ir.OpStaticProp: "static property access", ir.OpClassConst: "class constant",
@@ -203,6 +207,11 @@ func (fc *fnCompiler) binary(n *ir.Node) operand {
 	ra := fc.materialize(a)
 	rb := fc.materialize(b)
 	r := fc.allocNot(mark, ra, rb)
+	if n.FoldLine != 0 {
+		// PHP's parser folded this concatenation of literals; the one
+		// constant it compiles carries the line of the token after it.
+		fc.at(n.FoldLine)
+	}
 	fc.emit(bytecode.OpBinary, uint16(op), r, ra, rb)
 	return reg(r)
 }

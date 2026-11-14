@@ -243,11 +243,11 @@ func TestFormat12BranchesRespectHandlers(t *testing.T) {
 }
 
 func TestLoadAcceptsMinorTwoAndGatesFormat12(t *testing.T) {
-	if FormatVersion != 1 || FormatMinor != 3 {
-		t.Fatalf("format version = %d.%d, want 1.3", FormatVersion, FormatMinor)
+	if FormatVersion != 1 || FormatMinor != 4 {
+		t.Fatalf("format version = %d.%d, want 1.4", FormatVersion, FormatMinor)
 	}
-	t.Run("minor 4 is unsupported", func(t *testing.T) {
-		p, err := loadBytes(encodeAtMinor(t, validImage(), 4))
+	t.Run("minor 5 is unsupported", func(t *testing.T) {
+		p, err := loadBytes(encodeAtMinor(t, validImage(), 5))
 		if p != nil || !errors.Is(err, ErrVersion) {
 			t.Fatalf("Load=(%v,%v), want ErrVersion", p, err)
 		}

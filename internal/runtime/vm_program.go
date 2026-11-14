@@ -189,13 +189,18 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 			return roleValue, roleNone, roleNone
 		}
 	case bytecode.OpFetchDim:
-		switch flags := bytecode.FetchFlags(in.Aux); {
-		case flags&bytecode.FetchAppend != 0:
-			return roleLocation, roleLocation, roleNone
-		case flags&bytecode.FetchKeyLocation != 0:
-			return roleLocation, roleLocation, roleLocation
+		flags := bytecode.FetchFlags(in.Aux)
+		container := roleLocation
+		if flags&bytecode.FetchContainerValue != 0 {
+			container = roleValue // a reference in a Value register (format 1.4)
 		}
-		return roleLocation, roleLocation, roleValue
+		switch {
+		case flags&bytecode.FetchAppend != 0:
+			return roleLocation, container, roleNone
+		case flags&bytecode.FetchKeyLocation != 0:
+			return roleLocation, container, roleLocation
+		}
+		return roleLocation, container, roleValue
 	case bytecode.OpIterInit:
 		if in.Aux&uint16(bytecode.IterByRef) != 0 {
 			return roleValue, roleAny, roleTarget

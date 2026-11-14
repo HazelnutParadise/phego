@@ -31,10 +31,12 @@ func (s *vmState) readKey(k value) (arrayKey, error) {
 	return s.h.arrayKey(k, false)
 }
 
-// arrayGet is FETCH_DIM_R (aux 0) and FETCH_DIM_IS (aux 1).
+// arrayGet is FETCH_DIM_R (aux 0), FETCH_DIM_IS (aux ArrayGetQuiet) and
+// FETCH_LIST_R (aux ArrayGetList), zend_fetch_dimension_address_read with
+// is_list set for the last.
 func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 	c, k := regs[in.b].deref(), regs[in.c]
-	quiet := in.aux == 1
+	quiet, list := in.aux == bytecode.ArrayGetQuiet, in.aux == bytecode.ArrayGetList
 	switch c.kind {
 	case valueArray:
 		key, err := s.readKey(k)
@@ -49,13 +51,20 @@ func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 		}
 		return s.setReg(regs, in.a, nullValue())
 	case valueString:
-		return s.stringOffsetGet(regs, in, c.text, k)
+		if !list {
+			return s.stringOffsetGet(regs, in, c.text, k)
+		}
 	case valueObject, valueResource:
 		return s.unsupported("reading an offset of an object or resource")
 	}
 	// zend_fetch_dimension_address_read: null, bool, int and float containers
 	// warn (except in isset mode) and read null; the offset is not converted.
-	if !quiet {
+	// A list read says "Cannot use T as array" for every container but null,
+	// a string included, with the type's name rather than the value's.
+	switch {
+	case list && c.kind != valueNull && c.kind != valueUndefined:
+		s.h.warn(levelWarning, "Cannot use "+typeName(c)+" as array")
+	case !list && !quiet:
 		s.h.warn(levelWarning, "Trying to access array offset on "+valueName(c))
 	}
 	return s.setReg(regs, in.a, nullValue())

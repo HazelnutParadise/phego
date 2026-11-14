@@ -14,11 +14,19 @@ type Node struct {
 	// LeadingEmptyLine is the comma line when an array/list starts with an
 	// omitted element. Zero means absent; the omitted child remains nil.
 	LeadingEmptyLine int
-	Kind             string
-	Text             string
-	Token            Kind
-	Line             int
-	Children         []*Node
+	// CloseLine is the line of the closing bracket of an array/list
+	// literal. Zero means absent.
+	CloseLine int
+	// FoldLine is set on a "." whose operands are both literals, which
+	// PHP's parser folds into one string (zend_ast_create_concat_op): the
+	// line of the token after the right operand, which the folded value
+	// carries. Zero means the concatenation is not folded by the parser.
+	FoldLine int
+	Kind     string
+	Text     string
+	Token    Kind
+	Line     int
+	Children []*Node
 }
 
 func node(kind string, line int, children ...*Node) *Node {
