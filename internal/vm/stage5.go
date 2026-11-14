@@ -18,19 +18,61 @@ import (
 // being guessed.
 func (fc *fnCompiler) foldable(name *ir.Name, line int) (phpconst.Constant, bool) {
 	if name.Fallback != "" {
+		// An unqualified name in a namespace resolves at run time, but
+		// the unit is the whole program (no include, eval or define()):
+		// when it declares no constant of the namespaced name, the
+		// fallback is certain, and a resource or platform-dependent
+		// constant behind it is refused here rather than at run time.
+		if !fc.c.declaredConsts[phpconst.Key(name.Resolved)] {
+			if c, ok := phpconst.Lookup(fc.c.unit.Profile.IntWidth, name.Fallback); ok {
+				fc.unsupportedConstant(c, name.Fallback, line)
+			}
+		}
 		return phpconst.Constant{}, false
 	}
 	c, ok := phpconst.Lookup(fc.c.unit.Profile.IntWidth, phpconst.Key(name.Resolved))
 	if !ok {
 		return phpconst.Constant{}, false
 	}
+	fc.unsupportedConstant(c, name.Resolved, line)
+	return c, c.Deprecated == ""
+}
+
+// unsupportedConstant refuses a predefined constant the VM cannot give a
+// value: a resource or a platform-dependent one.
+func (fc *fnCompiler) unsupportedConstant(c phpconst.Constant, written string, line int) {
 	switch c.Kind {
 	case phpconst.Resource:
-		fc.unsupported("the constant "+name.Resolved+" (a resource)", line)
+		fc.unsupported("the constant "+written+" (a resource)", line)
 	case phpconst.Platform:
-		fc.unsupported("the platform-dependent constant "+name.Resolved, line)
+		fc.unsupported("the platform-dependent constant "+written, line)
 	}
-	return c, c.Deprecated == ""
+}
+
+// declaredConstants collects the registered names of every constant the
+// unit declares with const: the statements of {main}, since PHP accepts
+// const only at the top level (blocks of OpConstDef).
+func declaredConstants(unit *ir.Unit) map[string]bool {
+	out := map[string]bool{}
+	stack := []*ir.Node{}
+	for _, s := range unit.Main.Body {
+		stack = append(stack, s)
+	}
+	for len(stack) > 0 {
+		n := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if n == nil {
+			continue
+		}
+		if n.Op == ir.OpConstDef && n.Name != nil {
+			out[phpconst.Key(n.Name.Resolved)] = true
+			continue
+		}
+		if n.Op == ir.OpBlock {
+			stack = append(stack, n.Kids...)
+		}
+	}
+	return out
 }
 
 // predefined converts a predefined constant to a pool constant.
@@ -124,21 +166,11 @@ func (fc *fnCompiler) unfoldedConstantLine(n *ir.Node, line int) int {
 }
 
 // jumptableCondition reports whether a match condition is an int or string
-// PHP knows while compiling (can_match_use_jumptable): a literal, or a
-// predefined constant with such a value. The lowering already replaced
-// the conditions PHP folds by literals on the lines PHP gives them.
+// PHP knows while compiling (can_match_use_jumptable). The lowering already
+// folded every condition PHP folds (ir.evalMatchCondition), so such a
+// condition is a literal here.
 func (fc *fnCompiler) jumptableCondition(n *ir.Node) bool {
-	switch n.Op {
-	case ir.OpLiteral:
-		return n.Value != nil && (n.Value.Kind == ir.LitInt || n.Value.Kind == ir.LitString)
-	case ir.OpConst:
-		if n.Name == nil {
-			return false
-		}
-		c, ok := fc.foldable(n.Name, n.Line)
-		return ok && (c.Kind == phpconst.Int || c.Kind == phpconst.String)
-	}
-	return false
+	return n.Op == ir.OpLiteral && n.Value != nil && (n.Value.Kind == ir.LitInt || n.Value.Kind == ir.LitString)
 }
 
 // matchExpr compiles a match expression. PHP compiles two forms. With at

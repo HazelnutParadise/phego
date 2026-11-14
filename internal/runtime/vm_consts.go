@@ -84,8 +84,13 @@ func predefinedValue(c phpconst.Constant) value {
 
 // fetchConst is ZEND_FETCH_CONSTANT for a name PHP could not fold at
 // compile time: an undefined constant throws Error with the name as
-// written, a deprecated one raises its deprecation on every read.
-func (s *vmState) fetchConst(regs []value, in *vmInstr) error {
+// written, a deprecated one raises its deprecation on every read. slot
+// identifies the instruction: as the opline's cache slot, it keeps the
+// first resolution of a non-deprecated name for the rest of the run.
+func (s *vmState) fetchConst(regs []value, in *vmInstr, slot uint64) error {
+	if v, ok := s.constCache[slot]; ok {
+		return s.setReg(regs, in.a, v)
+	}
 	name := s.prog.consts[in.b].text
 	v, pre, ok := s.lookupConstant(name, in.aux == bytecode.FetchConstUnqualified)
 	if !ok {
@@ -103,8 +108,16 @@ func (s *vmState) fetchConst(regs []value, in *vmInstr) error {
 			if s.stopped() {
 				return nil
 			}
+			return s.setReg(regs, in.a, v)
 		}
 	}
+	if s.constCache == nil {
+		s.constCache = make(map[uint64]value)
+	}
+	if v.kind >= valueArray {
+		retain(v)
+	}
+	s.constCache[slot] = v
 	return s.setReg(regs, in.a, v)
 }
 

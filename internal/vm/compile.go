@@ -97,6 +97,7 @@ func CompileWith(ctx context.Context, unit *ir.Unit, source []byte, opts Options
 		host:       opts.HostFunction,
 		lines:      sourceLines(source),
 	}
+	c.declaredConsts = declaredConstants(unit)
 	defer func() {
 		if r := recover(); r != nil {
 			image = bytecode.Image{}
@@ -137,8 +138,11 @@ type compiler struct {
 	// funcIndex maps the lower-case name of a hoisted function to its image
 	// index.
 	funcIndex map[string]uint32
-	lines     uint32
-	line      int // line of the node being compiled, for internal errors
+	// declaredConsts holds the registered names of the constants the unit
+	// declares, for the fallback of unqualified names in a namespace.
+	declaredConsts map[string]bool
+	lines          uint32
+	line           int // line of the node being compiled, for internal errors
 }
 
 func (c *compiler) compile(source []byte) (bytecode.Image, error) {

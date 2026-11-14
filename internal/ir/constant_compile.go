@@ -1,6 +1,7 @@
 package ir
 
 import (
+	"github.com/HazelnutParadise/phego/internal/phpconst"
 	"math"
 	"strconv"
 	"strings"
@@ -81,6 +82,22 @@ func (l *lowerer) compileConstValue(n *Node, depth int, budget *compileBudget) (
 		return compileConst{value: n.Value, className: n.Value.Kind == LitString || n.Value.Kind == LitInt || n.Value.Kind == LitFloat}, true
 	case OpArray:
 		return l.compileConstArray(n, depth, budget)
+	case OpConst:
+		// zend_try_ct_eval_const: a predefined constant that needs no
+		// run-time fallback and is not deprecated is a value at compile
+		// time. Resources and platform-dependent constants are not.
+		if n.Name == nil || n.Name.Fallback != "" {
+			return compileConst{}, false
+		}
+		c, ok := phpconst.Lookup(l.unit.Profile.IntWidth, phpconst.Key(n.Name.Resolved))
+		if !ok || c.Deprecated != "" {
+			return compileConst{}, false
+		}
+		v, ok := predefinedLiteral(c)
+		if !ok {
+			return compileConst{}, false
+		}
+		return compileConst{value: v, className: v.Kind == LitString || v.Kind == LitInt || v.Kind == LitFloat}, true
 	case OpUnary, OpLogical, OpBinary:
 		if chainOperand(n) == nil {
 			return compileConst{}, false

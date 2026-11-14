@@ -804,11 +804,11 @@ func (l *lowerer) constant(n *frontend.Node) *Node {
 	if name.Fallback == "" {
 		switch phpname.Lower(name.Resolved) {
 		case "true":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: true}})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: true}, Flags: FlagFolded})
 		case "false":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}, Flags: FlagFolded})
 		case "null":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitNull}})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitNull}, Flags: FlagFolded})
 		}
 	}
 	return l.seal(&Node{Op: OpConst, Line: n.Line, Name: name})
@@ -816,12 +816,12 @@ func (l *lowerer) constant(n *frontend.Node) *Node {
 
 func (l *lowerer) magic(n *frontend.Node) *Node {
 	str := func(s string) *Node {
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: s}})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: s}, Flags: FlagFolded})
 	}
 	f := l.fn
 	switch strings.ToUpper(n.Text) {
 	case "__LINE__":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitInt, Int: int64(n.Line)}})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitInt, Int: int64(n.Line)}, Flags: FlagFolded})
 	case "__FILE__":
 		return str(l.unit.File)
 	case "__DIR__":
@@ -1559,11 +1559,13 @@ func (l *lowerer) closure(n *frontend.Node) *Node {
 // conditions one by one (can_match_use_jumptable, zend_eval_const_expr) to
 // decide whether a jump table applies, and stops at the first one that is
 // not an int or string. A condition that folding builds anew (a constant
-// name, a magic constant, an operator on constants, an array literal) is a
-// zval created on the line PHP's line counter rests at, the subject's; a
-// scalar the scanner produced and a concatenation the parser folded keep
-// their own lines. The lowering replaces such conditions by literals on the
-// subject's line, so the compiler's comparisons report what PHP reports.
+// name, a magic constant, an operator on constants, a cast, an array
+// literal) is a zval created on the line PHP's line counter rests at, the
+// subject's; a scalar the scanner produced and a concatenation the parser
+// folded keep their own lines, and a ternary or ?? with a constant
+// condition is replaced by the chosen operand, which keeps its own line.
+// The lowering performs the same folding, so the compiler sees the literals
+// PHP sees, with their lines, and decides the jump table from them.
 func (l *lowerer) match(n *frontend.Node) *Node {
 	nd := &Node{Op: OpMatch, Line: n.Line, Kids: []*Node{l.expr(n.Children[0])}}
 	subjectLine := l.cur
@@ -1581,11 +1583,9 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 			for _, e := range conds.Children {
 				cond := l.expr(e)
 				if !stopped {
-					keyed, recreated := l.matchCondition(e, cond)
-					if recreated {
-						cond = l.refoldCondition(cond, subjectLine)
-					}
-					stopped = !keyed
+					folded, zval := l.evalMatchCondition(cond, subjectLine)
+					cond = folded
+					stopped = !(zval && cond.Op == OpLiteral && cond.Value != nil && (cond.Value.Kind == LitInt || cond.Value.Kind == LitString))
 				}
 				a.Kids = append(a.Kids, cond)
 			}
@@ -1596,55 +1596,149 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 	return l.seal(nd)
 }
 
-// matchCondition classifies a match condition as can_match_use_jumptable
-// sees it after zend_eval_const_expr: keyed when it is an int or string PHP
-// knows while compiling, recreated when folding gave it a new zval. A
-// constant name is known when it is a predefined constant that needs no
-// run-time fallback and is not deprecated (zend_try_ct_eval_const); a
-// user constant stays a name and stops the walk.
-func (l *lowerer) matchCondition(src *frontend.Node, cond *Node) (keyed, recreated bool) {
-	src = unparen(src)
-	switch {
-	case src.Kind == "literal":
-		return cond.Op == OpLiteral && cond.Value != nil && (cond.Value.Kind == LitInt || cond.Value.Kind == LitString), false
-	case src.Kind == "binary" && src.FoldLine != 0:
-		// A concatenation of two literals is one string zval since parsing.
-		return true, false
-	case cond.Op == OpConst:
+// evalMatchCondition is zend_eval_const_expr on a match condition, before
+// the jump-table decision. It returns the node PHP compiles afterwards and
+// whether it is a zval. A zval the folding creates (a predefined constant,
+// true, false, null, a magic constant, an operator on constants, a cast,
+// an array literal) takes the given line; a scalar the scanner produced, a concatenation the
+// parser folded (ir.Node.FoldLine) and the operand a ternary or ?? with a
+// constant condition selects keep their own lines. A user constant, a
+// deprecated one and anything that is not constant stay as they are.
+func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
+	switch cond.Op {
+	case OpLiteral:
+		if cond.Value == nil || cond.Value.Kind > LitString {
+			return cond, false
+		}
+		if cond.Flags&FlagFolded != 0 {
+			return l.seal(&Node{Op: OpLiteral, Line: line, Value: cond.Value}), true
+		}
+		return cond, true
+	case OpConst:
 		if cond.Name == nil || cond.Name.Fallback != "" {
-			return false, false
+			return cond, false
 		}
 		c, ok := phpconst.Lookup(l.unit.Profile.IntWidth, phpconst.Key(cond.Name.Resolved))
 		if !ok || c.Deprecated != "" {
-			return false, false
+			return cond, false
 		}
-		return c.Kind == phpconst.Int || c.Kind == phpconst.String, true
+		v, ok := predefinedLiteral(c)
+		if !ok {
+			return cond, false
+		}
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: v}), true
+	case OpTernary:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known {
+			return cond, false
+		}
+		truth, ok := v.truth()
+		if !ok {
+			return cond, false
+		}
+		chosen := cond.Kids[2]
+		if truth {
+			chosen = cond.Kids[1]
+			if chosen == nil {
+				chosen = cond.Kids[0]
+			}
+		}
+		return l.evalMatchCondition(chosen, line)
+	case OpCoalesce:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known {
+			return cond, false
+		}
+		if !v.array && v.value != nil && v.value.Kind == LitNull {
+			return l.evalMatchCondition(cond.Kids[1], line)
+		}
+		return l.evalMatchCondition(cond.Kids[0], line)
+	case OpCast:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known || v.array || v.value == nil {
+			return cond, false
+		}
+		folded, ok := castConstant(cond.Text, v.value, l.unit.Profile.IntWidth)
+		if !ok {
+			return cond, false
+		}
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: folded}), true
+	case OpBinary, OpUnary, OpLogical, OpArray:
+		v, known := l.evaluateConstant(cond)
+		if !known {
+			return cond, false
+		}
+		at := line
+		if cond.Op == OpBinary && cond.FoldLine != 0 {
+			at = cond.FoldLine
+		}
+		if l.constants == nil {
+			l.constants = newCompileBudget(cond)
+			l.constants.pool = l.constPool
+			defer func() { l.constants = nil }()
+		}
+		return l.constantValueNode(v, at, 0), true
 	}
-	v, known := l.evaluateConstant(cond)
-	if !known {
-		return false, false
-	}
-	return !v.array && v.value != nil && (v.value.Kind == LitInt || v.value.Kind == LitString), true
+	return cond, false
 }
 
-// refoldCondition is the zval zend_eval_const_expr creates for a folded
-// match condition: the condition's value as a literal on the given line, or
-// the constant name itself moved there when the lowering cannot evaluate it.
-func (l *lowerer) refoldCondition(cond *Node, line int) *Node {
-	if cond.Op == OpConst {
-		cond.Line = line
-		return cond
+// predefinedLiteral is the literal of a predefined constant with a scalar
+// value; resources and platform-dependent constants have none.
+func predefinedLiteral(c phpconst.Constant) (*Literal, bool) {
+	switch c.Kind {
+	case phpconst.Null:
+		return &Literal{Kind: LitNull}, true
+	case phpconst.Bool:
+		return &Literal{Kind: LitBool, Bool: c.Bool}, true
+	case phpconst.Int:
+		return &Literal{Kind: LitInt, Int: c.Int}, true
+	case phpconst.Float:
+		return &Literal{Kind: LitFloat, Float: c.Float}, true
+	case phpconst.String:
+		return &Literal{Kind: LitString, Str: c.Str}, true
 	}
-	v, known := l.evaluateConstant(cond)
-	if !known {
-		return cond
+	return nil, false
+}
+
+// castConstant is zend_try_ct_eval_cast: the casts PHP folds at compile
+// time on a scalar. A NAN operand is never folded (the cast warns), an int
+// cast of a float outside the integer range is not, and a string cast of a
+// float is not (its text depends on the precision setting).
+func castConstant(to string, v *Literal, width int) (*Literal, bool) {
+	if v.Kind == LitFloat && math.IsNaN(v.Float) {
+		return nil, false
 	}
-	if l.constants == nil {
-		l.constants = newCompileBudget(cond)
-		l.constants.pool = l.constPool
-		defer func() { l.constants = nil }()
+	switch to {
+	case "bool":
+		b, ok := constBool(v)
+		return &Literal{Kind: LitBool, Bool: b}, ok
+	case "int":
+		if v.Kind == LitFloat {
+			f := v.Float
+			if math.IsInf(f, 0) || f >= math.Exp2(float64(width-1)) || f < -math.Exp2(float64(width-1)) {
+				return nil, false
+			}
+			return &Literal{Kind: LitInt, Int: int64(math.Trunc(f))}, true
+		}
+		i, ok := constInteger(v, width)
+		return &Literal{Kind: LitInt, Int: i}, ok
+	case "float":
+		n, ok := constNumber(v, width)
+		if !ok {
+			return nil, false
+		}
+		if n.integer {
+			return &Literal{Kind: LitFloat, Float: float64(n.i)}, true
+		}
+		return &Literal{Kind: LitFloat, Float: n.f}, true
+	case "string":
+		if v.Kind == LitFloat {
+			return nil, false
+		}
+		s, ok := constString(v)
+		return &Literal{Kind: LitString, Str: s}, ok
 	}
-	return l.constantValueNode(v, line, 0)
+	return nil, false
 }
 
 // constExpr lowers a default value or constant initializer after checking
