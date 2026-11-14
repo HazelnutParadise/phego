@@ -303,12 +303,12 @@ class CapabilityReportTests(unittest.TestCase):
 
     def test_registry_alias_cannot_replace_the_snapshot(self) -> None:
         registry = self.root / "engineering/data/phego-acceptance-tests.json"
-        alias = self.root / "DOCS/data/phego-acceptance-tests.json"
+        alias = self.root / "ENGINEERING/data/phego-acceptance-tests.json"
         if not alias.exists() or not os.path.samefile(registry, alias):
             self.skipTest("requires case-insensitive filesystem")
         replacement = json.dumps({"items": [{"id": "T-REPLACED"}]}).encode()
         record = self.record("T-REPLACED")
-        record["evidence"] = {"path": "DOCS/data/phego-acceptance-tests.json", "sha256": hashlib.sha256(replacement).hexdigest()}
+        record["evidence"] = {"path": "ENGINEERING/data/phego-acceptance-tests.json", "sha256": hashlib.sha256(replacement).hexdigest()}
         caps = self.write_capabilities(self.payload([self.claim(test_ids=["T-REPLACED"])]))
         results = self.write_results([record])
         original = capabilities._read_beneath
