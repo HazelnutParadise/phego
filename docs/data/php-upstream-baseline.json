@@ -1,6 +1,12 @@
 {
   "news": [
     {
+      "id": "2026-11-12-1",
+      "sha256": "6a2e8c968b2621a3a374804e51f30bd61a954cd638a570bee18ef29730940b9b",
+      "time": "2026-11-12T13:55:02+00:00",
+      "title": "PHP 8.6.0RC7 available for testing"
+    },
+    {
       "id": "2026-11-05-1",
       "sha256": "2c69b5fa25a3d67862a2a109f3cac582cd42944dbc67e95b00531ef33be43c39",
       "time": "2026-11-05T21:12:54+00:00",
@@ -143,15 +149,9 @@
       "sha256": "17079945da4fab02d646e717ab4d7a525afc15dbb0622e51844b1ee45b2fe77b",
       "time": "2026-07-30T14:48:58+00:00",
       "title": "PHP 8.3.33 Released!"
-    },
-    {
-      "id": "2026-07-30-3",
-      "sha256": "d4d1d19925a39d040d1b105ddddb479e533440ab0d1011ad94dc95b88c564140",
-      "time": "2026-07-30T13:24:32+00:00",
-      "title": "PHP 8.6.0 Alpha 3 available for testing"
     }
   ],
-  "news_sha256": "94798b739b391c5e5af8dadc1cea3b23ba6a227d1118f63afc62ce808c54c65e",
+  "news_sha256": "2f3814da1a675a4943de72a56314a2a1f65ce49e1e50bd5d197c4f0b029a866d",
   "schema_version": 3,
   "series": {
     "8.2": {
