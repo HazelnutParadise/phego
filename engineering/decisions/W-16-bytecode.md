@@ -181,7 +181,7 @@ ArrayAdd 對應 ZEND_INIT_ARRAY／ZEND_ADD_ARRAY_ELEMENT，把一個陣列 liter
 
 Unset 不會讓暫存器變回未定義，Location 仍可繼續使用，只有對應的 PHP 變數變成 unset。Exit 和 Return 一樣是終止指令，沒有後繼指令，可以是函式最後一條指令。這些指令是後端要實作的 PHP 操作，不會在載入時執行。
 
-FetchConst 對應 ZEND_FETCH_CONSTANT，只用在編譯時不能折疊的名稱。B 是查詢用的名稱：namespace 部分小寫、常數本身的名稱照寫法，和 zend_register_constant 登錄的鍵相同；C 是原始寫法（去掉開頭的反斜線），用在 `Undefined constant "…"` 的錯誤文字。Aux 為 FetchConstUnqualified 時是 namespace 裡未限定的名稱：B 找不到時改以反斜線後的短名稱再找一次（IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE）。查詢先看當次執行以 DeclareConst 登錄的常數，再看 `internal/phpconst` 從固定映像產生的預先定義常數表；找不到就拋出 Error，已棄用的預先定義常數每次讀取都發出它的 Deprecated 訊息。值是資源（STDIN、STDOUT、STDERR）或依 CPU 架構而異（CHAR_MAX、PHP_BUILD_DATE）的常數在執行期以 Unsupported 結束，編譯器對直接寫出的名稱在 `Compile` 就拒絕。
+FetchConst 對應 ZEND_FETCH_CONSTANT，只用在編譯時不能折疊的名稱。B 是查詢用的名稱：namespace 部分小寫、常數本身的名稱照寫法，和 zend_register_constant 登錄的鍵相同；C 是原始寫法（去掉開頭的反斜線），用在 `Undefined constant "…"` 的錯誤文字。Aux 為 FetchConstUnqualified 時是 namespace 裡未限定的名稱：B 找不到時改以反斜線後的短名稱再找一次（IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE）。查詢先看當次執行以 DeclareConst 登錄的常數，再看 `internal/phpconst` 從固定映像產生的預先定義常數表；找不到就拋出 Error，已棄用的預先定義常數每次讀取都發出它的 Deprecated 訊息。每條指令第一次解析到的常數（已棄用的除外）在同一次執行裡記住，之後直接用（ZEND_FETCH_CONSTANT 的 cache slot）。值是資源（STDIN、STDOUT、STDERR）或依 CPU 架構而異（CHAR_MAX、PHP_BUILD_DATE）的常數在執行期以 Unsupported 結束，編譯器對直接寫出的名稱在 `Compile` 就拒絕。
 
 DeclareConst 對應 ZEND_DECLARE_CONST：把 A 的值（參照先解開，未定義視為 null）登錄為 B 這個名稱的常數，陣列以引用計數共用。名稱已存在（含預先定義的常數與資源、平台常數）、是 `__COMPILER_HALT_OFFSET__` 或大小寫不分的 true、false、null 時只發出 `Constant %s already defined, this will be an error in PHP 9` 的警告。常數表屬於當次執行，執行結束時釋放，不放進 Program。
 
