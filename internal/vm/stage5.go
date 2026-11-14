@@ -105,12 +105,34 @@ func (fc *fnCompiler) constant(n *ir.Node) operand {
 		fc.emit(bytecode.OpConst, 0, r, fc.c.predefined(c), 0)
 		return reg(r)
 	}
-	var aux uint16
-	if n.Name.Fallback != "" {
-		aux = bytecode.FetchConstUnqualified
-	}
-	fc.emit(bytecode.OpFetchConst, aux, r, fc.c.stringConst(phpconst.Key(n.Name.Resolved)), fc.c.stringConst(n.Name.Resolved))
+	fc.emit(bytecode.OpFetchConst, uint16(fc.fetchConstFlags(n.Name)), r, fc.c.stringConst(phpconst.Key(n.Name.Resolved)), fc.c.stringConst(n.Name.Resolved))
 	return reg(r)
+}
+
+// fetchConstFlags is the Aux of a FetchConst for name: the namespace
+// fallback, and no instruction cache inside a parameter default.
+func (fc *fnCompiler) fetchConstFlags(name *ir.Name) bytecode.FetchConstFlags {
+	var flags bytecode.FetchConstFlags
+	if name.Fallback != "" {
+		flags |= bytecode.FetchConstUnqualified
+	}
+	if fc.inDefault {
+		flags |= bytecode.FetchConstNoCache
+	}
+	return flags
+}
+
+// constantDefault compiles a parameter default that is a constant name
+// into the parameter register: the lookup is not cached by instruction,
+// but a scalar result becomes the cached default (ZEND_RECV_INIT keeps a
+// result that is not refcounted; a constant's string is a literal).
+func (fc *fnCompiler) constantDefault(n *ir.Node, param uint32) {
+	if c, ok := fc.foldable(n.Name, n.Line); ok {
+		fc.emit(bytecode.OpConst, 0, param, fc.c.predefined(c), 0)
+		return
+	}
+	flags := fc.fetchConstFlags(n.Name) | bytecode.FetchConstNoCache | bytecode.FetchConstDefault
+	fc.emit(bytecode.OpFetchConst, uint16(flags), param, fc.c.stringConst(phpconst.Key(n.Name.Resolved)), fc.c.stringConst(n.Name.Resolved))
 }
 
 // constDecl compiles a const statement: one DeclareConst per constant, each
@@ -126,6 +148,9 @@ func (fc *fnCompiler) constDecl(n *ir.Node) {
 	for _, item := range n.Kids {
 		if item.Op != ir.OpConstDef || item.Name == nil || len(item.Kids) != 1 || item.Kids[0] == nil {
 			panic(internalError{"malformed const declaration"})
+		}
+		if len(item.Attributes) > 0 {
+			fc.unsupported("constant attribute", positive(item.Attributes[0].Line, item.Line))
 		}
 		line = fc.unfoldedConstantLine(item.Kids[0], line)
 		fc.cur = line

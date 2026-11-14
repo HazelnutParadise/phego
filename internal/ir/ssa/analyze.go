@@ -39,9 +39,9 @@ func (b *builder) analyze(d *definition, extra ir.Effect) {
 		// An int the profile cannot represent is neither typed nor folded.
 		if n.Value != nil && literalType(n.Value.Kind) != Unknown && (n.Value.Kind != ir.LitInt || b.inRange(n.Value.Int)) {
 			v.Type = literalType(n.Value.Kind)
-			// FlagFolded records where PHP folds the literal; it is still a
-			// constant here.
-			v.Constant, v.IsConstant = *n.Value, n.Flags&^ir.FlagFolded == 0 && kids == 0 && args == 0 && v.Effects.PHP == 0
+			// FlagScanned records that the scanner produced the literal; it
+			// is a constant either way.
+			v.Constant, v.IsConstant = *n.Value, n.Flags&^ir.FlagScanned == 0 && kids == 0 && args == 0 && v.Effects.PHP == 0
 		}
 	case ir.OpIsset, ir.OpEmpty, ir.OpLogical, ir.OpInstanceof:
 		v.Type = Bool

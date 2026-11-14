@@ -597,9 +597,14 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		str := func(n uint32) bool {
 			return uint64(n) < uint64(len(image.Constants)) && image.Constants[n].Kind == String
 		}
-		if in.Aux > FetchConstUnqualified || !reg(in.A, Value) || !str(in.B) || !str(in.C) {
-			return invalid("invalid fetch-constant operands: A must be a Value, B and C string constants, Aux 0 or FetchConstUnqualified")
+		flags := FetchConstFlags(in.Aux)
+		switch {
+		case flags&^fetchConstKnown != 0, !reg(in.A, Value), !str(in.B), !str(in.C):
+		case flags&FetchConstDefault != 0 && (flags&FetchConstNoCache == 0 || in.A >= f.Params):
+		default:
+			return nil
 		}
+		return invalid("invalid fetch-constant operands: A must be a Value (a parameter register with FetchConstDefault, which needs FetchConstNoCache), B and C string constants; Aux is FetchConstFlags")
 	case OpDeclareConst:
 		if !reg(in.A, Value) || in.C != 0 || uint64(in.B) >= uint64(len(image.Constants)) || image.Constants[in.B].Kind != String {
 			return invalid("invalid declare-constant operands: A must be a Value, B a string constant, C zero")

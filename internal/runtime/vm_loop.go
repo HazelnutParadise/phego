@@ -424,7 +424,7 @@ func (s *vmState) loop() {
 				return
 			}
 		case bytecode.OpFetchConst:
-			if err := s.fetchConst(regs, in, uint64(f.fn.index)<<32|uint64(pc)); err != nil {
+			if err := s.fetchConst(f, in, uint64(f.fn.index)<<32|uint64(pc)); err != nil {
 				s.stop(err)
 				return
 			}

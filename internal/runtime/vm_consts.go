@@ -87,12 +87,14 @@ func predefinedValue(c phpconst.Constant) value {
 // written, a deprecated one raises its deprecation on every read. slot
 // identifies the instruction: as the opline's cache slot, it keeps the
 // first resolution of a non-deprecated name for the rest of the run.
-func (s *vmState) fetchConst(regs []value, in *vmInstr, slot uint64) error {
+func (s *vmState) fetchConst(f *vmFrame, in *vmInstr, slot uint64) error {
+	regs := f.regs
+	flags := bytecode.FetchConstFlags(in.aux)
 	if v, ok := s.constCache[slot]; ok {
 		return s.setReg(regs, in.a, v)
 	}
 	name := s.prog.consts[in.b].text
-	v, pre, ok := s.lookupConstant(name, in.aux == bytecode.FetchConstUnqualified)
+	v, pre, ok := s.lookupConstant(name, flags&bytecode.FetchConstUnqualified != 0)
 	if !ok {
 		return &Throwable{"Error", "Undefined constant \"" + s.prog.consts[in.c].text + "\""}
 	}
@@ -111,13 +113,24 @@ func (s *vmState) fetchConst(regs []value, in *vmInstr, slot uint64) error {
 			return s.setReg(regs, in.a, v)
 		}
 	}
-	if s.constCache == nil {
-		s.constCache = make(map[uint64]value)
+	switch {
+	case flags&bytecode.FetchConstDefault != 0:
+		// The constant is a parameter's whole default: PHP keeps a result
+		// that is not refcounted, which a constant's scalar always is (its
+		// string is a literal); an array is evaluated again on each call.
+		if v.kind < valueArray && int(in.a) < f.fn.params {
+			s.rememberDefault(f, int(in.a), vmCachedDefault{set: true, v: v})
+		}
+	case flags&bytecode.FetchConstNoCache != 0:
+	default:
+		if s.constCache == nil {
+			s.constCache = make(map[uint64]value)
+		}
+		if v.kind >= valueArray {
+			retain(v)
+		}
+		s.constCache[slot] = v
 	}
-	if v.kind >= valueArray {
-		retain(v)
-	}
-	s.constCache[slot] = v
 	return s.setReg(regs, in.a, v)
 }
 

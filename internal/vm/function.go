@@ -5,6 +5,7 @@ import (
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
+	"github.com/HazelnutParadise/phego/internal/phpconst"
 )
 
 // Frame layout of every compiled function:
@@ -41,6 +42,8 @@ type fnCompiler struct {
 	// pinned keeps cur where it is: the code of a parameter default carries
 	// the parameter's line whatever lines its expression spans.
 	pinned bool
+	// inDefault is set while the code of a parameter default is compiled.
+	inDefault bool
 
 	loops []loop
 	// elemPCs are the instructions that name the element register, by the
@@ -132,17 +135,20 @@ func (fc *fnCompiler) receive() {
 			pc := fc.emit(bytecode.OpParamDefault, 0, uint32(i), 0, 0)
 			fc.fixups = append(fc.fixups, fixup{pc, 1, passed})
 			mark := fc.top
-			fc.pinned = true
+			fc.pinned, fc.inDefault = true, true
 			if d := p.Default; d.Op == ir.OpLiteral {
 				fc.c.line = d.Line
 				fc.emit(bytecode.OpConst, 0, uint32(i), fc.c.literal(d.Value), 0)
+			} else if d.Op == ir.OpConst && d.Name != nil {
+				fc.c.line = d.Line
+				fc.constantDefault(d, uint32(i))
 			} else {
 				fc.emit(bytecode.OpMove, 0, uint32(i), fc.value(d), 0)
 				if !constArray(d) && fc.defaultMayBeInterned(d) {
 					fc.unsupported("parameter default whose string value PHP may intern", fc.cur)
 				}
 			}
-			fc.pinned = false
+			fc.pinned, fc.inDefault = false, false
 			fc.top = mark
 			fc.bind(passed)
 		}
@@ -191,6 +197,7 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 		pos int
 	}
 	conv, floatOrArray := false, false
+	width := fc.c.unit.Profile.IntWidth
 	for stack := []item{{d, value}}; len(stack) > 0; {
 		it := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
@@ -253,7 +260,7 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 			case "+", "-", "*", "/", "**":
 				floatOrArray = true
 			case "|", "&", "^":
-				if !notString(n.Kids[0], 0) && !notString(n.Kids[1], 0) {
+				if !notString(n.Kids[0], 0, width) && !notString(n.Kids[1], 0, width) {
 					return true
 				}
 			}
@@ -266,7 +273,7 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 			case "-", "+":
 				floatOrArray = true
 			case "~":
-				if !notString(n.Kids[0], 0) {
+				if !notString(n.Kids[0], 0, width) {
 					return true
 				}
 			}
@@ -298,25 +305,33 @@ func (fc *fnCompiler) defaultMayBeInterned(d *ir.Node) bool {
 // operator, a cast to another type, or a bitwise operator with such an
 // operand (whose result is then an integer). An operand nested deeper than
 // a few levels is not examined.
-func notString(n *ir.Node, depth int) bool {
+func notString(n *ir.Node, depth int, width int) bool {
 	if n == nil || depth > 16 {
 		return false
 	}
 	switch n.Op {
 	case ir.OpLiteral:
 		return n.Value != nil && n.Value.Kind != ir.LitString
+	case ir.OpConst:
+		// A predefined constant with a non-string value; a user constant
+		// could hold anything.
+		if n.Name == nil || n.Name.Fallback != "" {
+			return false
+		}
+		c, ok := phpconst.Lookup(width, phpconst.Key(n.Name.Resolved))
+		return ok && c.Deprecated == "" && c.Kind != phpconst.String && c.Kind != phpconst.Resource && c.Kind != phpconst.Platform
 	case ir.OpArray, ir.OpLogical, ir.OpIsset, ir.OpEmpty, ir.OpInstanceof:
 		return true
 	case ir.OpCast:
 		return n.Text != "string"
 	case ir.OpUnary:
-		return n.Text != "~" || notString(n.Kids[0], depth+1)
+		return n.Text != "~" || notString(n.Kids[0], depth+1, width)
 	case ir.OpBinary:
 		switch n.Text {
 		case ".", "|>":
 			return false
 		case "|", "&", "^":
-			return notString(n.Kids[0], depth+1) || notString(n.Kids[1], depth+1)
+			return notString(n.Kids[0], depth+1, width) || notString(n.Kids[1], depth+1, width)
 		}
 		return true
 	}

@@ -1030,7 +1030,7 @@ func (l *lowerer) constDecl(s *frontend.Node) *Node {
 	if attrs != nil && items > 1 {
 		l.fail(s.Line, "Cannot apply attributes to multiple constants at once")
 	}
-	l.checkAttributes(attrs, "constant", s.Line)
+	constAttrs := l.checkAttributes(attrs, "constant", s.Line)
 	for _, item := range s.Children {
 		if item == nil || item.Kind != "const_item" {
 			continue // attributes
@@ -1045,7 +1045,7 @@ func (l *lowerer) constDecl(s *frontend.Node) *Node {
 		}
 		l.see("const", full)
 		value := l.constExpr(item.Children[1], true)
-		b.Kids = append(b.Kids, l.seal(&Node{Op: OpConstDef, Line: item.Line, Name: &Name{Kind: ConstantName, Resolved: full}, Kids: []*Node{value}}))
+		b.Kids = append(b.Kids, l.seal(&Node{Op: OpConstDef, Line: item.Line, Name: &Name{Kind: ConstantName, Resolved: full}, Kids: []*Node{value}, Attributes: constAttrs}))
 	}
 	return b
 }

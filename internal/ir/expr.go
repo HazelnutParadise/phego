@@ -229,7 +229,7 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	c := n.Children
 	switch n.Kind {
 	case "literal":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: l.literal(n)})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: l.literal(n), Flags: FlagScanned})
 	case "variable", "variable_name":
 		return l.varNode(n, ctx)
 	case "variable_variable":
@@ -506,9 +506,9 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	case "spread":
 		return l.node(OpSpread, n.Line, l.expr(c[0]))
 	case "num_string":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: numString(n.Text)})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: numString(n.Text), Flags: FlagScanned})
 	case "string_offset":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: n.Text}})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: n.Text}, Flags: FlagScanned})
 	}
 	l.fail(n.Line, "Cannot use temporary expression in write context")
 	return nil
@@ -804,11 +804,11 @@ func (l *lowerer) constant(n *frontend.Node) *Node {
 	if name.Fallback == "" {
 		switch phpname.Lower(name.Resolved) {
 		case "true":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: true}, Flags: FlagFolded})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool, Bool: true}})
 		case "false":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}, Flags: FlagFolded})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitBool}})
 		case "null":
-			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitNull}, Flags: FlagFolded})
+			return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitNull}})
 		}
 	}
 	return l.seal(&Node{Op: OpConst, Line: n.Line, Name: name})
@@ -816,12 +816,12 @@ func (l *lowerer) constant(n *frontend.Node) *Node {
 
 func (l *lowerer) magic(n *frontend.Node) *Node {
 	str := func(s string) *Node {
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: s}, Flags: FlagFolded})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: s}})
 	}
 	f := l.fn
 	switch strings.ToUpper(n.Text) {
 	case "__LINE__":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitInt, Int: int64(n.Line)}, Flags: FlagFolded})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitInt, Int: int64(n.Line)}})
 	case "__FILE__":
 		return str(l.unit.File)
 	case "__DIR__":
@@ -1599,21 +1599,25 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 // evalMatchCondition is zend_eval_const_expr on a match condition, before
 // the jump-table decision. It returns the node PHP compiles afterwards and
 // whether it is a zval. A zval the folding creates (a predefined constant,
-// true, false, null, a magic constant, an operator on constants, a cast,
-// an array literal) takes the given line; a scalar the scanner produced, a concatenation the
-// parser folded (ir.Node.FoldLine) and the operand a ternary or ?? with a
-// constant condition selects keep their own lines. A user constant, a
-// deprecated one and anything that is not constant stay as they are.
+// true, false, null, a magic constant, an operator on constants, a cast, an
+// element of a constant array or string, an array literal) takes the given
+// line; a scalar the scanner produced (ir.FlagScanned) and a concatenation
+// the parser folded (ir.Node.FoldLine) keep their own lines, and the
+// operand a ternary or ?? with a constant condition selects keeps its line.
+// When the whole condition is not constant, its constant operands are still
+// folded in place, as PHP folds the children before giving up on the
+// parent. A user constant, a deprecated one and anything that is not
+// constant stay as they are.
 func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
 	switch cond.Op {
 	case OpLiteral:
 		if cond.Value == nil || cond.Value.Kind > LitString {
 			return cond, false
 		}
-		if cond.Flags&FlagFolded != 0 {
-			return l.seal(&Node{Op: OpLiteral, Line: line, Value: cond.Value}), true
+		if cond.Flags&FlagScanned != 0 {
+			return cond, true
 		}
-		return cond, true
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: cond.Value}), true
 	case OpConst:
 		if cond.Name == nil || cond.Name.Fallback != "" {
 			return cond, false
@@ -1630,11 +1634,11 @@ func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
 	case OpTernary:
 		v, known := l.evaluateConstant(cond.Kids[0])
 		if !known {
-			return cond, false
+			return l.foldMatchOperands(cond, line), false
 		}
 		truth, ok := v.truth()
 		if !ok {
-			return cond, false
+			return l.foldMatchOperands(cond, line), false
 		}
 		chosen := cond.Kids[2]
 		if truth {
@@ -1647,7 +1651,7 @@ func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
 	case OpCoalesce:
 		v, known := l.evaluateConstant(cond.Kids[0])
 		if !known {
-			return cond, false
+			return l.foldMatchOperands(cond, line), false
 		}
 		if !v.array && v.value != nil && v.value.Kind == LitNull {
 			return l.evalMatchCondition(cond.Kids[1], line)
@@ -1655,31 +1659,169 @@ func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
 		return l.evalMatchCondition(cond.Kids[0], line)
 	case OpCast:
 		v, known := l.evaluateConstant(cond.Kids[0])
-		if !known || v.array || v.value == nil {
-			return cond, false
+		if !known {
+			return l.foldMatchOperands(cond, line), false
+		}
+		if cond.Text == "array" {
+			if v.array {
+				return l.constantNode(v, line), true
+			}
+			if v.value == nil || v.value.Kind > LitString {
+				return l.foldMatchOperands(cond, line), false
+			}
+			if v.value.Kind == LitNull {
+				return l.seal(&Node{Op: OpArray, Line: line}), true
+			}
+			item := l.node(OpItem, line, nil, l.seal(&Node{Op: OpLiteral, Line: line, Value: v.value}))
+			return l.seal(&Node{Op: OpArray, Line: line, Kids: []*Node{item}}), true
+		}
+		if v.array || v.value == nil {
+			return l.foldMatchOperands(cond, line), false
 		}
 		folded, ok := castConstant(cond.Text, v.value, l.unit.Profile.IntWidth)
 		if !ok {
-			return cond, false
+			// The operand still folded to a zval on the subject's line; the
+			// cast itself runs when the condition is compared.
+			return l.foldMatchOperands(cond, line), false
 		}
 		return l.seal(&Node{Op: OpLiteral, Line: line, Value: folded}), true
+	case OpDim:
+		if len(cond.Kids) < 2 || cond.Kids[1] == nil {
+			return cond, false
+		}
+		container, ok := l.evaluateConstant(cond.Kids[0])
+		if !ok {
+			return l.foldMatchOperands(cond, line), false
+		}
+		key, ok := l.evaluateConstant(cond.Kids[1])
+		if !ok || key.array || key.value == nil {
+			return l.foldMatchOperands(cond, line), false
+		}
+		if v, ok := constantElement(container, key.value); ok {
+			return l.constantNode(v, line), true
+		}
+		return l.foldMatchOperands(cond, line), false
 	case OpBinary, OpUnary, OpLogical, OpArray:
 		v, known := l.evaluateConstant(cond)
 		if !known {
-			return cond, false
+			return l.foldMatchOperands(cond, line), false
 		}
 		at := line
 		if cond.Op == OpBinary && cond.FoldLine != 0 {
 			at = cond.FoldLine
 		}
-		if l.constants == nil {
-			l.constants = newCompileBudget(cond)
-			l.constants.pool = l.constPool
-			defer func() { l.constants = nil }()
-		}
-		return l.constantValueNode(v, at, 0), true
+		return l.constantNode(v, at), true
 	}
 	return cond, false
+}
+
+// foldMatchOperands folds the constant operands of a condition that is not
+// constant as a whole, in place: zend_eval_const_expr evaluates the
+// children before it finds that the parent cannot fold, and each child
+// that folds becomes a zval on the given line.
+func (l *lowerer) foldMatchOperands(cond *Node, line int) *Node {
+	for i, k := range cond.Kids {
+		if k == nil {
+			continue
+		}
+		switch k.Op {
+		case OpVar, OpCall, OpCallValue:
+			continue
+		case OpItem:
+			// An array element: its key and value fold on their own.
+			l.foldMatchOperands(k, line)
+			continue
+		}
+		if folded, zval := l.evalMatchCondition(k, line); zval {
+			cond.Kids[i] = folded
+		}
+	}
+	return cond
+}
+
+// constantNode is the literal or array node of a compile-time value, on
+// the given line.
+func (l *lowerer) constantNode(v compileConst, line int) *Node {
+	if l.constants == nil {
+		l.constants = newCompileBudget(nil)
+		l.constants.pool = l.constPool
+		defer func() { l.constants = nil }()
+	}
+	return l.constantValueNode(v, line, 0)
+}
+
+// constantElement is the ZEND_AST_DIM case of zend_eval_const_expr: an
+// element of a constant array by an int or string key (a numeric string is
+// an int key), or a byte of a constant string by an int or integer-numeric
+// offset in range. Anything else is left for execution.
+func constantElement(container compileConst, key *Literal) (compileConst, bool) {
+	if container.array {
+		if container.elements == nil {
+			return compileConst{}, false
+		}
+		var k compileKey
+		switch key.Kind {
+		case LitInt:
+			k = compileKey{integer: true, index: key.Int}
+		case LitString:
+			if i, ok := integerKey(key.Str); ok {
+				k = compileKey{integer: true, index: i}
+			} else {
+				k = compileKey{text: key.Str}
+			}
+		default:
+			return compileConst{}, false
+		}
+		if pos, ok := container.elements.positions[k]; ok {
+			return container.elements.entries[pos].value, true
+		}
+		return compileConst{}, false
+	}
+	if container.value == nil || container.value.Kind != LitString {
+		return compileConst{}, false
+	}
+	var offset int64
+	switch key.Kind {
+	case LitInt:
+		offset = key.Int
+	case LitString:
+		i, ok := integerKey(key.Str)
+		if !ok {
+			return compileConst{}, false
+		}
+		offset = i
+	default:
+		return compileConst{}, false
+	}
+	str := container.value.Str
+	if offset < 0 || offset >= int64(len(str)) {
+		return compileConst{}, false
+	}
+	return scalarConst(&Literal{Kind: LitString, Str: str[offset : offset+1]}), true
+}
+
+// integerKey is ZEND_HANDLE_NUMERIC_STR: a canonical decimal integer string.
+func integerKey(s string) (int64, bool) {
+	if s == "" || len(s) > 20 {
+		return 0, false
+	}
+	digits := s
+	if digits[0] == '-' {
+		digits = digits[1:]
+	}
+	if digits == "" || digits[0] < '0' || digits[0] > '9' || (digits[0] == '0' && len(digits) > 1) {
+		return 0, false
+	}
+	for i := 0; i < len(digits); i++ {
+		if digits[i] < '0' || digits[i] > '9' {
+			return 0, false
+		}
+	}
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || s == "-0" {
+		return 0, false
+	}
+	return i, true
 }
 
 // predefinedLiteral is the literal of a predefined constant with a scalar
@@ -1713,16 +1855,23 @@ func castConstant(to string, v *Literal, width int) (*Literal, bool) {
 		b, ok := constBool(v)
 		return &Literal{Kind: LitBool, Bool: b}, ok
 	case "int":
-		if v.Kind == LitFloat {
+		switch v.Kind {
+		case LitFloat:
 			f := v.Float
 			if math.IsInf(f, 0) || f >= math.Exp2(float64(width-1)) || f < -math.Exp2(float64(width-1)) {
 				return nil, false
 			}
 			return &Literal{Kind: LitInt, Int: int64(math.Trunc(f))}, true
+		case LitString:
+			// zval_get_long on a string: the numeric prefix, silently.
+			return &Literal{Kind: LitInt, Int: leadingInteger(v.Str, width)}, true
 		}
 		i, ok := constInteger(v, width)
 		return &Literal{Kind: LitInt, Int: i}, ok
 	case "float":
+		if v.Kind == LitString {
+			return &Literal{Kind: LitFloat, Float: leadingFloat(v.Str)}, true
+		}
 		n, ok := constNumber(v, width)
 		if !ok {
 			return nil, false
@@ -2185,4 +2334,67 @@ func validDefault(typ string, v *Literal, kind string) bool {
 		return parts["int"] || parts["float"]
 	}
 	return parts[kind]
+}
+
+// leadingFloat is strtod on the longest numeric prefix of s (after leading
+// whitespace), 0 when there is none, as zval_get_double converts a string.
+func leadingFloat(s string) float64 {
+	i := 0
+	for i < len(s) && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r' || s[i] == '\v' || s[i] == '\f') {
+		i++
+	}
+	start := i
+	if i < len(s) && (s[i] == '+' || s[i] == '-') {
+		i++
+	}
+	digits := 0
+	for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+		i++
+		digits++
+	}
+	if i < len(s) && s[i] == '.' {
+		j := i + 1
+		frac := 0
+		for j < len(s) && s[j] >= '0' && s[j] <= '9' {
+			j++
+			frac++
+		}
+		if digits+frac > 0 {
+			i = j
+			digits += frac
+		}
+	}
+	if digits == 0 {
+		return 0
+	}
+	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+		j := i + 1
+		if j < len(s) && (s[j] == '+' || s[j] == '-') {
+			j++
+		}
+		exp := 0
+		for j < len(s) && s[j] >= '0' && s[j] <= '9' {
+			j++
+			exp++
+		}
+		if exp > 0 {
+			i = j
+		}
+	}
+	f, err := strconv.ParseFloat(s[start:i], 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
+// leadingInteger is zval_get_long on a string: the integer value of its
+// numeric prefix through the float path; a value outside the integer
+// range becomes 0, as zend_dval_to_lval returns for it.
+func leadingInteger(s string, width int) int64 {
+	f := leadingFloat(s)
+	if math.IsNaN(f) || math.IsInf(f, 0) || f >= math.Exp2(float64(width-1)) || f < -math.Exp2(float64(width-1)) {
+		return 0
+	}
+	return int64(math.Trunc(f))
 }

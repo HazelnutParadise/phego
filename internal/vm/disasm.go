@@ -77,8 +77,18 @@ func auxName(in bytecode.Instruction) string {
 			return "empty"
 		}
 	case bytecode.OpFetchConst:
-		if in.Aux == bytecode.FetchConstUnqualified {
-			return "unqualified"
+		if f := bytecode.FetchConstFlags(in.Aux); f != 0 {
+			var parts []string
+			if f&bytecode.FetchConstUnqualified != 0 {
+				parts = append(parts, "unqualified")
+			}
+			if f&bytecode.FetchConstNoCache != 0 {
+				parts = append(parts, "nocache")
+			}
+			if f&bytecode.FetchConstDefault != 0 {
+				parts = append(parts, "default")
+			}
+			return strings.Join(parts, "+")
 		}
 	case bytecode.OpBind:
 		if bytecode.BindFlags(in.Aux) == bytecode.BindValue {

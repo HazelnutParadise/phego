@@ -21,7 +21,7 @@ func (f *vmFn) fetchConst(name, display string, unqualified bool) uint32 {
 	r := f.reg(bytecode.Value)
 	var aux uint16
 	if unqualified {
-		aux = bytecode.FetchConstUnqualified
+		aux = uint16(bytecode.FetchConstUnqualified)
 	}
 	f.emit(bytecode.OpFetchConst, aux, r, f.a.str(name), f.a.str(display))
 	return r

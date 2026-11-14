@@ -141,12 +141,12 @@ const (
 	// FlagCoerce marks a return converted to the function's declared type,
 	// which may call __toString, warn or throw a TypeError.
 	FlagCoerce
-	// FlagFolded marks a literal PHP keeps as an AST node until the
-	// compiler folds it: a magic constant, or the names true, false and
-	// null. Where the folding order is visible (a match condition) it
-	// behaves like a folded expression, not like a scalar the scanner
-	// produced.
-	FlagFolded
+	// FlagScanned marks a literal the scanner produced: a number or a
+	// string token, which PHP's parser already holds as a zval. Every other
+	// literal (true, false, null, a magic constant, a folded operation) is
+	// an AST node until the compiler folds it, which matters where the
+	// folding order is visible (a match condition).
+	FlagScanned
 )
 
 // Arg is one call argument.
