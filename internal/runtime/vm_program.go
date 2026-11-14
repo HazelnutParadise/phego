@@ -225,6 +225,12 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		return roleValue, roleValue, roleNone
 	case bytecode.OpParamDefault:
 		return roleValue, roleTarget, roleNone
+	case bytecode.OpFetchConst:
+		return roleValue, roleConst, roleConst
+	case bytecode.OpDeclareConst:
+		return roleValue, roleConst, roleNone
+	case bytecode.OpBeginSilence, bytecode.OpEndSilence, bytecode.OpMatchError:
+		return roleValue, roleNone, roleNone
 	}
 	return roleNone, roleNone, roleNone
 }
@@ -543,7 +549,8 @@ func vmLiveness(f *vmFunction) {
 	for _, in := range f.code {
 		switch in.op {
 		case bytecode.OpLoad, bytecode.OpArrayGet, bytecode.OpNewArray, bytecode.OpCall, bytecode.OpCallValue, bytecode.OpHostCall,
-			bytecode.OpInclude, bytecode.OpEval:
+			bytecode.OpInclude, bytecode.OpEval, bytecode.OpFetchConst:
+			// A constant's value can be an array (const A = [1]).
 			if in.op != bytecode.OpCall || in.aux == 0 {
 				composite[in.a] = true
 			}
@@ -624,7 +631,7 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpParamDefault:
 			visit(pc + 1)
 			visit(int(in.b))
-		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpLeave, bytecode.OpEndFinally:
+		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpLeave, bytecode.OpEndFinally, bytecode.OpMatchError:
 		default:
 			if pc+1 < n {
 				visit(pc + 1)
@@ -710,7 +717,8 @@ func definesA(op bytecode.Opcode) bool {
 	switch op {
 	case bytecode.OpConst, bytecode.OpMove, bytecode.OpLocal, bytecode.OpLoad, bytecode.OpBinary, bytecode.OpCall, bytecode.OpCallValue,
 		bytecode.OpHostCall, bytecode.OpNewArray, bytecode.OpArrayGet, bytecode.OpInclude, bytecode.OpEval, bytecode.OpShell,
-		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef:
+		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef,
+		bytecode.OpFetchConst, bytecode.OpBeginSilence:
 		return true
 	}
 	return false

@@ -50,7 +50,7 @@ var w17Unsupported = map[string]UnsupportedError{}
 
 // w17Cases is the number of programs in tests/vm/w17/cases; every
 // reference file holds one entry per program.
-const w17Cases = 263
+const w17Cases = 329
 
 // w17Profile is one PHP build the reference was recorded on.
 type w17Profile struct {
@@ -129,8 +129,10 @@ func TestW17PHP8512Programs(t *testing.T) {
 				} {
 					ok := t.Run(c.Case+"/"+mode.name, func(t *testing.T) {
 						want, isUnsupported := w17Unsupported[c.Case]
-						got := w17Execute(t, e, c.Case, string(src), WithINI("display_errors", mode.display), WithINI("log_errors", mode.log),
-							WithINI("html_errors", "0"), WithINI("error_reporting", "-1"))
+						opts := []RunOption{WithINI("display_errors", mode.display), WithINI("log_errors", mode.log),
+							WithINI("html_errors", "0"), WithINI("error_reporting", "-1")}
+						opts = append(opts, w17INIOverrides(t, src)...)
+						got := w17Execute(t, e, c.Case, string(src), opts...)
 						if isUnsupported {
 							var ue *UnsupportedError
 							if !errors.As(got.err, &ue) || ue.Feature != want.Feature || ue.File != want.File || ue.Line != want.Line || ue.Option != "" {
@@ -169,6 +171,26 @@ func TestW17PHP8512Programs(t *testing.T) {
 			}
 		})
 	}
+}
+
+// w17INIOverrides reads the "// ini: name=value" comment lines that follow a
+// case's opening tag, which reference.php passes to php -n after the mode's
+// own flags.
+func w17INIOverrides(t *testing.T, src []byte) []RunOption {
+	t.Helper()
+	var opts []RunOption
+	for _, line := range strings.Split(string(src), "\n")[1:] {
+		rest, ok := strings.CutPrefix(line, "// ini: ")
+		if !ok {
+			break
+		}
+		name, value, found := strings.Cut(rest, "=")
+		if !found || name == "" || value == "" {
+			t.Fatalf("malformed ini override %q", line)
+		}
+		opts = append(opts, WithINI(name, value))
+	}
+	return opts
 }
 
 type w17Observed struct {

@@ -108,9 +108,12 @@ func TestFormat14IsGatedByTheDeclaredMinor(t *testing.T) {
 
 func TestFormat14AddsNoOpcode(t *testing.T) {
 	// Destructuring is expressed with the existing instructions; the first
-	// unknown opcode is still 44.
-	if _, ok := Opcode(44).Safety(); ok {
-		t.Fatalf("opcode 44 is known")
+	// opcode after format 1.3's MakeRef is format 1.5's FetchConst (44).
+	if OpFetchConst != 44 || OpMatchError != 48 {
+		t.Fatalf("format 1.5 opcodes are %d..%d, want 44..48", OpFetchConst, OpMatchError)
+	}
+	if _, ok := Opcode(49).Safety(); ok {
+		t.Fatalf("opcode 49 is known")
 	}
 	if s, ok := OpArrayGet.Safety(); !ok || !s.MayThrow {
 		t.Fatalf("Safety(ArrayGet) = %+v, %v", s, ok)

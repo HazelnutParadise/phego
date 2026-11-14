@@ -479,12 +479,20 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"throw", "echo 1;\nthrow $e;", 3},
 		{"static variable", "echo 1;\nfunction f() { static $x = 0; }", 3},
 		{"global statement", "echo 1;\nfunction f() { global $x; }", 3},
-		{"const declaration", "echo 1;\nconst A = 1;", 3},
-		{"constant lookup", "echo 1;\necho PHP_EOL;", 3},
+		{"builtin function define()", "echo 1;\ndefine('A', 1);", 3},
+		{"builtin function constant()", "echo 1;\necho constant('A');", 3},
+		{"the constant STDIN (a resource)", "echo 1;\necho STDIN;", 3},
+		{"the constant STDIN (a resource)", "namespace A;\necho 1;\necho STDIN;", 4},
+		{"the platform-dependent constant CHAR_MAX", "namespace A;\necho 1;\nfunction f($d = CHAR_MAX) {}", 4},
+		{"the constant STDERR (a resource)", "namespace A;\necho 1;\nconst Y = STDERR;", 4},
+		{"constant attribute", "echo 1;\n#[\\Deprecated]\nconst X = 1;", 3},
+		{"the platform-dependent constant CHAR_MAX", "echo 1;\necho CHAR_MAX;", 3},
+		{"the constant STDERR (a resource)", "echo 1;\nconst A = STDERR;", 3},
 		{"include", "echo 1;\ninclude 'x.php';", 3},
 		{"require_once", "echo 1;\nrequire_once 'x.php';", 3},
 		{"eval", "echo 1;\neval('echo 1;');", 3},
-		{"match", "echo 1;\necho match ($x) { 1 => 2, default => 3 };", 3},
+		{"property access", "echo 1;\necho match ($o->p) { 1 => 2, default => 3 };", 3},
+		{"class constant", "echo 1;\necho match ($x) { A::B => 2, default => 3 };", 3},
 		{"property access", "echo 1;\n[$a, $o->p] = $c;", 3},
 		{"static property access", "echo 1;\n['k' => A::$s] = $c;", 3},
 		{"property access", "echo 1;\n[&$o->p] = $c;", 3},
@@ -507,8 +515,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"conditional function declaration", "echo 1;\nif ($c) { function f() {} }", 3},
 		{"superglobal", "echo 1;\necho $_GET;", 3},
 		{"$this", "echo 1;\necho $this;", 3},
-		{"@ error suppression", "echo 1;\necho @$x;", 3},
-		{"empty()", "echo 1;\necho empty($x);", 3},
+		{"property access", "echo 1;\necho @$o->p;", 3},
+		{"property access", "echo 1;\necho empty($o->p);", 3},
+		{"static property access", "echo 1;\necho empty(A::$p);", 3},
 		{"reference to the result of a call", "echo 1;\nfunction f() {}\n$a = &f();", 4},
 		{"passing a value that is not a variable by reference", "echo 1;\nfunction f(&$a) {}\nf(1);", 4},
 		{"value of an assignment by reference between two elements", "echo 1;\n$x = ($a[0] = &$b[0]);", 3},
@@ -613,11 +622,11 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		line    int
 	}{
 		// A function body before the main code that writes a property.
-		{"<?php\nfunction f() { return PHP_EOL; }\necho 1;\n$o->p = 1;\n", "constant lookup", 2},
+		{"<?php\nfunction f() { return $this; }\necho 1;\n$o->p = 1;\n", "$this", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\n$o->p = 1;\nfunction f() { return PHP_EOL; }\n", "property access", 3},
+		{"<?php\necho 1;\n$o->p = 1;\nfunction f() { return $this; }\n", "property access", 3},
 		// Within a statement, the left operand first.
-		{"<?php\necho PHP_EOL . $o->p;\n", "constant lookup", 2},
+		{"<?php\necho $this . $o->p;\n", "$this", 2},
 	}
 	for _, tc := range cases {
 		_, err := compileWidth(t, tc.src, 64, testFile)
@@ -634,6 +643,11 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 // reported, not compiled by approximation. Stage 2 compiles the three that
 // stage 1 listed here (element compound assignment and nested unset).
 var outsideSubset = map[string]UnsupportedError{}
+
+// Fixtures whose PHP result is a parse error, which the frontend reports.
+var parseFatal = map[string]string{
+	"fatal_const_conditional": `syntax error, unexpected token "const"`,
+}
 
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
@@ -653,12 +667,13 @@ var compileFatal = map[string]string{
 	"fatal_list_lines_mixed_after_element":     "Cannot mix keyed and unkeyed array entries in assignments",
 	"fatal_list_lines_foreach_mixed_after_ref": "Cannot mix keyed and unkeyed array entries in assignments",
 	"fatal_list_lines_mixed_after_var":         "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_const_redeclare_builtin":            "Cannot redeclare constant 'true'",
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 263 {
-		t.Fatalf("want 263 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 329 {
+		t.Fatalf("want 329 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
@@ -670,6 +685,13 @@ func TestReferenceFixturesCompile(t *testing.T) {
 				}
 				file := "/w/cases/" + name + ".php"
 				unit, err := lowerSource(string(src), width, file)
+				if msg, ok := parseFatal[name]; ok {
+					var se *frontend.SyntaxError
+					if !errors.As(err, &se) || se.Message != msg || se.Compile {
+						t.Fatalf("want parse error %q, got %v", msg, err)
+					}
+					return
+				}
 				if msg, ok := compileFatal[name]; ok {
 					var ce *ir.CompileError
 					if !errors.As(err, &ce) || ce.Message != msg {

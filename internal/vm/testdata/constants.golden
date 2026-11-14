@@ -1,0 +1,47 @@
+-- source --
+<?php
+namespace ns;
+const A = 1, B = A + 1;
+echo A, B, \ns\A, E_ALL, \PHP_EOL, PHP_EOL, E_STRICT, UNDEF, \UNDEF;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=113 lines=5
+const 0: int 1
+const 1: string "ns\\A"
+const 2: string "ns\\B"
+const 3: string "ns\\E_ALL"
+const 4: string "\n"
+const 5: string "ns\\PHP_EOL"
+const 6: string "ns\\E_STRICT"
+const 7: string "ns\\UNDEF"
+const 8: string "UNDEF"
+const 9: null
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+  registers VVV
+  0: Const 0 0 0 0 ; line 3 ; int 1
+  1: DeclareConst 0 0 1 0 ; line 3
+  2: FetchConst unqualified 0 1 1 ; line 3
+  3: Const 0 1 0 0 ; line 3 ; int 1
+  4: Binary Add 2 0 1 ; line 3
+  5: DeclareConst 0 2 2 0 ; line 3
+  6: FetchConst unqualified 0 1 1 ; line 4
+  7: Output 0 0 0 0 ; line 4
+  8: FetchConst unqualified 0 2 2 ; line 4
+  9: Output 0 0 0 0 ; line 4
+  10: FetchConst 0 0 1 1 ; line 4
+  11: Output 0 0 0 0 ; line 4
+  12: FetchConst unqualified 0 3 3 ; line 4
+  13: Output 0 0 0 0 ; line 4
+  14: Const 0 0 4 0 ; line 4 ; string "\n"
+  15: Output 0 0 0 0 ; line 4
+  16: FetchConst unqualified 0 5 5 ; line 4
+  17: Output 0 0 0 0 ; line 4
+  18: FetchConst unqualified 0 6 6 ; line 4
+  19: Output 0 0 0 0 ; line 4
+  20: FetchConst unqualified 0 7 7 ; line 4
+  21: Output 0 0 0 0 ; line 4
+  22: FetchConst 0 0 8 8 ; line 4
+  23: Output 0 0 0 0 ; line 4
+  24: Const 0 0 9 0 ; line 5 ; null
+  25: Return 0 0 0 0 ; line 5

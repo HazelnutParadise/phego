@@ -674,6 +674,13 @@ func (s *vmState) cacheDefault(f *vmFrame, in *vmInstr) {
 	if !ok {
 		return
 	}
+	s.rememberDefault(f, p, d)
+}
+
+// rememberDefault records the cached default of parameter p of the frame's
+// function for the rest of the run.
+func (s *vmState) rememberDefault(f *vmFrame, p int, d vmCachedDefault) {
+	fi := f.fn.index
 	if s.defaults == nil {
 		s.defaults = make([][]vmCachedDefault, len(s.prog.funcs))
 	}

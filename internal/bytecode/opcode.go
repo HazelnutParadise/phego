@@ -23,6 +23,15 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		// Format 1.3. Binding releases the destination's old value, and
 		// making a reference can create an element or a null variable.
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpFetchConst, OpDeclareConst, OpMatchError:
+		// Format 1.5. A constant lookup copies a value (an array included)
+		// or throws, a declaration copies and warns, and a match error
+		// always throws.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpBeginSilence, OpEndSilence:
+		// Format 1.5. They move the run's error_reporting; the saved value
+		// replaces the destination register's old value.
+		s.MayAllocate, s.MayCallUser = true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:

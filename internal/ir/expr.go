@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
+	"github.com/HazelnutParadise/phego/internal/phpconst"
 	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
@@ -228,7 +229,7 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	c := n.Children
 	switch n.Kind {
 	case "literal":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: l.literal(n)})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: l.literal(n), Flags: FlagScanned})
 	case "variable", "variable_name":
 		return l.varNode(n, ctx)
 	case "variable_variable":
@@ -505,9 +506,9 @@ func (l *lowerer) exprBody(n *frontend.Node, ctx context) *Node {
 	case "spread":
 		return l.node(OpSpread, n.Line, l.expr(c[0]))
 	case "num_string":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: numString(n.Text)})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: numString(n.Text), Flags: FlagScanned})
 	case "string_offset":
-		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: n.Text}})
+		return l.seal(&Node{Op: OpLiteral, Line: n.Line, Value: &Literal{Kind: LitString, Str: n.Text}, Flags: FlagScanned})
 	}
 	l.fail(n.Line, "Cannot use temporary expression in write context")
 	return nil
@@ -1554,9 +1555,21 @@ func (l *lowerer) closure(n *frontend.Node) *Node {
 	return l.seal(&Node{Op: op, Line: n.Line, Func: f})
 }
 
+// match lowers a match expression. Before compiling the arms, PHP folds the
+// conditions one by one (can_match_use_jumptable, zend_eval_const_expr) to
+// decide whether a jump table applies, and stops at the first one that is
+// not an int or string. A condition that folding builds anew (a constant
+// name, a magic constant, an operator on constants, a cast, an array
+// literal) is a zval created on the line PHP's line counter rests at, the
+// subject's; a scalar the scanner produced and a concatenation the parser
+// folded keep their own lines, and a ternary or ?? with a constant
+// condition is replaced by the chosen operand, which keeps its own line.
+// The lowering performs the same folding, so the compiler sees the literals
+// PHP sees, with their lines, and decides the jump table from them.
 func (l *lowerer) match(n *frontend.Node) *Node {
 	nd := &Node{Op: OpMatch, Line: n.Line, Kids: []*Node{l.expr(n.Children[0])}}
-	seenDefault := false
+	subjectLine := l.cur
+	seenDefault, stopped := false, false
 	for _, arm := range n.Children[1:] {
 		a := &Node{Op: OpArm, Line: arm.Line}
 		if arm.Children[0] == nil {
@@ -1568,13 +1581,313 @@ func (l *lowerer) match(n *frontend.Node) *Node {
 		a.Kids = []*Node{nil}
 		if conds := arm.Children[0]; conds != nil {
 			for _, e := range conds.Children {
-				a.Kids = append(a.Kids, l.expr(e))
+				cond := l.expr(e)
+				if !stopped {
+					folded, zval := l.evalMatchCondition(cond, subjectLine)
+					cond = folded
+					stopped = !(zval && cond.Op == OpLiteral && cond.Value != nil && (cond.Value.Kind == LitInt || cond.Value.Kind == LitString))
+				}
+				a.Kids = append(a.Kids, cond)
 			}
 		}
 		a.Kids[0] = l.expr(arm.Children[1])
 		nd.Kids = append(nd.Kids, l.seal(a))
 	}
 	return l.seal(nd)
+}
+
+// evalMatchCondition is zend_eval_const_expr on a match condition, before
+// the jump-table decision. It returns the node PHP compiles afterwards and
+// whether it is a zval. A zval the folding creates (a predefined constant,
+// true, false, null, a magic constant, an operator on constants, a cast, an
+// element of a constant array or string, an array literal) takes the given
+// line; a scalar the scanner produced (ir.FlagScanned) and a concatenation
+// the parser folded (ir.Node.FoldLine) keep their own lines, and the
+// operand a ternary or ?? with a constant condition selects keeps its line.
+// When the whole condition is not constant, its constant operands are still
+// folded in place, as PHP folds the children before giving up on the
+// parent. A user constant, a deprecated one and anything that is not
+// constant stay as they are.
+func (l *lowerer) evalMatchCondition(cond *Node, line int) (*Node, bool) {
+	switch cond.Op {
+	case OpLiteral:
+		if cond.Value == nil || cond.Value.Kind > LitString {
+			return cond, false
+		}
+		if cond.Flags&FlagScanned != 0 {
+			return cond, true
+		}
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: cond.Value}), true
+	case OpConst:
+		if cond.Name == nil || cond.Name.Fallback != "" {
+			return cond, false
+		}
+		c, ok := phpconst.Lookup(l.unit.Profile.IntWidth, phpconst.Key(cond.Name.Resolved))
+		if !ok || c.Deprecated != "" {
+			return cond, false
+		}
+		v, ok := predefinedLiteral(c)
+		if !ok {
+			return cond, false
+		}
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: v}), true
+	case OpTernary:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known {
+			return l.foldMatchOperands(cond, line), false
+		}
+		truth, ok := v.truth()
+		if !ok {
+			return l.foldMatchOperands(cond, line), false
+		}
+		chosen := cond.Kids[2]
+		if truth {
+			chosen = cond.Kids[1]
+			if chosen == nil {
+				chosen = cond.Kids[0]
+			}
+		}
+		return l.evalMatchCondition(chosen, line)
+	case OpCoalesce:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known {
+			return l.foldMatchOperands(cond, line), false
+		}
+		if !v.array && v.value != nil && v.value.Kind == LitNull {
+			return l.evalMatchCondition(cond.Kids[1], line)
+		}
+		return l.evalMatchCondition(cond.Kids[0], line)
+	case OpCast:
+		v, known := l.evaluateConstant(cond.Kids[0])
+		if !known {
+			return l.foldMatchOperands(cond, line), false
+		}
+		if cond.Text == "array" {
+			if v.array {
+				return l.constantNode(v, line), true
+			}
+			if v.value == nil || v.value.Kind > LitString {
+				return l.foldMatchOperands(cond, line), false
+			}
+			if v.value.Kind == LitNull {
+				return l.seal(&Node{Op: OpArray, Line: line}), true
+			}
+			item := l.node(OpItem, line, nil, l.seal(&Node{Op: OpLiteral, Line: line, Value: v.value}))
+			return l.seal(&Node{Op: OpArray, Line: line, Kids: []*Node{item}}), true
+		}
+		if v.array || v.value == nil {
+			return l.foldMatchOperands(cond, line), false
+		}
+		folded, ok := castConstant(cond.Text, v.value, l.unit.Profile.IntWidth)
+		if !ok {
+			// The operand still folded to a zval on the subject's line; the
+			// cast itself runs when the condition is compared.
+			return l.foldMatchOperands(cond, line), false
+		}
+		return l.seal(&Node{Op: OpLiteral, Line: line, Value: folded}), true
+	case OpDim:
+		if len(cond.Kids) < 2 || cond.Kids[1] == nil {
+			return cond, false
+		}
+		container, ok := l.evaluateConstant(cond.Kids[0])
+		if !ok {
+			return l.foldMatchOperands(cond, line), false
+		}
+		key, ok := l.evaluateConstant(cond.Kids[1])
+		if !ok || key.array || key.value == nil {
+			return l.foldMatchOperands(cond, line), false
+		}
+		if v, ok := constantElement(container, key.value); ok {
+			return l.constantNode(v, line), true
+		}
+		return l.foldMatchOperands(cond, line), false
+	case OpBinary, OpUnary, OpLogical, OpArray:
+		v, known := l.evaluateConstant(cond)
+		if !known {
+			return l.foldMatchOperands(cond, line), false
+		}
+		at := line
+		if cond.Op == OpBinary && cond.FoldLine != 0 {
+			at = cond.FoldLine
+		}
+		return l.constantNode(v, at), true
+	}
+	return cond, false
+}
+
+// foldMatchOperands folds the constant operands of a condition that is not
+// constant as a whole, in place: zend_eval_const_expr evaluates the
+// children before it finds that the parent cannot fold, and each child
+// that folds becomes a zval on the given line.
+func (l *lowerer) foldMatchOperands(cond *Node, line int) *Node {
+	for i, k := range cond.Kids {
+		if k == nil {
+			continue
+		}
+		switch k.Op {
+		case OpVar, OpCall, OpCallValue:
+			continue
+		case OpItem:
+			// An array element: its key and value fold on their own.
+			l.foldMatchOperands(k, line)
+			continue
+		}
+		if folded, zval := l.evalMatchCondition(k, line); zval {
+			cond.Kids[i] = folded
+		}
+	}
+	return cond
+}
+
+// constantNode is the literal or array node of a compile-time value, on
+// the given line.
+func (l *lowerer) constantNode(v compileConst, line int) *Node {
+	if l.constants == nil {
+		l.constants = newCompileBudget(nil)
+		l.constants.pool = l.constPool
+		defer func() { l.constants = nil }()
+	}
+	return l.constantValueNode(v, line, 0)
+}
+
+// constantElement is the ZEND_AST_DIM case of zend_eval_const_expr: an
+// element of a constant array by an int or string key (a numeric string is
+// an int key), or a byte of a constant string by an int or integer-numeric
+// offset in range. Anything else is left for execution.
+func constantElement(container compileConst, key *Literal) (compileConst, bool) {
+	if container.array {
+		if container.elements == nil {
+			return compileConst{}, false
+		}
+		var k compileKey
+		switch key.Kind {
+		case LitInt:
+			k = compileKey{integer: true, index: key.Int}
+		case LitString:
+			if i, ok := integerKey(key.Str); ok {
+				k = compileKey{integer: true, index: i}
+			} else {
+				k = compileKey{text: key.Str}
+			}
+		default:
+			return compileConst{}, false
+		}
+		if pos, ok := container.elements.positions[k]; ok {
+			return container.elements.entries[pos].value, true
+		}
+		return compileConst{}, false
+	}
+	if container.value == nil || container.value.Kind != LitString {
+		return compileConst{}, false
+	}
+	var offset int64
+	switch key.Kind {
+	case LitInt:
+		offset = key.Int
+	case LitString:
+		i, ok := integerKey(key.Str)
+		if !ok {
+			return compileConst{}, false
+		}
+		offset = i
+	default:
+		return compileConst{}, false
+	}
+	str := container.value.Str
+	if offset < 0 || offset >= int64(len(str)) {
+		return compileConst{}, false
+	}
+	return scalarConst(&Literal{Kind: LitString, Str: str[offset : offset+1]}), true
+}
+
+// integerKey is ZEND_HANDLE_NUMERIC_STR: a canonical decimal integer string.
+func integerKey(s string) (int64, bool) {
+	if s == "" || len(s) > 20 {
+		return 0, false
+	}
+	digits := s
+	if digits[0] == '-' {
+		digits = digits[1:]
+	}
+	if digits == "" || digits[0] < '0' || digits[0] > '9' || (digits[0] == '0' && len(digits) > 1) {
+		return 0, false
+	}
+	for i := 0; i < len(digits); i++ {
+		if digits[i] < '0' || digits[i] > '9' {
+			return 0, false
+		}
+	}
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || s == "-0" {
+		return 0, false
+	}
+	return i, true
+}
+
+// predefinedLiteral is the literal of a predefined constant with a scalar
+// value; resources and platform-dependent constants have none.
+func predefinedLiteral(c phpconst.Constant) (*Literal, bool) {
+	switch c.Kind {
+	case phpconst.Null:
+		return &Literal{Kind: LitNull}, true
+	case phpconst.Bool:
+		return &Literal{Kind: LitBool, Bool: c.Bool}, true
+	case phpconst.Int:
+		return &Literal{Kind: LitInt, Int: c.Int}, true
+	case phpconst.Float:
+		return &Literal{Kind: LitFloat, Float: c.Float}, true
+	case phpconst.String:
+		return &Literal{Kind: LitString, Str: c.Str}, true
+	}
+	return nil, false
+}
+
+// castConstant is zend_try_ct_eval_cast: the casts PHP folds at compile
+// time on a scalar. A NAN operand is never folded (the cast warns), an int
+// cast of a float outside the integer range is not, and a string cast of a
+// float is not (its text depends on the precision setting).
+func castConstant(to string, v *Literal, width int) (*Literal, bool) {
+	if v.Kind == LitFloat && math.IsNaN(v.Float) {
+		return nil, false
+	}
+	switch to {
+	case "bool":
+		b, ok := constBool(v)
+		return &Literal{Kind: LitBool, Bool: b}, ok
+	case "int":
+		switch v.Kind {
+		case LitFloat:
+			f := v.Float
+			if math.IsInf(f, 0) || f >= math.Exp2(float64(width-1)) || f < -math.Exp2(float64(width-1)) {
+				return nil, false
+			}
+			return &Literal{Kind: LitInt, Int: int64(math.Trunc(f))}, true
+		case LitString:
+			// zval_get_long on a string: the numeric prefix, silently.
+			return &Literal{Kind: LitInt, Int: leadingInteger(v.Str, width)}, true
+		}
+		i, ok := constInteger(v, width)
+		return &Literal{Kind: LitInt, Int: i}, ok
+	case "float":
+		if v.Kind == LitString {
+			return &Literal{Kind: LitFloat, Float: leadingFloat(v.Str)}, true
+		}
+		n, ok := constNumber(v, width)
+		if !ok {
+			return nil, false
+		}
+		if n.integer {
+			return &Literal{Kind: LitFloat, Float: float64(n.i)}, true
+		}
+		return &Literal{Kind: LitFloat, Float: n.f}, true
+	case "string":
+		if v.Kind == LitFloat {
+			return nil, false
+		}
+		s, ok := constString(v)
+		return &Literal{Kind: LitString, Str: s}, ok
+	}
+	return nil, false
 }
 
 // constExpr lowers a default value or constant initializer after checking
@@ -2021,4 +2334,67 @@ func validDefault(typ string, v *Literal, kind string) bool {
 		return parts["int"] || parts["float"]
 	}
 	return parts[kind]
+}
+
+// leadingFloat is strtod on the longest numeric prefix of s (after leading
+// whitespace), 0 when there is none, as zval_get_double converts a string.
+func leadingFloat(s string) float64 {
+	i := 0
+	for i < len(s) && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r' || s[i] == '\v' || s[i] == '\f') {
+		i++
+	}
+	start := i
+	if i < len(s) && (s[i] == '+' || s[i] == '-') {
+		i++
+	}
+	digits := 0
+	for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+		i++
+		digits++
+	}
+	if i < len(s) && s[i] == '.' {
+		j := i + 1
+		frac := 0
+		for j < len(s) && s[j] >= '0' && s[j] <= '9' {
+			j++
+			frac++
+		}
+		if digits+frac > 0 {
+			i = j
+			digits += frac
+		}
+	}
+	if digits == 0 {
+		return 0
+	}
+	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+		j := i + 1
+		if j < len(s) && (s[j] == '+' || s[j] == '-') {
+			j++
+		}
+		exp := 0
+		for j < len(s) && s[j] >= '0' && s[j] <= '9' {
+			j++
+			exp++
+		}
+		if exp > 0 {
+			i = j
+		}
+	}
+	f, err := strconv.ParseFloat(s[start:i], 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
+// leadingInteger is zval_get_long on a string: the integer value of its
+// numeric prefix through the float path; a value outside the integer
+// range becomes 0, as zend_dval_to_lval returns for it.
+func leadingInteger(s string, width int) int64 {
+	f := leadingFloat(s)
+	if math.IsNaN(f) || math.IsInf(f, 0) || f >= math.Exp2(float64(width-1)) || f < -math.Exp2(float64(width-1)) {
+		return 0
+	}
+	return int64(math.Trunc(f))
 }

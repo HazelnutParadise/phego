@@ -1,0 +1,21 @@
+<?php
+const A = 1, B = A + 1, C = B * 2;
+echo A, B, C, "\n";
+const D = PHP_INT_MAX + 1;
+echo D, "\n";
+const E = -PHP_INT_MAX - 1;
+echo E, "\n";
+const F = 10 / 4, G = 7 % 2, H = 1 <=> 2, I = "5" + "5";
+echo F, " ", G, " ", H, " ", I, "\n";
+const J = true ? "t" : "f", K = null ?? "d", L = [1, 2][1];
+echo J, K, L, "\n";
+const M = "a" . 1.5 . C . PHP_EOL;
+echo M;
+const N = (A + B) * (C - 1), O = 1 << 3, P = 0b101 | 0x10, Q = ~0;
+echo N, " ", O, " ", P, " ", Q, "\n";
+const R = "abc"[1], S = [1, "k" => [2, 3]]["k"][1];
+echo R, S, "\n";
+const T = !A, U = A && B, V = A || B, W = A xor B;
+echo T ? "y" : "n", U ? "y" : "n", V ? "y" : "n", W ? "y" : "n", "\n";
+const X = 1.0 + 1, Y = 7 <=> 7.0, Z = "10" == "1e1";
+echo X, Y, Z ? "eq" : "ne", "\n";

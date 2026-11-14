@@ -162,7 +162,7 @@ func TestFormat11RejectsInvalidOperands(t *testing.T) {
 		"array unset key location undefined": {Op: OpArrayUnset, Aux: uint16(KeyLocation), A: 2, B: 4},
 		"isset c":                            {Op: OpIsset, A: 3, B: 2, C: 1},
 		"isset aux":                          {Op: OpIsset, Aux: 1, A: 3, B: 2},
-		"array isset aux":                    {Op: OpArrayIsset, Aux: 1, A: 3, B: 1, C: 0},
+		"array isset aux":                    {Op: OpArrayIsset, Aux: 2, A: 3, B: 1, C: 0},
 		"unset b":                            {Op: OpUnset, A: 2, B: 1},
 		"unset c":                            {Op: OpUnset, A: 2, C: 1},
 		"unset aux":                          {Op: OpUnset, Aux: 1, A: 2},

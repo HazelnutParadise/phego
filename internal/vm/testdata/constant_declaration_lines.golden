@@ -1,0 +1,40 @@
+-- source --
+<?php
+const A = 1,
+  B = A
+  . [],
+  C = [1, 'k' => 2];
+echo C['k'];
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=69 lines=7
+const 0: int 1
+const 1: string "A"
+const 2: string "B"
+const 3: string "k"
+const 4: int 2
+const 5: string "C"
+const 6: null
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+  registers VVV
+  0: Const 0 0 0 0 ; line 2 ; int 1
+  1: DeclareConst 0 0 1 0 ; line 2
+  2: FetchConst 0 0 1 1 ; line 3
+  3: NewArray 0 1 0 0 ; line 3
+  4: Cast CastString 1 1 0 ; line 3
+  5: Binary Concat 2 0 1 ; line 3
+  6: DeclareConst 0 2 2 0 ; line 3
+  7: NewArray 0 0 0 0 ; line 3
+  8: Const 0 1 0 0 ; line 3 ; int 1
+  9: ArrayAdd 0 0 1 0 ; line 3
+  10: Const 0 1 3 0 ; line 3 ; string "k"
+  11: Const 0 2 4 0 ; line 3 ; int 2
+  12: ArrayAdd 1 0 2 1 ; line 3
+  13: DeclareConst 0 0 5 0 ; line 3
+  14: FetchConst 0 0 5 5 ; line 6
+  15: Const 0 1 3 0 ; line 6 ; string "k"
+  16: ArrayGet 0 2 0 1 ; line 6
+  17: Output 0 2 0 0 ; line 6
+  18: Const 0 0 6 0 ; line 7 ; null
+  19: Return 0 0 0 0 ; line 7

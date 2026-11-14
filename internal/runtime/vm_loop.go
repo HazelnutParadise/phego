@@ -423,6 +423,34 @@ func (s *vmState) loop() {
 				s.stop(err)
 				return
 			}
+		case bytecode.OpFetchConst:
+			if err := s.fetchConst(f, in, uint64(f.fn.index)<<32|uint64(pc)); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpDeclareConst:
+			if err := s.declareConst(regs, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpBeginSilence:
+			// ZEND_BEGIN_SILENCE: the old error_reporting is saved in the
+			// register, then only the fatal levels stay on.
+			if err := s.setReg(regs, in.a, value{kind: valueInt, integer: int64(s.reporting)}); err != nil {
+				s.stop(err)
+				return
+			}
+			s.silence()
+			goto advance
+		case bytecode.OpEndSilence:
+			if err := s.unsilence(regs[in.a]); err != nil {
+				s.stop(err)
+				return
+			}
+			goto advance
+		case bytecode.OpMatchError:
+			s.stop(s.matchError(regs[in.a]))
+			return
 		case bytecode.OpParamDefault:
 			// RECV_INIT: the default's code is skipped for a passed argument,
 			// and for a default an earlier call evaluated and cached.

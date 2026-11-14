@@ -328,9 +328,24 @@ func format14(in Instruction) bool {
 	return false
 }
 
+// format15 reports whether a known instruction needs format 1.5: a 1.5
+// opcode, or an ArrayIsset that tests for empty.
+func format15(in Instruction) bool {
+	switch in.Op {
+	case OpFetchConst, OpDeclareConst, OpBeginSilence, OpEndSilence, OpMatchError:
+		return true
+	case OpArrayIsset:
+		return in.Aux == ArrayIssetEmpty
+	}
+	return false
+}
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 5 && format15(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.5, but the file declares format 1.%d", minor))
 	}
 	if minor < 4 && format14(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.4, but the file declares format 1.%d", minor))
@@ -354,7 +369,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
-		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind:
+		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -507,8 +522,8 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid isset operands: A must be a Value, B a Location, C zero")
 		}
 	case OpArrayIsset:
-		if !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
-			return invalid("invalid array-isset operands: A, B and C must be Value registers")
+		if in.Aux > ArrayIssetEmpty || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
+			return invalid("invalid array-isset operands: A, B and C must be Value registers, Aux 0 or ArrayIssetEmpty")
 		}
 	case OpUnset:
 		if !reg(in.A, Location) || !zero {
@@ -578,6 +593,26 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
 			return invalid("invalid make-ref operands: A must be a Value, B a Location, C zero")
 		}
+	case OpFetchConst:
+		str := func(n uint32) bool {
+			return uint64(n) < uint64(len(image.Constants)) && image.Constants[n].Kind == String
+		}
+		flags := FetchConstFlags(in.Aux)
+		switch {
+		case flags&^fetchConstKnown != 0, !reg(in.A, Value), !str(in.B), !str(in.C):
+		case flags&FetchConstDefault != 0 && (flags&FetchConstNoCache == 0 || in.A >= f.Params):
+		default:
+			return nil
+		}
+		return invalid("invalid fetch-constant operands: A must be a Value (a parameter register with FetchConstDefault, which needs FetchConstNoCache), B and C string constants; Aux is FetchConstFlags")
+	case OpDeclareConst:
+		if !reg(in.A, Value) || in.C != 0 || uint64(in.B) >= uint64(len(image.Constants)) || image.Constants[in.B].Kind != String {
+			return invalid("invalid declare-constant operands: A must be a Value, B a string constant, C zero")
+		}
+	case OpBeginSilence, OpEndSilence, OpMatchError:
+		if !reg(in.A, Value) || !zero {
+			return invalid("invalid value operation operands")
+		}
 	default:
 		return invalid("unknown opcode")
 	}
@@ -591,7 +626,7 @@ type edge struct {
 
 func successorCount(in Instruction, pc, n uint32) int {
 	switch in.Op {
-	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit:
+	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit, OpMatchError:
 		return 0
 	case OpBranch, OpIterInit, OpIterNext, OpParamDefault:
 		return 2
@@ -1069,12 +1104,18 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			}
 			stack = stack[:len(stack)-int(in.C)]
 			write(in.A)
-		case OpReturn, OpReturnRef, OpThrow, OpOutput:
+		case OpReturn, OpReturnRef, OpThrow, OpOutput, OpMatchError:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
 			}
 			if in.Op != OpOutput && len(stack) != 0 {
 				return invalidPC("terminal instruction leaves pending arguments")
+			}
+		case OpFetchConst, OpBeginSilence:
+			write(in.A)
+		case OpDeclareConst, OpEndSilence:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
 			}
 		case OpArrayGet:
 			if err := read(in.B); err != nil {
@@ -1209,7 +1250,7 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
 		}
-		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit) {
+		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit && in.Op != OpMatchError) {
 			if hasFallDef {
 				// The jump edge is merged before the fall-through
 				// definition is added.

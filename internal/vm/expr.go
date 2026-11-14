@@ -50,6 +50,8 @@ func (fc *fnCompiler) discard(n *ir.Node) {
 		fc.assignRef(n, false)
 	case n != nil && n.Op == ir.OpDestructure:
 		fc.destructure(n, false)
+	case n != nil && n.Op == ir.OpSilence:
+		fc.silence(n, false)
 	default:
 		fc.value(n)
 	}
@@ -142,6 +144,14 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return reg(r)
 	case ir.OpExit:
 		return fc.exit(n)
+	case ir.OpConst:
+		return fc.constant(n)
+	case ir.OpMatch:
+		return fc.matchExpr(n)
+	case ir.OpEmpty:
+		return fc.empty(n)
+	case ir.OpSilence:
+		return fc.silence(n, true)
 	}
 	fc.unsupportedNode(n)
 	return operand{}
@@ -152,14 +162,11 @@ func (fc *fnCompiler) unsupportedNode(n *ir.Node) {
 	feature, ok := map[ir.Op]string{
 		ir.OpForeach: "foreach", ir.OpClass: "class declaration", ir.OpNew: "new",
 		ir.OpTry: "try", ir.OpThrow: "throw", ir.OpStatic: "static variable",
-		ir.OpGlobal: "global statement", ir.OpConstDef: "const declaration",
-		ir.OpConst: "constant lookup", ir.OpMagic: "magic constant", ir.OpEval: "eval",
-		ir.OpMatch:  "match",
+		ir.OpGlobal: "global statement", ir.OpMagic: "magic constant", ir.OpEval: "eval",
 		ir.OpVarVar: "variable variables", ir.OpSuperGlobal: "superglobal", ir.OpThis: "$this",
 		ir.OpProp: "property access", ir.OpNullsafe: "nullsafe property access",
 		ir.OpStaticProp: "static property access", ir.OpClassConst: "class constant",
 		ir.OpClassName: "::class", ir.OpAssignRef: "reference assignment",
-		ir.OpSilence: "@ error suppression", ir.OpEmpty: "empty()",
 		ir.OpCallValue: "dynamic call", ir.OpMethodCall: "method call",
 		ir.OpNullsafeMC: "nullsafe method call", ir.OpStaticCall: "static method call",
 		ir.OpCallable: "first-class callable", ir.OpClone: "clone", ir.OpClosure: "closure",

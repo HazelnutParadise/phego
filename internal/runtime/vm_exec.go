@@ -61,15 +61,29 @@ type vmState struct {
 	refIters  []vmRefIter
 	freeIters []int
 	args      []value
-	steps     int64
-	limit     int64
-	next      int64 // steps at which the next slow check runs
-	done      <-chan struct{}
-	scratch   []byte
-	globals   []Global
-	prelude   []RunDiagnostic
-	end       completion
-	ended     bool
+	// reporting is the run's error_reporting, EG(error_reporting): the
+	// INI value, lowered to the fatal levels inside @ (BeginSilence) and
+	// restored after it (EndSilence). x.errors.excluded mirrors it.
+	reporting int
+	// consts holds the constants the run declared with const, by registered
+	// name (the namespace part lower-cased). They never enter the shared
+	// Program; the predefined ones are in internal/phpconst.
+	consts map[string]value
+	// constCache is ZEND_FETCH_CONSTANT\'s run-time cache slot per
+	// instruction (function index and pc): the first resolution of a
+	// non-deprecated name is kept for the rest of the run, so a namespaced
+	// constant declared later does not take over an unqualified name that
+	// already fell back to the global one.
+	constCache map[uint64]value
+	steps      int64
+	limit      int64
+	next       int64 // steps at which the next slow check runs
+	done       <-chan struct{}
+	scratch    []byte
+	globals    []Global
+	prelude    []RunDiagnostic
+	end        completion
+	ended      bool
 
 	// offsetBuf holds the bytes of offsetLast, the string the last string
 	// offset write built, when offsetValid is set, so that a write
@@ -93,8 +107,8 @@ func newVMState(p *Program, x *execution, cfg RunConfig) *vmState {
 		s.limit = min(cfg.Steps, s.limit)
 	}
 	s.next = min(s.limit, vmPollInterval)
-	excluded := ^cfg.ErrorReporting
-	x.errors = errorChannels{display: cfg.DisplayErrors, log: cfg.LogErrors, where: s.where, excluded: excluded}
+	s.reporting = cfg.ErrorReporting
+	x.errors = errorChannels{display: cfg.DisplayErrors, log: cfg.LogErrors, where: s.where, excluded: ^cfg.ErrorReporting}
 	x.heap.sink = s.warn
 	return s
 }
@@ -470,6 +484,18 @@ func (s *vmState) unwind() {
 		_ = s.releaseValue(v)
 	}
 	s.args = nil
+	if release {
+		for name, v := range s.consts {
+			delete(s.consts, name)
+			_ = s.releaseValue(v)
+		}
+		for slot, v := range s.constCache {
+			delete(s.constCache, slot)
+			_ = s.releaseValue(v)
+		}
+	}
+	s.consts = nil
+	s.constCache = nil
 }
 
 // codeKind maps a Binary aux to its operator spelling for the helpers.

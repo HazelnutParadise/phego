@@ -1,0 +1,497 @@
+# commit efe13b4 (before the review fixes): Phego output of the regression fixtures added after the independent review
+# PHP 8.5.12 output is in tests/vm/w17/reference-*.json (amd64 image); PHP lines are summarized after each run
+
+$ PHEGO_PROBE=match_jumptable_folded_conditions.php go test -run TestZZProbe -v .
+
+Warning: Undefined variable $u in /w/cases/match_jumptable_folded_conditions.php on line 3
+
+Warning: Undefined variable $u in /w/cases/match_jumptable_folded_conditions.php on line 4
+d
+
+Warning: Undefined variable $v in /w/cases/match_jumptable_folded_conditions.php on line 8
+
+Warning: Undefined variable $v in /w/cases/match_jumptable_folded_conditions.php on line 9
+d
+
+Warning: Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 13
+
+Warning: Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 14
+
+Warning: Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 15
+
+Warning: Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 16
+d
+
+Warning: Undefined variable $x in /w/cases/match_jumptable_folded_conditions.php on line 20
+
+Warning: Undefined variable $x in /w/cases/match_jumptable_folded_conditions.php on line 21
+d
+
+Warning: Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 25
+
+Warning: Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 26
+d
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 30
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 31
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 32
+d
+
+Warning: Undefined variable $q in /w/cases/match_jumptable_folded_conditions.php on line 36
+
+Warning: Undefined variable $q in /w/cases/match_jumptable_folded_conditions.php on line 37
+d
+
+Warning: Undefined variable $r in /w/cases/match_jumptable_folded_conditions.php on line 40
+d
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 46
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 47
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 49
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 51
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 53
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 56
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 57
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 59
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 61
+d
+
+Warning: Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 65
+
+Warning: Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 68
+d
+
+Warning: Undefined variable $m in /w/cases/match_jumptable_folded_conditions.php on line 74
+
+Warning: Undefined variable $m in /w/cases/match_jumptable_folded_conditions.php on line 76
+d
+sixteen
+--- stderr ---
+PHP Warning:  Undefined variable $u in /w/cases/match_jumptable_folded_conditions.php on line 3
+PHP Warning:  Undefined variable $u in /w/cases/match_jumptable_folded_conditions.php on line 4
+PHP Warning:  Undefined variable $v in /w/cases/match_jumptable_folded_conditions.php on line 8
+PHP Warning:  Undefined variable $v in /w/cases/match_jumptable_folded_conditions.php on line 9
+PHP Warning:  Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 13
+PHP Warning:  Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 14
+PHP Warning:  Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 15
+PHP Warning:  Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 16
+PHP Warning:  Undefined variable $x in /w/cases/match_jumptable_folded_conditions.php on line 20
+PHP Warning:  Undefined variable $x in /w/cases/match_jumptable_folded_conditions.php on line 21
+PHP Warning:  Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 25
+PHP Warning:  Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 26
+PHP Warning:  Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 30
+PHP Warning:  Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 31
+PHP Warning:  Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 32
+PHP Warning:  Undefined variable $q in /w/cases/match_jumptable_folded_conditions.php on line 36
+PHP Warning:  Undefined variable $q in /w/cases/match_jumptable_folded_conditions.php on line 37
+PHP Warning:  Undefined variable $r in /w/cases/match_jumptable_folded_conditions.php on line 40
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 46
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 47
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 49
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 51
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 53
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 56
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 57
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 59
+PHP Warning:  Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 61
+PHP Warning:  Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 65
+PHP Warning:  Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 68
+PHP Warning:  Undefined variable $m in /w/cases/match_jumptable_folded_conditions.php on line 74
+PHP Warning:  Undefined variable $m in /w/cases/match_jumptable_folded_conditions.php on line 76
+--- exit 0 err <nil>
+# PHP (amd64 image):
+
+Warning: Undefined variable $u in /w/cases/match_jumptable_folded_conditions.php on line 2
+d
+
+Warning: Undefined variable $v in /w/cases/match_jumptable_folded_conditions.php on line 7
+d
+
+Warning: Undefined variable $w in /w/cases/match_jumptable_folded_conditions.php on line 12
+d
+
+Warning: Undefined variable $x in /w/cases/match_jumptable_folded_conditions.php on line 19
+d
+
+Warning: Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 24
+
+Warning: Undefined variable $y in /w/cases/match_jumptable_folded_conditions.php on line 24
+d
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 30
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 31
+
+Warning: Undefined variable $z in /w/cases/match_jumptable_folded_conditions.php on line 29
+d
+
+Warning: Undefined variable $q in /w/cases/match_jumptable_folded_conditions.php on line 35
+d
+
+Warning: Undefined variable $r in /w/cases/match_jumptable_folded_conditions.php on line 40
+d
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 46
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 47
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 49
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 51
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 53
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 56
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 57
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 59
+
+Warning: Undefined variable $s in /w/cases/match_jumptable_folded_conditions.php on line 61
+d
+
+Warning: Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 65
+
+Warning: Undefined variable $t in /w/cases/match_jumptable_folded_conditions.php on line 68
+d
+
+Warning: Undefined variable $m in /w/cases/match_jumptable_folded_conditions.php on line 72
+d
+sixteen
+[php exit 0]
+
+$ PHEGO_PROBE=fatal_match_lines_folded_expression.php go test -run TestZZProbe -v .
+
+Fatal error: Uncaught UnhandledMatchError: Unhandled match case 9 in /w/cases/fatal_match_lines_folded_expression.php:8
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_match_lines_folded_expression.php on line 8
+--- stderr ---
+PHP Fatal error:  Uncaught UnhandledMatchError: Unhandled match case 9 in /w/cases/fatal_match_lines_folded_expression.php:8
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_match_lines_folded_expression.php on line 8
+--- exit 255 err phego: PHP uncaught throwable: UnhandledMatchError: Unhandled match case 9 in /w/cases/fatal_match_lines_folded_expression.php on line 8
+# PHP (amd64 image):
+
+Fatal error: Uncaught UnhandledMatchError: Unhandled match case 9 in /w/cases/fatal_match_lines_folded_expression.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_match_lines_folded_expression.php on line 4
+[php exit 0]
+
+$ PHEGO_PROBE=const_namespace_fallback_cache.php go test -run TestZZProbe -v .
+Linux 30719
+mine 30719 mine 7
+mine/2mine/2
+|
+
+Deprecated: Constant E_STRICT is deprecated since 8.4, the error level was removed in /w/cases/const_namespace_fallback_cache.php on line 22
+2048
+1 1
+--- stderr ---
+PHP Deprecated:  Constant E_STRICT is deprecated since 8.4, the error level was removed in /w/cases/const_namespace_fallback_cache.php on line 22
+--- exit 0 err <nil>
+# PHP (amd64 image):
+Linux 30719
+Linux 30719 mine 7
+mine/2mine/2
+|
+
+Deprecated: Constant E_STRICT is deprecated since 8.4, the error level was removed in /w/cases/const_namespace_fallback_cache.php on line 22
+2048
+1 1
+[php exit 0]
+
+$ PHEGO_PROBE=namespace_stdin.php go test -run TestZZProbe -v .
+x--- stderr ---
+--- exit 255 err phego: unsupported: the constant STDIN (a resource) in /w/cases/namespace_stdin.php on line 4
+# PHP (amd64 image):
+xResource id #1[php exit 0]
+
+# ---- second review (commit ba401b4, before the second round of fixes) ----
+# Phego output of the regression fixtures added after the second independent review; PHP (amd64 image) follows each run
+
+$ PHEGO_PROBE=match_folded_operands_and_elements.php go test -run TestZZProbe -v .
+
+Warning: Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 3
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 5
+
+Warning: Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 5
+d
+
+Warning: Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 9
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 10
+
+Warning: Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 12
+d
+
+Warning: Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 16
+
+Warning: Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 18
+d
+
+Warning: Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 22
+
+Warning: Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 24
+d
+
+Warning: Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 28
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 29
+
+Warning: Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 30
+d
+
+Warning: Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 34
+
+Warning: Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 36
+d
+
+Warning: Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 40
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 41
+
+Warning: Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 42
+d
+
+Warning: Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 46
+
+Warning: Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 45
+d
+
+Warning: Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 52
+
+Warning: Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 54
+d
+
+Warning: Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 58
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 59
+
+Warning: Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 59
+d
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 65
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 67
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 69
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 70
+d
+x
+x
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 75
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 78
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 80
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 81
+d
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 85
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 87
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 88
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 89
+d
+
+Warning: Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 94
+
+Warning: unexpected NAN value was coerced to bool in /w/cases/match_folded_operands_and_elements.php on line 96
+
+Warning: Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 96
+d
+twelvefloat
+--- stderr ---
+PHP Warning:  Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 3
+PHP Warning:  Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 5
+PHP Warning:  Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 5
+PHP Warning:  Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 9
+PHP Warning:  Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 10
+PHP Warning:  Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 12
+PHP Warning:  Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 16
+PHP Warning:  Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 18
+PHP Warning:  Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 22
+PHP Warning:  Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 24
+PHP Warning:  Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 28
+PHP Warning:  Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 29
+PHP Warning:  Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 30
+PHP Warning:  Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 34
+PHP Warning:  Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 36
+PHP Warning:  Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 40
+PHP Warning:  Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 41
+PHP Warning:  Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 42
+PHP Warning:  Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 46
+PHP Warning:  Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 45
+PHP Warning:  Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 52
+PHP Warning:  Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 54
+PHP Warning:  Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 58
+PHP Warning:  Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 59
+PHP Warning:  Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 59
+PHP Warning:  Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 65
+PHP Warning:  Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 67
+PHP Warning:  Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 69
+PHP Warning:  Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 70
+PHP Warning:  Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 75
+PHP Warning:  Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 78
+PHP Warning:  Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 80
+PHP Warning:  Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 81
+PHP Warning:  Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 85
+PHP Warning:  Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 87
+PHP Warning:  Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 88
+PHP Warning:  Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 89
+PHP Warning:  Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 94
+PHP Warning:  unexpected NAN value was coerced to bool in /w/cases/match_folded_operands_and_elements.php on line 96
+PHP Warning:  Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 96
+--- exit 0 err <nil>
+# PHP (amd64 image):
+
+Warning: Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 3
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 2
+
+Warning: Undefined variable $u in /w/cases/match_folded_operands_and_elements.php on line 2
+d
+
+Warning: Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 9
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 10
+
+Warning: Undefined variable $v in /w/cases/match_folded_operands_and_elements.php on line 8
+d
+
+Warning: Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 16
+
+Warning: Undefined variable $w in /w/cases/match_folded_operands_and_elements.php on line 15
+d
+
+Warning: Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 22
+
+Warning: Undefined variable $x in /w/cases/match_folded_operands_and_elements.php on line 21
+d
+
+Warning: Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 28
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 29
+
+Warning: Undefined variable $y in /w/cases/match_folded_operands_and_elements.php on line 27
+d
+
+Warning: Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 34
+
+Warning: Undefined variable $z in /w/cases/match_folded_operands_and_elements.php on line 33
+d
+
+Warning: Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 40
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 41
+
+Warning: Undefined variable $p in /w/cases/match_folded_operands_and_elements.php on line 39
+d
+
+Warning: Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 46
+
+Warning: Undefined variable $q in /w/cases/match_folded_operands_and_elements.php on line 45
+d
+
+Warning: Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 52
+
+Warning: Undefined variable $r in /w/cases/match_folded_operands_and_elements.php on line 51
+d
+
+Warning: Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 58
+
+Warning: Undefined variable $a in /w/cases/match_folded_operands_and_elements.php on line 59
+
+Warning: Undefined variable $s in /w/cases/match_folded_operands_and_elements.php on line 59
+d
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 63
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 63
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 63
+
+Warning: Undefined variable $t in /w/cases/match_folded_operands_and_elements.php on line 70
+d
+x
+x
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 75
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 75
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 75
+
+Warning: Undefined variable $m in /w/cases/match_folded_operands_and_elements.php on line 81
+d
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 85
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 84
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 88
+
+Warning: Undefined variable $n in /w/cases/match_folded_operands_and_elements.php on line 89
+d
+
+Warning: Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 94
+
+Warning: unexpected NAN value was coerced to bool in /w/cases/match_folded_operands_and_elements.php on line 93
+
+Warning: Undefined variable $o in /w/cases/match_folded_operands_and_elements.php on line 93
+d
+twelvefloat
+[php exit 0]
+
+$ PHEGO_PROBE=const_default_fallback_cache.php go test -run TestZZProbe -v .
+Linuxx 30719 30719 Linux 16
+yLinuxx 30719 30719 Linux 16
+y
+--- stderr ---
+--- exit 0 err <nil>
+# PHP (amd64 image):
+Linuxx 30719 30719 Linux 16
+yminex 30719 7 Linux 16!y
+[php exit 0]
+
+$ PHEGO_PROBE=const_expr_predefined.php go test -run TestZZProbe -v .
+--- stderr ---
+--- exit 0 err phego: unsupported: parameter default whose string value PHP may intern in /w/cases/const_expr_predefined.php on line 9
+# PHP (amd64 image):
+9.2233720368548E+18|
+x|6.2831853071796|30711|64|-9223372036854775808
+9.2233720368548E+18|1.5707963267949|30717|-9223372036854775808|4.4408920985006E-16
+1|2|3|4|5
+13.5|81|8
+[php exit 0]
+
+$ PHEGO_PROBE=const_deprecated_attribute.php go test -run TestZZProbe -v .
+11
+--- stderr ---
+--- exit 0 err <nil>
+# PHP (amd64 image):
+
+Deprecated: Constant A\X is deprecated in /w/cases/const_deprecated_attribute.php on line 5
+1
+Deprecated: Constant A\X is deprecated in /w/cases/const_deprecated_attribute.php on line 5
+1
+[php exit 0]

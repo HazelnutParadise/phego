@@ -301,9 +301,15 @@ func (s *vmState) arrayUnset(f *vmFrame, in *vmInstr) error {
 	return &Throwable{"Error", "Cannot unset offset in a non-array variable"}
 }
 
-// arrayIsset is ZEND_ISSET_ISEMPTY_DIM_OBJ for isset().
+// arrayIsset is ZEND_ISSET_ISEMPTY_DIM_OBJ: isset($a[k]) and, with Aux
+// bytecode.ArrayIssetEmpty, empty($a[k]). An array element is set when it
+// exists and is not null, empty when it is missing or false as a bool. A
+// string container is tested by position (zend_isset_dim_slow,
+// zend_isempty_dim_slow: an offset in range is set, and empty only when
+// the byte is "0"). Any other container is not set and is empty.
 func (s *vmState) arrayIsset(regs []value, in *vmInstr) error {
 	c, k := regs[in.b].deref(), regs[in.c].deref()
+	empty := in.aux == bytecode.ArrayIssetEmpty
 	result := false
 	switch c.kind {
 	case valueArray:
@@ -316,24 +322,37 @@ func (s *vmState) arrayIsset(regs []value, in *vmInstr) error {
 		}
 		if b, ok := c.array.lookup(key); ok {
 			v := b.val.deref()
-			result = v.kind != valueNull && v.kind != valueUndefined
+			if empty {
+				result = !s.h.toBool(v)
+			} else {
+				result = v.kind != valueNull && v.kind != valueUndefined
+			}
+		} else {
+			result = empty
 		}
 	case valueString:
-		var err error
-		result, err = s.stringOffsetIsset(c.text, k)
+		pos, ok, err := s.stringOffsetPosition(c.text, k)
 		if err != nil || s.stopped() {
 			return err
 		}
+		if empty {
+			result = !ok || c.text[pos] == '0'
+		} else {
+			result = ok
+		}
 	case valueObject, valueResource:
-		return s.unsupported("isset on an offset of an object or resource")
+		return s.unsupported("isset or empty on an offset of an object or resource")
+	default:
+		result = empty
 	}
 	return s.setReg(regs, in.a, boolValue(result))
 }
 
-// stringOffsetIsset is zend_isset_dim_slow for a string container: integer
-// offsets, simple scalars and integer numeric strings are positions.
-func (s *vmState) stringOffsetIsset(str string, k value) (bool, error) {
-	var pos int64
+// stringOffsetPosition converts the offset of isset or empty on a string
+// (zend_isset_dim_slow, zend_isempty_dim_slow): integer offsets, simple
+// scalars and integer numeric strings are positions; ok reports that the
+// position is within str.
+func (s *vmState) stringOffsetPosition(str string, k value) (pos int64, ok bool, err error) {
 	switch k.kind {
 	case valueInt:
 		pos = k.integer
@@ -353,16 +372,16 @@ func (s *vmState) stringOffsetIsset(str string, k value) (bool, error) {
 	case valueString:
 		n := php8512NumericString(k.text, s.h.width, false)
 		if n.kind != numericInt {
-			return false, nil
+			return 0, false, nil
 		}
 		pos = n.integer
 	default:
-		return false, nil
+		return 0, false, nil
 	}
 	if pos < 0 {
 		pos += int64(len(str))
 	}
-	return pos >= 0 && pos < int64(len(str)), nil
+	return pos, pos >= 0 && pos < int64(len(str)), nil
 }
 
 func (s *vmState) isset(f *vmFrame, in *vmInstr) error {

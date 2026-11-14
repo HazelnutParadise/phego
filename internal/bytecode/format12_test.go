@@ -141,7 +141,7 @@ func TestFormat12RejectsInvalidOperands(t *testing.T) {
 		"array set aux bit 2":           {Op: OpArraySet, Aux: 1 << 2, A: 2, B: 0, C: 0},
 		"array set result out of range": {Op: OpArraySet, Aux: arraySetAuxRaw(0, 9), A: 2, B: 0, C: 0},
 		"array append result":           {Op: OpArrayAppend, Aux: arraySetAuxRaw(0, 3), A: 2, B: 0},
-		"first unknown op":              {Op: OpMakeRef + 1},
+		"first unknown op":              {Op: OpMatchError + 1},
 	}
 	for name, in := range cases {
 		t.Run(name, func(t *testing.T) { requireBuildError(t, format12Image(in), ErrInvalid) })
@@ -243,11 +243,11 @@ func TestFormat12BranchesRespectHandlers(t *testing.T) {
 }
 
 func TestLoadAcceptsMinorTwoAndGatesFormat12(t *testing.T) {
-	if FormatVersion != 1 || FormatMinor != 4 {
-		t.Fatalf("format version = %d.%d, want 1.4", FormatVersion, FormatMinor)
+	if FormatVersion != 1 || FormatMinor != 5 {
+		t.Fatalf("format version = %d.%d, want 1.5", FormatVersion, FormatMinor)
 	}
-	t.Run("minor 5 is unsupported", func(t *testing.T) {
-		p, err := loadBytes(encodeAtMinor(t, validImage(), 5))
+	t.Run("minor 6 is unsupported", func(t *testing.T) {
+		p, err := loadBytes(encodeAtMinor(t, validImage(), 6))
 		if p != nil || !errors.Is(err, ErrVersion) {
 			t.Fatalf("Load=(%v,%v), want ErrVersion", p, err)
 		}
@@ -346,8 +346,8 @@ func TestFormat12Safety(t *testing.T) {
 			t.Errorf("Safety(%d) = %+v, %v; want %+v", op, s, ok, want)
 		}
 	}
-	if _, ok := (OpMakeRef + 1).Safety(); ok {
-		t.Errorf("opcode %d reported known", OpMakeRef+1)
+	if _, ok := (OpMatchError + 1).Safety(); ok {
+		t.Errorf("opcode %d reported known", OpMatchError+1)
 	}
 	if OpFetchDim != 37 || OpIterInit != 38 || OpIterNext != 39 || OpIterKey != 40 || OpParamDefault != 41 {
 		t.Errorf("format 1.2 opcodes are renumbered: %d %d %d %d %d", OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpParamDefault)
