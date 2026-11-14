@@ -140,10 +140,10 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 - **使用者常數**屬於當次執行：DeclareConst 把值登錄進 vmState 的表，執行結束時釋放，Program 不會留下任何一次執行的常數，同一個 Program 的多次執行與並行執行互不相見（`internal/runtime/vm_stage5_test.go`）。重複宣告、宣告預先定義的名稱、`__COMPILER_HALT_OFFSET__` 與大小寫不分的 true／false／null 都只發出 PHP 的 `Constant %s already defined` 警告。
 - **宣告的行號**照 zend_compile_const_decl：值在 DECLARE_CONST 執行時才求值（zval_update_constant_ex），所有診斷都帶那條指令的行號，而那個行號是 CG(zend_lineno) 當時的值：陳述式的行（第一個常數名稱的行），被值裡每個編譯時折疊不了的常數引用依序移到它的行（zend_compile_const_expr_const），而且同一個陳述式裡不會移回來。所以 `const A = 1,\n B =\n UNDEF\n + 1;` 的錯誤在 UNDEF 那一行，`const A = 1,\n B = C,\n D = 2 + [];` 的 TypeError 在 C 那一行。值的程式碼以 `pinned` 固定在這個行號編譯。
 - **match** 照 zend_compile_match 的兩種形式。至少兩個條件而且全部是編譯時已知的整數或字串時，PHP 用 jump table（ZEND_MATCH），變數主體只讀一次、在主體的行發出未定義警告；否則每個條件依序編譯，再以 CASE_STRICT／IS_IDENTICAL 比較，變數主體在每次比較時重讀，警告在條件的行。兩種形式都用 Identical 與 Branch 表達，差別只在主體變數何時 Load。沒有 `default` 時走到 MatchError，它讀未定義的主體變數不發警告，行號在 jump table 形式是主體的行、否則是最後一個條件的行。訊息照 smart_str_append_scalar：字串加引號、截到 15 個 byte 加 `...`，浮點帶 `.0`，陣列是 `of type array`。
-- **match 條件的折疊**照 PHP 編譯器的順序：can_match_use_jumptable 依序對每個條件做 zend_eval_const_expr，遇到第一個不是整數或字串的條件就停止。折疊出新 zval 的條件（true／false／null、magic constant、預先定義常數、常數上的運算、cast、陣列字面值）會拿到當時 CG(zend_lineno) 的值，也就是主體的行；掃描器產生的純量與 parser 折疊的字串串接保留自己的行；條件為常數的 `?:` 與 `??` 換成選到的那個運算元，保留它自己的行；停止之後的條件保留自己的行。這由 lowering 在 `internal/ir` 的 `match()` 做同樣的折疊（`evalMatchCondition`），編譯器只看到折疊後的字面值，jump table 的判斷也以它們為準。為了讓 `PHP_INT_SIZE * 2` 這類運算式能折疊，IR 的常數求值把不需要退回全域、也沒有被棄用的預先定義常數當成編譯期的值，和 zend_try_ct_eval_const 一致。
+- **match 條件的折疊**照 PHP 編譯器的順序：can_match_use_jumptable 依序對每個條件做 zend_eval_const_expr，遇到第一個不是整數或字串的條件就停止。折疊出新 zval 的條件（true／false／null、magic constant、預先定義常數、常數上的運算、cast、常數陣列或字串的元素、陣列字面值）會拿到當時 CG(zend_lineno) 的值，也就是主體的行；掃描器產生的純量（HIR 的 `FlagScanned`）與 parser 折疊的字串串接保留自己的行；條件為常數的 `?:` 與 `??` 換成選到的那個運算元，保留它自己的行；整個條件折不了時，裡面能折的運算元照樣換成主體行上的 zval（`$a + PHP_INT_SIZE` 的比較因此落在主體的行）；停止之後的條件保留自己的行。這由 lowering 在 `internal/ir` 的 `match()` 做同樣的折疊（`evalMatchCondition`），編譯器只看到折疊後的字面值，jump table 的判斷也以它們為準。為了讓 `PHP_INT_SIZE * 2` 這類運算式能折疊，IR 的常數求值把不需要退回全域、也沒有被棄用的預先定義常數當成編譯期的值，和 zend_try_ct_eval_const 一致；cast 照 zend_try_ct_eval_cast（字串以數字開頭的部分轉換、NAN 與浮點轉字串不折）。
 - **empty()** 照 zend_compile_isset_or_empty：變數是安靜的 Load 接 Not（ISSET_ISEMPTY_CV），元素是每一層安靜的 ArrayGet 接 ArrayIsset Aux 1（ISSET_ISEMPTY_DIM_OBJ 的 ZEND_ISEMPTY），其他運算式是 `!expr`。字串容器照 zend_isempty_dim_slow 以位置判斷：位置在範圍內時只有 `"0"` 算空；`"1x"` 這類開頭是數字的字串位移在 `empty()` 不發警告，在讀取時發 `Illegal string offset`，所以元素形式不能用安靜讀取加 Not 組合。
 - **@** 照 zend_compile_silence：BeginSilence 把 error_reporting 存進暫存器並只留下 E_FATAL_ERRORS 的位元，運算式在中間編譯（變數也在裡面才 Load，對應 PHP 強制的 FETCH），EndSilence 在目前值只剩 fatal 位元時還原存下的值；巢狀的內層存到的已是只剩 fatal 的值，所以由外層還原。error_reporting 是 vmState 的欄位，`errorChannels.excluded` 跟著它，每次執行從 INI 值開始，一個請求的 `@` 不影響另一個請求。fatal（未捕捉的錯誤）照樣顯示，因為 E_ERROR 留在遮罩裡；`exit` 與未捕捉錯誤結束執行時不需要還原，PHP 在同樣情況下也沒有可觀察的差別。
-- **FetchConst 的執行期快取**照 ZEND_FETCH_CONSTANT 的 cache slot：每條指令在一次執行裡第一次解析到的常數（已棄用的除外）會記住，之後都用同一個值。所以 namespace 裡退回全域的名稱，在之後宣告了同名的 namespace 常數後，同一條指令仍讀到全域的值，和 PHP 相同；重複讀取也省掉查表。快取屬於當次執行。
+- **FetchConst 的執行期快取**照 ZEND_FETCH_CONSTANT 的 cache slot：每條指令在一次執行裡第一次解析到的常數（已棄用的除外）會記住，之後都用同一個值。所以 namespace 裡退回全域的名稱，在之後宣告了同名的 namespace 常數後，同一條指令仍讀到全域的值，和 PHP 相同；重複讀取也省掉查表。參數預設值的程式碼不用這個快取（Aux 的 FetchConstNoCache）：PHP 用 zval_update_constant_ex 求預設值，沒有 cache slot，所以 `$d = PHP_OS . "x"` 每次呼叫都重新查，之後宣告的 namespace 常數會被看到；預設值就是一個常數名稱時（FetchConstDefault），純量結果記成參數的預設值快取，和 RECV_INIT 保留不計數的結果一樣，陣列則每次重新求。快取屬於當次執行，正常結束時釋放；fatal 或宿主停止時和其他執行狀態一樣留給請求拆除。
 - **對照測試的 INI 覆寫**：fixture 在開頭標籤後的 `// ini: error_reporting=30717` 這類註解會由 `reference.php` 加成 `-d`，也由 `w17_differential_test.go` 加成 `WithINI`，用來測 error_reporting 不同時 `@` 與一般診斷的結果（只顯示 fatal、全部關閉、關掉 warning 但留 deprecated）。
 
 獨立審查跑了 178 個 PHP 探測程式（amd64 映像全部，386 與 arm64 各 163 與 134 個）、96 個並行執行的隔離與 race 檢查、15 個手寫 bytecode 程式，沒有 P0 或 P1；找到的問題都已修正並加上修正前會失敗的回歸 fixture（修正前的輸出在 [stage5/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage5/red-review-fixes.txt)）：
@@ -153,7 +153,15 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 - **退回全域的名稱每次重新解析**（P3）。PHP 把第一次解析的結果記在指令的 cache slot，之後 namespace 裡再宣告同名常數也不會改變那條指令讀到的值；Phego 原本每次重查，所以第二次呼叫讀到新宣告的值。現在每條 FetchConst 在一次執行裡記住第一次的結果（`const_namespace_fallback_cache`）。
 - 決策紀錄原本寫「只有 match 條件的行號依賴這個折疊」，但 jump table 的判斷（也就是警告的次數）同樣依賴它；已改寫。
 
-測試程式加到 326 個（新增 63 個 `const_*`、`magic_*`、`match_*`、`empty_*`、`silence_*`、`return_const_profile` 與對應的 `fatal_*`），三個 profile 各 978 項全部和 PHP 8.5.12 逐位元組相同。
+Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由第二位獨立審查者檢查上述修正（efe13b4..ba401b4）：64 個探測程式在 amd64 與 386 映像對照、32 個 goroutine 各 20 次的隔離與 race 檢查，沒有 P0 或 P1。找到並修正：
+
+- **FetchConst 快取套用到參數預設值**（P2，回歸）。`namespace A; function g($d = PHP_OS . "x")` 在 PHP 每次呼叫重新求值，之後宣告的 `A\PHP_OS` 會被看到；快取讓 Phego 一直給舊值。預設值程式碼改為不用指令快取，常數名稱本身當預設值時改記進參數預設值快取（`const_default_fallback_cache`）。
+- **短路邏輯折出的字面值行號**（P2，回歸）。lowering 把 `true || $a` 折成字面值時沒有標記，被當成掃描器的純量而保留自己的行。改成反過來標記掃描器產生的字面值（`FlagScanned`），其他字面值一律視為折疊出來的。
+- **整個條件折不了時運算元沒有折**、**常數陣列或字串的元素**、**以數字開頭的字串 cast 與 `(array)`**（P2）：`$a + PHP_INT_SIZE`、`[10, 20][1]`、`(int) "12abc"` 現在都照 zend_eval_const_expr 處理（`match_folded_operands_and_elements`）。
+- **`#[\Deprecated] const`**（P2）：屬性原本被靜默忽略，現在在 `Compile` 回報不支援。
+- **`E_ALL ^ E_WARNING` 當參數預設值**（P3）原本被 intern 判斷拒絕；預先定義常數的非字串值現在算進已知不是字串的運算元（`const_expr_predefined`）。
+
+測試程式加到 329 個（新增 63 個 `const_*`、`magic_*`、`match_*`、`empty_*`、`silence_*`、`return_const_profile` 與對應的 `fatal_*`），三個 profile 各 987 項全部和 PHP 8.5.12 逐位元組相同。
 
 ## 階段一的對照結果
 
@@ -217,6 +225,9 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
 - **依 CPU 架構而異的預先定義常數**：CHAR_MAX（arm64 為 255，amd64 與 386 為 127）與 PHP_BUILD_DATE 在 `Compile` 回報不支援；profile 要有架構欄位才能給值。
 - **STDIN、STDOUT、STDERR**：值是資源，`Compile` 回報不支援，等資源與串流的工作包。
-- **預先定義常數上的運算只在常數運算式與 match 條件裡折疊**：PHP 把一般運算式裡的 `PHP_INT_MAX + 1` 也折成常數，Phego 在執行時算，結果相同，目前沒有觀察到可見的差別。`(int) "5x"` 這類 PHP 能無聲轉換、Phego 的常數求值拒絕的 cast 在 match 條件裡不折疊，主體是未定義變數時警告的次數可能不同。
+- **預先定義常數上的運算只在常數運算式與 match 條件裡折疊**：PHP 把一般運算式裡的 `PHP_INT_MAX + 1` 也折成常數，Phego 在執行時算，結果相同，目前沒有觀察到可見的差別。
+- **含預先定義常數的參數預設值的警告行號**：`function f($a = "5x"\n + PHP_INT_SIZE)` 的 `A non-numeric value` 警告 PHP 報在 PHP_INT_SIZE 那一行，Phego 報在參數的行；折疊時移動 CG(zend_lineno) 的機制還沒查清楚。
+- **以執行期才算出的值為值的使用者常數當參數預設值**：PHP 對不計數的結果才快取預設值；Phego 把常數名稱的預設值一律當成可快取的純量。目前能寫出的常數值都在編譯期折成字面值，看不出差別。
+- **`#[\Deprecated]` 等常數屬性**在 `Compile` 回報不支援。
 - **match 沒有 jump table**：PHP 對至少兩個整數或字串字面值的條件用 hash 查表，Phego 依序比較，條件很多時較慢，結果相同。
 - **`define()`、`constant()`、`defined()`**：內建函式，屬於模組工作包；`const` 以外沒有辦法在執行期宣告常數。
