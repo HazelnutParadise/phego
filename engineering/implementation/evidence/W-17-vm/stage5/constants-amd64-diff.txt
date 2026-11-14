@@ -1,0 +1,12 @@
+# gen/constants.php run in the amd64 image (php@sha256:35fd7ee3...) against the committed 64-bit table generated from the arm64 image (php@sha256:add6a138...), 2026-11-14.
+# The only difference is the header: CHAR_MAX and PHP_BUILD_DATE are recorded as platform-dependent by the generator because the raw values differ (CHAR_MAX 255 on arm64, 127 on amd64 and 386; the build timestamps differ).
+$ diff internal/phpconst/constants_64_gen.go <(docker run --rm --network none --cap-drop ALL -v "$PWD/internal/phpconst/gen":/g:ro php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f php -n /g/constants.php)
+4c4
+< // 64-bit image (aarch64), 1792 constants; see the go:generate
+---
+> // 64-bit image (x86_64), 1792 constants; see the go:generate
+exit 1
+
+# Raw get_defined_constants() comparison across the three images (names, types and values):
+arm64 vs amd64 differ: CHAR_MAX (255 vs 127), PHP_BUILD_DATE ("Oct 28 2026 01:21:21" vs "Oct 28 2026 01:20:43")
+arm64 vs 386 differ: CHAR_MAX, CREDITS_ALL, CURLAUTH_ONLY, Dom\HTML_NO_DEFAULT_NS, INFO_ALL, PHP_BUILD_DATE, PHP_INT_MAX, PHP_INT_MIN, PHP_INT_SIZE

@@ -41,13 +41,13 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 |---|---|---|
 | 0 | 8 | `PHEGOBC` 加 NUL |
 | 8 | 2 | major，版本 1 |
-| 10 | 2 | minor，`Encode` 寫入 2，`Load` 接受 0、1 與 2 |
+| 10 | 2 | minor，`Encode` 寫入 5，`Load` 接受 0 到 5 |
 | 12 | 4 | 表頭大小，必須為 64 |
 | 16 | 8 | 整份檔案長度，必須與輸入完全相等 |
 | 24 | 32 | SHA-256，計算 `data[:24]` 接 `data[56:]` |
 | 56 | 8 | features，目前必須為零 |
 
-所有整數均採 little-endian。解析器拒絕不同 major、大於 2 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
+所有整數均採 little-endian。解析器拒絕不同 major、大於 5 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
 
 ## Payload 的區段順序
 
@@ -70,7 +70,7 @@ Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。
 
 RegisterKind 的 Value／Location 分別是 1／2。ConstantKind 的 Null／Bool／Int／Float／String 分別是 1–5。HandlerKind 的 Catch／Finally 分別是 1／2。CapabilitySet 的 HostCallbacks／DynamicCode／FileRead／Shell 分別為 bit 0–3。
 
-Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41，格式 1.3 再加入 Bind=42、MakeRef=43。零與其他編號均為未知指令，目前第一個未知編號是 44。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2，格式 1.3 的 FetchForRef=3 表示元素要被綁成參照，只能搭配 FetchWrite），格式 1.4 的 bit 6 是 FetchContainerValue（容器 B 是存放參照的 Value 暫存器，只能搭配 FetchWrite 與 FetchForRef）。ArrayGet 的 Aux 為 0、1（格式 1.1 的安靜讀取）或 2（格式 1.4 的 FETCH_LIST_R）。IterFlags 的 IterLocation=1，格式 1.3 加入 IterByRef=2。BindFlags 只有 BindValue=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
+Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Store=6、Binary=7、Jump=8、Branch=9、Push=10、Call=11、CallValue=12、HostCall=13、Return=14、ReturnRef=15、Throw=16、Output=17、NewArray=18、ArrayGet=19、Include=20、Eval=21、Shell=22、Drop=23、Leave=24、EndFinally=25。格式 1.1 接著加入 Unary=26、Cast=27、IncDec=28、ArraySet=29、ArrayAppend=30、ArrayUnset=31、Isset=32、ArrayIsset=33、Unset=34、Exit=35、ArrayAdd=36。格式 1.2 再加入 FetchDim=37、IterInit=38、IterNext=39、IterKey=40、ParamDefault=41，格式 1.3 再加入 Bind=42、MakeRef=43，格式 1.5 再加入 FetchConst=44、DeclareConst=45、BeginSilence=46、EndSilence=47、MatchError=48。零與其他編號均為未知指令，目前第一個未知編號是 49。BinaryOp 的 Add／Subtract／Multiply／Divide／Concat／Equal／Identical／Less／BitAnd／BitOr／BitXor 依序為 1–11，格式 1.1 加入的 Modulo／Power／ShiftLeft／ShiftRight／NotEqual／NotIdentical／LessOrEqual／Spaceship／BoolXor 依序為 12–20。UnaryOp 的 Not／Negate／Plus／BitNot 為 1–4。CastKind 的 CastBool／CastInt／CastFloat／CastString／CastArray 為 1–5。IncDecOp 的 PreInc／PreDec／PostInc／PostDec 為 1–4，前置形式的結果是新值，後置形式的結果是舊值。ArrayWriteFlags 的 ValueLocation／KeyLocation 為 bit 0／1，ArrayAddFlags 的 AddKey／AddKeyLocation 為 bit 0／1。FetchFlags 的 bit 0–1 是模式（FetchWrite=0、FetchReadWrite=1、FetchUnset=2），bit 2 是 FetchKeyLocation，bit 3 是 FetchAppend，bit 4–5 是用途（0 表示接著做下一層元素操作，FetchForIncDec=1，FetchForAssignOp=2，格式 1.3 的 FetchForRef=3 表示元素要被綁成參照，只能搭配 FetchWrite），格式 1.4 的 bit 6 是 FetchContainerValue（容器 B 是存放參照的 Value 暫存器，只能搭配 FetchWrite 與 FetchForRef）。ArrayGet 的 Aux 為 0、1（格式 1.1 的安靜讀取）或 2（格式 1.4 的 FETCH_LIST_R）。ArrayIsset 的 Aux 為 0 或 1（格式 1.5 的 ArrayIssetEmpty，`empty($a[k])`）。FetchConst 的 Aux 為 0 或 1（格式 1.5 的 FetchConstUnqualified，namespace 裡未限定的常數名稱）。IterFlags 的 IterLocation=1，格式 1.3 加入 IterByRef=2。BindFlags 只有 BindValue=1。ArraySet 的 Aux 在格式 1.2 以 bit 3–15 存放結果暫存器：0 表示沒有結果，否則是 Value 暫存器的索引加一，bit 2 必須為零，因此只有索引小於 8191 的暫存器能當結果。
 
 格式 1.1 由 W-17 為第一版 VM 加入，只新增編號與 Aux 值，原有編號不變。`Encode` 一律寫入 minor 1。minor 0 的 1.0 檔案仍可載入，但只要其中出現 1.1 的指令（包含 ArraySet、ArrayAppend、ArrayUnset 與 ArrayAdd 的任何 Aux）、BinaryOp 或 Load／ArrayGet 的 Aux 1，`Load` 就以 `ErrInvalid` 拒絕並指出該指令，這和未知 opcode 的回報方式相同。1.1 的每個函式在例外表後多一張 local 名稱表，筆數為 0 或恰好等於 Locals，每筆指向存放不含 `$` 變數名稱的 String 常數，讓 VM 能印出 PHP 的未定義變數警告並依名稱接收宿主提供的全域變數。minor 0 檔案沒有這張表，載入後沒有名稱。筆數不符、索引超出範圍或常數不是 String 時以 `ErrInvalid` 拒絕並指出函式。
 
@@ -78,7 +78,9 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 
 格式 1.3 由 W-17 第三階段加入，用來表達 PHP 的參照，payload 的版面也不變。新增的是 Bind、MakeRef 兩個指令，IterInit 與 IterNext 的 IterByRef，以及 FetchDim 的 FetchForRef 用途。minor 0 到 2 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.3。
 
-格式 1.4 由 W-17 第四階段加入，用來表達 PHP 的解構，沒有新增指令，payload 的版面也不變。新增的是 ArrayGet 的 Aux 2（ZEND_FETCH_LIST_R）與 FetchDim 的 FetchContainerValue（ZEND_FETCH_DIM_W 的容器是 VAR）。`Encode` 一律寫入 minor 4。minor 0 到 3 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.4。
+格式 1.4 由 W-17 第四階段加入，用來表達 PHP 的解構，沒有新增指令，payload 的版面也不變。新增的是 ArrayGet 的 Aux 2（ZEND_FETCH_LIST_R）與 FetchDim 的 FetchContainerValue（ZEND_FETCH_DIM_W 的容器是 VAR）。minor 0 到 3 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.4。
+
+格式 1.5 由 W-17 第五階段加入，用來表達常數、`@` 與 `match` 沒有命中的錯誤，payload 的版面不變。新增五個指令：FetchConst（ZEND_FETCH_CONSTANT）、DeclareConst（ZEND_DECLARE_CONST）、BeginSilence 與 EndSilence（ZEND_BEGIN_SILENCE、ZEND_END_SILENCE）、MatchError（ZEND_MATCH_ERROR），以及 ArrayIsset 的 Aux 1（ZEND_ISSET_ISEMPTY_DIM_OBJ 的 ZEND_ISEMPTY）。`match` 的比較與分支、`empty()` 的其他形式都用現有指令組合。`Encode` 一律寫入 minor 5。minor 0 到 4 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.5。
 
 ## 固定指令與純量常數
 
@@ -90,7 +92,7 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 
 ## 指令操作數
 
-下表省略的操作數必須為零。除 Binary、Include、Load、ArrayGet、Unary、Cast、IncDec、Exit、ArraySet、ArrayAppend、ArrayUnset、ArrayAdd、FetchDim、IterInit、IterNext、IterKey 與 Bind 外，Aux 必須為零。暫存器索引從零開始。
+下表省略的操作數必須為零。除 Binary、Include、Load、ArrayGet、ArrayIsset、Unary、Cast、IncDec、Exit、ArraySet、ArrayAppend、ArrayUnset、ArrayAdd、FetchDim、IterInit、IterNext、IterKey、Bind 與 FetchConst 外，Aux 必須為零。暫存器索引從零開始。
 
 | 指令 | A | B | C |
 |---|---|---|---|
@@ -133,6 +135,11 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 | ParamDefault | 參數暫存器（索引小於 Params） | 呼叫有傳這個引數時的目標指令索引 | — |
 | Bind | 目的 Location | 來源 Location，Aux 為 BindValue 時為 Value | — |
 | MakeRef | 目的 Value | 來源 Location | — |
+| FetchConst | 目的 Value | 查詢名稱的字串常數索引 | 原始寫法名稱的字串常數索引 |
+| DeclareConst | 值 Value | 登錄名稱的字串常數索引 | — |
+| BeginSilence | 存放原 error_reporting 的目的 Value | — | — |
+| EndSilence | BeginSilence 寫入的 Value | — | — |
+| MatchError | 主體 Value | — | — |
 
 Binary 的 Aux 為 Add 至 BoolXor 的有效列舉值。Include 的 Aux 為 0–3，分別對應 include、include_once、require、require_once。Load 的 Aux 為 0 或 1，ArrayGet 的為 0、1 或 2。1 表示安靜讀取，Load 不發出未定義變數警告，ArrayGet 不發出未定義 key 或 offset 警告。ArrayGet 的 2 是解構的元素讀取（zend_fetch_dimension_address_read 的 is_list）：陣列照一般讀取，缺少的 key 發出警告並讀到 null；容器是 null 時安靜讀到 null；其他型別（字串也算，不當成字串位移）發出 `Cannot use T as array` 並讀到 null，T 是型別名稱（true 與 false 都是 bool）。Unary、Cast、IncDec 的 Aux 分別是 UnaryOp、CastKind、IncDecOp 的有效值。Exit 的 Aux 為 0 時沒有狀態且 A 為零，為 1 時 A 是狀態 Value。
 
@@ -173,6 +180,14 @@ ParamDefault 也實作 RECV_INIT 的執行期快取。B 指向的 Store 若正�
 ArrayAdd 對應 ZEND_INIT_ARRAY／ZEND_ADD_ARRAY_ELEMENT，把一個陣列 literal 元素就地加入 A 暫存器裡的陣列。A 會被讀取且保持已定義，指令不重新定義它。沒有 AddKey 時 C 必須為零，值以下一個索引附加；有 AddKey 時 C 是 key，key 依 PHP 陣列 key 規則轉換（null 為空字串並發出 PHP 8.5 的棄用通知，浮點、bool 與數字字串轉成整數 key，陣列與物件拋出 `Cannot access offset of type T on array`）。AddKeyLocation 只能和 AddKey 一起出現，表示 C 是由指令自行讀取的 Location，未定義時只發出未定義變數警告並以空字串為 key，不發出 null key 的棄用通知。A 不是陣列的映像通過驗證，執行時以 Unsupported 結束，因為編譯器只會對 literal 自己的 NewArray 使用 ArrayAdd。
 
 Unset 不會讓暫存器變回未定義，Location 仍可繼續使用，只有對應的 PHP 變數變成 unset。Exit 和 Return 一樣是終止指令，沒有後繼指令，可以是函式最後一條指令。這些指令是後端要實作的 PHP 操作，不會在載入時執行。
+
+FetchConst 對應 ZEND_FETCH_CONSTANT，只用在編譯時不能折疊的名稱。B 是查詢用的名稱：namespace 部分小寫、常數本身的名稱照寫法，和 zend_register_constant 登錄的鍵相同；C 是原始寫法（去掉開頭的反斜線），用在 `Undefined constant "…"` 的錯誤文字。Aux 為 FetchConstUnqualified 時是 namespace 裡未限定的名稱：B 找不到時改以反斜線後的短名稱再找一次（IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE）。查詢先看當次執行以 DeclareConst 登錄的常數，再看 `internal/phpconst` 從固定映像產生的預先定義常數表；找不到就拋出 Error，已棄用的預先定義常數每次讀取都發出它的 Deprecated 訊息。值是資源（STDIN、STDOUT、STDERR）或依 CPU 架構而異（CHAR_MAX、PHP_BUILD_DATE）的常數在執行期以 Unsupported 結束，編譯器對直接寫出的名稱在 `Compile` 就拒絕。
+
+DeclareConst 對應 ZEND_DECLARE_CONST：把 A 的值（參照先解開，未定義視為 null）登錄為 B 這個名稱的常數，陣列以引用計數共用。名稱已存在（含預先定義的常數與資源、平台常數）、是 `__COMPILER_HALT_OFFSET__` 或大小寫不分的 true、false、null 時只發出 `Constant %s already defined, this will be an error in PHP 9` 的警告。常數表屬於當次執行，執行結束時釋放，不放進 Program。
+
+BeginSilence 把目前的 error_reporting 存進 A，若其中有非 fatal 的層級就只留下 E_FATAL_ERRORS 的位元；EndSilence 在目前值只剩 fatal 位元而 A 保存的值不只時還原它。巢狀的 `@` 內層存到的已是只剩 fatal 的值，所以內層結束不還原、外層才還原。A 不是 BeginSilence 寫入的整數時是內部錯誤。error_reporting 屬於當次執行。
+
+MatchError 對應 ZEND_MATCH_ERROR，是終止指令：以 A（參照先解開，未定義視為 null）拋出 UnhandledMatchError，訊息是 `Unhandled match case ` 接 smart_str_append_scalar 的寫法（字串加引號並截到 15 個 byte，浮點加 `.0`，null 寫 NULL），陣列等非純量寫 `of type array`。和 Return、Throw 一樣不能留下待處理引數。
 
 Push 將帶有 Value／Location 類別及可選名稱的引數加入請求內 stack。Call 只接受數量恰好等於 Params 的位置 Value 引數，CallValue 交由 Runtime 綁定可帶 Location 或名稱的引數。HostCall 只接受 Value 引數，可帶名稱，實際名稱綁定依宿主呼叫契約處理。三種呼叫指令均消耗 stack 尾端 C 筆，保留外層呼叫已累積的引數。分支合流時 stack 形狀必須相同。Return、ReturnRef、Throw、Leave、EndFinally 不得留下待處理引數。Exit 例外，因為 PHP 可以在計算呼叫引數途中結束執行。
 

@@ -33,6 +33,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 二 | 陣列元素的複合指定、`??=`、`++`／`--`，任意層的巢狀寫入與 `unset`，`foreach` 傳值，參數預設值，讀寫字串位移 | foreach 傳參照、解構、走訪物件，透過非變數寫入陣列，參照，參數型別、傳參照與不定參數，具名引數，以常數為預設值，PHP 不 intern 的字串預設值 |
 | 三 | 參照指定 `$a = &$b`（變數與任意層元素都可以當來源或目標），`foreach` 傳參照，傳參照的參數（含預設值） | 解構、走訪物件，參照到函式呼叫結果或屬性，把不是變數的值傳給傳參照參數，兩個元素之間參照指定的運算式值，`global`、`static`，陣列字面值裡的 `&$x`，回傳參照，參數型別與不定參數，具名引數 |
 | 四 | 解構：`[$a, $b] = $x`、`list()`、跳過的位置、任意運算式的 key、巢狀樣式、元素目標（含 `$a[]`）、解構運算式的值、`foreach` 搭配樣式（含 key）、傳參照的元素 `[&$a]`（含巢狀與 foreach）、右邊不是陣列、缺少的 key、左右互相影響的寫法 | 物件與靜態屬性目標，`[...$rest]`（PHP 的編譯錯誤），`[&$a] = f()`，從元素解構參照的運算式值，走訪物件，其他第三階段右欄的項目 |
+| 五 | 頂層與 namespace 裡的 `const`（含相依的值、陣列值、重複宣告的警告、未定義常數的錯誤、namespace 裡退回全域的查詢）、`php -n` 的 1,792 個預先定義常數（三個 profile 各自的值、已棄用常數的通知）、以常數為參數預設值、magic constant、`match`（多條件、`default`、`match(true)`、沒有命中的 `UnhandledMatchError`）、`empty()`（變數、任意層元素、字串位移、運算式）、`@`（巢狀、函式呼叫內的警告、display 與 log 兩條路、不同的 `error_reporting`） | `define()`、`constant()`、`defined()`（內建函式），STDIN／STDOUT／STDERR（資源），CHAR_MAX 與 PHP_BUILD_DATE（依 CPU 架構而異），類別常數，trait 裡的 `__CLASS__`，`global`、`static`，不定參數，具名引數，物件，try／catch |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -130,6 +131,22 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 
 測試程式加到 263 個（新增 24 個 `list_*`、`foreach_list_*`、`ref_*` 與 18 個 `fatal_list_*`），三個 profile 各 789 項全部和 PHP 8.5.12 逐位元組相同。
 
+## 階段五
+
+格式升到 1.5，新增 FetchConst、DeclareConst、BeginSilence、EndSilence 與 MatchError 五個指令，以及 ArrayIsset 的 Aux 1（`empty($a[k])`）。1.0 到 1.4 的檔案照樣能載入，其中出現 1.5 的內容時以 `ErrInvalid` 拒絕並指出需要 1.5。操作數規則在 [W-16 文件](W-16-bytecode.md)。這五個指令都沒有現有指令能組合出來：沒有指令能讀寫 error_reporting、查詢或登錄常數，也沒有指令能拋出帶格式訊息的錯誤；`match` 的比較與分支、`empty()` 的變數與運算式形式則用 Identical、Branch、安靜的 Load 與 Not 組合。分派用的 `switch` 多了五個 case，以 main 與本分支各自建置的測試執行檔交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，五個工作量的中位數差在 −3.4% 到 +5.4% 之間，每格的 6 輪範圍互相重疊，原始輸出在 [stage5/bench-main.txt](../implementation/evidence/W-17-vm/stage5/bench-main.txt) 與 [stage5/bench-stage5.txt](../implementation/evidence/W-17-vm/stage5/bench-stage5.txt)。
+
+- **預先定義的常數**在 `internal/phpconst`，由 `gen/constants.php` 在固定映像裡用 `get_defined_constants()` 產生，64 位元的表來自 arm64 映像、32 位元的表來自 386 映像，每個名稱記下值、型別，以及 `ReflectionConstant::isDeprecated()` 為真時實際觸發的 Deprecated 訊息（E_STRICT 等 56 個）。amd64 映像的表和 arm64 的只有 CHAR_MAX（127 對 255）與 PHP_BUILD_DATE 不同，兩者記為「依平台而異」：profile 目前沒有 CPU 架構欄位，程式讀到它們時 `Compile` 回報帶位置的不支援，不猜值。STDIN、STDOUT、STDERR 是資源，同樣只記名稱並拒絕。表唯讀且可共用。
+- **編譯期折疊**照 zend_try_ct_eval_const：不需要執行期退回全域名稱、而且不是已棄用的預先定義常數，在編譯時換成它的值；其他名稱（使用者常數、namespace 裡未限定的名稱、已棄用的常數）用 FetchConst 在執行時查。查詢的鍵是 namespace 部分小寫、常數名稱照寫法，和 zend_register_constant 一致，所以 `\A\c` 找得到 `namespace a\B; const c`，而 `\B\C` 找不到。未定義常數的錯誤文字用原始寫法（含 namespace 前綴）。
+- **使用者常數**屬於當次執行：DeclareConst 把值登錄進 vmState 的表，執行結束時釋放，Program 不會留下任何一次執行的常數，同一個 Program 的多次執行與並行執行互不相見（`internal/runtime/vm_stage5_test.go`）。重複宣告、宣告預先定義的名稱、`__COMPILER_HALT_OFFSET__` 與大小寫不分的 true／false／null 都只發出 PHP 的 `Constant %s already defined` 警告。
+- **宣告的行號**照 zend_compile_const_decl：值在 DECLARE_CONST 執行時才求值（zval_update_constant_ex），所有診斷都帶那條指令的行號，而那個行號是 CG(zend_lineno) 當時的值：陳述式的行（第一個常數名稱的行），被值裡每個編譯時折疊不了的常數引用依序移到它的行（zend_compile_const_expr_const），而且同一個陳述式裡不會移回來。所以 `const A = 1,\n B =\n UNDEF\n + 1;` 的錯誤在 UNDEF 那一行，`const A = 1,\n B = C,\n D = 2 + [];` 的 TypeError 在 C 那一行。值的程式碼以 `pinned` 固定在這個行號編譯。
+- **match** 照 zend_compile_match 的兩種形式。至少兩個條件而且全部是編譯時已知的整數或字串時，PHP 用 jump table（ZEND_MATCH），變數主體只讀一次、在主體的行發出未定義警告；否則每個條件依序編譯，再以 CASE_STRICT／IS_IDENTICAL 比較，變數主體在每次比較時重讀，警告在條件的行。兩種形式都用 Identical 與 Branch 表達，差別只在主體變數何時 Load。沒有 `default` 時走到 MatchError，它讀未定義的主體變數不發警告，行號在 jump table 形式是主體的行、否則是最後一個條件的行。訊息照 smart_str_append_scalar：字串加引號、截到 15 個 byte 加 `...`，浮點帶 `.0`，陣列是 `of type array`。
+- **match 條件的行號**有一個 PHP 編譯器的細節：can_match_use_jumptable 依序對每個條件做 zend_eval_const_expr，折疊出新 zval 的條件（true／false／null、magic constant、常數上的運算、陣列字面值、預先定義常數）會拿到當時 CG(zend_lineno) 的值，也就是主體的行；掃描器產生的純量與 parser 折疊的字串串接保留自己的行；遇到第一個不是整數或字串的條件就停止，後面的條件保留自己的行。這由 lowering 在 `internal/ir` 的 `match()` 處理：把會被重建的條件換成主體行上的字面值（或把常數名稱移到那一行），編譯器照節點的行輸出即可。
+- **empty()** 照 zend_compile_isset_or_empty：變數是安靜的 Load 接 Not（ISSET_ISEMPTY_CV），元素是每一層安靜的 ArrayGet 接 ArrayIsset Aux 1（ISSET_ISEMPTY_DIM_OBJ 的 ZEND_ISEMPTY），其他運算式是 `!expr`。字串容器照 zend_isempty_dim_slow 以位置判斷：位置在範圍內時只有 `"0"` 算空；`"1x"` 這類開頭是數字的字串位移在 `empty()` 不發警告，在讀取時發 `Illegal string offset`，所以元素形式不能用安靜讀取加 Not 組合。
+- **@** 照 zend_compile_silence：BeginSilence 把 error_reporting 存進暫存器並只留下 E_FATAL_ERRORS 的位元，運算式在中間編譯（變數也在裡面才 Load，對應 PHP 強制的 FETCH），EndSilence 在目前值只剩 fatal 位元時還原存下的值；巢狀的內層存到的已是只剩 fatal 的值，所以由外層還原。error_reporting 是 vmState 的欄位，`errorChannels.excluded` 跟著它，每次執行從 INI 值開始，一個請求的 `@` 不影響另一個請求。fatal（未捕捉的錯誤）照樣顯示，因為 E_ERROR 留在遮罩裡；`exit` 與未捕捉錯誤結束執行時不需要還原，PHP 在同樣情況下也沒有可觀察的差別。
+- **對照測試的 INI 覆寫**：fixture 在開頭標籤後的 `// ini: error_reporting=30717` 這類註解會由 `reference.php` 加成 `-d`，也由 `w17_differential_test.go` 加成 `WithINI`，用來測 error_reporting 不同時 `@` 與一般診斷的結果（只顯示 fatal、全部關閉、關掉 warning 但留 deprecated）。
+
+測試程式加到 323 個（新增 60 個 `const_*`、`magic_*`、`match_*`、`empty_*`、`silence_*`、`return_const_profile` 與對應的 `fatal_*`），三個 profile 各 969 項全部和 PHP 8.5.12 逐位元組相同。
+
 ## 階段一的對照結果
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
@@ -190,3 +207,8 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`[&$a] = f()`**：PHP 會發出 `Attempting to set reference to non referenceable value` 的 notice 再照值讀取；Phego 沿用第三階段「參照到函式呼叫結果」的不支援回報。執行期 FetchDim 的容器暫存器不是參照時也以 Unsupported 結束，編譯器不會產生這種 bytecode。
 - **傳參照的引數只檢查到編譯時已知的函式**：直接呼叫時以 MakeRef 傳入；bytecode 的函式表沒有記錄哪些參數傳參照，所以驗證器無法檢查手寫的 bytecode 有沒有對傳值參數傳入參照。被呼叫端的 Store 會解開參照，不會造成記憶體問題。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
+- **依 CPU 架構而異的預先定義常數**：CHAR_MAX（arm64 為 255，amd64 與 386 為 127）與 PHP_BUILD_DATE 在 `Compile` 回報不支援；profile 要有架構欄位才能給值。
+- **STDIN、STDOUT、STDERR**：值是資源，`Compile` 回報不支援，等資源與串流的工作包。
+- **預先定義常數上的運算不在編譯期折疊**：PHP 把 `PHP_INT_MAX + 1` 折成常數，Phego 在執行時算，結果相同；只有 `match` 條件的行號依賴這個折疊，lowering 對單獨的常數名稱有建模，對 `PHP_EOL . "x"` 這類含預先定義常數的運算式則保留運算式自己的行。
+- **match 沒有 jump table**：PHP 對至少兩個整數或字串字面值的條件用 hash 查表，Phego 依序比較，條件很多時較慢，結果相同。
+- **`define()`、`constant()`、`defined()`**：內建函式，屬於模組工作包；`const` 以外沒有辦法在執行期宣告常數。

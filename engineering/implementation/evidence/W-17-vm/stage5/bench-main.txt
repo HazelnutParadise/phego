@@ -1,0 +1,62 @@
+# BenchmarkVMDispatch/*/switch, test binary built from main (9f79867), alternated round by round with bench-stage5.txt
+# host: AMD Ryzen AI 9 HX 370, linux/amd64, GOMAXPROCS=4, go1.26.0; 6 rounds of -test.benchtime 1s each
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    3153	    361292 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2604	    496421 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    4177	    431355 ns/op	      8015 steps/op	 1240744 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     513	   2612786 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     790	   1581691 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    3928	    456086 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2529	    541171 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3712	    404809 ns/op	      8015 steps/op	 1240744 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     583	   2277388 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     853	   1406302 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    3132	    385455 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2944	    525886 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3886	    371973 ns/op	      8015 steps/op	 1240745 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     457	   2211579 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     880	   1476401 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    3404	    327989 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2305	    442687 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3439	    393077 ns/op	      8015 steps/op	 1240744 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     560	   2269204 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     868	   1580294 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    3322	    354943 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2133	    498719 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3591	    419362 ns/op	      8015 steps/op	 1240744 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     544	   2313400 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     784	   1588541 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: AMD Ryzen AI 9 HX 370 w/ Radeon 890M           
+BenchmarkVMDispatch/arith/switch-4         	    2871	    374615 ns/op	     32013 steps/op	    3912 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2337	    551074 ns/op	     49211 steps/op	    4808 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3626	    432738 ns/op	      8015 steps/op	 1240744 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     612	   2003719 ns/op	    108692 steps/op	   85288 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     774	   1482695 ns/op	     62023 steps/op	  249704 B/op	     130 allocs/op
+PASS
