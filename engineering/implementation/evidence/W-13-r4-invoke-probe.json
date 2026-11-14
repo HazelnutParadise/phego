@@ -1,6 +1,6 @@
 {
   "scope": "native declaration warning and invocation probe; no Go frontend compatibility pass",
-  "fixture": "docs/implementation/evidence/W-13-r4-invoke-probe.php.txt",
+  "fixture": "engineering/implementation/evidence/W-13-r4-invoke-probe.php.txt",
   "fixture_sha256": "3e86973f67972643be687e8830bdc9ec4911ed47f47e203b6010e749cb77bc43",
   "profiles": [
     {

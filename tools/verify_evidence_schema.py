@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--schema", type=Path, default=ROOT / "docs/data/evidence-records.schema.json", help="schema to check")
+    parser.add_argument("--schema", type=Path, default=ROOT / "engineering/data/evidence-records.schema.json", help="schema to check")
     args = parser.parse_args()
     try:
         import jsonschema
@@ -31,8 +31,8 @@ def main():
     validator = jsonschema.Draft202012Validator(schema)
     with tempfile.TemporaryDirectory(prefix="phego-schema-") as temporary:
         root = Path(temporary)
-        (root / "docs/data").mkdir(parents=True)
-        (root / "docs/data/phego-acceptance-tests.json").write_text(json.dumps({"items": [{"id": "T-001"}]}))
+        (root / "engineering/data").mkdir(parents=True)
+        (root / "engineering/data/phego-acceptance-tests.json").write_text(json.dumps({"items": [{"id": "T-001"}]}))
         data = b"synthetic evidence\n"
         (root / "evidence.log").write_bytes(data)
         valid = {"test_id": "T-001", "status": "pass", "commit": "a" * 40, "command": "test",

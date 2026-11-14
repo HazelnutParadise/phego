@@ -32,16 +32,16 @@ The slogan is a playful riff on the classic 'PHP is the best language in the wor
 
 | Document | Purpose |
 |---|---|
-| [Documentation index](docs/README.md) | Navigate the complete design and evidence rules. |
-| [Full specification, Traditional Chinese](/engineering/spec/specification.zh-TW.md) | The standalone 40-chapter specification and implementation plan. |
-| [Compatibility contract](/engineering/compatibility/README.md) | Every historical release, explicit profiles, and evidence requirements. |
-| [Benchmark contract](/engineering/benchmarks/README.md) | Complete competitor coverage and strict, reproducible comparisons. |
-| [Real-application acceptance](/engineering/acceptance/README.md) | Real projects, data integrity, and release gates. |
-| [Implementation issues and draft PRs](/engineering/implementation/README.md) | Complete work-package mapping, dependencies, and acceptance ownership. |
+| [Documentation index](engineering/README.md) | Navigate the complete design and evidence rules. |
+| [Full specification, Traditional Chinese](engineering/spec/specification.zh-TW.md) | The standalone 40-chapter specification and implementation plan. |
+| [Compatibility contract](engineering/compatibility/README.md) | Every historical release, explicit profiles, and evidence requirements. |
+| [Benchmark contract](engineering/benchmarks/README.md) | Complete competitor coverage and strict, reproducible comparisons. |
+| [Real-application acceptance](engineering/acceptance/README.md) | Real projects, data integrity, and release gates. |
+| [Implementation issues and draft PRs](engineering/implementation/README.md) | Complete work-package mapping, dependencies, and acceptance ownership. |
 | [Agent instructions](AGENTS.md) | Implementation boundaries, traceability, and completion rules. |
 | [Change log](CHANGELOG.md) | Specification changes and superseded decisions. |
 
-The plan contains **100 requirements, 200 acceptance scenarios, 60 work packages, and 28 architecture decisions**. Machine-readable records are in [docs/data](docs/data/).
+The plan contains **100 requirements, 200 acceptance scenarios, 60 work packages, and 28 architecture decisions**. Machine-readable records are in [engineering/data](engineering/data/).
 
 Validate documentation structure and traceability with Python 3.10 or later:
 

@@ -125,9 +125,9 @@
   ],
   "source_sha256": {
     ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
-    "docs/compatibility/profile-matrix.json": "7ae7f07bd5e31f80b52f47cdf4c32a8fdd47f9fe48494ea993317a7e9a3d6962",
-    "docs/decisions/W-13-objects.md": "03c9e8f761dd075f502e3acd9327d66048453a53f194ff51ca8bd477c3a0b9b0",
-    "docs/implementation/W-13.md": "3717482eb3119808d645f4926914a94b9a59c2a050ca11a11f6bd2449dca9eae",
+    "engineering/compatibility/profile-matrix.json": "7ae7f07bd5e31f80b52f47cdf4c32a8fdd47f9fe48494ea993317a7e9a3d6962",
+    "engineering/decisions/W-13-objects.md": "03c9e8f761dd075f502e3acd9327d66048453a53f194ff51ca8bd477c3a0b9b0",
+    "engineering/implementation/W-13.md": "3717482eb3119808d645f4926914a94b9a59c2a050ca11a11f6bd2449dca9eae",
     "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
     "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
@@ -359,7 +359,7 @@
   },
   "reproduction": {
     "registration_baseline": "git show f772b2c776e1b3d03828f67aedf9529844e55e6e:internal/runtime/object_model.go > /tmp/phego-w13-r11-registration-baseline.go",
-    "overlay_script": "python3 - <<'PYOVERLAY'\nimport json\nfrom pathlib import Path\nr=Path.cwd()\nfor name,baseline in [('registration','/tmp/phego-w13-r11-registration-baseline.go'),('trait','docs/implementation/evidence/W-13-r11-object-model-before-sharing.go.txt')]:\n Path('/tmp/phego-w13-r11-'+name+'-overlay.json').write_text(json.dumps({'Replace':{str(r/'internal/runtime/object_model.go'):str(Path(baseline).resolve())}}))\nPYOVERLAY",
+    "overlay_script": "python3 - <<'PYOVERLAY'\nimport json\nfrom pathlib import Path\nr=Path.cwd()\nfor name,baseline in [('registration','/tmp/phego-w13-r11-registration-baseline.go'),('trait','engineering/implementation/evidence/W-13-r11-object-model-before-sharing.go.txt')]:\n Path('/tmp/phego-w13-r11-'+name+'-overlay.json').write_text(json.dumps({'Replace':{str(r/'internal/runtime/object_model.go'):str(Path(baseline).resolve())}}))\nPYOVERLAY",
     "registration_before": "go test -overlay /tmp/phego-w13-r11-registration-overlay.json ./internal/runtime -run '^$' -bench '^BenchmarkW13ClassChainRegistration$' -benchtime=200ms -count=3",
     "registration_after": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW13ClassChainRegistration$' -benchtime=200ms -count=3",
     "trait_before": "go test -overlay /tmp/phego-w13-r11-trait-overlay.json ./internal/runtime -run '^$' -bench '^BenchmarkW13TraitSnapshotBuild$' -benchtime=200ms -count=3",

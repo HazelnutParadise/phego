@@ -22,7 +22,7 @@
   "source_base": "0ba11a888d26fd6287e0a64c1b461d81699503fd",
   "captured_at": "2026-11-06T19:15:35.490943+00:00",
   "source_sha256": {
-    "docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt": "046b9f0ebb9732e6448a8f7f492a92d640a7886a65108c66ae12535b667f160b",
+    "engineering/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt": "046b9f0ebb9732e6448a8f7f492a92d640a7886a65108c66ae12535b667f160b",
     "internal/ir/class_binding.go": "332e1fcd4c28bed443121f25decc446a4d7e43777b8f9d43a26f842d48d42b09",
     "internal/ir/class_compile.go": "108eb3f86e5d2b5a5aae29be80035819edcd83a21e5c4b4f198fdca01d924a6d",
     "internal/ir/class_link.go": "1520d58d85e14102d0947d7e3e703d3bb5f41e55f99b8be6eebf02485c4b4984",
@@ -57,7 +57,7 @@
   "product_test_status": "not_run",
   "commands": [
     {
-      "command": "python3 docs/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt . <output>",
+      "command": "python3 engineering/implementation/evidence/compatibility-php8512-review-20261106/review-fixture.py.txt . <output>",
       "exit_code": 0,
       "log": "compatibility-php8512-review-20261106/review-fixture.log",
       "result": "Exit code 0 (stored in the log). Generated 567 sources per integer width with the linux/386 and linux/amd64 images, including the three follow-up review groups."
@@ -250,7 +250,7 @@
     }
   },
   "limits": [
-    "PHP substitutes persistent constants such as NAN and PHP_INT_MAX while compiling; Phego leaves them for execution, so [NAN . ''] lacks its compile warning. Excluded from the fixture and listed in docs/decisions/compatibility-php8512.md.",
+    "PHP substitutes persistent constants such as NAN and PHP_INT_MAX while compiling; Phego leaves them for execution, so [NAN . ''] lacks its compile warning. Excluded from the fixture and listed in engineering/decisions/compatibility-php8512.md.",
     "SPL classes such as ArrayObject have no inheritance metadata before W-29; static covariance cases use equivalent user classes.",
     "Constant expressions fold a class operand before PHP checks it, so const X = (A::class)::C; and const X = (PHP_EOL)::C; compile in PHP but not in Phego.",
     "Closures inside attribute arguments are checked as constant expressions but their bodies are not lowered, so their compile-time diagnostics are missing.",

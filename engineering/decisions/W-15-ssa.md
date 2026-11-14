@@ -31,7 +31,7 @@
 
 比較過逐值指標節點、全部 operands 都使用 slab、以及目前 inline2／slab 的表示。逐值指標增加 GC 可掃描邊與配置次數。完整 CFG、變數提升與可重排的多效果鏈在本輪沒有必要的收益，反而增加 alias、例外與解構時機的證明負擔。分支仍由原 HIR 控制，沒有引入第二套控制流程。
 
-原始樣本在 [evidence/W-15-ssa](/docs/implementation/evidence/W-15-ssa)。命令為：
+原始樣本在 [evidence/W-15-ssa](../implementation/evidence/W-15-ssa)。命令為：
 
 ```sh
 go test ./internal/ir/ssa -run '^$' -bench BenchmarkW15 -benchmem -count=3 -benchtime=200ms

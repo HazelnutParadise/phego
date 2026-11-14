@@ -135,7 +135,7 @@ func (e *InternalError) Diagnostic() diag.Diagnostic {
 }
 
 // ConfigError reports an invalid Config, option, or host function. Code is
-// the stable diagnostic code (docs/diagnostics/codes.md). Errors built by
+// the stable diagnostic code (engineering/diagnostics/codes.md). Errors built by
 // host code may leave it empty and then report PHG1000; a code that is not
 // in the table is kept, with PHG1000's note and help.
 type ConfigError struct {

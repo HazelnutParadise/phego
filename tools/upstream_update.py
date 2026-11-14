@@ -436,7 +436,7 @@ def main(argv=None):
         description="The lock contains old/new objects with version, tag, commit, "
                     "archive_sha256 and announcement. SHA-256 is checked before decoding.",
         epilog="Example: python3 tools/upstream_update.py pair --lock "
-               "docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json "
+               "engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json "
                "php-8.5.11.tar.xz php-8.5.12.tar.xz")
     pair.add_argument("--lock", required=True, help="JSON containing old/new release identities")
     pair.add_argument("old_archive")
@@ -449,7 +449,7 @@ def main(argv=None):
                     "have a 180-second total deadline and require a POSIX main thread "
                     "with no active timer; otherwise use --archive-dir.",
         epilog="Example: python3 tools/upstream_update.py watch "
-               "docs/data/php-upstream-baseline.json observed.json --archive-dir /tmp/php-cache")
+               "engineering/data/php-upstream-baseline.json observed.json --archive-dir /tmp/php-cache")
     watch.add_argument("baseline")
     watch.add_argument("observed")
     watch.add_argument("--archive-dir", help="Offline cache: <sha256>.tar.xz; missing files block")

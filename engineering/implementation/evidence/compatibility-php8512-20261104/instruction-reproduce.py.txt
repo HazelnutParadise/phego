@@ -15,7 +15,7 @@ p = argparse.ArgumentParser(description=__doc__)
 p.add_argument("--repo", required=True, type=Path)
 p.add_argument("--mpfr", required=True, help="existing MPFR 4.2.2 shared library")
 a = p.parse_args()
-e = a.repo / "docs/implementation/evidence/compatibility-php8512-20261104"
+e = a.repo / "engineering/implementation/evidence/compatibility-php8512-20261104"
 s = Path(tempfile.mkdtemp(prefix="phego-instructions-"))
 for source, target in [(e / "instructionsfrac.c.txt", "instructionsfrac.c"),
                        (e / "instruction-verify.py.txt", "verify.py"),

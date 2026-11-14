@@ -14,8 +14,8 @@ class ProfileTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        (self.root / "docs/data").mkdir(parents=True)
-        (self.root / "docs/data/phego-acceptance-tests.json").write_text(
+        (self.root / "engineering/data").mkdir(parents=True)
+        (self.root / "engineering/data/phego-acceptance-tests.json").write_text(
             json.dumps({"items": [{"id": "T-001"}, {"id": "T-002"}]}))
         (self.root / "result.log").write_bytes(b"observed result\n")
         self.path = self.root / "records.json"

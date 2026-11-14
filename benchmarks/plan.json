@@ -4123,7 +4123,7 @@
    "sha256": "974fd70dc6e2d23e3eeafb05c92066c638c3a1a56753ae08b3c3ef1a9d642018"
   },
   {
-   "path": "docs/implementation/evidence/W-54-discovered-inventory.json",
+   "path": "engineering/implementation/evidence/W-54-discovered-inventory.json",
    "sha256": "0f6c8a5d9a947fa88f29460d540a43015bdfe1d674ace622b2bdd67548dba026"
   }
  ]

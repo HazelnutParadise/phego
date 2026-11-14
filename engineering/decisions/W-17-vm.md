@@ -1,8 +1,8 @@
 # W-17：VM 通用執行路徑
 
-需求：REQ-001、REQ-005、REQ-011、REQ-015、REQ-016、REQ-025、REQ-026。局部測試對應 T-009、T-010、T-029～T-032、T-051、T-052。實作進度以 [W-17](/engineering/implementation/W-17.md) 為準，本文件記錄設計決定與理由。
+需求：REQ-001、REQ-005、REQ-011、REQ-015、REQ-016、REQ-025、REQ-026。局部測試對應 T-009、T-010、T-029～T-032、T-051、T-052。實作進度以 [W-17](../implementation/W-17.md) 為準，本文件記錄設計決定與理由。
 
-本文件供 VM、編譯器與 Runtime 維護者使用。W-17 是第一個能把 PHP 原始碼端對端執行的工作包，建立在 [W-16 的 bytecode 格式](/engineering/decisions/W-16-bytecode.md)、[W-12 陣列](/engineering/decisions/W-12-arrays.md)、W-14 執行框架與 [Runtime 內部配置](/engineering/decisions/runtime-layout.md)之上。
+本文件供 VM、編譯器與 Runtime 維護者使用。W-17 是第一個能把 PHP 原始碼端對端執行的工作包，建立在 [W-16 的 bytecode 格式](W-16-bytecode.md)、[W-12 陣列](W-12-arrays.md)、W-14 執行框架與 [Runtime 內部配置](runtime-layout.md)之上。
 
 ## 開工時的現況（2026-11-11，main 為 d676ee4）
 
@@ -39,7 +39,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 
 ## bytecode 1.1 新增的指令
 
-格式版本的 minor 由 0 改為 1，1.0 的檔案照樣能載入。操作數規則在 [W-16 文件的指令表](/engineering/decisions/W-16-bytecode.md)。
+格式版本的 minor 由 0 改為 1，1.0 的檔案照樣能載入。操作數規則在 [W-16 文件的指令表](W-16-bytecode.md)。
 
 | 指令 | 用途 |
 |---|---|
@@ -70,20 +70,20 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 
 ## 分派、frame、區域變數與取消檢查的布局
 
-每一項都把候選做法放進同一個測試執行檔，跑同樣的五個工作量，先確認輸出、回傳值與步數完全相同，再比時間。工作量是算術迴圈、分支加 `%` 與比較、以 `.` 串接字串、遞迴的 `fib(18)`、陣列填入與讀取。量測在 GitHub 的 ubuntu-24.04（amd64）與 ubuntu-24.04-arm runner 上各交替執行 10 輪，以 benchstat 比較（`tools/benchstat-variants.sh`，「VM layout benchmarks」工作流程，commit 5545d4f）。原始輸出在 [W-17 證據目錄](/docs/implementation/evidence/W-17-vm/benchstat)。
+每一項都把候選做法放進同一個測試執行檔，跑同樣的五個工作量，先確認輸出、回傳值與步數完全相同，再比時間。工作量是算術迴圈、分支加 `%` 與比較、以 `.` 串接字串、遞迴的 `fib(18)`、陣列填入與讀取。量測在 GitHub 的 ubuntu-24.04（amd64）與 ubuntu-24.04-arm runner 上各交替執行 10 輪，以 benchstat 比較（`tools/benchstat-variants.sh`，「VM layout benchmarks」工作流程，commit 5545d4f）。原始輸出在 [W-17 證據目錄](../implementation/evidence/W-17-vm/benchstat)。
 
 | 項目 | 採用 | 其他候選在 CI 上的結果 | 理由 |
 |---|---|---|---|
 | 分派 | 單一 `switch` 迴圈 | 預先解碼成 closure：五個工作量都慢，amd64 慢 11～78%，arm64 慢 11～63%。比較加分支的合併指令：十格中七格量不出差異，其餘三格在 −1.5% 到 +1.3% 之間 | closure 每條指令多一次間接呼叫，還要為每個程式配置 closure。合併指令沒有可量到的好處，不值得多一條執行路徑 |
 | frame | 每次執行一塊連續的值陣列，各 frame 取其中一段 | 每次呼叫新配置：`fib` 慢 60%（amd64）與 94%（arm64），其餘量不出差異。每個深度各自重用：`fib` 慢 0.7～1.0%，其餘量不出差異 | 連續陣列配置次數最少，時間不輸其他做法 |
-| 區域變數 | frame 自己擁有的位置 | 沿用 `local()` 逐一登記：慢 220%（amd64）與 245%（arm64），配置次數由 23 次變成 8,422 次 | `local()` 每次登記都掃描所有 frame，[Runtime 內部配置](/engineering/decisions/runtime-layout.md)的後續事項已指出這是每次呼叫的主要成本。VM 不再呼叫它，其他呼叫者不受影響 |
+| 區域變數 | frame 自己擁有的位置 | 沿用 `local()` 逐一登記：慢 220%（amd64）與 245%（arm64），配置次數由 23 次變成 8,422 次 | `local()` 每次登記都掃描所有 frame，[Runtime 內部配置](runtime-layout.md)的後續事項已指出這是每次呼叫的主要成本。VM 不再呼叫它，其他呼叫者不受影響 |
 | 取消檢查 | 回邊、呼叫、回傳、Checkpoint，以及每 1,024 條直線指令 | 每條指令都檢查：amd64 慢 9～69%，arm64 慢 8～46% | 步數仍然每條指令計量，取消最多延後 1,024 條指令被看見 |
 
 W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 Runtime 呼叫重測。這次的結果和當時不同：closure 在 W-16 的 branch-heavy 合成測試比 `switch` 快，在真實的值上則全面較慢。
 
 ## 階段二
 
-格式升到 1.2，新增 FetchDim、IterInit、IterNext、IterKey 與 ParamDefault。1.0 與 1.1 的檔案照樣能載入，其中出現 1.2 指令時以 `ErrInvalid` 拒絕。操作數規則在 [W-16 文件](/engineering/decisions/W-16-bytecode.md)。
+格式升到 1.2，新增 FetchDim、IterInit、IterNext、IterKey 與 ParamDefault。1.0 與 1.1 的檔案照樣能載入，其中出現 1.2 指令時以 `ErrInvalid` 拒絕。操作數規則在 [W-16 文件](W-16-bytecode.md)。
 
 - **元素寫入**照 PHP 的取值順序：先檢查容器，再讀鍵、轉換鍵、讀值、寫入。元素位置只能用在編譯器產生的那一段直線指令裡，驗證器會拒絕其他用法，所以手寫的 bytecode 也無法經由過期的位置寫入。
 - **`foreach` 傳值**走訪迴圈開始時的陣列，靠寫入時複製保留，不提前複製。走訪狀態放在暫存器，屬於當次執行，每一圈都檢查取消。
@@ -94,7 +94,7 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 
 ## 階段三
 
-格式升到 1.3，新增 Bind 與 MakeRef，IterInit 與 IterNext 加上 IterByRef，FetchDim 加上 FetchForRef 用途。1.0 到 1.2 的檔案照樣能載入，其中出現 1.3 的指令時以 `ErrInvalid` 拒絕。操作數規則在 [W-16 文件](/engineering/decisions/W-16-bytecode.md)。
+格式升到 1.3，新增 Bind 與 MakeRef，IterInit 與 IterNext 加上 IterByRef，FetchDim 加上 FetchForRef 用途。1.0 到 1.2 的檔案照樣能載入，其中出現 1.3 的指令時以 `ErrInvalid` 拒絕。操作數規則在 [W-16 文件](W-16-bytecode.md)。
 
 - **參照指定**照 zend_compile_assign_ref 的順序：先算目標的 key，再取來源，最後才取目標的元素。兩邊都不只是變數時，取完來源就先把它變成參照（MakeRef），再去取目標，這樣目標的寫入讓陣列搬家時，手上也不會留著指向舊位置的指標（PHP bug #71539 的修法）。元素是用來當參照的那一層，字串位移的錯誤是 `Cannot create references to/from string offsets`。來源是未定義的變數或元素時，參照裡放的是 null，不發警告。
 - **傳參照的參數**在呼叫端照 SEND_REF，每個引數在它自己的位置變成參照，所以後面的引數改到同一個變數時，函式看到的是改過的值。被呼叫端以 Bind 接收；省略引數時預設值照樣進入每次執行的預設值快取。
@@ -114,7 +114,7 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 
 ## 階段四
 
-格式升到 1.4，沒有新增指令：ArrayGet 多一個 Aux 2（ZEND_FETCH_LIST_R），FetchDim 多一個 FetchContainerValue 旗標（ZEND_FETCH_LIST_W 對 VAR 容器的寫入取元素）。1.0 到 1.3 的檔案照樣能載入，其中出現 1.4 的內容時以 `ErrInvalid` 拒絕並指出需要 1.4。操作數規則在 [W-16 文件](/engineering/decisions/W-16-bytecode.md)。因為只是現有指令的新 Aux，沒有做布局量測。
+格式升到 1.4，沒有新增指令：ArrayGet 多一個 Aux 2（ZEND_FETCH_LIST_R），FetchDim 多一個 FetchContainerValue 旗標（ZEND_FETCH_LIST_W 對 VAR 容器的寫入取元素）。1.0 到 1.3 的檔案照樣能載入，其中出現 1.4 的內容時以 `ErrInvalid` 拒絕並指出需要 1.4。操作數規則在 [W-16 文件](W-16-bytecode.md)。因為只是現有指令的新 Aux，沒有做布局量測。
 
 - **順序**照 zend_compile_assign 的 ZEND_AST_ARRAY 分支與 zend_compile_list_assign。右邊是變數時先複製（QM_ASSIGN），所以 `[$a, $b] = $a` 與 `[$a[0], $a[1]] = $a` 讀的是原本的陣列；其他右邊只求值一次。每個元素依序：有 key 就先算 key（key 是變數時由讀取指令自己讀），用 FETCH_LIST_R 取出元素，再指定給目標；元素目標的 key 在取出元素之後才算；巢狀樣式從取出的元素再解構。PHP 8.5.12 的原始碼裡沒有 `zend_list_has_assign_to_self`，變數右邊一律複製，Phego 照做。
 - **右邊不是陣列**：null 安靜讀到 null；int、float、bool、string 發出 `Cannot use T as array`（T 是型別名稱，true 與 false 都是 bool）並讀到 null；字串不當成字串位移。缺少的 key 發出 `Undefined array key`。
@@ -122,7 +122,7 @@ W-16 以合成工作量選了 `switch` 當起點，並要求用真實的值與 R
 - **行號**照 zend_compile_list_assign 留下的 `CG(zend_lineno)`：第一個元素的 FETCH 在右邊結束的行；變數目標指定後，行移到那個變數的行；元素目標與參照目標留在 FETCH 的行；右邊是變數時，複製發生在樣式第一個元素的行。為了讓多行的寫法逐位元組相同，另外修正兩個前端與 HIR 的行號：空的陣列字面值取右括號那一行（zend_ast_create_list 沒有子節點時取當時的行），兩個字面值的 `.` 由 PHP 的 parser 折疊成一個字串（zend_ast_create_concat_op），行號是右運算元後面那個 token 的行，HIR 以 `FoldLine` 記下，VM 在 Concat 之後把行停在那裡。
 - **編譯期拒絕**：`[...$rest]`、空樣式、混用 key、混用 `[]` 與 `list()`、`array()` 當目標、對不能參照的值取參照、`foreach` 的 key 是樣式，都照 PHP 的編譯錯誤訊息，由 lowering 回報。物件與靜態屬性目標回報帶位置的 `UnsupportedError`。
 
-獨立審查跑了 118 個 PHP 探測程式，另以 1,300 層巢狀的超大函式確認關閉 liveness 時暫存器沒有殘留可見的參照。沒有 P0 或 P1；找到的問題都已修正並加上修正前會失敗的回歸 fixture（修正前的輸出在 [stage4/red-review-fixes.txt](/engineering/implementation/evidence/W-17-vm/stage4/red-review-fixes.txt)）：
+獨立審查跑了 118 個 PHP 探測程式，另以 1,300 層巢狀的超大函式確認關閉 liveness 時暫存器沒有殘留可見的參照。沒有 P0 或 P1；找到的問題都已修正並加上修正前會失敗的回歸 fixture（修正前的輸出在 [stage4/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage4/red-review-fixes.txt)）：
 
 - **透過參照碰到 false 容器時多印 Deprecated**（P2）。zend_fetch_dimension_address 的 IS_REFERENCE 分支對 null 與 false 直接 array_init，unset 模式直接回 null，都不呼叫 zend_false_to_array_deprecated；只有 ASSIGN_DIM 與 ASSIGN_DIM_OP 會先解參照再警告。傳參照解構的容器一定是參照，所以 `[&$a] = $f`（`$f = false`）每次都多一行；`$r = &$h; $h[0][1] = 1`、`$x = &$m[0]`、`unset($m[0][1])` 從第二階段起就有同樣的問題。現在 FetchDim 的容器是參照時不發這個通知，ASSIGN_DIM_OP 的最後一層除外。
 - **樣式裡的編譯錯誤行號**（P3）。lowering 在每個元素之後把目前行停在目標的行，PHP 則是元素目標與參照目標都留在取值那一行、變數目標移到變數那一行；foreach 的樣式從主體結束的行開始。七個 `fatal_list_lines_*` fixture 的 `Cannot mix`、`Spread operator` 與 `Cannot use empty array entries` 行號現在和 PHP 相同。

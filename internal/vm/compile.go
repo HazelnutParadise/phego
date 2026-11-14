@@ -1,6 +1,6 @@
 // Package vm compiles HIR to Phego bytecode for the first W-17 stage. It
 // never executes PHP. The encoding contract shared with the interpreter is
-// recorded in docs/decisions/W-17-vm.md and the W-17 stage-1 conventions.
+// recorded in engineering/decisions/W-17-vm.md and the W-17 stage-1 conventions.
 //
 // REQ-025, REQ-026; T-009, T-010.
 package vm
@@ -42,7 +42,7 @@ func (e *CompileError) Error() string {
 	return fmt.Sprintf("%s:%d: %s", e.File, e.Line, e.Message)
 }
 
-// Identity placeholders of stage 1 (docs/decisions/W-17-vm.md); cache keys
+// Identity placeholders of stage 1 (engineering/decisions/W-17-vm.md); cache keys
 // arrive with W-23.
 const (
 	guestPlatform    = "php-8.5.12"

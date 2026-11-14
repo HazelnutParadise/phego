@@ -17,7 +17,7 @@ python3 tools/upstream_snapshot.py capture --archive "$NEW_ARCHIVE" --sha256 08b
 python3 tools/upstream_snapshot.py compare old.json new.json > diff.json
 ```
 
-快照分別為 22,007 和 22,415 個來源項目，實際檔案 SHA-256 分別為 `b7ace91fae6ffe0d3a8ada394ad138900cc002fe2c99488d23b055577fa72a15` 與 `5c798f1bd1f18ccd2005fba37f4c409a7892b557e52b2f1bbc8e9a3727fc4b6e`。[完整差異記錄](/engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json)的 SHA-256 是 `55f1041efb9a4fa43ee379f78e6451e50c3ba1e45a696cfe682857cf114cbe37`；再次擷取 8.5.11 及比較兩份快照得到相同摘要。
+快照分別為 22,007 和 22,415 個來源項目，實際檔案 SHA-256 分別為 `b7ace91fae6ffe0d3a8ada394ad138900cc002fe2c99488d23b055577fa72a15` 與 `5c798f1bd1f18ccd2005fba37f4c409a7892b557e52b2f1bbc8e9a3727fc4b6e`。[完整差異記錄](W-02-upstream-8.5.11-8.5.12.json)的 SHA-256 是 `55f1041efb9a4fa43ee379f78e6451e50c3ba1e45a696cfe682857cf114cbe37`；再次擷取 8.5.11 及比較兩份快照得到相同摘要。
 
 來源差異為測試新增 422、移除 14、內容變更 37，stub 內容變更 3，發布紀錄內容變更 2；兩個公告網址不同。語法檔沒有內容差異。`compatibility` 明確為 `not_assessed`。
 

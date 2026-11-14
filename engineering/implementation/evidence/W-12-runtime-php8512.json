@@ -402,7 +402,7 @@
     "blocking_readability_findings": 0,
     "scope": "Final 102-case artifact passed fresh-context review; no blocking readability gaps.",
     "nonblocking_followup": {
-      "path": "docs/implementation/README.md:45",
+      "path": "engineering/implementation/README.md:45",
       "existing_text": "These product tests have not been run (Traditional Chinese overview).",
       "recommendation": "In a separate overview update, distinguish full product acceptance from executed work-package-local Go tests. W-12 package/evidence already make this distinction."
     },
@@ -1310,10 +1310,10 @@
     "upstream_main_commit": "5be9226b426e7d6ac7defd5892a257e3fc90b7c7",
     "merge_commit": "3a9c6f56542482f51c74cf58491992274d1de09c",
     "conflict_paths": [
-      "docs/data/document-validation.json"
+      "engineering/data/document-validation.json"
     ],
     "resolution_commands": [
-      "git checkout --theirs docs/data/document-validation.json",
+      "git checkout --theirs engineering/data/document-validation.json",
       "python3 tools/validate_docs.py"
     ],
     "runtime_and_fixture_diff_from_57ee97f": "empty; merged W-45 source from main without changing W-12 runtime/fixture content",
@@ -1366,6 +1366,6 @@
     },
     "latest_head_ci_and_review": "pending after push; live PR is authoritative"
   },
-  "superseded_by": "docs/implementation/evidence/W-12-sorting-php8512.json",
+  "superseded_by": "engineering/implementation/evidence/W-12-sorting-php8512.json",
   "historical_sorting_note": "The former implementation-dependent comparator schedule was not approved as a compatibility reduction. It is corrected and verified separately in W-12-sorting-php8512.json; historical command results below are retained, not current-head verification."
 }

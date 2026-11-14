@@ -42,7 +42,7 @@ typed-source 的來源順序可被 `__toString` 重入觀察。驗證保存原�
 
 參照寫入在轉換期間持有原 reference 及 RHS。alias 被 unset 時更新原位置而不重建名稱，被重新綁定時追隨目前 reference，重新核對 request owner，依固定 PHP 不重跑新目的地的型別限制。寫入後先釋放 RHS，再釋放舊 target garbage，精確保留 `convert,convert,rhs,old`。Go 測試使用真正的可寫 cell；額外複製／持有測試 operand 會掩蓋這些生命週期錯誤。
 
-[建構函式回傳的暫存值](/internal/runtime/heap.go#L88)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
+[建構函式回傳的暫存值](../../internal/runtime/heap.go#L88)（constructor-style temporary）尚未存入 PHP 位置，持有計數為零。對尚未認領的 array／reference 圖，先驗證所有可達值，整體成功後才提交 owner。已認領的同請求值使用固定成本檢查，不重走整張圖。bind 與 foreach 綁定會先保存兩個可寫位置的原始零計數狀態，再各取得所需 owner，避免兩位置指向同一個暫存值時，先取得的計數掩蓋另一位置的需要。普通 Go value 複製本身不取得 PHP owner。
 
 類別描述不保存物件欄位、static 值、enum 活實例、lazy 初始化錯誤或 hook 重入狀態。這些狀態由該請求的 heap／object 擁有。Go callback 是受信任的宿主程式；程式描述中的 callback 不應捕捉 PHP 請求的可變值。
 
@@ -232,7 +232,7 @@ getter 沒有型別或恰為 mixed 時，在原持有與 invocation wrapper 內�
 
 資源在執行 close callback 前先提交 closed／freed／close=nil，再取得 identity 暫時持有。持有直到 callback 及 panic 的 Stringer 格式化結束後才釋放，避免兩個 owner 交替期間短暫歸零造成有效 handle 提早刪除。最後一次 release 依 callback 結束後的 refcount 決定是否移除 registry。明確 close 若原有 owner 全部釋放也移除；原先為零的 constructor temporary 則保留到呼叫端 discard。關閉狀態不回復、callback 不重跑，cleanup context、取消及 shutdown 已關閉請求的限制保留。
 
-72 組 Go 宿主控制涵蓋兩種寬度、三個入口、三種 owner 變化與成功／錯誤／panic／可重入 panic Stringer。它們不是新增 PHP 案例。原始版本、先釋放暫時 hold 再格式化的中間候選都曾失敗，正式版通過；實際 Go/386 回歸亦通過。兩個固定 PHP 映像各 1,596 案，原 1,566 案完全不變，四項已核准的不安全指定輸入保持受阻且不計通過，沒有新增例外。完整紅燈、原始觀察、來源雜湊、量測與重跑命令見 [R13 證據](/engineering/implementation/evidence/W-13-r13-review.json)。
+72 組 Go 宿主控制涵蓋兩種寬度、三個入口、三種 owner 變化與成功／錯誤／panic／可重入 panic Stringer。它們不是新增 PHP 案例。原始版本、先釋放暫時 hold 再格式化的中間候選都曾失敗，正式版通過；實際 Go/386 回歸亦通過。兩個固定 PHP 映像各 1,596 案，原 1,566 案完全不變，四項已核准的不安全指定輸入保持受阻且不計通過，沒有新增例外。完整紅燈、原始觀察、來源雜湊、量測與重跑命令見 [R13 證據](../implementation/evidence/W-13-r13-review.json)。
 
 ## 驗證與尚未完成項目
 
@@ -246,7 +246,7 @@ getter 沒有型別或恰為 mixed 時，在原持有與 invocation wrapper 內�
 
 ### 使用者核准保留安全修正的參考引擎不安全案例
 
-`diagnostics/gc_weak_resurrection.php` 在解構期間，經 WeakReference 將另一個不相連的循環物件保存到外部變數。固定 arm64 映像在輸出 `saved=live` 後以 139 結束。固定 i386 映像以 0 結束，但回報收集 2 個物件、外部變數仍是物件、WeakReference 已不再指向該物件。原始命令、輸出與 fixture 雜湊位於 `docs/implementation/evidence/W-13-gc-weak-diagnostic.json`。
+`diagnostics/gc_weak_resurrection.php` 在解構期間，經 WeakReference 將另一個不相連的循環物件保存到外部變數。固定 arm64 映像在輸出 `saved=live` 後以 139 結束。固定 i386 映像以 0 結束，但回報收集 2 個物件、外部變數仍是物件、WeakReference 已不再指向該物件。原始命令、輸出與 fixture 雜湊位於 `engineering/implementation/evidence/W-13-gc-weak-diagnostic.json`。
 
 Go 的 `TestW13GCExternalRootDuringDestructor` 已重現收集器釋放新增 owner 所指物件的問題。修正是在 destructor 改變圖之後重新核對存活，避免留下有效 owner 指向已釋放物件。此測試證明宿主安全不變條件，不是上述 PHP 案例的相容通過。
 
@@ -254,4 +254,4 @@ Go 的 `TestW13GCExternalRootDuringDestructor` 已重現收集器釋放新增 ow
 
 PHP 行為只由指定的 arm64 與 i386 digest 映像產生。CI 重新產生參考 JSON，先逐位元比對已提交的輸出，再用相同 guest 寬度執行 Go 操作矩陣。容器無網路、唯讀、移除 capabilities 並限制程序與記憶體，fixture 只有測試資料。
 
-方法與 static 分派、hook／lazy 重入、解構與 WeakMap 矩陣、取消／大量循環及配置量測已有局部證據。完整 PHP frontend／VM、autoload／namespace、Closure／Reflection 公開介面、真實 I/O、歷史版本與應用驗收仍未涵蓋。最終結果及未涵蓋項目以 [W-13](/engineering/implementation/W-13.md) 及其執行證據為準。
+方法與 static 分派、hook／lazy 重入、解構與 WeakMap 矩陣、取消／大量循環及配置量測已有局部證據。完整 PHP frontend／VM、autoload／namespace、Closure／Reflection 公開介面、真實 I/O、歷史版本與應用驗收仍未涵蓋。最終結果及未涵蓋項目以 [W-13](../implementation/W-13.md) 及其執行證據為準。

@@ -21271,39 +21271,39 @@
       "sha256": "3e3c2c12fcc867b6a8a175743d83f6d06fa973e85df15137c331cfb61cbdd17f"
     },
     {
-      "path": "docs/implementation/evidence/W-02-php-license-files.json",
+      "path": "engineering/implementation/evidence/W-02-php-license-files.json",
       "sha256": "8878d4382ef53fe2622b15009dca0a0ac2132ea6c2d135695bd9e0255f652b15"
     },
     {
-      "path": "docs/implementation/evidence/W-02-go-source-license-files.json",
+      "path": "engineering/implementation/evidence/W-02-go-source-license-files.json",
       "sha256": "08849adfca535a456b63c4bed2b03c3089aeaec0b3a4c8646b9681a90a5b2b69"
     },
     {
-      "path": "docs/implementation/evidence/W-02-build-image-packages.json",
+      "path": "engineering/implementation/evidence/W-02-build-image-packages.json",
       "sha256": "900b5e30ab78687767720de17738806df5bd376fc6ae7a610c8e7c2a9bab340c"
     },
     {
-      "path": "docs/implementation/evidence/W-02-binary-license-files.json",
+      "path": "engineering/implementation/evidence/W-02-binary-license-files.json",
       "sha256": "7a1ca7f1f8087f78085a92ac9094d04b76aa25ccd362eaad97f6ac96ee4a1980"
     },
     {
-      "path": "docs/implementation/evidence/W-02-probe-image-packages.json",
+      "path": "engineering/implementation/evidence/W-02-probe-image-packages.json",
       "sha256": "1e6f45eed5b504f61700eaf3bc2e3d30789e56ff43e95b6803933ebd281beb18"
     },
     {
-      "path": "docs/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
+      "path": "engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json",
       "sha256": "89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31"
     },
     {
-      "path": "docs/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
+      "path": "engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json",
       "sha256": "4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3"
     },
     {
-      "path": "docs/implementation/evidence/W-02-php-reference-index.json",
+      "path": "engineering/implementation/evidence/W-02-php-reference-index.json",
       "sha256": "2d7fd9aab90c5444e6c4f5c59fce9ab6ba6bce7b8709ef74fcd1f618cd2e867b"
     },
     {
-      "path": "docs/implementation/evidence/W-02-python-local-20261029/local-1.json",
+      "path": "engineering/implementation/evidence/W-02-python-local-20261029/local-1.json",
       "sha256": "9636d680f02ec3bdccf32d1a89287cbecf154597659a6cd153b91beb604addfc"
     }
   ],

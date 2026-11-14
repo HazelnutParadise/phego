@@ -35,11 +35,11 @@ SLIDE_LEADS = [("1.90", "1995-09-18"), ("1.91", "1995-10-09"), ("1.92", "1995-10
 SLIDES_URL = "https://talks.php.net/show/oscon2002/5"
 # Archive names whose exact version was established from their contents.
 KNOWN_IDENTITY = {
-    "php-108.tar.gz": ("1.0.8", "docs/implementation/evidence/W-49-php-108-source.json"),
+    "php-108.tar.gz": ("1.0.8", "engineering/implementation/evidence/W-49-php-108-source.json"),
 }
 # Versions whose official archive was retrieved and hashed in recorded evidence.
-RETRIEVED = {"2.0": "docs/implementation/evidence/W-49-php-200-source.json",
-             "1.0.8": "docs/implementation/evidence/W-49-php-108-source.json"}
+RETRIEVED = {"2.0": "engineering/implementation/evidence/W-49-php-200-source.json",
+             "1.0.8": "engineering/implementation/evidence/W-49-php-108-source.json"}
 
 
 def _read(path, limit):

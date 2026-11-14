@@ -2,7 +2,7 @@
 
 需求：REQ-025、REQ-061、REQ-064。局部測試對應 T-049、T-050、T-121、T-122、T-127、T-128。
 
-本文件供編譯器、VM、快取與原生後端維護者使用。W-16 提供程式格式及載入驗證，PHP 執行與完整產品驗收由 [W-17 計畫](https://github.com/HazelnutParadise/phego/blob/b104c91278e756546aa5b60ef3e77b7f6c1f3c82/docs/implementation/W-17.md)、W-23、W-41、W-44 整合。實作與驗證進度以 [W-16](/engineering/implementation/W-16.md) 為準。
+本文件供編譯器、VM、快取與原生後端維護者使用。W-16 提供程式格式及載入驗證，PHP 執行與完整產品驗收由 [W-17 計畫](https://github.com/HazelnutParadise/phego/blob/b104c91278e756546aa5b60ef3e77b7f6c1f3c82/docs/implementation/W-17.md)、W-23、W-41、W-44 整合。實作與驗證進度以 [W-16](../implementation/W-16.md) 為準。
 
 ## 程式只在驗證完成後發布
 
@@ -232,7 +232,7 @@ VM 與原生後端必須使用同一套契約。合併指令時保留各語意�
 
 ## 分派與 PGO 實測
 
-環境：Go 1.26.5、darwin/arm64、Apple M3。每個數字是五次 150 ms 樣本的中位數，單位為 ns／完整合成工作量，越小越快。原始樣本、最小／最大值及配置量保存在 [bench-summary.json](/engineering/implementation/evidence/W-16-bytecode/bench-summary.json)。測量含每個語意步驟的取消與配額檢查，各候選的結果、步數、binary output 及中斷位置均先對照獨立控制案例。
+環境：Go 1.26.5、darwin/arm64、Apple M3。每個數字是五次 150 ms 樣本的中位數，單位為 ns／完整合成工作量，越小越快。原始樣本、最小／最大值及配置量保存在 [bench-summary.json](../implementation/evidence/W-16-bytecode/bench-summary.json)。測量含每個語意步驟的取消與配額檢查，各候選的結果、步數、binary output 及中斷位置均先對照獨立控制案例。
 
 PGO 訓練只含 arithmetic、branch-heavy、binary-mixed。heldout-alternating 未參與訓練，包含交替 taken／not-taken 分支。所有候選在獨立迴圈分派，trampoline 不使用 Go 遞迴。沒有提供生產用 default.pgo。
 

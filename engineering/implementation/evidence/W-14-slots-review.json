@@ -25,84 +25,84 @@
       "command": "gofmt -l internal (assert empty stdout)",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/format.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/format.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "CGO_ENABLED=0 go test ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/go.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/go.txt",
       "sha256": "f5d8358f909070a87b2b73b69f9714b69837ecf21639f205f5b9bae7b67de8a5"
     },
     {
       "command": "go test -race ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/race.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/race.txt",
       "sha256": "9aa2e02631f57de339899e64bba09d29c9b26e370330e97575398967adf4689f"
     },
     {
       "command": "go vet ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/vet.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/vet.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 tools/lifecycle_reference.py",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/oracle64.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/oracle64.txt",
       "sha256": "951a5f7ed50a4b90d043d5601c43d868b96420ed327aea20d26b435b2e3f58eb"
     },
     {
       "command": "python3 tools/lifecycle_reference.py --width 32",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/oracle32.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/oracle32.txt",
       "sha256": "6d18862663e309865c582f769c218eeba2e4d3b9b58a4af9f71d69f8b1907d10"
     },
     {
       "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/replay.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/replay.txt",
       "sha256": "ea06d6369c57523508680da140da4367d803237e37c0ee0cb387e69bf275dca4"
     },
     {
       "command": "CGO_ENABLED=0 go test -count=1 ./internal/runtime",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/runtime-final.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/runtime-final.txt",
       "sha256": "0f021f6d35bdb1f10de27320bec463623870c96112768ede96a348e23f503c09"
     },
     {
       "command": "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime (temporary pinned W-12 archive plus W-14 execution*.go and fixtures)",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/w12.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/w12.txt",
       "sha256": "eda058b15715e2a60f1f1ca83870d2ac9980c888e2653f200752597f935d3521"
     },
     {
       "command": "python3 tools/validate_docs.py",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/docs.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/docs.txt",
       "sha256": "7889cee6b8ab82ec4df27cbeaaa1d9d764e67dacb0174aecfad5cd8d53005534"
     },
     {
       "command": "python3 tools/validate_docs.py --no-write",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/docs-readonly.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/docs-readonly.txt",
       "sha256": "7889cee6b8ab82ec4df27cbeaaa1d9d764e67dacb0174aecfad5cd8d53005534"
     },
     {
       "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-slots-review/python.txt",
+      "evidence": "engineering/implementation/evidence/W-14-slots-review/python.txt",
       "sha256": "a5f6f2dd931c5a21aa93515b9523c7c256cc19fec0a2b3a3611865dcc25ede7d"
     }
   ],
@@ -111,26 +111,26 @@
       "baseline": "2eb6883",
       "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay/(64|32)/(array_throw_chain|array_throw_caught_chain|local_cow)$' ./internal/runtime",
       "before_exit_code": 1,
-      "before_evidence": "docs/implementation/evidence/W-14-slots-review/red.txt",
+      "before_evidence": "engineering/implementation/evidence/W-14-slots-review/red.txt",
       "sha256": "76c0d11f3e79a61e8fa35468e9d1b696ad77ffb5ef5433dfea6cb89527f21109",
-      "after_evidence": "docs/implementation/evidence/W-14-slots-review/runtime-final.txt"
+      "after_evidence": "engineering/implementation/evidence/W-14-slots-review/runtime-final.txt"
     },
     {
       "baseline": "local candidate before tryCatch helper",
       "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay/(64|32)/caught_then_throw$' ./internal/runtime",
       "before_exit_code": 1,
-      "before_evidence": "docs/implementation/evidence/W-14-slots-review/caught-red.txt",
+      "before_evidence": "engineering/implementation/evidence/W-14-slots-review/caught-red.txt",
       "sha256": "bf85309a50bede17bb83cf5126b70293589e52ec3674657a3cffd40b775eeba7",
-      "after_evidence": "docs/implementation/evidence/W-14-slots-review/runtime-final.txt",
+      "after_evidence": "engineering/implementation/evidence/W-14-slots-review/runtime-final.txt",
       "reproducibility": "Intermediate diagnostic log only; candidate patch not retained as a separate version."
     },
     {
       "baseline": "local candidate before tryCatch entry stop check",
       "command": "CGO_ENABLED=0 go test -count=1 -run TestExecutionCatchHonorsEntryStop ./internal/runtime",
       "before_exit_code": 1,
-      "before_evidence": "docs/implementation/evidence/W-14-slots-review/catch-stop-red.txt",
+      "before_evidence": "engineering/implementation/evidence/W-14-slots-review/catch-stop-red.txt",
       "sha256": "ce50a33e870745ce4fb07f75265238e6424f9499cbc19ae04a4af96f1ccd27e3",
-      "after_evidence": "docs/implementation/evidence/W-14-slots-review/runtime-final.txt",
+      "after_evidence": "engineering/implementation/evidence/W-14-slots-review/runtime-final.txt",
       "reproducibility": "Intermediate diagnostic log only; candidate patch not retained as a separate version."
     }
   ],
@@ -146,7 +146,7 @@
     ".github/workflows/semantics-lifecycle.yml": "268d6659d26b45959100022e5b50442b1ea1f3a3faef1e8e36e2c173d24c778a",
     "tools/lifecycle_reference.py": "1115aec71f1dac4378299db45b405d98676c3fb6bfdca819456ca2ceda5d944e",
     "tools/test_lifecycle_reference.py": "a742909f87e3bdea915052613089341d35dc5270712e0757c649c6c455ddcd10",
-    "docs/implementation/W-14.md": "f26c0bfe3a63521ab4d0ee09d07c4a590105c7e44bebd958893af9147dc1816e",
+    "engineering/implementation/W-14.md": "f26c0bfe3a63521ab4d0ee09d07c4a590105c7e44bebd958893af9147dc1816e",
     "internal/runtime/execution_ci_review_test.go": "7e451a7e0ac37cf84981d9497f7b504c2df3f2cb8ce7990e0cd256beba429d97",
     "internal/runtime/execution.go": "b3227fcce82012ded836a8155e8824ddd6fb90b77ee5f8b572659c8d0e5a504d",
     "internal/runtime/execution_review_test.go": "8996f23e22fe173f18279fa2d31828afb4542a4468235e2e31a457cbae26104c",
@@ -209,5 +209,5 @@
   ],
   "snapshot_commit": "0078c47d1c826f835992262fa708709ffe2bc222",
   "snapshot_note": "Historical 43-case snapshot; later finally suppression regressions are in the followup record.",
-  "followup_evidence": "docs/implementation/evidence/W-14-finally-review.json"
+  "followup_evidence": "engineering/implementation/evidence/W-14-finally-review.json"
 }

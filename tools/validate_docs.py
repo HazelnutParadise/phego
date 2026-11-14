@@ -18,8 +18,8 @@ from urllib.parse import unquote, urlsplit
 def validate(root: Path) -> dict:
     errors: list[str] = []
     checks: list[dict[str, str]] = []
-    data = root / "docs/data"
-    document = root / "docs/spec/specification.zh-TW.md"
+    data = root / "engineering/data"
+    document = root / "engineering/spec/specification.zh-TW.md"
 
     def check(name: str, condition: bool, detail: str = "") -> None:
         checks.append({"check": name, "status": "pass" if condition else "fail", "detail": detail})
@@ -100,7 +100,7 @@ def validate(root: Path) -> dict:
                     raise ValueError(f"duplicate JSON key: {key}")
                 result[key] = value
             return result
-        index = json.loads((root / "docs/implementation/github-index.json").read_text(encoding="utf-8"), object_pairs_hook=unique_keys)
+        index = json.loads((root / "engineering/implementation/github-index.json").read_text(encoding="utf-8"), object_pairs_hook=unique_keys)
         owners = index["acceptance_owner"]
         indexed = index["items"]
         if not isinstance(owners, dict) or not isinstance(indexed, list):
@@ -167,7 +167,7 @@ def validate(root: Path) -> dict:
         check("specification " + label + " register", set(found) == set(ids) and len(found) == len(ids))
     adrs = re.findall(r'^\| (ADR-\d{2}) ', text, re.M)
     check("28 decision records", len(adrs) == 28 and set(adrs) == {f"ADR-{i:02d}" for i in range(1, 29)})
-    decision_file = root / "docs/decisions/README.md"
+    decision_file = root / "engineering/decisions/README.md"
     decisions = decision_file.read_text(encoding="utf-8") if decision_file.exists() else ""
     source_rows = re.findall(r'^\| ADR-.*$', text, re.M)
     decision_rows = re.findall(r'^\| ADR-.*$', decisions, re.M)
@@ -238,7 +238,7 @@ def validate(root: Path) -> dict:
     for p in sorted(root.rglob("*")):
         if not p.is_file() or ".git" in p.parts or "__pycache__" in p.parts: continue
         rel = p.relative_to(root).as_posix()
-        if rel == "docs/data/document-validation.json": continue
+        if rel == "engineering/data/document-validation.json": continue
         inputs[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
     return {
         "schema_version": 1, "document_version": "1.1.2", "scope": "documentation_only",
@@ -265,7 +265,7 @@ def main() -> int:
         print(f"Documentation validation could not complete: {exc}", file=sys.stderr)
         return 2
     if not args.no_write:
-        out = root / "docs/data/document-validation.json"
+        out = root / "engineering/data/document-validation.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: result[k] for k in ("scope", "status", "counts", "product_test_status", "errors")}, ensure_ascii=False, indent=2))

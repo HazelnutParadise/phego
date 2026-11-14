@@ -10,7 +10,7 @@
 
 - **公開子套件 `phego/diag`**：`Diagnostic`、`Span`、`Severity`、`Code` 與 `Render`。根套件的 `phego.Diagnostic` 早已是 PHP notice／warning 的型別（`Result.Diagnostics`），所以不在根套件新增同名型別，也不用 alias 到 internal 型別（`go doc` 只會顯示 alias，看不到欄位）。
 - **單位用 byte**：`Column`、`Offset`、`Length` 都以 byte 計，和 `go/token` 相同，遇到非法 UTF-8 也有定義。渲染器從原始碼文字換算成終端欄寬：tab 展開成 4 格，中日韓全形字算 2 格。只有 `Offset` 沒有 `Column` 時，拿得到原始碼就自行算出欄位，所以 bytecode 錯誤也能畫出標記。
-- **代碼只有一個來源**：公開套件 `phego/diag/codes` 為每個代碼匯出一個常數，宿主可以寫 `d.Code == codes.MountPath` 比對，不必手打字串；`codes.Lookup` 取標題、note 與 help，`codes.All` 列出全部代碼。底層 registry 不匯出，宿主無法改掉 Phego 回報的內容。registry 以常數當 map key，重複代碼會直接編譯失敗。`docs/diagnostics/codes.md` 由 `go generate ./diag/codes` 產生，測試比對兩者是否一致，也禁止 `PHG` 字面值出現在 registry 以外的正式程式碼。代碼發佈後不改號、不重用，停用時標成 retired。`PHG1xxx` 是設定與執行選項，`PHG2xxx` 是 bytecode。
+- **代碼只有一個來源**：公開套件 `phego/diag/codes` 為每個代碼匯出一個常數，宿主可以寫 `d.Code == codes.MountPath` 比對，不必手打字串；`codes.Lookup` 取標題、note 與 help，`codes.All` 列出全部代碼。底層 registry 不匯出，宿主無法改掉 Phego 回報的內容。registry 以常數當 map key，重複代碼會直接編譯失敗。`engineering/diagnostics/codes.md` 由 `go generate ./diag/codes` 產生，測試比對兩者是否一致，也禁止 `PHG` 字面值出現在 registry 以外的正式程式碼。代碼發佈後不改號、不重用，停用時標成 retired。`PHG1xxx` 是設定與執行選項，`PHG2xxx` 是 bytecode。
 - **note 和 help 綁在代碼上**：每個代碼在 registry 寫一次原因與修法，建構點只填 `Code`，動態值放在 `Reason` 或 `Detail`。help 是純文字，不會被自動套用。
 - **既有錯誤只新增**：`ConfigError` 新增匯出欄位 `Code` 與方法 `Diagnostic()`，`Error()` 仍是原本的單行。宿主自己建立、沒有 `Code` 的 `ConfigError` 回報 `PHG1000`。測試掃描根套件，確保引擎建立的每個 `ConfigError` 都有代碼。`phego.Diagnose(err)` 沿錯誤鏈找出第一個能描述自己的錯誤，nil 和其他錯誤回傳 false。
 - **相容性備註**：`ConfigError` 新增欄位後，宿主若用不具名欄位的複合字面值（`ConfigError{"a", "b"}`）會編譯失敗。Go 1 相容承諾允許新增欄位，`go vet` 也會對這種寫法警告。宿主可以填自己的代碼，不在代碼表裡的代碼會保留，note 與 help 用 PHG1000 的內容。

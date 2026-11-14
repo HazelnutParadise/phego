@@ -1,6 +1,6 @@
 # W-12 陣列、參照與迭代位置
 
-本紀錄延續 [W-06 值模型](/engineering/decisions/W-06-value-model.md)，對應 REQ-007、REQ-016、REQ-017 與 T-013、T-014、T-031、T-032、T-033、T-034。只記錄 PHP 8.5.12 的 runtime 操作，不是完整 PHP 引擎或產品驗收證明。
+本紀錄延續 [W-06 值模型](W-06-value-model.md)，對應 REQ-007、REQ-016、REQ-017 與 T-013、T-014、T-031、T-032、T-033、T-034。只記錄 PHP 8.5.12 的 runtime 操作，不是完整 PHP 引擎或產品驗收證明。
 
 ## 選定做法
 
@@ -36,7 +36,7 @@ Apple M3、darwin/arm64 的型別布局：value 64 B、reference 72 B、arrayKey
 | 綁定參照並寫入 | 56～125 ns | 46～49 ns | 1 次、80 B，兩者相同 |
 | ordered 陣列讀取一格 | 本批未量測 | 52～57 ns | 0 次、0 B |
 
-表格使用最後一批樣本。前一批與最後一批的耗時差異很大，背景負載沒有固定，不能據此宣稱更快或排除耗時退步。W-12 以補足語意為目的，沒有以這次量測主張效能最佳化成立。各批原始樣本、基準 commit、工具版本與雜湊保存在[執行證據](/engineering/implementation/evidence/W-12-runtime-php8512.json)。每元素一次配置的成本仍存在，沒有在本票重寫布局。
+表格使用最後一批樣本。前一批與最後一批的耗時差異很大，背景負載沒有固定，不能據此宣稱更快或排除耗時退步。W-12 以補足語意為目的，沒有以這次量測主張效能最佳化成立。各批原始樣本、基準 commit、工具版本與雜湊保存在[執行證據](../implementation/evidence/W-12-runtime-php8512.json)。每元素一次配置的成本仍存在，沒有在本票重寫布局。
 
 ## 排序相容修正與量測
 
@@ -50,7 +50,7 @@ callback 拋錯與參數清理拋錯分開傳遞。後者保留已產生的比�
 
 空副本保留下一索引，但不複製初始化狀態與迭代位置。`limit == 0` 是 Go 表示未初始化的記號，不是 Zend 欄位布局。內建排序的混合陣列移除空洞時保留原始迭代位置；packed 轉換則使用原有位置映射。這些行為與排序中暫時清空查找索引均有 PHP 對照。
 
-上游版本鎖定 PHP 8.5.12 commit `136e049ac10b032c83018e65b63b6df858943750`。衍生程式保留 Zend 2.00、PHP 3.01 及 libc++ 的完整授權與聲明，見 [THIRD_PARTY_NOTICES.md](/THIRD_PARTY_NOTICES.md) 與 [UPSTREAM.json](/third_party/php-sort/UPSTREAM.json)。原創專案程式維持 MIT。
+上游版本鎖定 PHP 8.5.12 commit `136e049ac10b032c83018e65b63b6df858943750`。衍生程式保留 Zend 2.00、PHP 3.01 及 libc++ 的完整授權與聲明，見 [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) 與 [UPSTREAM.json](../../third_party/php-sort/UPSTREAM.json)。原創專案程式維持 MIT。
 
 排序量測使用 `go test ./internal/runtime -run '^$' -bench '^BenchmarkW12Sorting$' -benchtime 200x -count 3`，輸入為固定種子的整數序列。基準為修正前 `65adcab` 的 Go 排序，候選與 PHP 固定映像的比較次數完全相同：
 
@@ -60,13 +60,13 @@ callback 拋錯與參數清理拋錯分開傳遞。後者保留已產生的比�
 | 128 | 1119 | 810 | 138 次，約 29.5 KB |
 | 1024 | 12938 | 9942 | 1038 次，約 243 KB |
 
-比較次數沒有增加，穩定位置表增加配置。各批耗時受背景負載影響而大幅變動，不能據此主張加速。原始樣本、失敗再現及 650 組案例在兩種位元寬度的對照見[排序修正證據](/engineering/implementation/evidence/W-12-sorting-php8512.json)。這是 runtime 整數比較量測，不包含 PHP VM 或應用效能。
+比較次數沒有增加，穩定位置表增加配置。各批耗時受背景負載影響而大幅變動，不能據此主張加速。原始樣本、失敗再現及 650 組案例在兩種位元寬度的對照見[排序修正證據](../implementation/evidence/W-12-sorting-php8512.json)。這是 runtime 整數比較量測，不包含 PHP VM 或應用效能。
 
 PHP 次數使用同一個 seed 73 數列，每次追加前以 `(seed*73+19)%9973` 更新，完整受限容器命令、內嵌 PHP 腳本及排序輸出的 JSON 雜湊編碼存於證據的 `native_comparison_probe`。從專案根目錄可重跑：
 
 ```python
 import json, subprocess
-with open("docs/implementation/evidence/W-12-sorting-php8512.json") as source:
+with open("engineering/implementation/evidence/W-12-sorting-php8512.json") as source:
     probe = json.load(source)["native_comparison_probe"]
 subprocess.run(probe["command"], check=True)
 ```

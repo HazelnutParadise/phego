@@ -4,7 +4,7 @@ The product goal is to outperform every applicable existing PHP compiler and exe
 
 ## Scope and discovery
 
-The [competitor catalog](/engineering/data/competitor-catalog.json) is a seed for ongoing discovery, not an exhaustive or source-locked inventory. Distinguish independent engines from website deployment stacks. Include suitable historical PHP implementations and current alternatives. A project that cannot execute a workload is not a performance loss; compare its supported common workloads separately.
+The [competitor catalog](../data/competitor-catalog.json) is a seed for ongoing discovery, not an exhaustive or source-locked inventory. Distinguish independent engines from website deployment stacks. Include suitable historical PHP implementations and current alternatives. A project that cannot execute a workload is not a performance loss; compare its supported common workloads separately.
 
 ## Fair comparisons
 
@@ -22,4 +22,4 @@ Every applicable required competitor/workload cell must pass to satisfy the comp
 
 ## Evidence
 
-Retain raw observations, commands, source/configuration locks, input seeds, correctness results, resource measurements, analysis code, and an independent reproduction. The authoritative methodology is [chapter 37](/engineering/spec/specification.zh-TW.md#chapter-37).
+Retain raw observations, commands, source/configuration locks, input seeds, correctness results, resource measurements, analysis code, and an independent reproduction. The authoritative methodology is [chapter 37](../spec/specification.zh-TW.md#chapter-37).

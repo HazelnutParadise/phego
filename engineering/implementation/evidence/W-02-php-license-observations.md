@@ -1,6 +1,6 @@
 # W-02｜PHP 來源授權文件的原文觀察
 
-此紀錄對應 REQ-060、T-119 與 [W-02](/engineering/implementation/W-02.md)。2026-10-29 在無網路、唯讀、非 root 且限制資源的 Linux 容器中，核對 PHP 8.5.12 封存檔 SHA-256 `08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209`，並逐一核對[既有清單](/engineering/implementation/evidence/W-02-php-license-files.json)的 17 份一般檔案大小與摘要，均相符。容器映像為 `buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3`；沒有執行來源程式。清單保留每份文件的完整路徑與摘要，路徑以下省略 `php-8.5.12/`。
+此紀錄對應 REQ-060、T-119 與 [W-02](../W-02.md)。2026-10-29 在無網路、唯讀、非 root 且限制資源的 Linux 容器中，核對 PHP 8.5.12 封存檔 SHA-256 `08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209`，並逐一核對[既有清單](W-02-php-license-files.json)的 17 份一般檔案大小與摘要，均相符。容器映像為 `buildpack-deps@sha256:4c9dc8ac4ff58f6fe23d2b007fe3bb8e25716f947adae6fb312d6cfbaac2b3c3`；沒有執行來源程式。清單保留每份文件的完整路徑與摘要，路徑以下省略 `php-8.5.12/`。
 
 | 文件 | 原文中可確認的內容 |
 |---|---|
@@ -57,7 +57,7 @@ PYCODE
 
 ## bcmath 原始檔的授權標記
 
-2026-10-29 對同一封存檔的 `ext/bcmath/libbcmath/` 下 28 個一般 `.c`／`.h` 檔案，檢查各檔前 4096 bytes。結果及各檔完整內容摘要記錄於 [標記清單](/engineering/implementation/evidence/W-02-bcmath-headers.json)，SHA-256 為 `eded231667ca8efac8415e485624b6d3ba12c97b431b244b31345683ed8d3542`。兩次獨立受限容器執行的輸出逐位元相同。
+2026-10-29 對同一封存檔的 `ext/bcmath/libbcmath/` 下 28 個一般 `.c`／`.h` 檔案，檢查各檔前 4096 bytes。結果及各檔完整內容摘要記錄於 [標記清單](W-02-bcmath-headers.json)，SHA-256 為 `eded231667ca8efac8415e485624b6d3ba12c97b431b244b31345683ed8d3542`。兩次獨立受限容器執行的輸出逐位元相同。
 
 21 個檔案的標頭文字指定 GNU Lesser General Public License 第 2 版或更新版本，5 個標示 PHP License 3.01，`xsse.h` 標示 MIT License，`config.h` 沒有命中這三種文字。目錄內的 `LICENSE` 文件是 LGPL 2.1 通用文字，不能把該檔名自動套用到目錄內每個檔案。未命中不代表無授權，這些字串比對也不是完整授權分類或分發義務判斷。其他檔案、依賴及實際產物的適用條件仍待審查。
 

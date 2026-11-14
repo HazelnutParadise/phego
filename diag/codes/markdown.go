@@ -2,7 +2,7 @@ package codes
 
 import "strings"
 
-// Markdown renders the code table; docs/diagnostics/codes.md must equal it.
+// Markdown renders the code table; engineering/diagnostics/codes.md must equal it.
 func Markdown() string {
 	var b strings.Builder
 	b.WriteString("# Phego diagnostic codes\n\n")

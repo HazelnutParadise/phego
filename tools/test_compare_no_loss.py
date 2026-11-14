@@ -11,8 +11,8 @@ class NoLossTests(unittest.TestCase):
     def test_previous_results_are_not_silently_removed_or_reclassified(self):
         with tempfile.TemporaryDirectory() as name:
             root = Path(name)
-            (root / "docs/data").mkdir(parents=True)
-            (root / "docs/data/phego-acceptance-tests.json").write_text(json.dumps({"items": [{"id": "T-001"}]}))
+            (root / "engineering/data").mkdir(parents=True)
+            (root / "engineering/data/phego-acceptance-tests.json").write_text(json.dumps({"items": [{"id": "T-001"}]}))
             (root / "log").write_bytes(b"synthetic\n")
             base = {"test_id": "T-001", "commit": "a" * 40, "command": "test", "profile":
                     {"release": "8.5.12", "platform": "linux/arm64", "build": "cli"},

@@ -57,8 +57,8 @@
     }
   ],
   "input_sha256": {
-    "docs/data/document-validation.json": "d3623afb49e080f7eaf636ddfefc6603ace76f5ad9bcf5e000f1c2f6ec4f4a7f",
-    "docs/implementation/W-14.md": "7f9e8ace5980540676e4f24c71a0b3e48e029606f51d2c6ccf3e7dc8c7943158",
+    "engineering/data/document-validation.json": "d3623afb49e080f7eaf636ddfefc6603ace76f5ad9bcf5e000f1c2f6ec4f4a7f",
+    "engineering/implementation/W-14.md": "7f9e8ace5980540676e4f24c71a0b3e48e029606f51d2c6ccf3e7dc8c7943158",
     "internal/runtime/execution.go": "fcd5aaed4ed8a1bd17bfeb105326bbc8e165e068b145c5db1b781f8b9358cd0b",
     "internal/runtime/execution_destruct.go": "8510ce31abae7d8192e9526de09a84b234486897768b9fba30495216ebd6d7d5",
     "internal/runtime/execution_oracle_test.go": "6c6afff366fc484f2038c4f8f33411aba313973efa824a3c74042e97a3e6ac8a",
@@ -415,22 +415,22 @@
         "LICENSE": "1d89138d5b983bf02dd2f6c6da3a63014631251033e9adc039c153ffe54b32cc",
         "README.md": "55fa09d8c4efe007ea5181192a9e91cc9a375a57df90dfe867af2a5abd0a5b95",
         "THIRD_PARTY_NOTICES.md": "fce643a639b306627eea3c21ecb57a81269b27b726b11b62ab5bfc1b2cc5b7ac",
-        "docs/README.md": "a32b9bfb6e78fe92585e1d5a4c5c403046f72f8da622d2b46fdf6f83231bb5e5",
-        "docs/acceptance/README.md": "6f454d12918ff24b738e15aa95e42819353af13e2850c81c2f3ced9adb331edc",
-        "docs/benchmarks/README.md": "11a1356436fd1536199fb4cdcc79ed65da04e1c2077695897d611069630f2cb5",
-        "docs/compatibility/README.md": "d7ccaecc26dc24b4aa11268f72cb595f1d46889a21acc62756fcf2c40e620277",
-        "docs/data/application-catalog.json": "8f64ee2b6722b3d494f25692c4713ab7f77ef66660c7938b5e7930850c33425c",
-        "docs/data/competitor-catalog.json": "c4c3d61cd9056ccb9a1220f213a1db82a5cd4b08ca03d572d0b571e92853bd43",
-        "docs/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
-        "docs/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
-        "docs/data/phego-sources.json": "c4e4217c59185e7f97ee49f32eb92d335b79df1528c93b6102bf8e3395609079",
-        "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
-        "docs/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
-        "docs/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
-        "docs/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
-        "docs/implementation/W-14.md": "9087a0ac9fa81eb0928ed6ef480614024e6819578c30be79e27936ed5456c6e3",
-        "docs/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
-        "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+        "engineering/README.md": "a32b9bfb6e78fe92585e1d5a4c5c403046f72f8da622d2b46fdf6f83231bb5e5",
+        "engineering/acceptance/README.md": "6f454d12918ff24b738e15aa95e42819353af13e2850c81c2f3ced9adb331edc",
+        "engineering/benchmarks/README.md": "11a1356436fd1536199fb4cdcc79ed65da04e1c2077695897d611069630f2cb5",
+        "engineering/compatibility/README.md": "d7ccaecc26dc24b4aa11268f72cb595f1d46889a21acc62756fcf2c40e620277",
+        "engineering/data/application-catalog.json": "8f64ee2b6722b3d494f25692c4713ab7f77ef66660c7938b5e7930850c33425c",
+        "engineering/data/competitor-catalog.json": "c4c3d61cd9056ccb9a1220f213a1db82a5cd4b08ca03d572d0b571e92853bd43",
+        "engineering/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
+        "engineering/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
+        "engineering/data/phego-sources.json": "c4e4217c59185e7f97ee49f32eb92d335b79df1528c93b6102bf8e3395609079",
+        "engineering/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102",
+        "engineering/data/php-history-policy.json": "dfb79a23a864e2236c3600db8fac9b5b3f852d63f654f1030a99a1ef886d699d",
+        "engineering/decisions/README.md": "f634293746a3164705c7097215849b3016e8b648b8fa5ead3c203b0f8b4f5337",
+        "engineering/implementation/README.md": "d83c1d07f1ac8097567bdd41abd4a4e1d1bb0c5c6f393ab7ac4b24842c627086",
+        "engineering/implementation/W-14.md": "9087a0ac9fa81eb0928ed6ef480614024e6819578c30be79e27936ed5456c6e3",
+        "engineering/implementation/github-index.json": "04593908c901227e5086fc3e22eb8f119b738e3a53dc8d1e8aa31edaa7671cc1",
+        "engineering/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
         "tools/test_validate_docs.py": "3dd54e7b66a74ab3b5132ee5f310d65b30539dbe264313d0b71be395407cb9b6",
         "tools/validate_docs.py": "d95e9604d4b22ccd2bce19e0c0e2116cd631c5de265df5c2210817143296c127"
       }
@@ -442,7 +442,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/go.txt",
+        "path": "engineering/implementation/evidence/W-14-review/go.txt",
         "sha256": "5487cdf81bb437b49ab2d2ccec856056a5267c42d39a8f3159d7b010890b4878"
       }
     },
@@ -451,7 +451,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/race.txt",
+        "path": "engineering/implementation/evidence/W-14-review/race.txt",
         "sha256": "c8ef8015a92fb7d27ab2f18de32d451e5202efdc0fd6c865b9d39df13634488c"
       }
     },
@@ -460,7 +460,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/vet.txt",
+        "path": "engineering/implementation/evidence/W-14-review/vet.txt",
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     },
@@ -469,7 +469,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/python.txt",
+        "path": "engineering/implementation/evidence/W-14-review/python.txt",
         "sha256": "5a619c5696c45e519bdd00e59719e43b9e5efc35780f6e3cb9f86aedb8deef5a"
       }
     },
@@ -478,7 +478,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/oracle.txt",
+        "path": "engineering/implementation/evidence/W-14-review/oracle.txt",
         "sha256": "99044abd1024a8c33f3a2c054aae315e63ef0fc44403dd85ab0500831b5d1b38"
       }
     },
@@ -487,7 +487,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/docs.json",
+        "path": "engineering/implementation/evidence/W-14-review/docs.json",
         "sha256": "482065b6b29ffc75efc8383bb1847be8e1a00cafdd88206088dbb1aeedffaed7"
       }
     },
@@ -496,7 +496,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/green.txt",
+        "path": "engineering/implementation/evidence/W-14-review/green.txt",
         "sha256": "1e067f5eecb4bbbcca6307a6877627fd17de9b7fdb740740fbbe4bf15173f763"
       }
     },
@@ -510,7 +510,7 @@
   "recorded_at_utc": "2026-11-01T06:40:33.552007+00:00",
   "previous_local_evidence": {
     "commit": "9d9097ce9d38f982990ab5c2d027297d34ceec98",
-    "path": "docs/implementation/evidence/W-14.json"
+    "path": "engineering/implementation/evidence/W-14.json"
   },
   "github_review_followup": {
     "reviewed_commit": "9d9097ce9d38f982990ab5c2d027297d34ceec98",
@@ -524,11 +524,11 @@
       "scope": "isolated git archive plus recorded red-test snapshot",
       "status": "fail",
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/red.txt",
+        "path": "engineering/implementation/evidence/W-14-review/red.txt",
         "sha256": "1eda37512c8d7937322c5a3b49af55fea3f2ba1117d67255e303f35ac9c2bcf2"
       },
       "test_snapshot": {
-        "path": "docs/implementation/evidence/W-14-review/red-tests.go.txt",
+        "path": "engineering/implementation/evidence/W-14-review/red-tests.go.txt",
         "sha256": "7a64c92f2bcdd7094c50911ff3ada2aa509e00a1a21e1e28f846eddb6121b51e"
       },
       "reproduction": [
@@ -542,7 +542,7 @@
       "status": "pass",
       "exit_code": 0,
       "evidence": {
-        "path": "docs/implementation/evidence/W-14-review/green.txt",
+        "path": "engineering/implementation/evidence/W-14-review/green.txt",
         "sha256": "1e067f5eecb4bbbcca6307a6877627fd17de9b7fdb740740fbbe4bf15173f763"
       }
     },
@@ -564,5 +564,5 @@
       }
     ]
   },
-  "ci_followup_evidence": "docs/implementation/evidence/W-14-ci.json"
+  "ci_followup_evidence": "engineering/implementation/evidence/W-14-ci.json"
 }

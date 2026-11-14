@@ -18,7 +18,7 @@ class DocumentationValidatorTests(unittest.TestCase):
         shutil.copytree(SOURCE, self.root, ignore=shutil.ignore_patterns(".git", "__pycache__"))
 
     def mutate_json(self, filename, transform) -> None:
-        path = self.root / "docs/data" / filename
+        path = self.root / "engineering/data" / filename
         value = json.loads(path.read_text())
         transform(value)
         path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
@@ -75,7 +75,7 @@ class DocumentationValidatorTests(unittest.TestCase):
         self.assert_rejected("MIT license identity")
 
     def test_undefined_source(self) -> None:
-        p = self.root / "docs/spec/specification.zh-TW.md"
+        p = self.root / "engineering/spec/specification.zh-TW.md"
         p.write_text(p.read_text() + "\n[R99]\n")
         self.assert_rejected("source references resolve")
 

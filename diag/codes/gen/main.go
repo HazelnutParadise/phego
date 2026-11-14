@@ -1,4 +1,4 @@
-// Command gen writes docs/diagnostics/codes.md from the code registry.
+// Command gen writes engineering/diagnostics/codes.md from the code registry.
 package main
 
 import (
@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	path := filepath.Join("..", "..", "docs", "diagnostics", "codes.md")
+	path := filepath.Join("..", "..", "engineering", "diagnostics", "codes.md")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		log.Fatal(err)
 	}

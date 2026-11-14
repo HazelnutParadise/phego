@@ -2,7 +2,7 @@
 
 對應 REQ-060、T-119、T-120 的準備工作。每份封存檔依 `compat.lock.json` 的 component、版本、平台與 SHA-256 選取，先複製到容器私有暫存區並核對摘要，再清點檔名命中候選。結果為 `partial`，不代表授權適用性或散布義務已審查。
 
-[七份整理結果](/engineering/implementation/evidence/W-02-binary-license-files.json)的 SHA-256 為 `7a1ca7f1f8087f78085a92ac9094d04b76aa25ccd362eaad97f6ac96ee4a1980`。2026-10-29 每份獨立執行兩次，兩次 stdout 逐位元一致；[兩次原始輸出](/docs/implementation/evidence/W-02-binary-license-20261029)均已保存。以下摘要是各份 stdout 原始位元組的 SHA-256。各次退出碼、隔離設定及清理狀態來自當次操作紀錄。
+[七份整理結果](W-02-binary-license-files.json)的 SHA-256 為 `7a1ca7f1f8087f78085a92ac9094d04b76aa25ccd362eaad97f6ac96ee4a1980`。2026-10-29 每份獨立執行兩次，兩次 stdout 逐位元一致；[兩次原始輸出](W-02-binary-license-20261029)均已保存。以下摘要是各份 stdout 原始位元組的 SHA-256。各次退出碼、隔離設定及清理狀態來自當次操作紀錄。
 
 | 元件 | 平台 | 成員數 | 展開檔案內容 bytes | 候選數 | 單份輸出 SHA-256 |
 |---|---|---:|---:|---:|---|

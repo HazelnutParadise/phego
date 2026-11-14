@@ -37,7 +37,7 @@
     "tests/policy/special-files/probe.php": "2351554308d121482a94f3bce2e33d728da14fa61a070fdb0063fa36743765e8",
     "tests/policy/special-files/probe-windows.ps1": "e3893641c35abe5d2f464acf8498d07d5bfbd88f11e2055fc47a2ada3a22ae88",
     ".github/workflows/special-files.yml": "fc6bd3b3559c815ad6ceab797a35e6097437c72767a35698e66c3cbef6dc515c",
-    "docs/implementation/W-20.md": "184239d0f82eab35a3dd9d1fac271776e1ba78a8c5713abf01ab6822e181aa9b"
+    "engineering/implementation/W-20.md": "184239d0f82eab35a3dd9d1fac271776e1ba78a8c5713abf01ab6822e181aa9b"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",

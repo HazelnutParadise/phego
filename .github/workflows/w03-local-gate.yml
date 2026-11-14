@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/w03-local-gate.yml'
       - 'tools/**'
-      - 'docs/**'
+      - 'engineering/**'
       - 'README.md'
       - 'LICENSE'
   workflow_dispatch:

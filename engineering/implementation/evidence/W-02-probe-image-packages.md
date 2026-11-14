@@ -1,6 +1,6 @@
 # W-02：探查映像的套件文件清點
 
-對應 REQ-060、T-119、T-120 的準備工作。[部分清點](/engineering/implementation/evidence/W-02-probe-image-packages.json)記錄三個來源鎖中的 Go／LLVM 探查映像，以及清點工具本身使用的 Python 映像。2026-10-29 每個映像在獨立受限容器執行兩次，輸出逐位元一致，兩份[原始輸出](/docs/implementation/evidence/W-02-probe-images-20261029)均保留。
+對應 REQ-060、T-119、T-120 的準備工作。[部分清點](W-02-probe-image-packages.json)記錄三個來源鎖中的 Go／LLVM 探查映像，以及清點工具本身使用的 Python 映像。2026-10-29 每個映像在獨立受限容器執行兩次，輸出逐位元一致，兩份[原始輸出](W-02-probe-images-20261029)均保留。
 
 | 映像用途 | 平台 | 已安裝套件 | 未記錄 copyright | 單次輸出 SHA-256 |
 |---|---|---:|---:|---|
@@ -11,7 +11,7 @@
 
 ## 重跑與身分
 
-[清點腳本](/engineering/implementation/evidence/W-02-probe-images-20261029/inventory.sh) SHA-256 為 `dbb9a786bed81d99aa7b54a0fde582cbd24076092f756dc7c7df0666fe03957f`。已取得固定映像時，從專案根目錄以 Go 探查映像為例：
+[清點腳本](W-02-probe-images-20261029/inventory.sh) SHA-256 為 `dbb9a786bed81d99aa7b54a0fde582cbd24076092f756dc7c7df0666fe03957f`。已取得固定映像時，從專案根目錄以 Go 探查映像為例：
 
 ```sh
 docker run --rm -i --pull never --platform linux/amd64 --network none \
@@ -19,18 +19,18 @@ docker run --rm -i --pull never --platform linux/amd64 --network none \
   --security-opt no-new-privileges --cpus 1 --memory 512m --pids-limit 64 \
   --tmpfs /tmp:rw,noexec,nosuid,size=32m --entrypoint timeout \
   debian@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f891a94054b31 \
-  300 sh < docs/implementation/evidence/W-02-probe-images-20261029/inventory.sh
+  300 sh < engineering/implementation/evidence/W-02-probe-images-20261029/inventory.sh
 ```
 
 其他映像依清點 JSON 的完整映像識別與平台替換。映像拉取不在 300 秒限制內。記錄的執行與清理狀態來自當次操作；原始輸出可逐位元比對。
 
-來源鎖的 Debian 與 arm64 buildpack-deps 是映像索引。[Debian 原始索引](/engineering/implementation/evidence/W-02-probe-images-20261029/debian-index.json) SHA-256 與來源鎖一致，其中 linux/amd64 descriptor 為 `sha256:1e1a22175fbf1b32157ddaf0219e1db4e5401fab2b94ed285add64d18587cd2d`。[buildpack 原始索引](/engineering/implementation/evidence/W-02-probe-images-20261029/buildpack-index.json) SHA-256 與來源鎖一致，其中 linux/arm64 descriptor 為 `sha256:e95290ae09bb6aff3a9bd67b687a38c450cc256f0779da2ed9926dde4167f483`。這些索引使用 `docker buildx imagetools inspect --raw` 取得；兩個直接指定的平台 manifest 並非索引。
+來源鎖的 Debian 與 arm64 buildpack-deps 是映像索引。[Debian 原始索引](W-02-probe-images-20261029/debian-index.json) SHA-256 與來源鎖一致，其中 linux/amd64 descriptor 為 `sha256:1e1a22175fbf1b32157ddaf0219e1db4e5401fab2b94ed285add64d18587cd2d`。[buildpack 原始索引](W-02-probe-images-20261029/buildpack-index.json) SHA-256 與來源鎖一致，其中 linux/arm64 descriptor 為 `sha256:e95290ae09bb6aff3a9bd67b687a38c450cc256f0779da2ed9926dde4167f483`。這些索引使用 `docker buildx imagetools inspect --raw` 取得；兩個直接指定的平台 manifest 並非索引。
 
 ## Python 映像的 `/usr/local` 候選文件
 
-固定 Python 工具映像的 `/usr/local` 另以不追蹤目錄符號連結的方式，按相同檔名規則清點。2026-10-29 的兩次隔離執行均查看 1,576 個檔案並找到 42 個一般檔案候選；一個目錄符號連結未追蹤。兩次[原始結果](/docs/implementation/evidence/W-02-python-local-20261029)逐位元一致，SHA-256 為 `9636d680f02ec3bdccf32d1a89287cbecf154597659a6cd153b91beb604addfc`。清點只記錄檔名、大小、摘要與編碼，不能代表已盤點所有非 dpkg 內容或判定授權。
+固定 Python 工具映像的 `/usr/local` 另以不追蹤目錄符號連結的方式，按相同檔名規則清點。2026-10-29 的兩次隔離執行均查看 1,576 個檔案並找到 42 個一般檔案候選；一個目錄符號連結未追蹤。兩次[原始結果](W-02-python-local-20261029)逐位元一致，SHA-256 為 `9636d680f02ec3bdccf32d1a89287cbecf154597659a6cd153b91beb604addfc`。清點只記錄檔名、大小、摘要與編碼，不能代表已盤點所有非 dpkg 內容或判定授權。
 
-[清點程式](/engineering/implementation/evidence/W-02-python-local-20261029/phego-python-local-inventory-20261029.py) SHA-256 為 `602dbd00a72ed563605037ab560c65fc0e54117d6c81d2b851f2b7cd462d3e0c`。在已取得固定映像的環境，從專案根目錄執行：
+[清點程式](W-02-python-local-20261029/phego-python-local-inventory-20261029.py) SHA-256 為 `602dbd00a72ed563605037ab560c65fc0e54117d6c81d2b851f2b7cd462d3e0c`。在已取得固定映像的環境，從專案根目錄執行：
 
 ```sh
 docker run --rm -i --pull never --platform linux/arm64 --network none \
@@ -38,7 +38,7 @@ docker run --rm -i --pull never --platform linux/arm64 --network none \
   --security-opt no-new-privileges --cpus 1 --memory 512m --pids-limit 64 \
   --entrypoint timeout \
   python@sha256:29434a59c93070e470f84663e4289026e04644ea44b5220ef7e07d653318ca1f \
-  300 python3 - < docs/implementation/evidence/W-02-python-local-20261029/phego-python-local-inventory-20261029.py
+  300 python3 - < engineering/implementation/evidence/W-02-python-local-20261029/phego-python-local-inventory-20261029.py
 ```
 
 ## 限制

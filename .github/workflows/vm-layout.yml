@@ -1,7 +1,7 @@
 name: VM layout benchmarks
 
 # Compares the candidates for VM dispatch, frame layout, local slots and
-# cancellation polling (docs/decisions/W-17-vm.md) with benchstat on hosted
+# cancellation polling (engineering/decisions/W-17-vm.md) with benchstat on hosted
 # runners. All candidates of a family are in one test binary and run the
 # same workloads. Run it by hand, or by changing this file, the script or
 # the benchmarks.

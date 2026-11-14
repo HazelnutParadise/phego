@@ -8,7 +8,7 @@ import (
 )
 
 func TestReleasesMatchInventory(t *testing.T) {
-	raw, err := os.ReadFile("../../docs/compatibility/php-release-inventory.json")
+	raw, err := os.ReadFile("../../engineering/compatibility/php-release-inventory.json")
 	if err != nil {
 		t.Fatal(err)
 	}

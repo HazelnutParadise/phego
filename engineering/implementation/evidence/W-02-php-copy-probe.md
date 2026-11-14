@@ -1,8 +1,8 @@
 # W-02 參考 PHP 來源快照探查
 
-本紀錄對應 [REQ-002、REQ-060](/engineering/data/phego-requirements.json)、局部情境 [T-003、T-119](/engineering/data/phego-acceptance-tests.json) 與 [W-02](/engineering/implementation/W-02.md)。它不代表 Phego 相容或產品驗收。
+本紀錄對應 [REQ-002、REQ-060](../../data/phego-requirements.json)、局部情境 [T-003、T-119](../../data/phego-acceptance-tests.json) 與 [W-02](../W-02.md)。它不代表 Phego 相容或產品驗收。
 
-[參考建置工具](/tools/reference_php.py)先將唯讀掛載的 PHP 封存檔複製到容器私人暫存區，再核對該份副本摘要並只解壓該副本。主機若在複製後改寫原始掛載檔，不會改變已核對的解壓輸入。`python3 -m unittest discover -s tools -p test_reference_php_archive_race.py` 的四項測試已通過；命令結構測試涵蓋 linux/arm64 與 linux/amd64。其餘三項動態測試使用 linux/arm64 profile 產生的腳本，在主機 shell 使用替身執行，未啟動 Docker。
+[參考建置工具](../../../tools/reference_php.py)先將唯讀掛載的 PHP 封存檔複製到容器私人暫存區，再核對該份副本摘要並只解壓該副本。主機若在複製後改寫原始掛載檔，不會改變已核對的解壓輸入。`python3 -m unittest discover -s tools -p test_reference_php_archive_race.py` 的四項測試已通過；命令結構測試涵蓋 linux/arm64 與 linux/amd64。其餘三項動態測試使用 linux/arm64 profile 產生的腳本，在主機 shell 使用替身執行，未啟動 Docker。
 
 2026-10-29 使用工具 SHA-256 `c0e890c59c30f67798c709b4e0671b7c98bbccd9c71d691feb5c5d06236f3a42` 與來源鎖 SHA-256 `44e58acca832e60f70eb9ee2ff2760256422c1aa4b7082b141b3c5fce651b144`，在 Mac 的 OrbStack Linux arm64 環境執行：
 

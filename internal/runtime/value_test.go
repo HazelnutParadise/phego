@@ -10,7 +10,7 @@ import (
 )
 
 // The expected output in these tests comes from the PHP 8.5.12 probes recorded
-// in docs/implementation/evidence/W-06-php85-lifecycle-linux-386.json.
+// in engineering/implementation/evidence/W-06-php85-lifecycle-linux-386.json.
 
 func testHeap(t *testing.T) *heap {
 	t.Helper()

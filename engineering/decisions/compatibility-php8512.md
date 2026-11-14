@@ -14,7 +14,7 @@ PHP 的 10,000 格語法狀態堆疊與 Go 遞迴深度分開計量。可能填�
 
 `declare(encoding=...)` 依 PHP 建構語法樹時的規則辨識字面值，接受括號、純 heredoc／nowdoc 及字面值串接。一般常數計算不適用於這項判斷。兩個解析入口共用迭代走訪，長串接不會增加 Go 呼叫深度。沒有 encoding 名稱的宣告省去診斷用 AST 的重建。
 
-`tools/php_diagnostics.py` 從固定雜湊的 PHP 發行檔產生稀疏轉移表。資料來源、授權與修改記錄在 [UPSTREAM.json](/third_party/php-diagnostics/UPSTREAM.json)，可用 `--check` 確認產物一致。表格不包含 C parser 骨架、Zend AST、配置器或執行器。
+`tools/php_diagnostics.py` 從固定雜湊的 PHP 發行檔產生稀疏轉移表。資料來源、授權與修改記錄在 [UPSTREAM.json](../../third_party/php-diagnostics/UPSTREAM.json)，可用 `--check` 確認產物一致。表格不包含 C parser 骨架、Zend AST、配置器或執行器。
 
 heredoc 縮排錯誤另保留 `CallerLocation`，區分 PHP 顯示呼叫端位置與原始碼位置的情形。參考腳本從兩個不同呼叫行執行同一來源，避免把腳本的固定呼叫行誤當來源行。Go SDK 的 `SourceLocation` 繼續指向傳入程式的檔名與行號。
 
@@ -64,8 +64,8 @@ magic method 的回傳型別依 `zend_check_magic_method_return_type` 的型別�
 
 - `python3 tools/verify_compile_fixtures.py` 以固定的 32／64 位元 PHP 8.5.12 映像重新執行 11,896 筆編譯案例，逐項比對層級、訊息、行號與順序。工具不改寫預期結果。
 - `TestLowerMatchesCompileReference` 對照 5,307 份 php-src 編譯輸入，剩餘 12 項 W-29 缺口維持明列。
-- `TestCompatibility*` 與 `TestConstant*` 保護修正、短路、錯誤順序與資源限制，完整命令及結果見[執行證據](/engineering/implementation/evidence/compatibility-php8512-20261104.json)。
-- PR #129 審查後新增的 1,134 筆編譯案例在 `TestCompatibilityReviewOracle` 比對，`php -l` 看不到的執行期名稱與類別運算元由 `TestCompatibilityReviewRuntimeOperands` 檢查，命令與結果見[審查後執行證據](/engineering/implementation/evidence/compatibility-php8512-review-20261106.json)。
+- `TestCompatibility*` 與 `TestConstant*` 保護修正、短路、錯誤順序與資源限制，完整命令及結果見[執行證據](../implementation/evidence/compatibility-php8512-20261104.json)。
+- PR #129 審查後新增的 1,134 筆編譯案例在 `TestCompatibilityReviewOracle` 比對，`php -l` 看不到的執行期名稱與類別運算元由 `TestCompatibilityReviewRuntimeOperands` 檢查，命令與結果見[審查後執行證據](../implementation/evidence/compatibility-php8512-review-20261106.json)。
 
 下列差異已用固定映像確認，尚未實作，因此不在比對資料內：
 

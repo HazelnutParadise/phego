@@ -55,7 +55,7 @@
     ".github/workflows/semantics-objects.yml": "ec9cca5115dad3bbbd1428f1a5be3cf30290845c2a3cb8097534841159696598",
     ".github/workflows/semantics-lifecycle.yml": "ca0f770da11cf5ee062d8439070e72d779455f642d9e2f6b813735c9e495ccee",
     ".github/workflows/semantics-optimization.yml": "85d84ae42be8fa69fcded238831bd7c9e14377a9f86d9e0a598b30f45c71cf0b",
-    "docs/decisions/runtime-layout.md": "af6accb09c3b9a0dfe9198ce62f6c23e2fb021fe5850ee207e01dfb0e0e1f7d3"
+    "engineering/decisions/runtime-layout.md": "af6accb09c3b9a0dfe9198ce62f6c23e2fb021fe5850ee207e01dfb0e0e1f7d3"
   },
   "environment": {
     "go": "go version go1.26.5 darwin/arm64",

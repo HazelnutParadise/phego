@@ -18,12 +18,12 @@
     ],
     "runs": [
       {
-        "path": "docs/implementation/evidence/W-04-reference-20261029/run-01.log.gz",
+        "path": "engineering/implementation/evidence/W-04-reference-20261029/run-01.log.gz",
         "sha256": "fad229946eaf43c2c7013f6009554c7a09283222efed22977480589bb3eab3ec",
         "uncompressed_sha256": "e27f8b209f82c1af00dc3c83585ef07358bafc4386be3b20c33b384afe5e71a3"
       },
       {
-        "path": "docs/implementation/evidence/W-04-reference-20261029/run-02.log.gz",
+        "path": "engineering/implementation/evidence/W-04-reference-20261029/run-02.log.gz",
         "sha256": "7fb5150fd679285d48a4fa0cc003f3d7c1cd168f984b41c2d7613680e036656e",
         "uncompressed_sha256": "3c6bee561b5758c29d2fbd17eb633cc33b24723158e533eef8d72c5c185e27ca"
       }

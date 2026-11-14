@@ -1,6 +1,6 @@
 # W-01 契約局部驗收紀錄
 
-檢查對象為提交 `fd411b6104c2b58d702a82167c7d936e7fc1c76e` 的[契約與威脅檢查](/engineering/decisions/W-01-contract.md)、[決策登錄](/engineering/decisions/README.md)及[工作包計畫](/engineering/implementation/W-01.md)。規格版本為 1.1.2。此紀錄只涵蓋文件契約，不是引擎、相容性或安全功能的驗收。
+檢查對象為提交 `fd411b6104c2b58d702a82167c7d936e7fc1c76e` 的[契約與威脅檢查](../../decisions/W-01-contract.md)、[決策登錄](../../decisions/README.md)及[工作包計畫](../W-01.md)。規格版本為 1.1.2。此紀錄只涵蓋文件契約，不是引擎、相容性或安全功能的驗收。
 
 ## 局部檢查
 

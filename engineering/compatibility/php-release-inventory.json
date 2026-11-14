@@ -124,8 +124,8 @@
       "published_checksums": false,
       "source_status": "retrieved_hash_recorded",
       "evidence_status": "listed_unverified",
-      "source_evidence": "docs/implementation/evidence/W-49-php-108-source.json",
-      "identity_evidence": "docs/implementation/evidence/W-49-php-108-source.json"
+      "source_evidence": "engineering/implementation/evidence/W-49-php-108-source.json",
+      "identity_evidence": "engineering/implementation/evidence/W-49-php-108-source.json"
     },
     {
       "version": "1.99s",
@@ -160,7 +160,7 @@
       "published_checksums": false,
       "source_status": "retrieved_hash_recorded",
       "evidence_status": "listed_unverified",
-      "source_evidence": "docs/implementation/evidence/W-49-php-200-source.json"
+      "source_evidence": "engineering/implementation/evidence/W-49-php-200-source.json"
     },
     {
       "version": "2.0.1",

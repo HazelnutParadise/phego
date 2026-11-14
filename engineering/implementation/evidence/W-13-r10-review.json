@@ -251,7 +251,7 @@
   },
   "source_sha256": {
     ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
-    "docs/compatibility/profile-matrix.json": "edfe0b34fd57a505d721e4f46ad6cdbb212df9625b383d82ba5ef18ad6b648a7",
+    "engineering/compatibility/profile-matrix.json": "edfe0b34fd57a505d721e4f46ad6cdbb212df9625b383d82ba5ef18ad6b648a7",
     "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
     "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",
@@ -538,7 +538,7 @@
     "host_after": "go test ./internal/runtime -run '^$' -bench '^BenchmarkW13(ObjectComparison|PropertyHookHolds)$' -benchmem -benchtime=200ms -count=3",
     "go386_before_build": "CGO_ENABLED=0 GOOS=linux GOARCH=386 go test -overlay \"$W13_REPLAY/overlay.json\" -c ./internal/runtime -o \"$W13_REPLAY/baseline.test\"",
     "go386_after_build": "CGO_ENABLED=0 GOOS=linux GOARCH=386 go test -c ./internal/runtime -o \"$W13_REPLAY/accepted.test\"",
-    "go386_run_script": "python3 - <<'PYRUN'\nfrom pathlib import Path\nimport json, os, subprocess\nrecord=json.loads(Path('docs/implementation/evidence/W-13-r10-review.json').read_text())\nscratch=os.environ['W13_REPLAY']\nrefs=str(Path('internal/runtime/testdata').resolve())+':/testdata:ro'\nfor run in record['go386']['commands']:\n    command=[scratch+':/w:ro' if arg=='/tmp/phego-w13-r10-go386:/w:ro' else refs if arg.endswith('/internal/runtime/testdata:/testdata:ro') else arg for arg in run['command']]\n    with (Path(scratch)/run['output']).open('wb') as output:\n        subprocess.run(command,stdout=output,stderr=subprocess.STDOUT,check=True)\nPYRUN",
+    "go386_run_script": "python3 - <<'PYRUN'\nfrom pathlib import Path\nimport json, os, subprocess\nrecord=json.loads(Path('engineering/implementation/evidence/W-13-r10-review.json').read_text())\nscratch=os.environ['W13_REPLAY']\nrefs=str(Path('internal/runtime/testdata').resolve())+':/testdata:ro'\nfor run in record['go386']['commands']:\n    command=[scratch+':/w:ro' if arg=='/tmp/phego-w13-r10-go386:/w:ro' else refs if arg.endswith('/internal/runtime/testdata:/testdata:ro') else arg for arg in run['command']]\n    with (Path(scratch)/run['output']).open('wb') as output:\n        subprocess.run(command,stdout=output,stderr=subprocess.STDOUT,check=True)\nPYRUN",
     "scope": "Before binary runs constructor/hold controls and microbenchmarks, not the new semantic regressions that intentionally fail on baseline. After binary runs all TestW13. Run serially without other builds/tests for timing; simulated Go386 ns are not application/PHP comparisons."
   },
   "compatibility_approval_update": {

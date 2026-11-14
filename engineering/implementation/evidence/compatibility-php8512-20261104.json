@@ -29,12 +29,12 @@
     ".github/workflows/semantics-hir.yml": "4e0b03756aa363b5dc1aacb862a9c5d29c1e76338b5eef11ecb7c452de3729ec",
     ".github/workflows/semantics-ops.yml": "2bb91a7239cbb75954fa7ac79cc5a0ed00974874b0c3c5d02ac02370fc11df9f",
     "THIRD_PARTY_NOTICES.md": "b845a967fa3611d9c1d59278de1721dca2a418b092a92132a4dca5680b4f77f7",
-    "docs/compatibility/php-8.5.12-syntax.md": "f7ffcb0bad4ee2b5ba92589e728a67b100d81e02be58c793323be2bfea1ee412",
-    "docs/decisions/compatibility-php8512.md": "153c31e8c7d75c6a4afb8e26d9955dae53bd980fd0e4fa17cac5c669708ecee6",
-    "docs/implementation/W-09.md": "91e47448b7a4506ba66bda4ce2a9cb4c830845cc9c3ac005f551647526523a82",
-    "docs/implementation/W-10.md": "69b5e1692e14716ee52c5ac8e4b505be6c1bfe56a19e2e807816ceb3a333bda8",
-    "docs/implementation/W-11.md": "651a50716c24e5690d39d0234ab727e3eb1cc40415371f804438f0141ef147be",
-    "docs/implementation/W-13.md": "c0682358c92fd45b665bc73b0c7ad1468d9d93bb1d5eda5c6e10e8c1e1584fbe",
+    "engineering/compatibility/php-8.5.12-syntax.md": "f7ffcb0bad4ee2b5ba92589e728a67b100d81e02be58c793323be2bfea1ee412",
+    "engineering/decisions/compatibility-php8512.md": "153c31e8c7d75c6a4afb8e26d9955dae53bd980fd0e4fa17cac5c669708ecee6",
+    "engineering/implementation/W-09.md": "91e47448b7a4506ba66bda4ce2a9cb4c830845cc9c3ac005f551647526523a82",
+    "engineering/implementation/W-10.md": "69b5e1692e14716ee52c5ac8e4b505be6c1bfe56a19e2e807816ceb3a333bda8",
+    "engineering/implementation/W-11.md": "651a50716c24e5690d39d0234ab727e3eb1cc40415371f804438f0141ef147be",
+    "engineering/implementation/W-13.md": "c0682358c92fd45b665bc73b0c7ad1468d9d93bb1d5eda5c6e10e8c1e1584fbe",
     "engine_heredoc_test.go": "7576f46476c6368f480300e48989b19ad03fb2baec396b480ae7c862fa88157c",
     "internal/frontend/ast.go": "96d8e619b1a431c71cf2799c69392fb3c6d89392a354b7118dcd8b6162ab1beb",
     "internal/frontend/diagnostics.go": "6eefe8dbd444991c2d2aa16b1516884c5c4f906b81842bbf07d6092ff04036f3",
@@ -301,7 +301,7 @@
       "output_note": "Expected negative-path diagnostic output; unittest reports OK and exits 0."
     },
     {
-      "command": "python3 docs/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /opt/homebrew/lib/libmpfr.6.dylib",
+      "command": "python3 engineering/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /opt/homebrew/lib/libmpfr.6.dylib",
       "exit_code": 0,
       "log": "compatibility-php8512-20261104/instruction-reproduced.log",
       "result": "200000 deterministic inputs; 46 F2XM1 differences versus MPFR 4.2.2 RN64; 0 final RN53 differences; 46 native PHP controls match."
@@ -325,7 +325,7 @@
       "result": "547 tests passed in 137.216s."
     },
     {
-      "command": "python3 docs/implementation/evidence/compatibility-php8512-20261104/ci-private-workspace-probe.py.txt",
+      "command": "python3 engineering/implementation/evidence/compatibility-php8512-20261104/ci-private-workspace-probe.py.txt",
       "exit_code": 0,
       "log": "compatibility-php8512-20261104/ci-permissions.log",
       "result": "Prepared Linux workspace has owner 1001:1001 and mode 0700; capability-free root fails to open run.php, matching UID succeeds."
@@ -664,7 +664,7 @@
     "frontend": "tools/frontend_corpus.py extracts the corpus outside the repository; tests/frontend/parse_dump.php produces paired call/source locations. Exact replay environments and local paths are recorded per command.",
     "pow_extra": "Decompress the newpairs.txt.gz, newpow32.txt.gz, intpairs.txt.gz and intpow32.txt.gz artifacts into /tmp/phego-compat-pow-research and restore go_verify_test.go.txt there as go_verify_test.go. Use a Go overlay mapping an absent internal/phpnum/research_verify_test.go to that file, then go test -overlay <overlay.json> ./internal/phpnum -run TestResearchOracle -v. The saved Python generators reproduce the two input sets at that same sandbox path. intpow.php.txt and tests/semantics/w10-ops/pow.php produce corresponding outputs in the pinned i386 image.",
     "encoding_and_depth": "The compressed case files retain source and expected observations; write each source to a uniquely named external corpus/*.php and run tests/frontend/parse_dump.php in each pinned image. Corresponding Go tests are encoding_test.go, encoding_timing_test.go and nesting_test.go.",
-    "instruction_probe": "From the repository root: python3 docs/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /path/to/libmpfr.6.dylib (Linux: path to libmpfr.so.6). Requires the existing Docker CLI, the pinned i386 PHP image and MPFR 4.2.2; these are research dependencies only. The script creates a fresh external sandbox, regenerates all 200000 inputs (seed 876532019, exact SHA256 asserted), compiles the saved C probe inside the restricted container, compares every F2XM1 result with MPFR exp2m1 at 64 bits, checks the final +1/RN53 step, and runs all 46 targeted PHP pow controls. A different CPU or translator may produce a different instruction result; the script rejects a different mismatch set instead of declaring equivalence."
+    "instruction_probe": "From the repository root: python3 engineering/implementation/evidence/compatibility-php8512-20261104/instruction-reproduce.py.txt --repo . --mpfr /path/to/libmpfr.6.dylib (Linux: path to libmpfr.so.6). Requires the existing Docker CLI, the pinned i386 PHP image and MPFR 4.2.2; these are research dependencies only. The script creates a fresh external sandbox, regenerates all 200000 inputs (seed 876532019, exact SHA256 asserted), compiles the saved C probe inside the restricted container, compares every F2XM1 result with MPFR exp2m1 at 64 bits, checks the final +1/RN53 step, and runs all 46 targeted PHP pow controls. A different CPU or translator may produce a different instruction result; the script rejects a different mismatch set instead of declaring equivalence."
   },
   "review_status": "Independent code review findings reproduced and fixed locally; remote latest-head checks and review are separate delivery gates.",
   "transient_failure": {

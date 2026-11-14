@@ -137,7 +137,7 @@
     "ci": "GitHub-hosted ubuntu-24.04 and ubuntu-24.04-arm runners for the VM layout benchstat (commit 5545d4f)"
   },
   "decisions": [
-    "See docs/decisions/W-17-vm.md: package split, staged delivery, bytecode 1.1 to 1.4, layout choices measured with benchstat, WithINI, limits behaviour, references (stage 3), destructuring (stage 4) and the fixes made after each independent review."
+    "See engineering/decisions/W-17-vm.md: package split, staged delivery, bytecode 1.1 to 1.4, layout choices measured with benchstat, WithINI, limits behaviour, references (stage 3), destructuring (stage 4) and the fixes made after each independent review."
   ],
   "local_status": "pass",
   "product_test_status": "not_run",

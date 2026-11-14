@@ -340,10 +340,10 @@
     }
   },
   "source_sha256": {
-    "docs/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
-    "docs/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
-    "docs/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
-    "docs/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102"
+    "engineering/spec/specification.zh-TW.md": "718506db2e8cf8037417806a89e423c9fa69acb5e8a149988214e9d84ae1b84c",
+    "engineering/data/phego-requirements.json": "b3b9806d68ef0cb26f929ca6f4f569aa4334647c0c75d130c628bcb82b71b9b4",
+    "engineering/data/phego-acceptance-tests.json": "ca366f4e4a888432f8e041bf2be0d58ea0e61bbccf30b43299f67d85e7afd3e6",
+    "engineering/data/phego-work-packages.json": "9d35125c9fb2a7bd44aa9c94a9684d268e8818a21781c4c52983bed91f75f102"
   },
   "items": [
     {
@@ -352,7 +352,7 @@
       "title": "[W-01][M0] 維護者可以判斷每個執行入口的信任、權限與授權條件",
       "work_package_title": "建立產品契約與威脅模型",
       "branch": "codex/w-01-implementation",
-      "plan_path": "docs/implementation/W-01.md",
+      "plan_path": "engineering/implementation/W-01.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-01-implementation/docs/implementation/W-01.md",
       "dependencies": [],
       "integration_dependencies": [],
@@ -398,7 +398,7 @@
         "commit": "99ed795eabfcf66ea86789be2a436109e7467c43",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-01.json",
+        "evidence_path": "engineering/implementation/evidence/W-01.json",
         "status": "pass"
       }
     },
@@ -408,7 +408,7 @@
       "title": "[W-02][M0] 維護者可以從真實來源重建固定的 PHP 與工具基準",
       "work_package_title": "鎖定官方與工具基準",
       "branch": "codex/w-02-implementation",
-      "plan_path": "docs/implementation/W-02.md",
+      "plan_path": "engineering/implementation/W-02.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-02-implementation/docs/implementation/W-02.md",
       "dependencies": [
         "W-01"
@@ -456,7 +456,7 @@
         "commit": "52c09c0f6eb461950dd5950c5f9f9541e3b5d35d",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-02.json",
+        "evidence_path": "engineering/implementation/evidence/W-02.json",
         "status": "pass"
       }
     },
@@ -466,7 +466,7 @@
       "title": "[W-03][M0] 維護者可以追查需求、測試、工作包與執行證據",
       "work_package_title": "建立追蹤與證據工具",
       "branch": "codex/w-03-implementation",
-      "plan_path": "docs/implementation/W-03.md",
+      "plan_path": "engineering/implementation/W-03.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-03-implementation/docs/implementation/W-03.md",
       "dependencies": [
         "W-01",
@@ -521,7 +521,7 @@
         "commit": "3a2682a69e45aea6a0ac47a3fa23996956b29088",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-03.json",
+        "evidence_path": "engineering/implementation/evidence/W-03.json",
         "status": "pass"
       }
     },
@@ -531,7 +531,7 @@
       "title": "[W-04][M0] 維護者可以用官方測試比較參考 PHP 與受測引擎",
       "work_package_title": "建立官方測試與差異runner",
       "branch": "codex/w-04-implementation",
-      "plan_path": "docs/implementation/W-04.md",
+      "plan_path": "engineering/implementation/W-04.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-04-implementation/docs/implementation/W-04.md",
       "dependencies": [
         "W-02",
@@ -574,7 +574,7 @@
         "commit": "1f74086ef3d132915fb6575983b1362eaa24c91a",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-04.json",
+        "evidence_path": "engineering/implementation/evidence/W-04.json",
         "status": "pass"
       }
     },
@@ -584,7 +584,7 @@
       "title": "[W-05][M1] 維護者可以重播初始化、取消與資源釋放的狀態轉移",
       "work_package_title": "生命週期與資源狀態模型",
       "branch": "codex/w-05-implementation",
-      "plan_path": "docs/implementation/W-05.md",
+      "plan_path": "engineering/implementation/W-05.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-05-implementation/docs/implementation/W-05.md",
       "dependencies": [
         "W-01",
@@ -636,7 +636,7 @@
         "commit": "20ee261b98b3285ac27209d23012e5187465c6c5",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-05.json",
+        "evidence_path": "engineering/implementation/evidence/W-05.json",
         "status": "pass"
       }
     },
@@ -646,7 +646,7 @@
       "title": "[W-06][M1] 維護者可以驗證 PHP 值、參照及解構的候選模型",
       "work_package_title": "值／參照／生命週期原型",
       "branch": "codex/w-06-implementation",
-      "plan_path": "docs/implementation/W-06.md",
+      "plan_path": "engineering/implementation/W-06.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-06-implementation/docs/implementation/W-06.md",
       "dependencies": [
         "W-02",
@@ -705,7 +705,7 @@
         "commit": "51d43d6cb45dd7155a4d7407746acddb7d2423f1",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-06.json",
+        "evidence_path": "engineering/implementation/evidence/W-06.json",
         "status": "pass"
       }
     },
@@ -715,7 +715,7 @@
       "title": "[W-07][M1] 維護者可以在受控 ABI 下驗證 LLVM 與 Go 橋接",
       "work_package_title": "LLVM與Go橋接概念驗證",
       "branch": "codex/w-07-implementation",
-      "plan_path": "docs/implementation/W-07.md",
+      "plan_path": "engineering/implementation/W-07.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-07-implementation/docs/implementation/W-07.md",
       "dependencies": [
         "W-02",
@@ -761,7 +761,7 @@
         "commit": "25fd3cf19558d858a86aa2716bca3dba5e1a6039",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-07.json",
+        "evidence_path": "engineering/implementation/evidence/W-07.json",
         "status": "pass"
       }
     },
@@ -771,7 +771,7 @@
       "title": "[W-08][M1] Go 開發者可以依單函式入口與明確資料擁有權整合 PHP",
       "work_package_title": "定義Go公開API與結果契約",
       "branch": "codex/w-08-implementation",
-      "plan_path": "docs/implementation/W-08.md",
+      "plan_path": "engineering/implementation/W-08.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-08-implementation/docs/implementation/W-08.md",
       "dependencies": [
         "W-01",
@@ -830,7 +830,7 @@
         "commit": "4fd6435b024fd16683712236702ea28565f35ffe",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-08.json",
+        "evidence_path": "engineering/implementation/evidence/W-08.json",
         "status": "pass"
       }
     },
@@ -840,7 +840,7 @@
       "title": "[W-09][M2] 開發者可以解析 PHP 與模板並定位語法錯誤",
       "work_package_title": "Lexer與parser",
       "branch": "codex/w-09-implementation",
-      "plan_path": "docs/implementation/W-09.md",
+      "plan_path": "engineering/implementation/W-09.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-09-implementation/docs/implementation/W-09.md",
       "dependencies": [
         "W-02",
@@ -886,7 +886,7 @@
         "commit": "4231e92d3eb1415eaa96ed7a049d03f7ede3ac9b",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-09.json",
+        "evidence_path": "engineering/implementation/evidence/W-09.json",
         "status": "pass"
       }
     },
@@ -896,7 +896,7 @@
       "title": "[W-10][M2] 開發者可以依精確版本辨識語法、行為與相容缺口",
       "work_package_title": "版本規則與相容診斷",
       "branch": "codex/w-10-implementation",
-      "plan_path": "docs/implementation/W-10.md",
+      "plan_path": "engineering/implementation/W-10.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-10-implementation/docs/implementation/W-10.md",
       "dependencies": [
         "W-02",
@@ -954,7 +954,7 @@
         "commit": "40256a8f066caaebccd215392da1413db56c9914",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-10.json",
+        "evidence_path": "engineering/implementation/evidence/W-10.json",
         "status": "pass"
       }
     },
@@ -964,7 +964,7 @@
       "title": "[W-11][M2] 維護者可以將 PHP 呼叫與副作用保留到中介表示",
       "work_package_title": "高階IR與呼叫語意",
       "branch": "codex/w-11-implementation",
-      "plan_path": "docs/implementation/W-11.md",
+      "plan_path": "engineering/implementation/W-11.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-11-implementation/docs/implementation/W-11.md",
       "dependencies": [
         "W-06",
@@ -1017,7 +1017,7 @@
         "commit": "3173de779d45c3713b5183dbc99a9940a33b2ddb",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-11.json",
+        "evidence_path": "engineering/implementation/evidence/W-11.json",
         "status": "pass"
       }
     },
@@ -1027,7 +1027,7 @@
       "title": "[W-12][M2] PHP 程式可以保留陣列順序、鍵轉換與參照關係",
       "work_package_title": "正式array與reference實作",
       "branch": "codex/w-12-implementation",
-      "plan_path": "docs/implementation/W-12.md",
+      "plan_path": "engineering/implementation/W-12.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-12-implementation/docs/implementation/W-12.md",
       "dependencies": [
         "W-06",
@@ -1076,7 +1076,7 @@
         "commit": "44fb89bd87b55fbc7f3345428eee16f1a75953fa",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-12.json",
+        "evidence_path": "engineering/implementation/evidence/W-12.json",
         "status": "pass"
       }
     },
@@ -1086,7 +1086,7 @@
       "title": "[W-13][M3] PHP 程式可以執行完整物件行為及可觀察的生命週期",
       "work_package_title": "物件與邏輯生命週期",
       "branch": "codex/w-13-implementation",
-      "plan_path": "docs/implementation/W-13.md",
+      "plan_path": "engineering/implementation/W-13.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-13-implementation/docs/implementation/W-13.md",
       "dependencies": [
         "W-05",
@@ -1146,7 +1146,7 @@
         "commit": "be46d8139ca8a3ee2ecfe0301072045bc2f8cf74",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-13.json",
+        "evidence_path": "engineering/implementation/evidence/W-13.json",
         "status": "pass"
       }
     },
@@ -1156,7 +1156,7 @@
       "title": "[W-14][M2] Go 宿主可以區分 PHP 結束原因並正確清理請求",
       "work_package_title": "Frame、錯誤與shutdown",
       "branch": "codex/w-14-implementation",
-      "plan_path": "docs/implementation/W-14.md",
+      "plan_path": "engineering/implementation/W-14.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-14-implementation/docs/implementation/W-14.md",
       "dependencies": [
         "W-05",
@@ -1215,7 +1215,7 @@
         "commit": "1b9a1aa0b91e6720972f02b6034bc1e1a05a2850",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-14.json",
+        "evidence_path": "engineering/implementation/evidence/W-14.json",
         "status": "pass"
       }
     },
@@ -1225,7 +1225,7 @@
       "title": "[W-15][M3] 維護者可以最佳化程式並保留語意、政策與取消行為",
       "work_package_title": "SSA、效果與安全保留最佳化",
       "branch": "codex/w-15-implementation",
-      "plan_path": "docs/implementation/W-15.md",
+      "plan_path": "engineering/implementation/W-15.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-15-implementation/docs/implementation/W-15.md",
       "dependencies": [
         "W-11",
@@ -1278,7 +1278,7 @@
         "commit": "0675253db9f2b218ae9081318da6c0e4f2e34f8f",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-15.json",
+        "evidence_path": "engineering/implementation/evidence/W-15.json",
         "status": "pass"
       }
     },
@@ -1288,7 +1288,7 @@
       "title": "[W-16][M2] 維護者可以安全載入及拒絕損毀的 Bytecode",
       "work_package_title": "Bytecode格式與驗證器",
       "branch": "codex/w-16-implementation",
-      "plan_path": "docs/implementation/W-16.md",
+      "plan_path": "engineering/implementation/W-16.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-16-implementation/docs/implementation/W-16.md",
       "dependencies": [
         "W-11",
@@ -1337,7 +1337,7 @@
         "commit": "6c922527ce76f2399aac8d07374d6f5e5e0010fd",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-16.json",
+        "evidence_path": "engineering/implementation/evidence/W-16.json",
         "status": "pass"
       }
     },
@@ -1347,7 +1347,7 @@
       "title": "[W-17][M2] Go 開發者可以經 VM 執行 PHP 並取得明確結果",
       "work_package_title": "VM通用執行路徑",
       "branch": "codex/w-17-implementation",
-      "plan_path": "docs/implementation/W-17.md",
+      "plan_path": "engineering/implementation/W-17.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-17-implementation/docs/implementation/W-17.md",
       "dependencies": [
         "W-12",
@@ -1414,7 +1414,7 @@
         "commit": "b104c91278e756546aa5b60ef3e77b7f6c1f3c82",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-17.json",
+        "evidence_path": "engineering/implementation/evidence/W-17.json",
         "status": "pass"
       }
     },
@@ -1424,7 +1424,7 @@
       "title": "[W-18][M3] PHP 程式可以在同一政策下動態載入、eval 與 autoload",
       "work_package_title": "動態載入、eval與autoload",
       "branch": "codex/w-18-implementation",
-      "plan_path": "docs/implementation/W-18.md",
+      "plan_path": "engineering/implementation/W-18.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-18-implementation/docs/implementation/W-18.md",
       "dependencies": [
         "W-10",
@@ -1484,7 +1484,7 @@
         "commit": "25ec453b0c8a1d88311dbe78d3a630d12b27c6f3",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-18.json",
+        "evidence_path": "engineering/implementation/evidence/W-18.json",
         "status": "pass"
       }
     },
@@ -1494,7 +1494,7 @@
       "title": "[W-19][M3] PHP 程式可以依原本順序暫停及恢復 Generator 與 Fiber",
       "work_package_title": "Generator與Fiber",
       "branch": "codex/w-19-implementation",
-      "plan_path": "docs/implementation/W-19.md",
+      "plan_path": "engineering/implementation/W-19.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-19-implementation/docs/implementation/W-19.md",
       "dependencies": [
         "W-13",
@@ -1541,7 +1541,7 @@
         "commit": "731fe9a742085ed543db60bd598cf85755fe053a",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-19.json",
+        "evidence_path": "engineering/implementation/evidence/W-19.json",
         "status": "pass"
       }
     },
@@ -1551,7 +1551,7 @@
       "title": "[W-20][M2] 宿主可以限制每次 PHP 執行的資源與外部能力",
       "work_package_title": "能力與配額核心",
       "branch": "codex/w-20-implementation",
-      "plan_path": "docs/implementation/W-20.md",
+      "plan_path": "engineering/implementation/W-20.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-20-implementation/docs/implementation/W-20.md",
       "dependencies": [
         "W-01",
@@ -1643,7 +1643,7 @@
         "commit": "ec2ff84cfce013a0704bf20bf2ec10823af99b0b",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-20.json",
+        "evidence_path": "engineering/implementation/evidence/W-20.json",
         "status": "pass"
       }
     },
@@ -1653,7 +1653,7 @@
       "title": "[W-21][M5] 宿主可以追查資料來源並依使用脈絡觀察或阻擋操作",
       "work_package_title": "來源追蹤與脈絡政策",
       "branch": "codex/w-21-implementation",
-      "plan_path": "docs/implementation/W-21.md",
+      "plan_path": "engineering/implementation/W-21.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-21-implementation/docs/implementation/W-21.md",
       "dependencies": [
         "W-12",
@@ -1715,7 +1715,7 @@
         "commit": "0353b79cac1a499899cf0369346f560ef1a05819",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-21.json",
+        "evidence_path": "engineering/implementation/evidence/W-21.json",
         "status": "pass"
       }
     },
@@ -1725,7 +1725,7 @@
       "title": "[W-22][M4] 網站管理者可以並行處理請求而不混用執行狀態",
       "work_package_title": "Goroutine接納與Execution隔離",
       "branch": "codex/w-22-implementation",
-      "plan_path": "docs/implementation/W-22.md",
+      "plan_path": "engineering/implementation/W-22.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-22-implementation/docs/implementation/W-22.md",
       "dependencies": [
         "W-05",
@@ -1797,7 +1797,7 @@
         "commit": "db2e625ade0cee6c1ad5077312c8af78871fdd31",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-22.json",
+        "evidence_path": "engineering/implementation/evidence/W-22.json",
         "status": "pass"
       }
     },
@@ -1807,7 +1807,7 @@
       "title": "[W-23][M4] 多個請求可以安全重用有容量上限的編譯結果",
       "work_package_title": "共享編譯快取",
       "branch": "codex/w-23-implementation",
-      "plan_path": "docs/implementation/W-23.md",
+      "plan_path": "engineering/implementation/W-23.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-23-implementation/docs/implementation/W-23.md",
       "dependencies": [
         "W-16",
@@ -1875,7 +1875,7 @@
         "commit": "8cd2adb19d1fc9335768820dd1b3e4755a11a6f8",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-23.json",
+        "evidence_path": "engineering/implementation/evidence/W-23.json",
         "status": "pass"
       }
     },
@@ -1885,7 +1885,7 @@
       "title": "[W-24][M4] Go 開發者可以執行檔案、重用程式並註冊受控 callback",
       "work_package_title": "正式SDK與HostCall",
       "branch": "codex/w-24-implementation",
-      "plan_path": "docs/implementation/W-24.md",
+      "plan_path": "engineering/implementation/W-24.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-24-implementation/docs/implementation/W-24.md",
       "dependencies": [
         "W-08",
@@ -1960,7 +1960,7 @@
         "commit": "d11ea9741470fb3e49ca361072714cbf50ad18f0",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-24.json",
+        "evidence_path": "engineering/implementation/evidence/W-24.json",
         "status": "pass"
       }
     },
@@ -1970,7 +1970,7 @@
       "title": "[W-25][M4] 網站管理者可以保留 Apache 或 Nginx 並接到 FastCGI",
       "work_package_title": "FastCGI adapter",
       "branch": "codex/w-25-implementation",
-      "plan_path": "docs/implementation/W-25.md",
+      "plan_path": "engineering/implementation/W-25.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-25-implementation/docs/implementation/W-25.md",
       "dependencies": [
         "W-14",
@@ -2030,7 +2030,7 @@
         "commit": "ff0933694d83f35a0f686b3b8cf94d5b1f90eb95",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-25.json",
+        "evidence_path": "engineering/implementation/evidence/W-25.json",
         "status": "pass"
       }
     },
@@ -2040,7 +2040,7 @@
       "title": "[W-26][M4] 網站管理者可以經內建 HTTP 服務公開允許的內容",
       "work_package_title": "內建HTTP與公開目錄路由",
       "branch": "codex/w-26-implementation",
-      "plan_path": "docs/implementation/W-26.md",
+      "plan_path": "engineering/implementation/W-26.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-26-implementation/docs/implementation/W-26.md",
       "dependencies": [
         "W-20",
@@ -2096,7 +2096,7 @@
         "commit": "35d2041c79864d9fcb2023bfd9db286e139cad03",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-26.json",
+        "evidence_path": "engineering/implementation/evidence/W-26.json",
         "status": "pass"
       }
     },
@@ -2106,7 +2106,7 @@
       "title": "[W-27][M4] PHP 網站可以取得相容的表單、輸入與上傳資料",
       "work_package_title": "PHP請求映射與上傳",
       "branch": "codex/w-27-implementation",
-      "plan_path": "docs/implementation/W-27.md",
+      "plan_path": "engineering/implementation/W-27.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-27-implementation/docs/implementation/W-27.md",
       "dependencies": [
         "W-20",
@@ -2153,7 +2153,7 @@
         "commit": "a541f7361992a5aa93fe6c1a7833ea5dc8a115a2",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-27.json",
+        "evidence_path": "engineering/implementation/evidence/W-27.json",
         "status": "pass"
       }
     },
@@ -2163,7 +2163,7 @@
       "title": "[W-28][M4] PHP 網站可以安全共用 Session 並與既有資料共存",
       "work_package_title": "Session與共享狀態",
       "branch": "codex/w-28-implementation",
-      "plan_path": "docs/implementation/W-28.md",
+      "plan_path": "engineering/implementation/W-28.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-28-implementation/docs/implementation/W-28.md",
       "dependencies": [
         "W-14",
@@ -2217,7 +2217,7 @@
         "commit": "26e7ed31dcb551f4153f99c4c587714fccd8f46f",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-28.json",
+        "evidence_path": "engineering/implementation/evidence/W-28.json",
         "status": "pass"
       }
     },
@@ -2227,7 +2227,7 @@
       "title": "[W-29][M3] PHP 程式可以呼叫真實存在的核心函式並查詢能力",
       "work_package_title": "核心函式與模組登錄",
       "branch": "codex/w-29-implementation",
-      "plan_path": "docs/implementation/W-29.md",
+      "plan_path": "engineering/implementation/W-29.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-29-implementation/docs/implementation/W-29.md",
       "dependencies": [
         "W-10",
@@ -2284,7 +2284,7 @@
         "commit": "6f26000868d190729b5e8b4102d3583de63c091b",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-29.json",
+        "evidence_path": "engineering/implementation/evidence/W-29.json",
         "status": "pass"
       }
     },
@@ -2294,7 +2294,7 @@
       "title": "[W-30][M5] PHP 程式可以依版本執行字串、編碼與 PCRE 行為",
       "work_package_title": "字串、編碼與PCRE",
       "branch": "codex/w-30-implementation",
-      "plan_path": "docs/implementation/W-30.md",
+      "plan_path": "engineering/implementation/W-30.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-30-implementation/docs/implementation/W-30.md",
       "dependencies": [
         "W-12",
@@ -2344,7 +2344,7 @@
         "commit": "c3ab49ce8ffec3a18dea140b237b137e5d24c4a8",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-30.json",
+        "evidence_path": "engineering/implementation/evidence/W-30.json",
         "status": "pass"
       }
     },
@@ -2354,7 +2354,7 @@
       "title": "[W-31][M5] PHP 網站可以正確使用 PDO／mysqli 的查詢與交易",
       "work_package_title": "資料庫與PDO／mysqli",
       "branch": "codex/w-31-implementation",
-      "plan_path": "docs/implementation/W-31.md",
+      "plan_path": "engineering/implementation/W-31.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-31-implementation/docs/implementation/W-31.md",
       "dependencies": [
         "W-20",
@@ -2407,7 +2407,7 @@
         "commit": "c4e22281d369b7b6c9ea8e6e5558cf6968e85c61",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-31.json",
+        "evidence_path": "engineering/implementation/evidence/W-31.json",
         "status": "pass"
       }
     },
@@ -2417,7 +2417,7 @@
       "title": "[W-32][M5] PHP 網站可以在明確網路政策下使用 HTTP、TLS 與密碼功能",
       "work_package_title": "HTTP、crypto與網路政策",
       "branch": "codex/w-32-implementation",
-      "plan_path": "docs/implementation/W-32.md",
+      "plan_path": "engineering/implementation/W-32.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-32-implementation/docs/implementation/W-32.md",
       "dependencies": [
         "W-20",
@@ -2473,7 +2473,7 @@
         "commit": "7cf99699bc9b49157845e84a6924af2c0d9acce5",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-32.json",
+        "evidence_path": "engineering/implementation/evidence/W-32.json",
         "status": "pass"
       }
     },
@@ -2483,7 +2483,7 @@
       "title": "[W-33][M5] PHP 網站可以使用明列的 XML、封存與國際化功能",
       "work_package_title": "XML、封存、國際化與網站額外模組",
       "branch": "codex/w-33-implementation",
-      "plan_path": "docs/implementation/W-33.md",
+      "plan_path": "engineering/implementation/W-33.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-33-implementation/docs/implementation/W-33.md",
       "dependencies": [
         "W-20",
@@ -2527,7 +2527,7 @@
         "commit": "0e315a1a3dd2899f24a3a5249e76cc3ded5021fa",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-33.json",
+        "evidence_path": "engineering/implementation/evidence/W-33.json",
         "status": "pass"
       }
     },
@@ -2537,7 +2537,7 @@
       "title": "[W-34][M5] 網站管理者可以檢查 Composer 需求並重播不改碼網站流程",
       "work_package_title": "Composer與網站認證場景",
       "branch": "codex/w-34-implementation",
-      "plan_path": "docs/implementation/W-34.md",
+      "plan_path": "engineering/implementation/W-34.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-34-implementation/docs/implementation/W-34.md",
       "dependencies": [
         "W-18",
@@ -2605,7 +2605,7 @@
         "commit": "fc0d459fae69adfd59e47ccb916ed75083f33998",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-34.json",
+        "evidence_path": "engineering/implementation/evidence/W-34.json",
         "status": "pass"
       }
     },
@@ -2615,7 +2615,7 @@
       "title": "[W-35][M4] 使用者可以透過 CLI 執行、服務及檢查相容性",
       "work_package_title": "CLI、設定與相容檢查入口",
       "branch": "codex/w-35-implementation",
-      "plan_path": "docs/implementation/W-35.md",
+      "plan_path": "engineering/implementation/W-35.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-35-implementation/docs/implementation/W-35.md",
       "dependencies": [
         "W-10",
@@ -2697,7 +2697,7 @@
         "commit": "b91d3f39132cd1188a7c59358f527be011795c45",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-35.json",
+        "evidence_path": "engineering/implementation/evidence/W-35.json",
         "status": "pass"
       }
     },
@@ -2707,7 +2707,7 @@
       "title": "[W-36][M6] 部署者可以封裝應用並分開管理唯讀程式與可寫資料",
       "work_package_title": "單檔封裝與VFS",
       "branch": "codex/w-36-implementation",
-      "plan_path": "docs/implementation/W-36.md",
+      "plan_path": "engineering/implementation/W-36.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-36-implementation/docs/implementation/W-36.md",
       "dependencies": [
         "W-18",
@@ -2769,7 +2769,7 @@
         "commit": "67afa240189c7b0531b7029d85b5a5b34ab29a23",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-36.json",
+        "evidence_path": "engineering/implementation/evidence/W-36.json",
         "status": "pass"
       }
     },
@@ -2779,7 +2779,7 @@
       "title": "[W-37][M6] 維護者可以把已驗證的 PHP 中介表示編成原生物件",
       "work_package_title": "LLVM降低與AOT產生",
       "branch": "codex/w-37-implementation",
-      "plan_path": "docs/implementation/W-37.md",
+      "plan_path": "engineering/implementation/W-37.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-37-implementation/docs/implementation/W-37.md",
       "dependencies": [
         "W-07",
@@ -2835,7 +2835,7 @@
         "commit": "4410207c31fac453bb0e159b6e67eb4f37f63248",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-37.json",
+        "evidence_path": "engineering/implementation/evidence/W-37.json",
         "status": "pass"
       }
     },
@@ -2845,7 +2845,7 @@
       "title": "[W-38][M6] Go 宿主可以透過版本化 ABI 與原生 Runtime 安全互通",
       "work_package_title": "正式Native Runtime ABI",
       "branch": "codex/w-38-implementation",
-      "plan_path": "docs/implementation/W-38.md",
+      "plan_path": "engineering/implementation/W-38.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-38-implementation/docs/implementation/W-38.md",
       "dependencies": [
         "W-07",
@@ -2909,7 +2909,7 @@
         "commit": "daf2739bc4f72d16304ffbf6d7e31281905a0f8c",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-38.json",
+        "evidence_path": "engineering/implementation/evidence/W-38.json",
         "status": "pass"
       }
     },
@@ -2919,7 +2919,7 @@
       "title": "[W-39][M6] 維護者可以證明 VM、AOT 與混合路徑語意及安全一致",
       "work_package_title": "後端等價與安全整合",
       "branch": "codex/w-39-implementation",
-      "plan_path": "docs/implementation/W-39.md",
+      "plan_path": "engineering/implementation/W-39.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-39-implementation/docs/implementation/W-39.md",
       "dependencies": [
         "W-15",
@@ -3007,7 +3007,7 @@
         "commit": "7cbb910432994e65db0af7a6a99bb9a72ce24e92",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-39.json",
+        "evidence_path": "engineering/implementation/evidence/W-39.json",
         "status": "pass"
       }
     },
@@ -3017,7 +3017,7 @@
       "title": "[W-40][M7] 網站管理者可以觀測、重載、關閉及回復部署",
       "work_package_title": "維運、重載、遷移與回復",
       "branch": "codex/w-40-implementation",
-      "plan_path": "docs/implementation/W-40.md",
+      "plan_path": "engineering/implementation/W-40.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-40-implementation/docs/implementation/W-40.md",
       "dependencies": [
         "W-22",
@@ -3097,7 +3097,7 @@
         "commit": "2efe6d1908bb2248876cc1e6c2c750de312d668a",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-40.json",
+        "evidence_path": "engineering/implementation/evidence/W-40.json",
         "status": "pass"
       }
     },
@@ -3107,7 +3107,7 @@
       "title": "[W-41][M7] 維護者可以重現並修正格式、並行與故障注入缺陷",
       "work_package_title": "全系統fuzz、race與故障注入",
       "branch": "codex/w-41-implementation",
-      "plan_path": "docs/implementation/W-41.md",
+      "plan_path": "engineering/implementation/W-41.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-41-implementation/docs/implementation/W-41.md",
       "dependencies": [
         "W-05",
@@ -3283,7 +3283,7 @@
         "commit": "f5f683ccaac03f58641948bf8b487f712c8f319b",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-41.json",
+        "evidence_path": "engineering/implementation/evidence/W-41.json",
         "status": "pass"
       }
     },
@@ -3293,7 +3293,7 @@
       "title": "[W-42][M7] 驗收者可以審查完整相容範圍及真實網站結果",
       "work_package_title": "完整相容性與網站驗收",
       "branch": "codex/w-42-implementation",
-      "plan_path": "docs/implementation/W-42.md",
+      "plan_path": "engineering/implementation/W-42.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-42-implementation/docs/implementation/W-42.md",
       "dependencies": [
         "W-04",
@@ -3409,7 +3409,7 @@
         "commit": "21df3dff41a9100c931b56ffd463d0b7257f5045",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-42.json",
+        "evidence_path": "engineering/implementation/evidence/W-42.json",
         "status": "pass"
       }
     },
@@ -3419,7 +3419,7 @@
       "title": "[W-43][M7] 維護者可以量測正確請求的效能、容量及長時間資源變化",
       "work_package_title": "效能、容量與長時間測試",
       "branch": "codex/w-43-implementation",
-      "plan_path": "docs/implementation/W-43.md",
+      "plan_path": "engineering/implementation/W-43.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-43-implementation/docs/implementation/W-43.md",
       "dependencies": [
         "W-17",
@@ -3488,7 +3488,7 @@
         "commit": "ce134fd40c60b00a10f1670ca6201c9d22f2e0d8",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-43.json",
+        "evidence_path": "engineering/implementation/evidence/W-43.json",
         "status": "pass"
       }
     },
@@ -3498,7 +3498,7 @@
       "title": "[W-44][M7] 發布維護者可以準備具來源、授權及證據的候選產物",
       "work_package_title": "供應鏈與發布候選",
       "branch": "codex/w-44-implementation",
-      "plan_path": "docs/implementation/W-44.md",
+      "plan_path": "engineering/implementation/W-44.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-44-implementation/docs/implementation/W-44.md",
       "dependencies": [
         "W-02",
@@ -3601,7 +3601,7 @@
         "commit": "f0bd3e478d72c5864c09cd5d3673c7106c2a8e5b",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-44.json",
+        "evidence_path": "engineering/implementation/evidence/W-44.json",
         "status": "pass"
       }
     },
@@ -3611,7 +3611,7 @@
       "title": "[W-45][M8] 維護者可以持續發現新版 PHP 與安全差異並建立回歸",
       "work_package_title": "上游版本追蹤",
       "branch": "codex/w-45-implementation",
-      "plan_path": "docs/implementation/W-45.md",
+      "plan_path": "engineering/implementation/W-45.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-45-implementation/docs/implementation/W-45.md",
       "dependencies": [
         "W-02",
@@ -3665,7 +3665,7 @@
         "commit": "79a19382e41510a177d3e1294719985527fc46c8",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-45.json",
+        "evidence_path": "engineering/implementation/evidence/W-45.json",
         "status": "pass"
       }
     },
@@ -3675,7 +3675,7 @@
       "title": "[W-46][M5] 宿主可以在獨立程序強制限制及停止高風險執行",
       "work_package_title": "高風險worker隔離模式",
       "branch": "codex/w-46-implementation",
-      "plan_path": "docs/implementation/W-46.md",
+      "plan_path": "engineering/implementation/W-46.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-46-implementation/docs/implementation/W-46.md",
       "dependencies": [
         "W-05",
@@ -3729,7 +3729,7 @@
         "commit": "8e580069509a3a2bd8fccbbda540f99f537eb831",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-46.json",
+        "evidence_path": "engineering/implementation/evidence/W-46.json",
         "status": "pass"
       }
     },
@@ -3739,7 +3739,7 @@
       "title": "[W-47][M8] 維護者可以以獨立安全及效能閘門接受或拒絕 JIT",
       "work_package_title": "可選JIT實驗",
       "branch": "codex/w-47-implementation",
-      "plan_path": "docs/implementation/W-47.md",
+      "plan_path": "engineering/implementation/W-47.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-47-implementation/docs/implementation/W-47.md",
       "dependencies": [
         "W-37",
@@ -3784,7 +3784,7 @@
         "commit": "a8c544676f1c0b73101cd47506bc761fc6340f67",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-47.json",
+        "evidence_path": "engineering/implementation/evidence/W-47.json",
         "status": "pass"
       }
     },
@@ -3794,7 +3794,7 @@
       "title": "[W-48][M8] 維護者可以實測自適應接納與池化並退回固定策略",
       "work_package_title": "自適應接納與池化實驗",
       "branch": "codex/w-48-implementation",
-      "plan_path": "docs/implementation/W-48.md",
+      "plan_path": "engineering/implementation/W-48.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-48-implementation/docs/implementation/W-48.md",
       "dependencies": [
         "W-22",
@@ -3842,7 +3842,7 @@
         "commit": "7223b14db07aaac9e8eda9de8b1d0672f079114f",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-48.json",
+        "evidence_path": "engineering/implementation/evidence/W-48.json",
         "status": "pass"
       }
     },
@@ -3852,7 +3852,7 @@
       "title": "[W-49][M0] 維護者可以追溯第一版起的所有發行與隔離參考環境",
       "work_package_title": "全歷史版本清冊與隔離參考環境",
       "branch": "codex/w-49-implementation",
-      "plan_path": "docs/implementation/W-49.md",
+      "plan_path": "engineering/implementation/W-49.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-49-implementation/docs/implementation/W-49.md",
       "dependencies": [
         "W-01",
@@ -3911,7 +3911,7 @@
         "commit": "d22ab1c8bb9d0c461034584d73865221dff80a0f",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-49.json",
+        "evidence_path": "engineering/implementation/evidence/W-49.json",
         "status": "pass"
       }
     },
@@ -3921,7 +3921,7 @@
       "title": "[W-50][M2] 歷史 PHP 程式可以經對應前端及受控工具入口執行",
       "work_package_title": "早期 PHP Tools／PHP-FI 前端與工具語意",
       "branch": "codex/w-50-implementation",
-      "plan_path": "docs/implementation/W-50.md",
+      "plan_path": "engineering/implementation/W-50.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-50-implementation/docs/implementation/W-50.md",
       "dependencies": [
         "W-49",
@@ -3971,7 +3971,7 @@
         "commit": "1769b09d3fcc77dd636746e0548596a95463f698",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-50.json",
+        "evidence_path": "engineering/implementation/evidence/W-50.json",
         "status": "pass"
       }
     },
@@ -3981,7 +3981,7 @@
       "title": "[W-51][M3] PHP 程式可以選擇正確的歷史版本與平台語意",
       "work_package_title": "完整版本與平台語意規則",
       "branch": "codex/w-51-implementation",
-      "plan_path": "docs/implementation/W-51.md",
+      "plan_path": "engineering/implementation/W-51.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-51-implementation/docs/implementation/W-51.md",
       "dependencies": [
         "W-49",
@@ -4039,7 +4039,7 @@
         "commit": "7117692b5872e5b0ed1601e86a0be0e0f828f44d",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-51.json",
+        "evidence_path": "engineering/implementation/evidence/W-51.json",
         "status": "pass"
       }
     },
@@ -4049,7 +4049,7 @@
       "title": "[W-52][M5] 歷史 PHP 網站可以使用相應的內建函式及擴充功能",
       "work_package_title": "歷史內建函式與擴充相容",
       "branch": "codex/w-52-implementation",
-      "plan_path": "docs/implementation/W-52.md",
+      "plan_path": "engineering/implementation/W-52.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-52-implementation/docs/implementation/W-52.md",
       "dependencies": [
         "W-50",
@@ -4111,7 +4111,7 @@
         "commit": "d28f724d7f0553c6e2478dd20b5cd47846223936",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-52.json",
+        "evidence_path": "engineering/implementation/evidence/W-52.json",
         "status": "pass"
       }
     },
@@ -4121,7 +4121,7 @@
       "title": "[W-53][M5] 多版本網站可以共享引擎而不交換請求狀態或政策",
       "work_package_title": "混合版本並行與安全契約",
       "branch": "codex/w-53-implementation",
-      "plan_path": "docs/implementation/W-53.md",
+      "plan_path": "engineering/implementation/W-53.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-53-implementation/docs/implementation/W-53.md",
       "dependencies": [
         "W-49",
@@ -4187,7 +4187,7 @@
         "commit": "a123014773fbeae0301097b2a74682fa817f354f",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-53.json",
+        "evidence_path": "engineering/implementation/evidence/W-53.json",
         "status": "pass"
       }
     },
@@ -4197,7 +4197,7 @@
       "title": "[W-54][M0] 驗收者可以查明全部競品與預先固定的比較工作負載",
       "work_package_title": "全競品與工作負載登錄",
       "branch": "codex/w-54-implementation",
-      "plan_path": "docs/implementation/W-54.md",
+      "plan_path": "engineering/implementation/W-54.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-54-implementation/docs/implementation/W-54.md",
       "dependencies": [
         "W-01",
@@ -4250,7 +4250,7 @@
         "commit": "2c74bda007f279a77db37627c5d4097f2e995dc3",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-54.json",
+        "evidence_path": "engineering/implementation/evidence/W-54.json",
         "status": "pass"
       }
     },
@@ -4260,7 +4260,7 @@
       "title": "[W-55][M7] 驗收者可以逐格判斷是否嚴格超越所有適用競品",
       "work_package_title": "嚴格效能比較與統計驗收",
       "branch": "codex/w-55-implementation",
-      "plan_path": "docs/implementation/W-55.md",
+      "plan_path": "engineering/implementation/W-55.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-55-implementation/docs/implementation/W-55.md",
       "dependencies": [
         "W-54",
@@ -4325,7 +4325,7 @@
         "commit": "c3d91ddfcc1d5796ef31433b22b320f31b30d291",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-55.json",
+        "evidence_path": "engineering/implementation/evidence/W-55.json",
         "status": "pass"
       }
     },
@@ -4335,7 +4335,7 @@
       "title": "[W-56][M5] 驗收者可以重播 WordPress 與 WooCommerce 的整站與交易流程",
       "work_package_title": "WordPress 與 WooCommerce 真實驗收",
       "branch": "codex/w-56-implementation",
-      "plan_path": "docs/implementation/W-56.md",
+      "plan_path": "engineering/implementation/W-56.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-56-implementation/docs/implementation/W-56.md",
       "dependencies": [
         "W-34",
@@ -4387,7 +4387,7 @@
         "commit": "3939dfe604ab4cb9b87f5d1405e3c236b1b967d3",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-56.json",
+        "evidence_path": "engineering/implementation/evidence/W-56.json",
         "status": "pass"
       }
     },
@@ -4397,7 +4397,7 @@
       "title": "[W-57][M5] 驗收者可以分別證明 Laravel 框架與 BookStack 應用相容",
       "work_package_title": "Laravel 與 BookStack 真實驗收",
       "branch": "codex/w-57-implementation",
-      "plan_path": "docs/implementation/W-57.md",
+      "plan_path": "engineering/implementation/W-57.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-57-implementation/docs/implementation/W-57.md",
       "dependencies": [
         "W-34",
@@ -4449,7 +4449,7 @@
         "commit": "2652f8415323cb9e9f5dadd8ed54a702687f3982",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-57.json",
+        "evidence_path": "engineering/implementation/evidence/W-57.json",
         "status": "pass"
       }
     },
@@ -4459,7 +4459,7 @@
       "title": "[W-58][M5] 驗收者可以重播多個生態與歷史應用的真實工作",
       "work_package_title": "多生態與歷史專案驗收",
       "branch": "codex/w-58-implementation",
-      "plan_path": "docs/implementation/W-58.md",
+      "plan_path": "engineering/implementation/W-58.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-58-implementation/docs/implementation/W-58.md",
       "dependencies": [
         "W-50",
@@ -4515,7 +4515,7 @@
         "commit": "2b5d537183b50bb1fdbffdb7cb4926183c0f40ee",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-58.json",
+        "evidence_path": "engineering/implementation/evidence/W-58.json",
         "status": "pass"
       }
     },
@@ -4525,7 +4525,7 @@
       "title": "[W-59][M7] 驗收者可以證明長時間服務、資料完整與遷移回復",
       "work_package_title": "資料完整、故障、長時間與遷移驗收",
       "branch": "codex/w-59-implementation",
-      "plan_path": "docs/implementation/W-59.md",
+      "plan_path": "engineering/implementation/W-59.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-59-implementation/docs/implementation/W-59.md",
       "dependencies": [
         "W-53",
@@ -4595,7 +4595,7 @@
         "commit": "6024917d8d36f7f2d651414fcd0356568b6f2aca",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-59.json",
+        "evidence_path": "engineering/implementation/evidence/W-59.json",
         "status": "pass"
       }
     },
@@ -4605,7 +4605,7 @@
       "title": "[W-60][M7] 驗收者可以依同一候選提交核對完整目標與發布授權",
       "work_package_title": "全目標認證與專案文件發布",
       "branch": "codex/w-60-implementation",
-      "plan_path": "docs/implementation/W-60.md",
+      "plan_path": "engineering/implementation/W-60.md",
       "plan_url": "https://github.com/HazelnutParadise/phego/blob/codex/w-60-implementation/docs/implementation/W-60.md",
       "dependencies": [
         "W-49",
@@ -4697,7 +4697,7 @@
         "commit": "0ade6a63fd955b9703ad15f5779aae0114e26bff",
         "document_checks": 33,
         "tool_tests": 11,
-        "evidence_path": "docs/implementation/evidence/W-60.json",
+        "evidence_path": "engineering/implementation/evidence/W-60.json",
         "status": "pass"
       }
     }

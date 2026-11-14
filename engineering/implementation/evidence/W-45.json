@@ -35,11 +35,11 @@
       "version": "8.5.12"
     },
     "lock": {
-      "path": "docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json",
+      "path": "engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json",
       "sha256": "55f1041efb9a4fa43ee379f78e6451e50c3ba1e45a696cfe682857cf114cbe37"
     },
     "inventory": {
-      "path": "docs/compatibility/php-release-inventory.json",
+      "path": "engineering/compatibility/php-release-inventory.json",
       "sha256": "63f373b24952b78937f33ce6e6409b7c9d03cb670bccbc033a0d7fff15f6379b"
     },
     "verification": "Both source hashes match the reviewed release lock and inventory. SHA-256 is verified before decoding either archive."
@@ -60,7 +60,7 @@
       "command": "python3 -m unittest discover -s tools -p 'test_*.py'",
       "tests": 522,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-classifier-full-tests.txt",
+        "path": "engineering/implementation/evidence/W-45-classifier-full-tests.txt",
         "sha256": "8cfb5bb4f1d9edb6dcea6771086455f4738acfc9d1ed055e6bd69d9a58775f19"
       },
       "source_commit": "0fc6907d3b08316171f13cfaa9c8e15adfb6d551",
@@ -71,7 +71,7 @@
       "command": "python3 tools/w03_local_gate.py --commit 0fc6907d3b08316171f13cfaa9c8e15adfb6d551 --timeout 1800",
       "observed_pass": 522,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-classifier-gate.json",
+        "path": "engineering/implementation/evidence/W-45-classifier-gate.json",
         "sha256": "27705bf7e5373c7c6d37811d8854c6c253ae9ec63291bf396ee10e212307c6cb"
       },
       "source_commit": "0fc6907d3b08316171f13cfaa9c8e15adfb6d551",
@@ -82,7 +82,7 @@
       "command": "python3 -m unittest tools.test_upstream_diff tools.test_upstream_diff_review tools.test_upstream_diff_limits -v",
       "tests": 73,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-classifier-tests.txt",
+        "path": "engineering/implementation/evidence/W-45-classifier-tests.txt",
         "sha256": "60909616bc4175a6beb344cde9f897bbb777bffff6ed5358fa1370c3929f4bb1"
       },
       "source_commit": "0fc6907d3b08316171f13cfaa9c8e15adfb6d551",
@@ -110,11 +110,11 @@
       "exit_code": 0
     },
     {
-      "command": "python3 tools/upstream_update.py pair --lock docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json /tmp/phego-w45-review/php-8.5.11.tar.xz /tmp/phego-w45-review/php-8.5.12.tar.xz",
+      "command": "python3 tools/upstream_update.py pair --lock engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json /tmp/phego-w45-review/php-8.5.11.tar.xz /tmp/phego-w45-review/php-8.5.12.tar.xz",
       "repetitions": 2,
       "byte_identical": true,
       "result": {
-        "path": "docs/compatibility/upstream-update-8.5.11-8.5.12.json",
+        "path": "engineering/compatibility/upstream-update-8.5.11-8.5.12.json",
         "sha256": "680bb6c2039787d20d89eca821694e6f84ccc64d8a6475ca0f92370c64f6a051"
       },
       "source_commit": "0fc6907d3b08316171f13cfaa9c8e15adfb6d551",
@@ -128,7 +128,7 @@
       "tests": 498,
       "exit_code": 0,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-tool-tests.txt",
+        "path": "engineering/implementation/evidence/W-45-tool-tests.txt",
         "sha256": "1251c784b326ece7e885183e16d586aeeb81ad64fb19d576c198d9b9ecbed7d9"
       }
     },
@@ -139,7 +139,7 @@
       "observed_pass": 491,
       "exit_code": 0,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-w03-local-gate.json",
+        "path": "engineering/implementation/evidence/W-45-w03-local-gate.json",
         "sha256": "75bd026541d5275e45a6dd1d5cd83ea11ec30473f702e3ce47451783f940c875"
       }
     },
@@ -150,7 +150,7 @@
       "tests": 32,
       "exit_code": 0,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-update-tests.txt",
+        "path": "engineering/implementation/evidence/W-45-update-tests.txt",
         "sha256": "5179753f5429d4c899f42ae84e93040a151fe13e08d4dec4588c21a9b071413e"
       }
     },
@@ -175,30 +175,30 @@
       "exit_code": 0
     },
     {
-      "command": "python3 tools/upstream_update.py pair --lock docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json OLD_ARCHIVE NEW_ARCHIVE",
+      "command": "python3 tools/upstream_update.py pair --lock engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json OLD_ARCHIVE NEW_ARCHIVE",
       "source_commit": "31af02ab3bb26814b097d38f8f9a22297fd60f26",
       "status": "pass",
       "exit_code": 0,
       "repetitions": 2,
       "byte_identical": true,
       "result": {
-        "path": "docs/compatibility/upstream-update-8.5.11-8.5.12.json",
+        "path": "engineering/compatibility/upstream-update-8.5.11-8.5.12.json",
         "sha256": "84df6ef68d04644c713cdfd91d5e423984c20674a71c6ab7a695d01f8f9b988e",
         "source_commit": "31af02ab3bb26814b097d38f8f9a22297fd60f26",
         "resolution": "Resolve this historical path at source_commit, not at the current working tree."
       }
     },
     {
-      "command": "python3 tools/upstream_watch.py observe; python3 tools/upstream_update.py watch docs/data/php-upstream-baseline.json OBSERVED",
+      "command": "python3 tools/upstream_watch.py observe; python3 tools/upstream_update.py watch engineering/data/php-upstream-baseline.json OBSERVED",
       "source_commit": "31af02ab3bb26814b097d38f8f9a22297fd60f26",
       "status": "pass",
       "exit_code": 0,
       "observation": {
-        "path": "docs/implementation/evidence/W-45-upstream-observed.json",
+        "path": "engineering/implementation/evidence/W-45-upstream-observed.json",
         "sha256": "9baac1702d126fefa7e4a332f29974b4dd5afbced0dbd8014140ca2bc6721995"
       },
       "result": {
-        "path": "docs/implementation/evidence/W-45-watch-report.json",
+        "path": "engineering/implementation/evidence/W-45-watch-report.json",
         "sha256": "beea6255407f5cb09f11dbb50ff9f5e8b6b64b9c0a1628299f3da7a777ab878f"
       },
       "outcome": "unchanged; changed-pair and partial-failure paths separately exercised by controlled fixtures",
@@ -227,7 +227,7 @@
       "status": "pass",
       "scope": "source-locked tool classification; no PHP engine compatibility claim",
       "result": {
-        "path": "docs/compatibility/upstream-update-8.5.11-8.5.12.json",
+        "path": "engineering/compatibility/upstream-update-8.5.11-8.5.12.json",
         "sha256": "680bb6c2039787d20d89eca821694e6f84ccc64d8a6475ca0f92370c64f6a051"
       },
       "file_changes": 747,
@@ -255,7 +255,7 @@
       "scope": "controlled source fixture; identical stub, implementation return 1 changed to return 0",
       "reproduce_from_repository": "python3 - <<'FIXTURE'\nimport json\nfrom pathlib import Path\nfrom tools.test_upstream_update import _archive_pair, IMPLEMENTATION\nold, new, before, after = _archive_pair(\n    {IMPLEMENTATION: b'int run(void) { return 1; }\\n'},\n    {IMPLEMENTATION: b'int run(void) { return 0; }\\n'})\np = Path('w45-t130-fixture')\np.mkdir()\n(p / 'old.tar').write_bytes(old)\n(p / 'new.tar').write_bytes(new)\n(p / 'lock.json').write_text(json.dumps({'old': before, 'new': after}))\nFIXTURE\npython3 tools/upstream_update.py pair --lock w45-t130-fixture/lock.json w45-t130-fixture/old.tar w45-t130-fixture/new.tar",
       "result": {
-        "path": "docs/implementation/evidence/W-45-t130-report.json",
+        "path": "engineering/implementation/evidence/W-45-t130-report.json",
         "sha256": "1321c36578f96af537a4294d1e06e8f414c1bd12b21aab1fc24f8cee6d486a33"
       },
       "observed": {
@@ -296,7 +296,7 @@
     }
   },
   "current_profile_regression": {
-    "path": "docs/implementation/evidence/W-45-profile64.json",
+    "path": "engineering/implementation/evidence/W-45-profile64.json",
     "sha256": "ff85804cdbcffddd97fc83be091c3d21cd5b7ecc167f10678bfc2bb17603fa85"
   },
   "automation": {
@@ -311,7 +311,7 @@
     "regression_candidates": "Exact release/archive/path/PHPT hash; pending W-04 execution on matching Phego profiles.",
     "live_observation": "unchanged; no release support inferred"
   },
-  "planning_snapshot_policy": "docs/data initial planned/not_run/not_started values remain immutable; this evidence contains current observed outcomes.",
+  "planning_snapshot_policy": "engineering/data initial planned/not_run/not_started values remain immutable; this evidence contains current observed outcomes.",
   "remaining": [
     "Second exact implemented release and cross-release regression evidence (W-42 with W-50/W-51).",
     "Fatal-error behavior and controlled advisory regressions (W-44 with W-14/W-17).",
@@ -328,7 +328,7 @@
       "failures": 2,
       "errors": 3,
       "raw_result": {
-        "path": "docs/implementation/evidence/W-45-http-before.txt",
+        "path": "engineering/implementation/evidence/W-45-http-before.txt",
         "sha256": "10c6253a4e286328e49dd5677607872ebf9ef479f51b8d26de1e887b60f64df0"
       }
     },
@@ -357,18 +357,18 @@
     "status": "pass",
     "scope": "source classification only; no engine or application compatibility claim",
     "before_regressions": {
-      "path": "docs/implementation/evidence/W-45-classifier-before.txt",
+      "path": "engineering/implementation/evidence/W-45-classifier-before.txt",
       "sha256": "4da7a9bfe89b5b40941c2558c0f8187aee88d9f158f5a10f18f3ede6f3a5f7c6"
     },
     "before_regressions_scope": "Test-first failures on the previous classifier and on uncommitted intermediate fixes; controls may pass. Full-file synthetic fixtures reproduce missing properties, attributes and metadata.",
     "classification_schema_version": 2,
     "update_schema_version": 1,
     "official_diff": {
-      "path": "docs/compatibility/upstream-diff-8.5.11-8.5.12.json",
+      "path": "engineering/compatibility/upstream-diff-8.5.11-8.5.12.json",
       "sha256": "8bd749c410f2293a22dac133ec7a13424a506e1f0ab5faafa34313433fafceef"
     },
     "official_update": {
-      "path": "docs/compatibility/upstream-update-8.5.11-8.5.12.json",
+      "path": "engineering/compatibility/upstream-update-8.5.11-8.5.12.json",
       "sha256": "680bb6c2039787d20d89eca821694e6f84ccc64d8a6475ca0f92370c64f6a051"
     },
     "official_source_validation": {

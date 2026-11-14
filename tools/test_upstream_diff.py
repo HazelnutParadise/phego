@@ -68,7 +68,7 @@ class TestImpact(unittest.TestCase):
         self.assertEqual(upstream_diff.impact("CLI"), ["W-35"])
 
     def test_unmatched_paths_and_sections_are_unmapped(self):
-        for value in ("sapi/apache2handler/sapi_apache2.c", "docs/README.md", "SAPI", "Unknown"):
+        for value in ("sapi/apache2handler/sapi_apache2.c", "engineering/README.md", "SAPI", "Unknown"):
             with self.subTest(value=value):
                 self.assertEqual(upstream_diff.impact(value), ["unmapped"])
 

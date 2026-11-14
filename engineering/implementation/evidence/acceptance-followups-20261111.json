@@ -96,7 +96,7 @@
       "command": "Runtime layout benchmarks workflow, run 43012023379 (tools/benchstat-pair.sh, 10 alternating rounds)",
       "exit_code": 0,
       "log": "acceptance-followups-20261111/benchstat/heap-objects.benchstat.txt",
-      "result": "See docs/decisions/runtime-layout.md: object store 3-20% faster for small objects, sort ordinals 23% faster on equal data, bucket chunks 19% faster copy-on-write and 6-7% slower sorting, frames 22% faster."
+      "result": "See engineering/decisions/runtime-layout.md: object store 3-20% faster for small objects, sort ordinals 23% faster on equal data, bucket chunks 19% faster copy-on-write and 6-7% slower sorting, frames 22% faster."
     },
     {
       "command": "gofmt -l .; CGO_ENABLED=0 go build ./...; go vet ./...; CGO_ENABLED=0 go test -count=1 ./...; go test -race -count=1 ./...; python3 -m unittest discover -s tools -p 'test_*.py' (commit in local/commit.txt, darwin/arm64)",

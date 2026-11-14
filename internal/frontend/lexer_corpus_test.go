@@ -15,7 +15,7 @@ import (
 // PHEGO_LEXER_REFERENCE (default reference.jsonl) for the integer width in
 // PHEGO_LEXER_INT_WIDTH (default 32), with short_open_tag on unless
 // PHEGO_LEXER_SHORT_OPEN_TAG is "0"; see
-// docs/implementation/W-09.md.
+// engineering/implementation/W-09.md.
 func TestLexMatchesReferenceCorpus(t *testing.T) {
 	dir := os.Getenv("PHEGO_LEXER_CORPUS")
 	if dir == "" {

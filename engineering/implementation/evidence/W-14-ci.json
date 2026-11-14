@@ -19,7 +19,7 @@
     "tools/test_lifecycle_reference.py": "a742909f87e3bdea915052613089341d35dc5270712e0757c649c6c455ddcd10",
     "internal/runtime/execution_oracle_test.go": "c6053065a31efa5cb99765d1189f10d74820ff93b24ba1f179ec07203a9e145e",
     "tools/w03-local-checks.json": "ba954f5aa4e2b3699333b0745d6789c9b298e64459f63705ce85bb31ef9d0b19",
-    "docs/implementation/W-14.md": "31236aa5f939cb19458f1ffe8c0242f2f023bf4573a1a6dfa1d9fd77cb6854a0"
+    "engineering/implementation/W-14.md": "31236aa5f939cb19458f1ffe8c0242f2f023bf4573a1a6dfa1d9fd77cb6854a0"
   },
   "profiles": [
     {
@@ -63,71 +63,71 @@
     "command": "python3 -m unittest test_lifecycle_reference.LifecycleReferenceTests.test_cold_image_pull_noise_is_separate_from_reference_streams test_lifecycle_reference.LifecycleReferenceTests.test_runner_stderr_and_wrong_profile_are_rejected test_lifecycle_reference.LifecycleReferenceTests.test_pull_failure_does_not_start_container",
     "method": "isolated baseline runner plus new tests and fixtures",
     "before_exit_code": 1,
-    "before_evidence": "docs/implementation/evidence/W-14-ci/runner-before.txt",
-    "after_evidence": "docs/implementation/evidence/W-14-ci/runner-after.txt"
+    "before_evidence": "engineering/implementation/evidence/W-14-ci/runner-before.txt",
+    "after_evidence": "engineering/implementation/evidence/W-14-ci/runner-after.txt"
   },
   "commands": [
     {
       "command": "gofmt -l internal (assert empty stdout)",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/format.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/format.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "CGO_ENABLED=0 go test ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/go.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/go.txt",
       "sha256": "1f34436b56ed9d14287ded1d1db36d0a6f5de8bc93d8a00136b22d47c1e35fd0"
     },
     {
       "command": "go test -race ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/race.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/race.txt",
       "sha256": "5215c7c51b27d0a1e383f4feea363210d8355556a3a39747157c320049985aa5"
     },
     {
       "command": "go vet ./...",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/vet.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/vet.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "command": "python3 tools/lifecycle_reference.py",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/oracle64.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/oracle64.txt",
       "sha256": "5fe9d8af04f60fd86aabbe8b8b64e6aea11a5394f4b0d9d368d221ddcf5066df"
     },
     {
       "command": "python3 tools/lifecycle_reference.py --width 32",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/oracle32.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/oracle32.txt",
       "sha256": "a84fc04882d8f34e6bc934925b87f1898bbfa786b9ecf398b753b4c3d30474fe"
     },
     {
       "command": "python3 -m unittest discover -s tools -p test_lifecycle_reference.py",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/runner-after.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/runner-after.txt",
       "sha256": "31d461d4f5ea9a76ac910ab10c6f0bdaffcf73105fffad0bef6b67b23d0e121f"
     },
     {
       "command": "CGO_ENABLED=0 go test -count=1 -run '^TestExecutionOracleReplay' -v ./internal/runtime",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/replay.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/replay.txt",
       "sha256": "ace2a6218abb4aca6d172961eb3feeacfd474819126d0277d3c99306d21c3bcf"
     },
     {
       "command": "CGO_ENABLED=0 GOWORK=off go test ./internal/runtime (temporary W-12 git archive plus W-14 execution*.go and fixtures)",
       "status": "pass",
       "exit_code": 0,
-      "evidence": "docs/implementation/evidence/W-14-ci/w12-integration.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/w12-integration.txt",
       "sha256": "40eb1db12579d3690f91fc53c600bf76b9ee05d6543371a76d5eda2e2236ca56"
     },
     {
@@ -135,7 +135,7 @@
       "status": "pass",
       "exit_code": 0,
       "tests": 530,
-      "evidence": "docs/implementation/evidence/W-14-ci/python.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/python.txt",
       "sha256": "ce6072f18b6e8d35fcabc0abd893e6805d5d73523fe7540654ab77202df2e268"
     },
     {
@@ -143,7 +143,7 @@
       "status": "pass",
       "exit_code": 0,
       "checks": 34,
-      "evidence": "docs/implementation/evidence/W-14-ci/docs-final.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/docs-final.txt",
       "sha256": "6ce6fe19839915632ede5b8474ed4d716d49207c51befc608909beb4c390a60e"
     },
     {
@@ -151,7 +151,7 @@
       "status": "pass",
       "exit_code": 0,
       "checks": 34,
-      "evidence": "docs/implementation/evidence/W-14-ci/docs-no-write.txt",
+      "evidence": "engineering/implementation/evidence/W-14-ci/docs-no-write.txt",
       "sha256": "6ce6fe19839915632ede5b8474ed4d716d49207c51befc608909beb4c390a60e"
     }
   ],
@@ -161,7 +161,7 @@
     "failures": 3,
     "errors": 14,
     "cause": "Plan linked W-14-ci.json before this evidence file existed; planning-validation consumers rejected the missing local link. Tests were not changed or weakened.",
-    "evidence": "docs/implementation/evidence/W-14-ci/python-incomplete-docs.txt"
+    "evidence": "engineering/implementation/evidence/W-14-ci/python-incomplete-docs.txt"
   },
   "review": {
     "scope": "full PR diff and CI changes",
@@ -170,7 +170,7 @@
     "github_current_head_review": "pending push"
   },
   "security_assessment": {
-    "path": "docs/compatibility/security-assessments.json",
+    "path": "engineering/compatibility/security-assessments.json",
     "status": "needs_regression",
     "unchanged_from_main_sha256": "02fa2bfef585b035fb340bee387e02491895feec7a5c3724e451254fa073beb8"
   },
@@ -182,5 +182,5 @@
   "local_status": "pass",
   "snapshot_commit": "cacf865508ff0880db8a226491db86591ffc4a3d",
   "snapshot_note": "Input and reference hashes describe the initial 28-case CI snapshot at snapshot_commit; subsequent 30-case regression evidence is linked separately.",
-  "followup_review_evidence": "docs/implementation/evidence/W-14-ci-review.json"
+  "followup_review_evidence": "engineering/implementation/evidence/W-14-ci-review.json"
 }

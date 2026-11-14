@@ -1,6 +1,6 @@
 # W-06 值、參照與邏輯生命週期選型
 
-本文件記錄 W-06 候選值模型的選型與量測結果，屬於[ADR-10](/engineering/decisions/README.md)「Go GC 管實體記憶體，PHP 邏輯生命週期獨立」的實作基準。它不是 PHP 引擎完成或產品驗收的證明。對應 REQ-007、REQ-015、REQ-016、REQ-017、REQ-020；REQ-023 尚未涵蓋。
+本文件記錄 W-06 候選值模型的選型與量測結果，屬於[ADR-10](README.md)「Go GC 管實體記憶體，PHP 邏輯生命週期獨立」的實作基準。它不是 PHP 引擎完成或產品驗收的證明。對應 REQ-007、REQ-015、REQ-016、REQ-017、REQ-020；REQ-023 尚未涵蓋。
 
 ## 選定做法
 
@@ -20,7 +20,7 @@
 
 ## 量測結果
 
-在 Apple M3、Go 1.26.5 上以 `go test -run '^$' -bench . -benchtime 2000x -count 3 ./internal/runtime/` 量測，原始數據見[證據](/engineering/implementation/evidence/W-06-php85-lifecycle-linux-386.json)。
+在 Apple M3、Go 1.26.5 上以 `go test -run '^$' -bench . -benchtime 2000x -count 3 ./internal/runtime/` 量測，原始數據見[證據](../implementation/evidence/W-06-php85-lifecycle-linux-386.json)。
 
 | 操作 | 每次耗時 | 配置 |
 |---|---|---|
@@ -35,7 +35,7 @@
 ## 已知限制
 
 - 只對 PHP 8.5.12 在模擬 linux/386 的參考結果驗證，早期世代、舊物件模型世代與其他平台仍缺差異案例。
-- W-06 當時尚未模型化浮點數、資源與複合陣列鍵；[W-12](/engineering/decisions/W-12-arrays.md) 補上浮點轉換與複合鍵的 PHP 錯誤，resource 鍵仍等待 resource 模型。
+- W-06 當時尚未模型化浮點數、資源與複合陣列鍵；[W-12](W-12-arrays.md) 補上浮點轉換與複合鍵的 PHP 錯誤，resource 鍵仍等待 resource 模型。
 - 參照參數、參照回傳與型別化屬性的限制要等呼叫與類別模型存在後驗證。
 - 緩衝池化（REQ-023）尚未實作；目前不重用任何請求資料。
 - 同一次循環回收內多個解構的先後，Zend 取決於根緩衝區的槽位重用；本模型依加入緩衝的先後執行，兩者可能不同。

@@ -529,8 +529,8 @@ def main() -> int:
             end = datetime.now(timezone.utc).isoformat()
             if _snapshot_fingerprint(snapshot) != before:
                 raise ValueError('snapshot changed during checks')
-            paths = ('docs/data/phego-requirements.json', 'docs/data/phego-acceptance-tests.json',
-                     'docs/data/phego-work-packages.json', 'docs/implementation/github-index.json')
+            paths = ('engineering/data/phego-requirements.json', 'engineering/data/phego-acceptance-tests.json',
+                     'engineering/data/phego-work-packages.json', 'engineering/implementation/github-index.json')
             result = {
                 'scope': _SCOPE, 'commit': args.commit, 'tree': tree,
                 'tool_sha256': hashlib.sha256(tool.read_bytes()).hexdigest(),

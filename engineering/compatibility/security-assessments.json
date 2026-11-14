@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Maintainer judgements of whether each upstream PHP security fix affects Phego, with evidence. tools/upstream_diff.py reports every fix as needs_assessment; tools/test_security_assessments.py requires a record here for every security identifier in a committed docs/compatibility/upstream-diff-*.json report.",
+  "description": "Maintainer judgements of whether each upstream PHP security fix affects Phego, with evidence. tools/upstream_diff.py reports every fix as needs_assessment; tools/test_security_assessments.py requires a record here for every security identifier in a committed engineering/compatibility/upstream-diff-*.json report.",
   "assessments": [
     {
       "release": "8.5.12",

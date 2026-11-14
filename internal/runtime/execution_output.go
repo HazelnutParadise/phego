@@ -19,7 +19,7 @@ func (x *execution) write(data []byte) completion {
 	// the two in step. A completion is too large to return through a second
 	// frame for free: on linux/amd64 benchstat measured echo 31-33% slower
 	// when this called writeTo, and 10-15% slower with both as inlined
-	// entries to one shared body (docs/decisions/runtime-layout.md).
+	// entries to one shared body (engineering/decisions/runtime-layout.md).
 	top := len(x.buffers) - 1
 	if (x.filtering || x.outputRunning) && top >= 0 {
 		x.buffers[top].produced = true

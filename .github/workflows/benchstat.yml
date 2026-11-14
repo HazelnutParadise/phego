@@ -1,6 +1,6 @@
 name: Runtime layout benchmarks
 
-# Re-measures the runtime layout decisions (docs/decisions/runtime-layout.md)
+# Re-measures the runtime layout decisions (engineering/decisions/runtime-layout.md)
 # with benchstat on a hosted runner: for each decision, the commit before it
 # and the commit that made it run alternately. Run it by hand, or by changing
 # this file or the script.

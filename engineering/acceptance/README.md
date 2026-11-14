@@ -2,7 +2,7 @@
 
 Acceptance must run real applications, not only self-written demos, language tests, or a homepage. The initial required lines include WordPress/WooCommerce, Laravel framework tests plus BookStack, Drupal, a real Symfony application, MediaWiki, phpMyAdmin, phpBB, and authentic historical PHP applications.
 
-See the [application catalog](/engineering/data/application-catalog.json). It records targets and workflows, not pinned source artifacts or completed tests. Each real test run must first lock actual upstream versions, source digests, dependency locks, PHP/platform profiles, modules, databases, configuration, and fixtures.
+See the [application catalog](../data/application-catalog.json). It records targets and workflows, not pinned source artifacts or completed tests. Each real test run must first lock actual upstream versions, source digests, dependency locks, PHP/platform profiles, modules, databases, configuration, and fixtures.
 
 ## Required behavior
 
@@ -22,4 +22,4 @@ Use disposable test databases and authorized service sandboxes. Never run live p
 
 All required cases within the declared scope must pass with no unresolved failures, crashes, timeouts, corruption, authorization failures, unknown support, or runner gaps. Approved environmental inapplicability and security differences remain explicit; they are not silently reported as successful equivalent behavior.
 
-Passing finite tests does not prove that no possible bug exists. It establishes the exact tested scope and evidence, which must be maintained as the engine changes. Full requirements are in [chapter 38](/engineering/spec/specification.zh-TW.md#chapter-38).
+Passing finite tests does not prove that no possible bug exists. It establishes the exact tested scope and evidence, which must be maintained as the engine changes. Full requirements are in [chapter 38](../spec/specification.zh-TW.md#chapter-38).

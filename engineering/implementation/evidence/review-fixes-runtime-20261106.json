@@ -47,7 +47,7 @@
   "captured_at": "2026-11-07T05:18:55.241576+00:00",
   "source_sha256": {
     ".github/workflows/go.yml": "c102a39d5ff496bceb043fa6d8d88d170b9d099f8c2d80e528da46cb18da62c0",
-    "docs/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
+    "engineering/compatibility/upstream-diff-8.5.11-8.5.12.json": "a36ccb5760d7313d486057120c208d0d6ac5136361c30ca3b17d7f377f1fb0d2",
     "engine.go": "8989ae6d6f32c8892c4323368a556a6294a09ce8d002c65fada559bf6720cfc5",
     "engine_read_other.go": "124247d71a79e67b332b7d6c3fc677ff2d8310a9f9d562abdcaac043d4dba185",
     "engine_read_unix.go": "b6c551ddd1f7f6a82347bd1c5507c3cc239094acb0d028a2510bb84ffde69733",
@@ -153,7 +153,7 @@
       "result": "64 registers: Load needs 106,956,053 work and 152,045,160 bytes; defaults are 134,217,728 and 201,326,592."
     },
     {
-      "command": "python3 tools/upstream_update.py pair --lock docs/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json <8.5.11> <8.5.12>",
+      "command": "python3 tools/upstream_update.py pair --lock engineering/implementation/evidence/W-02-upstream-8.5.11-8.5.12.json <8.5.11> <8.5.12>",
       "exit_code": 0,
       "log": "review-fixes-runtime-20261106/upstream-pair.log",
       "result": "Both archives match their locked SHA-256; the committed classification equals the pair output; 177 grammar rules."

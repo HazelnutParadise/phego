@@ -6399,10 +6399,10 @@
   "os": "Darwin",
   "package_acceptance": "not_claimed",
   "planning_sha256": {
-    "docs/data/phego-acceptance-tests.json": "cef40502d412c57e2494ade96d0affdea2cc6cc606fd71b7f67af432d1a2dc7f",
-    "docs/data/phego-requirements.json": "809d9be241f0e82bff0db0243ac4435255b54337b5f9e83aec40c109a4375934",
-    "docs/data/phego-work-packages.json": "38b90e699c8255a104dca4f60ef56997808fb2fee3a33ce6cf63c3c9baae5528",
-    "docs/implementation/github-index.json": "6e9de314da96ef2e7e5ae555e6d3473e70ff823902ed59c6543dbfe15c729410"
+    "engineering/data/phego-acceptance-tests.json": "cef40502d412c57e2494ade96d0affdea2cc6cc606fd71b7f67af432d1a2dc7f",
+    "engineering/data/phego-requirements.json": "809d9be241f0e82bff0db0243ac4435255b54337b5f9e83aec40c109a4375934",
+    "engineering/data/phego-work-packages.json": "38b90e699c8255a104dca4f60ef56997808fb2fee3a33ce6cf63c3c9baae5528",
+    "engineering/implementation/github-index.json": "6e9de314da96ef2e7e5ae555e6d3473e70ff823902ed59c6543dbfe15c729410"
   },
   "product_acceptance": "not_claimed",
   "python_executable_sha256": "b971331ab9beb1dac075006955f035a97332eca21187c4de615ae58346713e2f",

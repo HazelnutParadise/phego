@@ -27,8 +27,8 @@ class CapabilityReportTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        (self.root / "docs/data").mkdir(parents=True)
-        (self.root / "docs/data/phego-acceptance-tests.json").write_text(
+        (self.root / "engineering/data").mkdir(parents=True)
+        (self.root / "engineering/data/phego-acceptance-tests.json").write_text(
             json.dumps({"items": [{"id": test_id} for test_id in TEST_IDS]}), encoding="utf-8"
         )
         self.evidence = self.root / "evidence.txt"
@@ -302,7 +302,7 @@ class CapabilityReportTests(unittest.TestCase):
             capabilities.report(self.root, self.write_capabilities(self.payload([claim])), self.write_results(records))
 
     def test_registry_alias_cannot_replace_the_snapshot(self) -> None:
-        registry = self.root / "docs/data/phego-acceptance-tests.json"
+        registry = self.root / "engineering/data/phego-acceptance-tests.json"
         alias = self.root / "DOCS/data/phego-acceptance-tests.json"
         if not alias.exists() or not os.path.samefile(registry, alias):
             self.skipTest("requires case-insensitive filesystem")
@@ -314,7 +314,7 @@ class CapabilityReportTests(unittest.TestCase):
         original = capabilities._read_beneath
         def replace_after_snapshot(root, relative, limit):
             value = original(root, relative, limit)
-            if relative == "docs/data/phego-acceptance-tests.json":
+            if relative == "engineering/data/phego-acceptance-tests.json":
                 registry.write_bytes(replacement)
             return value
         with mock.patch.object(capabilities, "_read_beneath", side_effect=replace_after_snapshot):
@@ -322,7 +322,7 @@ class CapabilityReportTests(unittest.TestCase):
                 capabilities.report(self.root, caps, results)
 
     def test_registry_size_is_bounded(self) -> None:
-        registry = self.root / "docs/data/phego-acceptance-tests.json"
+        registry = self.root / "engineering/data/phego-acceptance-tests.json"
         registry.write_bytes(b'{"items":[]}' + b" " * (1024 * 1024))
         with self.assertRaises(ValueError):
             capabilities.report(self.root, self.write_capabilities(self.payload([])), None)
@@ -339,7 +339,7 @@ class CapabilityReportTests(unittest.TestCase):
     @unittest.skipUnless(hasattr(os, "mkfifo"), "requires POSIX FIFO")
     def test_fifo_registry_is_rejected_without_waiting(self) -> None:
         caps = self.write_capabilities(self.payload([]))
-        registry = self.root / "docs/data/phego-acceptance-tests.json"
+        registry = self.root / "engineering/data/phego-acceptance-tests.json"
         registry.unlink()
         os.mkfifo(registry)
         result = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),

@@ -5,11 +5,11 @@
   "benchmark_status": "not_run",
   "source_inputs": [
     {
-      "path": "docs/data/competitor-catalog.json",
+      "path": "engineering/data/competitor-catalog.json",
       "sha256": "c4c3d61cd9056ccb9a1220f213a1db82a5cd4b08ca03d572d0b571e92853bd43"
     },
     {
-      "path": "docs/implementation/evidence/W-54-candidate-sources.json",
+      "path": "engineering/implementation/evidence/W-54-candidate-sources.json",
       "sha256": "c0377307277a0596e5f4fa88a08b3b2e1b2e0bd073560845edb1b4010c189ef4"
     }
   ],

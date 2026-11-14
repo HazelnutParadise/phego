@@ -122,9 +122,9 @@
   ],
   "source_sha256": {
     ".github/workflows/semantics-objects.yml": "df442e5204cc8f3e2881076f61f1fb40f5a9d2ff36a79d6dc47aeb30bf605062",
-    "docs/compatibility/profile-matrix.json": "e234da5829e24d60569e2954845744a0c8722e6b833549fc5f2d7eacfaf2c49d",
-    "docs/decisions/W-13-objects.md": "2ef0748464663b2b3b7da06119de929616377a2b0c7d2657a3960cec91fd1230",
-    "docs/implementation/W-13.md": "b6dbb5f3ba94ebbf81a8c97a9b18a0b6020259ad6c212531ed4158dc17b18c89",
+    "engineering/compatibility/profile-matrix.json": "e234da5829e24d60569e2954845744a0c8722e6b833549fc5f2d7eacfaf2c49d",
+    "engineering/decisions/W-13-objects.md": "2ef0748464663b2b3b7da06119de929616377a2b0c7d2657a3960cec91fd1230",
+    "engineering/implementation/W-13.md": "b6dbb5f3ba94ebbf81a8c97a9b18a0b6020259ad6c212531ed4158dc17b18c89",
     "internal/runtime/array.go": "262b7a29cfda10751dfdd84be321816fb8037fc02d017004244356b235ba71a6",
     "internal/runtime/array_key_php8512.go": "d66f2090a8a8797dc525554d27884127c86ad2c7b1e1dbc4b9005e9dde0d52a6",
     "internal/runtime/array_key_php8512_fuzz_test.go": "66a461f7e265c5af6c09edf4a032f5634e717fcda3b7dc52e1a4af482c8bed1a",

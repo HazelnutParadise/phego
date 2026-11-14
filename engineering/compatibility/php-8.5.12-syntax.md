@@ -16,7 +16,7 @@ This list describes what `internal/frontend` accepts for the PHP 8.5.12 profile.
 
 The diagnostic replay uses pinned PHP 8.5.12 grammar data, including expected-token lists, scanner errors and modifier checks. PHP's 10000-state stack is separate from the Go recursion guard. Tests check the observed acceptance limits and the next rejected depth for parentheses (9995), unary operators (9996), variable variables (9997), nested if statements (2499), closures (768), and mixed if/while blocks (833). Successful cases must produce a Go AST. A bounded replay that cannot reach a conclusion reports a host resource error.
 
-All 16320 token-level mutants agree under both integer widths. Four heredoc failures use PHP caller locations, recorded separately from source locations. Both `short_open_tag` settings have been compared with 32- and 64-bit references, 5449 files per setting/profile. See the [compatibility decision](/engineering/decisions/compatibility-php8512.md) for costs, tested scope and reproduction commands.
+All 16320 token-level mutants agree under both integer widths. Four heredoc failures use PHP caller locations, recorded separately from source locations. Both `short_open_tag` settings have been compared with 32- and 64-bit references, 5449 files per setting/profile. See the [compatibility decision](../decisions/compatibility-php8512.md) for costs, tested scope and reproduction commands.
 
 ## Remaining verification
 

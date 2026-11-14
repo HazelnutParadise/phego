@@ -63,7 +63,7 @@
   },
   "status": "pass",
   "raw_result": {
-    "path": "docs/implementation/evidence/W-45-profile64-go.jsonl",
+    "path": "engineering/implementation/evidence/W-45-profile64-go.jsonl",
     "sha256": "c02e18cba377ca00f4726bdd692fffed75fb24ea68849e1fb58be7941917cee4"
   },
   "limitations": [
