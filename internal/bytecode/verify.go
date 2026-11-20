@@ -1327,6 +1327,12 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 				if stack[i].kind != Value && stack[i].kind != Location {
 					return invalidPC("dynamic call takes arguments of a started call")
 				}
+				// A named argument belongs to a started call and may leave
+				// no pending argument behind (a variadic parameter collects
+				// it), so only CallPending takes it (format 1.6).
+				if minor >= 6 && stack[i].named {
+					return invalidPC("dynamic call takes a named argument, which only a started call receives")
+				}
 			}
 			stack = stack[:len(stack)-int(in.C)]
 			write(in.A)
@@ -1337,6 +1343,9 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			for i := len(stack) - int(in.C); i < len(stack); i++ {
 				if stack[i].kind != Value {
 					return invalidPC("host call arguments must be values")
+				}
+				if minor >= 6 && stack[i].named {
+					return invalidPC("host call takes a named argument, which only a started call receives")
 				}
 			}
 			stack = stack[:len(stack)-int(in.C)]

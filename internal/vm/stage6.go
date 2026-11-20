@@ -92,7 +92,10 @@ func (fc *fnCompiler) calleeKnown(n *ir.Node, callee *ir.Func) bool {
 		return false
 	}
 	if fc.f.Kind == ir.FuncMain {
-		return callee.Line < n.Line
+		// A declaration on the call's own line is taken to precede it:
+		// the HIR has no columns, and "function f() {} f(...)" is the
+		// order such a line is written in.
+		return callee.Line <= n.Line
 	}
 	self, ok := fc.c.declared[fc.f]
 	return ok && fc.c.declared[callee] < self
@@ -111,8 +114,16 @@ func argListLine(n *ir.Node) int {
 	if len(n.Args) == 0 || n.Args[0].Value == nil {
 		return n.Line
 	}
+	if a := n.Args[0]; a.Name != "" && a.Line > 0 {
+		return a.Line // a named argument's node is on its name's line
+	}
 	first := n.Args[0].Value
 	for {
+		if first.FoldLine != 0 {
+			// A concatenation of literals the parser folded is one string
+			// on the line of the token after it.
+			return first.FoldLine
+		}
 		var kid *ir.Node
 		for _, k := range first.Kids {
 			if k != nil {

@@ -185,7 +185,14 @@ func (s *vmState) bindStatic(f *vmFrame, in *vmInstr) error {
 func (s *vmState) recvVariadic(f *vmFrame, in *vmInstr) error {
 	arr := s.h.newArrayValue()
 	a := arr.array
+	// A by-value variadic parameter holds values: a reference that
+	// hand-written bytecode sent is read here, as a by-value parameter's
+	// Store reads its register.
+	byRef := f.fn.variadicByRef
 	for i, v := range f.extra {
+		if !byRef {
+			v = v.deref()
+		}
 		if v.kind >= valueArray {
 			retain(v)
 		}
@@ -196,10 +203,14 @@ func (s *vmState) recvVariadic(f *vmFrame, in *vmInstr) error {
 			if b == nil {
 				continue
 			}
-			if b.val.kind >= valueArray {
-				retain(b.val)
+			v := b.val
+			if !byRef {
+				v = v.deref()
 			}
-			a.insert(b.key, b.val, s.prog.width)
+			if v.kind >= valueArray {
+				retain(v)
+			}
+			a.insert(b.key, v, s.prog.width)
 		}
 	}
 	return s.setReg(f.regs, in.a, arr)
@@ -390,6 +401,9 @@ func (s *vmState) sendUnpack(f *vmFrame, in *vmInstr) error {
 			t = nullValue()
 		}
 		return &Throwable{"TypeError", "Only arrays and Traversables can be unpacked, " + valueName(t) + " given"}
+	}
+	if len(s.args) < rec.base {
+		return s.internal("pending call with %d arguments below its base", rec.base-len(s.args))
 	}
 	a := t.array
 	if variable && fn.anyByRef && a.refcount > 1 {

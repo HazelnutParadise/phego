@@ -153,6 +153,8 @@ const (
 type Arg struct {
 	Value *Node
 	Name  string // named argument, without $
+	// Line is the line of a named argument's name; zero otherwise.
+	Line int
 	// Spread marks ...$args.
 	Spread bool
 	// MayRef marks an argument that is passed by reference when the callee

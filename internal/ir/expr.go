@@ -1331,7 +1331,7 @@ func (l *lowerer) argsFor(n *frontend.Node, line int, callee *Func) []*Arg {
 			v = a.Children[0]
 		case "named_arg":
 			named = true
-			arg.Name = a.Text
+			arg.Name, arg.Line = a.Text, a.Line
 			v = a.Children[0]
 		default:
 			if unpacked {
