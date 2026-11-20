@@ -186,6 +186,12 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由第�
 - **引數列的行號有兩種情況沒算對**（P3）。第一個引數是具名引數時要用名稱那一行，HIR 的引數現在記下這一行。第一個引數是 parser 折疊過的字串串接時要用折疊後的行（`FoldLine`）。heredoc 當第一個引數的情況仍然不同，列在已知缺口。
 - **把不是變數的值以名稱或不定參數傳給傳參照的參數**（P3）仍是 `Compile` 的不支援回報，和位置引數在前幾個階段的做法相同，列在已知缺口。
 
+Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另一位獨立審查者檢查上述修正（4245736..0ebd83e）。agy 仍沒有額度，Codex 沒有符合條件的模型，所以由內建的 Opus 在全新的脈絡進行：246 個探測在 arm64 映像、38 個在 386、5 個在 amd64，另有 7 個手寫 bytecode 測試，並把各項修正逐一拿掉，確認對應的回歸測試會失敗。沒有 P0、P1 或 P2，三個 P3：
+
+- **鍵值陣列當第一個引數時的引數列行號**。Zend 的陣列元素節點把值放在鍵前面，所以 `['k'\n=>\n1]` 的行是值那一行，Phego 取了鍵那一行。這在第一輪審查前就不同，現在往下找最左邊的運算元時，陣列元素先走值（`call_callee_known_lines` 的 `later_keyed`）。
+- **HostCall 不能取用具名引數的規則沒有測試**。把那幾行拿掉，測試照樣通過。已在 `internal/bytecode/format16_test.go` 補上。
+- **行號由下一個 token 決定的引數**。第一個引數是 `__LINE__`、`__FILE__` 這類 magic constant，或名稱是 `array`、`list`、`fn`、`function`、`match` 的具名引數，而且後面的逗號或冒號在下一行時，PHP 用的是下一行。這在 main 上就不同，列在已知缺口。
+
 測試程式加到 384 個（新增 55 個 `global_*`、`static_*`、`variadic_*`、`unpack_*`、`named_*`、`call_callee_*` 與對應的 `fatal_*`），三個 profile 各 1,152 項全部和 PHP 8.5.12 逐位元組相同。
 
 ## 階段一的對照結果
@@ -252,6 +258,7 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`func_get_args()`、`func_num_args()`**：內建函式，屬於模組工作包。
 - **把不是變數的值以名稱或不定參數傳給傳參照參數**：`f(r: 1 + 2)` 與 `f(r: g())` 沿用第三階段的不支援回報。PHP 對字面值是執行期的 `Error: f(): Argument #1 ($r) could not be passed by reference`，對函式回傳值是 `Only variables should be passed by reference` 的 notice。
 - **heredoc 當第一個引數時的引數列行號**：PHP 不認得被呼叫函式時，後面單純變數引數的警告報在 heredoc 內容的那一行，Phego 報在 heredoc 開頭那一行。HIR 的字面值只記開頭的行。
+- **引數列行號由下一個 token 決定的情況**：PHP 不認得被呼叫函式，而且第一個引數是 magic constant，或是名稱為 `array`、`list`、`fn`、`function`、`match` 的具名引數時，若後面的逗號或冒號換到下一行，PHP 的行號是下一行，Phego 是 token 自己那一行。原因推測是 PHP 的 parser 要多讀一個 token 才建立這些節點，還沒有讀原始碼確認。
 - **函式宣告和呼叫寫在同一行、而且呼叫在前**：HIR 沒有欄位資訊，同一行的宣告一律視為在呼叫之前。`f(\n$u); function f() {}` 的前半段若和宣告擠在同一行，警告的行號會和 PHP 不同。
 - **反組譯不顯示參數表**：`Disassemble` 的輸出沒有列出函式的參數名稱與旗標。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
