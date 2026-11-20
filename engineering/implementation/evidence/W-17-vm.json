@@ -16,8 +16,8 @@
     "T-031",
     "T-032"
   ],
-  "source_base": "7f66138",
-  "captured_at": "2026-11-20T16:58:30.755867+00:00",
+  "source_base": "bc0f299",
+  "captured_at": "2026-11-20T17:27:09.262421+00:00",
   "source_sha256": {
     ".github/workflows/semantics-vm.yml": "b710ebbe8efcacd3f0e05e370058ed53eaed33e02e11c926bde27371cc3160e0",
     ".github/workflows/vm-layout.yml": "604faee5d40ee8fe0ea822548c01828f8db92acc0e960f1f3fe2139267117dd9",
@@ -38,7 +38,7 @@
     "internal/bytecode/format13_test.go": "ca5b4da516e5ea607793e6264a9257f98f57209f3cd29ebddb11e151f8f0649f",
     "internal/bytecode/format14_test.go": "c3e67fac42e7fe44c91e523a7886f22832bf956a91ef0077b7d83c0b4217001a",
     "internal/bytecode/format15_test.go": "68be30c2406b8a7cfb7398933a87930704cb00e55475fd9453a12ab90fc9f699",
-    "internal/bytecode/format16_test.go": "59166b2ea7f8d6a21fa006260b23ab560117f43dd5eeff2225e1d6edb587bb9a",
+    "internal/bytecode/format16_test.go": "68b357b4bd52d41daf286ab5f2bc8c7b3492e849b60e841800d0db87ebba74a3",
     "internal/bytecode/fuzz_test.go": "4873752f6f67ace02d87de8a6af156b9aecaad8fd3e0c055363817e6dbe46427",
     "internal/bytecode/localnames_test.go": "5ad1db477e43ab493cb2881fbf565dd58dd0eea987a43e670a82ddde8132228a",
     "internal/bytecode/opcode.go": "c86e5855ed974f4500cfcf7f4ea7fd68fba722dc3f180ef4e95cd0d7825b091a",
@@ -128,7 +128,7 @@
     "internal/vm/review_test.go": "666637a97cbfb965632791525f78ea20ac77a96e80b49a8b695b946661af8cfd",
     "internal/vm/stage2_test.go": "701724d8e7c2b65ed1a764e6e69a609be7aab8666cc927333de23a3c7ad37a4a",
     "internal/vm/stage5.go": "e2bf914ad137ce4f85b307f610c567bc0278d42e5026882a64dca58f83239bf5",
-    "internal/vm/stage6.go": "5898ff19f1dd201c740d0e3c18dcab0b242c0f193cf9de16f6c3b4c3a736b682",
+    "internal/vm/stage6.go": "0ec837d207ecc2e342aa1ca650aec1bf712e3cfd31a30b0885cc5effff775e7f",
     "policy.go": "6a29c533314e4d09a2fa3ea9b31cf3c16646b30c90ce7590009a76f9962b5b07",
     "policy_review_test.go": "59d6d0c9f7a98ba254166acd8af8eccc27eee7f7930f245cf05b7058dc719db2",
     "policy_test.go": "98cb9f82f6ce072fc36b5907b98f4482c4b5fc8563946683f962601498953b10",
@@ -210,7 +210,7 @@
       "command": "independent review of stage 6 and the red runs of its fixes",
       "exit_code": 0,
       "log": "W-17-vm/stage6/red-review-fixes.txt",
-      "result": "two independent reviewers: 148 probes (147 equal to PHP, 1 outside the stage), then 183 probes on arm64, 20 on 386 and 13 hand-written bytecode programs; no P0; one P1, two P2 and two P3 fixed or recorded as known gaps, with the output before the fixes"
+      "result": "three review passes: 148 probes (147 equal to PHP, 1 outside the stage); 183 probes on arm64, 20 on 386 and 13 hand-written bytecode programs (one P1, two P2, two P3); then 246 probes on arm64, 38 on 386, 5 on amd64 and mutation of each fix on the fixes themselves (three P3); no P0; findings fixed or recorded as known gaps, with the output before the fixes"
     }
   ],
   "limits": [
@@ -317,15 +317,15 @@
     },
     "local/differential.log": {
       "path": "W-17-vm/local/differential.log",
-      "sha256": "656f1139c1c75a65562c8d32f483f8a8938f05b3a8f6b9fc9240c59fc181c346"
+      "sha256": "503e43f2d9947d68cb01e01b692639122a5c71366bb4e8e5903f3e1df0b9e407"
     },
     "local/go-test.log": {
       "path": "W-17-vm/local/go-test.log",
-      "sha256": "2575cb4c75ec23dcb30c28ff123f1335130380b633a2089b352aa53754cb37d7"
+      "sha256": "866421aeae811afb3e2431291f45f9c7c764c9cc2bb3a96ff53d022a01387f78"
     },
     "local/race.log": {
       "path": "W-17-vm/local/race.log",
-      "sha256": "11978e1628d63b8e12ad542f55454116f7b3ccf9478ac65bc9cb5bd58e9aa936"
+      "sha256": "073254541a32c92719c32075b7c0d03887b879a0dc7d1945b35730c0e763f41b"
     },
     "stage2/random-differential.txt": {
       "path": "W-17-vm/stage2/random-differential.txt",
@@ -425,7 +425,7 @@
     },
     "stage6/red-review-fixes.txt": {
       "path": "W-17-vm/stage6/red-review-fixes.txt",
-      "sha256": "b306c95d74962c2b2e514ba54c7adf96e635fa6268c680db89155a0b9594e7fe"
+      "sha256": "1c64a19d78322fbe02aea28b21886095337f6e6964b004edfc441c040650e236"
     }
   }
 }

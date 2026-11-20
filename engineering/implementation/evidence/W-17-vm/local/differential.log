@@ -3465,8 +3465,8 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/warn_undefined_variable/both
 === NAME  TestW17PHP8512Programs/32
     w17_differential_test.go:165: profile 32: 1152 pass, 0 unsupported, 0 fail of 1152
---- PASS: TestW17PHP8512Programs (0.55s)
-    --- PASS: TestW17PHP8512Programs/64 (0.18s)
+--- PASS: TestW17PHP8512Programs (0.50s)
+    --- PASS: TestW17PHP8512Programs/64 (0.17s)
         --- PASS: TestW17PHP8512Programs/64/arith_float_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/arith_float_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/arith_float_ops/both (0.00s)
@@ -4619,7 +4619,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/warn_undefined_variable/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/warn_undefined_variable/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/warn_undefined_variable/both (0.00s)
-    --- PASS: TestW17PHP8512Programs/amd64 (0.17s)
+    --- PASS: TestW17PHP8512Programs/amd64 (0.16s)
         --- PASS: TestW17PHP8512Programs/amd64/arith_float_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/arith_float_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/arith_float_ops/both (0.00s)
@@ -5772,7 +5772,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/both (0.00s)
-    --- PASS: TestW17PHP8512Programs/32 (0.19s)
+    --- PASS: TestW17PHP8512Programs/32 (0.17s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/both (0.00s)
@@ -7541,7 +7541,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17Stage2Probes/def_escape_elsewhere/display32
 === RUN   TestW17Stage2Probes/def_int_operators/display32
 === RUN   TestW17Stage2Probes/def_interned_strings/display32
---- PASS: TestW17Stage2Probes (0.07s)
+--- PASS: TestW17Stage2Probes (0.05s)
     --- PASS: TestW17Stage2Probes/assign_dim_result_chain/display64 (0.00s)
     --- PASS: TestW17Stage2Probes/assign_dim_result_chain/log64 (0.00s)
     --- PASS: TestW17Stage2Probes/cas_append/display64 (0.00s)
@@ -8114,4 +8114,4 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
     --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/array_spread (0.00s)
     --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/first-class_callable (0.00s)
 PASS
-ok  	github.com/HazelnutParadise/phego	1.212s
+ok  	github.com/HazelnutParadise/phego	1.128s
