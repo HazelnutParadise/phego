@@ -991,40 +991,50 @@ func (fc *fnCompiler) call(n *ir.Node) operand {
 		return fc.undefinedCall(n)
 	}
 	for _, a := range n.Args {
-		switch {
-		case a.Spread:
-			fc.unsupported("argument unpacking", positive(a.Value.Line, n.Line))
-		case a.Name != "":
-			fc.unsupported("named arguments", positive(a.Value.Line, n.Line))
+		if a.Spread || a.Name != "" {
+			return fc.callPending(n, index)
 		}
 	}
 	argc := uint32(len(n.Args))
-	if argc > limits.MaxStack {
+	if argc > limits.MaxStack || fc.pending+argc > limits.MaxStack {
 		fc.unsupported("too many call arguments", n.Line)
 	}
 	// A unit function called with the wrong number of arguments still gets
 	// them all evaluated; the run time then raises ArgumentCountError for
 	// too few and ignores extra ones.
-	direct := uint32(len(fc.c.unit.Functions[index-1].Params)) == argc
+	target := fc.c.unit.Functions[index-1]
+	params, _ := fixedParams(target)
+	direct := uint32(len(params)) == argc
 	res := fc.alloc()
 	var callee uint32
 	if !direct {
 		callee = fc.alloc()
 		fc.emit(bytecode.OpConst, 0, callee, fc.c.stringConst(name), 0)
 	}
-	params := fc.c.unit.Functions[index-1].Params
+	// When PHP does not know the callee, a plain variable argument is
+	// sent on the line of the argument list.
+	known, listLine := fc.calleeKnown(n, target), argListLine(n)
 	args := make([]uint32, len(n.Args))
 	for i, a := range n.Args {
-		if i < len(params) && params[i].ByRef {
+		plain := !known && a.Value.Op == ir.OpVar
+		switch {
+		case argByRef(target, "", i):
 			args[i] = fc.refArg(a.Value, n.Line)
-		} else {
+			if plain {
+				fc.cur = listLine
+			}
+		case plain:
+			o := fc.expr(a.Value)
+			fc.cur = listLine
+			args[i] = fc.materialize(o)
+		default:
 			args[i] = fc.value(a.Value)
 		}
 	}
 	for _, r := range args {
 		fc.emit(bytecode.OpPush, 0, r, 0, 0)
 	}
-	fc.maxStack = max(fc.maxStack, argc)
+	fc.maxStack = max(fc.maxStack, fc.pending+argc)
 	// The call itself carries the call's line, as zend_compile_call_common
 	// sets it on DO_FCALL; the current line stays at the last argument.
 	after := fc.cur

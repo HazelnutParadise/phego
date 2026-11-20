@@ -38,6 +38,9 @@ type vmFrame struct {
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
 	extra      []value // arguments beyond the declared parameters, for backtraces
+	// call is set for a frame CallPending entered with named arguments the
+	// variadic parameter collects, or with omitted parameters.
+	call *vmCallInfo
 }
 
 type vmState struct {
@@ -61,6 +64,17 @@ type vmState struct {
 	refIters  []vmRefIter
 	freeIters []int
 	args      []value
+	// calls are the calls InitCall started and CallPending has not made
+	// yet, innermost last. entering hands CallPending's extra knowledge of
+	// a call to push.
+	calls    []vmPendingCall
+	entering *vmCallInfo
+	// statics holds the run's static variables: per function index, per
+	// local, a reference once the variable is initialized. globalVars are
+	// the global variables {main} has no local for. Both live with the
+	// run, never in the shared Program.
+	statics    [][]value
+	globalVars map[string]*value
 	// reporting is the run's error_reporting, EG(error_reporting): the
 	// INI value, lowered to the fatal levels inside @ (BeginSilence) and
 	// restored after it (EndSilence). x.errors.excluded mirrors it.
@@ -386,6 +400,15 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	clear(args)
 	s.args = s.args[:len(s.args)-argc]
+	if e := s.entering; e != nil {
+		s.entering = nil
+		fr.call = e
+		if e.missing {
+			// CallPending reports the missing parameter in this frame.
+			s.frames = append(s.frames, fr)
+			return nil
+		}
+	}
 	s.frames = append(s.frames, fr)
 	if argc < fn.required {
 		return s.tooFewArguments(argc)
@@ -460,6 +483,17 @@ func (s *vmState) pop(release bool) error {
 			keep(s.releaseValue(v))
 		}
 	}
+	if f.call != nil && release {
+		keep(s.releaseValue(f.call.named))
+	}
+	if len(s.calls) > 0 {
+		// Calls the frame started and never made: an error or exit ended
+		// it between their arguments.
+		err := s.dropCalls(len(s.frames))
+		if release {
+			keep(err)
+		}
+	}
 	clear(f.locals)
 	clear(f.locs)
 	clear(f.elems)
@@ -493,7 +527,19 @@ func (s *vmState) unwind() {
 			delete(s.constCache, slot)
 			_ = s.releaseValue(v)
 		}
+		for name, p := range s.globalVars {
+			delete(s.globalVars, name)
+			_ = s.releaseValue(*p)
+		}
+		for _, slots := range s.statics {
+			for i, v := range slots {
+				slots[i] = value{}
+				_ = s.releaseValue(v)
+			}
+		}
 	}
+	s.globalVars = nil
+	s.statics = nil
 	s.consts = nil
 	s.constCache = nil
 }
@@ -711,7 +757,16 @@ func (s *vmState) callValue(callable value, argc int, dest uint32) error {
 		}
 		return &Throwable{"Error", "Call to undefined function " + name + "()"}
 	}
-	return s.push(&s.prog.funcs[idx], argc, dest)
+	fn := &s.prog.funcs[idx]
+	if fn.paramByRef != nil {
+		if argc > len(s.args) {
+			return s.internal("call with %d arguments but %d pending", argc, len(s.args))
+		}
+		if err := s.derefArguments(fn, argc); err != nil {
+			return err
+		}
+	}
+	return s.push(fn, argc, dest)
 }
 
 func (s *vmState) dropArgs(argc int) error {

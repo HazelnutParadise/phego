@@ -663,7 +663,7 @@ func (s *vmState) cachedDefault(f *vmFrame, p uint32) (bool, error) {
 // if PHP would keep it.
 func (s *vmState) cacheDefault(f *vmFrame, in *vmInstr) {
 	p := int(in.c) - 1
-	if p < f.nargs || p >= f.fn.params {
+	if p >= f.fn.params || f.passed(uint32(p)) {
 		return
 	}
 	fi := f.fn.index

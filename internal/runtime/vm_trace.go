@@ -4,6 +4,8 @@ import (
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/HazelnutParadise/phego/internal/bytecode"
 )
 
 // traceArgLimit is exception_string_param_max_len's default.
@@ -23,7 +25,7 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 	_, _, file, line := s.location()
 	var b strings.Builder
 	n := 0
-	frame := func(callerFile string, callerLine int, name string, args []value) {
+	frame := func(callerFile string, callerLine int, name string, args []value, named *phpArray) {
 		b.WriteByte('#')
 		b.WriteString(strconv.Itoa(n))
 		b.WriteByte(' ')
@@ -39,15 +41,45 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 			}
 			b.WriteString(traceArg(a))
 		}
+		// The named arguments a variadic parameter collects follow, as
+		// "name: value" (zend_fetch_debug_backtrace keeps their keys).
+		if named != nil {
+			sep := len(args) > 0
+			for _, bk := range named.buckets {
+				if bk == nil {
+					continue
+				}
+				if sep {
+					b.WriteString(", ")
+				}
+				sep = true
+				b.WriteString(bk.key.text)
+				b.WriteString(": ")
+				b.WriteString(traceArg(bk.val))
+			}
+		}
 		b.WriteString(")\n")
 		n++
 	}
 	if internal != "" {
-		frame(file, line, internal, args)
+		frame(file, line, internal, args, nil)
 	}
 	for i := len(s.frames) - 1; i >= 1; i-- {
 		f, caller := &s.frames[i], &s.frames[i-1]
-		frame(caller.fn.files[caller.pc], int(caller.fn.lines[caller.pc]), f.fn.name, s.frameArgs(f))
+		line := int(caller.fn.lines[caller.pc])
+		var named *phpArray
+		if c := f.call; c != nil {
+			if c.named.kind == valueArray {
+				named = c.named.array
+			}
+			// While the omitted parameters are being filled the call is
+			// still at ZEND_CHECK_UNDEF_ARGS, which carries the line of the
+			// last argument: the Checkpoint before CallPending.
+			if c.holePC >= 0 && f.pc <= int(c.holePC) && caller.pc > 0 && caller.code[caller.pc-1].op == bytecode.OpCheckpoint {
+				line = int(caller.fn.lines[caller.pc-1])
+			}
+		}
+		frame(caller.fn.files[caller.pc], line, f.fn.name, s.frameArgs(f), named)
 	}
 	b.WriteByte('#')
 	b.WriteString(strconv.Itoa(n))

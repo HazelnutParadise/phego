@@ -201,15 +201,21 @@ func (s *vmState) loop() {
 			continue
 		case bytecode.OpPush:
 			if in.b != 0 {
-				s.stop(s.unsupported("named arguments"))
-				return
-			}
-			if in.aux == 1 {
-				if err := s.pushRef(f, in); err != nil {
+				if err := s.sendNamed(f, in); err != nil {
 					s.stop(err)
 					return
 				}
-				goto advance
+				break
+			}
+			if in.aux != 0 {
+				// A Location: sent by reference, or its value read now.
+				v, err := s.pushValue(f, in)
+				if err != nil {
+					s.stop(err)
+					return
+				}
+				s.args = append(s.args, v)
+				break
 			}
 			v := regs[in.a]
 			switch {
@@ -254,6 +260,16 @@ func (s *vmState) loop() {
 			continue
 		case bytecode.OpReturn:
 			v := take(regs, in.a)
+			if v.kind == valueReference {
+				// A function returns the value of a reference.
+				t := v.ref.target
+				retain(t)
+				if err := s.releaseValue(v); err != nil {
+					s.stop(err)
+					return
+				}
+				v = t
+			}
 			if len(s.frames) == 1 {
 				s.ended = true
 				s.end = completion{kind: endReturn, value: v, returnOwned: true}
@@ -451,10 +467,60 @@ func (s *vmState) loop() {
 		case bytecode.OpMatchError:
 			s.stop(s.matchError(regs[in.a]))
 			return
+		case bytecode.OpBindGlobal:
+			if err := s.bindGlobal(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpStaticInit:
+			bound, err := s.staticInit(f, in)
+			if err != nil {
+				s.stop(err)
+				return
+			}
+			if bound {
+				target := int(in.b)
+				if target <= pc && s.poll() {
+					return
+				}
+				pc = target
+				continue
+			}
+			goto advance
+		case bytecode.OpBindStatic:
+			if err := s.bindStatic(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpRecvVariadic:
+			if err := s.recvVariadic(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpInitCall:
+			s.calls = append(s.calls, vmPendingCall{fn: int(in.b), base: len(s.args), depth: len(s.frames)})
+			goto advance
+		case bytecode.OpSendUnpack:
+			if err := s.sendUnpack(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpCallPending:
+			if err := s.callPending(in); err != nil {
+				s.stop(err)
+				return
+			}
+			if s.poll() {
+				return
+			}
+			f = &s.frames[len(s.frames)-1]
+			code, regs = f.code, f.regs
+			pc = 0
+			continue
 		case bytecode.OpParamDefault:
 			// RECV_INIT: the default's code is skipped for a passed argument,
 			// and for a default an earlier call evaluated and cached.
-			passed := int(in.a) < f.nargs
+			passed := int(in.a) < f.nargs && (f.call == nil || !f.call.isOmitted(in.a))
 			if !passed {
 				hit, err := s.cachedDefault(f, in.a)
 				if err != nil {

@@ -36,6 +36,10 @@ type vmFn struct {
 	locs   map[string]uint32 // local name -> location register
 	index  map[string]uint32 // local name -> local index
 	line   uint32
+	// table is the function's parameter table (format 1.6), and stack its
+	// MaxStack when a started call makes the pushes hard to count.
+	table []bytecode.Parameter
+	stack uint32
 }
 
 const vmTestFile = "/w/t.php"
@@ -335,8 +339,9 @@ func (a *vmAsm) image() bytecode.Image {
 			}
 		}
 		maxStack = max(maxStack, stack)
+		stack = max(stack, f.stack)
 		img.Functions = append(img.Functions, bytecode.Function{Name: f.name, Params: uint32(f.params), Locals: uint32(len(f.names)),
-			MaxStack: stack, ReturnKind: bytecode.Value, Registers: f.regs, Code: f.code, Positions: f.pos, LocalNames: f.names})
+			MaxStack: stack, ReturnKind: bytecode.Value, Registers: f.regs, Code: f.code, Positions: f.pos, LocalNames: f.names, Parameters: f.table})
 	}
 	_ = maxStack
 	return img
