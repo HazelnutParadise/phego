@@ -22,3 +22,17 @@ later_spread(
 function later_named($a, $b) { echo "later named\n"; }
 function later_concat($a, $b) { echo "later concat\n"; }
 function later_spread($a, $b) { echo "later spread\n"; }
+later_keyed(
+  ['k'
+    =>
+    1],
+  $u6
+);
+later_keyed(
+  array(
+    0
+    =>
+    ['v']),
+  $u7
+);
+function later_keyed($a, $b) { echo "later keyed\n"; }

@@ -58,3 +58,56 @@ function f($a, $b) { echo "ok\n"; }
 Warning: Undefined variable $u in /w/cases/line_unknown_first_concat_chain.php on line 5
 -- Phego before the fix
 Warning: Undefined variable $u in /w/cases/line_unknown_first_concat_chain.php on line 3
+
+# Second review (of the fixes above), on 0ebd83e: PHP 8.5.12 (arm64 image) against Phego before the fix of the keyed-array argument line.
+
+== m027_keyarr_main.php
+<?php
+$i = 0;
+u(
+  [
+'k'
+=>
+1],
+  $w
+);
+function u($a = 0, $b = 0) { echo "u\n"; }
+-- PHP 8.5.12
+Warning: Undefined variable $w in /w/cases/m027_keyarr_main.php on line 7
+-- Phego before the fix
+Warning: Undefined variable $w in /w/cases/m027_keyarr_main.php on line 5
+
+== n005_keyed_int.php
+<?php
+function t() {
+u(
+  [
+0
+=>
+'v'],
+  $w
+);
+}
+t();
+function u($a = 0, $b = 0) { echo "u\n"; }
+-- PHP 8.5.12
+Warning: Undefined variable $w in /w/cases/n005_keyed_int.php on line 7
+-- Phego before the fix
+Warning: Undefined variable $w in /w/cases/n005_keyed_int.php on line 5
+
+== n007_keyed_value_nested.php
+<?php
+function t() {
+u(
+  ['k' =>
+[
+1]],
+  $w
+);
+}
+t();
+function u($a = 0, $b = 0) { echo "u\n"; }
+-- PHP 8.5.12
+Warning: Undefined variable $w in /w/cases/n007_keyed_value_nested.php on line 6
+-- Phego before the fix
+Warning: Undefined variable $w in /w/cases/n007_keyed_value_nested.php on line 4

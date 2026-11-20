@@ -139,6 +139,21 @@ func TestFormat16RejectsInvalidOperands(t *testing.T) {
 			Instruction{Op: OpCall, A: 3, B: 1, C: 2},
 		), ErrInvalid)
 	})
+	t.Run("host call takes a named argument", func(t *testing.T) {
+		body := []Instruction{{Op: OpPush, A: 0, B: 2}, {Op: OpHostCall, A: 3, B: 1, C: 1}}
+		i := format16Image(body...)
+		i.Required = HostCallbacks
+		requireBuildError(t, i, ErrInvalid)
+		_, err := Build(context.Background(), i, testOptions())
+		var e *Error
+		if !errors.As(err, &e) || !strings.Contains(e.Detail, "host call takes a named argument") {
+			t.Fatalf("error = %+v, want the named-argument rule", e)
+		}
+		// The same call with a positional argument is valid.
+		i = format16Image(Instruction{Op: OpPush, A: 0}, Instruction{Op: OpHostCall, A: 3, B: 1, C: 1})
+		i.Required = HostCallbacks
+		requireValidBuild(t, i)
+	})
 	t.Run("recv variadic needs a variadic parameter", func(t *testing.T) {
 		i := format16Image(Instruction{Op: OpRecvVariadic, A: 3})
 		i.Functions[0].Parameters = i.Functions[0].Parameters[:1]
