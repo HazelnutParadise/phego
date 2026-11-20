@@ -178,7 +178,15 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由第�
 - **暫存器不留值**：BindStatic 與 RecvVariadic 後面的 Bind 都把值移出暫存器，具名的 Push 把暫存器裡的參照移交給呼叫，所以不管 liveness 有沒有執行，static 變數與不定參數的陣列都只有一個持有者（`TestStage6InstructionsEmptyTheirRegisters` 用跳過 liveness 的函式檢查）。函式回傳時 Return 把暫存器裡的參照換成它的值。
 - **補上第三階段的缺口**：函式表記錄每個參數是否傳參照。格式 1.6 的驗證器追蹤哪些 Value 暫存器可能存放參照，拒絕以 Call 把參照送給記錄為傳值的參數。以名稱呼叫（CallValue）與 CallPending 在執行期把送給傳值參數的參照換成值。
 
-測試程式加到 383 個（新增 54 個 `global_*`、`static_*`、`variadic_*`、`unpack_*`、`named_*`、`call_callee_declared_later` 與對應的 `fatal_*`），三個 profile 各 1,149 項全部和 PHP 8.5.12 逐位元組相同。
+獨立審查先後由兩位審查者進行，都只拿到需求與程式碼。第一位（agy 的 Opus）跑了 148 個 PHP 探測後額度用完，沒有交出報告。重跑它留下的探測，147 個和 PHP 相同，剩下 1 個用到本來就不支援的 `[&$x]`。Codex 在這台機器上沒有符合條件的模型。第二位（內建的 Opus，全新的脈絡）另外跑了 183 個探測（arm64 映像，另有 20 個在 386 映像）、13 個手寫 bytecode 程式與逐套件的 race 檢查，沒有 P0。找到的問題都已修正並加上修正前會失敗的回歸測試，修正前的輸出在 [stage6/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage6/red-review-fixes.txt)：
+
+- **CallValue 能取走具名引數**（P1，只有手寫 bytecode 能觸發）。驗證器把帶名稱的 Push 算成引數堆疊上的一筆，CallValue 可以把它當引數取走。但被不定參數收下的名稱在執行期不會留下待處理的引數，CallValue 於是取走了下面那一筆，也就是呼叫者自己那次呼叫的引數，接著的 SendUnpack 還會以負的位置查表而讓這次執行以內部錯誤結束。現在格式 1.6 的驗證器不讓 CallValue 與 HostCall 取用帶名稱的引數，只有 CallPending 能收，SendUnpack 也先檢查引數堆疊沒有低於這次呼叫的起點（`TestNamedArgumentIsNotTakenByACallByName`）。
+- **傳值的不定參數收到參照**（P2，同樣只有手寫 bytecode）。把 Location 或 MakeRef 的暫存器送給傳值不定參數時，`$rest` 陣列裡放的是呼叫者變數的參照，寫入 `$rest[0]` 會改到呼叫者的變數。RecvVariadic 現在對傳值的不定參數取參照的值（`TestByValueVariadicReceivesValues`）。
+- **和呼叫同一行宣告的函式被當成 PHP 不認得**（P2，位置引數呼叫的回歸）。`function f($a, $b) {} f(1,\n$u);` 的警告應該在變數那一行。HIR 沒有欄位資訊，現在同一行的宣告一律視為在呼叫之前，這是這種寫法實際的順序（`call_callee_known_lines`）。
+- **引數列的行號有兩種情況沒算對**（P3）。第一個引數是具名引數時要用名稱那一行，HIR 的引數現在記下這一行。第一個引數是 parser 折疊過的字串串接時要用折疊後的行（`FoldLine`）。heredoc 當第一個引數的情況仍然不同，列在已知缺口。
+- **把不是變數的值以名稱或不定參數傳給傳參照的參數**（P3）仍是 `Compile` 的不支援回報，和位置引數在前幾個階段的做法相同，列在已知缺口。
+
+測試程式加到 384 個（新增 55 個 `global_*`、`static_*`、`variadic_*`、`unpack_*`、`named_*`、`call_callee_*` 與對應的 `fatal_*`），三個 profile 各 1,152 項全部和 PHP 8.5.12 逐位元組相同。
 
 ## 階段一的對照結果
 
@@ -242,8 +250,9 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`$GLOBALS` 與 `global $$name`**：`Compile` 回報不支援。全域變數目前只能以編譯時已知的名稱取得。
 - **展開物件與 Traversable**：`f(...$iterator)` 要等物件與迭代器，執行期遇到物件以 Unsupported 結束，目前沒有寫法能產生物件。
 - **`func_get_args()`、`func_num_args()`**：內建函式，屬於模組工作包。
-- **把不是變數的值以名稱傳給傳參照參數**：`f(r: 1 + 2)` 沿用第三階段的不支援回報，PHP 是執行期的 Error。
-- **具名引數的名稱和值不在同一行**：PHP 不認得被呼叫函式時，引數列的行號取第一個引數最左邊那個 token 的行，具名引數是名稱那一行。HIR 沒有記錄名稱的行，Phego 用值的行。`f(\n a:\n $x)` 這種寫法的警告行號會差一行。
+- **把不是變數的值以名稱或不定參數傳給傳參照參數**：`f(r: 1 + 2)` 與 `f(r: g())` 沿用第三階段的不支援回報。PHP 對字面值是執行期的 `Error: f(): Argument #1 ($r) could not be passed by reference`，對函式回傳值是 `Only variables should be passed by reference` 的 notice。
+- **heredoc 當第一個引數時的引數列行號**：PHP 不認得被呼叫函式時，後面單純變數引數的警告報在 heredoc 內容的那一行，Phego 報在 heredoc 開頭那一行。HIR 的字面值只記開頭的行。
+- **函式宣告和呼叫寫在同一行、而且呼叫在前**：HIR 沒有欄位資訊，同一行的宣告一律視為在呼叫之前。`f(\n$u); function f() {}` 的前半段若和宣告擠在同一行，警告的行號會和 PHP 不同。
 - **反組譯不顯示參數表**：`Disassemble` 的輸出沒有列出函式的參數名稱與旗標。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
 - **依 CPU 架構而異的預先定義常數**：CHAR_MAX（arm64 為 255，amd64 與 386 為 127）與 PHP_BUILD_DATE 在 `Compile` 回報不支援；profile 要有架構欄位才能給值。

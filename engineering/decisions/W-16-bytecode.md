@@ -205,7 +205,7 @@ BindGlobal 對應 ZEND_BIND_GLOBAL：A 變成名稱為 B 的全域變數的參�
 
 StaticInit 與 BindStatic 對應 ZEND_BIND_INIT_STATIC_OR_JMP 與 ZEND_BIND_STATIC。static 變數以「函式、local」為鍵：A 必須是 Local 綁定的變數，不是的話執行期以 Unsupported 結束，所以每個函式最多有 Locals 個 static 變數，不需要另外的表。StaticInit 在變數已初始化時把 A 綁上去並跳到 B，否則順序執行初始值的程式碼。BindStatic 在變數還沒初始化時以 B 的值（參照先解開）初始化，再把 A 綁上去，並清空 B。初始值執行到一半結束（拋出錯誤）時變數保持未初始化。初始值裡又呼叫同一個函式時，內層先初始化，外層算出的值被丟棄，和 PHP 相同。編譯器對字面值與運算式初始值都產生同一組指令。static 變數的值屬於當次執行，不放進 Program。
 
-RecvVariadic 對應 ZEND_RECV_VARIADIC：把超過 Params 的引數依序從 key 0 放進新陣列，再接上被不定參數收下的具名引數（key 是名稱），寫進 A。傳參照的引數在陣列裡仍是參照。函式的參數表必須以不定參數結尾。
+RecvVariadic 對應 ZEND_RECV_VARIADIC：把超過 Params 的引數依序從 key 0 放進新陣列，再接上被不定參數收下的具名引數（key 是名稱），寫進 A。不定參數宣告為傳參照時，引數在陣列裡仍是參照。宣告為傳值時，送來的參照在這裡換成它的值。函式的參數表必須以不定參數結尾。
 
 InitCall、帶名稱的 Push、SendUnpack 與 CallPending 表達引數個數或位置在執行期才決定的呼叫，對應 PHP 在 INIT_FCALL 與 DO_FCALL 之間逐一送出引數。InitCall 記下被呼叫的函式與引數堆疊目前的高度。之後堆疊上高於這個高度的引數都屬於這次呼叫（巢狀呼叫在引數求值時自己進出，結束後堆疊回到原高度）。不帶名稱的 Push 照常把引數接在後面。帶名稱的 Push 照 zend_handle_named_arg：名稱對到參數時放進那個位置，位置比目前個數大就先補上空位。名稱沒有對應的參數時，不定參數函式把它收進另一張具名表，其他函式拋出 `Unknown named parameter $x`。位置已經有引數或具名表已有同名時拋出 `Named parameter $x overwrites previous argument`。這些檢查都在讀取引數之前，所以 PushLoad 的未定義變數警告出現在檢查之後，和 ZEND_SEND_VAR 相同。Push 的 A 是 Location 而沒有 PushLoad 時照 ZEND_SEND_REF 傳參照。在沒有 InitCall 的 frame 裡執行帶名稱的 Push、SendUnpack 或 CallPending 時以 Unsupported 結束：呼叫者開始的呼叫不能由被呼叫的函式填。
 
@@ -213,7 +213,7 @@ SendUnpack 只接受陣列（參照先解開）：整數 key 的元素依序成�
 
 CallPending 取出最內層開始的呼叫，以堆疊上屬於它的引數進入函式。留有空位的參數（具名引數跳過的）若有預設值，由被呼叫函式的 ParamDefault 當成沒傳來求值並照樣進入預設值快取。沒有預設值時在被呼叫函式的 frame 內、接收該參數的指令位置拋出 `ArgumentCountError: f(): Argument #N ($name) not passed`。編譯器在 CallPending 前面放一條 Checkpoint，帶最後一個引數的行號（PHP 的 ZEND_CHECK_UNDEF_ARGS 在那一行）。被呼叫函式還在填空位時，backtrace 用那一行當呼叫位置。
 
-驗證器把 InitCall 當成引數堆疊上的一個標記，SendUnpack 當成一筆「個數不明」的項目，所以分支合流時兩邊開始的呼叫必須相同，迴圈無法累積未完成的呼叫，MaxStack 也限制了巢狀深度。Call、CallValue 與 HostCall 不能取用標記或個數不明的項目。CallPending 需要標記，並把標記以上的項目全部取走，目的暫存器的類別要符合被呼叫函式的 ReturnKind。
+驗證器把 InitCall 當成引數堆疊上的一個標記，SendUnpack 當成一筆「個數不明」的項目，所以分支合流時兩邊開始的呼叫必須相同，迴圈無法累積未完成的呼叫，MaxStack 也限制了巢狀深度。Call、CallValue 與 HostCall 不能取用標記或個數不明的項目，在格式 1.6 的檔案裡也不能取用帶名稱的引數：被不定參數收下的名稱在執行期不留下待處理的引數，讓別的呼叫取用它就會拿到下面那一筆。帶名稱的引數只有 CallPending 能收。CallPending 需要標記，並把標記以上的項目全部取走，目的暫存器的類別要符合被呼叫函式的 ReturnKind。
 
 格式 1.6 的檔案另外受一條規則保護：被 Call 直接呼叫、而且記錄了參數表的函式，只在宣告傳參照的參數收到參照。驗證器追蹤哪些 Value 暫存器可能存放參照（MakeRef、傳參照的迭代器與它取出的元素、宣告為傳參照或沒有參數表的函式的參數暫存器，以及從它們 Move 來的），Push 這種暫存器或 Location 的引數標記為參照，Call 把它對到傳值參數時以 `ErrInvalid` 拒絕。只有可能持有參照的函式才多付這一份位元集。函式回傳時 Return 把暫存器裡的參照換成它的值，所以呼叫結果不會是參照。以名稱呼叫（CallValue）與 CallPending 則在執行期把送給傳值參數的參照換成值。
 
