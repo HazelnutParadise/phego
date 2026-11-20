@@ -27,6 +27,9 @@ var opNames = [...]string{
 	bytecode.OpBind: "Bind", bytecode.OpMakeRef: "MakeRef",
 	bytecode.OpFetchConst: "FetchConst", bytecode.OpDeclareConst: "DeclareConst",
 	bytecode.OpBeginSilence: "BeginSilence", bytecode.OpEndSilence: "EndSilence", bytecode.OpMatchError: "MatchError",
+	bytecode.OpBindGlobal: "BindGlobal", bytecode.OpStaticInit: "StaticInit", bytecode.OpBindStatic: "BindStatic",
+	bytecode.OpRecvVariadic: "RecvVariadic", bytecode.OpInitCall: "InitCall", bytecode.OpSendUnpack: "SendUnpack",
+	bytecode.OpCallPending: "CallPending",
 }
 
 var binaryNames = [...]string{

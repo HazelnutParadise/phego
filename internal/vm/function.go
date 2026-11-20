@@ -34,7 +34,10 @@ type fnCompiler struct {
 	labels   []int
 	fixups   []fixup
 	maxStack uint32
-	maxLine  int
+	// pending counts the argument stack entries of the calls being built
+	// around the code compiled now (callPending).
+	pending uint32
+	maxLine int
 	// cur is the line the next instruction gets, PHP's CG(zend_lineno): it
 	// moves to each statement and expression as compilation reaches it, so
 	// an operation carries the line of the last operand compiled for it.
@@ -89,7 +92,8 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 			panic(r)
 		}
 	}()
-	fc := &fnCompiler{c: c, f: f, vars: make(map[*ir.Var]int, len(f.Vars)), nvars: len(f.Vars), params: len(f.Params)}
+	fixed, _ := fixedParams(f)
+	fc := &fnCompiler{c: c, f: f, vars: make(map[*ir.Var]int, len(f.Vars)), nvars: len(f.Vars), params: len(fixed)}
 	for i, v := range f.Vars {
 		fc.vars[v] = i
 	}
@@ -130,6 +134,16 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 func (fc *fnCompiler) receive() {
 	for i, p := range fc.f.Params {
 		fc.cur = positive(p.Line, fc.f.Line)
+		if p.Variadic {
+			// ZEND_RECV_VARIADIC: the array of the remaining arguments
+			// moves into the variable, which is its only owner.
+			mark := fc.top
+			r := fc.alloc()
+			fc.emit(bytecode.OpRecvVariadic, 0, r, 0, 0)
+			fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), fc.varLoc(p.Var), r, 0)
+			fc.top = mark
+			continue
+		}
 		if p.Default != nil {
 			passed := fc.label()
 			pc := fc.emit(bytecode.OpParamDefault, 0, uint32(i), 0, 0)
@@ -364,8 +378,6 @@ func (fc *fnCompiler) signature() {
 			fc.unsupported("parameter attribute", positive(p.Attributes[0].Line, line))
 		case p.Type != nil:
 			fc.unsupported("typed parameter", line)
-		case p.Variadic:
-			fc.unsupported("variadic parameter", line)
 		case len(p.Promoted) > 0:
 			fc.unsupported("promoted parameter", line)
 		case p.Var == nil:
@@ -527,6 +539,17 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	if f.Kind == ir.FuncMain {
 		name = "{main}"
 	}
+	var parameters []bytecode.Parameter
+	for _, p := range f.Params {
+		var flags bytecode.ParameterFlags
+		if p.ByRef {
+			flags |= bytecode.ParamByRef
+		}
+		if p.Variadic {
+			flags |= bytecode.ParamVariadic
+		}
+		parameters = append(parameters, bytecode.Parameter{Name: c.stringConst(p.Name), Flags: flags})
+	}
 	return bytecode.Function{
 		Name:       name,
 		Params:     uint32(fc.params),
@@ -537,6 +560,7 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		Code:       code,
 		Positions:  positions,
 		LocalNames: names,
+		Parameters: parameters,
 	}
 }
 
@@ -625,6 +649,10 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			fc.unset(k)
 			fc.top = mark
 		}
+	case ir.OpGlobal:
+		fc.globalStmt(n)
+	case ir.OpStatic:
+		fc.staticStmt(n)
 	case ir.OpLabel:
 		// A label without goto has no run-time effect.
 	default:

@@ -47,7 +47,7 @@ func (e *CompileError) Error() string {
 const (
 	guestPlatform    = "php-8.5.12"
 	target           = "portable-go"
-	compilerManifest = "phego/internal/vm stage-5 format-1.5"
+	compilerManifest = "phego/internal/vm stage-6 format-1.6"
 	modulesManifest  = "phego/modules/none"
 	runtimeManifest  = "phego/runtime-abi/w17-1"
 	policyManifest   = "phego/policy/unbound"
@@ -138,6 +138,8 @@ type compiler struct {
 	// funcIndex maps the lower-case name of a hoisted function to its image
 	// index.
 	funcIndex map[string]uint32
+	// declared is each unit function's position in declaration order.
+	declared map[*ir.Func]int
 	// declaredConsts holds the registered names of the constants the unit
 	// declares, for the fallback of unqualified names in a namespace.
 	declaredConsts map[string]bool
@@ -163,6 +165,10 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 			return bytecode.Image{}, &CompileError{Message: "Cannot redeclare function " + f.Name + "()", File: unit.File, Line: positive(f.Line, 1)}
 		}
 		c.funcIndex[phpname.Lower(f.Name)] = uint32(i + 1)
+	}
+	c.declared = make(map[*ir.Func]int, len(unit.Functions))
+	for i, f := range unit.Functions {
+		c.declared[f] = i
 	}
 	funcs := append([]*ir.Func{unit.Main}, unit.Functions...)
 	out := make([]bytecode.Function, len(funcs))

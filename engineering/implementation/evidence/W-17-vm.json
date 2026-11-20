@@ -1,5 +1,5 @@
 {
-  "scope": "W-17 stages 1 to 5: Engine.Run executes a growing subset of PHP 8.5.12 end to end through the HIR-to-bytecode compiler and the VM, compared byte for byte with the pinned images; local and CI evidence, not product acceptance.",
+  "scope": "W-17 stages 1 to 6: Engine.Run executes a growing subset of PHP 8.5.12 end to end through the HIR-to-bytecode compiler and the VM, compared byte for byte with the pinned images; local and CI evidence, not product acceptance.",
   "requirements": [
     "REQ-001",
     "REQ-005",
@@ -16,8 +16,8 @@
     "T-031",
     "T-032"
   ],
-  "source_base": "5c7c525",
-  "captured_at": "2026-11-14T12:22:01.948386+00:00",
+  "source_base": "bc0f299",
+  "captured_at": "2026-11-20T17:27:09.262421+00:00",
   "source_sha256": {
     ".github/workflows/semantics-vm.yml": "b710ebbe8efcacd3f0e05e370058ed53eaed33e02e11c926bde27371cc3160e0",
     ".github/workflows/vm-layout.yml": "604faee5d40ee8fe0ea822548c01828f8db92acc0e960f1f3fe2139267117dd9",
@@ -28,21 +28,22 @@
     "engine_test.go": "bb01189f0fd9038df5dd541b0b63071ab6f2eeb0790ee198cbb83e7b6b9e56f2",
     "errors.go": "eeda9b4ca5cc6c1cc9ca7bbf2ee71ffd03c47cd6bed56d2b025a4ffe5c20f225",
     "example_test.go": "b142f1062c7b62ceab34d43c26ecca95a56b6a9592114527d47db1238b38ca20",
-    "internal/bytecode/build.go": "fcaa0d71d61240d2efc42167d31654c5ef2dff43b823de15d5f42f85f4031cbb",
-    "internal/bytecode/bytecode.go": "f8bcad25cd9a5dd02f62c4c876d1e1b3b1e975daa4d8f344b2ff4a505087b9ca",
-    "internal/bytecode/bytecode_test.go": "c27a4be5f186094460a51138e71ff811c8f36429c18ad6474254447163843d8a",
+    "internal/bytecode/build.go": "7d8d8c4c556752b98d3d38af331140527c70b128aa80e328666c71415269667d",
+    "internal/bytecode/bytecode.go": "f5a563574e3b956b74d8efa56a4f6ee10920ad52be36c103a5be5eebf35d647d",
+    "internal/bytecode/bytecode_test.go": "05bb7ecc5d0d8c455d5e65db1df00bc76090f0099f8c695b4311bf5cbf6ce96e",
     "internal/bytecode/elements.go": "dec03bcee0fad6d64355c125e3be96c258d76eda47b8fda2ef0e3c9d73c56042",
     "internal/bytecode/elements_test.go": "deebc7df7dc0b110a66cd6f2fabc57e989e4829f5f14b046a8974988cd594891",
     "internal/bytecode/format11_test.go": "f0472dc17c30617a69c0193212fd1586127bb413b4254cba419a005dadffb2e0",
-    "internal/bytecode/format12_test.go": "7c21e00e359fe1e2a641329b2680ca07ee79b7113d625647a7e8c8685f32893d",
+    "internal/bytecode/format12_test.go": "3994d0eb14b946f091dec1c58a7718e1297c058f1c92899f0283421ace6a1f95",
     "internal/bytecode/format13_test.go": "ca5b4da516e5ea607793e6264a9257f98f57209f3cd29ebddb11e151f8f0649f",
-    "internal/bytecode/format14_test.go": "53b1a889da8c9ba6fd38a1d864bcb21bb09b636d60a5bdc298804a8027a90f49",
-    "internal/bytecode/format15_test.go": "b54223c64c3052e3088ddb7889743b6a8d9c02d3d8d3ed4806974e3e1a4cd964",
+    "internal/bytecode/format14_test.go": "c3e67fac42e7fe44c91e523a7886f22832bf956a91ef0077b7d83c0b4217001a",
+    "internal/bytecode/format15_test.go": "68be30c2406b8a7cfb7398933a87930704cb00e55475fd9453a12ab90fc9f699",
+    "internal/bytecode/format16_test.go": "68b357b4bd52d41daf286ab5f2bc8c7b3492e849b60e841800d0db87ebba74a3",
     "internal/bytecode/fuzz_test.go": "4873752f6f67ace02d87de8a6af156b9aecaad8fd3e0c055363817e6dbe46427",
-    "internal/bytecode/localnames_test.go": "2b2c31fa33403d47a298deb1f268820296ba8a214ddb0e4be93d99797795aefa",
-    "internal/bytecode/opcode.go": "e17964c6007a5a6b84b4bbe1be18adebfa190300bcc77741ec112dedda33fa47",
-    "internal/bytecode/verify.go": "7a07917887aeaccee0fa5f2ee7b16dbdcd421e56b86b2d3f0139fc98ca62b439",
-    "internal/bytecode/wire.go": "e921d1be2b8d81fd394961ed1076797395dc8fe8c425c144e25e795deed4bb23",
+    "internal/bytecode/localnames_test.go": "5ad1db477e43ab493cb2881fbf565dd58dd0eea987a43e670a82ddde8132228a",
+    "internal/bytecode/opcode.go": "c86e5855ed974f4500cfcf7f4ea7fd68fba722dc3f180ef4e95cd0d7825b091a",
+    "internal/bytecode/verify.go": "68bb393168a558e413c1c78f212483bdc95b47413a0b5fabd8d6400929857fcf",
+    "internal/bytecode/wire.go": "7e1b7f9ba8ddb03e38c8ca89079c579b6465f4db1a0f8708c4ab661a6adfd94c",
     "internal/frontend/ast.go": "b09baf5ae2d3708652633459b1ddc657641982e3cec13322932f570266d28fbe",
     "internal/frontend/diagnostics.go": "64d563e87a7ac5050e78bdf0aa7ad1b59d2a654c480a1cf5cf9cd4c61bb25a16",
     "internal/frontend/expr.go": "8d4fd112e3dd43f05fdf34764ee371b78f9833a619b686de9e779feee587555d",
@@ -59,8 +60,8 @@
     "internal/ir/core_classes.go": "438802ef3fadf1387a5a57d608f5d04ba059b7c79e7d9ed6ed18c59ee58911ea",
     "internal/ir/decl.go": "350412209efc0b61520eb1c8208d017d40938b181ae4a24059a28fcdbd735753",
     "internal/ir/effects.go": "00ad1ccfa4c22384dd48dc40eb9f57680f562a2e8d3bb50d9a13c4bdec4c2c0c",
-    "internal/ir/expr.go": "4de10d6cc56e4882193703a7cd49b73d7790a3b90f292c645802bb475398c4d0",
-    "internal/ir/hir.go": "4697a8dce2ed9a73e840f21ba11a4cd1126b287d7d66158d13983b5016fb7b9d",
+    "internal/ir/expr.go": "5377ee0a582dbed4cc86afacda4ca6226d6b337462074f23685cef6f2380d379",
+    "internal/ir/hir.go": "11eedd7717747fbc63c15b85c9256740dc77c34e775adf2686eb0cfaa13a0c37",
     "internal/ir/lower.go": "9581eba4949421638b16934da7c23eb35081480edc82178d65dc3a99a745cf20",
     "internal/ir/lower_test.go": "cd99eab41ac9290976f96b14be73d8b8315578a66d543acd4bbf449a16172e44",
     "internal/ir/names.go": "0eb61bca10378daf1db38fdda12cfa74d6ebfd8c7fbcece10f28d29faa038d9e",
@@ -81,39 +82,41 @@
     "internal/runtime/value.go": "073c9e3f1818f828fa815fec566f72a7dc1f8564d1f51dcd9ff7a5cd7f5b9069",
     "internal/runtime/vm.go": "62a4656a56d4af0e28269b83164c7356db9cb67f81ac7c75be60342db483bf47",
     "internal/runtime/vm_arrayops_test.go": "24750283700f3a25004a1212ac5ff1d08dca05ba57405d86cc74bd1a0df936a3",
-    "internal/runtime/vm_asm_test.go": "888d0fd3b6a81f54b8f2e051ea53c0d70b28ec4ccf97de0e67262b8feabc9c2c",
+    "internal/runtime/vm_asm_test.go": "398150a9cd50026950c6952d73eea8c5bcebad75a83a51ea7af358ce21cdf27e",
     "internal/runtime/vm_bench_test.go": "1972e9f0d1c8f70adf3f77636a4144653a6ce0959467bbeb84e941e9407ec6cd",
     "internal/runtime/vm_concurrency_test.go": "930330e394bd63af91d1086a7b806520ddae96eea61c560b4630037f7457b86b",
     "internal/runtime/vm_consts.go": "3288663381bb18d85220b30d01c5983b9d680e079d27d46c3cb111b80ee05d7a",
-    "internal/runtime/vm_exec.go": "540f163c168861187c96869ed7123b26911e5ba34833f3876200da6116f5d1a4",
+    "internal/runtime/vm_exec.go": "65b4b4268e4620204107da746a172f25b822f6bbea1c0dab659311c5c7100ced",
     "internal/runtime/vm_fuzz_test.go": "8da58ada19e46ab3ac9eff4673dc77e0ad60aeed70093e0157a2a3a2bdb34260",
     "internal/runtime/vm_list_test.go": "3ac524cd61b52b82949516118c298bf6aea0b1943a832357f71272fd97757471",
-    "internal/runtime/vm_loop.go": "6557d4abe6cb12c292d5adf682af7b48c996abfcebcb25dffea913e7df130e57",
+    "internal/runtime/vm_loop.go": "ac685d81786b6b7217de40789e4bd23a8e6014ea752804722c34173cd2ed5e77",
     "internal/runtime/vm_ops.go": "40910739a1c030c0f32b56c320c01d01ba08808c889ceec11465bd232248b0be",
     "internal/runtime/vm_oracle_test.go": "bf87fcd3e997a902e31e57c00dafc71599d1cdd7bf4b1f3c15b3fc70cc05b3a6",
-    "internal/runtime/vm_program.go": "7370462c803716bb38914aff844353043ff90423633e9cdaec18de3766fa88b0",
+    "internal/runtime/vm_program.go": "4b25a264a3249c693c068b3079f235b26cf9b63bdb0604d6809b85718d57fb42",
     "internal/runtime/vm_reference_test.go": "65e29d49d14699c43a7a5a511fc229300c74eb455cf55d41c5e117e582e98576",
-    "internal/runtime/vm_refs.go": "a1af694f85f2286436f7c9c12bd776901e3fc6fcb2a175f990d4170650f2561c",
+    "internal/runtime/vm_refs.go": "5befac22b97156e2102ae4045597374235cb7666385bdf7a4129a09d5508c196",
     "internal/runtime/vm_refs_test.go": "0ae8f338c5c404afffd4e2a65d552cbf4a0447c4060434ff8ab7ff0182087392",
     "internal/runtime/vm_runconfig_test.go": "a76c02cc395487951d537e98769df753d4e6a75ed002ac993b5265911285d1bd",
-    "internal/runtime/vm_safety_test.go": "00310735913367f7884bbbc970fea46870b40f33801396a02ae34b0074024616",
+    "internal/runtime/vm_safety_test.go": "1c9e4e375ac054b83ab08611245abe276cf5a79eb969b079d43a4b296c8c0d3f",
     "internal/runtime/vm_snippets_test.go": "acf47033c07befa32f403580d787a555af46a22f63b9e25b88075a2ad1c24e7f",
-    "internal/runtime/vm_stage2.go": "da906605404fc4e95be565ccb250e51b57afbbb28c273a257c91f0d6142966d5",
+    "internal/runtime/vm_stage2.go": "24b8a172b5573b8250c85effe074027011ff29df1caf352063af04ed0a5aeaca",
     "internal/runtime/vm_stage2_elements_test.go": "4057a73bbddc4f62867534441d225d513cf53add676053edf08f9aafce0bf0cf",
     "internal/runtime/vm_stage2_offset_test.go": "ff033945e44a2726153f5fa94e838cedfa63aff80a630a95160112ea0ac318b2",
     "internal/runtime/vm_stage2_test.go": "955ef5ec7e1a5f5b49694331ade2882bda5a57a7b1055e7523a9cee0ee39e933",
     "internal/runtime/vm_stage5_test.go": "b7a2a45db2c6130d2540f7aad30dd139ddcd6e126ca6ccef93efec2660c6c69f",
-    "internal/runtime/vm_trace.go": "333332992acd322a7a1af3399c604686b2b9633c679cce877e4a375ee844c182",
+    "internal/runtime/vm_stage6.go": "2976e6b2ac526330ceafcc8f37a117e91b37b753b614df55619dd9fa744fb490",
+    "internal/runtime/vm_stage6_test.go": "5934c51306242636935ec2b0990e2ddd19b3b3ad7511b49b24e0f57b3a738a45",
+    "internal/runtime/vm_trace.go": "58c689e814a6c78c10d23793707f92df4c396e8bd27ae031047925d706136885",
     "internal/runtime/vm_wiring_test.go": "227a6cbc5d56dee4db798b30d71ed783571c8fe4b85da016f35bd0f6ca0b3949",
     "internal/runtime/w17_codex_review_test.go": "a68950667445fc01534927fa0ca1b5093eba7a60d57359dd814dcac969a56482",
     "internal/runtime/w17_hardening_test.go": "bd7515420f57f5b0ba5890cc845fa390b7ffc2fa9869c420840db54a16f4d6b9",
     "internal/vm/builtins.go": "6dca7f4be0b21ce5bfc215e0b2cde2d9e295648b6d9ce50300b2bb886623e927",
     "internal/vm/builtins_gen.go": "a8c214fe9283cfe940f8cdc9ec1652e43f027dba0a61de797840ab01e8e532a8",
-    "internal/vm/compile.go": "2612ba42e5d66a71e6b35d45c073763e7f7a84e4131b36e20b94843b959e4b88",
-    "internal/vm/compile_test.go": "56581bd53397c5aa6456f3d2d5b84e8a073643496b9ecd49f75e49a658afe14e",
-    "internal/vm/disasm.go": "8616b7e3ee534b5ec1d2a1f413e666fd06f5e26f9299b0808407152385e7234c",
-    "internal/vm/expr.go": "2d43f978a6dcd94767d11858581349a578b057c3ff391ef80377b5ecaa9db75f",
-    "internal/vm/function.go": "39b2c794b27b7334196d01c533c003da9e7c78387e5a8649471c0fae208f0ad6",
+    "internal/vm/compile.go": "eb31a1f88fee3c98a4332d4435045e7fbfbf3c80e0494ec430f9cad2b923ceb6",
+    "internal/vm/compile_test.go": "478f992d1e8e4f25a27599ea7cae84ccd27b8d7e321b3cbf441644cf8191eb1b",
+    "internal/vm/disasm.go": "1f371eac0fe26b1273a33d6c9a795963297a539bab14b6965b25633effaa5b15",
+    "internal/vm/expr.go": "8ac4dc2ca52232d3faf21d61a6fc2be762039ff16f2c324b989e39f6dda5d473",
+    "internal/vm/function.go": "99c1fa8b19c3a552eef23b0968419e64d460b8473323c2e11270582c19099613",
     "internal/vm/golden_test.go": "f775e679be4fb8ede203b78b522543f520801dc8f282a02fe55cb9e1d3ae88d6",
     "internal/vm/lines_test.go": "0d8f68ddd0dad0e6a31ae8b3b09bd4275b82573aecbc12d6da538f84b1e80589",
     "internal/vm/list.go": "ca91af254cae24de9f30cee8dd6abdf0558d7167636bf5a8f2c041161c29b1c0",
@@ -123,32 +126,34 @@
     "internal/vm/refs.go": "83989c87b9aa4c921beb689b7904aebcba5c5775d831f9c334c63db0c6b6f3ef",
     "internal/vm/refs_test.go": "ce5d67e634769c5c4182bf80df8c13a8ca979797f470d2ac84e727370c37d096",
     "internal/vm/review_test.go": "666637a97cbfb965632791525f78ea20ac77a96e80b49a8b695b946661af8cfd",
-    "internal/vm/stage2_test.go": "7fbe16663f9b83fee22b274e798806f90cdc97dc81376c74162affc986e50e64",
+    "internal/vm/stage2_test.go": "701724d8e7c2b65ed1a764e6e69a609be7aab8666cc927333de23a3c7ad37a4a",
     "internal/vm/stage5.go": "e2bf914ad137ce4f85b307f610c567bc0278d42e5026882a64dca58f83239bf5",
+    "internal/vm/stage6.go": "0ec837d207ecc2e342aa1ca650aec1bf712e3cfd31a30b0885cc5effff775e7f",
     "policy.go": "6a29c533314e4d09a2fa3ea9b31cf3c16646b30c90ce7590009a76f9962b5b07",
     "policy_review_test.go": "59d6d0c9f7a98ba254166acd8af8eccc27eee7f7930f245cf05b7058dc719db2",
     "policy_test.go": "98cb9f82f6ce072fc36b5907b98f4482c4b5fc8563946683f962601498953b10",
     "run.go": "92b993bf2302e5bbd22b32ceebd9d9022ae74602a0b37234d94abc09b7f5a0d5",
     "runfile_fifo_review_fixes_test.go": "95431c9c1f70c4f6e83869faf9c2668dff32c1326aa4c0077a4f632ae86f0479",
     "runfile_review_fixes_test.go": "1771bd83832b40b06088248177bb4308cc83064dbbd6ec4616c0cc5dd2b1b880",
-    "tests/vm/w17/README.md": "7265809f44541f94a944334b49654748a6f00d13b293806ad9eb84ebd2448c13",
+    "tests/vm/w17/README.md": "9c414fd681f1f764b5e95a9aba78f0b804daf6bbdb57c4e4fbc57cc42face142",
     "tests/vm/w17/reference.php": "d75ab4338150c418cddecafdea28dbdb64f847db435306dedd4bb81aae0c6d76",
     "tests/vm/w17/reference.py": "899bad24246824ddf0b1a508747c45dd4d1a293d410f5a47ea43aefbc0c958bb",
     "tools/benchstat-variants.sh": "50bd5ab6f4b27172c142928731636342cc91ebb977600b3a445bfdd233e6a214",
     "tools/test_w17_reference.py": "bb93a25c9b2cdbc522fc1b6940fb7f76d8ac707f1f5cf49582e48c0fee4d83e2",
     "w17_codex_review_test.go": "149d727c033497a557d3aff1456bcec8d9dac11f3a38001841adec05087c9797",
-    "w17_differential_test.go": "9e8acc032bc2fc5e8c05a8ac8b0494f059a79ee18d8db6e6befcfba4b0e833e7",
+    "w17_differential_test.go": "a4372f6f2c283d6cdffb2e7f88fdd49e1623cd35060b428e1d2ef1d32af2b7de",
     "w17_hardening_test.go": "3362dc10e3ce54522b4bd826d95605481d4f350cdd4f9db5127397085a6f91bc",
     "w17_review_probes_test.go": "04a08ab6a1a8bc508b9289f664ab523415fbe3d6861dda07a01f5691247abfbb",
-    "w17_stage2_probes_test.go": "70530202ebb95aef2abe89d79dae11918c0d61a9fc5f5acebc2a1966f4ba3166"
+    "w17_stage2_probes_test.go": "64bdc86e7b3b47109afa0070522d19b5f7044ded9363742d9da043c05e5966ec",
+    "w17_stage6_test.go": "a184a6e762f0341ddffdd509584782d67fbe2ae294a133ec9d89897bbfc049ae"
   },
   "environment": {
-    "local": "go1.26.0 linux/amd64",
+    "local": "go1.26.5 darwin/arm64",
     "reference_images": "php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 (linux/arm64), php@sha256:35fd7ee3ab5af1ed1f23f6bb01a3464c10ad0bb813a020b29b770115b852d06f (linux/amd64), i386/php@sha256:07e835693e041c2a79cd7a3a7a0fda4b2a8d65c6f93bd89bb8dad5c616f28049 (linux/386); php -n, --network none",
     "ci": "GitHub-hosted ubuntu-24.04 and ubuntu-24.04-arm runners for the VM layout benchstat (commit 5545d4f)"
   },
   "decisions": [
-    "See engineering/decisions/W-17-vm.md: package split, staged delivery, bytecode 1.1 to 1.4, layout choices measured with benchstat, WithINI, limits behaviour, references (stage 3), destructuring (stage 4), constants, match, empty() and @ with bytecode 1.5 and the shared predefined-constant table (stage 5), and the fixes made after each independent review."
+    "See engineering/decisions/W-17-vm.md: package split, staged delivery, bytecode 1.1 to 1.4, layout choices measured with benchstat, WithINI, limits behaviour, references (stage 3), destructuring (stage 4), constants, match, empty() and @ with bytecode 1.5 and the shared predefined-constant table (stage 5), global and static variables, variadic parameters, argument unpacking and named arguments with bytecode 1.6 and the function parameter table (stage 6), and the fixes made after each independent review."
   ],
   "local_status": "pass",
   "product_test_status": "not_run",
@@ -166,10 +171,10 @@
       "result": "every package ok"
     },
     {
-      "command": "go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$' -v .",
+      "command": "go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$|TestW17Stage6' -v .",
       "exit_code": 0,
       "log": "W-17-vm/local/differential.log",
-      "result": "profile 32: 987 pass, 0 unsupported, 0 fail of 987; profile 64: 987 pass, 0 unsupported, 0 fail of 987; profile amd64: 987 pass, 0 unsupported, 0 fail of 987; review, stage-2, stage-3 and stage-4 probes pass"
+      "result": "profile 32: 1152 pass, 0 unsupported, 0 fail of 1152; profile 64: 1152 pass, 0 unsupported, 0 fail of 1152; profile amd64: 1152 pass, 0 unsupported, 0 fail of 1152; review, stage-2, stage-3, stage-4 and stage-6 probes pass"
     },
     {
       "command": "VM layout benchmarks workflow (tools/benchstat-variants.sh), commit 5545d4f",
@@ -194,12 +199,24 @@
       "exit_code": 0,
       "log": "W-17-vm/stage5/constants-amd64-diff.txt",
       "result": "only the header differs; CHAR_MAX and PHP_BUILD_DATE are recorded as platform-dependent"
+    },
+    {
+      "command": "BenchmarkVMDispatch/*/switch, test binaries built from main (56f8bf5) and the stage-6 tree, alternated for 6 rounds each (-test.benchtime 1s)",
+      "exit_code": 0,
+      "log": "W-17-vm/stage6/bench-stage6.txt",
+      "result": "medians: arith -3.4%, branch -4.7%, concat +5.6%, fib -3.5%, array -6.2% against bench-main.txt; every pair of 6-round ranges overlaps; fastest rounds differ by +0.3% to +1.9%; the host was busy during the run"
+    },
+    {
+      "command": "independent review of stage 6 and the red runs of its fixes",
+      "exit_code": 0,
+      "log": "W-17-vm/stage6/red-review-fixes.txt",
+      "result": "three review passes: 148 probes (147 equal to PHP, 1 outside the stage); 183 probes on arm64, 20 on 386 and 13 hand-written bytecode programs (one P1, two P2, two P3); then 246 probes on arm64, 38 on 386, 5 on amd64 and mutation of each fix on the fixes themselves (three P3); no P0; findings fixed or recorded as known gaps, with the output before the fixes"
     }
   ],
   "limits": [
-    "Local run on linux/amd64 only (go test under systemd-run MemoryMax); the 386 and arm64 references are replayed on the host architecture.",
+    "Local run on darwin/arm64 (stage 6); the 386, amd64 and arm64 references are replayed on the host architecture, and the references themselves were recorded in the pinned images under emulation where needed.",
     "The red runs recorded by the fixing engineers before the stage 2 session restart were not preserved as logs.",
-    "T-029 to T-032 stay not_run: stages 1 to 5 cover a subset of PHP."
+    "T-029 to T-032 stay not_run: stages 1 to 6 cover a subset of PHP."
   ],
   "artifacts": {
     "benchstat/Dispatch-ubuntu-24.04-arm/BenchmarkVMDispatch.benchstat.txt": {
@@ -300,15 +317,15 @@
     },
     "local/differential.log": {
       "path": "W-17-vm/local/differential.log",
-      "sha256": "7fb2b12d9366a1d1ba76cbc17d45bd470705787e25112a829fc429f34308be1f"
+      "sha256": "503e43f2d9947d68cb01e01b692639122a5c71366bb4e8e5903f3e1df0b9e407"
     },
     "local/go-test.log": {
       "path": "W-17-vm/local/go-test.log",
-      "sha256": "2278d9654953f4b4896d6f715d56e4414a89a461094cae8c1fbde850b9c302bf"
+      "sha256": "866421aeae811afb3e2431291f45f9c7c764c9cc2bb3a96ff53d022a01387f78"
     },
     "local/race.log": {
       "path": "W-17-vm/local/race.log",
-      "sha256": "06de14cf28759a364ae8ccab1ae4f75a2eab3b0b8c8f4eafc4f5185a4d376674"
+      "sha256": "073254541a32c92719c32075b7c0d03887b879a0dc7d1945b35730c0e763f41b"
     },
     "stage2/random-differential.txt": {
       "path": "W-17-vm/stage2/random-differential.txt",
@@ -397,6 +414,18 @@
     "stage5/red-review-fixes.txt": {
       "path": "W-17-vm/stage5/red-review-fixes.txt",
       "sha256": "e691815bc65487c3b2ae3e367f40e22f3884dcf51ed807aed27cd85a24b90145"
+    },
+    "stage6/bench-main.txt": {
+      "path": "W-17-vm/stage6/bench-main.txt",
+      "sha256": "e105fe426f0464ccfa677abfa948f85d5538dc89e424c5c0cd14b1ba53f1d897"
+    },
+    "stage6/bench-stage6.txt": {
+      "path": "W-17-vm/stage6/bench-stage6.txt",
+      "sha256": "2ce4fec4ab4c3eee82e7b5a39f42205603677bae7f4c3b1d0827fe78837d0907"
+    },
+    "stage6/red-review-fixes.txt": {
+      "path": "W-17-vm/stage6/red-review-fixes.txt",
+      "sha256": "1c64a19d78322fbe02aea28b21886095337f6e6964b004edfc441c040650e236"
     }
   }
 }

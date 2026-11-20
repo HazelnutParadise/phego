@@ -466,7 +466,7 @@ func TestUnsupportedConstructs(t *testing.T) {
 		line         int
 	}{
 		{"typed parameter", "echo 1;\nfunction f(int $a) {}", 3},
-		{"variadic parameter", "echo 1;\nfunction f(...$a) {}", 3},
+		{"typed parameter", "echo 1;\nfunction f(int ...$a) {}", 3},
 		{"return type", "echo 1;\nfunction f(): int { return 1; }", 3},
 		{"return by reference", "echo 1;\nfunction &f() { return $x; }", 3},
 		{"function attribute", "echo 1;\n#[Foo]\nfunction f() {}", 3},
@@ -477,8 +477,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"new", "echo 1;\n$o = new A;", 3},
 		{"try", "echo 1;\ntry { echo 2; } finally { echo 3; }", 3},
 		{"throw", "echo 1;\nthrow $e;", 3},
-		{"static variable", "echo 1;\nfunction f() { static $x = 0; }", 3},
-		{"global statement", "echo 1;\nfunction f() { global $x; }", 3},
+		{"new", "echo 1;\nfunction f() { static $x = new A; }", 3},
+		{"variable variables", "echo 1;\nfunction f() { global $$x; }", 3},
+		{"superglobal", "echo 1;\nfunction f() { global $GLOBALS; }", 3},
 		{"builtin function define()", "echo 1;\ndefine('A', 1);", 3},
 		{"builtin function constant()", "echo 1;\necho constant('A');", 3},
 		{"the constant STDIN (a resource)", "echo 1;\necho STDIN;", 3},
@@ -497,8 +498,10 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"static property access", "echo 1;\n['k' => A::$s] = $c;", 3},
 		{"property access", "echo 1;\n[&$o->p] = $c;", 3},
 		{"variable variables", "echo 1;\n$$n = 1;", 3},
-		{"named arguments", "echo 1;\nfunction f($a) {}\nf(a: 1);", 4},
-		{"argument unpacking", "echo 1;\nfunction f($a) {}\nf(...$x);", 4},
+		{"named arguments", "echo 1;\nfunction f($a) {}\nexit(status: 1);", 4},
+		{"new", "echo 1;\nfunction f($a) {}\nf(a: new A);", 4},
+		{"argument unpacking", "echo 1;\nfunction f($a) {}\nexit(...$x);", 4},
+		{"closure", "echo 1;\nfunction f($a) {}\nf(...function () {});", 4},
 		{"array spread", "echo 1;\n$a = [...$x];", 3},
 		{"dynamic call", "echo 1;\n$f = 'g';\n$f();", 4},
 		{"property access", "echo 1;\necho \"{$o->p}\";", 3},
@@ -654,6 +657,12 @@ var parseFatal = map[string]string{
 var compileFatal = map[string]string{
 	"fatal_redeclare_function":                 "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
 	"fatal_param_default_redeclared_param":     "Redefinition of parameter $a",
+	"fatal_named_positional_after":             "Cannot use positional argument after named argument",
+	"fatal_static_duplicate":                   "Duplicate declaration of static variable $a",
+	"fatal_unpack_after_named":                 "Cannot use argument unpacking after named arguments",
+	"fatal_unpack_positional_after":            "Cannot use positional argument after argument unpacking",
+	"fatal_variadic_default":                   "Variadic parameter cannot have a default value",
+	"fatal_variadic_not_last":                  "Only the last parameter can be variadic",
 	"fatal_list_spread":                        "Spread operator is not supported in assignments",
 	"fatal_list_empty":                         "Cannot use empty list",
 	"fatal_list_mixed_keys":                    "Cannot mix keyed and unkeyed array entries in assignments",
@@ -672,8 +681,8 @@ var compileFatal = map[string]string{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 329 {
-		t.Fatalf("want 329 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 384 {
+		t.Fatalf("want 384 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

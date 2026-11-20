@@ -103,6 +103,9 @@ func cloneImage(b *budget, src Image) (Image, error) {
 		if dst.Functions[i].LocalNames, ok = cloneLocalNames(b, f.LocalNames); !ok {
 			return Image{}, b.pollOrLimit()
 		}
+		if dst.Functions[i].Parameters, ok = cloneParameters(b, f.Parameters); !ok {
+			return Image{}, b.pollOrLimit()
+		}
 	}
 	return dst, nil
 }
@@ -160,6 +163,16 @@ func cloneLocalNames(b *budget, src []uint32) ([]uint32, bool) {
 		return nil, false
 	}
 	dst := make([]uint32, len(src))
+	return dst, copyChunks(b, dst, src)
+}
+func cloneParameters(b *budget, src []Parameter) ([]Parameter, bool) {
+	if len(src) == 0 {
+		return nil, true
+	}
+	if b.chargeWork(uint64(len(src))) != nil {
+		return nil, false
+	}
+	dst := make([]Parameter, len(src))
 	return dst, copyChunks(b, dst, src)
 }
 func copyChunks[T any](b *budget, dst, src []T) bool {
@@ -231,6 +244,9 @@ func encodedSize(b *budget, image Image, minor uint16) (uint64, error) {
 			return 0, ErrLimit
 		}
 		if minor >= 1 && (uint64(len(f.LocalNames)) > uint64(^uint32(0)) || !add(4+uint64(len(f.LocalNames))*4)) {
+			return 0, ErrLimit
+		}
+		if minor >= 6 && (uint64(len(f.Parameters)) > uint64(^uint32(0)) || !add(4+uint64(len(f.Parameters))*parameterWire)) {
 			return 0, ErrLimit
 		}
 	}

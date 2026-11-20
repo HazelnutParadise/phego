@@ -10,7 +10,8 @@ import (
 
 // localNamesImage is validCallAndReferenceImage with a constant pool holding
 // variable names and names on both functions. Function 1 (callee) is last in
-// the payload, so its local names table ends the encoding.
+// the payload, so its local names table ends the encoding, followed only by
+// the count of its (empty) format 1.6 parameter table.
 func localNamesImage() Image {
 	i := validCallAndReferenceImage()
 	i.Constants = []Constant{{Kind: Null}, {Kind: String, Bytes: "x"}, {Kind: String, Bytes: "y"}, {Kind: Int, Bits: 7}, {Kind: String}}
@@ -87,13 +88,14 @@ func TestLocalNamesEncodeLoadRoundTrip(t *testing.T) {
 	if err != nil || string(again) != string(data) {
 		t.Fatalf("canonical re-encode differs: err=%v", err)
 	}
-	// The callee's one-entry table ends the payload: count 1, then index 2.
-	if binary.LittleEndian.Uint32(data[len(data)-8:]) != 1 || binary.LittleEndian.Uint32(data[len(data)-4:]) != 2 {
-		t.Fatalf("payload does not end with the callee local names table: % x", data[len(data)-8:])
+	// The callee's one-entry table ends the payload: count 1, then index 2,
+	// then the empty parameter table.
+	if binary.LittleEndian.Uint32(data[len(data)-12:]) != 1 || binary.LittleEndian.Uint32(data[len(data)-8:]) != 2 || binary.LittleEndian.Uint32(data[len(data)-4:]) != 0 {
+		t.Fatalf("payload does not end with the callee local names table: % x", data[len(data)-12:])
 	}
 	noNames := localNamesImage()
 	noNames.Functions[0].LocalNames, noNames.Functions[1].LocalNames = nil, nil
-	if plain := encodeAtMinor(t, noNames, FormatMinor); binary.LittleEndian.Uint32(plain[len(plain)-4:]) != 0 {
+	if plain := encodeAtMinor(t, noNames, FormatMinor); binary.LittleEndian.Uint32(plain[len(plain)-8:]) != 0 {
 		t.Fatal("Encode did not write an empty local names table")
 	}
 }
@@ -104,11 +106,11 @@ func TestLocalNamesWireRejectsInvalidTables(t *testing.T) {
 		edit   func([]byte) []byte
 		detail string
 	}{
-		"index out of range": {func(b []byte) []byte { binary.LittleEndian.PutUint32(b[len(b)-4:], 99); return b }, "local name index"},
-		"non-string":         {func(b []byte) []byte { binary.LittleEndian.PutUint32(b[len(b)-4:], 3); return b }, "not a string"},
+		"index out of range": {func(b []byte) []byte { binary.LittleEndian.PutUint32(b[len(b)-8:], 99); return b }, "local name index"},
+		"non-string":         {func(b []byte) []byte { binary.LittleEndian.PutUint32(b[len(b)-8:], 3); return b }, "not a string"},
 		"count not locals": {func(b []byte) []byte {
-			binary.LittleEndian.PutUint32(b[len(b)-8:], 2)
-			return append(b, 1, 0, 0, 0)
+			binary.LittleEndian.PutUint32(b[len(b)-12:], 2)
+			return append(b[:len(b)-4], 1, 0, 0, 0, 0, 0, 0, 0)
 		}, "local name count"},
 	}
 	for name, tc := range cases {
@@ -123,7 +125,7 @@ func TestLocalNamesWireRejectsInvalidTables(t *testing.T) {
 		})
 	}
 	t.Run("truncated table", func(t *testing.T) {
-		b := append([]byte(nil), original[:len(original)-4]...)
+		b := append([]byte(nil), original[:len(original)-8]...)
 		repairWireIntegrity(b)
 		if p, err := loadBytes(b); p != nil || !errors.Is(err, ErrInvalid) {
 			t.Fatalf("Load=(%v,%v), want ErrInvalid", p, err)

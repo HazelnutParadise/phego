@@ -529,7 +529,7 @@ func TestStage2Unsupported(t *testing.T) {
 		{"class constant", "echo 1;\nfunction f($a = 1,\n  $b = A::X) {}", 4},
 		{"class constant", "echo 1;\nfunction f($a = self::X) {}", 3},
 		{"typed parameter", "echo 1;\nfunction f(int $a = 1) {}", 3},
-		{"variadic parameter", "echo 1;\nfunction f(&...$a) {}", 3},
+		{"typed parameter", "echo 1;\nfunction f(int &...$a) {}", 3},
 	} {
 		t.Run(tc.feature, func(t *testing.T) {
 			img, err := compileWidth(t, "<?php\n"+tc.src+"\n", 64, testFile)

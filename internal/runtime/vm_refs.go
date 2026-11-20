@@ -106,23 +106,6 @@ func (s *vmState) clearReg(f *vmFrame, r uint32) error {
 	return s.releaseValue(old)
 }
 
-// pushRef is ZEND_SEND_REF: the variable or element becomes a reference
-// and the argument stack holds it, which the callee's by-reference
-// parameter binds (Bind with BindValue).
-func (s *vmState) pushRef(f *vmFrame, in *vmInstr) error {
-	src, err := s.slot(f, in.a)
-	if err != nil {
-		return err
-	}
-	nullIfUndefined(src)
-	var arg value
-	if err := s.h.bind(&arg, src); err != nil {
-		return err
-	}
-	s.args = append(s.args, arg)
-	return nil
-}
-
 // --- foreach by reference ---
 
 // refIter is the by-reference iteration an iterator register names, or nil

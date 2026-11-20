@@ -21,6 +21,9 @@ type Program struct {
 	byName map[string]int // lower-case function name to index
 	entry  int
 	width  int
+	// mainLocal maps a variable name of the entry function to its local:
+	// the global variables a global statement binds.
+	mainLocal map[string]int
 }
 
 // vmInstr is a bytecode instruction whose register operands are renumbered
@@ -51,6 +54,16 @@ type vmFunction struct {
 	localNames []string
 	paramLocal []int32 // local of parameter i, -1 if the prologue does not store it
 	paramPC    []int32 // pc of the prologue Store that receives parameter i, or -1
+	// paramNames and paramByRef come from the parameter table (format
+	// 1.6): nil when the function records nothing, else one entry per
+	// parameter register. variadic says a variadic parameter follows them,
+	// variadicByRef that it takes references, anyByRef that some parameter
+	// does.
+	paramNames    []string
+	paramByRef    []bool
+	variadic      bool
+	variadicByRef bool
+	anyByRef      bool
 	// required is how many arguments a call must pass: every parameter up
 	// to the last one no ParamDefault names, as PHP treats an optional
 	// parameter before a required one as required.
@@ -151,6 +164,18 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		return roleValue, roleTarget, roleTarget
 	case bytecode.OpPush:
 		return roleAny, roleNameConst, roleNone
+	case bytecode.OpBindGlobal:
+		return roleLocation, roleConst, roleNone
+	case bytecode.OpStaticInit:
+		return roleLocation, roleTarget, roleNone
+	case bytecode.OpBindStatic:
+		return roleLocation, roleValue, roleNone
+	case bytecode.OpRecvVariadic:
+		return roleValue, roleNone, roleNone
+	case bytecode.OpInitCall:
+		return roleNone, roleFunc, roleNone
+	case bytecode.OpSendUnpack, bytecode.OpCallPending:
+		return roleAny, roleNone, roleNone
 	case bytecode.OpCall:
 		return roleAny, roleFunc, roleCount
 	case bytecode.OpCallValue:
@@ -270,6 +295,14 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 			return nil, err
 		}
 		prog.funcs[i] = f
+		if i == prog.entry {
+			prog.mainLocal = make(map[string]int, len(f.localNames))
+			for l, name := range f.localNames {
+				if _, dup := prog.mainLocal[name]; !dup && name != "" {
+					prog.mainLocal[name] = l
+				}
+			}
+		}
 		if i != prog.entry {
 			key := phpname.Lower(f.name)
 			if _, dup := prog.byName[key]; !dup {
@@ -359,6 +392,19 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	for i := range f.localNames {
 		f.localNames[i], _ = fv.LocalName(uint32(i))
 	}
+	if n := fv.ParameterCount(); n > 0 {
+		f.paramNames, f.paramByRef = make([]string, f.params), make([]bool, f.params)
+		for i := 0; i < n; i++ {
+			name, flags, _ := fv.Parameter(uint32(i))
+			byRef := flags&bytecode.ParamByRef != 0
+			f.anyByRef = f.anyByRef || byRef
+			if i < f.params {
+				f.paramNames[i], f.paramByRef[i] = name, byRef
+			} else {
+				f.variadic, f.variadicByRef = true, byRef
+			}
+		}
+	}
 	f.code = make([]vmInstr, len(code))
 	f.lines = make([]int32, len(code))
 	f.files = make([]string, len(code))
@@ -438,8 +484,20 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 				out.aux = 1
 			}
 		case bytecode.OpPush:
+			out.aux = 0
 			if kinds[in.A] == bytecode.Location {
-				out.aux = 1
+				out.aux = vmPushRef
+				if in.Aux == uint16(bytecode.PushLoad) {
+					out.aux = vmPushLoad
+				}
+			}
+		case bytecode.OpSendUnpack:
+			if kinds[in.A] == bytecode.Location {
+				out.aux = vmPushRef // a plain variable
+			}
+		case bytecode.OpCallPending:
+			if kinds[in.A] != bytecode.Value {
+				out.aux = 1 // a Location result: a by-reference callee
 			}
 		case bytecode.OpIterInit:
 			// A by-reference subject that is a variable or an element.
@@ -549,9 +607,9 @@ func vmLiveness(f *vmFunction) {
 	for _, in := range f.code {
 		switch in.op {
 		case bytecode.OpLoad, bytecode.OpArrayGet, bytecode.OpNewArray, bytecode.OpCall, bytecode.OpCallValue, bytecode.OpHostCall,
-			bytecode.OpInclude, bytecode.OpEval, bytecode.OpFetchConst:
+			bytecode.OpInclude, bytecode.OpEval, bytecode.OpFetchConst, bytecode.OpRecvVariadic, bytecode.OpCallPending:
 			// A constant's value can be an array (const A = [1]).
-			if in.op != bytecode.OpCall || in.aux == 0 {
+			if (in.op != bytecode.OpCall && in.op != bytecode.OpCallPending) || in.aux == 0 {
 				composite[in.a] = true
 			}
 		case bytecode.OpBinary:
@@ -608,7 +666,7 @@ func vmLiveness(f *vmFunction) {
 			if role == roleAny && i == 1 && in.op == bytecode.OpMove && in.aux == 0 {
 				visit(ops[i])
 			}
-			if role == roleAny && i == 0 && (in.op == bytecode.OpPush || in.op == bytecode.OpDrop) && in.aux == 0 {
+			if role == roleAny && i == 0 && (in.op == bytecode.OpPush || in.op == bytecode.OpDrop || in.op == bytecode.OpSendUnpack) && in.aux == 0 {
 				visit(ops[i])
 			}
 			if role == roleAny && i == 1 && in.op == bytecode.OpIterInit && in.aux&vmIterSubjectLocation == 0 {
@@ -628,7 +686,7 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpIterInit, bytecode.OpIterNext:
 			visit(pc + 1)
 			visit(int(in.c))
-		case bytecode.OpParamDefault:
+		case bytecode.OpParamDefault, bytecode.OpStaticInit:
 			visit(pc + 1)
 			visit(int(in.b))
 		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpLeave, bytecode.OpEndFinally, bytecode.OpMatchError:
@@ -698,7 +756,7 @@ func vmLiveness(f *vmFunction) {
 		// Return and Exit end the frame; Call results are written after the
 		// callee returns, so neither keeps a kill list.
 		switch in.op {
-		case bytecode.OpReturn, bytecode.OpExit, bytecode.OpCall, bytecode.OpCallValue:
+		case bytecode.OpReturn, bytecode.OpExit, bytecode.OpCall, bytecode.OpCallValue, bytecode.OpCallPending:
 			f.kills = f.kills[:start]
 		}
 		if k := len(f.kills) - start; k > 0 && k <= math.MaxUint16 {
@@ -718,7 +776,7 @@ func definesA(op bytecode.Opcode) bool {
 	case bytecode.OpConst, bytecode.OpMove, bytecode.OpLocal, bytecode.OpLoad, bytecode.OpBinary, bytecode.OpCall, bytecode.OpCallValue,
 		bytecode.OpHostCall, bytecode.OpNewArray, bytecode.OpArrayGet, bytecode.OpInclude, bytecode.OpEval, bytecode.OpShell,
 		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef,
-		bytecode.OpFetchConst, bytecode.OpBeginSilence:
+		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending:
 		return true
 	}
 	return false
@@ -731,7 +789,7 @@ func vmDefOperand(in vmInstr) int {
 	switch in.op {
 	case bytecode.OpLocal, bytecode.OpArraySet:
 		return -1
-	case bytecode.OpMove, bytecode.OpCall:
+	case bytecode.OpMove, bytecode.OpCall, bytecode.OpCallPending:
 		if in.aux != 0 {
 			return -1 // a Location
 		}

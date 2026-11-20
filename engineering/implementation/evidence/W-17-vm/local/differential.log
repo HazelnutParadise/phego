@@ -1,4 +1,4 @@
-$ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$' -v .
+$ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$|TestW17Stage6' -v .
 === RUN   TestW17PHP8512Programs
 === RUN   TestW17PHP8512Programs/64
 === RUN   TestW17PHP8512Programs/64/arith_float_ops/display
@@ -91,6 +91,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/bitwise_ops/display
 === RUN   TestW17PHP8512Programs/64/bitwise_ops/log
 === RUN   TestW17PHP8512Programs/64/bitwise_ops/both
+=== RUN   TestW17PHP8512Programs/64/call_callee_declared_later/display
+=== RUN   TestW17PHP8512Programs/64/call_callee_declared_later/log
+=== RUN   TestW17PHP8512Programs/64/call_callee_declared_later/both
+=== RUN   TestW17PHP8512Programs/64/call_callee_known_lines/display
+=== RUN   TestW17PHP8512Programs/64/call_callee_known_lines/log
+=== RUN   TestW17PHP8512Programs/64/call_callee_known_lines/both
 === RUN   TestW17PHP8512Programs/64/cast_float_to_int_range/display
 === RUN   TestW17PHP8512Programs/64/cast_float_to_int_range/log
 === RUN   TestW17PHP8512Programs/64/cast_float_to_int_range/both
@@ -412,6 +418,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/fatal_modulo_by_zero/display
 === RUN   TestW17PHP8512Programs/64/fatal_modulo_by_zero/log
 === RUN   TestW17PHP8512Programs/64/fatal_modulo_by_zero/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_backtrace_args/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_backtrace_args/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_backtrace_args/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_default_error_trace/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_default_error_trace/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_default_error_trace/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_required/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_required/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_missing_required/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_overwrite/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_overwrite/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_overwrite/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_positional_after/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_positional_after/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_positional_after/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_too_few/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_too_few/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_too_few/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_twice/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_twice/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_twice/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_undefined_function/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_undefined_function/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_undefined_function/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/both
+=== RUN   TestW17PHP8512Programs/64/fatal_named_variadic_twice/display
+=== RUN   TestW17PHP8512Programs/64/fatal_named_variadic_twice/log
+=== RUN   TestW17PHP8512Programs/64/fatal_named_variadic_twice/both
 === RUN   TestW17PHP8512Programs/64/fatal_non_numeric_string_add/display
 === RUN   TestW17PHP8512Programs/64/fatal_non_numeric_string_add/log
 === RUN   TestW17PHP8512Programs/64/fatal_non_numeric_string_add/both
@@ -469,6 +514,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/fatal_silence_undefined_function/display
 === RUN   TestW17PHP8512Programs/64/fatal_silence_undefined_function/log
 === RUN   TestW17PHP8512Programs/64/fatal_silence_undefined_function/both
+=== RUN   TestW17PHP8512Programs/64/fatal_static_duplicate/display
+=== RUN   TestW17PHP8512Programs/64/fatal_static_duplicate/log
+=== RUN   TestW17PHP8512Programs/64/fatal_static_duplicate/both
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_error/display
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_error/log
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_error/both
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_undefined_const/display
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_undefined_const/log
+=== RUN   TestW17PHP8512Programs/64/fatal_static_init_undefined_const/both
 === RUN   TestW17PHP8512Programs/64/fatal_string_offset_array_key/display
 === RUN   TestW17PHP8512Programs/64/fatal_string_offset_array_key/log
 === RUN   TestW17PHP8512Programs/64/fatal_string_offset_array_key/both
@@ -496,6 +550,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/fatal_undefined_function/display
 === RUN   TestW17PHP8512Programs/64/fatal_undefined_function/log
 === RUN   TestW17PHP8512Programs/64/fatal_undefined_function/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_after_named/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_after_named/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_after_named/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_non_array/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_non_array/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_non_array/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_overwrite/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_overwrite/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_overwrite/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_string/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_string/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_string/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_unknown_named/display
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_unknown_named/log
+=== RUN   TestW17PHP8512Programs/64/fatal_unpack_unknown_named/both
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_backtrace/display
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_backtrace/log
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_backtrace/both
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_default/display
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_default/log
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_default/both
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_not_last/display
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_not_last/log
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_not_last/both
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_too_few/display
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_too_few/log
+=== RUN   TestW17PHP8512Programs/64/fatal_variadic_too_few/both
 === RUN   TestW17PHP8512Programs/64/float_format_echo/display
 === RUN   TestW17PHP8512Programs/64/float_format_echo/log
 === RUN   TestW17PHP8512Programs/64/float_format_echo/both
@@ -607,6 +697,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/func_recursion/display
 === RUN   TestW17PHP8512Programs/64/func_recursion/log
 === RUN   TestW17PHP8512Programs/64/func_recursion/both
+=== RUN   TestW17PHP8512Programs/64/global_basic/display
+=== RUN   TestW17PHP8512Programs/64/global_basic/log
+=== RUN   TestW17PHP8512Programs/64/global_basic/both
+=== RUN   TestW17PHP8512Programs/64/global_recursion_nested/display
+=== RUN   TestW17PHP8512Programs/64/global_recursion_nested/log
+=== RUN   TestW17PHP8512Programs/64/global_recursion_nested/both
+=== RUN   TestW17PHP8512Programs/64/global_reference_semantics/display
+=== RUN   TestW17PHP8512Programs/64/global_reference_semantics/log
+=== RUN   TestW17PHP8512Programs/64/global_reference_semantics/both
+=== RUN   TestW17PHP8512Programs/64/global_top_level/display
+=== RUN   TestW17PHP8512Programs/64/global_top_level/log
+=== RUN   TestW17PHP8512Programs/64/global_top_level/both
+=== RUN   TestW17PHP8512Programs/64/global_undefined_and_shared/display
+=== RUN   TestW17PHP8512Programs/64/global_undefined_and_shared/log
+=== RUN   TestW17PHP8512Programs/64/global_undefined_and_shared/both
+=== RUN   TestW17PHP8512Programs/64/global_unset_and_rebind/display
+=== RUN   TestW17PHP8512Programs/64/global_unset_and_rebind/log
+=== RUN   TestW17PHP8512Programs/64/global_unset_and_rebind/both
 === RUN   TestW17PHP8512Programs/64/heredoc_nowdoc/display
 === RUN   TestW17PHP8512Programs/64/heredoc_nowdoc/log
 === RUN   TestW17PHP8512Programs/64/heredoc_nowdoc/both
@@ -745,6 +853,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/multiline_expression_lines/display
 === RUN   TestW17PHP8512Programs/64/multiline_expression_lines/log
 === RUN   TestW17PHP8512Programs/64/multiline_expression_lines/both
+=== RUN   TestW17PHP8512Programs/64/named_basic/display
+=== RUN   TestW17PHP8512Programs/64/named_basic/log
+=== RUN   TestW17PHP8512Programs/64/named_basic/both
+=== RUN   TestW17PHP8512Programs/64/named_by_ref/display
+=== RUN   TestW17PHP8512Programs/64/named_by_ref/log
+=== RUN   TestW17PHP8512Programs/64/named_by_ref/both
+=== RUN   TestW17PHP8512Programs/64/named_defaults_skipped/display
+=== RUN   TestW17PHP8512Programs/64/named_defaults_skipped/log
+=== RUN   TestW17PHP8512Programs/64/named_defaults_skipped/both
+=== RUN   TestW17PHP8512Programs/64/named_eval_order/display
+=== RUN   TestW17PHP8512Programs/64/named_eval_order/log
+=== RUN   TestW17PHP8512Programs/64/named_eval_order/both
+=== RUN   TestW17PHP8512Programs/64/named_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/64/named_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/64/named_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/64/named_variadic/display
+=== RUN   TestW17PHP8512Programs/64/named_variadic/log
+=== RUN   TestW17PHP8512Programs/64/named_variadic/both
 === RUN   TestW17PHP8512Programs/64/null_coalesce/display
 === RUN   TestW17PHP8512Programs/64/null_coalesce/log
 === RUN   TestW17PHP8512Programs/64/null_coalesce/both
@@ -889,6 +1015,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/spaceship_mixed/display
 === RUN   TestW17PHP8512Programs/64/spaceship_mixed/log
 === RUN   TestW17PHP8512Programs/64/spaceship_mixed/both
+=== RUN   TestW17PHP8512Programs/64/static_basic/display
+=== RUN   TestW17PHP8512Programs/64/static_basic/log
+=== RUN   TestW17PHP8512Programs/64/static_basic/both
+=== RUN   TestW17PHP8512Programs/64/static_expr_init/display
+=== RUN   TestW17PHP8512Programs/64/static_expr_init/log
+=== RUN   TestW17PHP8512Programs/64/static_expr_init/both
+=== RUN   TestW17PHP8512Programs/64/static_init_warning/display
+=== RUN   TestW17PHP8512Programs/64/static_init_warning/log
+=== RUN   TestW17PHP8512Programs/64/static_init_warning/both
+=== RUN   TestW17PHP8512Programs/64/static_recursion/display
+=== RUN   TestW17PHP8512Programs/64/static_recursion/log
+=== RUN   TestW17PHP8512Programs/64/static_recursion/both
+=== RUN   TestW17PHP8512Programs/64/static_scopes/display
+=== RUN   TestW17PHP8512Programs/64/static_scopes/log
+=== RUN   TestW17PHP8512Programs/64/static_scopes/both
+=== RUN   TestW17PHP8512Programs/64/static_unset_rebind/display
+=== RUN   TestW17PHP8512Programs/64/static_unset_rebind/log
+=== RUN   TestW17PHP8512Programs/64/static_unset_rebind/both
 === RUN   TestW17PHP8512Programs/64/string_offset_array_of_strings/display
 === RUN   TestW17PHP8512Programs/64/string_offset_array_of_strings/log
 === RUN   TestW17PHP8512Programs/64/string_offset_array_of_strings/both
@@ -964,6 +1108,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/unary_ops/display
 === RUN   TestW17PHP8512Programs/64/unary_ops/log
 === RUN   TestW17PHP8512Programs/64/unary_ops/both
+=== RUN   TestW17PHP8512Programs/64/unpack_basic/display
+=== RUN   TestW17PHP8512Programs/64/unpack_basic/log
+=== RUN   TestW17PHP8512Programs/64/unpack_basic/both
+=== RUN   TestW17PHP8512Programs/64/unpack_by_ref/display
+=== RUN   TestW17PHP8512Programs/64/unpack_by_ref/log
+=== RUN   TestW17PHP8512Programs/64/unpack_by_ref/both
+=== RUN   TestW17PHP8512Programs/64/unpack_eval_order/display
+=== RUN   TestW17PHP8512Programs/64/unpack_eval_order/log
+=== RUN   TestW17PHP8512Programs/64/unpack_eval_order/both
+=== RUN   TestW17PHP8512Programs/64/unpack_string_keys/display
+=== RUN   TestW17PHP8512Programs/64/unpack_string_keys/log
+=== RUN   TestW17PHP8512Programs/64/unpack_string_keys/both
+=== RUN   TestW17PHP8512Programs/64/variadic_basic/display
+=== RUN   TestW17PHP8512Programs/64/variadic_basic/log
+=== RUN   TestW17PHP8512Programs/64/variadic_basic/both
+=== RUN   TestW17PHP8512Programs/64/variadic_by_ref/display
+=== RUN   TestW17PHP8512Programs/64/variadic_by_ref/log
+=== RUN   TestW17PHP8512Programs/64/variadic_by_ref/both
+=== RUN   TestW17PHP8512Programs/64/variadic_recursion/display
+=== RUN   TestW17PHP8512Programs/64/variadic_recursion/log
+=== RUN   TestW17PHP8512Programs/64/variadic_recursion/both
 === RUN   TestW17PHP8512Programs/64/warn_after_inline_html/display
 === RUN   TestW17PHP8512Programs/64/warn_after_inline_html/log
 === RUN   TestW17PHP8512Programs/64/warn_after_inline_html/both
@@ -989,7 +1154,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/64/warn_undefined_variable/log
 === RUN   TestW17PHP8512Programs/64/warn_undefined_variable/both
 === NAME  TestW17PHP8512Programs/64
-    w17_differential_test.go:165: profile 64: 987 pass, 0 unsupported, 0 fail of 987
+    w17_differential_test.go:165: profile 64: 1152 pass, 0 unsupported, 0 fail of 1152
 === RUN   TestW17PHP8512Programs/amd64
 === RUN   TestW17PHP8512Programs/amd64/arith_float_ops/display
 === RUN   TestW17PHP8512Programs/amd64/arith_float_ops/log
@@ -1081,6 +1246,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/bitwise_ops/display
 === RUN   TestW17PHP8512Programs/amd64/bitwise_ops/log
 === RUN   TestW17PHP8512Programs/amd64/bitwise_ops/both
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_declared_later/display
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_declared_later/log
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_declared_later/both
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_known_lines/display
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_known_lines/log
+=== RUN   TestW17PHP8512Programs/amd64/call_callee_known_lines/both
 === RUN   TestW17PHP8512Programs/amd64/cast_float_to_int_range/display
 === RUN   TestW17PHP8512Programs/amd64/cast_float_to_int_range/log
 === RUN   TestW17PHP8512Programs/amd64/cast_float_to_int_range/both
@@ -1402,6 +1573,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/display
 === RUN   TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/log
 === RUN   TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_required/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_required/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_missing_required/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_overwrite/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_overwrite/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_overwrite/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_positional_after/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_positional_after/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_positional_after/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_too_few/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_too_few/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_too_few/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_twice/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_twice/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_twice/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_undefined_function/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_undefined_function/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_undefined_function/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/both
 === RUN   TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/display
 === RUN   TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/log
 === RUN   TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/both
@@ -1459,6 +1669,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/display
 === RUN   TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/log
 === RUN   TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_duplicate/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_duplicate/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_duplicate/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_error/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_error/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_error/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/both
 === RUN   TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/display
 === RUN   TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/log
 === RUN   TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/both
@@ -1486,6 +1705,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/fatal_undefined_function/display
 === RUN   TestW17PHP8512Programs/amd64/fatal_undefined_function/log
 === RUN   TestW17PHP8512Programs/amd64/fatal_undefined_function/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_after_named/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_after_named/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_after_named/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_non_array/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_non_array/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_non_array/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_string/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_string/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_string/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_default/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_default/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_default/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_not_last/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_not_last/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_not_last/both
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_too_few/display
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_too_few/log
+=== RUN   TestW17PHP8512Programs/amd64/fatal_variadic_too_few/both
 === RUN   TestW17PHP8512Programs/amd64/float_format_echo/display
 === RUN   TestW17PHP8512Programs/amd64/float_format_echo/log
 === RUN   TestW17PHP8512Programs/amd64/float_format_echo/both
@@ -1597,6 +1852,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/func_recursion/display
 === RUN   TestW17PHP8512Programs/amd64/func_recursion/log
 === RUN   TestW17PHP8512Programs/amd64/func_recursion/both
+=== RUN   TestW17PHP8512Programs/amd64/global_basic/display
+=== RUN   TestW17PHP8512Programs/amd64/global_basic/log
+=== RUN   TestW17PHP8512Programs/amd64/global_basic/both
+=== RUN   TestW17PHP8512Programs/amd64/global_recursion_nested/display
+=== RUN   TestW17PHP8512Programs/amd64/global_recursion_nested/log
+=== RUN   TestW17PHP8512Programs/amd64/global_recursion_nested/both
+=== RUN   TestW17PHP8512Programs/amd64/global_reference_semantics/display
+=== RUN   TestW17PHP8512Programs/amd64/global_reference_semantics/log
+=== RUN   TestW17PHP8512Programs/amd64/global_reference_semantics/both
+=== RUN   TestW17PHP8512Programs/amd64/global_top_level/display
+=== RUN   TestW17PHP8512Programs/amd64/global_top_level/log
+=== RUN   TestW17PHP8512Programs/amd64/global_top_level/both
+=== RUN   TestW17PHP8512Programs/amd64/global_undefined_and_shared/display
+=== RUN   TestW17PHP8512Programs/amd64/global_undefined_and_shared/log
+=== RUN   TestW17PHP8512Programs/amd64/global_undefined_and_shared/both
+=== RUN   TestW17PHP8512Programs/amd64/global_unset_and_rebind/display
+=== RUN   TestW17PHP8512Programs/amd64/global_unset_and_rebind/log
+=== RUN   TestW17PHP8512Programs/amd64/global_unset_and_rebind/both
 === RUN   TestW17PHP8512Programs/amd64/heredoc_nowdoc/display
 === RUN   TestW17PHP8512Programs/amd64/heredoc_nowdoc/log
 === RUN   TestW17PHP8512Programs/amd64/heredoc_nowdoc/both
@@ -1735,6 +2008,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/multiline_expression_lines/display
 === RUN   TestW17PHP8512Programs/amd64/multiline_expression_lines/log
 === RUN   TestW17PHP8512Programs/amd64/multiline_expression_lines/both
+=== RUN   TestW17PHP8512Programs/amd64/named_basic/display
+=== RUN   TestW17PHP8512Programs/amd64/named_basic/log
+=== RUN   TestW17PHP8512Programs/amd64/named_basic/both
+=== RUN   TestW17PHP8512Programs/amd64/named_by_ref/display
+=== RUN   TestW17PHP8512Programs/amd64/named_by_ref/log
+=== RUN   TestW17PHP8512Programs/amd64/named_by_ref/both
+=== RUN   TestW17PHP8512Programs/amd64/named_defaults_skipped/display
+=== RUN   TestW17PHP8512Programs/amd64/named_defaults_skipped/log
+=== RUN   TestW17PHP8512Programs/amd64/named_defaults_skipped/both
+=== RUN   TestW17PHP8512Programs/amd64/named_eval_order/display
+=== RUN   TestW17PHP8512Programs/amd64/named_eval_order/log
+=== RUN   TestW17PHP8512Programs/amd64/named_eval_order/both
+=== RUN   TestW17PHP8512Programs/amd64/named_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/amd64/named_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/amd64/named_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/amd64/named_variadic/display
+=== RUN   TestW17PHP8512Programs/amd64/named_variadic/log
+=== RUN   TestW17PHP8512Programs/amd64/named_variadic/both
 === RUN   TestW17PHP8512Programs/amd64/null_coalesce/display
 === RUN   TestW17PHP8512Programs/amd64/null_coalesce/log
 === RUN   TestW17PHP8512Programs/amd64/null_coalesce/both
@@ -1879,6 +2170,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/spaceship_mixed/display
 === RUN   TestW17PHP8512Programs/amd64/spaceship_mixed/log
 === RUN   TestW17PHP8512Programs/amd64/spaceship_mixed/both
+=== RUN   TestW17PHP8512Programs/amd64/static_basic/display
+=== RUN   TestW17PHP8512Programs/amd64/static_basic/log
+=== RUN   TestW17PHP8512Programs/amd64/static_basic/both
+=== RUN   TestW17PHP8512Programs/amd64/static_expr_init/display
+=== RUN   TestW17PHP8512Programs/amd64/static_expr_init/log
+=== RUN   TestW17PHP8512Programs/amd64/static_expr_init/both
+=== RUN   TestW17PHP8512Programs/amd64/static_init_warning/display
+=== RUN   TestW17PHP8512Programs/amd64/static_init_warning/log
+=== RUN   TestW17PHP8512Programs/amd64/static_init_warning/both
+=== RUN   TestW17PHP8512Programs/amd64/static_recursion/display
+=== RUN   TestW17PHP8512Programs/amd64/static_recursion/log
+=== RUN   TestW17PHP8512Programs/amd64/static_recursion/both
+=== RUN   TestW17PHP8512Programs/amd64/static_scopes/display
+=== RUN   TestW17PHP8512Programs/amd64/static_scopes/log
+=== RUN   TestW17PHP8512Programs/amd64/static_scopes/both
+=== RUN   TestW17PHP8512Programs/amd64/static_unset_rebind/display
+=== RUN   TestW17PHP8512Programs/amd64/static_unset_rebind/log
+=== RUN   TestW17PHP8512Programs/amd64/static_unset_rebind/both
 === RUN   TestW17PHP8512Programs/amd64/string_offset_array_of_strings/display
 === RUN   TestW17PHP8512Programs/amd64/string_offset_array_of_strings/log
 === RUN   TestW17PHP8512Programs/amd64/string_offset_array_of_strings/both
@@ -1954,6 +2263,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/unary_ops/display
 === RUN   TestW17PHP8512Programs/amd64/unary_ops/log
 === RUN   TestW17PHP8512Programs/amd64/unary_ops/both
+=== RUN   TestW17PHP8512Programs/amd64/unpack_basic/display
+=== RUN   TestW17PHP8512Programs/amd64/unpack_basic/log
+=== RUN   TestW17PHP8512Programs/amd64/unpack_basic/both
+=== RUN   TestW17PHP8512Programs/amd64/unpack_by_ref/display
+=== RUN   TestW17PHP8512Programs/amd64/unpack_by_ref/log
+=== RUN   TestW17PHP8512Programs/amd64/unpack_by_ref/both
+=== RUN   TestW17PHP8512Programs/amd64/unpack_eval_order/display
+=== RUN   TestW17PHP8512Programs/amd64/unpack_eval_order/log
+=== RUN   TestW17PHP8512Programs/amd64/unpack_eval_order/both
+=== RUN   TestW17PHP8512Programs/amd64/unpack_string_keys/display
+=== RUN   TestW17PHP8512Programs/amd64/unpack_string_keys/log
+=== RUN   TestW17PHP8512Programs/amd64/unpack_string_keys/both
+=== RUN   TestW17PHP8512Programs/amd64/variadic_basic/display
+=== RUN   TestW17PHP8512Programs/amd64/variadic_basic/log
+=== RUN   TestW17PHP8512Programs/amd64/variadic_basic/both
+=== RUN   TestW17PHP8512Programs/amd64/variadic_by_ref/display
+=== RUN   TestW17PHP8512Programs/amd64/variadic_by_ref/log
+=== RUN   TestW17PHP8512Programs/amd64/variadic_by_ref/both
+=== RUN   TestW17PHP8512Programs/amd64/variadic_recursion/display
+=== RUN   TestW17PHP8512Programs/amd64/variadic_recursion/log
+=== RUN   TestW17PHP8512Programs/amd64/variadic_recursion/both
 === RUN   TestW17PHP8512Programs/amd64/warn_after_inline_html/display
 === RUN   TestW17PHP8512Programs/amd64/warn_after_inline_html/log
 === RUN   TestW17PHP8512Programs/amd64/warn_after_inline_html/both
@@ -1979,7 +2309,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/amd64/warn_undefined_variable/log
 === RUN   TestW17PHP8512Programs/amd64/warn_undefined_variable/both
 === NAME  TestW17PHP8512Programs/amd64
-    w17_differential_test.go:165: profile amd64: 987 pass, 0 unsupported, 0 fail of 987
+    w17_differential_test.go:165: profile amd64: 1152 pass, 0 unsupported, 0 fail of 1152
 === RUN   TestW17PHP8512Programs/32
 === RUN   TestW17PHP8512Programs/32/arith_float_ops/display
 === RUN   TestW17PHP8512Programs/32/arith_float_ops/log
@@ -2071,6 +2401,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/bitwise_ops/display
 === RUN   TestW17PHP8512Programs/32/bitwise_ops/log
 === RUN   TestW17PHP8512Programs/32/bitwise_ops/both
+=== RUN   TestW17PHP8512Programs/32/call_callee_declared_later/display
+=== RUN   TestW17PHP8512Programs/32/call_callee_declared_later/log
+=== RUN   TestW17PHP8512Programs/32/call_callee_declared_later/both
+=== RUN   TestW17PHP8512Programs/32/call_callee_known_lines/display
+=== RUN   TestW17PHP8512Programs/32/call_callee_known_lines/log
+=== RUN   TestW17PHP8512Programs/32/call_callee_known_lines/both
 === RUN   TestW17PHP8512Programs/32/cast_float_to_int_range/display
 === RUN   TestW17PHP8512Programs/32/cast_float_to_int_range/log
 === RUN   TestW17PHP8512Programs/32/cast_float_to_int_range/both
@@ -2392,6 +2728,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/fatal_modulo_by_zero/display
 === RUN   TestW17PHP8512Programs/32/fatal_modulo_by_zero/log
 === RUN   TestW17PHP8512Programs/32/fatal_modulo_by_zero/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_backtrace_args/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_backtrace_args/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_backtrace_args/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_default_error_trace/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_default_error_trace/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_default_error_trace/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_required/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_required/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_missing_required/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_overwrite/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_overwrite/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_overwrite/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_positional_after/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_positional_after/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_positional_after/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_too_few/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_too_few/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_too_few/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_twice/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_twice/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_twice/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_undefined_function/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_undefined_function/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_undefined_function/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/both
+=== RUN   TestW17PHP8512Programs/32/fatal_named_variadic_twice/display
+=== RUN   TestW17PHP8512Programs/32/fatal_named_variadic_twice/log
+=== RUN   TestW17PHP8512Programs/32/fatal_named_variadic_twice/both
 === RUN   TestW17PHP8512Programs/32/fatal_non_numeric_string_add/display
 === RUN   TestW17PHP8512Programs/32/fatal_non_numeric_string_add/log
 === RUN   TestW17PHP8512Programs/32/fatal_non_numeric_string_add/both
@@ -2449,6 +2824,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/fatal_silence_undefined_function/display
 === RUN   TestW17PHP8512Programs/32/fatal_silence_undefined_function/log
 === RUN   TestW17PHP8512Programs/32/fatal_silence_undefined_function/both
+=== RUN   TestW17PHP8512Programs/32/fatal_static_duplicate/display
+=== RUN   TestW17PHP8512Programs/32/fatal_static_duplicate/log
+=== RUN   TestW17PHP8512Programs/32/fatal_static_duplicate/both
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_error/display
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_error/log
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_error/both
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_undefined_const/display
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_undefined_const/log
+=== RUN   TestW17PHP8512Programs/32/fatal_static_init_undefined_const/both
 === RUN   TestW17PHP8512Programs/32/fatal_string_offset_array_key/display
 === RUN   TestW17PHP8512Programs/32/fatal_string_offset_array_key/log
 === RUN   TestW17PHP8512Programs/32/fatal_string_offset_array_key/both
@@ -2476,6 +2860,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/fatal_undefined_function/display
 === RUN   TestW17PHP8512Programs/32/fatal_undefined_function/log
 === RUN   TestW17PHP8512Programs/32/fatal_undefined_function/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_after_named/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_after_named/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_after_named/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_non_array/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_non_array/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_non_array/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_overwrite/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_overwrite/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_overwrite/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_string/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_string/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_string/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_unknown_named/display
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_unknown_named/log
+=== RUN   TestW17PHP8512Programs/32/fatal_unpack_unknown_named/both
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_backtrace/display
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_backtrace/log
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_backtrace/both
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_default/display
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_default/log
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_default/both
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_not_last/display
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_not_last/log
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_not_last/both
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_too_few/display
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_too_few/log
+=== RUN   TestW17PHP8512Programs/32/fatal_variadic_too_few/both
 === RUN   TestW17PHP8512Programs/32/float_format_echo/display
 === RUN   TestW17PHP8512Programs/32/float_format_echo/log
 === RUN   TestW17PHP8512Programs/32/float_format_echo/both
@@ -2587,6 +3007,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/func_recursion/display
 === RUN   TestW17PHP8512Programs/32/func_recursion/log
 === RUN   TestW17PHP8512Programs/32/func_recursion/both
+=== RUN   TestW17PHP8512Programs/32/global_basic/display
+=== RUN   TestW17PHP8512Programs/32/global_basic/log
+=== RUN   TestW17PHP8512Programs/32/global_basic/both
+=== RUN   TestW17PHP8512Programs/32/global_recursion_nested/display
+=== RUN   TestW17PHP8512Programs/32/global_recursion_nested/log
+=== RUN   TestW17PHP8512Programs/32/global_recursion_nested/both
+=== RUN   TestW17PHP8512Programs/32/global_reference_semantics/display
+=== RUN   TestW17PHP8512Programs/32/global_reference_semantics/log
+=== RUN   TestW17PHP8512Programs/32/global_reference_semantics/both
+=== RUN   TestW17PHP8512Programs/32/global_top_level/display
+=== RUN   TestW17PHP8512Programs/32/global_top_level/log
+=== RUN   TestW17PHP8512Programs/32/global_top_level/both
+=== RUN   TestW17PHP8512Programs/32/global_undefined_and_shared/display
+=== RUN   TestW17PHP8512Programs/32/global_undefined_and_shared/log
+=== RUN   TestW17PHP8512Programs/32/global_undefined_and_shared/both
+=== RUN   TestW17PHP8512Programs/32/global_unset_and_rebind/display
+=== RUN   TestW17PHP8512Programs/32/global_unset_and_rebind/log
+=== RUN   TestW17PHP8512Programs/32/global_unset_and_rebind/both
 === RUN   TestW17PHP8512Programs/32/heredoc_nowdoc/display
 === RUN   TestW17PHP8512Programs/32/heredoc_nowdoc/log
 === RUN   TestW17PHP8512Programs/32/heredoc_nowdoc/both
@@ -2725,6 +3163,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/multiline_expression_lines/display
 === RUN   TestW17PHP8512Programs/32/multiline_expression_lines/log
 === RUN   TestW17PHP8512Programs/32/multiline_expression_lines/both
+=== RUN   TestW17PHP8512Programs/32/named_basic/display
+=== RUN   TestW17PHP8512Programs/32/named_basic/log
+=== RUN   TestW17PHP8512Programs/32/named_basic/both
+=== RUN   TestW17PHP8512Programs/32/named_by_ref/display
+=== RUN   TestW17PHP8512Programs/32/named_by_ref/log
+=== RUN   TestW17PHP8512Programs/32/named_by_ref/both
+=== RUN   TestW17PHP8512Programs/32/named_defaults_skipped/display
+=== RUN   TestW17PHP8512Programs/32/named_defaults_skipped/log
+=== RUN   TestW17PHP8512Programs/32/named_defaults_skipped/both
+=== RUN   TestW17PHP8512Programs/32/named_eval_order/display
+=== RUN   TestW17PHP8512Programs/32/named_eval_order/log
+=== RUN   TestW17PHP8512Programs/32/named_eval_order/both
+=== RUN   TestW17PHP8512Programs/32/named_undefined_variable/display
+=== RUN   TestW17PHP8512Programs/32/named_undefined_variable/log
+=== RUN   TestW17PHP8512Programs/32/named_undefined_variable/both
+=== RUN   TestW17PHP8512Programs/32/named_variadic/display
+=== RUN   TestW17PHP8512Programs/32/named_variadic/log
+=== RUN   TestW17PHP8512Programs/32/named_variadic/both
 === RUN   TestW17PHP8512Programs/32/null_coalesce/display
 === RUN   TestW17PHP8512Programs/32/null_coalesce/log
 === RUN   TestW17PHP8512Programs/32/null_coalesce/both
@@ -2869,6 +3325,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/spaceship_mixed/display
 === RUN   TestW17PHP8512Programs/32/spaceship_mixed/log
 === RUN   TestW17PHP8512Programs/32/spaceship_mixed/both
+=== RUN   TestW17PHP8512Programs/32/static_basic/display
+=== RUN   TestW17PHP8512Programs/32/static_basic/log
+=== RUN   TestW17PHP8512Programs/32/static_basic/both
+=== RUN   TestW17PHP8512Programs/32/static_expr_init/display
+=== RUN   TestW17PHP8512Programs/32/static_expr_init/log
+=== RUN   TestW17PHP8512Programs/32/static_expr_init/both
+=== RUN   TestW17PHP8512Programs/32/static_init_warning/display
+=== RUN   TestW17PHP8512Programs/32/static_init_warning/log
+=== RUN   TestW17PHP8512Programs/32/static_init_warning/both
+=== RUN   TestW17PHP8512Programs/32/static_recursion/display
+=== RUN   TestW17PHP8512Programs/32/static_recursion/log
+=== RUN   TestW17PHP8512Programs/32/static_recursion/both
+=== RUN   TestW17PHP8512Programs/32/static_scopes/display
+=== RUN   TestW17PHP8512Programs/32/static_scopes/log
+=== RUN   TestW17PHP8512Programs/32/static_scopes/both
+=== RUN   TestW17PHP8512Programs/32/static_unset_rebind/display
+=== RUN   TestW17PHP8512Programs/32/static_unset_rebind/log
+=== RUN   TestW17PHP8512Programs/32/static_unset_rebind/both
 === RUN   TestW17PHP8512Programs/32/string_offset_array_of_strings/display
 === RUN   TestW17PHP8512Programs/32/string_offset_array_of_strings/log
 === RUN   TestW17PHP8512Programs/32/string_offset_array_of_strings/both
@@ -2944,6 +3418,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/unary_ops/display
 === RUN   TestW17PHP8512Programs/32/unary_ops/log
 === RUN   TestW17PHP8512Programs/32/unary_ops/both
+=== RUN   TestW17PHP8512Programs/32/unpack_basic/display
+=== RUN   TestW17PHP8512Programs/32/unpack_basic/log
+=== RUN   TestW17PHP8512Programs/32/unpack_basic/both
+=== RUN   TestW17PHP8512Programs/32/unpack_by_ref/display
+=== RUN   TestW17PHP8512Programs/32/unpack_by_ref/log
+=== RUN   TestW17PHP8512Programs/32/unpack_by_ref/both
+=== RUN   TestW17PHP8512Programs/32/unpack_eval_order/display
+=== RUN   TestW17PHP8512Programs/32/unpack_eval_order/log
+=== RUN   TestW17PHP8512Programs/32/unpack_eval_order/both
+=== RUN   TestW17PHP8512Programs/32/unpack_string_keys/display
+=== RUN   TestW17PHP8512Programs/32/unpack_string_keys/log
+=== RUN   TestW17PHP8512Programs/32/unpack_string_keys/both
+=== RUN   TestW17PHP8512Programs/32/variadic_basic/display
+=== RUN   TestW17PHP8512Programs/32/variadic_basic/log
+=== RUN   TestW17PHP8512Programs/32/variadic_basic/both
+=== RUN   TestW17PHP8512Programs/32/variadic_by_ref/display
+=== RUN   TestW17PHP8512Programs/32/variadic_by_ref/log
+=== RUN   TestW17PHP8512Programs/32/variadic_by_ref/both
+=== RUN   TestW17PHP8512Programs/32/variadic_recursion/display
+=== RUN   TestW17PHP8512Programs/32/variadic_recursion/log
+=== RUN   TestW17PHP8512Programs/32/variadic_recursion/both
 === RUN   TestW17PHP8512Programs/32/warn_after_inline_html/display
 === RUN   TestW17PHP8512Programs/32/warn_after_inline_html/log
 === RUN   TestW17PHP8512Programs/32/warn_after_inline_html/both
@@ -2969,7 +3464,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17PHP8512Programs/32/warn_undefined_variable/log
 === RUN   TestW17PHP8512Programs/32/warn_undefined_variable/both
 === NAME  TestW17PHP8512Programs/32
-    w17_differential_test.go:165: profile 32: 987 pass, 0 unsupported, 0 fail of 987
+    w17_differential_test.go:165: profile 32: 1152 pass, 0 unsupported, 0 fail of 1152
 --- PASS: TestW17PHP8512Programs (0.50s)
     --- PASS: TestW17PHP8512Programs/64 (0.17s)
         --- PASS: TestW17PHP8512Programs/64/arith_float_ops/display (0.00s)
@@ -3062,6 +3557,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/bitwise_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/bitwise_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/bitwise_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_declared_later/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_declared_later/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_declared_later/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_known_lines/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_known_lines/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/call_callee_known_lines/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/cast_float_to_int_range/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/cast_float_to_int_range/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/cast_float_to_int_range/both (0.00s)
@@ -3383,6 +3884,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/fatal_modulo_by_zero/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_modulo_by_zero/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_modulo_by_zero/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_backtrace_args/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_backtrace_args/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_backtrace_args/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_default_error_trace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_default_error_trace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_default_error_trace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_after_default_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_required/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_required/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_missing_required/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_too_few/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_twice/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_undefined_function/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_undefined_function/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_element_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_unknown_variable_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_variadic_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_variadic_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_named_variadic_twice/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_non_numeric_string_add/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_non_numeric_string_add/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_non_numeric_string_add/both (0.00s)
@@ -3440,6 +3980,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/fatal_silence_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_silence_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_silence_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_duplicate/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_duplicate/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_duplicate/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_error/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_error/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_error/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_undefined_const/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_undefined_const/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_static_init_undefined_const/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_string_offset_array_key/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_string_offset_array_key/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_string_offset_array_key/both (0.00s)
@@ -3467,6 +4016,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/fatal_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/fatal_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_after_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_after_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_after_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_non_array/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_non_array/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_non_array/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_positional_after_named_key/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_string/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_string/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_string/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_unknown_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_unknown_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_unpack_unknown_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_backtrace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_backtrace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_backtrace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_default/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_default/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_default/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_not_last/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_not_last/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_not_last/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/fatal_variadic_too_few/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/float_format_echo/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/float_format_echo/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/float_format_echo/both (0.00s)
@@ -3578,6 +4163,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/func_recursion/display (0.01s)
         --- PASS: TestW17PHP8512Programs/64/func_recursion/log (0.01s)
         --- PASS: TestW17PHP8512Programs/64/func_recursion/both (0.01s)
+        --- PASS: TestW17PHP8512Programs/64/global_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_recursion_nested/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_recursion_nested/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_recursion_nested/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_reference_semantics/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_reference_semantics/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_reference_semantics/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_top_level/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_top_level/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_top_level/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_undefined_and_shared/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_undefined_and_shared/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_undefined_and_shared/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_unset_and_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_unset_and_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/global_unset_and_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/heredoc_nowdoc/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/heredoc_nowdoc/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/heredoc_nowdoc/both (0.00s)
@@ -3716,6 +4319,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/multiline_expression_lines/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/multiline_expression_lines/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/multiline_expression_lines/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_defaults_skipped/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_defaults_skipped/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_defaults_skipped/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_variadic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_variadic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/named_variadic/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/null_coalesce/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/null_coalesce/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/null_coalesce/both (0.00s)
@@ -3860,6 +4481,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/spaceship_mixed/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/spaceship_mixed/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/spaceship_mixed/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_expr_init/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_expr_init/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_expr_init/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_init_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_init_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_init_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_recursion/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_scopes/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_scopes/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_scopes/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_unset_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_unset_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/static_unset_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/string_offset_array_of_strings/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/string_offset_array_of_strings/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/string_offset_array_of_strings/both (0.00s)
@@ -3935,6 +4574,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/64/unary_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/unary_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/unary_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_string_keys/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_string_keys/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/unpack_string_keys/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/64/variadic_recursion/both (0.00s)
         --- PASS: TestW17PHP8512Programs/64/warn_after_inline_html/display (0.00s)
         --- PASS: TestW17PHP8512Programs/64/warn_after_inline_html/log (0.00s)
         --- PASS: TestW17PHP8512Programs/64/warn_after_inline_html/both (0.00s)
@@ -4050,6 +4710,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/bitwise_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/bitwise_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/bitwise_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_declared_later/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_declared_later/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_declared_later/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_known_lines/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_known_lines/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/call_callee_known_lines/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/cast_float_to_int_range/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/cast_float_to_int_range/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/cast_float_to_int_range/both (0.00s)
@@ -4371,6 +5037,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_modulo_by_zero/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_backtrace_args/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_default_error_trace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_after_default_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_required/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_required/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_missing_required/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_too_few/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_twice/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_undefined_function/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_undefined_function/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_element_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_unknown_variable_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_named_variadic_twice/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_non_numeric_string_add/both (0.00s)
@@ -4428,6 +5133,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_silence_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_duplicate/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_duplicate/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_duplicate/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_error/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_error/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_error/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_static_init_undefined_const/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_string_offset_array_key/both (0.00s)
@@ -4455,6 +5169,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/fatal_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/fatal_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_after_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_after_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_after_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_non_array/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_non_array/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_non_array/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_positional_after_named_key/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_string/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_string/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_string/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_unpack_unknown_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_backtrace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_default/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_default/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_default/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_not_last/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_not_last/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_not_last/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/fatal_variadic_too_few/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/float_format_echo/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/float_format_echo/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/float_format_echo/both (0.00s)
@@ -4563,9 +5313,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/func_basic/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/func_basic/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/func_basic/both (0.00s)
-        --- PASS: TestW17PHP8512Programs/amd64/func_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/func_recursion/display (0.01s)
         --- PASS: TestW17PHP8512Programs/amd64/func_recursion/log (0.01s)
         --- PASS: TestW17PHP8512Programs/amd64/func_recursion/both (0.01s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_recursion_nested/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_recursion_nested/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_recursion_nested/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_reference_semantics/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_reference_semantics/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_reference_semantics/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_top_level/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_top_level/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_top_level/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_undefined_and_shared/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_undefined_and_shared/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_undefined_and_shared/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_unset_and_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_unset_and_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/global_unset_and_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/heredoc_nowdoc/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/heredoc_nowdoc/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/heredoc_nowdoc/both (0.00s)
@@ -4704,6 +5472,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/multiline_expression_lines/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/multiline_expression_lines/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/multiline_expression_lines/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_defaults_skipped/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_defaults_skipped/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_defaults_skipped/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_variadic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_variadic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/named_variadic/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/null_coalesce/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/null_coalesce/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/null_coalesce/both (0.00s)
@@ -4848,6 +5634,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/spaceship_mixed/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/spaceship_mixed/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/spaceship_mixed/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_expr_init/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_expr_init/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_expr_init/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_init_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_init_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_init_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_recursion/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_scopes/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_scopes/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_scopes/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_unset_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_unset_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/static_unset_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/string_offset_array_of_strings/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/string_offset_array_of_strings/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/string_offset_array_of_strings/both (0.00s)
@@ -4923,6 +5727,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/unary_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/unary_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/unary_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_string_keys/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_string_keys/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/unpack_string_keys/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/amd64/variadic_recursion/both (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_after_inline_html/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_after_inline_html/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_after_inline_html/both (0.00s)
@@ -4947,7 +5772,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/display (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/log (0.00s)
         --- PASS: TestW17PHP8512Programs/amd64/warn_undefined_variable/both (0.00s)
-    --- PASS: TestW17PHP8512Programs/32 (0.18s)
+    --- PASS: TestW17PHP8512Programs/32 (0.17s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/arith_float_ops/both (0.00s)
@@ -5038,6 +5863,12 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/bitwise_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/bitwise_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/bitwise_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_declared_later/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_declared_later/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_declared_later/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_known_lines/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_known_lines/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/call_callee_known_lines/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/cast_float_to_int_range/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/cast_float_to_int_range/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/cast_float_to_int_range/both (0.00s)
@@ -5359,6 +6190,45 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/fatal_modulo_by_zero/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_modulo_by_zero/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_modulo_by_zero/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_backtrace_args/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_backtrace_args/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_backtrace_args/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_default_error_trace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_default_error_trace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_default_error_trace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_after_default_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_required/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_required/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_missing_required/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_too_few/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_twice/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_undefined_function/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_undefined_function/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_element_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_unknown_variable_arg/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_variadic_twice/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_variadic_twice/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_named_variadic_twice/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_non_numeric_string_add/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_non_numeric_string_add/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_non_numeric_string_add/both (0.00s)
@@ -5416,6 +6286,15 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/fatal_silence_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_silence_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_silence_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_duplicate/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_duplicate/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_duplicate/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_error/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_error/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_error/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_undefined_const/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_undefined_const/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_static_init_undefined_const/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_string_offset_array_key/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_string_offset_array_key/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_string_offset_array_key/both (0.00s)
@@ -5443,6 +6322,42 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/fatal_undefined_function/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_undefined_function/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/fatal_undefined_function/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_after_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_after_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_after_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_non_array/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_non_array/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_non_array/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_overwrite/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_overwrite/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_overwrite/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_positional_after_named_key/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_string/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_string/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_string/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_unknown_named/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_unknown_named/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_unpack_unknown_named/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_backtrace/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_backtrace/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_backtrace/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_default/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_default/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_default/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_not_last/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_not_last/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_not_last/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_too_few/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_too_few/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/fatal_variadic_too_few/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/float_format_echo/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/float_format_echo/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/float_format_echo/both (0.00s)
@@ -5554,6 +6469,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/func_recursion/display (0.01s)
         --- PASS: TestW17PHP8512Programs/32/func_recursion/log (0.01s)
         --- PASS: TestW17PHP8512Programs/32/func_recursion/both (0.01s)
+        --- PASS: TestW17PHP8512Programs/32/global_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_recursion_nested/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_recursion_nested/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_recursion_nested/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_reference_semantics/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_reference_semantics/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_reference_semantics/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_top_level/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_top_level/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_top_level/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_undefined_and_shared/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_undefined_and_shared/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_undefined_and_shared/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_unset_and_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_unset_and_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/global_unset_and_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/heredoc_nowdoc/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/heredoc_nowdoc/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/heredoc_nowdoc/both (0.00s)
@@ -5692,6 +6625,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/multiline_expression_lines/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/multiline_expression_lines/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/multiline_expression_lines/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_defaults_skipped/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_defaults_skipped/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_defaults_skipped/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_undefined_variable/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_undefined_variable/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_undefined_variable/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_variadic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_variadic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/named_variadic/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/null_coalesce/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/null_coalesce/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/null_coalesce/both (0.00s)
@@ -5836,6 +6787,24 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/spaceship_mixed/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/spaceship_mixed/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/spaceship_mixed/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_expr_init/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_expr_init/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_expr_init/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_init_warning/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_init_warning/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_init_warning/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_recursion/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_scopes/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_scopes/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_scopes/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_unset_rebind/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_unset_rebind/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/static_unset_rebind/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/string_offset_array_of_strings/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/string_offset_array_of_strings/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/string_offset_array_of_strings/both (0.00s)
@@ -5911,6 +6880,27 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
         --- PASS: TestW17PHP8512Programs/32/unary_ops/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/unary_ops/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/unary_ops/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_eval_order/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_eval_order/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_eval_order/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_string_keys/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_string_keys/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/unpack_string_keys/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_basic/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_basic/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_basic/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_by_ref/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_by_ref/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_by_ref/both (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_recursion/display (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_recursion/log (0.00s)
+        --- PASS: TestW17PHP8512Programs/32/variadic_recursion/both (0.00s)
         --- PASS: TestW17PHP8512Programs/32/warn_after_inline_html/display (0.00s)
         --- PASS: TestW17PHP8512Programs/32/warn_after_inline_html/log (0.00s)
         --- PASS: TestW17PHP8512Programs/32/warn_after_inline_html/both (0.00s)
@@ -6551,7 +7541,7 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17Stage2Probes/def_escape_elsewhere/display32
 === RUN   TestW17Stage2Probes/def_int_operators/display32
 === RUN   TestW17Stage2Probes/def_interned_strings/display32
---- PASS: TestW17Stage2Probes (0.06s)
+--- PASS: TestW17Stage2Probes (0.05s)
     --- PASS: TestW17Stage2Probes/assign_dim_result_chain/display64 (0.00s)
     --- PASS: TestW17Stage2Probes/assign_dim_result_chain/log64 (0.00s)
     --- PASS: TestW17Stage2Probes/cas_append/display64 (0.00s)
@@ -7072,6 +8062,9 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
 === RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_default_by_ref
 === RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_list
 === RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_list_keyed
+=== RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_body
+=== RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_default_variadic
+=== RUN   TestW17Stage3RunsFormerlyUnsupportedProbes/u_named_argument
 --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes (0.00s)
     --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/fe_by_ref_literal (0.00s)
     --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_by_ref (0.00s)
@@ -7079,6 +8072,46 @@ $ go test -count=1 -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Sta
     --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_default_by_ref (0.00s)
     --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_list (0.00s)
     --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_list_keyed (0.00s)
+    --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_fe_body (0.00s)
+    --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_default_variadic (0.00s)
+    --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes/u_named_argument (0.00s)
+=== RUN   TestW17Stage6StateBelongsToTheRun
+--- PASS: TestW17Stage6StateBelongsToTheRun (0.01s)
+=== RUN   TestW17Stage6FailedInitializerIsNotRemembered
+--- PASS: TestW17Stage6FailedInitializerIsNotRemembered (0.00s)
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/superglobal_read
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/superglobal_global
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/dynamic_global
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/func_get_args
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/unpacking_an_object
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/unpacking_a_generator
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/typed_variadic
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/static_closure
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/static_property
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/static_with_new
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/named_method_call
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/named_new
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/by-reference_value_by_name
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/by-reference_call_result_by_name
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/array_spread
+=== RUN   TestW17Stage6UnsupportedIsRefusedAtCompile/first-class_callable
+--- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/superglobal_read (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/superglobal_global (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/dynamic_global (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/func_get_args (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/unpacking_an_object (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/unpacking_a_generator (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/typed_variadic (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/static_closure (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/static_property (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/static_with_new (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/named_method_call (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/named_new (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/by-reference_value_by_name (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/by-reference_call_result_by_name (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/array_spread (0.00s)
+    --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile/first-class_callable (0.00s)
 PASS
-ok  	github.com/HazelnutParadise/phego	0.572s
-exit 0
+ok  	github.com/HazelnutParadise/phego	1.128s

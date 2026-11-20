@@ -112,12 +112,9 @@ func TestFormat15IsGatedByTheDeclaredMinor(t *testing.T) {
 }
 
 func TestFormat15Opcodes(t *testing.T) {
-	// Five opcodes follow format 1.3's MakeRef; 49 is the first unknown one.
+	// Five opcodes follow format 1.3's MakeRef; format 1.6 continues at 49.
 	if OpFetchConst != 44 || OpDeclareConst != 45 || OpBeginSilence != 46 || OpEndSilence != 47 || OpMatchError != 48 {
 		t.Fatalf("format 1.5 opcodes are %d %d %d %d %d, want 44..48", OpFetchConst, OpDeclareConst, OpBeginSilence, OpEndSilence, OpMatchError)
-	}
-	if _, ok := Opcode(49).Safety(); ok {
-		t.Fatal("opcode 49 is known")
 	}
 	for _, op := range []Opcode{OpFetchConst, OpDeclareConst, OpMatchError} {
 		if s, ok := op.Safety(); !ok || !s.MayThrow || s.Capabilities != 0 {
@@ -129,7 +126,7 @@ func TestFormat15Opcodes(t *testing.T) {
 			t.Fatalf("Safety(%d) = %+v, %v", op, s, ok)
 		}
 	}
-	if FormatMinor != 5 {
-		t.Fatalf("FormatMinor = %d, want 5", FormatMinor)
+	if FormatMinor < 5 {
+		t.Fatalf("FormatMinor = %d, want at least 5", FormatMinor)
 	}
 }

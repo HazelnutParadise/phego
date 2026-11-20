@@ -24,8 +24,8 @@ func validateIdentity(id Identity) error {
 
 // verifyImage checks image as format version 1.minor. Minor 0 files may not
 // use any format 1.1 opcode, Aux value or binary operator, files below minor
-// 2 may not use any format 1.2 opcode or Aux value, and so on for 1.3 and
-// 1.4 (format13, format14).
+// 2 may not use any format 1.2 opcode or Aux value, and so on up to 1.6
+// (format13 to format16).
 func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (CapabilitySet, error) {
 	if err := b.poll(); err != nil {
 		return 0, err
@@ -151,6 +151,9 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 		if err := verifyLocalNames(b, image, f, cloneCost); err != nil {
 			return 0, functionError(err, fi, -1)
 		}
+		if err := verifyParameters(b, image, f, cloneCost); err != nil {
+			return 0, functionError(err, fi, -1)
+		}
 		for _, k := range f.Registers {
 			if err := b.chargeWork(1); err != nil {
 				return 0, err
@@ -223,14 +226,100 @@ func verifyLocalNames(b *budget, image Image, f *Function, cloneCost bool) error
 	return nil
 }
 
+// verifyParameters checks a function's parameter table (format 1.6): it is
+// empty, or has one entry per parameter register and, for a variadic
+// function, one more that alone carries ParamVariadic. The count is checked
+// first, so the loop is bounded by the registers before any entry is read.
+func verifyParameters(b *budget, image Image, f *Function, cloneCost bool) error {
+	n := uint64(len(f.Parameters))
+	if n == 0 {
+		return nil
+	}
+	if n != uint64(f.Params) && n != uint64(f.Params)+1 {
+		return invalid(fmt.Sprintf("parameter table has %d entries; it must have none, the function's Params (%d), or one more for a variadic parameter", n, f.Params))
+	}
+	if cloneCost {
+		if err := b.reserveMul(n, 8); err != nil {
+			return err
+		}
+	}
+	if err := b.chargeWork(n); err != nil {
+		return err
+	}
+	for i, p := range f.Parameters {
+		if uint64(p.Name) >= uint64(len(image.Constants)) || image.Constants[p.Name].Kind != String {
+			return invalid(fmt.Sprintf("name of parameter %d is not a string constant", i))
+		}
+		if p.Flags&^paramFlagsKnown != 0 {
+			return invalid(fmt.Sprintf("parameter %d has unknown flags", i))
+		}
+		if variadic := p.Flags&ParamVariadic != 0; variadic != (uint64(i) == uint64(f.Params)) {
+			return invalid(fmt.Sprintf("parameter %d: ParamVariadic marks exactly the entry after the %d parameter registers", i, f.Params))
+		}
+	}
+	return nil
+}
+
+// variadic reports whether the function's parameter table ends with a
+// variadic parameter.
+func (f *Function) variadic() bool {
+	return uint64(len(f.Parameters)) == uint64(f.Params)+1
+}
+
+// The kinds of the argument stack entries that are not arguments (format
+// 1.6): the mark OpInitCall leaves for the call it starts, and the unknown
+// number of arguments an OpSendUnpack sent to that call.
+const (
+	shapeMark   RegisterKind = Location + 1
+	shapeUnpack RegisterKind = Location + 2
+)
+
+// argShape is one entry of the argument stack. ref says the argument may be
+// a reference: a Location sent by reference, or a Value register that may
+// hold one. fn is the callee of a shapeMark.
 type argShape struct {
 	kind  RegisterKind
 	named bool
+	ref   bool
+	fn    uint32
 	name  string
 }
+
+// flowState is what is known where an instruction starts: the registers
+// defined on every path (defs), those that may hold a reference on some
+// path (refs, nil when the function is not tracked) and the argument stack.
 type flowState struct {
 	defs  []uint64
+	refs  []uint64
 	stack []argShape
+}
+
+// tracksReferences reports whether a format 1.6 function can hold a
+// reference in a Value register: it creates one (OpMakeRef, a by-reference
+// iterator or its element), or a parameter register can arrive holding one.
+// Only such functions pay for the second bit set of the flow analysis.
+func tracksReferences(f *Function) bool {
+	if f.Params > 0 {
+		if len(f.Parameters) == 0 {
+			return true
+		}
+		for _, p := range f.Parameters[:f.Params] {
+			if p.Flags&ParamByRef != 0 {
+				return true
+			}
+		}
+	}
+	for _, in := range f.Code {
+		switch in.Op {
+		case OpMakeRef:
+			return true
+		case OpIterInit, OpIterNext:
+			if IterFlags(in.Aux)&IterByRef != 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Function) (CapabilitySet, error) {
@@ -270,7 +359,7 @@ func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Funct
 	if err := verifyElementLocations(b, f); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}
-	if err := verifyFlow(b, image, f, uint32(index)); err != nil {
+	if err := verifyFlow(b, image, minor, f, uint32(index)); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}
 	return caps, nil
@@ -340,9 +429,24 @@ func format15(in Instruction) bool {
 	return false
 }
 
+// format16 reports whether a known instruction needs format 1.6: a 1.6
+// opcode, or a Push that reads a variable itself.
+func format16(in Instruction) bool {
+	switch in.Op {
+	case OpBindGlobal, OpStaticInit, OpBindStatic, OpRecvVariadic, OpInitCall, OpSendUnpack, OpCallPending:
+		return true
+	case OpPush:
+		return in.Aux != 0
+	}
+	return false
+}
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 6 && format16(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.6, but the file declares format 1.%d", minor))
 	}
 	if minor < 5 && format15(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.5, but the file declares format 1.%d", minor))
@@ -359,6 +463,10 @@ func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) e
 	if minor == 0 && format11(in) {
 		return invalid("instruction needs bytecode format 1.1, but the file declares format 1.0")
 	}
+	// Checked after the format: only a format 1.6 file has a parameter table.
+	if in.Op == OpRecvVariadic && !f.variadic() {
+		return invalid("recv-variadic in a function whose parameter table does not end with a variadic parameter")
+	}
 	return nil
 }
 
@@ -369,7 +477,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
-		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst:
+		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush:
 	default:
 		if in.Aux != 0 {
 			return invalid("unused aux field")
@@ -415,6 +523,9 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	case OpPush:
 		if uint64(in.A) >= uint64(len(f.Registers)) || in.C != 0 {
 			return invalid("invalid push operands")
+		}
+		if in.Aux > uint16(PushLoad) || (in.Aux == uint16(PushLoad) && f.Registers[in.A] != Location) {
+			return invalid("invalid push operands: Aux is 0 or PushLoad, which needs a Location in A")
 		}
 		if in.B != 0 && (uint64(in.B-1) >= uint64(len(image.Constants)) || image.Constants[in.B-1].Kind != String) {
 			return invalid("invalid named argument")
@@ -613,6 +724,34 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if !reg(in.A, Value) || !zero {
 			return invalid("invalid value operation operands")
 		}
+	case OpBindGlobal:
+		if !reg(in.A, Location) || in.C != 0 || uint64(in.B) >= uint64(len(image.Constants)) || image.Constants[in.B].Kind != String {
+			return invalid("invalid bind-global operands: A must be a Location, B a string constant, C zero")
+		}
+	case OpStaticInit:
+		if !reg(in.A, Location) || uint64(in.B) >= uint64(len(f.Code)) || in.C != 0 {
+			return invalid("invalid static-init operands: A must be a Location, B an instruction index, C zero")
+		}
+	case OpBindStatic:
+		if !reg(in.A, Location) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid bind-static operands: A must be a Location, B a Value, C zero")
+		}
+	case OpRecvVariadic:
+		if !reg(in.A, Value) || !zero {
+			return invalid("invalid recv-variadic operands: A must be a Value, B and C zero")
+		}
+	case OpInitCall:
+		if in.A != 0 || in.C != 0 || uint64(in.B) >= uint64(len(image.Functions)) {
+			return invalid("invalid init-call operands: B must be a function index, A and C zero")
+		}
+	case OpSendUnpack:
+		if uint64(in.A) >= uint64(len(f.Registers)) || !zero {
+			return invalid("invalid send-unpack operands: A must be a register, B and C zero")
+		}
+	case OpCallPending:
+		if uint64(in.A) >= uint64(len(f.Registers)) || !zero {
+			return invalid("invalid call-pending operands: A must be a register, B and C zero")
+		}
 	default:
 		return invalid("unknown opcode")
 	}
@@ -628,7 +767,7 @@ func successorCount(in Instruction, pc, n uint32) int {
 	switch in.Op {
 	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit, OpMatchError:
 		return 0
-	case OpBranch, OpIterInit, OpIterNext, OpParamDefault:
+	case OpBranch, OpIterInit, OpIterNext, OpParamDefault, OpStaticInit:
 		return 2
 	default:
 		return 1
@@ -652,7 +791,7 @@ func successor(in Instruction, pc, n uint32, which int) edge {
 			return edge{pc: in.C}
 		}
 		return edge{pc: pc + 1}
-	case OpParamDefault:
+	case OpParamDefault, OpStaticInit:
 		if which == 1 {
 			return edge{pc: in.B}
 		}
@@ -904,17 +1043,25 @@ func (x *handlerIndex) innermostBody(pc int) (HandlerKind, bool) {
 	return x.f.Handlers[x.body[pc]].Kind, true
 }
 
-func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
+func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) error {
 	n, nr := len(f.Code), len(f.Registers)
 	words := (nr + 63) / 64
-	if err := b.reserve(uint64(n)*17 + uint64(words)*16 + uint64(f.MaxStack)*24 + 256); err != nil {
+	// Format 1.6 keeps references out of the by-value parameters of a
+	// direct call; only a function that can hold one tracks them. A call's
+	// result is never a reference: Return yields the value of one.
+	track := minor >= 6 && tracksReferences(f)
+	stateWords := words
+	if track {
+		stateWords = 2 * words
+	}
+	if err := b.reserve(uint64(n)*17 + uint64(stateWords)*16 + uint64(f.MaxStack)*32 + 256); err != nil {
 		return err
 	}
 	states := make([]*flowState, n)
 	queue := make([]int, n)
 	inQ := make([]bool, n)
 	qHead, qTail, qCount := 0, 0, 0
-	var scratchDefs []uint64
+	var scratchDefs, scratchRefs []uint64
 	var scratchStack []argShape
 	enqueue := func(pc int) {
 		if !inQ[pc] {
@@ -924,20 +1071,23 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			inQ[pc] = true
 		}
 	}
-	merge := func(pc int, defs []uint64, stack []argShape) (bool, error) {
+	merge := func(pc int, defs, refs []uint64, stack []argShape) (bool, error) {
 		if pc < 0 || pc >= n {
 			return false, invalid("control flow falls off function")
 		}
-		if err := b.chargeWork(uint64(words) + uint64(len(stack))); err != nil {
+		if err := b.chargeWork(uint64(stateWords) + uint64(len(stack))); err != nil {
 			return false, err
 		}
 		old := states[pc]
 		if old == nil {
-			if err := b.reserve(uint64(words)*8 + uint64(len(stack))*32 + 64); err != nil {
+			if err := b.reserve(uint64(stateWords)*8 + uint64(len(stack))*32 + 64); err != nil {
 				return false, err
 			}
 			old = &flowState{defs: make([]uint64, words), stack: append([]argShape(nil), stack...)}
 			copy(old.defs, defs)
+			if track {
+				old.refs = append([]uint64(nil), refs...)
+			}
 			states[pc] = old
 			enqueue(pc)
 			return true, nil
@@ -945,8 +1095,9 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		if len(old.stack) != len(stack) {
 			return false, invalid("argument stack shape differs at control-flow join")
 		}
+		changed := false
 		for i := range stack {
-			if old.stack[i].kind != stack[i].kind || old.stack[i].named != stack[i].named || len(old.stack[i].name) != len(stack[i].name) {
+			if old.stack[i].kind != stack[i].kind || old.stack[i].named != stack[i].named || old.stack[i].fn != stack[i].fn || len(old.stack[i].name) != len(stack[i].name) {
 				return false, invalid("argument stack shape differs at control-flow join")
 			}
 			for off := 0; off < len(stack[i].name); {
@@ -959,12 +1110,22 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 				}
 				off = end
 			}
+			if stack[i].ref && !old.stack[i].ref {
+				old.stack[i].ref = true
+				changed = true
+			}
 		}
-		changed := false
 		for i := range old.defs {
 			next := old.defs[i] & defs[i]
 			if next != old.defs[i] {
 				old.defs[i] = next
+				changed = true
+			}
+		}
+		for i := range old.refs {
+			next := old.refs[i] | refs[i]
+			if next != old.refs[i] {
+				old.refs[i] = next
 				changed = true
 			}
 		}
@@ -974,11 +1135,23 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		return changed, nil
 	}
 	seed := make([]uint64, words)
+	var seedRefs []uint64
+	if track {
+		seedRefs = make([]uint64, words)
+	}
 	for i := uint32(0); i < f.Params; i++ {
 		seed[i/64] |= uint64(1) << (i % 64)
+		// A parameter register may arrive holding a reference when the
+		// parameter is declared by reference, or nothing is declared.
+		if track && (len(f.Parameters) == 0 || f.Parameters[i].Flags&ParamByRef != 0) {
+			seedRefs[i/64] |= uint64(1) << (i % 64)
+		}
 	}
-	if _, err := merge(0, seed, nil); err != nil {
+	if _, err := merge(0, seed, seedRefs, nil); err != nil {
 		return err
+	}
+	if track {
+		clear(seedRefs)
 	}
 	for _, h := range f.Handlers {
 		if err := b.chargeWork(uint64(words) + 1); err != nil {
@@ -988,7 +1161,7 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		if h.Kind == Catch {
 			seed[h.Register/64] |= uint64(1) << (h.Register % 64)
 		}
-		if _, err := merge(int(h.Target), seed, nil); err != nil {
+		if _, err := merge(int(h.Target), seed, seedRefs, nil); err != nil {
 			return err
 		}
 	}
@@ -1004,8 +1177,12 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		if scratchDefs == nil {
 			scratchDefs = make([]uint64, words)
 			scratchStack = make([]argShape, int(f.MaxStack))
+			if track {
+				scratchRefs = make([]uint64, words)
+			}
 		}
 		copy(scratchDefs, st.defs)
+		copy(scratchRefs, st.refs)
 		depth := copy(scratchStack, st.stack)
 		stack := scratchStack[:depth]
 		in := f.Code[pc]
@@ -1018,13 +1195,49 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		invalidPC := func(detail string) error {
 			return &Error{Kind: ErrInvalid, Offset: -1, Function: int(fi), PC: pc, Detail: detail}
 		}
-		write := func(r uint32) { scratchDefs[r/64] |= uint64(1) << (r % 64) }
-		clear := func(r uint32) { scratchDefs[r/64] &^= uint64(1) << (r % 64) }
+		isRef := func(r uint32) bool { return track && scratchRefs[r/64]&(uint64(1)<<(r%64)) != 0 }
+		setRef := func(r uint32) {
+			if track {
+				scratchRefs[r/64] |= uint64(1) << (r % 64)
+			}
+		}
+		dropRef := func(r uint32) {
+			if track {
+				scratchRefs[r/64] &^= uint64(1) << (r % 64)
+			}
+		}
+		// write defines r with a value that is not a reference.
+		write := func(r uint32) {
+			scratchDefs[r/64] |= uint64(1) << (r % 64)
+			dropRef(r)
+		}
+		clear := func(r uint32) {
+			scratchDefs[r/64] &^= uint64(1) << (r % 64)
+			dropRef(r)
+		}
+		// push adds an entry to the argument stack.
+		push := func(a argShape) error {
+			if len(stack) >= int(f.MaxStack) {
+				return invalidPC("argument stack exceeds frame limit")
+			}
+			stack = stack[:len(stack)+1]
+			stack[len(stack)-1] = a
+			return nil
+		}
+		// mark is the index of the innermost started call, or -1.
+		mark := func() int {
+			for i := len(stack) - 1; i >= 0; i-- {
+				if stack[i].kind == shapeMark {
+					return i
+				}
+			}
+			return -1
+		}
 		// fallDef is a register the instruction defines on its fall-through
-		// edge (edge 0) only.
+		// edge (edge 0) only; fallRef says it may then hold a reference.
 		var fallDef uint32
-		hasFallDef := false
-		if err := b.chargeWork(uint64(len(stack)) + uint64(words) + 1); err != nil {
+		hasFallDef, fallRef := false, false
+		if err := b.chargeWork(uint64(len(stack)) + uint64(stateWords) + 1); err != nil {
 			return err
 		}
 		switch in.Op {
@@ -1034,7 +1247,11 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if err := read(in.B); err != nil {
 				return flowError(err, fi, pc)
 			}
+			ref := isRef(in.B)
 			write(in.A)
+			if ref {
+				setRef(in.A)
+			}
 		case OpLoad:
 			if err := read(in.B); err != nil {
 				return flowError(err, fi, pc)
@@ -1063,23 +1280,38 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
 			}
-			if len(stack) >= int(f.MaxStack) {
-				return invalidPC("argument stack exceeds frame limit")
-			}
 			a := argShape{kind: f.Registers[in.A]}
+			switch {
+			case in.Aux == uint16(PushLoad):
+				// The variable's value is sent, not the variable.
+				a.kind = Value
+			case a.kind == Location:
+				a.ref = true
+			case isRef(in.A):
+				// The instruction moves the reference to the stack.
+				a.ref = true
+				dropRef(in.A)
+			}
 			if in.B != 0 {
 				a.named = true
 				a.name = image.Constants[in.B-1].Bytes
 			}
-			stack = stack[:len(stack)+1]
-			stack[len(stack)-1] = a
+			if err := push(a); err != nil {
+				return err
+			}
 		case OpCall:
 			if int(in.C) > len(stack) {
 				return invalidPC("direct call argument stack underflow")
 			}
+			callee := &image.Functions[in.B]
 			for i := len(stack) - int(in.C); i < len(stack); i++ {
 				if stack[i].kind != Value || stack[i].named {
 					return invalidPC("direct call requires positional value arguments")
+				}
+				// A callee that records its parameters receives a reference
+				// only where it declares one (format 1.6).
+				if p := i - (len(stack) - int(in.C)); minor >= 6 && stack[i].ref && p < len(callee.Parameters) && callee.Parameters[p].Flags&ParamByRef == 0 {
+					return invalidPC(fmt.Sprintf("direct call passes a reference to by-value parameter %d", p))
 				}
 			}
 			stack = stack[:len(stack)-int(in.C)]
@@ -1091,6 +1323,17 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if int(in.C) > len(stack) {
 				return invalidPC("dynamic call argument stack underflow")
 			}
+			for i := len(stack) - int(in.C); i < len(stack); i++ {
+				if stack[i].kind != Value && stack[i].kind != Location {
+					return invalidPC("dynamic call takes arguments of a started call")
+				}
+				// A named argument belongs to a started call and may leave
+				// no pending argument behind (a variadic parameter collects
+				// it), so only CallPending takes it (format 1.6).
+				if minor >= 6 && stack[i].named {
+					return invalidPC("dynamic call takes a named argument, which only a started call receives")
+				}
+			}
 			stack = stack[:len(stack)-int(in.C)]
 			write(in.A)
 		case OpHostCall:
@@ -1101,8 +1344,35 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 				if stack[i].kind != Value {
 					return invalidPC("host call arguments must be values")
 				}
+				if minor >= 6 && stack[i].named {
+					return invalidPC("host call takes a named argument, which only a started call receives")
+				}
 			}
 			stack = stack[:len(stack)-int(in.C)]
+			write(in.A)
+		case OpInitCall:
+			if err := push(argShape{kind: shapeMark, fn: in.B}); err != nil {
+				return err
+			}
+		case OpSendUnpack:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if mark() < 0 {
+				return invalidPC("send-unpack outside a started call")
+			}
+			if err := push(argShape{kind: shapeUnpack}); err != nil {
+				return err
+			}
+		case OpCallPending:
+			m := mark()
+			if m < 0 {
+				return invalidPC("call-pending without a started call")
+			}
+			if f.Registers[in.A] != image.Functions[stack[m].fn].ReturnKind {
+				return invalidPC("call-pending destination does not match the callee's return kind")
+			}
+			stack = stack[:m]
 			write(in.A)
 		case OpReturn, OpReturnRef, OpThrow, OpOutput, OpMatchError:
 			if err := read(in.A); err != nil {
@@ -1111,12 +1381,20 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if in.Op != OpOutput && len(stack) != 0 {
 				return invalidPC("terminal instruction leaves pending arguments")
 			}
-		case OpFetchConst, OpBeginSilence:
+		case OpFetchConst, OpBeginSilence, OpRecvVariadic:
 			write(in.A)
-		case OpDeclareConst, OpEndSilence:
+		case OpDeclareConst, OpEndSilence, OpBindGlobal, OpStaticInit:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
 			}
+		case OpBindStatic:
+			if err := read(in.A); err != nil {
+				return flowError(err, fi, pc)
+			}
+			if err := read(in.B); err != nil {
+				return flowError(err, fi, pc)
+			}
+			clear(in.B) // the instruction empties it
 		case OpArrayGet:
 			if err := read(in.B); err != nil {
 				return flowError(err, fi, pc)
@@ -1167,11 +1445,12 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 		case OpIterInit:
 			// The iterator is written on the fall-through edge only; the
 			// jump for a subject that cannot be iterated leaves it cleared.
+			// A by-reference iterator is the loop's reference to the subject.
 			if err := read(in.B); err != nil {
 				return flowError(err, fi, pc)
 			}
 			clear(in.A)
-			fallDef, hasFallDef = in.A, true
+			fallDef, hasFallDef, fallRef = in.A, true, IterFlags(in.Aux)&IterByRef != 0
 		case OpIterNext:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
@@ -1181,8 +1460,9 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 					return flowError(err, fi, pc)
 				}
 			} else {
-				// The element is written only when there is one.
-				fallDef, hasFallDef = in.B, true
+				// The element is written only when there is one; by
+				// reference it is a reference.
+				fallDef, hasFallDef, fallRef = in.B, true, IterFlags(in.Aux)&IterByRef != 0
 			}
 		case OpIterKey:
 			if err := read(in.B); err != nil {
@@ -1212,6 +1492,7 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 				return flowError(err, fi, pc)
 			}
 			write(in.A)
+			setRef(in.A)
 		case OpArrayAppend, OpArrayUnset:
 			if err := read(in.A); err != nil {
 				return flowError(err, fi, pc)
@@ -1254,24 +1535,29 @@ func verifyFlow(b *budget, image Image, f *Function, fi uint32) error {
 			if hasFallDef {
 				// The jump edge is merged before the fall-through
 				// definition is added.
-				if _, err := merge(int(successor(in, uint32(pc), uint32(n), 1).pc), scratchDefs, stack); err != nil {
+				if _, err := merge(int(successor(in, uint32(pc), uint32(n), 1).pc), scratchDefs, scratchRefs, stack); err != nil {
 					return flowError(err, fi, pc)
 				}
 				write(fallDef)
-				if _, err := merge(pc+1, scratchDefs, stack); err != nil {
+				if fallRef {
+					setRef(fallDef)
+				}
+				if _, err := merge(pc+1, scratchDefs, scratchRefs, stack); err != nil {
 					return flowError(err, fi, pc)
 				}
 				continue
 			}
 			for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 				e := successor(in, uint32(pc), uint32(n), ei)
-				d := scratchDefs
 				if e.leave {
 					for i := range scratchDefs {
 						scratchDefs[i] = 0
 					}
+					for i := range scratchRefs {
+						scratchRefs[i] = 0
+					}
 				}
-				if _, err := merge(int(e.pc), d, stack); err != nil {
+				if _, err := merge(int(e.pc), scratchDefs, scratchRefs, stack); err != nil {
 					return flowError(err, fi, pc)
 				}
 			}

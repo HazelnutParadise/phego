@@ -32,6 +32,14 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		// Format 1.5. They move the run's error_reporting; the saved value
 		// replaces the destination register's old value.
 		s.MayAllocate, s.MayCallUser = true, true
+	case OpBindGlobal, OpStaticInit, OpBindStatic, OpRecvVariadic, OpSendUnpack, OpCallPending:
+		// Format 1.6. Binding releases the old value of the variable,
+		// collecting and unpacking arguments build and separate arrays, and
+		// a call with named arguments can throw before it enters the callee.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpInitCall:
+		// Format 1.6. It records the callee of the call being built.
+		s.MayAllocate = true
 	case Opcode(0):
 		return Safety{}, false
 	default:
