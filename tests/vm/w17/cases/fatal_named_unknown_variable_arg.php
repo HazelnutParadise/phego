@@ -1,0 +1,6 @@
+<?php
+function f($a = 1) {
+    echo "called\n";
+}
+f(a: $undefined_ok);
+f(A: $undefined_never_read);
