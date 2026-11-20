@@ -16,13 +16,43 @@ import (
 // FormatVersion is the major format version. FormatMinor is the minor
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
 // 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
-// minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth) and
-// minor 5 (format 1.5, the fifth); a file may not use operations newer than
-// the minor it declares.
+// minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth), minor 5
+// (format 1.5, the fifth) and minor 6 (format 1.6, the sixth); a file may
+// not use operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 5
+	FormatMinor   uint16 = 6
 )
+
+// PushFlags is the Aux of OpPush (format 1.6).
+type PushFlags uint16
+
+// PushLoad makes the operand A a Location whose value is sent, read when
+// the instruction runs, as ZEND_SEND_VAR reads a CV: a named argument is
+// checked against the callee first, and only then does an undefined
+// variable warn. Without it a Location operand is sent by reference.
+const PushLoad PushFlags = 1
+
+// ParameterFlags describes one entry of a function's parameter table.
+type ParameterFlags uint8
+
+const (
+	// ParamByRef marks a parameter that receives a reference.
+	ParamByRef ParameterFlags = 1 << iota
+	// ParamVariadic marks the variadic parameter, which is the entry after
+	// the function's Params and has no parameter register: OpRecvVariadic
+	// collects its arguments.
+	ParamVariadic
+
+	paramFlagsKnown = ParamByRef | ParamVariadic
+)
+
+// Parameter is one entry of a function's parameter table (format 1.6): Name
+// is the index of a String constant holding the name without "$".
+type Parameter struct {
+	Name  uint32
+	Flags ParameterFlags
+}
 
 // The Aux of OpArrayGet. ArrayGetQuiet (format 1.1) is FETCH_DIM_IS: no
 // warning for a missing key or a non-array container. ArrayGetList (format
@@ -184,6 +214,14 @@ const (
 	OpBeginSilence // A dest Value: saves error_reporting and keeps only its fatal levels (@)
 	OpEndSilence   // A Value saved by BeginSilence: restores error_reporting
 	OpMatchError   // A subject Value: throws UnhandledMatchError for it; a terminal instruction
+	// Format 1.6 (W-17 stage 6). Operands are in engineering/decisions/W-16-bytecode.md.
+	OpBindGlobal   // A dest Location, B string constant (the variable name): global $name
+	OpStaticInit   // A dest Location, B static slot, C target taken, after binding A, when the slot is initialized
+	OpBindStatic   // A dest Location, B static slot, C Value: initializes the slot with C unless it is, then binds A
+	OpRecvVariadic // A dest Value: the array of the arguments beyond Params and of the extra named ones
+	OpInitCall     // B function index: starts a call whose arguments may be named or unpacked
+	OpSendUnpack   // A Value, or the Location of a plain variable: unpacks an array into the started call
+	OpCallPending  // A dest: calls the function of the innermost started call with the arguments sent since
 )
 
 // BindFlags is the Aux of OpBind.
@@ -407,6 +445,9 @@ type Position struct{ Source, Start, End, Line uint32 }
 // LocalNames is empty (no names, as in every format 1.0 function) or has
 // exactly Locals entries, each the index of a String constant holding the
 // variable name without "$". Names need not be unique or non-empty.
+// Parameters (format 1.6) is empty (nothing is known about the parameters,
+// as in every function of an older file), or has one entry per parameter
+// register, followed by one more with ParamVariadic for a variadic function.
 type Function struct {
 	Name                     string
 	Params, Locals, MaxStack uint32
@@ -416,6 +457,7 @@ type Function struct {
 	Positions                []Position
 	Handlers                 []Handler
 	LocalNames               []uint32
+	Parameters               []Parameter
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged
@@ -583,6 +625,29 @@ func (f FunctionView) LocalName(index uint32) (name string, ok bool) {
 		return "", false // unreachable for a verified Program
 	}
 	return f.constants[c].Bytes, true
+}
+
+// ParameterCount is the size of the parameter table: zero when the function
+// records nothing about its parameters, else Params, plus one for a variadic
+// parameter.
+func (f FunctionView) ParameterCount() int {
+	if f.function == nil {
+		return 0
+	}
+	return len(f.function.Parameters)
+}
+
+// Parameter is entry index of the parameter table: the name without "$" and
+// the flags. ok is false when index is out of range.
+func (f FunctionView) Parameter(index uint32) (name string, flags ParameterFlags, ok bool) {
+	if f.function == nil || uint64(index) >= uint64(len(f.function.Parameters)) {
+		return "", 0, false
+	}
+	p := f.function.Parameters[index]
+	if uint64(p.Name) >= uint64(len(f.constants)) {
+		return "", 0, false // unreachable for a verified Program
+	}
+	return f.constants[p.Name].Bytes, p.Flags, true
 }
 func (f FunctionView) HandlerCount() int {
 	if f.function == nil {

@@ -356,6 +356,19 @@ func (w *writer) payload(i Image, minor uint16) error {
 				}
 			}
 		}
+		if minor >= 6 {
+			if err := w.u32(uint32(len(f.Parameters))); err != nil {
+				return err
+			}
+			for _, p := range f.Parameters {
+				if err := w.u32(p.Name); err != nil {
+					return err
+				}
+				if err := w.u8(uint8(p.Flags)); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -731,6 +744,32 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 				}
 			}
 		}
+		if minor >= 6 {
+			// Verification checks the count against Params; a function has
+			// at most MaxRegisters parameter registers and one variadic
+			// parameter, which bounds the allocation here.
+			maxParams := b.lim.MaxRegisters
+			if maxParams < ^uint32(0) {
+				maxParams++
+			}
+			np, ee := r.count(parameterWire, maxParams)
+			if ee != nil {
+				return Image{}, ee
+			}
+			if np > 0 {
+				if ee = b.reserveMul(uint64(np), 8); ee != nil {
+					return Image{}, ee
+				}
+				f.Parameters = make([]Parameter, int(np))
+				for j := range f.Parameters {
+					p, ee := r.take(parameterWire)
+					if ee != nil {
+						return Image{}, ee
+					}
+					f.Parameters[j] = Parameter{Name: binary.LittleEndian.Uint32(p), Flags: ParameterFlags(p[4])}
+				}
+			}
+		}
 	}
 	if r.pos != len(data) {
 		return Image{}, r.invalid("trailing payload bytes")
@@ -738,4 +777,8 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 	_ = ctx
 	return i, nil
 }
+
+// parameterWire is the encoded size of one Parameter: Name:u32, Flags:u8.
+const parameterWire = 5
+
 func readRequired(r *reader) (CapabilitySet, error) { v, e := r.u16(); return CapabilitySet(v), e }
