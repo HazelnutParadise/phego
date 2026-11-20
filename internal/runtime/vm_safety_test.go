@@ -306,8 +306,10 @@ func TestVMUnsupportedConstructs(t *testing.T) {
 		},
 		"named argument": func(a *vmAsm) {
 			m := a.fn("{main}", 0, 2)
+			// A named Push with no started call: only a started call
+			// takes it, so nothing may consume it; the run stops there.
 			m.emit(bytecode.OpPush, 0, m.k(1), a.str("x")+1, 0)
-			m.ret(m.callNameNoPush("f", 1))
+			m.exit()
 			f := a.fn("f", 1, 3, "x")
 			f.retNull()
 		},

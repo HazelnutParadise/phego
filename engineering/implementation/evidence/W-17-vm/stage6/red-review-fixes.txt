@@ -1,0 +1,60 @@
+# Stage-6 independent review: output of the reviewer's reproductions on 4245736, before the fixes.
+# Hand-written bytecode tests (go test -overlay, internal/runtime), then PHP 8.5.12 (arm64 image) against Phego for the line-number probes.
+
+    zz_review_test.go:60: BUILD ACCEPTED; End=Internal Err=internal VM error: pending call with 1 arguments below its base at /w/t.php:2 (function g, pc 5) Output="w got MAIN-ARG\n" Diags=[]
+--- PASS: TestZZNamedVariadicEntryConsumedByCallValue (0.00s)
+    zz_review_test.go:91: BUILD ACCEPTED; End=Internal Err=execution callback panicked: runtime error: index out of range [-1] Output="w got MAIN-ARG\n" Diags=[]
+--- PASS: TestZZSendUnpackBelowBase (0.00s)
+    zz_review_test.go:125: BUILD ACCEPTED; End=Completed Err=<nil> Output="W0W1WN" Diags=[]
+--- PASS: TestZZByValueVariadicGetsReferencesPending (0.00s)
+    zz_review_test.go:142: BUILD ACCEPTED; End=Completed Err=<nil> Output="W0W1" Diags=[]
+--- PASS: TestZZByValueVariadicGetsReferencesCallValue (0.00s)
+    zz_review_test.go:160: BUILD ACCEPTED; End=Completed Err=<nil> Output="W0" Diags=[]
+--- PASS: TestZZByValueVariadicGetsMakeRef (0.00s)
+PASS
+ok  	github.com/HazelnutParadise/phego/internal/runtime	0.419s
+
+== line_sameline_known.php
+<?php
+function f($a, $b) { echo "ok\n"; } f(1,
+$u);
+-- PHP 8.5.12
+Warning: Undefined variable $u in /w/cases/line_sameline_known.php on line 3
+-- Phego before the fix
+Warning: Undefined variable $u in /w/cases/line_sameline_known.php on line 2
+
+== line_sameline_known_named.php
+<?php
+function f($a, $b) { echo "ok\n"; } f(a: 1,
+b: $u);
+-- PHP 8.5.12
+Warning: Undefined variable $u in /w/cases/line_sameline_known_named.php on line 3
+-- Phego before the fix
+Warning: Undefined variable $u in /w/cases/line_sameline_known_named.php on line 2
+
+== line_first_is_named_unknown.php
+<?php
+f(
+  b:
+   $u,
+  a: 1
+);
+function f($a, $b) { echo "ok\n"; }
+-- PHP 8.5.12
+Warning: Undefined variable $u in /w/cases/line_first_is_named_unknown.php on line 3
+-- Phego before the fix
+Warning: Undefined variable $u in /w/cases/line_first_is_named_unknown.php on line 4
+
+== line_unknown_first_concat_chain.php
+<?php
+f(
+  'a'
+  . 'b'
+  . 'c',
+  $u
+);
+function f($a, $b) { echo "ok\n"; }
+-- PHP 8.5.12
+Warning: Undefined variable $u in /w/cases/line_unknown_first_concat_chain.php on line 5
+-- Phego before the fix
+Warning: Undefined variable $u in /w/cases/line_unknown_first_concat_chain.php on line 3

@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -172,7 +173,7 @@ func TestStartedCallBelongsToItsFrame(t *testing.T) {
 	cases := map[string]func(m, g *vmFn){
 		"named push without a call": func(m, g *vmFn) {
 			m.emit(bytecode.OpPush, 0, m.k(1), m.a.str("p")+1, 0)
-			m.emit(bytecode.OpCallValue, 0, m.reg(bytecode.Value), m.k("g"), 1)
+			m.exit()
 		},
 		"named push in the callee of a started call": func(m, g *vmFn) {
 			m.emit(bytecode.OpInitCall, 0, 0, 1, 0)
@@ -187,12 +188,13 @@ func TestStartedCallBelongsToItsFrame(t *testing.T) {
 			m.stack = 4
 			g := a.fn("g", 1, 2, "p").parameters("p")
 			g.retNull()
-			// function h() { <named Push with no started call>; g(...) }
+			// function h() { <named Push with no started call>; exit; }
+			// Nothing but CallPending may take a named argument, so the
+			// verifier accepts the Push only where it stays pending.
 			h := a.fn("h", 0, 3)
 			h.stack = 2
 			h.emit(bytecode.OpPush, 0, h.k(1), a.str("p")+1, 0)
-			h.emit(bytecode.OpCallValue, 0, h.reg(bytecode.Value), h.k("g"), 1)
-			h.retNull()
+			h.exit()
 			build(m, g)
 			m.retNull()
 			res := runAsm(t, a)
@@ -281,5 +283,127 @@ func TestUnpackLargeArray(t *testing.T) {
 	out := runAsm(t, a)
 	if out.Err != nil || string(out.Output) != "199999" {
 		t.Fatalf("output %q, err %v", out.Output, out.Err)
+	}
+}
+
+// A by-value variadic parameter holds values even when hand-written
+// bytecode sends it references: positional extras and a collected name
+// through a started call, Locations through a call by name, and a MakeRef
+// register. Writing the parameter's array must not write the caller's
+// variables. Before the fix the three programs printed W0W1WN, W0W1 and W0.
+func TestByValueVariadicReceivesValues(t *testing.T) {
+	// function vw(...$rest) { $rest[0] = "W0"; $rest[1] = "W1"; $rest["n"] = "WN"; }
+	writer := func(a *vmAsm) {
+		v := a.fn("vw", 0, 5, "rest").parameters("...rest")
+		r := v.reg(bytecode.Value)
+		v.emit(bytecode.OpRecvVariadic, 0, r, 0, 0)
+		v.emit(bytecode.OpBind, uint16(bytecode.BindValue), v.loc("rest"), r, 0)
+		v.set("rest", v.k(0), v.k("W0"))
+		v.set("rest", v.k(1), v.k("W1"))
+		v.set("rest", v.k("n"), v.k("WN"))
+		v.retNull()
+	}
+	cases := map[string]struct {
+		send func(m *vmFn)
+		want string
+	}{
+		"started call": {func(m *vmFn) {
+			m.emit(bytecode.OpInitCall, 0, 0, 1, 0)
+			m.emit(bytecode.OpPush, 0, m.loc("x"), 0, 0)
+			m.emit(bytecode.OpPush, 0, m.loc("y"), 0, 0)
+			m.emit(bytecode.OpPush, 0, m.loc("z"), m.a.str("n")+1, 0)
+			m.emit(bytecode.OpCallPending, 0, m.reg(bytecode.Value), 0, 0)
+		}, "xyz"},
+		"call by name": {func(m *vmFn) {
+			m.emit(bytecode.OpPush, 0, m.loc("x"), 0, 0)
+			m.emit(bytecode.OpPush, 0, m.loc("y"), 0, 0)
+			m.emit(bytecode.OpCallValue, 0, m.reg(bytecode.Value), m.k("vw"), 2)
+		}, "xyz"},
+		"reference in a register": {func(m *vmFn) {
+			r := m.reg(bytecode.Value)
+			m.emit(bytecode.OpMakeRef, 0, r, m.loc("x"), 0)
+			m.emit(bytecode.OpInitCall, 0, 0, 1, 0)
+			m.emit(bytecode.OpPush, 0, r, 0, 0)
+			m.emit(bytecode.OpCallPending, 0, m.reg(bytecode.Value), 0, 0)
+		}, "xyz"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			a := newAsm(t, 64)
+			m := a.fn("{main}", 0, 1, "x", "y", "z")
+			m.stack = 8
+			for _, v := range []string{"x", "y", "z"} {
+				m.store(v, m.k(v))
+			}
+			tc.send(m)
+			for _, v := range []string{"x", "y", "z"} {
+				m.echo(m.load(v))
+			}
+			m.retNull()
+			writer(a)
+			res := runAsm(t, a)
+			if res.End != Completed || res.Err != nil || string(res.Output) != tc.want {
+				t.Fatalf("End %v, err %v, output %q; want %q", res.End, res.Err, res.Output, tc.want)
+			}
+		})
+	}
+}
+
+// A by-reference variadic parameter still receives the references.
+func TestByReferenceVariadicReceivesReferences(t *testing.T) {
+	a := newAsm(t, 64)
+	m := a.fn("{main}", 0, 1, "x", "y")
+	m.stack = 8
+	m.store("x", m.k("x"))
+	m.store("y", m.k("y"))
+	m.emit(bytecode.OpInitCall, 0, 0, 1, 0)
+	m.emit(bytecode.OpPush, 0, m.loc("x"), 0, 0)
+	m.emit(bytecode.OpPush, 0, m.loc("y"), a.str("n")+1, 0)
+	m.emit(bytecode.OpCallPending, 0, m.reg(bytecode.Value), 0, 0)
+	m.echo(m.load("x"))
+	m.echo(m.load("y"))
+	m.retNull()
+	v := a.fn("vw", 0, 5, "rest").parameters("...&rest")
+	r := v.reg(bytecode.Value)
+	v.emit(bytecode.OpRecvVariadic, 0, r, 0, 0)
+	v.emit(bytecode.OpBind, uint16(bytecode.BindValue), v.loc("rest"), r, 0)
+	v.set("rest", v.k(0), v.k("W0"))
+	v.set("rest", v.k("n"), v.k("WN"))
+	v.retNull()
+	if res := runAsm(t, a); res.Err != nil || string(res.Output) != "W0WN" {
+		t.Fatalf("output %q, err %v; want \"W0WN\"", res.Output, res.Err)
+	}
+}
+
+// A named argument a variadic parameter collects leaves no pending
+// argument, so a call by name after it would take an argument of the
+// caller's own started call. The verifier refuses the image; before the
+// fix it was accepted and the callee printed the caller's argument.
+func TestNamedArgumentIsNotTakenByACallByName(t *testing.T) {
+	a := newAsm(t, 64)
+	m := a.fn("{main}", 0, 1)
+	m.stack = 8
+	m.emit(bytecode.OpInitCall, 0, 0, 1, 0)
+	m.emit(bytecode.OpPush, 0, m.k("MAIN-ARG"), 0, 0)
+	m.emit(bytecode.OpPush, 0, m.call(2), 0, 0)
+	m.emit(bytecode.OpCallPending, 0, m.reg(bytecode.Value), 0, 0)
+	m.retNull()
+	v := a.fn("v", 0, 2, "rest").parameters("...rest")
+	v.retNull()
+	// function g() { InitCall v; Push 1, name "zz"; CallValue "w", 1 }
+	g := a.fn("g", 0, 3)
+	g.stack = 4
+	g.emit(bytecode.OpInitCall, 0, 0, 1, 0)
+	g.emit(bytecode.OpPush, 0, g.k(1), a.str("zz")+1, 0)
+	g.emit(bytecode.OpCallValue, 0, g.reg(bytecode.Value), g.k("w"), 1)
+	g.emit(bytecode.OpCallPending, 0, g.reg(bytecode.Value), 0, 0)
+	g.retNull()
+	w := a.fn("w", 1, 4, "p").parameters("p")
+	w.echo(w.load("p"))
+	w.retNull()
+	_, err := bytecode.Build(context.Background(), a.image(), bytecode.Options{Limits: bytecode.DefaultLimits(), Supported: bytecode.AllCapabilities})
+	var be *bytecode.Error
+	if !errors.Is(err, bytecode.ErrInvalid) || !errors.As(err, &be) || be.Function != 2 || !strings.Contains(be.Detail, "named argument") {
+		t.Fatalf("Build = %v, want ErrInvalid for the named argument in function 2", err)
 	}
 }
