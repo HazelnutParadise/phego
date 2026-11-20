@@ -1,0 +1,62 @@
+# BenchmarkVMDispatch/*/switch, test binary built from main (56f8bf5), alternated round by round with bench-stage6.txt
+# host: Apple M3, darwin/arm64, go1.26.5; 6 rounds of -test.benchtime 1s each; other work was running on the host (load average 7 to 14)
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    3452	    321251 ns/op	     32013 steps/op	    3976 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	    2589	    463691 ns/op	     49211 steps/op	    4872 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	    5169	    306819 ns/op	      8015 steps/op	 1240811 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     642	   1909340 ns/op	    108692 steps/op	   85352 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     879	   1366697 ns/op	     62023 steps/op	  249768 B/op	     130 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    4058	    296233 ns/op	     32013 steps/op	    3977 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	    2851	    420342 ns/op	     49211 steps/op	    4872 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	    5530	    276578 ns/op	      8015 steps/op	 1240807 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     704	   1707925 ns/op	    108692 steps/op	   85352 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     926	   1296154 ns/op	     62023 steps/op	  249768 B/op	     130 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    4054	    295917 ns/op	     32013 steps/op	    3977 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	    2836	    424042 ns/op	     49211 steps/op	    4872 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	    5509	    277659 ns/op	      8015 steps/op	 1240808 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     699	   1723301 ns/op	    108692 steps/op	   85352 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     909	   1301487 ns/op	     62023 steps/op	  249768 B/op	     130 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    4039	    300046 ns/op	     32013 steps/op	    3979 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	    2786	    431634 ns/op	     49211 steps/op	    4872 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	    5426	    281115 ns/op	      8015 steps/op	 1240808 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     682	   1761079 ns/op	    108692 steps/op	   85352 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     895	   1520610 ns/op	     62023 steps/op	  249768 B/op	     130 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    1504	   1364522 ns/op	     32013 steps/op	    3978 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	     696	   1838702 ns/op	     49211 steps/op	    4873 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	     829	   1358709 ns/op	      8015 steps/op	 1240828 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     163	   6148051 ns/op	    108692 steps/op	   85355 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     392	   3625616 ns/op	     62023 steps/op	  249772 B/op	     130 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Apple M3
+BenchmarkVMDispatch/arith/switch-8         	    3512	    354151 ns/op	     32013 steps/op	    3978 B/op	      16 allocs/op
+BenchmarkVMDispatch/branch/switch-8        	    2150	    532655 ns/op	     49211 steps/op	    4874 B/op	      16 allocs/op
+BenchmarkVMDispatch/concat/switch-8        	    5140	    336251 ns/op	      8015 steps/op	 1240811 B/op	    1417 allocs/op
+BenchmarkVMDispatch/fib/switch-8           	     573	   2128566 ns/op	    108692 steps/op	   85352 B/op	      28 allocs/op
+BenchmarkVMDispatch/array/switch-8         	     842	   1468928 ns/op	     62023 steps/op	  249768 B/op	     130 allocs/op
+PASS

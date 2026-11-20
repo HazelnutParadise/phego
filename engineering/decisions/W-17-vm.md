@@ -34,6 +34,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 三 | 參照指定 `$a = &$b`（變數與任意層元素都可以當來源或目標），`foreach` 傳參照，傳參照的參數（含預設值） | 解構、走訪物件，參照到函式呼叫結果或屬性，把不是變數的值傳給傳參照參數，兩個元素之間參照指定的運算式值，`global`、`static`，陣列字面值裡的 `&$x`，回傳參照，參數型別與不定參數，具名引數 |
 | 四 | 解構：`[$a, $b] = $x`、`list()`、跳過的位置、任意運算式的 key、巢狀樣式、元素目標（含 `$a[]`）、解構運算式的值、`foreach` 搭配樣式（含 key）、傳參照的元素 `[&$a]`（含巢狀與 foreach）、右邊不是陣列、缺少的 key、左右互相影響的寫法 | 物件與靜態屬性目標，`[...$rest]`（PHP 的編譯錯誤），`[&$a] = f()`，從元素解構參照的運算式值，走訪物件，其他第三階段右欄的項目 |
 | 五 | 頂層與 namespace 裡的 `const`（含相依的值、陣列值、重複宣告的警告、未定義常數的錯誤、namespace 裡退回全域的查詢）、`php -n` 的 1,792 個預先定義常數（三個 profile 各自的值、已棄用常數的通知）、以常數為參數預設值、magic constant、`match`（多條件、`default`、`match(true)`、沒有命中的 `UnhandledMatchError`）、`empty()`（變數、任意層元素、字串位移、運算式）、`@`（巢狀、函式呼叫內的警告、display 與 log 兩條路、不同的 `error_reporting`） | `define()`、`constant()`、`defined()`（內建函式），STDIN／STDOUT／STDERR（資源），CHAR_MAX 與 PHP_BUILD_DATE（依 CPU 架構而異），類別常數，trait 裡的 `__CLASS__`，`global`、`static`，不定參數，具名引數，物件，try／catch |
+| 六 | `global`（函式內與頂層、不存在時建立 null、`unset` 只解除函式裡的綁定、宿主以 `WithGlobal` 提供的值）、`static` 變數（字面值與任意運算式的初始值、第一次執行到才求值、多個宣告、遞迴）、不定參數（`...$rest`、`&...$refs`、接在有預設值的參數後面）、引數展開（`f(...$a)`、多段展開、字串 key 成為具名引數、對傳參照參數建立參照）、具名引數（任意順序、略過有預設值的參數、多出的名稱收進不定參數、傳參照） | `$GLOBALS`、`global $$name`，`func_get_args()` 等內建函式，展開物件與 Traversable，把不是變數的值以名稱傳給傳參照參數，參數型別，類別與方法，closure，try／catch |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -163,6 +164,22 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由第�
 
 測試程式加到 329 個（新增 63 個 `const_*`、`magic_*`、`match_*`、`empty_*`、`silence_*`、`return_const_profile` 與對應的 `fatal_*`），三個 profile 各 987 項全部和 PHP 8.5.12 逐位元組相同。
 
+## 階段六
+
+格式升到 1.6，新增 BindGlobal、StaticInit、BindStatic、RecvVariadic、InitCall、SendUnpack 與 CallPending 七個指令、Push 的 Aux PushLoad，以及每個函式的參數表（名稱與是否傳參照、是否有不定參數）。1.0 到 1.5 的檔案照樣能載入，其中出現 1.6 的內容時以 `ErrInvalid` 拒絕並指出需要 1.6。操作數規則在 [W-16 文件](W-16-bytecode.md)。這七個指令都沒有現有指令能組合出來：沒有指令能碰到別的 frame 的變數或跨呼叫保存的值，也沒有指令能讀到超過參數個數的引數，或在執行期才決定引數的個數與位置。位置引數的呼叫仍走原本的 Push 與 Call，不經過新指令。分派用的 `switch` 多了七個 case，Return 多一個「暫存器裡是不是參照」的判斷。以 main（56f8bf5）與本分支各自建置的測試執行檔交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，五個工作量的中位數差在 −6.2% 到 +5.6% 之間，每格的 6 輪範圍互相重疊，各格最快的一輪相差 +0.3% 到 +1.9%。量測時主機上有其他工作在跑，數字比第五階段雜，原始輸出在 [stage6/bench-main.txt](../implementation/evidence/W-17-vm/stage6/bench-main.txt) 與 [stage6/bench-stage6.txt](../implementation/evidence/W-17-vm/stage6/bench-stage6.txt)。
+
+- **global** 照 ZEND_BIND_GLOBAL：函式裡的變數變成頂層同名變數的參照，頂層沒有這個變數時建立 null。頂層變數就是 `{main}` 的 local，`Program` 只記名稱到 local 的對照表。`{main}` 從沒提過的名稱放在當次執行自己的表裡，宿主以 `WithGlobal` 提供的同名值在第一次用到時匯入，所以只在函式裡出現的全域變數也看得到宿主的值。`unset($a)` 與 `$a = &$other` 只改函式裡的綁定。在頂層寫 `global $x` 只會讓未定義的 `$x` 變成 null。
+- **static 變數** 的值放在當次執行的表裡，以函式和變數為鍵，執行結束時釋放，`Program` 不留任何一次執行的值。同一個 `Program` 的多次執行各自從初始值開始，並行執行互不相見（`internal/runtime/vm_stage6_test.go` 與 `w17_stage6_test.go` 各以 16 個 goroutine 同時執行同一個 `Program`）。PHP 對字面值初始值只用 ZEND_BIND_STATIC，對其他運算式用 ZEND_BIND_INIT_STATIC_OR_JMP 加 ZEND_BIND_STATIC。編譯器兩種都產生後者的形式，因為字面值在第一次執行時求值會得到同樣的值。初始值拋出錯誤時變數保持未初始化，下一次呼叫重新求值。初始值裡又呼叫同一個函式時，內層先完成初始化，外層算出的值被丟棄（`static_recursion` 的 `init_reenters`）。
+- **不定參數** 不占參數暫存器：bytecode 的 Params 只算前面的固定參數，多出的引數照舊留在 frame 裡（backtrace 本來就要顯示它們），RecvVariadic 把它們和多出的具名引數收成陣列。少傳引數時的訊息照 zend_missing_arg_error，以固定參數判斷 `exactly` 或 `at least`，所以 `function f($a, $b, ...$rest)` 少傳時是 `exactly 2 expected`。
+- **具名引數與展開** 的呼叫在引數之間就要檢查，所以這種呼叫的每個引數求值後立刻送出（InitCall、逐個 Push 或 SendUnpack、CallPending），不像位置引數那樣全部求值完才 Push。PHP 的錯誤時機因此相同：`f(a: g(), nope: h(), b: k())` 在 `h()` 執行後、`k()` 執行前拋出 `Unknown named parameter $nope`。引數是單純變數時由 Push 自己讀（PushLoad），名稱的檢查在讀取之前，所以名稱錯誤時不會先印未定義變數的警告。引數是元素時先讀取才檢查，和 PHP 的 FETCH 在 SEND 之前相同（`fatal_named_unknown_variable_arg` 與 `fatal_named_unknown_element_arg`）。
+- **略過的參數** 照 zend_handle_undef_args：具名引數跳過的參數在引數堆疊上留下空位，進入函式後由 ParamDefault 當成沒傳來求值，預設值的警告帶參數那一行，並照樣進入預設值快取。空位的參數沒有預設值時，在被呼叫函式的 frame 裡拋出 `ArgumentCountError: f(): Argument #N ($name) not passed`，backtrace 的那一格顯示 NULL。PHP 在 ZEND_CHECK_UNDEF_ARGS 處理空位，這條指令帶最後一個引數的行號，呼叫本身帶呼叫那一行。為了讓跨行的呼叫逐位元組相同，編譯器在 CallPending 前放一條帶最後引數行號的 Checkpoint，被呼叫函式還在填空位時，backtrace 用它的行號。
+- **展開與參照** 照 ZEND_SEND_UNPACK：展開的是變數，而且有元素要傳給傳參照的參數時，元素在變數自己的陣列裡變成參照，陣列被其他變數共用時先分離。展開的是函式回傳值、字面值或元素讀取的結果時，參照建立在暫存的陣列上，原本的陣列不變（`unpack_by_ref`）。字串 key 走具名引數的路徑，之後再出現整數 key 是 `Cannot use positional argument after named argument during unpacking`。
+- **PHP 編譯呼叫時認不認得函式**會影響行號。函式宣告在呼叫之後、函式呼叫自己、namespace 裡未限定的名稱，或引數排在展開之後時，PHP 還不知道被呼叫的是誰（zend_compile_call 在函式表裡找不到已完成的函式），這時單純變數的引數會帶引數列的行號，也就是第一個引數最左邊那個運算元的行，未定義變數的警告就報在那一行。編譯器以宣告順序重現這個判斷（`calleeKnown`），位置引數的呼叫也一併照做，這在前幾個階段是和 PHP 不同的（`call_callee_declared_later`）。
+- **暫存器不留值**：BindStatic 與 RecvVariadic 後面的 Bind 都把值移出暫存器，具名的 Push 把暫存器裡的參照移交給呼叫，所以不管 liveness 有沒有執行，static 變數與不定參數的陣列都只有一個持有者（`TestStage6InstructionsEmptyTheirRegisters` 用跳過 liveness 的函式檢查）。函式回傳時 Return 把暫存器裡的參照換成它的值。
+- **補上第三階段的缺口**：函式表記錄每個參數是否傳參照。格式 1.6 的驗證器追蹤哪些 Value 暫存器可能存放參照，拒絕以 Call 把參照送給記錄為傳值的參數。以名稱呼叫（CallValue）與 CallPending 在執行期把送給傳值參數的參照換成值。
+
+測試程式加到 383 個（新增 54 個 `global_*`、`static_*`、`variadic_*`、`unpack_*`、`named_*`、`call_callee_declared_later` 與對應的 `fatal_*`），三個 profile 各 1,149 項全部和 PHP 8.5.12 逐位元組相同。
+
 ## 階段一的對照結果
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
@@ -221,7 +238,13 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **兩個元素之間參照指定的運算式值**：`$x = ($a[0] = &$b[0])` 在 `Compile` 回報不支援。單獨成為陳述式的 `$a[0] = &$b[0];` 可以執行。
 - **從元素解構參照的運算式值**：`$y = ([&$a] = $x[0])` 在 `Compile` 回報不支援；`$y = ([&$a] = $x)` 與單獨成為陳述式的寫法可以執行。
 - **`[&$a] = f()`**：PHP 會發出 `Attempting to set reference to non referenceable value` 的 notice 再照值讀取；Phego 沿用第三階段「參照到函式呼叫結果」的不支援回報。執行期 FetchDim 的容器暫存器不是參照時也以 Unsupported 結束，編譯器不會產生這種 bytecode。
-- **傳參照的引數只檢查到編譯時已知的函式**：直接呼叫時以 MakeRef 傳入；bytecode 的函式表沒有記錄哪些參數傳參照，所以驗證器無法檢查手寫的 bytecode 有沒有對傳值參數傳入參照。被呼叫端的 Store 會解開參照，不會造成記憶體問題。
+- **沒有參數表的函式不受參照檢查**：格式 1.6 的驗證器只在被呼叫函式記錄了參數表時，拒絕以 Call 把參照送給傳值參數。編譯器產生的函式都有參數表，手寫的 bytecode 可以省略，舊版檔案則都沒有。被呼叫端的 Store 會解開參照，不會造成記憶體問題。
+- **`$GLOBALS` 與 `global $$name`**：`Compile` 回報不支援。全域變數目前只能以編譯時已知的名稱取得。
+- **展開物件與 Traversable**：`f(...$iterator)` 要等物件與迭代器，執行期遇到物件以 Unsupported 結束，目前沒有寫法能產生物件。
+- **`func_get_args()`、`func_num_args()`**：內建函式，屬於模組工作包。
+- **把不是變數的值以名稱傳給傳參照參數**：`f(r: 1 + 2)` 沿用第三階段的不支援回報，PHP 是執行期的 Error。
+- **具名引數的名稱和值不在同一行**：PHP 不認得被呼叫函式時，引數列的行號取第一個引數最左邊那個 token 的行，具名引數是名稱那一行。HIR 沒有記錄名稱的行，Phego 用值的行。`f(\n a:\n $x)` 這種寫法的警告行號會差一行。
+- **反組譯不顯示參數表**：`Disassemble` 的輸出沒有列出函式的參數名稱與旗標。
 - **`error_reporting` 的 INI 值只接受十進位整數**：PHP 的 `-d` 也接受 `E_ALL` 這類運算式。
 - **依 CPU 架構而異的預先定義常數**：CHAR_MAX（arm64 為 255，amd64 與 386 為 127）與 PHP_BUILD_DATE 在 `Compile` 回報不支援；profile 要有架構欄位才能給值。
 - **STDIN、STDOUT、STDERR**：值是資源，`Compile` 回報不支援，等資源與串流的工作包。
