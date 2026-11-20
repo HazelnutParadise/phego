@@ -125,7 +125,12 @@ func argListLine(n *ir.Node) int {
 			return first.FoldLine
 		}
 		var kid *ir.Node
-		for _, k := range first.Kids {
+		kids := first.Kids
+		if first.Op == ir.OpItem && len(kids) == 2 && kids[1] != nil {
+			// ZEND_AST_ARRAY_ELEM holds the value before the key.
+			kids = kids[1:]
+		}
+		for _, k := range kids {
 			if k != nil {
 				kid = k
 				break
