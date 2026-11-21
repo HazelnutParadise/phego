@@ -770,12 +770,14 @@ var compilerFatal = map[string]CompileError{
 	"fatal_class_abstract_method_body":   {Message: "Abstract function A::m() cannot contain body", Line: 5},
 	"fatal_class_access_level_interface": {Message: "Access type for interface method I::hidden() must be public", Line: 5},
 	"fatal_class_interface_property":     {Message: "Interfaces may only include hooked properties", Line: 5},
+	"fatal_review7a_stdclass":            {Message: "Cannot redeclare class stdClass", Line: 2},
+	"fatal_review7a_stringable":          {Message: "Cannot redeclare interface Stringable", Line: 2},
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 646 {
-		t.Fatalf("want 646 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 693 {
+		t.Fatalf("want 693 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
