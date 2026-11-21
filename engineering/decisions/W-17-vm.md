@@ -369,7 +369,21 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 
 審查留下、這一段不修的差異都列在已知缺口。回歸 fixture 共 20 個（`closure_review_*`、`fatal_closure_review_*`、`fatal_callable_review_*`），另有 `internal/bytecode/format18_test.go`、`internal/runtime/vm_closure_test.go` 與 `internal/vm/compile_test.go` 的 Go 測試。CallableConvert 接在建構子呼叫後面的檢查沒有獨立的回歸測試：測試用的組譯器不能宣告類別，這一項只有審查者以引擎編譯再改寫映像的探測（`~/.cache/phego-work/review7b-1/tools/zz_hostile_test.go` 的 H4）。
 
-測試程式加到 863 個（新增 131 個：82 個七 B 的 fixture、29 個自我探測、20 個審查的回歸 fixture），三個 profile 各 2,589 項全部和 PHP 8.5.12 逐位元組相同。
+#### 第二次審查
+
+Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另一位獨立審查者（內建的 Opus，全新的脈絡；agy 仍沒有額度，Codex 沒有符合條件的模型）檢查第一次審查之後的修正（6de0461..5b71e39）。他跑了 292 個 PHP 探測程式（arm64 映像）、8 個 goroutine 各 30 次的隔離與 race 檢查，並把修正逐段拿掉確認測試會失敗（27 段裡 22 段被現有測試抓到）。沒有 P0，請求之間沒有外洩。找到的問題如下，都已修正並補上修正前會失敗的回歸測試，修正前的輸出在 [stage7b/red-review2-fixes.txt](../implementation/evidence/W-17-vm/stage7b/red-review2-fixes.txt)。
+
+- **方法的本體可以用名稱當函式呼叫**（P1，main 上就有）。函式表原本只排除進入點與 closure，類別方法與初始值函式也登記了名稱，所以 `$f = 'pp'; $f()` 會直接執行某個類別的 private 方法 `pp`，沒有 `$this` 也沒有範圍。七 B 讓 `Closure::fromCallable` 與 `callable` 型別也走得到。現在類別成員的函式都不在名稱表裡。
+- **經由 `Closure::call` 進入的 frame 漏放 closure**（P2，第一次修正前就有）。`$f->call(new D)` 的新物件只有這一個持有者時，釋放它會執行解構子，解構子的 frame 重用同一個 frame 物件，蓋掉還沒讀出的 closure 欄位，closure 與它捕捉的物件就留到請求結束。現在先取出 closure 再釋放 `$this`。
+- **`Closure::fromCallable` 帶上呼叫者 `$this` 的條件太寬**（P2，第一次修正造成）。PHP 要求呼叫者的物件屬於呼叫者的範圍，而且那個範圍就是被指名的類別或它的子類別（zend_is_callable_check_class）。原本只看物件的類別。同一個條件成立時，被呼叫的類別是那個物件的類別，`static::class` 因此正確。
+- **沒有父類別時 `parent` 的訊息**（P2）：除了 `::class` 以外是 `Cannot access "parent" when current class scope has no parent`。這在 main 的 trait 裡就不同。
+- **`isset(self::$x)` 在沒有類別範圍時回傳 false**（P2）：PHP 先取類別，所以拋出錯誤。
+- **字面的內建函式名稱到執行期才拒絕**（P2）：`'strlen'('abc')`、`'strlen'(...)` 與 `Closure::fromCallable('strlen')` 現在在 `Compile` 帶位置拒絕。名稱是執行期的值時仍在執行期拒絕。
+- **其他**（P3）：相對名稱沒有可用的範圍時，`fromCallable` 的訊息照 PHP（`cannot access "self" when no class scope is active`）。callable 字串在最後一個 `::` 切開。對 `Closure` 方法做成的 closure，綁定失敗的警告印出方法自己的名稱，`__invoke` 會呼叫那個方法。以 `Closure::bindTo` 這類非 static 方法的名稱呼叫 `fromCallable` 時是 TypeError。
+
+第二次審查留下、這一段不修的差異列在已知缺口。回歸 fixture 共 22 個（`closure_review2_*` 與 `fatal_closure_review2_*`），另有 `internal/vm/compile_test.go` 的三個編譯期拒絕。CallableConvert 接在建構子呼叫後面的執行期檢查仍沒有獨立的回歸測試。
+
+測試程式加到 885 個（新增 153 個：82 個七 B 的 fixture、29 個自我探測、兩次審查的 42 個回歸 fixture），三個 profile 各 2,655 項全部和 PHP 8.5.12 逐位元組相同。
 
 ### 效能
 
@@ -465,10 +479,14 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`??=` 的目標是屬性底下的元素、而且運算元有副作用**：`$o->p[f()] ??= 1` 在 `Compile` 回報不支援。PHP 把目標編譯兩次但共用運算元的結果，這裡只在運算元是變數與字面值時才這樣做。
 - **closure 當屬性預設值**：`public $p = static function () {};` 與 static 屬性的同樣寫法在 `Compile` 回報不支援。屬性預設值目前以快照保存，放不了物件。類別常數、全域 `const` 與參數預設值裡的 closure 可以執行。
 - **循環回收不會在候選數量到門檻時自動啟動**：PHP 在可能的循環根累積到 10,001 個時回收一次，Phego 只在請求結束時回收。大量 `$this` 與 closure 互相持有的物件，解構子因此都排到 `end` 之後。這在 main 的一般物件循環就是如此，沒有內建函式能手動觸發。
-- **callable 裡的 `parent::m` 形式**：`['B', 'parent::m']`、`[$this, 'parent::m']` 與 `'B::parent::m'`，PHP 發出棄用通知後呼叫父類別的方法（最後一種是 `Class "B::parent" not found`），Phego 當成方法名稱而找不到。動態呼叫裡的 `'self::m'`、`'parent::m'`、`'static::m'` 字串也還不認得，只有 `Closure::fromCallable` 認得。
-- **`Closure::call` 釋放引數的順序**：PHP 先釋放新的 `$this` 再釋放引數，Phego 相反。只有兩者都只剩這一個持有者、而且都有解構子時看得出來。未捕捉錯誤時的順序已照 PHP。
+- **callable 裡的 `parent::m` 形式**：`['B', 'parent::m']`、`[$this, 'self::m']` 這類陣列，PHP 發出 `Callables of the form ["B", "parent::m"] are deprecated` 後呼叫那個方法，Phego 當成方法名稱而找不到。動態呼叫裡的 `'self::m'`、`'parent::m'`、`'static::m'` 字串也還不認得，只有 `Closure::fromCallable` 認得。名稱裡含 `::` 而前半不是類別的字串（例如 closure 的名稱），PHP 報未定義的函式，Phego 報找不到類別。
+- **`Closure` 方法的 backtrace 與具名引數**：經由 `call` 進入的 frame 在 backtrace 裡把具名引數印成位置引數；對 `__call` 做成的 closure 呼叫 `call` 時少了中間 `A->zz(...)` 那一格；以陣列 `[$f, '__invoke']` 動態呼叫時少了 `Closure->__invoke(...)` 那一格。`$f->call(x: 1)` 少了 `newThis` 時，PHP 報引數個數不足，Phego 報 `Argument #1 ($newThis) not passed`。對 `__call` 做成的 closure 以 `newThis:` 具名呼叫 `call` 會被當成少了引數。
+- **`Closure::getCurrent()` 在 `call` 裡**：PHP 回傳的是另一個物件，Phego 回傳原本的 closure。
+- **在物件方法裡以 `['A', 'zz']` 呼叫不存在的方法**：類別同時有 `__call` 與 `__callStatic` 時，PHP 報 `Non-static method A::zz() cannot be called statically`，Phego 呼叫 `__callStatic`。
+- **帶前導反斜線的函式名稱字串**：`$f = '\\Foo\\strlen'; $f()` 的錯誤訊息，PHP 保留反斜線，Phego 去掉。main 上就是如此。
+- **`Closure::call` 釋放引數的順序**：PHP 先釋放新的 `$this` 再釋放引數，Phego 相反。只有兩者都只剩這一個持有者、而且都有解構子時看得出來。未捕捉錯誤時的順序已照 PHP。兩次審查都指出這一項。
 - **對 `Closure` 方法做成的 closure 呼叫 `call`**：`$b = $f->bindTo(...); $b->call($o)` 這類寫法以 Unsupported 結束。對一般 closure 與 `__call` 做成的 closure 呼叫 `call` 可以執行。
-- **執行期才知道名稱的內建函式到執行期才拒絕**：`$f = 'strlen'; $f('abc')`、`Closure::fromCallable('strlen')` 與 `callable` 型別的 `'abs'` 在執行到時以 Unsupported 結束，之前的輸出已經寫出。名稱是執行期的值，`Compile` 看不到。
+- **執行期才知道名稱的內建函式到執行期才拒絕**：`$f = 'strlen'; $f('abc')` 與 `Closure::fromCallable($name)` 在執行到時以 Unsupported 結束，之前的輸出已經寫出。名稱是執行期的值，`Compile` 看不到；寫成字面字串的在 `Compile` 拒絕。`callable` 型別接受內建函式的名稱。
 - **箭頭函式結束的行**：PHP 把行號計數器停在箭頭函式運算式結束的那一行，也就是 parser 多讀的下一個 token 所在的行。Phego 取運算式裡最大的行號，下一個 token 換行時會差一行，只影響同一個陳述式裡後面才發出的警告。
 - **逐暫存器活性分析的工作量上限**：超大函式超過上限後不再分析，只被暫存器持有的 closure 要等暫存器被覆寫才釋放。審查在大小限制內做不出會碰到上限的程式（3,000 個陳述式仍準時釋放，更大的被「program too large」拒絕），所以沒有觀察到差別，也還不能排除。
 - **closure 的捕捉另外配置**：有 `use` 的 closure 建立時多一次配置放捕捉的值。把少量捕捉放進物件同一塊記憶體是審查提出、還沒做的改進。
