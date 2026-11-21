@@ -1,0 +1,9 @@
+# Rules for `tools/`
+
+Each line is a condition and what to do. The story behind a line is in the commit that added it (`git log -S '<words from the line>'`).
+
+- Saving the output of `tools/validate_docs.py` as evidence: write the log to a temporary file, move it into place, update the evidence record, then run the validator again. The validator hashes every evidence file, so redirecting straight into the evidence directory records the hash of an empty log. It rewrites `engineering/data/document-validation.json` unless `--no-write` is given.
+- Running `tools/validate_docs.py` in a checkout that has untracked copies of the repository (for example `.claude/worktrees/`): run it in a clean `git worktree` and copy `document-validation.json` back. The validator walks the tree without reading `.gitignore`, so the copies get hashed into the record.
+- Writing or changing a differential tool such as `upstream_diff.py`: run it against the real upstream file, not only the fixtures, and do not read an empty report section as "no change". The real `zend_language_parser.y` separator is `%% /* Rules */`, which a synthetic fixture with a bare `%%` did not catch.
+- Splitting HTML strictly, as `upstream_watch._news` does: check the content before the first item and after the last one, not only between items, and count tags without regard to case. Any change to the php.net homepage frame then fails the daily observe until the tool is updated.
+- `upstream-watch observe` reports only `news_sha256` changed: rebuild the old homepage body from the current one by dropping the new entries and re-appending the pushed-off ones from `https://www.php.net/archive/<year>.php` in homepage markup, and confirm the old digest reproduces. Patch-release RCs appear in neither the homepage nor the release JSON, so check php-src tags for them. Do not use `feed.atom`; it lagged the homepage by over a day.
