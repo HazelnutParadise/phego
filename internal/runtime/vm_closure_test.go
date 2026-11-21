@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -125,4 +126,42 @@ func errorText(err error) string {
 		return ""
 	}
 	return err.Error()
+}
+
+// The verifier cannot tell which locals the prologue gives the parameters,
+// so the loader refuses a capture that names one: the parameter's Store
+// would overwrite the captured variable.
+func TestCaptureOfAParameterLocalIsRefused(t *testing.T) {
+	a := newAsm(t, 64)
+	m := a.fn("{main}", 0, 1)
+	m.retNull()
+	c := a.fn("{closure}", 1, 2, "p", "v").parameters("p")
+	c.flags = bytecode.FuncClosure
+	c.captures = []bytecode.Capture{{Local: 0}}
+	c.retNull()
+	p, err := bytecode.Build(context.Background(), a.image(), bytecode.Options{Limits: bytecode.DefaultLimits()})
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+	if prog, err := NewProgram(p); prog != nil || err == nil || !strings.Contains(err.Error(), "names the local of a parameter") {
+		t.Fatalf("NewProgram = %v, %v; want the capture refused", prog, err)
+	}
+}
+
+// A callable that names a function PHP provides and Phego does not is
+// refused as unsupported; it is not reported as an undefined function.
+func TestBuiltinFunctionNamedByACallableIsUnsupported(t *testing.T) {
+	a := newAsm(t, 64)
+	m := a.fn("{main}", 0, 1)
+	m.stack = 2
+	m.emit(bytecode.OpInitMethod, bytecode.InitCallable, m.k("StrLen"), 0, 0)
+	m.emit(bytecode.OpCallPending, 0, m.reg(bytecode.Value), 0, 0)
+	m.retNull()
+	prog := a.program()
+	prog.Builtin = func(lower string) bool { return lower == "strlen" }
+	res := prog.Run(vmConfig(t, a.width))
+	var u *UnsupportedError
+	if res.End != Unsupported || !errors.As(res.Err, &u) || !strings.Contains(u.Feature, "builtin function StrLen()") {
+		t.Fatalf("End %v, err %v; want Unsupported for the builtin function", res.End, res.Err)
+	}
 }

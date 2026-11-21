@@ -37,6 +37,9 @@ type closureData struct {
 	// magic is the method name a fake closure of __call or __callStatic
 	// passes along; fn is then the magic method's function.
 	magic string
+	// native is the method of the Closure class a fake closure stands for
+	// (Closure::bind(...), [$f, 'bindTo'](...)); fn is then the trampoline.
+	native uint8
 }
 
 // The methods of the Closure class the VM implements (methodSpec.native).
@@ -46,6 +49,7 @@ const (
 	closureCall
 	closureFromCallable
 	closureInvoke
+	closureGetCurrent
 	// closureMagic is not a method: it marks the frame of __call or
 	// __callStatic entered through a closure of a magic method
 	// (vmFrame.via), which a backtrace shows as an internal call.
@@ -63,7 +67,7 @@ var closureBuiltin = func() *class {
 	}
 	c, err := buildClass(classSpec{name: "Closure", final: true, noDynamic: true, methods: []methodSpec{
 		m("bind", true, closureBind), m("bindTo", false, closureBindTo), m("call", false, closureCall),
-		m("fromCallable", true, closureFromCallable), m("__invoke", false, closureInvoke),
+		m("fromCallable", true, closureFromCallable), m("__invoke", false, closureInvoke), m("getCurrent", true, closureGetCurrent),
 	}})
 	if err != nil {
 		panic(err)
@@ -102,10 +106,11 @@ func (h *heap) freeClosureStorage(o *object, dead map[gcNode]bool) error {
 // the object's own closureData (one allocation with the object, see
 // newObjectShell) receives it. The result has no owner yet.
 func (s *vmState) newClosure(cd closureData) (value, error) {
-	if s.h.classes[closureKey] != closureBuiltin {
+	if !s.closureClass {
 		if err := s.h.registerClass(closureBuiltin); err != nil {
 			return value{}, err
 		}
+		s.closureClass = true
 	}
 	v, err := s.h.newObjectShell(closureBuiltin)
 	if err != nil {
@@ -114,8 +119,6 @@ func (s *vmState) newClosure(cd closureData) (value, error) {
 	*v.object.closure = cd
 	return v, nil
 }
-
-const closureKey = "closure"
 
 // makeClosure is ZEND_DECLARE_LAMBDA_FUNCTION: the closure takes the
 // frame's class scope, its called class and, unless the closure is static,
@@ -289,6 +292,11 @@ func (s *vmState) startTarget(t vmCallTarget) {
 		t.closure.refcount++
 		rec.closure = t.closure
 	}
+	if t.native == closureCall && t.this != nil && t.this.closure != nil && t.this.closure.fn != nil && t.this.closure.magic == "" && t.this.closure.native == 0 {
+		// Closure::call: named arguments are matched against the
+		// closure's parameters, which follow the object.
+		rec.fn, rec.shift = t.this.closure.fn.index, 1
+	}
 	s.calls = append(s.calls, rec)
 }
 
@@ -296,6 +304,9 @@ func (s *vmState) startTarget(t vmCallTarget) {
 // binding. The call holds the closure until it returns.
 func (s *vmState) closureTarget(o *object) vmCallTarget {
 	cd := o.closure
+	if cd.native != 0 {
+		return s.nativeTarget(cd.native, cd.this)
+	}
 	t := vmCallTarget{fn: cd.fn.index, this: cd.this, scope: cd.scope, called: cd.called, closure: o}
 	if cd.magic != "" {
 		t.fn, t.magic, t.magicFn, t.via = s.prog.trampoline, cd.magic, cd.fn.index, closureMagic
@@ -311,27 +322,31 @@ func (s *vmState) startNative(m *methodSpec, this value) error {
 		s.calls[len(s.calls)-1].via = closureInvoke
 		return nil
 	}
-	t := vmCallTarget{fn: s.prog.trampoline, native: m.native}
+	var o *object
 	if this.kind == valueObject {
-		t.this = this.object
+		o = this.object
 	}
-	call := m.native == closureCall && t.this != nil && t.this.closure != nil && t.this.closure.magic == ""
-	if call {
-		// Named arguments are matched against the closure's parameters,
-		// which follow the object.
-		t.fn = t.this.closure.fn.index
-	}
-	s.startTarget(t)
-	if call {
-		s.calls[len(s.calls)-1].shift = 1
-	}
+	s.startTarget(s.nativeTarget(m.native, o))
 	return nil
+}
+
+// nativeTarget is the call of a method of the Closure class on closure o
+// (nil for a static method).
+func (s *vmState) nativeTarget(kind uint8, o *object) vmCallTarget {
+	if kind == closureInvoke && o != nil && o.closure != nil && o.closure.native == 0 {
+		t := s.closureTarget(o)
+		if t.via == 0 {
+			t.via = closureInvoke
+		}
+		return t
+	}
+	return vmCallTarget{fn: s.prog.trampoline, native: kind, this: o}
 }
 
 // callClosureValue is CallValue on a Closure object: a positional call.
 func (s *vmState) callClosureValue(o *object, cd *closureData, argc int, dest uint32) error {
-	if cd.magic != "" {
-		return s.unsupported("calling a closure of a magic method without a started call")
+	if cd.magic != "" || cd.native != 0 {
+		return s.unsupported("calling a closure of a magic method or of a method of Closure without a started call")
 	}
 	if argc > len(s.args) {
 		return s.internal("call with %d arguments but %d pending", argc, len(s.args))
@@ -389,15 +404,18 @@ func (s *vmState) resolveCallable(f *vmFrame, v value, dynamic bool) (vmCallTarg
 			name := strings.TrimPrefix(v.text, "\\")
 			idx, ok := s.prog.byName[phpNameLower(name)]
 			if !ok {
+				if s.prog.Builtin != nil && s.prog.Builtin(phpNameLower(name)) {
+					return vmCallTarget{}, s.unsupported("builtin function " + name + "() named by a callable")
+				}
 				return fail("Call to undefined function "+name+"()", "function \""+v.text+"\" not found or invalid function name")
 			}
 			return vmCallTarget{fn: idx}, nil
 		}
-		c := s.lookupClass(class)
+		c, relative := s.callableClass(f, class, dynamic)
 		if c == nil {
 			return fail("Class \""+strings.TrimPrefix(class, "\\")+"\" not found", "class \""+strings.TrimPrefix(class, "\\")+"\" not found")
 		}
-		return s.staticTarget(f, c, method, nil, dynamic)
+		return s.staticTarget(f, c, method, relative, dynamic)
 	case valueArray:
 		a := v.array
 		var first, second value
@@ -419,11 +437,11 @@ func (s *vmState) resolveCallable(f *vmFrame, v value, dynamic bool) (vmCallTarg
 			return fail("Second array member is not a valid method", "second array member is not a valid method")
 		}
 		if first.kind == valueString {
-			c := s.lookupClass(first.text)
+			c, relative := s.callableClass(f, first.text, dynamic)
 			if c == nil {
 				return fail("Class \""+strings.TrimPrefix(first.text, "\\")+"\" not found", "class \""+strings.TrimPrefix(first.text, "\\")+"\" not found")
 			}
-			return s.staticTarget(f, c, second.text, nil, dynamic)
+			return s.staticTarget(f, c, second.text, relative, dynamic)
 		}
 		return s.instanceTarget(f, first.object, second.text, dynamic)
 	}
@@ -443,7 +461,10 @@ func (s *vmState) instanceTarget(f *vmFrame, o *object, name string, dynamic boo
 	m, found := s.h.resolveMethod(c, name, f.scope)
 	if found && m != nil && methodAccessible(f.scope, m) {
 		if m.native != 0 {
-			return vmCallTarget{}, s.unsupported("a callable that names a method of the Closure class")
+			if m.static {
+				return s.nativeTarget(m.native, nil), nil
+			}
+			return s.nativeTarget(m.native, o), nil
 		}
 		if m.abstract || m.call == nil {
 			return vmCallTarget{}, &Throwable{"Error", "Cannot call abstract method " + m.owner.name + "::" + m.name + "()"}
@@ -472,23 +493,53 @@ func (s *vmState) instanceTarget(f *vmFrame, o *object, name string, dynamic boo
 	return vmCallTarget{}, &callableError{"class " + c.name + " does not have a method \"" + name + "\""}
 }
 
+// callableClass is the class a callable names. A relative name (self,
+// parent, static) is resolved against the calling frame, with PHP's
+// deprecation, when zend_is_callable_ex resolves the callable; a dynamic
+// call takes the name literally. relative says the name was one.
+func (s *vmState) callableClass(f *vmFrame, name string, dynamic bool) (c *class, relative bool) {
+	if !dynamic {
+		switch lower := phpNameLower(name); lower {
+		case "self":
+			c = f.scope
+		case "parent":
+			if f.scope != nil && f.scope.schema != nil {
+				c = f.scope.schema.parent
+			}
+		case "static":
+			c = f.called
+		default:
+			return s.lookupClass(name), false
+		}
+		if c != nil {
+			s.h.warn(levelDeprecated, "Use of \""+phpNameLower(name)+"\" in callables is deprecated")
+		}
+		return c, true
+	}
+	return s.lookupClass(name), false
+}
+
 // staticTarget is method name of class c as a callable names it
-// ("A::m", ["A", "m"]): a static method, or __callStatic. A non-static
-// method is not callable this way.
-func (s *vmState) staticTarget(f *vmFrame, c *class, name string, _ *object, dynamic bool) (vmCallTarget, error) {
+// ("A::m", ["A", "m"]): a static method, or __callStatic. A dynamic call
+// never reaches a non-static method this way; zend_is_callable_ex accepts
+// one when the calling frame has an object of the class, which goes along.
+// relative says c came from self, parent or static, which forward the
+// calling frame's called class.
+func (s *vmState) staticTarget(f *vmFrame, c *class, name string, relative, dynamic bool) (vmCallTarget, error) {
 	var m *methodSpec
 	if c.schema != nil {
 		m = c.schema.methods[phpNameLower(name)]
 	}
+	called := c
+	if relative && f.called != nil && classIs(f.called, c) {
+		called = f.called
+	}
 	if m != nil && methodAccessible(f.scope, m) {
 		if m.native != 0 {
-			return vmCallTarget{}, s.unsupported("a callable that names a method of the Closure class")
-		}
-		if !m.static {
-			if dynamic {
-				return vmCallTarget{}, &Throwable{"Error", "Non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
+			if !m.static {
+				return vmCallTarget{}, &Throwable{"Error", "Non-static method Closure::" + m.name + "() cannot be called statically"}
 			}
-			return vmCallTarget{}, &callableError{"non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
+			return s.nativeTarget(m.native, nil), nil
 		}
 		if m.abstract || m.call == nil {
 			return vmCallTarget{}, &Throwable{"Error", "Cannot call abstract method " + m.owner.name + "::" + m.name + "()"}
@@ -496,10 +547,19 @@ func (s *vmState) staticTarget(f *vmFrame, c *class, name string, _ *object, dyn
 		if m.fn == 0 {
 			return vmCallTarget{}, s.unsupported("calling a method of a builtin class")
 		}
-		return vmCallTarget{fn: int(m.fn - 1), scope: m.owner, called: c}, nil
+		if !m.static {
+			if !dynamic && f.this != nil && classIs(f.this.class, c) {
+				return vmCallTarget{fn: int(m.fn - 1), this: f.this, scope: m.owner, called: f.this.class}, nil
+			}
+			if dynamic {
+				return vmCallTarget{}, &Throwable{"Error", "Non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
+			}
+			return vmCallTarget{}, &callableError{"non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
+		}
+		return vmCallTarget{fn: int(m.fn - 1), scope: m.owner, called: called}, nil
 	}
 	if magic, ok := s.h.resolveMethod(c, "__callStatic", nil); ok && magic != nil && magic.static && magic.fn != 0 {
-		return vmCallTarget{fn: s.prog.trampoline, scope: magic.owner, called: c, magic: name, magicFn: int(magic.fn - 1)}, nil
+		return vmCallTarget{fn: s.prog.trampoline, scope: magic.owner, called: called, magic: name, magicFn: int(magic.fn - 1)}, nil
 	}
 	if m != nil {
 		if dynamic {
@@ -520,7 +580,17 @@ func (s *vmState) fakeClosure(t vmCallTarget) (value, error) {
 		return value{kind: valueObject, object: t.closure}, nil
 	}
 	if t.native != 0 {
-		return value{}, s.unsupported("a closure of a method of the Closure class")
+		// A closure of a method of the Closure class itself.
+		cd := closureData{fn: &s.prog.funcs[s.prog.trampoline], fake: true, native: t.native, scope: closureBuiltin, called: closureBuiltin, static: t.this == nil}
+		if t.this != nil {
+			t.this.refcount++
+			cd.this = t.this
+		}
+		v, err := s.newClosure(cd)
+		if err != nil && cd.this != nil {
+			_ = s.releaseObject(cd.this)
+		}
+		return v, err
 	}
 	cd := closureData{fn: &s.prog.funcs[t.fn], fake: true, scope: t.scope, called: t.called, static: t.this == nil && t.scope != nil}
 	if t.magic != "" {
@@ -565,7 +635,7 @@ func (s *vmState) callableConvert(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	if rec.pass || len(s.args) != rec.base {
+	if rec.pass || rec.ctor || len(s.args) != rec.base {
 		return s.internal("callable-convert on a call with arguments")
 	}
 	t := vmCallTarget{fn: rec.fn, this: rec.this, scope: rec.scope, called: rec.called, closure: rec.closure, magic: rec.magic, magicFn: rec.magicFn, native: rec.native}
@@ -612,23 +682,57 @@ func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err e
 		}
 	}
 	name, min, max := "", 0, 0
+	var params []string
 	switch rec.native {
 	case closureBind:
-		name, min, max = "bind", 2, 3
+		name, min, max, params = "bind", 2, 3, []string{"closure", "newThis", "newScope"}
 	case closureBindTo:
-		name, min, max = "bindTo", 1, 2
+		name, min, max, params = "bindTo", 1, 2, []string{"newThis", "newScope"}
 	case closureFromCallable:
-		name, min, max = "fromCallable", 1, 1
+		name, min, max, params = "fromCallable", 1, 1, []string{"callback"}
 	case closureCall:
-		name, min, max = "call", 1, -1
+		name, min, max, params = "call", 1, -1, []string{"newThis"}
+	case closureGetCurrent:
+		name = "getCurrent"
 	default:
 		return false, s.internal("unknown native method %d", rec.native)
 	}
 	if rec.named.kind == valueArray && rec.native != closureCall {
-		return false, s.unsupported("named arguments to Closure::" + name + "()")
+		// Named arguments take the places of the method's parameters.
+		pos := 0
+		for b, ok := rec.named.array.next(&pos); ok; b, ok = rec.named.array.next(&pos) {
+			index := -1
+			for i, p := range params {
+				if p == b.key.text {
+					index = i
+				}
+			}
+			if index < 0 {
+				return false, &Throwable{"Error", "Unknown named parameter $" + b.key.text}
+			}
+			for len(s.args)-rec.base <= index {
+				s.args = append(s.args, value{})
+			}
+			if s.args[rec.base+index].kind != valueUndefined {
+				return false, &Throwable{"Error", "Named parameter $" + b.key.text + " overwrites previous argument"}
+			}
+			v := b.val.deref()
+			if v.kind >= valueArray {
+				retain(v)
+			}
+			s.args[rec.base+index] = v
+		}
+		named := rec.named
+		rec.named = value{}
+		if err := s.releaseValue(named); err != nil {
+			return false, err
+		}
+		args = s.args[rec.base:]
 	}
-	if len(args) > 0 && args[0].kind == valueUndefined {
-		return false, s.unsupported("Closure::" + name + "() without its first argument")
+	for i := 0; i < len(args) && i < min; i++ {
+		if args[i].kind == valueUndefined {
+			return false, nativeThrow(name, args, "ArgumentCountError", "Closure::"+name+"(): Argument #"+strconv.Itoa(i+1)+" ($"+params[i]+") not passed")
+		}
 	}
 	if len(args) < min || max >= 0 && len(args) > max {
 		bound, n := "exactly", min
@@ -649,6 +753,12 @@ func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err e
 	}
 	var out value
 	switch rec.native {
+	case closureGetCurrent:
+		// The function that makes the call must be a real closure.
+		if f.closure == nil || f.closure.closure == nil || f.closure.closure.fake {
+			return false, nativeThrow(name, args, "Error", "Current function is not a closure")
+		}
+		out = value{kind: valueObject, object: f.closure}
 	case closureFromCallable:
 		if out, err = s.fromCallable(f, args[0], args); err != nil {
 			return false, err
@@ -686,6 +796,19 @@ func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err e
 						ok = false
 					}
 				}
+			case valueInt, valueFloat, valueBool:
+				// A scalar is converted to a class name in weak mode.
+				if f.fn.strict {
+					return false, typeError(shift+1, "newScope", "object|string|null")
+				}
+				text, err := s.h.toString(sv)
+				if err != nil {
+					return false, err
+				}
+				if scope = s.lookupClass(text); scope == nil {
+					s.h.warn(levelWarning, "Class \""+text+"\" not found")
+					ok = false
+				}
 			default:
 				return false, typeError(shift+1, "newScope", "object|string|null")
 			}
@@ -710,8 +833,8 @@ func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err e
 			out = nullValue()
 			break
 		}
-		if cd.magic != "" {
-			return false, s.unsupported("Closure::call() on a closure of a magic method")
+		if cd.native != 0 {
+			return false, s.unsupported("Closure::call() on a closure of a method of Closure")
 		}
 		// The closure's function runs with the object and its class as
 		// scope, sharing the closure's own variables.
@@ -722,6 +845,12 @@ func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err e
 		rec.native, rec.fn, rec.shift, rec.via = 0, cd.fn.index, 0, closureCall
 		rec.this, rec.closure = newThis, cl // the first argument's owner and the method's object
 		rec.scope, rec.called = newThis.class, newThis.class
+		if cd.magic != "" {
+			// A closure of __call: the magic method receives the name
+			// and the arguments, on the new object.
+			rec.fn, rec.magic, rec.magicFn = s.prog.trampoline, cd.magic, cd.fn.index
+			return true, nil
+		}
 		for i := range args {
 			if i < len(cd.fn.paramByRef) && cd.fn.paramByRef[i] && args[i].kind != valueUndefined {
 				pname := ""
@@ -815,7 +944,7 @@ func (s *vmState) fromCallable(f *vmFrame, v value, args []value) (value, error)
 // same object and classes, are equal; every other pair is uncomparable.
 func compareClosures(a, b *closureData) int {
 	if a == nil || b == nil || !a.fake || !b.fake || a.this != b.this || a.called != b.called || a.scope != b.scope ||
-		a.magic != b.magic || a.fn.name != b.fn.name {
+		a.magic != b.magic || a.native != b.native || a.fn.name != b.fn.name {
 		return 1
 	}
 	return 0
@@ -824,6 +953,10 @@ func compareClosures(a, b *closureData) int {
 // functionExists reports whether name is a function the program declares
 // (a closure's body has no name to call).
 func (s *vmState) functionExists(name string) bool {
-	_, ok := s.prog.byName[phpNameLower(strings.TrimPrefix(name, "\\"))]
-	return ok
+	lower := phpNameLower(strings.TrimPrefix(name, "\\"))
+	if _, ok := s.prog.byName[lower]; ok {
+		return true
+	}
+	// A builtin function is callable in PHP; calling it is refused.
+	return s.prog.Builtin != nil && s.prog.Builtin(lower)
 }

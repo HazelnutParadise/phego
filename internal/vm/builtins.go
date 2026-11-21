@@ -40,3 +40,8 @@ func isBuiltinClass(name string) bool {
 
 // supportedBuiltinClasses are the builtin classes the runtime provides.
 var supportedBuiltinClasses = map[string]bool{"stdclass": true, "stringable": true, "closure": true}
+
+// IsBuiltinFunction reports whether lower, a lower-case function name
+// without a leading backslash, is a function PHP 8.5.12 declares under
+// php -n. The run time uses it to refuse a callable that names one.
+func IsBuiltinFunction(lower string) bool { return isBuiltin(lower) }

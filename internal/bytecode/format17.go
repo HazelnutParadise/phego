@@ -513,6 +513,9 @@ func verifyClasses(b *budget, image Image, minor uint16, cloneCost bool) error {
 		if initializer && (f.Params != 0 || len(f.Parameters) != 0) {
 			return invalid("an initializer function takes no parameters")
 		}
+		if f.Flags&FuncClosure != 0 {
+			return invalid("a class member's function is a closure function")
+		}
 		return nil
 	}
 	valueOrInit := func(value, init uint32, required bool) error {

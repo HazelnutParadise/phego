@@ -29,6 +29,11 @@ type Program struct {
 	// Both are immutable: a run builds its own classes from them.
 	classes []vmClassDecl
 	hoisted []int
+	// Builtin reports a lower-case name of a function PHP declares itself
+	// and Phego does not provide: a callable that names one is refused as
+	// unsupported, not reported as an undefined function. Set once, before
+	// the first run, by the engine that built the Program; nil knows none.
+	Builtin func(lower string) bool
 	// trampoline is the index of a function that no code calls: the
 	// callee of a call __call or __callStatic will receive, which takes
 	// any arguments by value.
@@ -664,6 +669,13 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 		}
 	}
 	f.paramLocal, f.paramPC = parameterPrologue(f, code)
+	for i, c := range f.captures {
+		for _, l := range f.paramLocal {
+			if l == c.local {
+				return f, fail(-1, "capture %d names the local of a parameter", i)
+			}
+		}
+	}
 	// The instruction that receives a typed parameter checks it: its
 	// decoded c is the parameter plus one, as for a parameter with a
 	// default.

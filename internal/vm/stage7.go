@@ -57,6 +57,13 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 		// PHP raises this redeclaration when the statement runs.
 		return fail("declaring a class with the name of builtin class "+cl.Name, cl.Line)
 	}
+	for _, p := range cl.Props {
+		if p.Default != nil && createsClosure([]*ir.Node{p.Default}) {
+			// The default would be an object, which a property's
+			// default cannot hold yet.
+			return fail("closure in a property default", positive(p.Default.Line, cl.Line))
+		}
+	}
 	names := append([]*ir.Name{}, cl.Interfaces...)
 	if cl.Parent != nil {
 		names = append([]*ir.Name{cl.Parent}, names...)
@@ -557,6 +564,11 @@ func (fc *fnCompiler) sendArgs(n *ir.Node, res uint32) {
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushAuto), fc.varLoc(v.Var), name, 0)
 			case isCall(v):
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushResult), fc.value(v), name, 0)
+			case v.Op == ir.OpDim && appendsElement(v):
+				// PHP fetches $a[] for writing when the parameter is by
+				// reference and throws "Cannot use [] for reading"
+				// otherwise; there is no instruction for that throw yet.
+				fc.unsupported("passing $a[] to a callee found at run time", positive(v.Line, n.Line))
 			case (v.Op == ir.OpDim || v.Op == ir.OpProp || v.Op == ir.OpStaticProp) && name == 0 && !hasNullsafe(v):
 				// ZEND_CHECK_FUNC_ARG: the callee decides whether the
 				// element is fetched for writing and sent as a reference

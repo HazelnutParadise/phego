@@ -133,7 +133,15 @@ func TestFormat18RejectsInvalidFunctions(t *testing.T) {
 		"the entry is a closure":        {func(i *Image) { i.Entry = 1 }, "entry function is a closure function"},
 		"a method is a closure": {func(i *Image) {
 			i.Classes = []Class{{Name: 1, Methods: []Method{{Name: 1, Function: 1}}}}
-		}, "closure function"},
+		}, "class member's function is a closure function"},
+		"a constant initializer is a closure": {func(i *Image) {
+			i.Functions[1].Captures, i.Functions[1].Locals, i.Functions[1].LocalNames = nil, 0, nil
+			i.Classes = []Class{{Name: 1, Constants: []ClassConstant{{Name: 1, Init: 2}}}}
+		}, "class member's function is a closure function"},
+		"a property initializer is a closure": {func(i *Image) {
+			i.Functions[1].Captures, i.Functions[1].Locals, i.Functions[1].LocalNames = nil, 0, nil
+			i.Classes = []Class{{Name: 1, Properties: []Property{{Name: 1, Init: 2}}}}
+		}, "class member's function is a closure function"},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

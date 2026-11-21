@@ -32,12 +32,12 @@ func (s *vmState) classOperand(f *vmFrame, in *vmInstr, operand uint32) (*class,
 		return c, nil
 	case bytecode.ClassSelf:
 		if f.scope == nil {
-			return nil, &Throwable{"Error", `Cannot use "self" when no class scope is active`}
+			return nil, scopeError(in, "self")
 		}
 		return f.scope, nil
 	case bytecode.ClassParent:
 		if f.scope == nil {
-			return nil, &Throwable{"Error", `Cannot use "parent" when no class scope is active`}
+			return nil, scopeError(in, "parent")
 		}
 		if f.scope.schema == nil || f.scope.schema.parent == nil {
 			return nil, &Throwable{"Error", `Cannot use "parent" when current class scope has no parent`}
@@ -45,7 +45,7 @@ func (s *vmState) classOperand(f *vmFrame, in *vmInstr, operand uint32) (*class,
 		return f.scope.schema.parent, nil
 	case bytecode.ClassStatic:
 		if f.called == nil {
-			return nil, &Throwable{"Error", `Cannot use "static" when no class scope is active`}
+			return nil, scopeError(in, "static")
 		}
 		return f.called, nil
 	}
@@ -613,9 +613,23 @@ func (s *vmState) className(f *vmFrame, in *vmInstr) error {
 	return s.setReg(f.regs, in.a, stringValue(c.name))
 }
 
+// scopeError is the Error for self, parent or static where no class scope
+// is active: ZEND_FETCH_CLASS_NAME (::class) words it differently from
+// zend_fetch_class, which every other use goes through.
+func scopeError(in *vmInstr, name string) error {
+	if in.op == bytecode.OpClassName {
+		return &Throwable{"Error", `Cannot use "` + name + `" in the global scope`}
+	}
+	return &Throwable{"Error", `Cannot access "` + name + `" when no class scope is active`}
+}
+
 // instanceOf is ZEND_INSTANCEOF: a class that does not exist is no error.
 func (s *vmState) instanceOf(f *vmFrame, in *vmInstr) error {
 	v := f.regs[in.b].deref()
+	if v.kind != valueObject && bytecode.AuxClassRef(in.aux) != bytecode.ClassValue {
+		// The class is fetched only for an object.
+		return s.setReg(f.regs, in.a, boolValue(false))
+	}
 	var c *class
 	switch bytecode.AuxClassRef(in.aux) {
 	case bytecode.ClassNamed:

@@ -115,16 +115,3 @@ func checkOperands18(image Image, in Instruction) error {
 	}
 	return nil
 }
-
-// verifyMethods18 keeps closure functions out of the class table: a method
-// or a constant initializer is entered by index, never as a closure.
-func verifyMethods18(image Image) error {
-	for ci := range image.Classes {
-		for _, m := range image.Classes[ci].Methods {
-			if uint64(m.Function) < uint64(len(image.Functions)) && image.Functions[m.Function].Flags&FuncClosure != 0 {
-				return invalid(fmt.Sprintf("method %d of class %d is a closure function", m.Function, ci))
-			}
-		}
-	}
-	return nil
-}

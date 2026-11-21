@@ -149,3 +149,32 @@ func lastLine(nodes []*ir.Node, floor int) int {
 	}
 	return floor
 }
+
+// createsClosure reports a closure, an arrow function or a first-class
+// callable among the nodes.
+func createsClosure(nodes []*ir.Node) bool {
+	for _, n := range nodes {
+		if n == nil {
+			continue
+		}
+		if n.Op == ir.OpClosure || n.Op == ir.OpArrowFn || n.Op == ir.OpCallable || createsClosure(n.Kids) {
+			return true
+		}
+		for _, a := range n.Args {
+			if a != nil && a.Value != nil && createsClosure([]*ir.Node{a.Value}) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// appendsElement reports an element access with [] at some level of n.
+func appendsElement(n *ir.Node) bool {
+	for ; n != nil && n.Op == ir.OpDim; n = n.Kids[0] {
+		if n.Kids[1] == nil {
+			return true
+		}
+	}
+	return false
+}

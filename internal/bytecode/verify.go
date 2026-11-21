@@ -195,9 +195,6 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 	if err := verifyClasses(b, image, minor, cloneCost); err != nil {
 		return 0, err
 	}
-	if err := verifyMethods18(image); err != nil {
-		return 0, err
-	}
 	if image.Functions[image.Entry].Flags&FuncClosure != 0 {
 		return 0, invalid("the entry function is a closure function")
 	}

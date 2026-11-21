@@ -411,13 +411,19 @@ func (s *vmState) pushValue(f *vmFrame, in *vmInstr) (value, error) {
 func (s *vmState) namedTarget(rec *vmPendingCall, name string) (index int, err error) {
 	fn := &s.prog.funcs[rec.fn]
 	index = -1
-	for i, p := range fn.paramNames[:min(fn.params, len(fn.paramNames))] {
-		if p == name {
-			index = i
-			break
+	// Closure::call's own parameter comes before the closure's.
+	own := rec.shift != 0 && name == "newThis"
+	if own {
+		index = -rec.shift
+	} else {
+		for i, p := range fn.paramNames[:min(fn.params, len(fn.paramNames))] {
+			if p == name {
+				index = i
+				break
+			}
 		}
 	}
-	if index < 0 {
+	if index < 0 && !own {
 		if !fn.variadic {
 			return 0, &Throwable{"Error", "Unknown named parameter $" + name}
 		}

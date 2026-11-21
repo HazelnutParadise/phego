@@ -137,6 +137,8 @@ type vmState struct {
 	// it: writing an element through it throws.
 	typedHole     value
 	typedHoleProp *propertyInfo
+	// closureClass says the run registered the Closure class.
+	closureClass bool
 	// traceHeld are the objects the backtrace of the uncaught error holds
 	// (an owner each) until the error is reported.
 	traceHeld []value
@@ -940,6 +942,9 @@ func (s *vmState) callValue(callable value, argc int, dest uint32) error {
 		// sent; the pending arguments are discarded.
 		if err := s.dropArgs(argc); err != nil {
 			return err
+		}
+		if s.prog.Builtin != nil && s.prog.Builtin(phpname.Lower(name)) {
+			return s.unsupported("builtin function " + name + "() named by a callable")
 		}
 		return &Throwable{"Error", "Call to undefined function " + name + "()"}
 	}

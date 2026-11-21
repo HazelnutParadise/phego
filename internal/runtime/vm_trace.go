@@ -38,11 +38,29 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 	// The exception's backtrace holds the arguments of every frame: an
 	// object only an argument refers to, directly or inside an array,
 	// outlives the unwinding and is destroyed after the error is reported.
+	hold := func(a value) {
+		if a = a.deref(); a.kind == valueObject || a.kind == valueArray {
+			retain(a)
+			s.traceHeld = append(s.traceHeld, a)
+		}
+	}
+	// The frame of an internal function (a method of Closure) comes first.
+	for _, a := range args {
+		hold(a)
+	}
 	for i := len(s.frames) - 1; i >= 1; i-- {
-		for _, a := range s.frameArgs(s.frames[i]) {
-			if a = a.deref(); a.kind == valueObject || a.kind == valueArray {
-				retain(a)
-				s.traceHeld = append(s.traceHeld, a)
+		f := s.frames[i]
+		for _, a := range s.frameArgs(f) {
+			hold(a)
+		}
+		// The frame of Closure::call or __invoke below it lists the
+		// arguments again, after the object for call.
+		if f.via == closureCall && f.this != nil {
+			hold(value{kind: valueObject, object: f.this})
+		}
+		if f.via == closureCall || f.via == closureInvoke {
+			for _, a := range s.frameArgs(f) {
+				hold(a)
 			}
 		}
 	}

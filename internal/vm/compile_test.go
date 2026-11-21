@@ -475,6 +475,10 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"function attribute", "echo 1;\n#[Foo]\nfunction f() {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[\\SensitiveParameter] $a) {}", 3},
 		{"generator", "echo 1;\n$f = function () { yield 1; };", 3},
+		{"closure in a property default", "echo 1;\nclass A {\n  public $p = static function () {};\n}", 4},
+		{"closure in a property default", "echo 1;\nclass A { public static $p = [1, strtoupper2(...)]; }", 3},
+		{"passing $a[] to a callee found at run time", "echo 1;\n$f = fn(&$r) => 1;\n$f($a[]);", 4},
+		{"passing $a[] to a callee found at run time", "echo 1;\n$o->m(1, $a['k'][]);", 3},
 		{"generator", "echo 1;\n$f = fn() => yield 1;", 3},
 		{"enum declaration", "echo 1;\nenum E {}", 3},
 		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
@@ -782,8 +786,8 @@ var compilerFatal = map[string]CompileError{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 843 {
-		t.Fatalf("want 843 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 863 {
+		t.Fatalf("want 863 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
