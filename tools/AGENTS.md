@@ -1,6 +1,6 @@
 # Rules for `tools/`
 
-Each line is a condition and what to do. The story behind a line is in the commit that added it (`git log -S '<words from the line>'`).
+Before changing a rule here, read its history with `git log -S '<words from the line>'`.
 
 - Saving the output of `tools/validate_docs.py` as evidence: write the log to a temporary file, move it into place, update the evidence record, then run the validator again. The validator hashes every evidence file, so redirecting straight into the evidence directory records the hash of an empty log. It rewrites `engineering/data/document-validation.json` unless `--no-write` is given.
 - Running `tools/validate_docs.py` in a checkout that has untracked copies of the repository (for example `.claude/worktrees/`): run it in a clean `git worktree` and copy `document-validation.json` back. The validator walks the tree without reading `.gitignore`, so the copies get hashed into the record.

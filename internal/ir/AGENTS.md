@@ -1,6 +1,6 @@
 # Rules for `internal/ir`
 
-Each line is a condition and what to do. The story behind a line is in the commit that added it (`git log -S '<words from the line>'`).
+Before changing a rule here, read its history with `git log -S '<words from the line>'`.
 
 - Checking a compile-time error against PHP: `TOKEN_PARSE` does not cover `zend_compile` errors, so run `php -n -d display_errors=1 -d error_reporting=-1 -l` on each corpus file in the pinned image and read the output with `grep -a`. Conditions and messages are in `Zend/zend_compile.c` of the locked archive.
 - Adding a node anywhere in lowering: pass every node you build through `l.seal`. An unsealed node reports no effects and hides the effects of everything inside it from the enclosing `if`, loop or `try`; `TestControlFlowBodiesCarryTheirEffects` guards this.

@@ -1,6 +1,6 @@
 # Rules for `internal/runtime`
 
-Each line is a condition and what to do. The story behind a line, with the failed routes and the evidence files, is in the commit that added it (`git log -S '<words from the line>'`). Every PHP-visible rule here was measured on the pinned PHP 8.5.12 images; verify there before changing one.
+Before changing a rule here, read its history with `git log -S '<words from the line>'`. Every PHP-visible rule here was measured on the pinned PHP 8.5.12 images; verify there before changing one.
 
 ## VM and execution
 
@@ -9,7 +9,7 @@ Each line is a condition and what to do. The story behind a line, with the faile
 - Returning a value through `finally`: dereference it and take a single owner before `finally` runs, and hand it to a nested call with `returnOwned`. Retaining only before locals are released lets `finally` free it early. `replaceOwnedCompletion` holds the new value before releasing the old one and handles a throw during that release.
 - After frame locals and every return owner are cleaned up: check sticky host termination again. `heap.freeArray` keeps only the first destructor error, and a later destructor can set a cancellation, writer or limit stop that must win over the PHP throw.
 - Caching an evaluated parameter default: cache per run in `vmState.defaults`, never in `Program`. PHP keeps a default across calls only when the value is not refcounted (null, bool, int, float, empty array, interned strings), so a warning from the default prints on the first call only. `Compile` refuses defaults whose result depends on interning. This rule is inferred from probes, not read from Zend source.
-- Choosing which lazy operand `==` initialises first: it follows the C compiler of the PHP build (left first on linux/arm64 and macOS, right first on linux/amd64, linux/386 and Windows x64), which is why the heap profile is (width, arch, os). Measure any new behaviour that depends on C argument order on `macos-15-intel` and `windows-2025` through the Host profile workflow.
+- Choosing which lazy operand `==` initialises first: it follows the C compiler of the PHP build (left first on linux/arm64 and macOS, right first on linux/amd64, linux/386 and Windows x64), which is why the heap profile is (width, arch, os). Measure any new behaviour that depends on C argument order on `macos-15-intel` and `windows-2025` through the "Host profile on macOS and Windows" workflow (`.github/workflows/host-profile.yml`).
 
 ## Output and shutdown
 
@@ -46,7 +46,7 @@ Each line is a condition and what to do. The story behind a line, with the faile
 - After coercing the first assignment to a readonly property: revalidate that the receiver is alive and refetch the slot, but do not repeat the readonly qualification check. PHP commits the outer assignment even when `__toString` initialised the property in between.
 - Accepting a `self` or `parent` type on a reference: resolve it against the property's owner, as `coerceProperty` does. "May coerce" is a verifier phase and not proof the conversion succeeds; keep PHP's ordering and do not add extra `TypeError` previous chains.
 - Assigning through a typed reference: validate against the original reference sources, store through the reference as it is currently bound, and do not re-run type validation for a rebound destination. Hold the original reference and the borrowed right-hand value during callbacks. Tests must use the real cell pointers, because copied cells hide the defect.
-- Passing a typed-property reference to a by-reference parameter of another type: reject before any conversion or body execution, even for `mixed`. Untyped references still coerce and write back. Check callable acceptance before rejecting typed sources.
+- Passing a typed-property reference to a by-reference parameter of another type: reject before any conversion or body execution, even when the property is `mixed`. Untyped references still coerce and write back. Check callable acceptance before rejecting typed sources.
 - Mutating the typed-source list while `__toString` runs: do not clear entries with `slices.DeleteFunc`. PHP captures the initial extent but reads current cells; removal swaps the last entry into the first match, and the list shrinks at a quarter full. Behaviour across reallocation is unverified.
 - Validating a setter hook's input: use the setter parameter's type and name, not the backing type. Take the receiver and raw right-hand holds before coercion, and enable `currentHook` only after preparation, inside the cleared callback frame. Build the synthetic method name only when a `TypeError` is raised.
 - Naming a getter in an error: build the `$name::get` label only in the two error formatters. Allocating it before successful return validation cost one allocation per read.
@@ -73,4 +73,3 @@ Each line is a condition and what to do. The story behind a line, with the faile
 - Deciding whether a bare object is callable: look up the effective `__invoke` on the receiver's class and ignore its visibility; `__call` alone does not make a bare object callable. Strict-types cases need a real `declare(strict_types=1)` file.
 - Resolving `__call` and `__callStatic`: use the receiver's effective handler with no lexical scope and no visibility gate, including the fallback for an inaccessible explicit `__call`. `is_callable` ignores handler visibility too. Pass arguments positionally, never as named arguments.
 - Validating a relative callable (`self`, `parent`, `static`): use the callee's lexical scope, the actual called class and whether the callee has `$this`, not the caller's scope. The deprecation fires exactly once after class resolution, even when the method is invalid; a leading backslash is not relative.
-- Changing a diagnostic harness under `engineering/implementation/evidence/`: archive the input versions of each recorded run with their hashes. A later change to a shared helper made a recorded output impossible to replay until the original sources were recovered.

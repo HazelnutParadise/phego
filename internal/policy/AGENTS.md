@@ -1,6 +1,6 @@
 # Rules for `internal/policy`
 
-Each line is a condition and what to do. The story behind a line is in the commit that added it (`git log -S '<words from the line>'`).
+Before changing a rule here, read its history with `git log -S '<words from the line>'`.
 
 - Opening a FIFO for reading: first ask a private level-triggered epoll (Linux) or kqueue (darwin, BSD) whether data or a hang-up is present, and only when there is no data do a 1-byte non-blocking read, where `EAGAIN` means a writer is present. Reading first loses a byte for other readers. Do not use `ioctl(FIONREAD)`, which needs `unsafe`, and never open the other end yourself to end a wait. A blocking `syscall.Open` in tests needs an `EINTR` retry loop.
 - Cancelling a blocked read of a FIFO or device: read in place and end it through the file itself, as `special_unix.go` does (a past deadline where the file is pollable, otherwise non-blocking reads that watch the context). Closing the file does not end a FIFO read on darwin, and a background reader goroutine keeps OS threads and takes the next reader's bytes.
