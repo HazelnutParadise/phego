@@ -67,7 +67,7 @@ func (s *vmState) storeElement(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	return s.h.assign(slot, operandValue(f.regs, in.b))
+	return s.h.assignPHP(slot, operandValue(f.regs, in.b), f.fn.strict)
 }
 
 // fetchDim is ZEND_FETCH_DIM_W, ZEND_FETCH_DIM_RW and ZEND_FETCH_DIM_UNSET
@@ -542,7 +542,12 @@ func (s *vmState) iterInit(f *vmFrame, in *vmInstr) (iterable bool, err error) {
 	case valueArray:
 		return true, s.setReg(f.regs, in.a, value{kind: valueArray, array: v.array})
 	case valueObject:
-		return false, s.unsupported("iterating an object")
+		// The iterator holds the object and a position in its property
+		// table: the loop sees properties as they are when it reaches them.
+		old := f.regs[in.a]
+		retain(v)
+		f.regs[in.a] = value{kind: valueObject, object: v.object}
+		return true, s.releaseValue(old)
 	}
 	old := f.regs[in.a]
 	f.regs[in.a] = value{}
@@ -560,6 +565,9 @@ func (s *vmState) iterInit(f *vmFrame, in *vmInstr) (iterable bool, err error) {
 // CV. It reports false when the iteration is over or the run stopped.
 func (s *vmState) iterNext(f *vmFrame, in *vmInstr) (more bool, err error) {
 	it := &f.regs[in.a]
+	if it.kind == valueObject && it.object != nil && !it.object.freed {
+		return s.iterNextObject(f, in)
+	}
 	if it.kind != valueArray {
 		return false, s.unsupported("advancing an iterator that IterInit did not create")
 	}
@@ -581,6 +589,9 @@ func (s *vmState) iterNext(f *vmFrame, in *vmInstr) (more bool, err error) {
 // iterKey is the key of the element IterNext fetched last.
 func (s *vmState) iterKey(f *vmFrame, in *vmInstr) error {
 	it := f.regs[in.b]
+	if it.kind == valueObject && it.object != nil && !it.object.freed {
+		return s.iterKeyObject(f, in)
+	}
 	if it.kind != valueArray || it.integer <= 0 || it.integer > int64(len(it.array.buckets)) || it.array.buckets[it.integer-1] == nil {
 		return s.unsupported("reading the key of an iterator that has no current element")
 	}

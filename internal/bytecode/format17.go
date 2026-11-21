@@ -110,11 +110,29 @@ const (
 // Value A, the result of a call: a by-reference parameter gets it with
 // PHP's "Only variables should be passed by reference" notice
 // (ZEND_SEND_VAR_NO_REF_EX).
+//
+// PushElement sends the Value A, read from an element or a property. PHP
+// fetches such an argument for writing when the parameter is by reference
+// (ZEND_FETCH_DIM_FUNC_ARG, ZEND_FETCH_OBJ_FUNC_ARG); this format cannot
+// yet, so a by-reference parameter ends the run as unsupported instead of
+// receiving a copy.
 const (
-	PushAuto   PushFlags = 2
-	PushTemp   PushFlags = 3
-	PushResult PushFlags = 4
+	PushAuto    PushFlags = 2
+	PushTemp    PushFlags = 3
+	PushResult  PushFlags = 4
+	PushElement PushFlags = 5
 )
+
+// NewArgs, in the Aux of OpNew, says arguments follow: a class without a
+// constructor then starts a call that evaluates and discards them, as
+// ZEND_NEW calls zend_pass_function, and C is not taken.
+const NewArgs uint16 = 1 << 3
+
+// InitCallable, in the Aux of OpInitMethod, makes A a callable value
+// instead of an object whose method B names: an object is called through
+// __invoke and a string names a function (ZEND_INIT_DYNAMIC_CALL). B is
+// zero.
+const InitCallable uint16 = 1 << 4
 
 // UnknownCallee is the callee of a call OpNew, OpInitMethod or OpInitStatic
 // started: it is found when the instruction runs.
@@ -164,8 +182,11 @@ func Roles17(in Instruction) (roles [3]Role, ok bool) {
 	case OpDeclareClass:
 		return [3]Role{RoleNone, RoleClass, RoleNone}, aux == 0
 	case OpNew:
-		return [3]Role{RoleDef, class(), RoleTarget}, only(classRefMask) && validRef
+		return [3]Role{RoleDef, class(), RoleTarget}, only(classRefMask|NewArgs) && validRef
 	case OpInitMethod:
+		if aux == InitCallable {
+			return [3]Role{RoleUse, RoleNone, RoleNone}, true
+		}
 		return [3]Role{RoleUse, name, RoleNone}, only(MemberNameReg)
 	case OpInitStatic:
 		return [3]Role{class(), name, RoleNone}, only(classRefMask|MemberNameReg) && validRef

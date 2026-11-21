@@ -322,8 +322,10 @@ func (p *parser) statements(top bool, done func() bool) []*Node {
 func (p *parser) block() *Node {
 	t := p.expect('{')
 	body := p.statements(false, func() bool { return p.at('}') })
-	p.expect('}')
-	return node("block", t.Line, body...)
+	end := p.expect('}')
+	n := node("block", t.Line, body...)
+	n.CloseLine = end.Line
+	return n
 }
 
 // altBody parses statements up to one of the end keywords for alternative syntax.

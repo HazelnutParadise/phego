@@ -18,7 +18,7 @@ const 6: string "w"
 const 7: string "r"
 const 8: string "x"
 const 9: string "y"
-func 0 "{main}" params=0 locals=6 registers=10 maxstack=0
+func 0 "{main}" params=0 locals=6 registers=10 maxstack=0 flags=nothis
   local 0 "u"
   local 1 "a"
   local 2 "v"
@@ -60,7 +60,7 @@ func 0 "{main}" params=0 locals=6 registers=10 maxstack=0
   31: Store 0 4 7 0 ; line 4
   32: Const 0 6 2 0 ; line 6 ; null
   33: Return 0 6 0 0 ; line 6
-func 1 "f" params=0 locals=1 registers=3 maxstack=0
+func 1 "f" params=0 locals=1 registers=3 maxstack=0 flags=nothis
   local 0 "y"
   registers LVV
   0: Local 0 0 0 0 ; line 5

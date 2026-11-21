@@ -548,9 +548,9 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid push operands")
 		}
 		wantsLocation := in.Aux == uint16(PushLoad) || in.Aux == uint16(PushAuto)
-		wantsValue := in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult)
-		if in.Aux > uint16(PushResult) || (wantsLocation && f.Registers[in.A] != Location) || (wantsValue && f.Registers[in.A] != Value) {
-			return invalid("invalid push operands: Aux is 0, PushLoad or PushAuto, which need a Location in A, or PushTemp or PushResult, which need a Value")
+		wantsValue := in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult) || in.Aux == uint16(PushElement)
+		if in.Aux > uint16(PushElement) || (wantsLocation && f.Registers[in.A] != Location) || (wantsValue && f.Registers[in.A] != Value) {
+			return invalid("invalid push operands: Aux is 0, PushLoad or PushAuto, which need a Location in A, or PushTemp, PushResult or PushElement, which need a Value")
 		}
 		if in.B != 0 && (uint64(in.B-1) >= uint64(len(image.Constants)) || image.Constants[in.B-1].Kind != String) {
 			return invalid("invalid named argument")
@@ -1318,7 +1318,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 					return invalidPC("push by the callee's declaration outside a call whose callee is resolved at run time")
 				}
 				a.kind, a.late = Value, true
-			case in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult):
+			case in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult) || in.Aux == uint16(PushElement):
 				a.late = true
 				if m := mark(); m < 0 || stack[m].fn != UnknownCallee {
 					return invalidPC("push by the callee's declaration outside a call whose callee is resolved at run time")
@@ -1601,8 +1601,10 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 		}
 		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit && in.Op != OpMatchError) {
 			if fallMark {
-				if _, err := merge(int(in.C), scratchDefs, scratchRefs, stack); err != nil {
-					return flowError(err, fi, pc)
+				if in.Aux&NewArgs == 0 {
+					if _, err := merge(int(in.C), scratchDefs, scratchRefs, stack); err != nil {
+						return flowError(err, fi, pc)
+					}
 				}
 				if err := push(argShape{kind: shapeMark, fn: UnknownCallee}); err != nil {
 					return err

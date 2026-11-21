@@ -443,14 +443,23 @@ func (s *vmState) cast(kind bytecode.CastKind, v value) (value, error) {
 		}
 		str, err := h.toString(v)
 		return stringValue(str), err
+	case bytecode.CastObject:
+		return s.castObject(v)
 	case bytecode.CastArray:
 		switch v.kind {
 		case valueArray:
 			return v, nil
 		case valueUndefined, valueNull:
 			return h.newArrayValue(), nil
-		case valueObject, valueResource:
-			return value{}, s.unsupported("casting an object or resource to array")
+		case valueObject:
+			arr, err := s.objectArray(v.object, nil, false, false)
+			if err != nil {
+				return value{}, err
+			}
+			unown(arr)
+			return arr, nil
+		case valueResource:
+			return value{}, s.unsupported("casting a resource to array")
 		}
 		out := h.newArrayValue()
 		if err := h.setElement(&out, h.number(0), v); err != nil {
@@ -536,7 +545,10 @@ func (s *vmState) increment(v value) (value, error) {
 	case valueArray:
 		return value{}, &Throwable{"TypeError", "Cannot increment array"}
 	}
-	return value{}, s.unsupported("incrementing an object or resource")
+	if v.kind == valueObject {
+		return value{}, &Throwable{"TypeError", "Cannot increment " + v.object.class.name}
+	}
+	return value{}, s.unsupported("incrementing a resource")
 }
 
 // decrement is decrement_function.
@@ -576,7 +588,10 @@ func (s *vmState) decrement(v value) (value, error) {
 	case valueArray:
 		return value{}, &Throwable{"TypeError", "Cannot decrement array"}
 	}
-	return value{}, s.unsupported("decrementing an object or resource")
+	if v.kind == valueObject {
+		return value{}, &Throwable{"TypeError", "Cannot decrement " + v.object.class.name}
+	}
+	return value{}, s.unsupported("decrementing a resource")
 }
 
 // incrementString is increment_string's Perl-style increment.

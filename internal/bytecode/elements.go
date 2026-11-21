@@ -182,6 +182,9 @@ func (w *elementWindow) step(in Instruction, elem []bool, other func(r, base uin
 		}
 	case OpBinary:
 		return w.loaded, nil
+	case OpUnary:
+		// The step of ++ or -- between the read and the write of a property.
+		return w.loaded && (UnaryOp(in.Aux) == Increment || UnaryOp(in.Aux) == Decrement), nil
 	case OpStore:
 		if in.A == e {
 			w.open = false

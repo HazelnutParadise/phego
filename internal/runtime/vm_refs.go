@@ -56,8 +56,14 @@ func (s *vmState) bind(f *vmFrame, in *vmInstr) error {
 		return err
 	}
 	if in.c != 0 {
-		// The Bind that receives a by-reference parameter with a default.
+		// The Bind that receives a by-reference parameter with a default
+		// or a declared type.
 		s.cacheDefault(f, in)
+		if f.fn.typed {
+			if err := s.checkParameter(f, int(in.c)-1); err != nil {
+				return err
+			}
+		}
 	}
 	if bytecode.BindFlags(in.aux) != bytecode.BindValue {
 		src, err := s.slot(f, in.b)
@@ -158,10 +164,15 @@ func (s *vmState) iterInitRef(f *vmFrame, in *vmInstr) (iterable bool, err error
 	}
 	// The subject is read (BP_VAR_R): an undefined variable warns and is
 	// not created, and only an array becomes a reference.
+	if t := subject.deref(); t.kind == valueObject {
+		// The iterator holds the object and a position in its property
+		// table; boolean marks it as binding each property by reference.
+		old := f.regs[in.a]
+		retain(t)
+		f.regs[in.a] = value{kind: valueObject, object: t.object, boolean: true}
+		return true, s.releaseValue(old)
+	}
 	if t := subject.deref(); t.kind != valueArray {
-		if t.kind == valueObject {
-			return false, s.unsupported("iterating an object")
-		}
 		if t.kind == valueUndefined && in.aux&vmIterSubjectLocation != 0 {
 			if name, ok := s.variableName(f, in.b); ok {
 				s.h.warn(levelWarning, "Undefined variable $"+name)
@@ -182,6 +193,7 @@ func (s *vmState) iterInitRef(f *vmFrame, in *vmInstr) (iterable bool, err error
 	if err := s.h.bind(&loop, subject); err != nil {
 		return false, err
 	}
+
 	var index int
 	if n := len(s.freeIters); n > 0 {
 		index, s.freeIters = s.freeIters[n-1], s.freeIters[:n-1]

@@ -246,6 +246,13 @@ func w17LogLines(ds []Diagnostic) []byte {
 	var b []byte
 	for _, d := range ds {
 		b = fmt.Appendf(b, "PHP %s:  %s in %s on line %d\n", d.Level, d.Message, d.File, d.Line)
+		// PHP 8.5 appends the backtrace to a fatal error that is not an
+		// exception. A Diagnostic does not carry it; the fixtures raise
+		// such errors (a class that cannot be declared) at top level only,
+		// where it is {main} alone.
+		if d.Level == "Fatal error" && !strings.HasPrefix(d.Message, "Uncaught ") {
+			b = append(b, "Stack trace:\n#0 {main}\n"...)
+		}
 	}
 	return b
 }

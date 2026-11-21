@@ -51,6 +51,19 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 	fail := func(feature string, line int) *UnsupportedError {
 		return &UnsupportedError{Feature: feature, File: c.unit.File, Line: positive(line, positive(cl.Line, 1))}
 	}
+	if isBuiltinClass(cl.Name) {
+		return fail("declaring a class with the name of builtin class "+cl.Name, cl.Line)
+	}
+	names := append([]*ir.Name{}, cl.Interfaces...)
+	if cl.Parent != nil {
+		names = append([]*ir.Name{cl.Parent}, names...)
+	}
+	for _, n := range append(names, cl.Traits...) {
+		lower := phpname.Lower(n.Resolved)
+		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "stringable" {
+			return fail("extending or implementing builtin class "+n.Resolved, cl.Line)
+		}
+	}
 	switch {
 	case cl.Kind == ir.KindEnum:
 		return fail("enum declaration", cl.Line)
@@ -81,6 +94,34 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 		if len(m.Attributes) > 0 {
 			return fail("method attribute", m.Attributes[0].Line)
 		}
+		if m.ByRef {
+			return fail("return by reference", m.Line)
+		}
+	}
+	return nil
+}
+
+// classCompileError reports a declaration PHP rejects while compiling the
+// class (zend_begin_method_decl, zend_compile_prop_group) that the
+// lowering lets through.
+func (c *compiler) classCompileError(cl *ir.Class) *CompileError {
+	fail := func(line int, msg string) *CompileError {
+		return &CompileError{Message: msg, File: c.unit.File, Line: positive(line, positive(cl.Line, 1))}
+	}
+	if cl.Kind == ir.KindInterface {
+		for _, p := range cl.Props {
+			if !p.HasHooks {
+				return fail(p.Line, "Interfaces may only include hooked properties")
+			}
+		}
+	}
+	for _, m := range cl.Methods {
+		switch {
+		case cl.Kind == ir.KindInterface && (hasMod(m.Modifiers, "private") || hasMod(m.Modifiers, "protected")):
+			return fail(m.Line, "Access type for interface method "+cl.Name+"::"+m.Name+"() must be public")
+		case hasMod(m.Modifiers, "abstract") && m.HasBody:
+			return fail(m.Line, "Abstract function "+cl.Name+"::"+m.Name+"() cannot contain body")
+		}
 	}
 	return nil
 }
@@ -105,7 +146,14 @@ func (c *compiler) constValue(cl *ir.Class, n *ir.Node, out *[]bytecode.Function
 func (c *compiler) classTable(nfuncs int) (table []bytecode.Class, pending []*ir.Func, err *UnsupportedError) {
 	out := make([]bytecode.Function, nfuncs) // only its length is used
 	c.classIndex = make(map[*ir.Class]uint32, len(c.unit.Classes))
+	c.declaredClass = make(map[string]bool, len(c.unit.Classes))
 	for _, cl := range c.unit.Classes {
+		c.declaredClass[phpname.Lower(cl.Name)] = true
+	}
+	for _, cl := range c.unit.Classes {
+		if ce := c.classCompileError(cl); ce != nil {
+			panic(ce)
+		}
 		if ue := c.classUnsupported(cl); ue != nil {
 			if err == nil || ue.Line < err.Line {
 				err = ue
@@ -208,6 +256,11 @@ func (fc *fnCompiler) classRef(name *ir.Name, expr *ir.Node) (bytecode.ClassRef,
 		}
 		return bytecode.ClassValue, fc.value(expr)
 	}
+	if name.Special != "" && fc.f.Kind == ir.FuncNamed && fc.f.Class == nil {
+		// zend_ensure_valid_class_fetch_type: a function's scope is known
+		// while it is compiled, and it has none.
+		panic(&CompileError{Message: `Cannot use "` + name.Special + `" when no class scope is active`, File: fc.c.unit.File, Line: positive(fc.cur, 1)})
+	}
 	switch name.Special {
 	case "self":
 		return bytecode.ClassSelf, 0
@@ -216,7 +269,19 @@ func (fc *fnCompiler) classRef(name *ir.Name, expr *ir.Node) (bytecode.ClassRef,
 	case "static":
 		return bytecode.ClassStatic, 0
 	}
+	fc.c.checkBuiltinClass(name.Resolved, fc.cur, fc.instanceofOperand)
 	return bytecode.ClassNamed, fc.c.stringConst(name.Resolved)
+}
+
+// checkBuiltinClass reports the use of a class PHP declares itself and
+// Phego does not provide yet. instanceOf allows any name: the test is then
+// by name, and false for every object a program can create.
+func (c *compiler) checkBuiltinClass(name string, line int, instanceOf bool) {
+	lower := phpname.Lower(name)
+	if instanceOf || c.declaredClass[lower] || !isBuiltinClass(lower) || supportedBuiltinClasses[lower] {
+		return
+	}
+	panic(&UnsupportedError{Feature: "builtin class " + name, File: c.unit.File, Line: positive(line, 1)})
 }
 
 // memberName is the name operand of a member access: the literal name, or
@@ -389,7 +454,9 @@ func (fc *fnCompiler) className(n *ir.Node) operand {
 
 func (fc *fnCompiler) instanceOf(n *ir.Node) operand {
 	v := fc.value(n.Kids[0])
+	fc.instanceofOperand = true
 	ref, class := fc.classRef(n.Name, n.Kids[1])
+	fc.instanceofOperand = false
 	fc.at(n.Line)
 	res := fc.alloc()
 	fc.emit(bytecode.OpInstanceof, uint16(ref), res, v, class)
@@ -454,6 +521,8 @@ func (fc *fnCompiler) sendArgs(n *ir.Node, res uint32) {
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushAuto), fc.varLoc(v.Var), name, 0)
 			case isCall(v):
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushResult), fc.value(v), name, 0)
+			case v.Op == ir.OpDim || v.Op == ir.OpProp || v.Op == ir.OpStaticProp:
+				fc.emit(bytecode.OpPush, uint16(bytecode.PushElement), fc.value(v), name, 0)
 			default:
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushTemp), fc.value(v), name, 0)
 			}
@@ -477,7 +546,11 @@ func (fc *fnCompiler) newExpr(n *ir.Node) operand {
 	ref, class := fc.classRef(n.Name, n.Kids[0])
 	fc.at(n.Line)
 	none := fc.label()
-	pc := fc.emit(bytecode.OpNew, uint16(ref), res, class, 0)
+	aux := uint16(ref)
+	if len(n.Args) > 0 {
+		aux |= bytecode.NewArgs
+	}
+	pc := fc.emit(bytecode.OpNew, aux, res, class, 0)
 	fc.fixups = append(fc.fixups, fixup{pc, 2, none})
 	// The constructor's result is discarded.
 	t := fc.alloc()
@@ -925,3 +998,121 @@ func (fc *fnCompiler) returnType() string {
 
 // lowerName folds a PHP identifier for comparison.
 func lowerName(s string) string { return phpname.Lower(s) }
+
+// callValue compiles $callable(args) for positional arguments
+// (ZEND_INIT_DYNAMIC_CALL): an object is called through __invoke, a string
+// names a function.
+func (fc *fnCompiler) callValue(n *ir.Node) operand {
+	res := fc.alloc()
+	callee := fc.value(n.Kids[0])
+	fc.at(n.Line)
+	fc.emit(bytecode.OpInitMethod, bytecode.InitCallable, callee, 0, 0)
+	fc.sendArgs(n, res)
+	fc.top = res - fc.base + 1
+	return reg(res)
+}
+
+// bindMember compiles "$obj->name =& source" and "A::$name =& source"
+// (ZEND_ASSIGN_OBJ_REF, ZEND_ASSIGN_STATIC_PROP_REF): the property's place
+// is fetched for writing and bound to the source's reference.
+func (fc *fnCompiler) bindMember(n *ir.Node, used bool) operand {
+	target, source := n.Kids[0], n.Kids[1]
+	if used {
+		fc.unsupported("value of an assignment by reference to a property", n.Line)
+	}
+	d := fc.delay(target)
+	var ref uint32
+	switch source.Op {
+	case ir.OpProp, ir.OpStaticProp:
+		ref = fc.memberRef(source)
+	default:
+		src := fc.refSource(source, n.Line)
+		ref = fc.alloc()
+		fc.emit(bytecode.OpMakeRef, 0, ref, src, 0)
+	}
+	d.fetch(bytecode.MemberWrite)
+	fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), elemReg, ref, 0)
+	return reg(fc.alloc())
+}
+
+// memberBased reports whether the element target n is reached through a
+// property or a static property.
+func memberBased(n *ir.Node) bool {
+	for n != nil && n.Op == ir.OpDim {
+		n = n.Kids[0]
+	}
+	return n != nil && (n.Op == ir.OpProp || n.Op == ir.OpStaticProp)
+}
+
+// pureTarget reports whether evaluating the operands of the write target n
+// twice is the same as evaluating them once: variables, $this and literal
+// names and keys only.
+func pureTarget(n *ir.Node) bool {
+	for n != nil {
+		switch n.Op {
+		case ir.OpVar, ir.OpThis:
+			return true
+		case ir.OpDim:
+			if k := n.Kids[1]; k != nil && k.Op != ir.OpLiteral && k.Op != ir.OpVar {
+				return false
+			}
+		case ir.OpProp:
+			if len(n.Kids) > 1 && n.Kids[1] != nil {
+				return false
+			}
+		case ir.OpStaticProp:
+			return n.Name != nil && (len(n.Kids) < 2 || n.Kids[1] == nil)
+		default:
+			return false
+		}
+		n = n.Kids[0]
+	}
+	return false
+}
+
+// quietRead is the target n as a quiet read (FETCH_*_IS at every level).
+func quietRead(n *ir.Node) *ir.Node {
+	if n == nil {
+		return nil
+	}
+	c := *n
+	c.Flags = ir.FlagQuiet
+	switch n.Op {
+	case ir.OpDim, ir.OpProp:
+		c.Kids = append([]*ir.Node(nil), n.Kids...)
+		c.Kids[0] = quietRead(n.Kids[0])
+	}
+	return &c
+}
+
+// coalesceSetMemberDim compiles "$obj->prop[k] ??= value": the element is
+// read quietly, and only when it is null is the value evaluated and the
+// element written. PHP compiles the target twice as well, sharing its
+// operand expressions, which are therefore limited here to ones without
+// side effects.
+func (fc *fnCompiler) coalesceSetMemberDim(n *ir.Node) operand {
+	target := n.Kids[0]
+	if !pureTarget(target) {
+		fc.unsupported("??= on an element of a property with computed operands", n.Line)
+	}
+	res := fc.alloc()
+	mark := fc.top
+	cur := fc.value(quietRead(target))
+	null, t := fc.alloc(), fc.alloc()
+	fc.emit(bytecode.OpConst, 0, null, fc.c.literal(&ir.Literal{Kind: ir.LitNull}), 0)
+	fc.emit(bytecode.OpBinary, uint16(bytecode.Identical), t, cur, null)
+	assign, keep, end := fc.label(), fc.label(), fc.label()
+	fc.branch(t, assign, keep)
+	fc.bind(keep)
+	fc.emit(bytecode.OpMove, 0, res, cur, 0)
+	fc.jump(end)
+	fc.bind(assign)
+	fc.top = mark
+	dt := fc.dimTarget(target, n.Line)
+	v := fc.value(n.Kids[1])
+	fc.emit(bytecode.OpMove, 0, res, v, 0)
+	fc.writeDim(dt, reg(v), false, false)
+	fc.bind(end)
+	fc.top = mark
+	return reg(res)
+}

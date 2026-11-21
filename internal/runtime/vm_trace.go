@@ -46,7 +46,7 @@ func traceName(f *vmFrame) string {
 	if f.scope == nil {
 		return f.fn.name
 	}
-	if f.this.kind == valueObject {
+	if f.this != nil {
 		return f.scope.name + "->" + f.fn.name
 	}
 	return f.scope.name + "::" + f.fn.name

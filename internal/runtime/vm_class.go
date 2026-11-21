@@ -191,6 +191,14 @@ func (prog *Program) decodeClasses(p *bytecode.Program) error {
 		if d.flags&bytecode.ClassHoisted != 0 {
 			prog.hoisted = append(prog.hoisted, i)
 		}
+		if d.flags&bytecode.ClassTrait != 0 {
+			if prog.fnTrait == nil {
+				prog.fnTrait = make([]bool, len(prog.funcs))
+			}
+			for _, m := range d.methods {
+				prog.fnTrait[m.fn] = true
+			}
+		}
 	}
 	return nil
 }
@@ -212,6 +220,9 @@ type vmClass struct {
 	// case names in declaration order.
 	defaults    map[string]any
 	methodOrder []string
+	// sigs holds, per lower-case method name, the declaration PHP prints
+	// after "Class::" in inheritance errors.
+	sigs map[string]string
 }
 
 type vmClassConst struct {
@@ -223,7 +234,12 @@ type vmClassConst struct {
 
 // vmFatal is a PHP fatal error that is not a Throwable (E_ERROR or
 // E_COMPILE_ERROR raised while a class is declared).
-type vmFatal struct{ message string }
+type vmFatal struct {
+	message string
+	// line, when positive, is the line PHP reports instead of the
+	// declaring instruction's: that of the member at fault.
+	line int
+}
 
 func (e *vmFatal) Error() string { return e.message }
 
@@ -242,7 +258,21 @@ func (s *vmState) lookupClass(name string) *class {
 	if len(name) > 0 && name[0] == '\\' {
 		name = name[1:]
 	}
-	return s.h.classes[phpname.Lower(name)]
+	lower := phpname.Lower(name)
+	if c := s.h.classes[lower]; c != nil {
+		return c
+	}
+	switch lower {
+	case "stdclass":
+		if s.h.registerClass(stdClassBuiltin) == nil {
+			return stdClassBuiltin
+		}
+	case "stringable":
+		if s.h.registerClass(stringableBuiltin) == nil {
+			return stringableBuiltin
+		}
+	}
+	return nil
 }
 
 // declareHoisted declares the classes PHP binds while compiling the file.
@@ -290,7 +320,7 @@ func (s *vmState) declareClass(index int) error {
 		if old.vm != nil {
 			where = " (previously declared in " + vmFileName(old.vm.decl.file) + ":" + strconv.Itoa(old.vm.decl.line) + ")"
 		}
-		return &vmFatal{"Cannot redeclare " + classKind(old) + " " + old.name + where}
+		return &vmFatal{message: "Cannot redeclare " + classKind(old) + " " + old.name + where}
 	}
 	vc := &vmClass{decl: d, consts: map[string]*vmClassConst{}}
 	spec := classSpec{
@@ -308,13 +338,13 @@ func (s *vmState) declareClass(index int) error {
 		}
 		switch ps := parent.schema; {
 		case ps != nil && ps.isInterface:
-			return &vmFatal{"Class " + d.name + " cannot extend interface " + parent.name}
+			return &vmFatal{message: "Class " + d.name + " cannot extend interface " + parent.name}
 		case ps != nil && ps.isTrait:
-			return &vmFatal{"Class " + d.name + " cannot extend trait " + parent.name}
+			return &vmFatal{message: "Class " + d.name + " cannot extend trait " + parent.name}
 		case ps != nil && ps.enumKind != enumNone:
-			return &vmFatal{"Class " + d.name + " cannot extend enum " + parent.name}
+			return &vmFatal{message: "Class " + d.name + " cannot extend enum " + parent.name}
 		case ps != nil && ps.final:
-			return &vmFatal{"Class " + d.name + " cannot extend final class " + parent.name}
+			return &vmFatal{message: "Class " + d.name + " cannot extend final class " + parent.name}
 		}
 		spec.parent = parent
 	}
@@ -325,9 +355,9 @@ func (s *vmState) declareClass(index int) error {
 		}
 		if c.schema == nil || !c.schema.isInterface {
 			if spec.isInterface {
-				return &vmFatal{d.name + " cannot implement " + c.name + " - it is not an interface"}
+				return &vmFatal{message: d.name + " cannot implement " + c.name + " - it is not an interface"}
 			}
-			return &vmFatal{d.name + " cannot implement " + c.name + " - it is not an interface"}
+			return &vmFatal{message: d.name + " cannot implement " + c.name + " - it is not an interface"}
 		}
 		spec.interfaces = append(spec.interfaces, c)
 	}
@@ -337,7 +367,7 @@ func (s *vmState) declareClass(index int) error {
 			return &Throwable{"Error", `Trait "` + name + `" not found`}
 		}
 		if c.schema == nil || !c.schema.isTrait {
-			return &vmFatal{d.name + " cannot use " + c.name + " - it is not a trait"}
+			return &Throwable{"Error", d.name + " cannot use " + c.name + " - it is not a trait"}
 		}
 		spec.traits = append(spec.traits, c)
 	}
@@ -385,7 +415,7 @@ func (s *vmState) declareClass(index int) error {
 		if errors.As(err, &t) {
 			// buildClass reports PHP's inheritance errors as throwables;
 			// PHP raises them as fatal errors.
-			return &vmFatal{t.Message}
+			return &vmFatal{message: t.Message}
 		}
 		return s.internal("class %s: %v", d.name, err)
 	}
@@ -534,24 +564,24 @@ func (s *vmState) classMethods(vc *vmClass, d *vmClassDecl, spec *classSpec) ([]
 		winner := traitOf(r.trait)
 		if winner == nil {
 			if c := s.lookupClass(r.trait); c == nil {
-				return nil, &vmFatal{`Could not find trait ` + r.trait}
+				return nil, &vmFatal{message: `Could not find trait ` + r.trait}
 			}
-			return nil, &vmFatal{"Required Trait " + r.trait + " wasn't added to " + d.name}
+			return nil, &vmFatal{message: "Required Trait " + r.trait + " wasn't added to " + d.name}
 		}
 		lower := phpname.Lower(r.method)
 		if winner.schema.methods[lower] == nil {
-			return nil, &vmFatal{"A precedence rule was defined for " + winner.name + "::" + r.method + " but this method does not exist"}
+			return nil, &vmFatal{message: "A precedence rule was defined for " + winner.name + "::" + r.method + " but this method does not exist"}
 		}
 		for _, name := range r.insteadof {
 			loser := traitOf(name)
 			if loser == nil {
 				if c := s.lookupClass(name); c == nil {
-					return nil, &vmFatal{`Could not find trait ` + name}
+					return nil, &vmFatal{message: `Could not find trait ` + name}
 				}
-				return nil, &vmFatal{"Required Trait " + name + " wasn't added to " + d.name}
+				return nil, &vmFatal{message: "Required Trait " + name + " wasn't added to " + d.name}
 			}
 			if loser == winner {
-				return nil, &vmFatal{"Inconsistent insteadof definition. The method " + r.method + " is to be used from " + winner.name + ", but " + winner.name + " is also on the exclude list"}
+				return nil, &vmFatal{message: "Inconsistent insteadof definition. The method " + r.method + " is to be used from " + winner.name + ", but " + winner.name + " is also on the exclude list"}
 			}
 			if excluded[loser] == nil {
 				excluded[loser] = map[string]bool{}
@@ -570,7 +600,7 @@ func (s *vmState) classMethods(vc *vmClass, d *vmClassDecl, spec *classSpec) ([]
 			if other == t {
 				return nil
 			}
-			return &vmFatal{"Trait method " + t.name + "::" + name + " has not been applied as " + d.name + "::" + name + ", because of collision with " + other.name + "::" + name}
+			return &vmFatal{message: "Trait method " + t.name + "::" + name + " has not been applied as " + d.name + "::" + name + ", because of collision with " + other.name + "::" + name}
 		}
 		from[lower] = t
 		ms := *src
@@ -762,10 +792,4 @@ func (s *vmState) releaseClasses() {
 		}
 	}
 	s.declared = nil
-}
-
-// linkCheck applies PHP's inheritance rules to a class about to be built
-// (zend_do_link_class), against the classes that exist now.
-func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error {
-	return nil
 }

@@ -19,7 +19,7 @@ const 2: int 1
 const 3: int 2
 const 4: null
 const 5: string "i"
-func 0 "{main}" params=0 locals=1 registers=4 maxstack=0
+func 0 "{main}" params=0 locals=1 registers=4 maxstack=0 flags=nothis
   local 0 "i"
   registers LVVV
   0: Local 0 0 0 0 ; line 1

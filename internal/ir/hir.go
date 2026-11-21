@@ -281,12 +281,15 @@ type Func struct {
 	Kind FuncKind
 	// Name is the fully qualified name for functions, the method name for
 	// methods and the "{closure:...}" name PHP reports for closures.
-	Name      string
-	Line      int
-	Params    []*Param
-	Return    *Type
-	ByRef     bool // returns by reference
-	HasBody   bool
+	Name    string
+	Line    int
+	Params  []*Param
+	Return  *Type
+	ByRef   bool // returns by reference
+	HasBody bool
+	// EndLine is the line of the body's closing brace, where PHP places
+	// the function's implicit return; zero when unknown.
+	EndLine   int
 	Static    bool // static method or static closure
 	Generator bool
 	Variadic  bool // the last parameter is variadic

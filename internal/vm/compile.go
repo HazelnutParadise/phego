@@ -104,6 +104,8 @@ func CompileWith(ctx context.Context, unit *ir.Unit, source []byte, opts Options
 			switch x := r.(type) {
 			case *UnsupportedError:
 				err = x
+			case *CompileError:
+				err = x
 			case ctxError:
 				err = x.err
 			case internalError:
@@ -147,6 +149,8 @@ type compiler struct {
 	line           int // line of the node being compiled, for internal errors
 	// classIndex is each compiled class's index in the class table.
 	classIndex map[*ir.Class]uint32
+	// declaredClass holds the lower-case names of the unit's classes.
+	declaredClass map[string]bool
 }
 
 func (c *compiler) compile(source []byte) (bytecode.Image, error) {

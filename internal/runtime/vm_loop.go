@@ -87,8 +87,15 @@ func (s *vmState) loop() {
 			goto advance
 		case bytecode.OpStore:
 			if in.c != 0 {
-				// The Store that receives a parameter with a default.
+				// The Store that receives a parameter with a default or
+				// a declared type.
 				s.cacheDefault(f, in)
+				if f.fn.typed {
+					if err := s.checkParameter(f, int(in.c)-1); err != nil {
+						s.stop(err)
+						return
+					}
+				}
 			}
 			l := f.locs[in.a]
 			if l <= 0 || int(l) > len(f.locals) {
@@ -105,7 +112,7 @@ func (s *vmState) loop() {
 			}
 			if slot.kind < valueArray && v.kind < valueArray {
 				*slot = v
-			} else if err := h.assign(slot, v); err != nil {
+			} else if err := h.assignPHP(slot, v, f.fn.strict); err != nil {
 				s.stop(err)
 				return
 			}
@@ -522,6 +529,9 @@ func (s *vmState) loop() {
 			}
 		case bytecode.OpCallPending:
 			if err := s.callPending(in); err != nil {
+				if err == errNoFrame {
+					break
+				}
 				s.stop(err)
 				return
 			}
@@ -723,6 +733,46 @@ func opcodeName(op bytecode.Opcode) string {
 		return "Leave"
 	case bytecode.OpEndFinally:
 		return "EndFinally"
+	case bytecode.OpDeclareClass:
+		return "DeclareClass"
+	case bytecode.OpNew:
+		return "New"
+	case bytecode.OpInitMethod:
+		return "InitMethod"
+	case bytecode.OpInitStatic:
+		return "InitStatic"
+	case bytecode.OpThis:
+		return "This"
+	case bytecode.OpPropGet:
+		return "PropGet"
+	case bytecode.OpPropSet:
+		return "PropSet"
+	case bytecode.OpFetchProp:
+		return "FetchProp"
+	case bytecode.OpPropRef:
+		return "PropRef"
+	case bytecode.OpPropIsset:
+		return "PropIsset"
+	case bytecode.OpPropUnset:
+		return "PropUnset"
+	case bytecode.OpStaticGet:
+		return "StaticGet"
+	case bytecode.OpStaticSet:
+		return "StaticSet"
+	case bytecode.OpFetchStatic:
+		return "FetchStatic"
+	case bytecode.OpStaticRef:
+		return "StaticRef"
+	case bytecode.OpClassConst:
+		return "ClassConst"
+	case bytecode.OpClassName:
+		return "ClassName"
+	case bytecode.OpInstanceof:
+		return "Instanceof"
+	case bytecode.OpClone:
+		return "Clone"
+	case bytecode.OpVerifyReturn:
+		return "VerifyReturn"
 	}
 	return "opcode " + strconv.Itoa(int(op))
 }

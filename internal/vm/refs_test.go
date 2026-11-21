@@ -61,8 +61,9 @@ func TestStage3ReferenceShapes(t *testing.T) {
 func TestStage3ByReferenceArgumentsAndParameters(t *testing.T) {
 	img := compile(t, "<?php\nfunction f($a, &$b, &$c = 1) {}\nf($x, $y, $z[1]);\n")
 	// SEND_REF makes each by-reference argument a reference at its
-	// position, between the evaluations of the other arguments.
-	if got, want := mainOps(t, img), "Load MakeRef Const FetchDim MakeRef Push Push Push Call"; got != want {
+	// position, between the evaluations of the other arguments. The unused
+	// result is released at once (ZEND_FREE), as stage 7A compiles it.
+	if got, want := mainOps(t, img), "Load MakeRef Const FetchDim MakeRef Push Push Push Call Drop"; got != want {
 		t.Fatalf("ops = %q, want %q\n%s", got, want, Disassemble(img))
 	}
 	// The callee binds a by-reference parameter, with a default or not.

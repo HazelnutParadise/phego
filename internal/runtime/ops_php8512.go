@@ -198,6 +198,10 @@ func cString(s string) string {
 // ToInt is the (int) cast.
 func (h *heap) toInt(v value) int64 {
 	switch v = v.deref(); v.kind {
+	case valueObject:
+		// zend_std_cast_object_tostring fails for _IS_NUMBER; the value is 1.
+		h.warn(levelWarning, "Object of class "+v.object.class.name+" could not be converted to int")
+		return 1
 	case valueResource:
 		return int64(v.object.handle)
 	case valueInt:
@@ -227,6 +231,9 @@ func (h *heap) toInt(v value) int64 {
 // toFloat is the (float) cast.
 func (h *heap) toFloat(v value) float64 {
 	switch v = v.deref(); v.kind {
+	case valueObject:
+		h.warn(levelWarning, "Object of class "+v.object.class.name+" could not be converted to float")
+		return 1
 	case valueResource:
 		return float64(v.object.handle)
 	case valueInt:

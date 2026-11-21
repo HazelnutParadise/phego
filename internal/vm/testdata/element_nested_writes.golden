@@ -18,7 +18,7 @@ const 6: string "a"
 const 7: string "v"
 const 8: string "k"
 const 9: string "r"
-func 0 "{main}" params=0 locals=4 registers=7 maxstack=0
+func 0 "{main}" params=0 locals=4 registers=7 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "v"
   local 2 "k"

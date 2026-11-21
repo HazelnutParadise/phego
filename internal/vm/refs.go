@@ -55,7 +55,12 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 		t := fc.dimTarget(target, n.Line)
 		mark := fc.top
 		var src, flags uint32
-		if source.Op == ir.OpVar {
+		if source.Op == ir.OpProp || source.Op == ir.OpStaticProp {
+			src, flags = fc.memberRef(source), uint32(bytecode.BindValue)
+			if used {
+				fc.unsupported("value of an assignment by reference between two elements", n.Line)
+			}
+		} else if source.Op == ir.OpVar {
 			src = fc.refSource(source, n.Line)
 		} else {
 			e := fc.refSource(source, n.Line)
@@ -72,6 +77,9 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 			return fc.refResult(src, used)
 		}
 		return reg(fc.alloc())
+	}
+	if target.Op == ir.OpProp || target.Op == ir.OpStaticProp {
+		return fc.bindMember(n, used)
 	}
 	fc.unsupportedNode(target)
 	return operand{}
@@ -115,6 +123,9 @@ func (fc *fnCompiler) foreachRefInit(it uint32, subject *ir.Node) int {
 	switch subject.Op {
 	case ir.OpVar, ir.OpDim:
 		src = fc.refSource(subject, subject.Line)
+	case ir.OpProp, ir.OpStaticProp:
+		// The property becomes a reference the loop shares.
+		src = fc.memberRef(subject)
 	default:
 		src = fc.value(subject)
 	}

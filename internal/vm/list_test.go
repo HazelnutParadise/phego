@@ -145,9 +145,9 @@ func TestStage4Unsupported(t *testing.T) {
 		line         int
 	}{
 		{"value of a destructuring assignment by reference from an element", "echo 1;\n$y = ([&$a] = $x[0]);", 3},
-		{"property access", "echo 1;\n[$o->p] = $x;", 3},
+		{"variable variables", "echo 1;\n[$$n] = $x;", 3},
 		{"property access", "echo 1;\n[&$o->p] = $x;", 3},
-		{"static property access", "echo 1;\nforeach ($r as [A::$p]) {}", 3},
+		{"variable variables", "echo 1;\nforeach ($r as [$$n]) {}", 3},
 		{"reference to the result of a call", "echo 1;\nfunction f() { return [1]; }\n[&$a] = f();", 4},
 	} {
 		t.Run(tc.feature, func(t *testing.T) {

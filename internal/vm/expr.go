@@ -78,8 +78,11 @@ var binaryOps = map[string]bytecode.BinaryOp{
 
 var unaryOps = map[string]bytecode.UnaryOp{"!": bytecode.Not, "-": bytecode.Negate, "+": bytecode.Plus, "~": bytecode.BitNot}
 
+var _ = bytecode.CastObject
+
 var castKinds = map[string]bytecode.CastKind{
-	"bool": bytecode.CastBool, "int": bytecode.CastInt, "float": bytecode.CastFloat,
+	"object": bytecode.CastObject,
+	"bool":   bytecode.CastBool, "int": bytecode.CastInt, "float": bytecode.CastFloat,
 	"string": bytecode.CastString, "array": bytecode.CastArray,
 }
 
@@ -135,6 +138,9 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 	case ir.OpIsset:
 		return fc.isset(n)
 	case ir.OpDim:
+		if hasNullsafe(n) {
+			return fc.chain(n, func() operand { return fc.dimRead(n) })
+		}
 		return fc.dimRead(n)
 	case ir.OpArray:
 		return fc.array(n)
@@ -178,6 +184,8 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.methodCall(n)
 	case ir.OpStaticCall:
 		return fc.staticCall(n)
+	case ir.OpCallValue:
+		return fc.callValue(n)
 	case ir.OpInstanceof:
 		return fc.instanceOf(n)
 	case ir.OpClone:
@@ -611,7 +619,13 @@ func (fc *fnCompiler) readChain(n *ir.Node) (container, key uint32) {
 		levels = append(levels, base)
 		base = base.Kids[0]
 	}
+	// The base continues a nullsafe chain the element read belongs to.
+	inBase := fc.inBase
+	if chainOp(base) && fc.short != nil {
+		fc.inBase = true
+	}
 	b := fc.expr(base)
+	fc.inBase = inBase
 	type level struct {
 		key   operand
 		lit   *ir.Literal
@@ -755,6 +769,10 @@ func (fc *fnCompiler) assignOpDim(n *ir.Node, op bytecode.BinaryOp) operand {
 		fc.cur = t.keys[len(t.keys)-1].line
 		v = reg(fc.materialize(v))
 	}
+	if t.prefix != nil {
+		// No variable is read inside a fetch that starts at a property.
+		v = reg(fc.materialize(v))
+	}
 	e := fc.fetchPath(t, len(t.keys), bytecode.FetchReadWrite, bytecode.FetchForAssignOp)
 	rv := fc.materialize(v)
 	old := fc.alloc()
@@ -773,6 +791,9 @@ func (fc *fnCompiler) assignOpDim(n *ir.Node, op bytecode.BinaryOp) operand {
 // a key that is a plain variable is read by each pass, as PHP memoizes
 // compiled expressions but reads a CV wherever it is used.
 func (fc *fnCompiler) coalesceSetDim(n *ir.Node) operand {
+	if memberBased(n.Kids[0]) {
+		return fc.coalesceSetMemberDim(n)
+	}
 	target, value := n.Kids[0], n.Kids[1]
 	res := fc.alloc()
 	mark := fc.top

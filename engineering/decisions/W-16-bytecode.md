@@ -41,13 +41,13 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 |---|---|---|
 | 0 | 8 | `PHEGOBC` 加 NUL |
 | 8 | 2 | major，版本 1 |
-| 10 | 2 | minor，`Encode` 寫入 6，`Load` 接受 0 到 6 |
+| 10 | 2 | minor，`Encode` 寫入 7，`Load` 接受 0 到 7 |
 | 12 | 4 | 表頭大小，必須為 64 |
 | 16 | 8 | 整份檔案長度，必須與輸入完全相等 |
 | 24 | 32 | SHA-256，計算 `data[:24]` 接 `data[56:]` |
 | 56 | 8 | features，目前必須為零 |
 
-所有整數均採 little-endian。解析器拒絕不同 major、大於 6 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
+所有整數均採 little-endian。解析器拒絕不同 major、大於 7 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
 
 ## Payload 的區段順序
 
@@ -59,13 +59,18 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 | 程式入口 | Required:u16、Entry:u32 |
 | constants table | Kind:u8、Bits:u64、Bytes:str |
 | sources table | Name:str、Digest:32 bytes、Bytes:u32、Lines:u32 |
-| functions table | Name:str、Params:u32、Locals:u32、MaxStack:u32、ReturnKind:u8，再接以下函式內表格，minor 0 為前四張，minor 1 起為五張，minor 6 起為六張 |
+| functions table | Name:str、Params:u32、Locals:u32、MaxStack:u32、ReturnKind:u8，再接以下函式內表格，minor 0 為前四張，minor 1 起為五張，minor 6 起為六張。minor 7 起每個函式最後再接 Flags:u8、ReturnType:u32 |
 | function registers table | Kind:u8 |
 | function instructions table | Op:u16、Aux:u16、A:u32、B:u32、C:u32 |
 | function positions table | Source:u32、Start:u32、End:u32、Line:u32 |
 | function handlers table | Start:u32、End:u32、Target:u32、BodyEnd:u32、StackDepth:u32、Register:u32、Kind:u32 |
 | function local names table（minor 1 起） | 常數索引:u32 |
-| function parameters table（minor 6 起） | Name（常數索引）:u32、Flags:u8 |
+| function parameters table（minor 6 起） | Name（常數索引）:u32、Flags:u8，minor 7 起再接 Type:u32 |
+| classes table（minor 7 起，接在所有函式之後） | Name:u32、Flags:u16、補零:u16、Parent:u32、Line:u32，再接 interfaces、traits（各為常數索引的 table）、trait rules、constants、properties、methods 六張表 |
+| class trait rules table | Trait:u32、Method:u32、Alias:u32、Flags:u16、HasVisibility:u8、Line:u32，再接 insteadof 的常數索引 table |
+| class constants table | Name:u32、Flags:u16、Value:u32、Init:u32 |
+| class properties table | Name:u32、Flags:u16、Type:u32、Value:u32、Init:u32 |
+| class methods table | Name:u32、Function:u32、Flags:u16、Signature:u32、Line:u32 |
 
 Function 的前 Params 個暫存器必須是 Value，作為已定義的參數。每條指令必須對應一筆 Position。Position 全零表示 synthetic，否則 Source 是從 1 開始的 sources 索引，Line 必須為正，Start／End 為來源 bytes 的半開區間。v1 的 Handler.StackDepth 固定為零，Finally.Register 固定為零，Catch.Register 則指向 Value 暫存器。
 
@@ -84,6 +89,8 @@ Opcode 固定編號為 Checkpoint=1、Const=2、Move=3、Local=4、Load=5、Stor
 格式 1.5 由 W-17 第五階段加入，用來表達常數、`@` 與 `match` 沒有命中的錯誤，payload 的版面不變。新增五個指令：FetchConst（ZEND_FETCH_CONSTANT）、DeclareConst（ZEND_DECLARE_CONST）、BeginSilence 與 EndSilence（ZEND_BEGIN_SILENCE、ZEND_END_SILENCE）、MatchError（ZEND_MATCH_ERROR），以及 ArrayIsset 的 Aux 1（ZEND_ISSET_ISEMPTY_DIM_OBJ 的 ZEND_ISEMPTY）。`match` 的比較與分支、`empty()` 的其他形式都用現有指令組合。`Encode` 一律寫入 minor 5。minor 0 到 4 的檔案照樣能載入，出現上述任一項時，`Load` 以同樣的方式拒絕並指出需要 1.5。
 
 格式 1.6 由 W-17 第六階段加入，用來表達 `global`、`static` 變數、不定參數、引數展開與具名引數。新增七個指令：BindGlobal（ZEND_BIND_GLOBAL）、StaticInit（ZEND_BIND_INIT_STATIC_OR_JMP）、BindStatic（ZEND_BIND_STATIC）、RecvVariadic（ZEND_RECV_VARIADIC）、InitCall（ZEND_INIT_FCALL）、SendUnpack（ZEND_SEND_UNPACK）、CallPending（ZEND_CHECK_UNDEF_ARGS 加上 ZEND_DO_FCALL），以及 Push 的 Aux PushLoad（ZEND_SEND_VAR 自己讀 CV）。帶名稱的 Push 從 1.0 起就在格式裡，1.6 起 VM 才執行它。payload 的版面多一張表：每個函式在 local 名稱表後面接參數表，筆數為 0（沒有記錄，舊檔案載入後都是這樣）、恰好等於 Params，或 Params 加一，多出的那一筆必須帶 ParamVariadic，而且只有它能帶。每筆的 Name 指向存放不含 `$` 參數名稱的 String 常數，Flags 的 ParamByRef 表示這個參數接收參照。筆數不符、旗標未知、ParamVariadic 位置不對、Name 不是 String 常數時以 `ErrInvalid` 拒絕並指出函式。`Encode` 一律寫入 minor 6。minor 0 到 5 的檔案照樣能載入，沒有參數表。出現上述任一個指令或 PushLoad 時，`Load` 以同樣的方式拒絕並指出需要 1.6。
+
+格式 1.7 由 W-17 第七階段 A 加入，用來表達類別與物件。新增二十個指令，編號接在 CallPending 之後：DeclareClass=56、New=57、InitMethod=58、InitStatic=59、This=60、PropGet=61、PropSet=62、FetchProp=63、PropRef=64、PropIsset=65、PropUnset=66、StaticGet=67、StaticSet=68、FetchStatic=69、StaticRef=70、ClassConst=71、ClassName=72、Instanceof=73、Clone=74、VerifyReturn=75。另外新增 Push 的 Aux PushAuto=2、PushTemp=3、PushResult=4、PushElement=5，Cast 的 CastObject，Unary 的 Increment 與 Decrement，ParameterFlags 的 ParamOptional（bit 2）。payload 多出類別表，每個函式多出 Flags（bit 0 FuncStrict、bit 1 FuncNoThis）與 ReturnType，每個參數多出 Type。ReturnType、Type 與類別表裡的 Parent、Alias、Signature、Value、Init 都是「索引加一」，0 表示沒有。`Encode` 一律寫入 minor 7。minor 0 到 6 的檔案照樣能載入，沒有類別表，函式的新欄位都是零。較舊的檔案出現上述任一項時，`Load` 以 `ErrInvalid` 拒絕並指出需要 1.7。二十個新 opcode 先檢查版本再檢查操作數：舊檔案沒有類別表，操作數不可能合法，先報操作數會讓人看錯原因。
 
 ## 固定指令與純量常數
 
@@ -212,6 +219,56 @@ InitCall、帶名稱的 Push、SendUnpack 與 CallPending 表達引數個數或�
 SendUnpack 只接受陣列（參照先解開）：整數 key 的元素依序成為下一個位置引數，字串 key 的元素照帶名稱的 Push 處理。字串 key 之後再出現整數 key 時拋出 `Cannot use positional argument after named argument during unpacking`。A 是未定義的變數時先發出未定義變數警告。不是陣列時拋出 `Only arrays and Traversables can be unpacked, T given`。物件以 Unsupported 結束。對傳參照的參數，A 是變數時元素本身變成參照（陣列被其他持有者共用時先分離），A 是暫存值時引數是新的參照。很大的陣列每 65,536 個元素檢查一次取消。
 
 CallPending 取出最內層開始的呼叫，以堆疊上屬於它的引數進入函式。留有空位的參數（具名引數跳過的）若有預設值，由被呼叫函式的 ParamDefault 當成沒傳來求值並照樣進入預設值快取。沒有預設值時在被呼叫函式的 frame 內、接收該參數的指令位置拋出 `ArgumentCountError: f(): Argument #N ($name) not passed`。編譯器在 CallPending 前面放一條 Checkpoint，帶最後一個引數的行號（PHP 的 ZEND_CHECK_UNDEF_ARGS 在那一行）。被呼叫函式還在填空位時，backtrace 用那一行當呼叫位置。
+
+### 格式 1.7 的類別表
+
+類別表和函式表一樣是唯讀的編譯資料：名稱、旗標，以及放方法本體與常數運算式的函式索引。物件、static 屬性的值、類別常數求值後的結果都不在裡面，它們屬於當次執行。
+
+- **類別**的 Flags：bit 0 ClassInterface、bit 1 ClassTrait、bit 2 ClassAbstract、bit 3 ClassFinal、bit 4 ClassReadonly、bit 5 ClassHoisted。ClassHoisted 表示 PHP 在編譯檔案時就綁定了這個類別（early binding），它在第一條指令執行前就存在。其他類別由 DeclareClass 在執行到時宣告。Parent、interfaces、traits 存的是名稱，宣告時才解析，因為同一個名稱可以有條件式的多個宣告。
+- **成員**的 Flags：bit 0–1 是可見度（0 public、1 protected、2 private），bit 2 MemberStatic、bit 3 MemberFinal、bit 4 MemberAbstract、bit 5 MemberReadonly、bit 6 MemberByRef。
+- **常數與屬性預設值**：Value 與 Init 最多一個不為零。Value 指向常數池裡的純量。Init 指向一個沒有參數的函式，執行期在宣告類別的範圍裡呼叫它取得值。常數在第一次被讀到時求值，屬性預設值在類別第一次建立物件或第一次用到 static 屬性時求值。陣列與引用其他常數的運算式都走 Init。
+- **方法**的 Function 一定指向一個函式，抽象方法也是：它的參數表描述簽章，程式碼不會被執行。Signature 是 PHP 在繼承錯誤訊息裡印出的宣告文字。
+- **trait 規則**：Insteadof 不為空時是 `T::m insteadof U, V`，必須有 Trait，不能有別名或可見度。否則是別名規則，Alias 與 HasVisibility 至少要有一個。HasVisibility 為假時 Flags 必須為零，所以一條規則只有一種編碼。
+
+驗證器檢查：每個索引都指向種類正確的常數或存在的函式，名稱不是空字串，旗標都是已知且不互相矛盾的組合，同一個類別裡常數與屬性名稱不重複（分大小寫），方法名稱不重複（ASCII 不分大小寫），每個函式最多是一個成員的本體，Init 函式沒有參數，成員的函式回傳 Value，介面的方法是 public 且 abstract，方法的 static 旗標和它函式的 FuncNoThis 一致。宣告是否符合 PHP 的繼承規則（抽象方法是否實作、簽章是否相容、final、常數衝突），要等宣告當下才知道有哪些類別，所以由執行期在 DeclareClass 檢查。不是編譯器產生的 bytecode 因此也會被檢查到。
+
+### 格式 1.7 的指令
+
+有類別操作數的指令以 Aux 的 bit 0–2 說明它怎麼指名類別（ClassRef）。0 是 ClassNamed，操作數是存放解析後名稱的 String 常數。1 ClassSelf、2 ClassParent、3 ClassStatic 的操作數必須為零，分別是程式碼所屬的類別、它的父類別、晚期靜態綁定的類別。4 是 ClassValue，操作數是 Value 暫存器，裡面是類別名稱字串或物件。成員名稱操作數預設是 String 常數，Aux 的 bit 3 MemberNameReg 設定時改成 Value 暫存器。bit 4–5 是模式。bit 6 MemberObjLocation 表示物件操作數是元素位置暫存器，物件從那個位置讀出。bit 7 MemberResult 見 PropSet。每個指令只接受它用得到的位元，其他位元必須為零。`bytecode.Roles17` 是這張表的單一來源，驗證器與直譯器的解碼都用它。
+
+| 指令 | 操作數與行為 |
+|---|---|
+| DeclareClass | B 類別表索引。對應 ZEND_DECLARE_CLASS：解析父類別、介面與 trait，套用繼承規則，再登錄類別。名稱已被使用、規則不符是 PHP 的 fatal，找不到父類別等是拋出 Error |
+| New | A 結果，B 類別，C 跳躍目標。對應 ZEND_NEW：建立物件後開始建構子的呼叫。Aux 的 bit 3 NewArgs 表示後面有引數：類別沒有建構子時仍開始一次呼叫，引數照樣求值後丟棄（PHP 呼叫 zend_pass_function）。沒有 NewArgs 而且沒有建構子時跳到 C |
+| InitMethod | A 物件，B 方法名稱。對應 ZEND_INIT_METHOD_CALL：依呼叫範圍的可見度解析方法，找不到或不可存取時退回 `__call`。Aux 恰為 InitCallable（bit 4）時 A 是 callable，物件走 `__invoke`，字串是函式名稱，B 必須為零 |
+| InitStatic | A 類別，B 方法名稱。對應 ZEND_INIT_STATIC_METHOD_CALL，包含 `parent::`、`self::` 轉送 `$this` 與被呼叫類別，以及 `__callStatic` |
+| This | A 結果。不在物件方法裡時拋出 `Using $this when not in object context` |
+| PropGet | A 結果，B 物件，C 名稱。模式 0 讀取、1 安靜讀取（isset、`??`）、2 複合指定的讀取半邊、3 `++`／`--` 的讀取半邊。後兩者在容器不是物件時拋出 PHP 對應的 Error，不是警告 |
+| PropSet | A 物件，B 名稱，C 值。對應 ZEND_ASSIGN_OBJ。MemberResult 設定時，指令把 C 換成指定運算式的值，也就是 typed 屬性轉型後實際存入的值 |
+| FetchProp | A 元素位置，B 物件，C 名稱。對應 ZEND_FETCH_OBJ_W／RW／UNSET（模式 0／1／2）：A 指向屬性本身，供接下來的元素或屬性操作使用。MemberObjLocation 時 B 必須等於 A，表示鏈的下一層 |
+| PropRef | A 結果（一個參照），B 物件，C 名稱：屬性變成參照，A 持有它 |
+| PropIsset | A 結果（bool），B 物件，C 名稱。模式 2 是 isset、3 是 empty |
+| PropUnset | A 物件，B 名稱 |
+| StaticGet | A 結果，B 類別，C 名稱。模式 0 讀取、1 安靜讀取、2 isset、3 empty |
+| StaticSet | A 值，B 類別，C 名稱。MemberResult 的意義同 PropSet |
+| FetchStatic | A 元素位置，B 類別，C 名稱。模式 0 寫入、1 讀寫 |
+| StaticRef | A 結果（一個參照），B 類別，C 名稱 |
+| ClassConst | A 結果，B 類別，C 常數名稱（String 常數）。第一次讀到時在宣告它的類別範圍裡求值 |
+| ClassName | A 結果，B 類別：`static::class`、trait 裡的 `self::class`、`$object::class` |
+| Instanceof | A 結果（bool），B 值，C 類別。類別不存在不是錯誤，結果是 false |
+| Clone | A 結果，B 值 |
+| VerifyReturn | A 值。Aux 0：把 A 轉成函式宣告的回傳型別，轉不了就拋出 TypeError。Aux 1：有回傳型別的函式沒有回傳值，一律拋出。Aux 2：`never` 的函式返回了，一律拋出 |
+
+New、InitMethod 與 InitStatic 開始的呼叫，被呼叫的函式要到指令執行時才知道。驗證器把它記成「被呼叫者不明」的標記，這種呼叫的 CallPending 目的地必須是 Value。Push 的四個新 Aux 只能出現在這種呼叫裡，由被呼叫函式的宣告決定送法：
+
+- PushAuto 的 A 是 Location：參數傳參照就送參照，否則送值（ZEND_SEND_VAR_EX）。
+- PushTemp 的 A 是不屬於任何變數的值：參數傳參照時拋出 `could not be passed by reference`（ZEND_SEND_VAL_EX）。
+- PushResult 的 A 是呼叫的結果：參數傳參照時發出 `Only variables should be passed by reference`，再照值傳（ZEND_SEND_VAR_NO_REF_EX）。
+- PushElement 的 A 是從元素或屬性讀出的值。PHP 在參數傳參照時會改用寫入方式取元素，這個格式還做不到，所以遇到傳參照的參數以 Unsupported 結束，不會把複本交給函式。
+
+這四種引數在驗證器裡帶著記號，Call、CallValue 與 HostCall 不能取走它們，否則依方法宣告送出的參照會進到另一個函式的傳值參數。
+
+PropRef 與 StaticRef 寫入的暫存器算成可能存放參照，受 1.6 那條「參照只能送給宣告傳參照的參數」規則約束。FetchProp 與 FetchStatic 定義的暫存器是元素位置，受元素位置規則約束：它們像從暫存器裡的參照取元素一樣開啟一段序列。序列裡除了原有的指令，還可以出現同一個暫存器上的 FetchProp（下一層）、以元素位置為物件的 PropGet（之後只能接 Binary，或 Increment／Decrement 的 Unary），以及結束序列的 PropSet 與 PropUnset。
 
 驗證器把 InitCall 當成引數堆疊上的一個標記，SendUnpack 當成一筆「個數不明」的項目，所以分支合流時兩邊開始的呼叫必須相同，迴圈無法累積未完成的呼叫，MaxStack 也限制了巢狀深度。Call、CallValue 與 HostCall 不能取用標記或個數不明的項目，在格式 1.6 的檔案裡也不能取用帶名稱的引數：被不定參數收下的名稱在執行期不留下待處理的引數，讓別的呼叫取用它就會拿到下面那一筆。帶名稱的引數只有 CallPending 能收。CallPending 需要標記，並把標記以上的項目全部取走，目的暫存器的類別要符合被呼叫函式的 ReturnKind。
 

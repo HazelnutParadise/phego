@@ -102,7 +102,13 @@ func (l *lowerer) bindClassMembers(cl, parent *Class) {
 			if phpname.EqualFold(f.Name, "__construct") || strings.HasPrefix(phpname.Lower(f.Name), "__") {
 				l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s)", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass)
 			}
-			l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s) or weaker", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass)
+			// zend_do_inheritance_check_on_method: "or weaker" only when
+			// something weaker than the parent's visibility exists.
+			weaker := " or weaker"
+			if visibilityName(base.Modifiers) == "public" {
+				weaker = ""
+			}
+			l.fail(f.Line, "Access level to %s::%s() must be %s (as in class %s)%s", cl.Name, f.Name, visibilityName(base.Modifiers), baseClass, weaker)
 		}
 		// The probe that allowed early binding owns the verdict; a member whose
 		// obligation is still unresolved is not reported here.

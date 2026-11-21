@@ -159,6 +159,20 @@ func (fc *fnCompiler) assignElement(target *ir.Node, e uint32) {
 		t := fc.dimTarget(target, target.Line)
 		fc.writeDim(t, reg(e), false, false)
 		fc.cur = after
+	case ir.OpProp:
+		after := fc.cur
+		fc.c.line = target.Line
+		t := fc.propTarget(target)
+		obj, aux := fc.object(t, bytecode.MemberWrite)
+		fc.emit(bytecode.OpPropSet, aux|t.name.aux(), obj, t.name.operand, e)
+		fc.cur = after
+	case ir.OpStaticProp:
+		after := fc.cur
+		ref, class := fc.classRef(target.Name, target.Kids[0])
+		name := fc.memberName(target)
+		fc.at(target.Line)
+		fc.emit(bytecode.OpStaticSet, bytecode.MemberAux(ref, name.isReg, 0, false), e, class, name.operand)
+		fc.cur = after
 	default:
 		fc.unsupportedNode(target)
 	}

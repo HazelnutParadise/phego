@@ -14,7 +14,7 @@ const 3: string "j"
 const 4: null
 const 5: string "a"
 const 6: string "b"
-func 0 "{main}" params=0 locals=2 registers=7 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=7 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "b"
   registers LLVVVVV

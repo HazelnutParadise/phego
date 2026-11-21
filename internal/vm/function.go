@@ -52,6 +52,9 @@ type fnCompiler struct {
 	// compiled, and short is the nullsafe chain being compiled (stage7.go).
 	inBase bool
 	short  *shortCircuit
+	// instanceofOperand is set while the class of an instanceof is
+	// compiled.
+	instanceofOperand bool
 
 	loops []loop
 	// elemPCs are the instructions that name the element register, by the
@@ -117,6 +120,9 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	end := int(c.lines)
 	if f.Kind != ir.FuncMain {
 		end = max(fc.maxLine, f.Line)
+		if f.EndLine > 0 {
+			end = f.EndLine
+		}
 	}
 	fc.cur = end
 	r := fc.alloc()

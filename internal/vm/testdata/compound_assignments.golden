@@ -20,7 +20,7 @@ const 9: string "default"
 const 10: null
 const 11: string "a"
 const 12: string "b"
-func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "b"
   registers LLVVV

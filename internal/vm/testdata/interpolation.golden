@@ -19,7 +19,7 @@ const 6: string "H "
 const 7: null
 const 8: string "x"
 const 9: string "a"
-func 0 "{main}" params=0 locals=2 registers=6 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=6 maxstack=0 flags=nothis
   local 0 "x"
   local 1 "a"
   registers LLVVVV

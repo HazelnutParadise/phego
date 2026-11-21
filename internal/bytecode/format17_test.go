@@ -131,6 +131,21 @@ func format17ValidBodies() map[string][]Instruction {
 		},
 		"new from a value": {{Op: OpNew, Aux: uint16(ClassValue), A: 3, B: 0, C: b + 2}, {Op: OpCallPending, A: 0}},
 		"new static":       {{Op: OpNew, Aux: uint16(ClassStatic), A: 3, C: b + 2}, {Op: OpCallPending, A: 0}},
+		"new with the arguments flag": {
+			// 3 New args r3 C, 6; 4 Push temp r0; 5 CallPending r0; 6 Output r3.
+			{Op: OpNew, Aux: NewArgs, A: 3, B: k17C, C: b + 3},
+			{Op: OpPush, Aux: uint16(PushTemp), A: 0}, {Op: OpCallPending, A: 0}, {Op: OpOutput, A: 3},
+		},
+		"new static with the arguments flag": {
+			{Op: OpNew, Aux: uint16(ClassStatic) | NewArgs, A: 3, C: b + 2}, {Op: OpCallPending, A: 0}, {Op: OpOutput, A: 3},
+		},
+		"init callable": {
+			{Op: OpInitMethod, Aux: InitCallable, A: 0},
+			{Op: OpPush, Aux: uint16(PushAuto), A: 2}, {Op: OpPush, Aux: uint16(PushTemp), A: 0},
+			{Op: OpCallPending, A: 3},
+		},
+		"unary increment": {{Op: OpUnary, Aux: uint16(Increment), A: 3, B: 0}, {Op: OpOutput, A: 3}},
+		"unary decrement": {{Op: OpUnary, Aux: uint16(Decrement), A: 3, B: 0}, {Op: OpOutput, A: 3}},
 		"init method": {
 			{Op: OpInitMethod, A: 0, B: k17m},
 			{Op: OpPush, Aux: uint16(PushAuto), A: 2},
@@ -142,44 +157,45 @@ func format17ValidBodies() map[string][]Instruction {
 			{Op: OpSendUnpack, A: 1},
 			{Op: OpCallPending, A: 3},
 		},
-		"init method name in a register": {{Op: OpInitMethod, Aux: MemberNameReg, A: 0, B: 1}, {Op: OpCallPending, A: 3}},
-		"init static parent":             {{Op: OpInitStatic, Aux: uint16(ClassParent), B: k17sm}, {Op: OpCallPending, A: 3}},
-		"init static named":              {{Op: OpInitStatic, A: k17C, B: k17sm}, {Op: OpPush, Aux: uint16(PushResult), A: 0}, {Op: OpCallPending, A: 3}},
-		"init static of a value":         {{Op: OpInitStatic, Aux: uint16(ClassValue) | MemberNameReg, A: 0, B: 1}, {Op: OpCallPending, A: 3}},
-		"this":                           {{Op: OpThis, A: 3}, {Op: OpOutput, A: 3}},
-		"prop get":                       {{Op: OpPropGet, A: 3, B: 0, C: k17p}, {Op: OpOutput, A: 3}},
-		"prop get quiet by name":         {{Op: OpPropGet, Aux: memberAux(ClassNamed, true, MemberQuiet, false), A: 3, B: 0, C: 1}},
-		"prop set":                       {{Op: OpPropSet, A: 0, B: k17p, C: 1}},
-		"prop set by name":               {{Op: OpPropSet, Aux: MemberNameReg, A: 0, B: 1, C: 0}},
-		"prop set with its result":       {{Op: OpPropSet, Aux: MemberResult, A: 0, B: k17p, C: 1}, {Op: OpOutput, A: 1}},
-		"prop get for an assign-op":      {{Op: OpPropGet, Aux: memberAux(ClassNamed, false, MemberAssignOp, false), A: 3, B: 0, C: k17p}},
-		"prop get for an increment":      {{Op: OpPropGet, Aux: memberAux(ClassNamed, true, MemberIncDec, false), A: 3, B: 0, C: 1}},
-		"fetch prop":                     {{Op: OpFetchProp, A: 4, B: 0, C: k17p}, {Op: OpStore, A: 4, B: 0}},
-		"fetch prop read-write":          {{Op: OpFetchProp, Aux: memberAux(ClassNamed, false, MemberReadWrite, false), A: 4, B: 0, C: k17p}, {Op: OpIncDec, Aux: uint16(PostInc), A: 3, B: 4}},
-		"fetch prop unset":               {{Op: OpFetchProp, Aux: memberAux(ClassNamed, true, MemberUnset, false), A: 4, B: 0, C: 1}, {Op: OpConst, A: 3, B: 0}, {Op: OpArrayUnset, A: 4, B: 3}},
-		"prop ref":                       {{Op: OpPropRef, A: 3, B: 0, C: k17p}, {Op: OpBind, Aux: uint16(BindValue), A: 2, B: 3}},
-		"prop isset":                     {{Op: OpPropIsset, Aux: memberAux(ClassNamed, false, MemberIsset, false), A: 3, B: 0, C: k17p}},
-		"prop empty by name":             {{Op: OpPropIsset, Aux: memberAux(ClassNamed, true, MemberEmpty, false), A: 3, B: 0, C: 1}},
-		"prop unset":                     {{Op: OpPropUnset, A: 0, B: k17p}},
-		"static get":                     {{Op: OpStaticGet, A: 3, B: k17C, C: k17p}},
-		"static isset of static":         {{Op: OpStaticGet, Aux: memberAux(ClassStatic, false, MemberIsset, false), A: 3, C: k17p}},
-		"static get of a value by name":  {{Op: OpStaticGet, Aux: memberAux(ClassValue, true, MemberEmpty, false), A: 3, B: 0, C: 1}},
-		"static set":                     {{Op: OpStaticSet, Aux: uint16(ClassSelf), A: 0, C: k17r}},
-		"static set with its result":     {{Op: OpStaticSet, Aux: uint16(ClassNamed) | MemberResult, A: 0, B: k17C, C: k17r}, {Op: OpOutput, A: 0}},
-		"fetch static":                   {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpStore, A: 4, B: 0}},
-		"fetch static read-write":        {{Op: OpFetchStatic, Aux: memberAux(ClassSelf, false, MemberReadWrite, false), A: 4, C: k17r}, {Op: OpArraySet, A: 4, B: 0, C: 0}},
-		"static ref":                     {{Op: OpStaticRef, Aux: uint16(ClassParent), A: 3, C: k17r}, {Op: OpPush, A: 0}, {Op: OpPush, A: 3}, {Op: OpCall, A: 3, B: 1, C: 2}},
-		"class const":                    {{Op: OpClassConst, A: 3, B: k17C, C: k17K}},
-		"class const of static":          {{Op: OpClassConst, Aux: uint16(ClassStatic), A: 3, C: k17K}},
-		"class name":                     {{Op: OpClassName, Aux: uint16(ClassStatic), A: 3}},
-		"class name of a value":          {{Op: OpClassName, Aux: uint16(ClassValue), A: 3, B: 0}},
-		"instanceof":                     {{Op: OpInstanceof, A: 3, B: 0, C: k17C}},
-		"instanceof a value":             {{Op: OpInstanceof, Aux: uint16(ClassValue), A: 3, B: 0, C: 1}},
-		"clone":                          {{Op: OpClone, A: 3, B: 0}},
-		"verify return":                  {{Op: OpVerifyReturn, A: 0}},
-		"verify return none":             {{Op: OpVerifyReturn, Aux: uint16(ReturnNone), A: 0}},
-		"verify return never":            {{Op: OpVerifyReturn, Aux: uint16(ReturnNever), A: 0}},
-		"cast object":                    {{Op: OpCast, Aux: uint16(CastObject), A: 3, B: 0}},
+		"init method with an element push": {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushElement), A: 0}, {Op: OpCallPending, A: 3}},
+		"init method name in a register":   {{Op: OpInitMethod, Aux: MemberNameReg, A: 0, B: 1}, {Op: OpCallPending, A: 3}},
+		"init static parent":               {{Op: OpInitStatic, Aux: uint16(ClassParent), B: k17sm}, {Op: OpCallPending, A: 3}},
+		"init static named":                {{Op: OpInitStatic, A: k17C, B: k17sm}, {Op: OpPush, Aux: uint16(PushResult), A: 0}, {Op: OpCallPending, A: 3}},
+		"init static of a value":           {{Op: OpInitStatic, Aux: uint16(ClassValue) | MemberNameReg, A: 0, B: 1}, {Op: OpCallPending, A: 3}},
+		"this":                             {{Op: OpThis, A: 3}, {Op: OpOutput, A: 3}},
+		"prop get":                         {{Op: OpPropGet, A: 3, B: 0, C: k17p}, {Op: OpOutput, A: 3}},
+		"prop get quiet by name":           {{Op: OpPropGet, Aux: memberAux(ClassNamed, true, MemberQuiet, false), A: 3, B: 0, C: 1}},
+		"prop set":                         {{Op: OpPropSet, A: 0, B: k17p, C: 1}},
+		"prop set by name":                 {{Op: OpPropSet, Aux: MemberNameReg, A: 0, B: 1, C: 0}},
+		"prop set with its result":         {{Op: OpPropSet, Aux: MemberResult, A: 0, B: k17p, C: 1}, {Op: OpOutput, A: 1}},
+		"prop get for an assign-op":        {{Op: OpPropGet, Aux: memberAux(ClassNamed, false, MemberAssignOp, false), A: 3, B: 0, C: k17p}},
+		"prop get for an increment":        {{Op: OpPropGet, Aux: memberAux(ClassNamed, true, MemberIncDec, false), A: 3, B: 0, C: 1}},
+		"fetch prop":                       {{Op: OpFetchProp, A: 4, B: 0, C: k17p}, {Op: OpStore, A: 4, B: 0}},
+		"fetch prop read-write":            {{Op: OpFetchProp, Aux: memberAux(ClassNamed, false, MemberReadWrite, false), A: 4, B: 0, C: k17p}, {Op: OpIncDec, Aux: uint16(PostInc), A: 3, B: 4}},
+		"fetch prop unset":                 {{Op: OpFetchProp, Aux: memberAux(ClassNamed, true, MemberUnset, false), A: 4, B: 0, C: 1}, {Op: OpConst, A: 3, B: 0}, {Op: OpArrayUnset, A: 4, B: 3}},
+		"prop ref":                         {{Op: OpPropRef, A: 3, B: 0, C: k17p}, {Op: OpBind, Aux: uint16(BindValue), A: 2, B: 3}},
+		"prop isset":                       {{Op: OpPropIsset, Aux: memberAux(ClassNamed, false, MemberIsset, false), A: 3, B: 0, C: k17p}},
+		"prop empty by name":               {{Op: OpPropIsset, Aux: memberAux(ClassNamed, true, MemberEmpty, false), A: 3, B: 0, C: 1}},
+		"prop unset":                       {{Op: OpPropUnset, A: 0, B: k17p}},
+		"static get":                       {{Op: OpStaticGet, A: 3, B: k17C, C: k17p}},
+		"static isset of static":           {{Op: OpStaticGet, Aux: memberAux(ClassStatic, false, MemberIsset, false), A: 3, C: k17p}},
+		"static get of a value by name":    {{Op: OpStaticGet, Aux: memberAux(ClassValue, true, MemberEmpty, false), A: 3, B: 0, C: 1}},
+		"static set":                       {{Op: OpStaticSet, Aux: uint16(ClassSelf), A: 0, C: k17r}},
+		"static set with its result":       {{Op: OpStaticSet, Aux: uint16(ClassNamed) | MemberResult, A: 0, B: k17C, C: k17r}, {Op: OpOutput, A: 0}},
+		"fetch static":                     {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpStore, A: 4, B: 0}},
+		"fetch static read-write":          {{Op: OpFetchStatic, Aux: memberAux(ClassSelf, false, MemberReadWrite, false), A: 4, C: k17r}, {Op: OpArraySet, A: 4, B: 0, C: 0}},
+		"static ref":                       {{Op: OpStaticRef, Aux: uint16(ClassParent), A: 3, C: k17r}, {Op: OpPush, A: 0}, {Op: OpPush, A: 3}, {Op: OpCall, A: 3, B: 1, C: 2}},
+		"class const":                      {{Op: OpClassConst, A: 3, B: k17C, C: k17K}},
+		"class const of static":            {{Op: OpClassConst, Aux: uint16(ClassStatic), A: 3, C: k17K}},
+		"class name":                       {{Op: OpClassName, Aux: uint16(ClassStatic), A: 3}},
+		"class name of a value":            {{Op: OpClassName, Aux: uint16(ClassValue), A: 3, B: 0}},
+		"instanceof":                       {{Op: OpInstanceof, A: 3, B: 0, C: k17C}},
+		"instanceof a value":               {{Op: OpInstanceof, Aux: uint16(ClassValue), A: 3, B: 0, C: 1}},
+		"clone":                            {{Op: OpClone, A: 3, B: 0}},
+		"verify return":                    {{Op: OpVerifyReturn, A: 0}},
+		"verify return none":               {{Op: OpVerifyReturn, Aux: uint16(ReturnNone), A: 0}},
+		"verify return never":              {{Op: OpVerifyReturn, Aux: uint16(ReturnNever), A: 0}},
+		"cast object":                      {{Op: OpCast, Aux: uint16(CastObject), A: 3, B: 0}},
 		"prop set through a fetched prop": {
 			{Op: OpFetchProp, A: 4, B: 0, C: k17p}, {Op: OpPropSet, Aux: objLoc, A: 4, B: k17q, C: 0},
 		},
@@ -203,8 +219,8 @@ func TestFormat17Opcodes(t *testing.T) {
 	if FormatMinor != 7 {
 		t.Fatalf("FormatMinor = %d, want 7", FormatMinor)
 	}
-	if CastObject != CastArray+1 || PushAuto != PushLoad+1 || PushTemp != PushAuto+1 || PushResult != PushTemp+1 {
-		t.Fatalf("format 1.7 Aux values are renumbered: cast %d, push %d %d %d", CastObject, PushAuto, PushTemp, PushResult)
+	if CastObject != CastArray+1 || PushAuto != PushLoad+1 || PushTemp != PushAuto+1 || PushResult != PushTemp+1 || PushElement != PushResult+1 {
+		t.Fatalf("format 1.7 Aux values are renumbered: cast %d, push %d %d %d %d", CastObject, PushAuto, PushTemp, PushResult, PushElement)
 	}
 	// Every format 1.7 opcode has a valid body below.
 	seen := map[Opcode]bool{}
@@ -435,7 +451,10 @@ func TestFormat17IsGatedByTheDeclaredMinor(t *testing.T) {
 		{Op: OpPush, Aux: uint16(PushAuto), A: 2},
 		{Op: OpPush, Aux: uint16(PushTemp), A: 0},
 		{Op: OpPush, Aux: uint16(PushResult), A: 0},
+		{Op: OpPush, Aux: uint16(PushElement), A: 0},
 		{Op: OpCast, Aux: uint16(CastObject), A: 3, B: 0},
+		{Op: OpUnary, Aux: uint16(Increment), A: 3, B: 0},
+		{Op: OpUnary, Aux: uint16(Decrement), A: 3, B: 0},
 	} {
 		for _, minor := range []uint16{6, 5, 0} {
 			err := verifyInstruction(image, f, minor, in)
@@ -768,8 +787,15 @@ func TestFormat17RejectsInvalidOperands(t *testing.T) {
 	objLoc := MemberObjLocation
 	mode := func(m MemberMode) uint16 { return uint16(m) << 4 }
 	cases := map[string]Instruction{
-		"declare class aux":              {Op: OpDeclareClass, Aux: 1, B: 0},
-		"new name reg":                   {Op: OpNew, Aux: MemberNameReg, A: 3, B: k17C, C: format12Body + 1},
+		"declare class aux": {Op: OpDeclareClass, Aux: 1, B: 0},
+		// Bit 3 of OpNew is NewArgs; it does not make the other bits valid.
+		"new args with a mode":           {Op: OpNew, Aux: NewArgs | mode(2), A: 3, B: k17C, C: format12Body + 1},
+		"new args with object location":  {Op: OpNew, Aux: NewArgs | objLoc, A: 3, B: k17C, C: format12Body + 1},
+		"init callable with a name":      {Op: OpInitMethod, Aux: InitCallable, A: 0, B: k17m},
+		"init callable with a name reg":  {Op: OpInitMethod, Aux: InitCallable | MemberNameReg, A: 0, B: 1},
+		"init callable with c":           {Op: OpInitMethod, Aux: InitCallable, A: 0, C: 1},
+		"init callable of a location":    {Op: OpInitMethod, Aux: InitCallable, A: 2},
+		"init callable with a class ref": {Op: OpInitMethod, Aux: InitCallable | uint16(ClassSelf), A: 0},
 		"new mode":                       {Op: OpNew, Aux: mode(1), A: 3, B: k17C, C: format12Body + 1},
 		"new object location":            {Op: OpNew, Aux: objLoc, A: 3, B: k17C, C: format12Body + 1},
 		"init method class ref":          {Op: OpInitMethod, Aux: uint16(ClassSelf), A: 0, B: k17m},
@@ -826,12 +852,16 @@ func TestFormat17RejectsInvalidOperands(t *testing.T) {
 	})
 	t.Run("the push and cast Aux values", func(t *testing.T) {
 		for name, body := range map[string][]Instruction{
-			"push auto of a value":      {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushAuto), A: 0}, {Op: OpCallPending, A: 3}},
-			"push temp of a location":   {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushTemp), A: 2}, {Op: OpCallPending, A: 3}},
-			"push result of a location": {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushResult), A: 2}, {Op: OpCallPending, A: 3}},
-			"push aux 5":                {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushResult) + 1, A: 0}, {Op: OpCallPending, A: 3}},
-			"cast aux past object":      {{Op: OpCast, Aux: uint16(CastObject) + 1, A: 3, B: 0}},
-			"cast object into a loc":    {{Op: OpCast, Aux: uint16(CastObject), A: 4, B: 0}},
+			"push auto of a value":       {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushAuto), A: 0}, {Op: OpCallPending, A: 3}},
+			"push temp of a location":    {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushTemp), A: 2}, {Op: OpCallPending, A: 3}},
+			"push result of a location":  {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushResult), A: 2}, {Op: OpCallPending, A: 3}},
+			"push aux past element":      {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushElement) + 1, A: 0}, {Op: OpCallPending, A: 3}},
+			"push element of a location": {{Op: OpInitMethod, A: 0, B: k17m}, {Op: OpPush, Aux: uint16(PushElement), A: 2}, {Op: OpCallPending, A: 3}},
+			"cast aux past object":       {{Op: OpCast, Aux: uint16(CastObject) + 1, A: 3, B: 0}},
+			"cast object into a loc":     {{Op: OpCast, Aux: uint16(CastObject), A: 4, B: 0}},
+			"unary aux past decrement":   {{Op: OpUnary, Aux: uint16(Decrement) + 1, A: 3, B: 0}},
+			"unary increment of a loc":   {{Op: OpUnary, Aux: uint16(Increment), A: 3, B: 2}},
+			"unary decrement with c":     {{Op: OpUnary, Aux: uint16(Decrement), A: 3, B: 0, C: 1}},
 		} {
 			t.Run(name, func(t *testing.T) { requireBuildError(t, format17Image(body...), ErrInvalid) })
 		}
@@ -967,6 +997,7 @@ func TestFormat17Flow(t *testing.T) {
 			{Op: OpPush, Aux: uint16(PushAuto), A: 2},
 			{Op: OpPush, Aux: uint16(PushTemp), A: 0},
 			{Op: OpPush, Aux: uint16(PushResult), A: 0},
+			{Op: OpPush, Aux: uint16(PushElement), A: 0},
 		} {
 			for name, body := range map[string][]Instruction{
 				"after a call of a known function": {{Op: OpInitCall, B: 1}, push, {Op: OpCallPending, A: 3}},
@@ -1056,6 +1087,14 @@ func TestFormat17ElementWindow(t *testing.T) {
 			fetchRW, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, {Op: OpConst, A: 1, B: 0},
 			{Op: OpBinary, Aux: uint16(Add), A: 3, B: 3, C: 1}, {Op: OpPropSet, Aux: objLoc, A: 4, B: k17q, C: 3},
 		},
+		"an increment through a prop": {
+			fetchRW, {Op: OpPropGet, Aux: objLoc | uint16(MemberIncDec)<<4, A: 3, B: 4, C: k17q},
+			{Op: OpUnary, Aux: uint16(Increment), A: 3, B: 3}, {Op: OpPropSet, Aux: objLoc, A: 4, B: k17q, C: 3},
+		},
+		"a decrement through a prop": {
+			fetchRW, {Op: OpPropGet, Aux: objLoc | uint16(MemberIncDec)<<4, A: 3, B: 4, C: k17q},
+			{Op: OpUnary, Aux: uint16(Decrement), A: 3, B: 3}, {Op: OpPropSet, Aux: objLoc, A: 4, B: k17q, C: 3},
+		},
 		"a store to a fetched prop":          {fetchP, {Op: OpConst, A: 3, B: 0}, {Op: OpStore, A: 4, B: 3}},
 		"fetch static then store":            {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpStore, A: 4, B: 0}},
 		"fetch static then array set":        {{Op: OpFetchStatic, Aux: uint16(ClassSelf), A: 4, C: k17r}, {Op: OpArraySet, A: 4, B: 0, C: 0}},
@@ -1076,12 +1115,17 @@ func TestFormat17ElementWindow(t *testing.T) {
 		"a second use after the write":          {fetchP, setThrough, setThrough},
 		"a store after a prop set":              {fetchP, setThrough, {Op: OpStore, A: 4, B: 0}},
 		"a fetch from the element after a load": {fetchRW, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, {Op: OpFetchProp, Aux: objLoc, A: 4, B: 4, C: k17q}},
-		"two loads":                             {fetchRW, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, setThrough},
-		"a fetch from a closed element":         {fetchP, setThrough, {Op: OpFetchProp, Aux: objLoc, A: 4, B: 4, C: k17q}},
-		"a prop of a variable's location":       {{Op: OpFetchProp, Aux: objLoc, A: 2, B: 2, C: k17p}, {Op: OpStore, A: 2, B: 0}},
-		"the element pushed":                    {fetchP, {Op: OpPush, A: 4}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
-		"the element loaded twice by a store":   {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpStore, A: 4, B: 0}, {Op: OpStore, A: 4, B: 0}},
-		"a fetched static used after a jump":    {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpJump, A: b + 2}, {Op: OpStore, A: 4, B: 0}},
+		// Only the ++/-- step may sit between the read and the write.
+		"a not between the read and the write": {
+			fetchRW, {Op: OpPropGet, Aux: objLoc | uint16(MemberIncDec)<<4, A: 3, B: 4, C: k17q},
+			{Op: OpUnary, Aux: uint16(Not), A: 3, B: 3}, {Op: OpPropSet, Aux: objLoc, A: 4, B: k17q, C: 3},
+		},
+		"two loads":                           {fetchRW, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, {Op: OpPropGet, Aux: objLoc, A: 3, B: 4, C: k17q}, setThrough},
+		"a fetch from a closed element":       {fetchP, setThrough, {Op: OpFetchProp, Aux: objLoc, A: 4, B: 4, C: k17q}},
+		"a prop of a variable's location":     {{Op: OpFetchProp, Aux: objLoc, A: 2, B: 2, C: k17p}, {Op: OpStore, A: 2, B: 0}},
+		"the element pushed":                  {fetchP, {Op: OpPush, A: 4}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
+		"the element loaded twice by a store": {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpStore, A: 4, B: 0}, {Op: OpStore, A: 4, B: 0}},
+		"a fetched static used after a jump":  {{Op: OpFetchStatic, A: 4, B: k17C, C: k17r}, {Op: OpJump, A: b + 2}, {Op: OpStore, A: 4, B: 0}},
 	} {
 		t.Run("invalid "+name, func(t *testing.T) {
 			e := requireBuildDetail(t, format17Image(body...), "element location")

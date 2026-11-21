@@ -13,7 +13,7 @@ const 1: int 2
 const 2: int 3
 const 3: int 4
 const 4: null
-func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0 flags=nothis
   registers VVV
   0: Call 0 1 1 0 ; line 5 ; f
   1: Branch 0 1 2 11 ; line 5
@@ -37,19 +37,19 @@ func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
   19: Output 0 0 0 0 ; line 5
   20: Const 0 0 4 0 ; line 6 ; null
   21: Return 0 0 0 0 ; line 6
-func 1 "f" params=0 locals=0 registers=1 maxstack=0
+func 1 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 0 0 ; line 2 ; int 1
   1: Return 0 0 0 0 ; line 2
   2: Const 0 0 4 0 ; line 2 ; null
   3: Return 0 0 0 0 ; line 2
-func 2 "g" params=0 locals=0 registers=1 maxstack=0
+func 2 "g" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 1 0 ; line 3 ; int 2
   1: Return 0 0 0 0 ; line 3
   2: Const 0 0 4 0 ; line 3 ; null
   3: Return 0 0 0 0 ; line 3
-func 3 "h" params=0 locals=0 registers=1 maxstack=0
+func 3 "h" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 2 0 ; line 4 ; int 3
   1: Return 0 0 0 0 ; line 4

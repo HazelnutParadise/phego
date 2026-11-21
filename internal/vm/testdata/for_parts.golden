@@ -15,7 +15,7 @@ const 1: int 9
 const 2: null
 const 3: string "i"
 const 4: string "j"
-func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0 flags=nothis
   local 0 "i"
   local 1 "j"
   registers LLVVV

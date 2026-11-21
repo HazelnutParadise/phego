@@ -14,7 +14,7 @@ const 3: int 0
 const 4: string "d"
 const 5: string "a"
 const 6: string "v"
-func 0 "{main}" params=0 locals=3 registers=9 maxstack=0
+func 0 "{main}" params=0 locals=3 registers=9 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "k"
   local 2 "v"

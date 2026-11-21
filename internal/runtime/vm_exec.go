@@ -35,13 +35,16 @@ type vmFrame struct {
 	// boundary marks the frame a nested run (vmState.invoke) entered: its
 	// Return ends that run instead of resuming a caller in the same loop.
 	boundary bool
-	dest     uint32
-	nargs    int
+	// weak marks a frame the runtime entered itself: its arguments are
+	// converted in weak mode whatever the caller's strict_types.
+	weak  bool
+	dest  uint32
+	nargs int
 	// this is the object of a method call (an owner), scope the class the
 	// code was declared in or used by (the lexical scope of self and of
 	// visibility checks) and called the class of late static binding. All
 	// are zero for a plain function.
-	this   value
+	this   *object
 	scope  *class
 	called *class
 	// unreceived marks a frame whose call passed too few arguments: its pc
@@ -86,8 +89,9 @@ type vmState struct {
 	// local, a reference once the variable is initialized. globalVars are
 	// the global variables {main} has no local for. Both live with the
 	// run, never in the shared Program.
-	statics    [][]value
-	globalVars map[string]*value
+	statics      [][]value
+	traitStatics map[vmTraitStatic][]value
+	globalVars   map[string]*value
 	// reporting is the run's error_reporting, EG(error_reporting): the
 	// INI value, lowered to the fatal levels inside @ (BeginSilence) and
 	// restored after it (EndSilence). x.errors.excluded mirrors it.
@@ -114,15 +118,19 @@ type vmState struct {
 	floor        int
 	nesting      int
 	fetchScratch value
-	steps        int64
-	limit        int64
-	next         int64 // steps at which the next slow check runs
-	done         <-chan struct{}
-	scratch      []byte
-	globals      []Global
-	prelude      []RunDiagnostic
-	end          completion
-	ended        bool
+	// caches are the run's inline caches (vmCache), allocated on first use.
+	caches []vmCache
+	// linking is the class whose declaration is being checked.
+	linking *class
+	steps   int64
+	limit   int64
+	next    int64 // steps at which the next slow check runs
+	done    <-chan struct{}
+	scratch []byte
+	globals []Global
+	prelude []RunDiagnostic
+	end     completion
+	ended   bool
 
 	// offsetBuf holds the bytes of offsetLast, the string the last string
 	// offset write built, when offsetValid is set, so that a write
@@ -270,6 +278,9 @@ func (s *vmState) stop(err error) {
 		s.end = c
 	case errors.As(err, &fatal):
 		_, _, s.lastFile, s.lastLine = s.location()
+		if fatal.line > 0 {
+			s.lastLine = fatal.line
+		}
 		s.x.errors.trailer = "Stack trace:\n" + s.backtrace("", nil) + "\n"
 		s.end = s.x.fail(endFatal, errors.New(fatal.message))
 	case errors.As(err, &internal):
@@ -435,12 +446,15 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
-	if fn.typed {
-		if err := s.checkArguments(fr, argc, into.internal); err != nil {
-			return err
-		}
-	}
+	fr.weak = into.internal
 	if argc < fn.required {
+		// ZEND_RECV checks each parameter in order: the type of an
+		// argument before a missing one is reported first.
+		if fn.typed {
+			if err := s.checkArguments(fr, argc); err != nil {
+				return err
+			}
+		}
 		return s.tooFewArguments(argc)
 	}
 	return nil
@@ -544,7 +558,7 @@ func (s *vmState) pop(release bool) error {
 		}
 	}
 	this := f.this
-	f.this = value{}
+	f.this = nil
 	clear(f.locals)
 	clear(f.locs)
 	clear(f.elems)
@@ -560,8 +574,8 @@ func (s *vmState) pop(release bool) error {
 	}
 	// $this is released after the frame's variables (i_free_compiled_variables
 	// runs before OBJ_RELEASE(ZEND_THIS) in zend_leave_helper).
-	if release && this.kind == valueObject {
-		keep(s.releaseValue(this))
+	if release && this != nil {
+		keep(s.releaseObject(this))
 	}
 	return first
 }
@@ -812,7 +826,11 @@ func (s *vmState) output(v value) completion {
 
 // callValue resolves a string callable naming a program function.
 func (s *vmState) callValue(callable value, argc int, dest uint32) error {
-	if callable = callable.deref(); callable.kind != valueString {
+	callable = callable.deref()
+	if callable.kind == valueObject {
+		return s.callObject(callable, argc, dest)
+	}
+	if callable.kind != valueString {
 		return s.unsupported("calling a non-string callable")
 	}
 	name := strings.TrimPrefix(callable.text, "\\")

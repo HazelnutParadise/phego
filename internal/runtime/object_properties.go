@@ -251,7 +251,18 @@ func (h *heap) readObject(obj value, name string, scope *class) (value, error) {
 			if callErr != nil {
 				return value{}, callErr
 			}
-			return h.dereferenceMethodReturn(out)
+			v, err := h.dereferenceMethodReturn(out)
+			if err != nil || p.typeName == "" {
+				return v, err
+			}
+			// zend_std_read_property: the value __get returns for an unset
+			// typed property must be assignable to it.
+			coerced, cerr := h.coerceProperty(p, v, false, false)
+			if cerr != nil {
+				failure := &Throwable{"TypeError", "Value of type " + valueName(v) + " returned from " + o.class.name + "::__get() must be compatible with unset property " + p.label() + " of type " + p.typeName}
+				return value{}, h.mergeObjectErrors(failure, h.discardMethodReturn(v))
+			}
+			return coerced, nil
 		}
 	}
 	if slot.kind == valueUndefined {

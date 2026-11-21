@@ -15,7 +15,7 @@ const 2: null
 const 3: string "a"
 const 4: string "b"
 const 5: int 3
-func 0 "{main}" params=0 locals=0 registers=4 maxstack=2
+func 0 "{main}" params=0 locals=0 registers=4 maxstack=2 flags=nothis
   registers VVVV
   0: Call 0 1 3 0 ; line 6 ; g
   1: Call 0 3 4 0 ; line 6 ; h
@@ -31,7 +31,9 @@ func 0 "{main}" params=0 locals=0 registers=4 maxstack=2
   11: Output 0 0 0 0 ; line 6
   12: Const 0 0 2 0 ; line 7 ; null
   13: Return 0 0 0 0 ; line 7
-func 1 "k" params=2 locals=2 registers=5 maxstack=0
+func 1 "k" params=2 locals=2 registers=5 maxstack=0 flags=nothis
+  param 0 "a"
+  param 1 "b"
   local 0 "a"
   local 1 "b"
   registers VVLLV
@@ -43,19 +45,19 @@ func 1 "k" params=2 locals=2 registers=5 maxstack=0
   5: Return 0 4 0 0 ; line 2
   6: Const 0 4 2 0 ; line 2 ; null
   7: Return 0 4 0 0 ; line 2
-func 2 "f" params=0 locals=0 registers=1 maxstack=0
+func 2 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 0 0 ; line 3 ; int 1
   1: Return 0 0 0 0 ; line 3
   2: Const 0 0 2 0 ; line 3 ; null
   3: Return 0 0 0 0 ; line 3
-func 3 "g" params=0 locals=0 registers=1 maxstack=0
+func 3 "g" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 1 0 ; line 4 ; int 2
   1: Return 0 0 0 0 ; line 4
   2: Const 0 0 2 0 ; line 4 ; null
   3: Return 0 0 0 0 ; line 4
-func 4 "h" params=0 locals=0 registers=1 maxstack=0
+func 4 "h" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 5 0 ; line 5 ; int 3
   1: Return 0 0 0 0 ; line 5
