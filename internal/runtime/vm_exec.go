@@ -633,6 +633,15 @@ func (s *vmState) pop(release bool) error {
 			this.destructorCalled = true
 		}
 	}
+	// Taken now: releasing $this below can run a destructor, whose frame
+	// reuses this frame object.
+	closure := f.closure
+	if closure != nil {
+		f.closure = nil
+	}
+	if f.via != 0 {
+		f.via = 0
+	}
 	clear(f.locals)
 	clear(f.locs)
 	clear(f.elems)
@@ -673,11 +682,8 @@ func (s *vmState) pop(release bool) error {
 	}
 	// The closure goes last (zend_leave_helper: OBJ_RELEASE of the closure
 	// after the variables).
-	if cl := f.closure; cl != nil {
-		f.closure = nil
-		if release {
-			keep(s.releaseObject(cl))
-		}
+	if closure != nil && release {
+		keep(s.releaseObject(closure))
 	}
 	return first
 }

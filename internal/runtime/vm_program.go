@@ -34,6 +34,9 @@ type Program struct {
 	// unsupported, not reported as an undefined function. Set once, before
 	// the first run, by the engine that built the Program; nil knows none.
 	Builtin func(lower string) bool
+	// memberFunc marks the functions that are a class member's body or
+	// initializer.
+	memberFunc []bool
 	// trampoline is the index of a function that no code calls: the
 	// callee of a call __call or __callStatic will receive, which takes
 	// any arguments by value.
@@ -348,7 +351,7 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 		return nil, err
 	}
 	n := p.FunctionCount()
-	prog := &Program{consts: pool, funcs: make([]vmFunction, n), byName: make(map[string]int, n), entry: int(p.Entry()), width: width}
+	prog := &Program{consts: pool, funcs: make([]vmFunction, n), byName: make(map[string]int, n), entry: int(p.Entry()), width: width, memberFunc: make([]bool, n)}
 	if prog.entry < 0 || prog.entry >= n {
 		return nil, fmt.Errorf("NewProgram: entry function %d out of range", prog.entry)
 	}
@@ -394,6 +397,13 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 	}
 	if err := prog.decodeClasses(p); err != nil {
 		return nil, err
+	}
+	// A method or an initializer is no function: a callable string that
+	// spells its bare name must not reach it.
+	for name, i := range prog.byName {
+		if prog.memberFunc[i] {
+			delete(prog.byName, name)
+		}
 	}
 	prog.trampoline = len(prog.funcs)
 	prog.funcs = append(prog.funcs, vmFunction{name: "__call", index: prog.trampoline, variadic: true, paramNames: []string{}, paramByRef: []bool{}, unsupported: "entering the magic call trampoline"})

@@ -643,6 +643,9 @@ func (fc *fnCompiler) methodCall(n *ir.Node) operand {
 }
 
 func (fc *fnCompiler) staticCall(n *ir.Node) operand {
+	if n.Name != nil && phpname.Lower(n.Name.Resolved) == "closure" && phpname.Lower(n.Text) == "fromcallable" && len(n.Args) == 1 && n.Args[0].Value != nil {
+		fc.refuseBuiltinCallable(n.Args[0].Value, n.Line)
+	}
 	res := fc.alloc()
 	ref, class := fc.classRef(n.Name, n.Kids[0])
 	name := fc.memberName(n)
@@ -1067,6 +1070,7 @@ func lowerName(s string) string { return phpname.Lower(s) }
 // (ZEND_INIT_DYNAMIC_CALL): an object is called through __invoke, a string
 // names a function.
 func (fc *fnCompiler) callValue(n *ir.Node) operand {
+	fc.refuseBuiltinCallable(n.Kids[0], n.Line)
 	res := fc.alloc()
 	callee := fc.value(n.Kids[0])
 	fc.at(n.Line)

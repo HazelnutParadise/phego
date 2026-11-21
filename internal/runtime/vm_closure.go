@@ -75,6 +75,10 @@ var closureBuiltin = func() *class {
 	return c
 }()
 
+// nativeNames are the methods of the Closure class by their native kind.
+var nativeNames = [...]string{closureBind: "bind", closureBindTo: "bindTo", closureCall: "call",
+	closureFromCallable: "fromCallable", closureInvoke: "__invoke", closureGetCurrent: "getCurrent"}
+
 // builtinClass reports a class the engine provides (ZEND_INTERNAL_CLASS).
 func builtinClass(c *class) bool {
 	return c == closureBuiltin || c == stdClassBuiltin || c == stringableBuiltin
@@ -333,7 +337,10 @@ func (s *vmState) startNative(m *methodSpec, this value) error {
 // nativeTarget is the call of a method of the Closure class on closure o
 // (nil for a static method).
 func (s *vmState) nativeTarget(kind uint8, o *object) vmCallTarget {
-	if kind == closureInvoke && o != nil && o.closure != nil && o.closure.native == 0 {
+	if kind == closureInvoke && o != nil && o.closure != nil && o.closure.native != 0 {
+		return s.nativeTarget(o.closure.native, o.closure.this)
+	}
+	if kind == closureInvoke && o != nil && o.closure != nil {
 		t := s.closureTarget(o)
 		if t.via == 0 {
 			t.via = closureInvoke
@@ -399,7 +406,11 @@ func (s *vmState) resolveCallable(f *vmFrame, v value, dynamic bool) (vmCallTarg
 		}
 		return vmCallTarget{fn: int(m.fn - 1), this: o, scope: m.owner, called: o.class}, nil
 	case valueString:
-		class, method, isMethod := strings.Cut(v.text, "::")
+		// zend_is_callable_check_func splits at the last "::".
+		class, method, isMethod := "", "", false
+		if i := strings.LastIndex(v.text, "::"); i >= 0 {
+			class, method, isMethod = v.text[:i], v.text[i+2:], true
+		}
 		if !isMethod {
 			name := strings.TrimPrefix(v.text, "\\")
 			idx, ok := s.prog.byName[phpNameLower(name)]
@@ -411,8 +422,11 @@ func (s *vmState) resolveCallable(f *vmFrame, v value, dynamic bool) (vmCallTarg
 			}
 			return vmCallTarget{fn: idx}, nil
 		}
-		c, relative := s.callableClass(f, class, dynamic)
+		c, relative, reason := s.callableClass(f, class, dynamic)
 		if c == nil {
+			if reason != "" {
+				return vmCallTarget{}, &callableError{reason}
+			}
 			return fail("Class \""+strings.TrimPrefix(class, "\\")+"\" not found", "class \""+strings.TrimPrefix(class, "\\")+"\" not found")
 		}
 		return s.staticTarget(f, c, method, relative, dynamic)
@@ -437,8 +451,11 @@ func (s *vmState) resolveCallable(f *vmFrame, v value, dynamic bool) (vmCallTarg
 			return fail("Second array member is not a valid method", "second array member is not a valid method")
 		}
 		if first.kind == valueString {
-			c, relative := s.callableClass(f, first.text, dynamic)
+			c, relative, reason := s.callableClass(f, first.text, dynamic)
 			if c == nil {
+				if reason != "" {
+					return vmCallTarget{}, &callableError{reason}
+				}
 				return fail("Class \""+strings.TrimPrefix(first.text, "\\")+"\" not found", "class \""+strings.TrimPrefix(first.text, "\\")+"\" not found")
 			}
 			return s.staticTarget(f, c, second.text, relative, dynamic)
@@ -496,27 +513,33 @@ func (s *vmState) instanceTarget(f *vmFrame, o *object, name string, dynamic boo
 // callableClass is the class a callable names. A relative name (self,
 // parent, static) is resolved against the calling frame, with PHP's
 // deprecation, when zend_is_callable_ex resolves the callable; a dynamic
-// call takes the name literally. relative says the name was one.
-func (s *vmState) callableClass(f *vmFrame, name string, dynamic bool) (c *class, relative bool) {
-	if !dynamic {
-		switch lower := phpNameLower(name); lower {
-		case "self":
-			c = f.scope
-		case "parent":
-			if f.scope != nil && f.scope.schema != nil {
-				c = f.scope.schema.parent
-			}
-		case "static":
-			c = f.called
-		default:
-			return s.lookupClass(name), false
-		}
-		if c != nil {
-			s.h.warn(levelDeprecated, "Use of \""+phpNameLower(name)+"\" in callables is deprecated")
-		}
-		return c, true
+// call takes the name literally. relative says the name was one, and
+// reason is zend_is_callable_ex's wording when a relative name has no
+// class to stand for.
+func (s *vmState) callableClass(f *vmFrame, name string, dynamic bool) (c *class, relative bool, reason string) {
+	if dynamic {
+		return s.lookupClass(name), false, ""
 	}
-	return s.lookupClass(name), false
+	lower := phpNameLower(name)
+	switch lower {
+	case "self":
+		c = f.scope
+	case "parent":
+		if f.scope != nil && f.scope.schema != nil {
+			if c = f.scope.schema.parent; c == nil {
+				return nil, true, `cannot access "parent" when current class scope has no parent`
+			}
+		}
+	case "static":
+		c = f.called
+	default:
+		return s.lookupClass(name), false, ""
+	}
+	if c == nil {
+		return nil, true, `cannot access "` + lower + `" when no class scope is active`
+	}
+	s.h.warn(levelDeprecated, "Use of \""+lower+"\" in callables is deprecated")
+	return c, true, ""
 }
 
 // staticTarget is method name of class c as a callable names it
@@ -534,9 +557,19 @@ func (s *vmState) staticTarget(f *vmFrame, c *class, name string, relative, dyna
 	if relative && f.called != nil && classIs(f.called, c) {
 		called = f.called
 	}
+	// zend_is_callable_check_class: the caller's object goes along, and
+	// its class is the called class, when the object is an instance of
+	// the caller's scope and that scope is the named class or a subclass.
+	var object *object
+	if !dynamic && f.this != nil && f.scope != nil && classIs(f.this.class, f.scope) && classIs(f.scope, c) {
+		object, called = f.this, f.this.class
+	}
 	if m != nil && methodAccessible(f.scope, m) {
 		if m.native != 0 {
 			if !m.static {
+				if !dynamic {
+					return vmCallTarget{}, &callableError{"non-static method Closure::" + m.name + "() cannot be called statically"}
+				}
 				return vmCallTarget{}, &Throwable{"Error", "Non-static method Closure::" + m.name + "() cannot be called statically"}
 			}
 			return s.nativeTarget(m.native, nil), nil
@@ -548,13 +581,13 @@ func (s *vmState) staticTarget(f *vmFrame, c *class, name string, relative, dyna
 			return vmCallTarget{}, s.unsupported("calling a method of a builtin class")
 		}
 		if !m.static {
-			if !dynamic && f.this != nil && classIs(f.this.class, c) {
-				return vmCallTarget{fn: int(m.fn - 1), this: f.this, scope: m.owner, called: f.this.class}, nil
+			if object != nil {
+				return vmCallTarget{fn: int(m.fn - 1), this: object, scope: m.owner, called: called}, nil
 			}
 			if dynamic {
 				return vmCallTarget{}, &Throwable{"Error", "Non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
 			}
-			return vmCallTarget{}, &callableError{"non-static method " + m.owner.name + "::" + m.name + "() cannot be called statically"}
+			return vmCallTarget{}, &callableError{"non-static method " + c.name + "::" + m.name + "() cannot be called statically"}
 		}
 		return vmCallTarget{fn: int(m.fn - 1), scope: m.owner, called: called}, nil
 	}
@@ -903,6 +936,9 @@ func (s *vmState) validBinding(cd *closureData, newThis *object, scope *class) b
 		name := cd.fn.name
 		if cd.magic != "" {
 			name = cd.magic
+		}
+		if cd.native != 0 {
+			name = nativeNames[cd.native]
 		}
 		return warn("Cannot bind method " + cd.scope.name + "::" + name + "() to object of class " + newThis.class.name)
 	case newThis == nil && method && !cd.static:

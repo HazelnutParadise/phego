@@ -40,7 +40,10 @@ func (s *vmState) classOperand(f *vmFrame, in *vmInstr, operand uint32) (*class,
 			return nil, scopeError(in, "parent")
 		}
 		if f.scope.schema == nil || f.scope.schema.parent == nil {
-			return nil, &Throwable{"Error", `Cannot use "parent" when current class scope has no parent`}
+			if in.op == bytecode.OpClassName {
+				return nil, &Throwable{"Error", `Cannot use "parent" when current class scope has no parent`}
+			}
+			return nil, &Throwable{"Error", `Cannot access "parent" when current class scope has no parent`}
 		}
 		return f.scope.schema.parent, nil
 	case bytecode.ClassStatic:
@@ -444,6 +447,11 @@ func (s *vmState) staticGet(f *vmFrame, in *vmInstr) error {
 	c, err := s.staticClass(f, in, in.b)
 	if err != nil {
 		if mode == bytecode.MemberRead {
+			return err
+		}
+		// self, parent and static are fetched before the test: without a
+		// class scope they throw.
+		if ref := bytecode.AuxClassRef(in.aux); ref == bytecode.ClassSelf || ref == bytecode.ClassParent || ref == bytecode.ClassStatic {
 			return err
 		}
 		// isset(Missing::$x) is false; so is the property of a class whose

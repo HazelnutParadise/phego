@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"strings"
+
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
 	"github.com/HazelnutParadise/phego/internal/phpname"
@@ -92,6 +94,9 @@ func (fc *fnCompiler) callable(n *ir.Node) operand {
 		fc.top = res - fc.base + 1
 		return reg(res)
 	case ir.OpCallValue, ir.OpMethodCall, ir.OpStaticCall:
+		if call.Op == ir.OpCallValue {
+			fc.refuseBuiltinCallable(call.Kids[0], n.Line)
+		}
 		fc.converting = call
 		return fc.expr(call)
 	}
@@ -177,4 +182,18 @@ func appendsElement(n *ir.Node) bool {
 		}
 	}
 	return false
+}
+
+// refuseBuiltinCallable refuses a callable written as a string literal that
+// names a function PHP provides and Phego does not, as a direct call of
+// that function is refused. A name known only at run time is refused when
+// it is resolved.
+func (fc *fnCompiler) refuseBuiltinCallable(n *ir.Node, line int) {
+	if n == nil || n.Op != ir.OpLiteral || n.Value == nil || n.Value.Kind != ir.LitString {
+		return
+	}
+	name := strings.TrimPrefix(n.Value.Str, "\\")
+	if _, declared := fc.c.funcIndex[phpname.Lower(name)]; !declared && isBuiltin(name) {
+		fc.unsupported("builtin function "+name+"() named by a callable", positive(n.Line, line))
+	}
 }

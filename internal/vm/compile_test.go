@@ -479,6 +479,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"closure in a property default", "echo 1;\nclass A { public static $p = [1, strtoupper2(...)]; }", 3},
 		{"passing $a[] to a callee found at run time", "echo 1;\n$f = fn(&$r) => 1;\n$f($a[]);", 4},
 		{"passing $a[] to a callee found at run time", "echo 1;\n$o->m(1, $a['k'][]);", 3},
+		{"builtin function strlen() named by a callable", "echo 1;\necho 'strlen'('abc');", 3},
+		{"builtin function StrLen() named by a callable", "echo 1;\n$f = \"\\\\StrLen\"(...);", 3},
+		{"builtin function count() named by a callable", "echo 1;\n$f = Closure::fromCallable(\n'count');", 4},
 		{"generator", "echo 1;\n$f = fn() => yield 1;", 3},
 		{"enum declaration", "echo 1;\nenum E {}", 3},
 		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
@@ -786,8 +789,8 @@ var compilerFatal = map[string]CompileError{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 863 {
-		t.Fatalf("want 863 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 885 {
+		t.Fatalf("want 885 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
