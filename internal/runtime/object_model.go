@@ -50,8 +50,11 @@ type methodSpec struct {
 	abstract         bool
 	// fn is, for a method a program declares, the index of its bytecode
 	// function plus one. It reuses the padding after the flags.
-	fn   int32
-	call func(*heap, value, []value) (value, error)
+	fn int32
+	// native names a method of the Closure class the VM implements itself
+	// (closureBind and the constants after it); zero for every other one.
+	native uint8
+	call   func(*heap, value, []value) (value, error)
 }
 
 type classSpec struct {

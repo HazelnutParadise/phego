@@ -47,6 +47,11 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		// constant initializers, conversions and the destructors of the
 		// values they replace.
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpClosure, OpBindLexical, OpCallableConvert, OpArgByRef:
+		// Format 1.8. Creating a closure allocates; binding a variable
+		// warns for an undefined one and releases the capture's old value;
+		// replacing the destination can run a destructor.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:

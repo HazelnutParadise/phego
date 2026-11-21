@@ -131,6 +131,12 @@ func sourceLines(source []byte) uint32 {
 }
 
 type compiler struct {
+	// funcs are the functions of the image in index order: {main}, the
+	// unit's functions, the class members, then the closures in the order
+	// their creating code was compiled. closures maps a closure to its
+	// index.
+	funcs    []*ir.Func
+	closures map[*ir.Func]uint32
 	// host reports a function the host registered; nil when there is none.
 	host       func(lower string) bool
 	ctx        context.Context
@@ -178,17 +184,24 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 	}
 	funcs := append([]*ir.Func{unit.Main}, unit.Functions...)
 	classes, members, classErr := c.classTable(len(funcs))
-	funcs = append(funcs, members...)
-	if uint64(len(funcs)) > uint64(limits.MaxFunctions) {
+	c.funcs = append(funcs, members...)
+	if uint64(len(c.funcs)) > uint64(limits.MaxFunctions) {
 		return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}
 	}
-	out := make([]bytecode.Function, len(funcs))
+	var out []bytecode.Function
 	var first *UnsupportedError
 	firstRank := 0
 	if classErr != nil {
 		first, firstRank = classErr, classErr.Line*2+1
 	}
-	for i, f := range funcs {
+	// Compiling a function appends the closures it creates (closureIndex),
+	// so the list grows while it is walked.
+	for i := 0; i < len(c.funcs); i++ {
+		f := c.funcs[i]
+		out = append(out, bytecode.Function{})
+		if uint64(len(c.funcs)) > uint64(limits.MaxFunctions) {
+			return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}
+		}
 		fn, err := c.function(f)
 		if err != nil {
 			var ue *UnsupportedError

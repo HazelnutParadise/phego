@@ -1046,7 +1046,8 @@ func (h *heap) isCallable(v value, context callableContext) bool {
 	case valueString:
 		c, method, ok := strings.Cut(v.text, "::")
 		if !ok {
-			return false
+			// A function name: the VM knows the program's functions.
+			return h.vm != nil && h.vm.functionExists(v.text)
 		}
 		requireStatic = true
 		target = className(c)

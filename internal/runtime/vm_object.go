@@ -32,20 +32,23 @@ func (s *vmState) classOperand(f *vmFrame, in *vmInstr, operand uint32) (*class,
 		return c, nil
 	case bytecode.ClassSelf:
 		if f.scope == nil {
-			return nil, &Throwable{"Error", `Cannot use "self" when no class scope is active`}
+			return nil, scopeError(in, "self")
 		}
 		return f.scope, nil
 	case bytecode.ClassParent:
 		if f.scope == nil {
-			return nil, &Throwable{"Error", `Cannot use "parent" when no class scope is active`}
+			return nil, scopeError(in, "parent")
 		}
 		if f.scope.schema == nil || f.scope.schema.parent == nil {
-			return nil, &Throwable{"Error", `Cannot use "parent" when current class scope has no parent`}
+			if in.op == bytecode.OpClassName {
+				return nil, &Throwable{"Error", `Cannot use "parent" when current class scope has no parent`}
+			}
+			return nil, &Throwable{"Error", `Cannot access "parent" when current class scope has no parent`}
 		}
 		return f.scope.schema.parent, nil
 	case bytecode.ClassStatic:
 		if f.called == nil {
-			return nil, &Throwable{"Error", `Cannot use "static" when no class scope is active`}
+			return nil, scopeError(in, "static")
 		}
 		return f.called, nil
 	}
@@ -446,6 +449,11 @@ func (s *vmState) staticGet(f *vmFrame, in *vmInstr) error {
 		if mode == bytecode.MemberRead {
 			return err
 		}
+		// self, parent and static are fetched before the test: without a
+		// class scope they throw.
+		if ref := bytecode.AuxClassRef(in.aux); ref == bytecode.ClassSelf || ref == bytecode.ClassParent || ref == bytecode.ClassStatic {
+			return err
+		}
 		// isset(Missing::$x) is false; so is the property of a class whose
 		// defaults cannot be computed.
 		if _, php := err.(*Throwable); !php {
@@ -613,9 +621,23 @@ func (s *vmState) className(f *vmFrame, in *vmInstr) error {
 	return s.setReg(f.regs, in.a, stringValue(c.name))
 }
 
+// scopeError is the Error for self, parent or static where no class scope
+// is active: ZEND_FETCH_CLASS_NAME (::class) words it differently from
+// zend_fetch_class, which every other use goes through.
+func scopeError(in *vmInstr, name string) error {
+	if in.op == bytecode.OpClassName {
+		return &Throwable{"Error", `Cannot use "` + name + `" in the global scope`}
+	}
+	return &Throwable{"Error", `Cannot access "` + name + `" when no class scope is active`}
+}
+
 // instanceOf is ZEND_INSTANCEOF: a class that does not exist is no error.
 func (s *vmState) instanceOf(f *vmFrame, in *vmInstr) error {
 	v := f.regs[in.b].deref()
+	if v.kind != valueObject && bytecode.AuxClassRef(in.aux) != bytecode.ClassValue {
+		// The class is fetched only for an object.
+		return s.setReg(f.regs, in.a, boolValue(false))
+	}
 	var c *class
 	switch bytecode.AuxClassRef(in.aux) {
 	case bytecode.ClassNamed:
@@ -799,6 +821,9 @@ func (s *vmState) castObject(v value) (value, error) {
 
 // callObject is ZEND_INIT_DYNAMIC_CALL for an object: its __invoke.
 func (s *vmState) callObject(obj value, argc int, dest uint32) error {
+	if cd := obj.object.closure; cd != nil {
+		return s.callClosureValue(obj.object, cd, argc, dest)
+	}
 	m, ok := s.h.resolveMethod(obj.object.class, "__invoke", nil)
 	if !ok || m == nil || m.fn == 0 || m.call == nil {
 		if err := s.dropArgs(argc); err != nil {
@@ -818,9 +843,7 @@ func (s *vmState) callObject(obj value, argc int, dest uint32) error {
 	retain(obj)
 	s.into = vmEnter{this: obj.object, scope: m.owner, called: obj.object.class}
 	err := s.push(fn, argc, dest)
-	if s.into.this != nil {
-		_ = s.releaseObject(s.into.this)
-	}
+	s.dropInto()
 	s.into = vmEnter{}
 	return err
 }

@@ -458,6 +458,11 @@ func (s *vmState) cast(kind bytecode.CastKind, v value) (value, error) {
 		case valueUndefined, valueNull:
 			return h.newArrayValue(), nil
 		case valueObject:
+			if v.object.closure != nil {
+				// convert_to_array wraps a Closure like a scalar.
+				out := h.newArrayValue()
+				return out, h.appendValue(&out, v)
+			}
 			arr, err := s.objectArray(v.object, nil, false, false)
 			if err != nil {
 				return value{}, err

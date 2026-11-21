@@ -1,0 +1,355 @@
+# W-17 stage 7B, second independent review (of the fixes): the regression fixtures before the fixes.
+# Commit 5b71e39. For each fixture: Phego's output in display mode, then PHP 8.5.12's (pinned linux/arm64 image, php -n).
+
+=== closure_review2_call_tmp_twice: Phego before the fix
+~t1
+t1~t2
+t2
+f dropped
+~cap
+
+[exit 0]
+=== closure_review2_call_tmp_twice: PHP 8.5.12
+~t1
+t1~t2
+t2
+~cap
+f dropped
+
+[exit 0]
+
+=== closure_review2_callable_param_builtin: Phego before the fix
+ok
+
+[exit 0]
+=== closure_review2_callable_param_builtin: PHP 8.5.12
+ok
+
+[exit 0]
+
+=== closure_review2_cmp_native_same_this: Phego before the fix
+ne
+eq
+
+[exit 0]
+=== closure_review2_cmp_native_same_this: PHP 8.5.12
+ne
+eq
+
+[exit 0]
+
+=== closure_review2_fc_callstatic_called: Phego before the fix
+zz:A
+
+Deprecated: Use of "static" in callables is deprecated in /w/cases/closure_review2_fc_callstatic_called.php on line 3
+yy:B
+
+[exit 0]
+=== closure_review2_fc_callstatic_called: PHP 8.5.12
+zz:B
+
+Deprecated: Use of "static" in callables is deprecated in /w/cases/closure_review2_fc_callstatic_called.php on line 3
+yy:B
+
+[exit 0]
+
+=== closure_review2_fc_named_called: Phego before the fix
+A
+A
+
+[exit 0]
+=== closure_review2_fc_named_called: PHP 8.5.12
+B
+B
+
+[exit 0]
+
+=== closure_review2_m_tmp_once: Phego before the fix
+~tmp
+f dropped
+~orig
+
+[exit 0]
+=== closure_review2_m_tmp_once: PHP 8.5.12
+~tmp
+~orig
+f dropped
+
+[exit 0]
+
+=== closure_review2_nat_bindto_on_native: Phego before the fix
+
+Warning: Cannot bind method Closure::__call() to object of class A, this will be an error in PHP 9 in /w/cases/closure_review2_nat_bindto_on_native.php on line 5
+null
+
+[exit 0]
+=== closure_review2_nat_bindto_on_native: PHP 8.5.12
+
+Warning: Cannot bind method Closure::bindTo() to object of class A, this will be an error in PHP 9 in /w/cases/closure_review2_nat_bindto_on_native.php on line 5
+null
+
+[exit 0]
+
+=== closure_review2_p_tmp_once: Phego before the fix
+~tmp
+f dropped
+~cap
+
+[exit 0]
+=== closure_review2_p_tmp_once: PHP 8.5.12
+~tmp
+~cap
+f dropped
+
+[exit 0]
+
+=== fatal_closure_review2_callable_param_method_name: Phego before the fix
+before
+ok
+
+[exit 0]
+=== fatal_closure_review2_callable_param_method_name: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: f(): Argument #1 ($c) must be of type callable, string given, called in /w/cases/fatal_closure_review2_callable_param_method_name.php on line 5 and defined in /w/cases/fatal_closure_review2_callable_param_method_name.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review2_callable_param_method_name.php(5): f('zq')
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_callable_param_method_name.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review2_colon_split: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Class "A" not found in /w/cases/fatal_closure_review2_colon_split.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_closure_review2_colon_split.php on line 4
+
+[exit 255]
+=== fatal_closure_review2_colon_split: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Class "A::b" not found in /w/cases/fatal_closure_review2_colon_split.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_closure_review2_colon_split.php on line 4
+
+[exit 255]
+
+=== fatal_closure_review2_fc_named_inst_unrelated_scope: Phego before the fix
+inst:B
+
+[exit 0]
+=== fatal_closure_review2_fc_named_inst_unrelated_scope: PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: non-static method A::inst() cannot be called statically in /w/cases/fatal_closure_review2_fc_named_inst_unrelated_scope.php:5
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_named_inst_unrelated_scope.php(5): Closure::fromCallable('A::inst')
+#1 /w/cases/fatal_closure_review2_fc_named_inst_unrelated_scope.php(7): X->{closure:/w/cases/fatal_closure_review2_fc_named_inst_unrelated_scope.php:5}()
+#2 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_named_inst_unrelated_scope.php on line 5
+
+[exit 255]
+
+=== fatal_closure_review2_fc_named_nonstatic_parentscope: Phego before the fix
+before
+m:B
+
+[exit 0]
+=== fatal_closure_review2_fc_named_nonstatic_parentscope: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: non-static method B::m() cannot be called statically in /w/cases/fatal_closure_review2_fc_named_nonstatic_parentscope.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_named_nonstatic_parentscope.php(2): Closure::fromCallable('B::m')
+#1 /w/cases/fatal_closure_review2_fc_named_nonstatic_parentscope.php(5): A->t()
+#2 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_named_nonstatic_parentscope.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review2_fc_parent_noparent: Phego before the fix
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: class "parent" not found in /w/cases/fatal_closure_review2_fc_parent_noparent.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_parent_noparent.php(2): Closure::fromCallable('parent::m')
+#1 /w/cases/fatal_closure_review2_fc_parent_noparent.php(4): A::t()
+#2 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_parent_noparent.php on line 2
+
+[exit 255]
+=== fatal_closure_review2_fc_parent_noparent: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: cannot access "parent" when current class scope has no parent in /w/cases/fatal_closure_review2_fc_parent_noparent.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_parent_noparent.php(2): Closure::fromCallable('parent::m')
+#1 /w/cases/fatal_closure_review2_fc_parent_noparent.php(4): A::t()
+#2 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_parent_noparent.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review2_fc_self_noscope: Phego before the fix
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: class "self" not found in /w/cases/fatal_closure_review2_fc_self_noscope.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_self_noscope.php(3): Closure::fromCallable('self::m')
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_self_noscope.php on line 3
+
+[exit 255]
+=== fatal_closure_review2_fc_self_noscope: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: cannot access "self" when no class scope is active in /w/cases/fatal_closure_review2_fc_self_noscope.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review2_fc_self_noscope.php(3): Closure::fromCallable('self::m')
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_fc_self_noscope.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review2_isset_static_closure2: Phego before the fix
+before
+n
+
+[exit 0]
+=== fatal_closure_review2_isset_static_closure2: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "static" when no class scope is active in /w/cases/fatal_closure_review2_isset_static_closure2.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_isset_static_closure2.php(5): {closure:/w/cases/fatal_closure_review2_isset_static_closure2.php:2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_isset_static_closure2.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review2_method_name_as_func: Phego before the fix
+before
+smethod
+
+[exit 0]
+=== fatal_closure_review2_method_name_as_func: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Call to undefined function yyy() in /w/cases/fatal_closure_review2_method_name_as_func.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_closure_review2_method_name_as_func.php on line 5
+
+[exit 255]
+
+=== fatal_closure_review2_method_name_fromcallable: Phego before the fix
+before
+r
+
+[exit 0]
+=== fatal_closure_review2_method_name_fromcallable: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: function "rr" not found or invalid function name in /w/cases/fatal_closure_review2_method_name_fromcallable.php:4
+Stack trace:
+#0 /w/cases/fatal_closure_review2_method_name_fromcallable.php(4): Closure::fromCallable('rr')
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_method_name_fromcallable.php on line 4
+
+[exit 255]
+
+=== fatal_closure_review2_method_name_private: Phego before the fix
+before
+private:nothis
+
+[exit 0]
+=== fatal_closure_review2_method_name_private: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Call to undefined function pp() in /w/cases/fatal_closure_review2_method_name_private.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_closure_review2_method_name_private.php on line 5
+
+[exit 255]
+
+=== fatal_closure_review2_nat_bindto_static_fc: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Non-static method Closure::bindTo() cannot be called statically in /w/cases/fatal_closure_review2_nat_bindto_static_fc.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_closure_review2_nat_bindto_static_fc.php on line 3
+
+[exit 255]
+=== fatal_closure_review2_nat_bindto_static_fc: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: non-static method Closure::bindTo() cannot be called statically in /w/cases/fatal_closure_review2_nat_bindto_static_fc.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review2_nat_bindto_static_fc.php(3): Closure::fromCallable('Closure::bindTo')
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_nat_bindto_static_fc.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review2_noparent_call_closure: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "parent" when current class scope has no parent in /w/cases/fatal_closure_review2_noparent_call_closure.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_noparent_call_closure.php(4): A->{closure:A::t():2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_noparent_call_closure.php on line 2
+
+[exit 255]
+=== fatal_closure_review2_noparent_call_closure: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "parent" when current class scope has no parent in /w/cases/fatal_closure_review2_noparent_call_closure.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_noparent_call_closure.php(4): A->{closure:A::t():2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_noparent_call_closure.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review2_noparent_const_closure: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "parent" when current class scope has no parent in /w/cases/fatal_closure_review2_noparent_const_closure.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_noparent_const_closure.php(4): A->{closure:A::t():2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_noparent_const_closure.php on line 2
+
+[exit 255]
+=== fatal_closure_review2_noparent_const_closure: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "parent" when current class scope has no parent in /w/cases/fatal_closure_review2_noparent_const_closure.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_noparent_const_closure.php(4): A->{closure:A::t():2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_noparent_const_closure.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review2_scopeerr_self_staticprop_isset: Phego before the fix
+before
+n
+
+[exit 0]
+=== fatal_closure_review2_scopeerr_self_staticprop_isset: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "self" when no class scope is active in /w/cases/fatal_closure_review2_scopeerr_self_staticprop_isset.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review2_scopeerr_self_staticprop_isset.php(4): {closure:/w/cases/fatal_closure_review2_scopeerr_self_staticprop_isset.php:2}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review2_scopeerr_self_staticprop_isset.php on line 2
+
+[exit 255]

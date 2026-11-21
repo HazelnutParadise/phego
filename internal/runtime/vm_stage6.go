@@ -48,6 +48,16 @@ type vmPendingCall struct {
 	// pass marks the call a class without a constructor gets for the
 	// arguments of new: they are evaluated and discarded.
 	pass bool
+	// Format 1.8: the Closure object the call runs (an owner), and the
+	// method of the Closure class the call is (see methodSpec.native).
+	closure *object
+	native  uint8
+	// shift is the number of leading arguments that are not the callee's
+	// parameters: Closure::call's object.
+	shift int
+	// via is the method of the Closure class that makes the call
+	// (closureCall, closureInvoke), for backtraces.
+	via uint8
 }
 
 // vmCallInfo is what a frame entered by CallPending knows beyond a plain
@@ -179,6 +189,14 @@ func (s *vmState) staticSlot(f *vmFrame, r uint32) (*value, error) {
 	if l <= 0 || int(l) > len(f.locals) {
 		return nil, s.unsupported("a static variable that is not a local")
 	}
+	if cl := f.closure; cl != nil && !cl.closure.fake {
+		// A closure's static variables belong to the Closure object.
+		cd := cl.closure
+		if cd.statics == nil {
+			cd.statics = make([]value, f.fn.locals)
+		}
+		return &cd.statics[l-1], nil
+	}
 	fi := f.fn.index
 	if s.prog.fnTrait != nil && s.prog.fnTrait[fi] && f.scope != nil {
 		key := vmTraitStatic{fi, f.scope}
@@ -205,8 +223,13 @@ func (s *vmState) staticSlot(f *vmFrame, r uint32) (*value, error) {
 // initialized, A is bound to it and the initializer is skipped.
 func (s *vmState) staticInit(f *vmFrame, in *vmInstr) (bound bool, err error) {
 	st, err := s.staticSlot(f, in.a)
-	if err != nil || st.kind != valueReference {
+	if err != nil || st.kind == valueUndefined {
 		return false, err
+	}
+	if st.kind != valueReference {
+		// A value a copied closure took over (zend_array_dup): the
+		// variable is initialized and becomes a reference on first use.
+		*st = value{kind: valueReference, ref: &reference{owner: s.h, refcount: 1, target: *st}}
 	}
 	dst, err := s.slot(f, in.a)
 	if err != nil {
@@ -233,10 +256,16 @@ func (s *vmState) bindStatic(f *vmFrame, in *vmInstr) error {
 		_ = s.releaseValue(v)
 		return err
 	}
-	if st.kind != valueReference {
+	switch {
+	case st.kind == valueUndefined:
 		*st = value{kind: valueReference, ref: &reference{owner: s.h, refcount: 1, target: v}}
-	} else if err := s.releaseValue(v); err != nil {
-		return err
+	case st.kind != valueReference:
+		*st = value{kind: valueReference, ref: &reference{owner: s.h, refcount: 1, target: *st}}
+		fallthrough
+	default:
+		if err := s.releaseValue(v); err != nil {
+			return err
+		}
 	}
 	dst, err := s.slot(f, in.a)
 	if err != nil {
@@ -317,7 +346,7 @@ func (s *vmState) pendingCall() (*vmPendingCall, error) {
 func (s *vmState) dropCalls(depth int) error {
 	var first error
 	for n := len(s.calls); n > 0 && s.calls[n-1].depth >= depth; n = len(s.calls) {
-		named, this := s.calls[n-1].named, s.calls[n-1].this
+		named, this, closure := s.calls[n-1].named, s.calls[n-1].this, s.calls[n-1].closure
 		if s.calls[n-1].ctor && this != nil {
 			this.destructorCalled = true
 		}
@@ -328,6 +357,11 @@ func (s *vmState) dropCalls(depth int) error {
 		}
 		if this != nil {
 			if err := s.releaseObject(this); err != nil && first == nil {
+				first = err
+			}
+		}
+		if closure != nil {
+			if err := s.releaseObject(closure); err != nil && first == nil {
 				first = err
 			}
 		}
@@ -377,13 +411,19 @@ func (s *vmState) pushValue(f *vmFrame, in *vmInstr) (value, error) {
 func (s *vmState) namedTarget(rec *vmPendingCall, name string) (index int, err error) {
 	fn := &s.prog.funcs[rec.fn]
 	index = -1
-	for i, p := range fn.paramNames[:min(fn.params, len(fn.paramNames))] {
-		if p == name {
-			index = i
-			break
+	// Closure::call's own parameter comes before the closure's.
+	own := rec.shift != 0 && name == "newThis"
+	if own {
+		index = -rec.shift
+	} else {
+		for i, p := range fn.paramNames[:min(fn.params, len(fn.paramNames))] {
+			if p == name {
+				index = i
+				break
+			}
 		}
 	}
-	if index < 0 {
+	if index < 0 && !own {
 		if !fn.variadic {
 			return 0, &Throwable{"Error", "Unknown named parameter $" + name}
 		}
@@ -394,6 +434,7 @@ func (s *vmState) namedTarget(rec *vmPendingCall, name string) (index int, err e
 		}
 		return -1, nil
 	}
+	index += rec.shift
 	have := len(s.args) - rec.base
 	if have < 0 {
 		return 0, s.internal("pending call with %d arguments below its base", -have)
@@ -626,6 +667,17 @@ func (s *vmState) callPending(in *vmInstr) (err error) {
 		}
 		return err
 	}
+	if rec.native != 0 {
+		// A method of the Closure class: all of them answer without a
+		// frame except call, which turns into the closure's own call.
+		enter, err := s.callNative(rec, in)
+		if err != nil || !enter {
+			if err == nil {
+				err = errNoFrame
+			}
+			return err
+		}
+	}
 	if rec.magic != "" {
 		if err := s.packMagic(rec); err != nil {
 			return err
@@ -640,8 +692,8 @@ func (s *vmState) callPending(in *vmInstr) (err error) {
 	// it: only omitted parameters or collected names make it escape.
 	var local vmCallInfo
 	local.named, local.holePC = rec.named, -1
-	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called, ctor: rec.ctor}
-	rec.this = nil
+	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called, ctor: rec.ctor, closure: rec.closure, via: rec.via}
+	rec.this, rec.closure = nil, nil
 	first, last := -1, -1
 	args := s.args[rec.base:]
 	for i := 0; i < argc && i < fn.params; i++ {
@@ -689,11 +741,7 @@ func (s *vmState) callPending(in *vmInstr) (err error) {
 	s.into = into
 	err = s.push(fn, argc, in.a)
 	s.entering = nil
-	if s.into.this != nil {
-		// push failed before it made the frame.
-		_ = s.releaseObject(s.into.this)
-	}
-	s.into = vmEnter{}
+	s.dropInto()
 	if err != nil {
 		return err
 	}

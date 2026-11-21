@@ -17,12 +17,12 @@ import (
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
 // 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
 // minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth), minor 5
-// (format 1.5, the fifth), minor 6 (format 1.6, the sixth) and minor 7
-// (format 1.7, stage 7A); a file may not use operations newer than the
-// minor it declares.
+// (format 1.5, the fifth), minor 6 (format 1.6, the sixth), minor 7 (format
+// 1.7, stage 7A) and minor 8 (format 1.8, stage 7B); a file may not use
+// operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 7
+	FormatMinor   uint16 = 8
 )
 
 // PushFlags is the Aux of OpPush (format 1.6).
@@ -250,6 +250,11 @@ const (
 	OpInstanceof   // A dest Value (bool), B value Value, C class operand
 	OpClone        // A dest Value, B value Value
 	OpVerifyReturn // A value Value, replaced by the value converted to the function's return type; Aux is a ReturnCheck
+	// Format 1.8 (W-17 stage 7B). Operands are in format18.go and engineering/decisions/W-16-bytecode.md.
+	OpClosure         // A dest Value, B function index (a FuncClosure function): creates the Closure object
+	OpBindLexical     // A closure Value, B variable Location, C the closure's function index; Aux is the capture index
+	OpCallableConvert // A dest Value: turns the innermost started call, which has no arguments yet, into a Closure
+	OpArgByRef        // A dest Value (bool): whether the innermost started call's callee takes its next positional argument by reference
 )
 
 // BindFlags is the Aux of OpBind.
@@ -497,6 +502,9 @@ type Function struct {
 	Parameters               []Parameter
 	Flags                    FunctionFlags
 	ReturnType               uint32
+	// Captures (format 1.8) is the use list of a closure function: capture
+	// i is copied or bound into its Local when a call enters the function.
+	Captures []Capture
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged

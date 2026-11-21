@@ -21,8 +21,16 @@ const (
 	// FuncNoThis marks code that never has $this: a static method or a
 	// plain function. OpThis in it throws.
 	FuncNoThis
+	// FuncClosure (format 1.8) marks the body of a closure or an arrow
+	// function: only OpClosure names it, and no call reaches it by name
+	// or index.
+	FuncClosure
+	// FuncUsesThis (format 1.8) marks a closure body that uses $this
+	// (ZEND_ACC_USES_THIS): Closure::bind refuses to unbind its object.
+	FuncUsesThis
 
-	functionFlagsKnown = FuncStrict | FuncNoThis
+	functionFlagsKnown17 = FuncStrict | FuncNoThis
+	functionFlagsKnown   = functionFlagsKnown17 | FuncClosure | FuncUsesThis
 )
 
 // ClassRef says how an instruction names a class. It is the low three bits
@@ -158,6 +166,7 @@ const (
 	RoleString             // a String constant
 	RoleClass              // an index into the class table
 	RoleTarget             // an instruction index
+	RoleFunc               // a function index (format 1.8)
 )
 
 // Roles17 gives the roles of the operands of a format 1.7 instruction. ok
@@ -230,6 +239,13 @@ func Roles17(in Instruction) (roles [3]Role, ok bool) {
 		return [3]Role{RoleDef, RoleUse, RoleNone}, aux == 0
 	case OpVerifyReturn:
 		return [3]Role{RoleUseDef, RoleNone, RoleNone}, aux <= uint16(ReturnNever)
+	// Format 1.8.
+	case OpClosure:
+		return [3]Role{RoleDef, RoleFunc, RoleNone}, aux == 0
+	case OpBindLexical:
+		return [3]Role{RoleUse, RoleLocUse, RoleFunc}, true
+	case OpCallableConvert, OpArgByRef:
+		return [3]Role{RoleDef, RoleNone, RoleNone}, aux == 0
 	}
 	return roles, false
 }
@@ -271,6 +287,8 @@ func checkOperands17(image Image, f *Function, in Instruction) error {
 			good = uint64(v) < uint64(len(image.Classes))
 		case RoleTarget:
 			good = uint64(v) < uint64(len(f.Code))
+		case RoleFunc:
+			good = uint64(v) < uint64(len(image.Functions))
 		}
 		if !good {
 			return invalid(fmt.Sprintf("invalid operand %c of a format 1.7 instruction", 'A'+i))
@@ -278,6 +296,9 @@ func checkOperands17(image Image, f *Function, in Instruction) error {
 	}
 	if in.Op == OpFetchProp && in.Aux&MemberObjLocation != 0 && in.A != in.B {
 		return invalid("a property fetched from an element location must replace that location")
+	}
+	if is18(in.Op) {
+		return checkOperands18(image, in)
 	}
 	return nil
 }
@@ -492,6 +513,9 @@ func verifyClasses(b *budget, image Image, minor uint16, cloneCost bool) error {
 		if initializer && (f.Params != 0 || len(f.Parameters) != 0) {
 			return invalid("an initializer function takes no parameters")
 		}
+		if f.Flags&FuncClosure != 0 {
+			return invalid("a class member's function is a closure function")
+		}
 		return nil
 	}
 	valueOrInit := func(value, init uint32, required bool) error {
@@ -653,6 +677,9 @@ func lowerASCII(s string) string {
 
 // verifyFunction17 checks the format 1.7 fields of a function.
 func verifyFunction17(image Image, minor uint16, f *Function) error {
+	if err := verifyFunction18(image, minor, f); err != nil {
+		return err
+	}
 	if minor < 7 {
 		if f.Flags != 0 || f.ReturnType != 0 {
 			return invalid(fmt.Sprintf("function flags and return types need bytecode format 1.7, but the file declares format 1.%d", minor))

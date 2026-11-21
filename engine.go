@@ -387,6 +387,9 @@ func (e *Engine) compileTree(ctx context.Context, name, source string, tree *fro
 		return nil, internalError("verifying "+name, err)
 	}
 	code, err := runtime.NewProgram(built)
+	if code != nil {
+		code.Builtin = vm.IsBuiltinFunction
+	}
 	if err != nil {
 		return nil, internalError("preparing "+name, err)
 	}

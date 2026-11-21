@@ -1357,7 +1357,9 @@ func (l *lowerer) closureName(line int) string {
 			break
 		}
 		if f.Kind == FuncClosure || f.Kind == FuncArrow {
-			continue
+			// A closure in a closure is named after the outer one.
+			scope = f.Name
+			break
 		}
 	}
 	return fmt.Sprintf("{closure:%s:%d}", scope, line)

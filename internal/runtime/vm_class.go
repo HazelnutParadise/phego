@@ -109,6 +109,9 @@ func (prog *Program) decodeClasses(p *bytecode.Program) error {
 			if int(init-1) >= len(prog.funcs) || int(init-1) == prog.entry {
 				return vmMemberValue{}, fmt.Errorf("NewProgram: class table names function %d out of range", init-1)
 			}
+			if i := int(init - 1); i >= 0 && i < len(prog.memberFunc) {
+				prog.memberFunc[i] = true
+			}
 			return vmMemberValue{has: true, init: int(init - 1)}, nil
 		case value != 0:
 			if int(value-1) >= len(prog.consts) {
@@ -178,6 +181,9 @@ func (prog *Program) decodeClasses(p *bytecode.Program) error {
 		}
 		for _, m := range c.Methods {
 			out := vmMethodDecl{flags: m.Flags, line: int(m.Line), fn: int(m.Function)}
+			if out.fn >= 0 && out.fn < len(prog.memberFunc) {
+				prog.memberFunc[out.fn] = true
+			}
 			if out.name, err = str(m.Name); err != nil {
 				return err
 			}
@@ -267,6 +273,10 @@ func (s *vmState) lookupClass(name string) *class {
 	case "stdclass":
 		if s.h.registerClass(stdClassBuiltin) == nil {
 			return stdClassBuiltin
+		}
+	case "closure":
+		if s.h.registerClass(closureBuiltin) == nil {
+			return closureBuiltin
 		}
 	case "stringable":
 		if s.h.registerClass(stringableBuiltin) == nil {

@@ -19,6 +19,11 @@ import (
 type vmEnter struct {
 	this          *object // an owner, which the frame takes over
 	scope, called *class
+	// closure is the Closure object the call runs (an owner the frame
+	// takes over), or nil.
+	closure *object
+	// via is the method of the Closure class the call goes through.
+	via uint8
 	// internal marks a call the runtime makes: its arguments are converted
 	// in weak mode whatever the caller's strict_types.
 	internal bool
@@ -59,11 +64,7 @@ func (s *vmState) invoke(fn *vmFunction, this value, scope, called *class, args 
 	}
 	s.into = vmEnter{this: receiver, scope: scope, called: called, internal: true}
 	err := s.push(fn, len(args), 0)
-	if s.into.this != nil {
-		// push failed before it made the frame.
-		_ = s.releaseObject(s.into.this)
-	}
-	s.into = vmEnter{}
+	s.dropInto()
 	if err != nil {
 		s.stop(err)
 	} else {
@@ -192,7 +193,7 @@ func (s *vmState) argumentTypeError(f *vmFrame, i int, typ string, v value) erro
 		name = " ($" + f.fn.paramNames[i] + ")"
 	}
 	msg := s.funcName(f) + "(): Argument #" + strconv.Itoa(i+1) + name + " must be of type " + resolvedType(typ, f) + ", " + valueName(v) + " given"
-	if n := len(s.frames); n >= 2 && !f.boundary {
+	if n := len(s.frames); n >= 2 && !f.boundary && f.via == 0 {
 		caller := s.frames[n-2]
 		msg += ", called in " + vmFileName(caller.fn.files[caller.pc]) + " on line " + strconv.Itoa(int(caller.fn.lines[caller.pc]))
 	}
@@ -272,6 +273,9 @@ func (s *vmState) verifyReturn(f *vmFrame, in *vmInstr) error {
 func (s *vmState) startCall(m *methodSpec, this value, called *class) error {
 	if m.abstract || m.call == nil {
 		return &Throwable{"Error", "Cannot call abstract method " + m.owner.name + "::" + m.name + "()"}
+	}
+	if m.native != 0 {
+		return s.startNative(m, this)
 	}
 	if m.fn == 0 {
 		return s.unsupported("calling a method of a builtin class")
@@ -452,6 +456,9 @@ func (s *vmState) newObject(f *vmFrame, in *vmInstr) (jump bool, err error) {
 	if err != nil {
 		return false, err
 	}
+	if c == closureBuiltin {
+		return false, &Throwable{"Error", "Instantiation of class Closure is not allowed"}
+	}
 	if err := s.prepareClass(c); err != nil {
 		return false, err
 	}
@@ -533,6 +540,10 @@ func (s *vmState) sendByCallee(f *vmFrame, in *vmInstr, rec *vmPendingCall, pos 
 	if pos >= 0 {
 		byRef = fn.byRefAt(pos)
 	}
+	if rec.native != 0 {
+		// The methods of Closure take every argument by value.
+		byRef = false
+	}
 	switch in.aux {
 	case vmPushAuto:
 		if byRef {
@@ -586,33 +597,16 @@ func (s *vmState) sendByCallee(f *vmFrame, in *vmInstr, rec *vmPendingCall, pos 
 	return v, nil
 }
 
-// initCallable is ZEND_INIT_DYNAMIC_CALL: an object is called through
-// __invoke, a string names a function of the program.
+// initCallable is ZEND_INIT_DYNAMIC_CALL: a Closure is entered directly, any
+// other object through __invoke, a string names a function or a static
+// method and an array an object or class and a method (vm_closure.go).
 func (s *vmState) initCallable(f *vmFrame, in *vmInstr) error {
-	callable := f.regs[in.a].deref()
-	switch callable.kind {
-	case valueObject:
-		c := callable.object.class
-		m, ok := s.h.resolveMethod(c, "__invoke", nil)
-		if !ok || m == nil {
-			return &Throwable{"Error", "Object of type " + c.name + " is not callable"}
-		}
-		return s.startCall(m, callable, c)
-	case valueString:
-		name := strings.TrimPrefix(callable.text, "\\")
-		idx, ok := s.prog.byName[phpNameLower(name)]
-		if !ok {
-			if strings.Contains(name, "::") {
-				return s.unsupported("calling a method through a string")
-			}
-			return &Throwable{"Error", "Call to undefined function " + name + "()"}
-		}
-		s.calls = append(s.calls, vmPendingCall{fn: idx, base: len(s.args), depth: len(s.frames)})
-		return nil
-	case valueArray:
-		return s.unsupported("calling an array callable")
+	t, err := s.resolveCallable(f, f.regs[in.a], true)
+	if err != nil {
+		return err
 	}
-	return &Throwable{"Error", "Value not callable"}
+	s.startTarget(t)
+	return nil
 }
 
 // releaseObject gives up one owner of o.

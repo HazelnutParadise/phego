@@ -1,0 +1,21 @@
+# closure data in the object's allocation (chosen), 20 runs of 100,000 iterations
+BenchmarkW17Stage7B/closure_call-8         	      20	  30176823 ns/op	   12200 B/op	      65 allocs/op
+BenchmarkW17Stage7B/closure_call-8         	      20	  30140723 ns/op	   12200 B/op	      65 allocs/op
+BenchmarkW17Stage7B/closure_call-8         	      20	  30045298 ns/op	   12200 B/op	      65 allocs/op
+BenchmarkW17Stage7B/closure_call-8         	      20	  30043927 ns/op	   12200 B/op	      65 allocs/op
+BenchmarkW17Stage7B/bound_closure_call-8   	      20	  32008185 ns/op	   15024 B/op	     101 allocs/op
+BenchmarkW17Stage7B/bound_closure_call-8   	      20	  31932331 ns/op	   15024 B/op	     101 allocs/op
+BenchmarkW17Stage7B/bound_closure_call-8   	      20	  31950146 ns/op	   15060 B/op	     101 allocs/op
+BenchmarkW17Stage7B/bound_closure_call-8   	      20	  31984483 ns/op	   15024 B/op	     101 allocs/op
+BenchmarkW17Stage7B/create_closure-8       	      20	  31959552 ns/op	28812170 B/op	  100064 allocs/op
+BenchmarkW17Stage7B/create_closure-8       	      20	  32030210 ns/op	28811905 B/op	  100064 allocs/op
+BenchmarkW17Stage7B/create_closure-8       	      20	  32087340 ns/op	28811852 B/op	  100064 allocs/op
+BenchmarkW17Stage7B/create_closure-8       	      20	  32096808 ns/op	28811840 B/op	  100064 allocs/op
+BenchmarkW17Stage7B/create_closure_3_captures-8         	      20	  42265529 ns/op	48013231 B/op	  200066 allocs/op
+BenchmarkW17Stage7B/create_closure_3_captures-8         	      20	  43556483 ns/op	48013229 B/op	  200066 allocs/op
+BenchmarkW17Stage7B/create_closure_3_captures-8         	      20	  42330790 ns/op	48013207 B/op	  200066 allocs/op
+BenchmarkW17Stage7B/create_closure_3_captures-8         	      20	  42330102 ns/op	48013212 B/op	  200066 allocs/op
+BenchmarkW17Stage7B/create_first_class_callable-8       	      20	  35363669 ns/op	28812020 B/op	  100065 allocs/op
+BenchmarkW17Stage7B/create_first_class_callable-8       	      20	  34828012 ns/op	28812011 B/op	  100065 allocs/op
+BenchmarkW17Stage7B/create_first_class_callable-8       	      20	  34764619 ns/op	28811990 B/op	  100064 allocs/op
+BenchmarkW17Stage7B/create_first_class_callable-8       	      20	  34785490 ns/op	28811966 B/op	  100064 allocs/op

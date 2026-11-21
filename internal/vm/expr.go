@@ -190,6 +190,10 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.instanceOf(n)
 	case ir.OpClone:
 		return fc.clone(n)
+	case ir.OpClosure, ir.OpArrowFn:
+		return fc.closure(n)
+	case ir.OpCallable:
+		return fc.callable(n)
 	}
 	fc.unsupportedNode(n)
 	return operand{}
