@@ -103,14 +103,15 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Download and verify the official PHP 8.5.12 build
-        # Digest from https://windows.php.net/downloads/releases/sha256sum.txt
+        # Digest from https://windows.php.net/downloads/releases/sha256sum.txt, recorded while
+        # 8.5.12 was current. windows.php.net moves a superseded release to archives/.
         run: |
           $ErrorActionPreference = 'Stop'
           $evidence = Join-Path $env:RUNNER_TEMP 'evidence'
           New-Item -ItemType Directory -Path $evidence | Out-Null
           $zip = Join-Path $env:RUNNER_TEMP 'php.zip'
           & curl.exe --fail --location --proto '=https' --proto-redir '=https' --retry 3 --max-time 300 `
-            'https://windows.php.net/downloads/releases/php-8.5.12-1-nts-Win32-vs17-x64.zip' -o $zip
+            'https://windows.php.net/downloads/releases/archives/php-8.5.12-1-nts-Win32-vs17-x64.zip' -o $zip
           if ($LASTEXITCODE -ne 0) { throw 'PHP download failed' }
           $digest = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
           if ($digest -ne '2a36a2edcb7a5b9252f638fd5e4cf84d7f6e066092654220dc0b63e5cf4e9723') { throw "PHP digest mismatch: $digest" }
