@@ -505,3 +505,15 @@ func (h *heap) reflectObjectProperties(c *class) [][]any {
 	}
 	return out
 }
+
+// canSet reports whether scope may write p. A protected(set) property is
+// checked against the class that first declared it, as PHP checks the
+// prototype (zend_asymmetric_property_has_set_access): two classes that
+// redeclare a protected property of a common ancestor may write each other's.
+func canSet(scope *class, p *propertyInfo) bool {
+	owner := p.owner
+	if p.setVisibility == protectedAccess && p.prototypeOwner != nil {
+		owner = p.prototypeOwner
+	}
+	return canAccess(scope, owner, p.setVisibility)
+}

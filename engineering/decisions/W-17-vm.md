@@ -280,7 +280,24 @@ cache 只存當次執行的類別描述指標與位置編號，不存值，也�
 
 審查留下、這一段不修的差異都列在已知缺口。回歸 fixture 共 47 個（`review7a_*` 與 `fatal_review7a_*`）。
 
-測試程式加到 693 個（新增 262 個 `class_*`、`object_*`、`method_*`、`prop_*`、`type_*`、`magic_method_*` 與對應的 `fatal_*`，以及 47 個審查的回歸 fixture），三個 profile 各 2,079 項全部和 PHP 8.5.12 逐位元組相同。
+#### 第二次審查
+
+Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另一位獨立審查者（內建的 Opus，全新的脈絡）檢查第一次審查之後的修正（eb00fae..f97a4d7）。他跑了 297 個 PHP 探測程式（arm64 映像）、33 個手寫 bytecode 的執行、32 個 goroutine 各 20 次的隔離與 race 檢查。請求之間沒有外洩，手寫 bytecode 沒有造成 Go panic。找到的問題如下，都已修正並補上修正前會失敗的回歸測試，修正前的輸出在 [stage7a/red-review2-fixes.txt](../implementation/evidence/W-17-vm/stage7a/red-review2-fixes.txt)。
+
+- **釋放很長的物件鏈會撐爆 Go 堆疊**（P0，修正前就有）。一百萬個節點的鏈結串列釋放時，每個節點在 Go 堆疊上多一層，宿主行程直接結束。現在釋放的巢狀超過 512 層時，沒有解構子要跑的物件排進佇列，由最外層依序處理。有解構子的物件仍然巢狀執行，解構子才會在 PHP 的時機跑，深度由巢狀呼叫的上限管。PHP 8.5.12 自己在這個長度會 segfault，所以這項用 Go 測試（`TestW17Stage7LongObjectChainIsFreed`），不是對照 fixture。
+- **trait 抽象方法的 `self` 與 `parent`**（P1，第一次修正造成）。`trait T { abstract function m(self $x): self; }` 由類別以 `m(C $x): C` 實作時被當成簽章不相容。trait 簽章裡的 `self` 與 `parent` 現在以使用它的類別解析。static 不一致時改用 PHP 的 `Cannot make static method T::m() non static in class C`。
+- **typed 屬性的自動建陣列檢查套用得太廣**（P2，第一次修正造成）。PHP 只在為了寫入元素而取屬性時檢查，`$o->i[0] .= "x"` 與 `$o->i[0]++` 不在其列。屬性被 `unset` 而類別有 `__get` 時先走 `__get`，readonly 屬性先報它自己的錯誤。`false` 也算會被自動轉成陣列的值。未初始化的 typed 屬性做複合寫入時，報 `must not be accessed before initialization`。
+- **`++` 的範圍錯誤**（P2，第一次修正造成）。`int|string` 屬性裡的數字字串加到變成 float 是普通的指定，只有原本是 int 的值超出範圍才報錯。
+- **引數求值失敗的 `new`**（P2）。類別沒有建構子時，`new A(nope())` 的物件也算建構失敗，不呼叫解構子。
+- **關機時的 `global` 看不到宿主給的全域變數**（P2，第一次修正造成）。`{main}` 沒有用到的名稱，現在和執行期間一樣從宿主的值建立。
+- **protected(set) 的檢查只修了讀取**（P2）。寫入、`unset`、取參照與 `++` 現在也以最初宣告屬性的類別判斷。
+- **`Cannot call constructor`**（P2）。任何類別參照（`A::`、`self::`、`static::`、`parent::`）以字面的 `__construct` 呼叫沒有建構子的類別都報這個錯誤，而且先於 `__call` 與 `__callStatic`。名稱是變數時則是 `Call to undefined method`。private 的父類別建構子報 `Cannot call private A::__construct()`。
+- **透過參照寫入 typed 屬性一律用嚴格模式**（P2，修正前就有）。`$o->i = &$arr[0]; $arr[0] = "3";` 在沒有 `strict_types` 的檔案應該轉成 int。陣列元素、`foreach` 與參照的寫入現在帶著寫入檔案的模式。
+- **其他**（P3）：對 null 綁定屬性參照的訊息是 `Attempt to modify property`。`empty($this)` 在 static 方法裡回傳 true。父類別的 private 常數不再和 interface 的同名常數衝突。backtrace 持有的引數包含陣列，陣列裡的物件也在錯誤回報後才解構。backtrace 持有的值在錯誤沒有被回報時也會釋放。
+
+第二次審查留下、這一段不修的差異列在已知缺口。回歸 fixture 共 39 個（`review7b_*` 與 `fatal_review7b_*`）。
+
+測試程式加到 732 個（新增 262 個 `class_*`、`object_*`、`method_*`、`prop_*`、`type_*`、`magic_method_*` 與對應的 `fatal_*`，以及兩次審查的 86 個回歸 fixture），三個 profile 各 2,196 項全部和 PHP 8.5.12 逐位元組相同。
 
 ### 公開介面沒有變
 
@@ -369,6 +386,13 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **回傳參照的函式與方法**：在 `Compile` 回報不支援。
 - **stdClass 與 Stringable 以外的內建類別與介面**：`new ArrayObject`、`extends Exception`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
 - **巢狀呼叫的深度上限是 12,000 層**：解構子、magic method、`__toString` 互相巢狀超過這個深度時拋出 PHP 的 `Maximum call stack size ... reached`。PHP 的門檻取決於 C 堆疊大小，兩邊觸發的深度不同。
+- **回報未捕捉錯誤之後才解構的物件，它的解構子再出錯**：`f(new D)` 在 `f` 裡出錯，D 的解構子又拋出錯誤或 `exit` 時，PHP 印出第二個 fatal 或採用 `exit` 的結束碼。Phego 執行解構子，丟掉它的錯誤。未捕捉錯誤之後，關機解構子裡的 `exit("字串")` 把結束碼設成 0，PHP 維持 255。
+- **函式結束時釋放區域變數所觸發的解構子，backtrace 多一格**：PHP 那時已經離開被呼叫的函式，Phego 的 backtrace 還帶著它。
+- **trait 組合的少數錯誤訊息**：抽象方法由父類別或另一個 trait 滿足時的檢查順序、巢狀 trait 的抽象方法簽章文字、兩個 trait 屬性衝突時先列哪個名稱、`insteadof` 與別名規則的檢查順序，和 PHP 不同。這些都是 fatal，只差訊息。
+- **常數運算式裡的 `parent::X`、`self::X`**：存取不到時 PHP 的訊息照寫法印 `parent::X`，Phego 印解析後的類別名稱。
+- **類別常數不在第一次 `new` 時求值**：`class A { const Z = UNDEF; } new A;` PHP 在 `new` 時報錯，Phego 到讀取常數時才報。
+- **綁定參照到 readonly 或 magic 屬性的檢查順序**：`$o->r = &$x` 對 readonly 屬性會先轉換 `$x` 的值才報錯。對只有 `__get`／`__set` 的屬性，PHP 拋出 `Cannot assign by reference to overloaded object`，Phego 以 Unsupported 結束。
+- **`$u->p = &$x` 而 `$u` 未定義**時多一個 `Undefined variable` 警告。
 - **private 或 protected 的解構子**：PHP 在範圍外釋放物件時拋出 `Call to private D::__destruct() from global scope`，請求結束時則發出警告後略過。Phego 照樣執行它。
 - **自我參照的類別常數**：`const X = self::Y; const Y = self::X;` PHP 的訊息是 `Cannot declare self-referencing constant self::Y`，backtrace 只有一格。Phego 寫成 `A::X`，多一格。
 - **`(object)` 轉型的陣列帶有 mangled 的 key**（`"\0A\0p"`）：從類別外走訪時 PHP 看得到三個屬性，Phego 把它們當成 private／protected 而略過。

@@ -36,11 +36,11 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 		in = " and defined in "
 	}
 	// The exception's backtrace holds the arguments of every frame: an
-	// object only an argument refers to outlives the unwinding and is
-	// destroyed after the error is reported.
+	// object only an argument refers to, directly or inside an array,
+	// outlives the unwinding and is destroyed after the error is reported.
 	for i := len(s.frames) - 1; i >= 1; i-- {
 		for _, a := range s.frameArgs(s.frames[i]) {
-			if a = a.deref(); a.kind == valueObject {
+			if a = a.deref(); a.kind == valueObject || a.kind == valueArray {
 				retain(a)
 				s.traceHeld = append(s.traceHeld, a)
 			}

@@ -367,6 +367,9 @@ func (s *vmState) initMethod(f *vmFrame, in *vmInstr) error {
 		return s.startMagic(magic, obj, c, name)
 	}
 	if found && m != nil {
+		if phpNameEqual(m.name, "__construct") {
+			return &Throwable{"Error", "Cannot call " + accessName(m.visibility) + " " + c.name + "::__construct()"}
+		}
 		return &Throwable{"Error", "Call to " + accessName(m.visibility) + " method " + m.owner.name + "::" + m.name + "() from " + methodScopeLabel(f.scope)}
 	}
 	return &Throwable{"Error", "Call to undefined method " + c.name + "::" + name + "()"}
@@ -407,6 +410,11 @@ func (s *vmState) initStatic(f *vmFrame, in *vmInstr) error {
 		m = c.schema.methods[phpNameLower(name)]
 	}
 	found := m != nil
+	if !found && in.aux&bytecode.MemberNameReg == 0 && phpNameEqual(name, "__construct") {
+		// PHP decides this when it compiles a literal constructor name,
+		// for any class reference and before __call or __callStatic.
+		return &Throwable{"Error", "Cannot call constructor"}
+	}
 	if found && methodAccessible(f.scope, m) {
 		if m.static {
 			return s.startCall(m, value{}, called)
@@ -428,10 +436,10 @@ func (s *vmState) initStatic(f *vmFrame, in *vmInstr) error {
 		return s.startMagic(magic, value{}, called, name)
 	}
 	if found && m != nil {
+		if phpNameEqual(m.name, "__construct") {
+			return &Throwable{"Error", "Cannot call " + accessName(m.visibility) + " " + c.name + "::__construct()"}
+		}
 		return &Throwable{"Error", "Call to " + accessName(m.visibility) + " method " + c.name + "::" + m.name + "() from " + methodScopeLabel(f.scope)}
-	}
-	if ref == bytecode.ClassParent && phpNameEqual(name, "__construct") {
-		return &Throwable{"Error", "Cannot call constructor"}
 	}
 	return &Throwable{"Error", "Call to undefined method " + c.name + "::" + name + "()"}
 }
@@ -459,7 +467,11 @@ func (s *vmState) newObject(f *vmFrame, in *vmInstr) (jump bool, err error) {
 		if in.aux&bytecode.NewArgs == 0 {
 			return true, nil
 		}
-		s.calls = append(s.calls, vmPendingCall{fn: s.prog.trampoline, base: len(s.args), depth: len(s.frames), pass: true})
+		// The call owns the object while the arguments run: when one of
+		// them fails, the object counts as not constructed and gets no
+		// destructor (zend_object_store_ctor_failed).
+		retain(obj)
+		s.calls = append(s.calls, vmPendingCall{fn: s.prog.trampoline, base: len(s.args), depth: len(s.frames), pass: true, ctor: true, this: obj.object})
 		return false, nil
 	}
 	if !canAccess(f.scope, ctor.owner, ctor.visibility) {

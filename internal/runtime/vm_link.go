@@ -314,7 +314,15 @@ func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error 
 			if _, declared := vc.sigs[lower]; !declared {
 				continue // the method comes from a trait itself
 			}
-			if tm.static != child.static || !s.signatureCompatible(child, self, tm, tr) {
+			if tm.static != child.static {
+				if tm.static {
+					return &vmFatal{message: "Cannot make static method " + tr.name + "::" + tm.name + "() non static in class " + self.name, line: lines[lower]}
+				}
+				return &vmFatal{message: "Cannot make non static method " + tr.name + "::" + tm.name + "() static in class " + self.name, line: lines[lower]}
+			}
+			// self and parent in the trait's signature mean the using class
+			// (fixup_trait_scope).
+			if !s.signatureCompatible(child, self, tm, self) {
 				return &vmFatal{message: "Declaration of " + signature(child) + " must be compatible with " + methodSignatureText(tr, tm), line: lines[lower]}
 			}
 		}
@@ -438,7 +446,10 @@ func (s *vmState) linkConstants(d *vmClassDecl, spec *classSpec) error {
 				}
 				continue
 			}
-			if other := from[name]; other != nil && other != k && other.owner != k.owner {
+			if other := from[name]; other != nil && other != k && other.owner != k.owner &&
+				accessOf(other.decl.flags) != privateAccess && accessOf(k.decl.flags) != privateAccess {
+				// A private constant of the parent is not inherited, so it
+				// cannot clash with an interface's.
 				kind := "Class"
 				if spec.isInterface {
 					kind = "Interface"

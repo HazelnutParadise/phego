@@ -102,7 +102,11 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 	if s.globalsKept {
 		// {main} ended: its variables are the execution's symbol table now
 		// (a destructor at request shutdown calls a function with global).
-		src = s.keptGlobal(name)
+		if src = s.keptGlobal(name); src == nil {
+			if src, err = s.globalVar(name); err != nil {
+				return err
+			}
+		}
 	} else if i, ok := s.prog.mainLocal[name]; ok {
 		src = &s.frames[0].locals[i]
 	} else if src, err = s.globalVar(name); err != nil {
@@ -117,12 +121,18 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 }
 
 // keptGlobal is the global variable name in the symbol table keepGlobals
-// handed to the execution, created holding null when it is not there.
+// handed to the execution, created holding null when it is one of {main}'s
+// variables that is not there, or nil when {main} never names it.
 func (s *vmState) keptGlobal(name string) *value {
 	a := s.x.globals.array
 	key := arrayKey{isString: true, text: name}
 	if b, ok := a.lookup(key); ok {
 		return &b.val
+	}
+	if _, mine := s.prog.mainLocal[name]; !mine {
+		// Not one of {main}'s variables: the run's own global, which
+		// starts from the host's value when the host gave one.
+		return nil
 	}
 	a.insert(key, nullValue(), s.prog.width)
 	b, _ := a.lookup(key)
@@ -597,11 +607,16 @@ func (s *vmState) callPending(in *vmInstr) (err error) {
 	if rec.pass {
 		f := s.frames[len(s.frames)-1]
 		err = s.dropArgs(len(s.args) - rec.base)
-		named := rec.named
+		named, this := rec.named, rec.this
 		*rec = vmPendingCall{}
 		s.calls = s.calls[:len(s.calls)-1]
 		if rerr := s.releaseValue(named); err == nil {
 			err = rerr
+		}
+		if this != nil {
+			if rerr := s.releaseObject(this); err == nil {
+				err = rerr
+			}
 		}
 		if rerr := s.setReg(f.regs, in.a, nullValue()); err == nil {
 			err = rerr

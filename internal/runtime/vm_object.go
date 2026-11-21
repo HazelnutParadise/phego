@@ -234,14 +234,20 @@ func (s *vmState) propSet(f *vmFrame, in *vmInstr) error {
 		v = nullValue()
 	}
 	if obj.kind != valueObject {
-		return &Throwable{"Error", `Attempt to assign property "` + name + `" on ` + valueName(obj)}
+		verb := "assign"
+		if bytecode.AuxMemberMode(in.aux) == bytecode.MemberBindRef {
+			verb = "modify" // the property is fetched for writing first
+		}
+		return &Throwable{"Error", `Attempt to ` + verb + ` property "` + name + `" on ` + valueName(obj)}
 	}
 	switch mode := bytecode.AuxMemberMode(in.aux); mode {
 	case bytecode.MemberBindRef:
 		return s.bindProperty(f, in, obj.object, name)
 	case bytecode.MemberIncrement, bytecode.MemberDecrement:
 		if v.kind == valueFloat {
-			if p, perr := resolvePropertyIn(obj.object.class, name, f.scope, true); perr == nil && p != nil {
+			// Only an int that left the range is refused; a numeric string
+			// that became a float is an ordinary assignment.
+			if p, perr := resolvePropertyIn(obj.object.class, name, f.scope, true); perr == nil && p != nil && !p.static && storedInt(obj.object.props, p.key) {
 				if err := incDecRangeError(p, mode == bytecode.MemberIncrement); err != nil {
 					return err
 				}
@@ -308,21 +314,24 @@ func (s *vmState) fetchProp(f *vmFrame, in *vmInstr) error {
 			return scratch(nullValue())
 		}
 	}
-	if p, perr := resolvePropertyIn(o.class, name, f.scope, true); perr == nil && p != nil && p.readonly && !p.static {
+	prop, perr := resolvePropertyIn(o.class, name, f.scope, true)
+	if perr != nil || (prop != nil && prop.static) {
+		prop = nil
+	}
+	if prop != nil && prop.readonly {
 		// A readonly property that holds an object is fetched as that
 		// object: what is written through it is the object, not the
 		// property.
-		if slot, ok := o.props.lookup(p.key); ok && slot.deref().kind == valueObject {
+		if slot, ok := o.props.lookup(prop.key); ok && slot.deref().kind == valueObject {
 			return scratch(slot.deref())
 		}
 	}
-	if mode != bytecode.MemberUnset {
-		if p, perr := resolvePropertyIn(o.class, name, f.scope, true); perr == nil && p != nil && !p.static && !p.virtual {
-			var cur value
-			if slot, ok := o.props.lookup(p.key); ok {
-				cur = slot.deref()
-			}
-			if hole, err := s.typedPropertyHole(f, in.a, p, cur); hole || err != nil {
+	if mode == bytecode.MemberWrite && prop != nil && prop.typeName != "" && !prop.readonly && !prop.virtual {
+		// Only a fetch for an element write refuses to create the array
+		// (ZEND_FETCH_DIM_WRITE); a property that was unset goes to __get
+		// and a readonly one to its own error first.
+		if slot, ok := o.props.lookup(prop.key); ok && !(slot.isExplicitlyUnset() && s.hasMagicGet(o.class)) {
+			if hole, err := s.typedPropertyHole(f, in.a, prop, slot.deref()); hole || err != nil {
 				return err
 			}
 		}
@@ -332,6 +341,9 @@ func (s *vmState) fetchProp(f *vmFrame, in *vmInstr) error {
 		return err
 	}
 	if address.slot != nil {
+		if mode == bytecode.MemberReadWrite && address.slot.kind == valueUndefined && address.property != nil && address.property.typeName != "" {
+			return &Throwable{"Error", "Typed property " + address.property.label() + " must not be accessed before initialization"}
+		}
 		if mode == bytecode.MemberReadWrite && address.slot.kind == valueUndefined {
 			s.h.warn(levelWarning, "Undefined property: "+o.class.name+"::$"+name)
 		}
@@ -495,7 +507,7 @@ func (s *vmState) staticSet(f *vmFrame, in *vmInstr) error {
 		return s.bindStaticProperty(f, in, c, name)
 	case bytecode.MemberIncrement, bytecode.MemberDecrement:
 		if v.kind == valueFloat {
-			if p, perr := s.h.resolveStatic(c, name, f.scope); perr == nil {
+			if p, perr := s.h.resolveStatic(c, name, f.scope); perr == nil && s.staticHoldsInt(p) {
 				if err := incDecRangeError(p, mode == bytecode.MemberIncrement); err != nil {
 					return err
 				}
@@ -530,7 +542,7 @@ func (s *vmState) fetchStatic(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	if !canAccess(f.scope, p.owner, p.setVisibility) {
+	if !canSet(f.scope, p) {
 		return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(f.scope)}
 	}
 	tbl, err := h.staticTable(p.owner)
@@ -541,8 +553,10 @@ func (s *vmState) fetchStatic(f *vmFrame, in *vmInstr) error {
 	if !ok {
 		slot = tbl.slot(p.key)
 	}
-	if hole, err := s.typedPropertyHole(f, in.a, p, slot.deref()); hole || err != nil {
-		return err
+	if bytecode.AuxMemberMode(in.aux) == bytecode.MemberWrite {
+		if hole, err := s.typedPropertyHole(f, in.a, p, slot.deref()); hole || err != nil {
+			return err
+		}
 	}
 	if slot.kind == valueUndefined && p.typeName != "" {
 		return &Throwable{"Error", "Typed static property " + p.label() + " must not be accessed before initialization"}
@@ -955,7 +969,7 @@ func (s *vmState) cacheProperty(c *vmCache, o *object, name string, scope *class
 	}
 	c.class, c.scope, c.slot = o.class, scope, int32(idx)
 	c.readable = true
-	c.writable = !p.readonly && canAccess(scope, p.owner, p.setVisibility)
+	c.writable = !p.readonly && canSet(scope, p)
 	c.typ = p.typeName
 }
 
@@ -963,7 +977,7 @@ func (s *vmState) cacheProperty(c *vmCache, o *object, name string, scope *class
 // property p, which holds v, must not create an array in it, and if so
 // makes the element register r name the hole.
 func (s *vmState) typedPropertyHole(f *vmFrame, r uint32, p *propertyInfo, v value) (bool, error) {
-	if p == nil || p.typeName == "" || (v.kind != valueNull && v.kind != valueUndefined) {
+	if p == nil || p.typeName == "" || (v.kind != valueNull && v.kind != valueUndefined && !(v.kind == valueBool && !v.boolean)) {
 		return false, nil
 	}
 	if methodTypeHas(p.typeName, "array") || methodTypeHas(p.typeName, "mixed") || methodTypeHas(p.typeName, "iterable") {
@@ -1046,7 +1060,7 @@ func (s *vmState) bindStaticProperty(f *vmFrame, in *vmInstr, c *class, name str
 	if err != nil {
 		return err
 	}
-	if !canAccess(f.scope, p.owner, p.setVisibility) {
+	if !canSet(f.scope, p) {
 		return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(f.scope)}
 	}
 	if err := s.bindTyped(f, in.a, p); err != nil {
@@ -1070,4 +1084,29 @@ func (s *vmState) bindStaticProperty(f *vmFrame, in *vmInstr, c *class, name str
 		h.addPropertySource(slot.ref, propertySource{slot, p})
 	}
 	return s.clearReg(f, in.a)
+}
+
+// storedInt reports whether the property stored under key holds an int.
+func storedInt(props *propertyTable, key string) bool {
+	if props == nil {
+		return false
+	}
+	slot, ok := props.lookup(key)
+	return ok && slot.deref().kind == valueInt
+}
+
+// staticHoldsInt reports whether the static property p holds an int.
+func (s *vmState) staticHoldsInt(p *propertyInfo) bool {
+	tbl, err := s.h.staticTable(p.owner)
+	if err != nil {
+		return false
+	}
+	return storedInt(tbl, p.key)
+}
+
+// hasMagicGet reports whether objects of c answer missing properties
+// through __get.
+func (s *vmState) hasMagicGet(c *class) bool {
+	m, ok := s.h.resolveMethod(c, "__get", nil)
+	return ok && m != nil
 }

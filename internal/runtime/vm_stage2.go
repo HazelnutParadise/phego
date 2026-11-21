@@ -616,7 +616,7 @@ func (s *vmState) iterStore(f *vmFrame, aux uint16, r uint32, v value) error {
 		*slot = v
 		return nil
 	}
-	return s.h.assign(slot, v)
+	return s.h.assignPHP(slot, v, f.fn.strict)
 }
 
 // --- parameter defaults ---

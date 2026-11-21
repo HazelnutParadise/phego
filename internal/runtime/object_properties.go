@@ -392,7 +392,7 @@ func (h *heap) writeObjectAt(obj value, name string, v value, scope *class, stri
 			return &Throwable{"Error", "Must not write to virtual property " + p.label()}
 		}
 		if p.set != nil {
-			if !canAccess(scope, p.owner, p.setVisibility) {
+			if !canSet(scope, p) {
 				return &Throwable{"Error", "Cannot modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 			}
 			_, err = h.setPropertyHook(o, p, v, strict, site)
@@ -405,7 +405,7 @@ func (h *heap) writeObjectAt(obj value, name string, v value, scope *class, stri
 		if err := readonlyObjectPropertyWriteError(o, p, slot); err != nil {
 			return err
 		}
-		if !canAccess(scope, p.owner, p.setVisibility) {
+		if !canSet(scope, p) {
 			from := h.calledScopeLabel(scope)
 			ro := ""
 			if p.readonly && p.setVisibility == protectedAccess {
@@ -473,7 +473,7 @@ func (h *heap) writeObjectSlot(o *object, p *propertyInfo, v value, scope *class
 	if err := readonlyObjectPropertyWriteError(o, p, slot); err != nil {
 		return err
 	}
-	if !canAccess(scope, p.owner, p.setVisibility) {
+	if !canSet(scope, p) {
 		from := h.calledScopeLabel(scope)
 		ro := ""
 		if p.readonly && p.setVisibility == protectedAccess {
@@ -564,7 +564,7 @@ func (h *heap) unsetObject(obj value, name string, scope *class) error {
 				(!o.hooks["\x00clone"] || o.hooks["\x00clone:"+p.key]) {
 				return &Throwable{"Error", "Cannot unset readonly property " + p.label()}
 			}
-			if !canAccess(scope, p.owner, p.setVisibility) {
+			if !canSet(scope, p) {
 				readonly := ""
 				if p.readonly && p.setVisibility == protectedAccess {
 					readonly = "readonly "
@@ -654,7 +654,7 @@ func (h *heap) resolveObjectReference(o *object, name string, scope *class) (obj
 		if p.readonly {
 			return objectReferenceAddress{}, &Throwable{"Error", "Cannot indirectly modify readonly property " + p.label()}
 		}
-		if !canAccess(scope, p.owner, p.setVisibility) {
+		if !canSet(scope, p) {
 			return objectReferenceAddress{}, &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(scope)}
 		}
 		bypassHook := h.propertyHookBypasses(o, p)

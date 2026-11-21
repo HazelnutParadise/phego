@@ -211,3 +211,35 @@ func w17Nested(t *testing.T, e *Engine, src string) *Program {
 	}
 	return p
 }
+
+// TestW17Stage7LongObjectChainIsFreed frees a chain of objects far longer
+// than any nesting the Go stack could carry: the frees past a fixed depth
+// are queued. (PHP 8.5.12 itself crashes on a chain this long, so this is
+// not a differential fixture.)
+func TestW17Stage7LongObjectChainIsFreed(t *testing.T) {
+	e := mustEngine(t, Config{})
+	for name, src := range map[string]string{
+		"properties": "<?php\nclass N { public $next; }\n$h = null;\nfor ($i = 0; $i < 400000; $i++) { $x = new N; $x->next = $h; $h = $x; }\n$x = null;\n$h = null;\necho \"done\\n\";\n",
+		"arrays":     "<?php\nclass N { public $arr; }\n$h = null;\nfor ($i = 0; $i < 200000; $i++) { $x = new N; $x->arr = [$h]; $h = $x; }\n$x = null;\n$h = null;\necho \"done\\n\";\n",
+		"at the end": "<?php\nclass N { public $next; }\n$h = null;\nfor ($i = 0; $i < 400000; $i++) { $x = new N; $x->next = $h; $h = $x; }\n$x = null;\necho \"done\\n\";\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			r, err := e.Run(context.Background(), w17Nested(t, e, src))
+			if err != nil || r.Status != StatusCompleted || string(r.Output) != "done\n" {
+				t.Fatalf("status %v, output %q, err %v", r.Status, r.Output, err)
+			}
+		})
+	}
+}
+
+// TestW17Stage7ShutdownGlobalSeesHostValue: a function a shutdown destructor
+// calls binds a global {main} never names to the host's value, as it does
+// while {main} runs.
+func TestW17Stage7ShutdownGlobalSeesHostValue(t *testing.T) {
+	e := mustEngine(t, Config{})
+	src := "<?php\nfunction f() { global $g; echo \"[\", $g, \"]\\n\"; }\nclass D { function __destruct() { f(); } }\n$d = new D;\n"
+	r, err := e.Run(context.Background(), w17Nested(t, e, src), WithGlobal("g", Bytes([]byte("host"))))
+	if err != nil || string(r.Output) != "[host]\n" {
+		t.Fatalf("output %q, err %v", r.Output, err)
+	}
+}

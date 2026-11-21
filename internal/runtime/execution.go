@@ -739,12 +739,12 @@ func (x *execution) recordEnd(c completion) {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)
-		if x.afterFatal != nil {
-			// What the reported error kept alive is released now, as PHP
-			// frees the exception object after zend_exception_error.
-			done := x.afterFatal
-			x.afterFatal = nil
-			done()
-		}
+	}
+	if x.afterFatal != nil {
+		// What the error kept alive is released now, reported or not, as
+		// PHP frees the exception object after zend_exception_error.
+		done := x.afterFatal
+		x.afterFatal = nil
+		done()
 	}
 }

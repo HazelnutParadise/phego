@@ -75,7 +75,7 @@ func (s *vmState) bind(f *vmFrame, in *vmInstr) error {
 	}
 	if f.regs[in.b].kind != valueReference {
 		v := take(f.regs, in.b)
-		err := s.h.assign(dst, v)
+		err := s.h.assignPHP(dst, v, f.fn.strict)
 		if rerr := s.releaseValue(v); err == nil {
 			err = rerr
 		}

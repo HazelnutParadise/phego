@@ -160,7 +160,7 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	}
 	if flags&bytecode.ValueLocation == 0 {
 		v := operandValue(f.regs, in.c)
-		if err := s.h.setElement(slot, k, v); err != nil {
+		if err := s.h.setElementPHP(slot, k, v, f.fn.strict); err != nil {
 			return err
 		}
 		return s.arraySetResult(f, in, v)
@@ -193,7 +193,7 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.c))
 	}
 	if err == nil && !s.stopped() {
-		err = s.h.assign(e, v)
+		err = s.h.assignPHP(e, v, f.fn.strict)
 	}
 	if err == nil && !s.stopped() {
 		err = s.arraySetResult(f, in, v)
@@ -251,7 +251,7 @@ func (s *vmState) arrayAdd(f *vmFrame, in *vmInstr) error {
 		return nextElementError(s.h.appendValue(arr, v))
 	}
 	if flags&bytecode.AddKeyLocation == 0 {
-		return s.h.setElement(arr, operandValue(f.regs, in.c), v)
+		return s.h.setElementPHP(arr, operandValue(f.regs, in.c), v, f.fn.strict)
 	}
 	k, undefined, err := s.readVar(f, in.c)
 	if err != nil || s.stopped() {
@@ -260,7 +260,7 @@ func (s *vmState) arrayAdd(f *vmFrame, in *vmInstr) error {
 	if undefined {
 		k = stringValue("")
 	}
-	return s.h.setElement(arr, k, v)
+	return s.h.setElementPHP(arr, k, v, f.fn.strict)
 }
 
 // arrayUnset is ZEND_UNSET_DIM.
@@ -509,7 +509,7 @@ func (s *vmState) incDec(f *vmFrame, in *vmInstr) error {
 	}
 	if old.kind < valueArray && next.kind < valueArray && slot.kind < valueArray {
 		*slot = next
-	} else if err := s.h.assign(slot, next); err != nil {
+	} else if err := s.h.assignPHP(slot, next, f.fn.strict); err != nil {
 		return err
 	}
 	result := next
