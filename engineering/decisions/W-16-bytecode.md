@@ -224,13 +224,13 @@ CallPending 取出最內層開始的呼叫，以堆疊上屬於它的引數進�
 
 類別表和函式表一樣是唯讀的編譯資料：名稱、旗標，以及放方法本體與常數運算式的函式索引。物件、static 屬性的值、類別常數求值後的結果都不在裡面，它們屬於當次執行。
 
-- **類別**的 Flags：bit 0 ClassInterface、bit 1 ClassTrait、bit 2 ClassAbstract、bit 3 ClassFinal、bit 4 ClassReadonly、bit 5 ClassHoisted。ClassHoisted 表示 PHP 在編譯檔案時就綁定了這個類別（early binding），它在第一條指令執行前就存在。其他類別由 DeclareClass 在執行到時宣告。Parent、interfaces、traits 存的是名稱，宣告時才解析，因為同一個名稱可以有條件式的多個宣告。
+- **類別**的 Flags：bit 0 ClassInterface、bit 1 ClassTrait、bit 2 ClassAbstract、bit 3 ClassFinal、bit 4 ClassReadonly、bit 5 ClassHoisted、bit 6 ClassAllowDynamic（`#[AllowDynamicProperties]`）。ClassHoisted 表示 PHP 在編譯檔案時就綁定了這個類別（early binding），它在第一條指令執行前就存在。其他類別由 DeclareClass 在執行到時宣告。Parent、interfaces、traits 存的是名稱，宣告時才解析，因為同一個名稱可以有條件式的多個宣告。
 - **成員**的 Flags：bit 0–1 是可見度（0 public、1 protected、2 private），bit 2 MemberStatic、bit 3 MemberFinal、bit 4 MemberAbstract、bit 5 MemberReadonly、bit 6 MemberByRef。
 - **常數與屬性預設值**：Value 與 Init 最多一個不為零。Value 指向常數池裡的純量。Init 指向一個沒有參數的函式，執行期在宣告類別的範圍裡呼叫它取得值。常數在第一次被讀到時求值，屬性預設值在類別第一次建立物件或第一次用到 static 屬性時求值。陣列與引用其他常數的運算式都走 Init。
 - **方法**的 Function 一定指向一個函式，抽象方法也是：它的參數表描述簽章，程式碼不會被執行。Signature 是 PHP 在繼承錯誤訊息裡印出的宣告文字。
 - **trait 規則**：Insteadof 不為空時是 `T::m insteadof U, V`，必須有 Trait，不能有別名或可見度。否則是別名規則，Alias 與 HasVisibility 至少要有一個。HasVisibility 為假時 Flags 必須為零，所以一條規則只有一種編碼。
 
-驗證器檢查：每個索引都指向種類正確的常數或存在的函式，名稱不是空字串，旗標都是已知且不互相矛盾的組合，同一個類別裡常數與屬性名稱不重複（分大小寫），方法名稱不重複（ASCII 不分大小寫），每個函式最多是一個成員的本體，Init 函式沒有參數，成員的函式回傳 Value，介面的方法是 public 且 abstract，方法的 static 旗標和它函式的 FuncNoThis 一致。宣告是否符合 PHP 的繼承規則（抽象方法是否實作、簽章是否相容、final、常數衝突），要等宣告當下才知道有哪些類別，所以由執行期在 DeclareClass 檢查。不是編譯器產生的 bytecode 因此也會被檢查到。
+驗證器檢查：每個索引都指向種類正確的常數或存在的函式，名稱不是空字串，旗標都是已知且不互相矛盾的組合，同一個類別裡常數與屬性名稱不重複（分大小寫），方法名稱不重複（ASCII 不分大小寫），每個函式最多是一個成員的本體，Init 函式沒有參數，成員的函式回傳 Value，介面的方法是 public 且 abstract，方法的 static 旗標和它函式的 FuncNoThis 一致。參數、回傳值與屬性的型別字串必須是型別的寫法（名稱以 `|` 或 `&` 連接，可以有前導的 `?`），參數與屬性不能是 `void` 或 `never`，所以 runtime 的型別判斷不會收到編譯器寫不出來的字串。宣告是否符合 PHP 的繼承規則（抽象方法是否實作、簽章是否相容、final、常數衝突），要等宣告當下才知道有哪些類別，所以由執行期在 DeclareClass 檢查。不是編譯器產生的 bytecode 因此也會被檢查到。
 
 ### 格式 1.7 的指令
 
@@ -242,15 +242,15 @@ CallPending 取出最內層開始的呼叫，以堆疊上屬於它的引數進�
 | New | A 結果，B 類別，C 跳躍目標。對應 ZEND_NEW：建立物件後開始建構子的呼叫。Aux 的 bit 3 NewArgs 表示後面有引數：類別沒有建構子時仍開始一次呼叫，引數照樣求值後丟棄（PHP 呼叫 zend_pass_function）。沒有 NewArgs 而且沒有建構子時跳到 C |
 | InitMethod | A 物件，B 方法名稱。對應 ZEND_INIT_METHOD_CALL：依呼叫範圍的可見度解析方法，找不到或不可存取時退回 `__call`。Aux 恰為 InitCallable（bit 4）時 A 是 callable，物件走 `__invoke`，字串是函式名稱，B 必須為零 |
 | InitStatic | A 類別，B 方法名稱。對應 ZEND_INIT_STATIC_METHOD_CALL，包含 `parent::`、`self::` 轉送 `$this` 與被呼叫類別，以及 `__callStatic` |
-| This | A 結果。不在物件方法裡時拋出 `Using $this when not in object context` |
+| This | A 結果。不在物件方法裡時拋出 `Using $this when not in object context`。Aux 1 是 `isset($this)`：A 得到 bool，不拋出 |
 | PropGet | A 結果，B 物件，C 名稱。模式 0 讀取、1 安靜讀取（isset、`??`）、2 複合指定的讀取半邊、3 `++`／`--` 的讀取半邊。後兩者在容器不是物件時拋出 PHP 對應的 Error，不是警告 |
-| PropSet | A 物件，B 名稱，C 值。對應 ZEND_ASSIGN_OBJ。MemberResult 設定時，指令把 C 換成指定運算式的值，也就是 typed 屬性轉型後實際存入的值 |
+| PropSet | A 物件，B 名稱，C 值。對應 ZEND_ASSIGN_OBJ。MemberResult 設定時，指令把 C 換成指定運算式的值，也就是 typed 屬性轉型後實際存入的值。模式 1（MemberBindRef）對應 ZEND_ASSIGN_OBJ_REF：C 存放一個參照，值先依屬性的型別檢查，屬性再綁上這個參照。模式 2、3 是 `++`、`--` 的寫入半邊：結果超出整數範圍而屬性的型別只收 int 時，拋出 `Cannot increment property ... past its maximal value`（或 decrement／minimal） |
 | FetchProp | A 元素位置，B 物件，C 名稱。對應 ZEND_FETCH_OBJ_W／RW／UNSET（模式 0／1／2）：A 指向屬性本身，供接下來的元素或屬性操作使用。MemberObjLocation 時 B 必須等於 A，表示鏈的下一層 |
 | PropRef | A 結果（一個參照），B 物件，C 名稱：屬性變成參照，A 持有它 |
 | PropIsset | A 結果（bool），B 物件，C 名稱。模式 2 是 isset、3 是 empty |
 | PropUnset | A 物件，B 名稱 |
 | StaticGet | A 結果，B 類別，C 名稱。模式 0 讀取、1 安靜讀取、2 isset、3 empty |
-| StaticSet | A 值，B 類別，C 名稱。MemberResult 的意義同 PropSet |
+| StaticSet | A 值，B 類別，C 名稱。MemberResult 與模式的意義同 PropSet |
 | FetchStatic | A 元素位置，B 類別，C 名稱。模式 0 寫入、1 讀寫 |
 | StaticRef | A 結果（一個參照），B 類別，C 名稱 |
 | ClassConst | A 結果，B 類別，C 常數名稱（String 常數）。第一次讀到時在宣告它的類別範圍裡求值 |

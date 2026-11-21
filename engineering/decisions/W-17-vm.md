@@ -218,7 +218,7 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 ### 呼叫
 
 - **PHP 寫出來的方法呼叫用 VM 自己的 frame**，和函式呼叫一樣，所以 PHP 的遞迴不會加深 Go 的堆疊。frame 多了 `$this`、宣告範圍（`self` 與可見度判斷用）與被呼叫的類別（`static` 用）。
-- **runtime 在指令中途回頭呼叫 PHP 時跑巢狀迴圈**（`vmState.invoke`）：解構子、magic method、`__toString`、常數運算式。巢狀深度上限 4,096 層，超過時拋出 PHP 在 C 堆疊用完時的 `Maximum call stack size ... reached. Infinite recursion?`。
+- **runtime 在指令中途回頭呼叫 PHP 時跑巢狀迴圈**（`vmState.invoke`）：解構子、magic method、`__toString`、常數運算式。巢狀深度上限 12,000 層，超過時拋出 PHP 在 C 堆疊用完時的 `Maximum call stack size ... reached. Infinite recursion?`。
 - 因為指令執行到一半可能有 PHP 程式進出 frame，frame 物件與它的暫存器視窗改成不會搬動：frame 物件依深度重複使用，三個堆疊（值、位置、元素）滿了就接新的區塊而不是整塊搬家。
 - **被呼叫者要到執行期才知道**，所以引數的送法由被呼叫函式的宣告決定（PushAuto、PushTemp、PushResult），對應 PHP 的 SEND_VAR_EX、SEND_VAL_EX、SEND_VAR_NO_REF_EX。
 - **`new`** 照 ZEND_NEW：先建立物件，再呼叫建構子。沒有建構子時引數仍然求值後丟棄。
@@ -248,9 +248,9 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 | 屬性讀寫 | 每條指令一個當次執行的 inline cache：記下物件的類別、所在範圍與屬性的位置。命中時直接讀寫宣告屬性的位置，條件不符就走 W-13 的完整操作 | `$o->n = $o->n + 1` 的迴圈每圈由約 428 ns 降到約 186 ns |
 | 方法查找 | 同一個 cache 記下解析到的方法 | 省掉每次呼叫的名稱轉小寫與查表 |
 | 呼叫的附帶資料 | 只有具名引數或略過的參數才配置 | 方法呼叫由每次 96 B、1 次配置降到 0 |
-| frame | 逐欄位寫入、指標沒變就不寫 | 整個結構一次指定會經過 GC 的 bulk write barrier，`fib` 比 main 慢 10.6%。改完後慢 3.2% |
+| frame | 逐欄位寫入、指標沒變就不寫 | 整個結構一次指定會經過 GC 的 bulk write barrier，`fib` 比 main 慢 10.6%。改完後慢 3.2%，審查後的修正再量一次是快 2.4% |
 
-cache 只存當次執行的類別描述指標與位置編號，不存值，也不放進 `Program`。分派迴圈多了二十個 case。和 main（1374780）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，算術、分支、字串、陣列四個工作量快 0.4% 到 3.6%，遞迴的 `fib` 慢 3.2%，6 輪的範圍不重疊。這 3.2% 是 frame 不能搬動的代價，列在已知缺口。原始輸出在 [stage7a/bench-main.txt](../implementation/evidence/W-17-vm/stage7a/bench-main.txt)、[stage7a/bench-stage7a.txt](../implementation/evidence/W-17-vm/stage7a/bench-stage7a.txt) 與 [stage7a/bench-objects.txt](../implementation/evidence/W-17-vm/stage7a/bench-objects.txt)。
+cache 只存當次執行的類別描述指標與位置編號，不存值，也不放進 `Program`。分派迴圈多了二十個 case。和 main（1374780）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，審查修正後的最後一輪，五個工作量都比 main 快：算術 16.6%、分支 13.2%、陣列 7.7%、遞迴的 `fib` 2.4%、字串 2.3%，6 輪的範圍不重疊。原始輸出在 [stage7a/bench-main.txt](../implementation/evidence/W-17-vm/stage7a/bench-main.txt)、[stage7a/bench-stage7a.txt](../implementation/evidence/W-17-vm/stage7a/bench-stage7a.txt) 與 [stage7a/bench-objects.txt](../implementation/evidence/W-17-vm/stage7a/bench-objects.txt)。
 
 ### 修在 W-13 與 lowering 的地方
 
@@ -259,6 +259,28 @@ cache 只存當次執行的類別描述指標與位置編號，不存值，也�
 - 透過參照指定時，strict 與否改由 VM 傳入實際的模式，原本一律當成 strict。
 - lowering 的 `Access level to ... must be public (as in class X)`：父類別是 public 時 PHP 不加 `or weaker`。
 - 函式隱含的 return 改用右大括號那一行（frontend 記下區塊的結束行）。這原本列在已知缺口，`never` 與「沒有回傳值」的 TypeError 讓它看得出差別。
+
+### 獨立審查
+
+審查者（內建的 Opus，全新的脈絡）只拿到需求與程式碼。他寫了 488 個 PHP 探測程式，全部在 arm64 映像對照，另有 50 個在 386、21 個在 amd64。他也用 32 個 goroutine 同時執行同一個 `Program` 檢查隔離（`-race`），手寫約 45 個惡意 bytecode 映像，並測試取消與深層巢狀。請求之間沒有外洩，驗證器沒有被繞過的 Go panic。找到的問題如下，都已修正並補上修正前會失敗的回歸測試，修正前的輸出在 [stage7a/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage7a/red-review-fixes.txt)。
+
+- **請求結束時 panic**（P0）。一個全域物件持有另一個全域物件（`$a->o = $b`）時，關機流程在移除元素後用舊的索引讀符號表，Go panic 直接傳到宿主。這段是 W-06 的程式，物件接上 VM 後才走得到。現在每次都重新檢查索引（`execution_destruct.go`、`heap.go`）。
+- **解構子裡建立同類別物件會撐爆 Go 堆疊**（P0）。巢狀深度原本在 frame 收掉之前就減掉，釋放 frame 的值又觸發解構子，深度永遠數不到。現在算到這次呼叫的 frame 都釋放完為止，上限 12,000 層，超過時拋出 PHP 的 `Maximum call stack size` 錯誤（`TestW17Stage7NestedCallbacksAreBounded`）。
+- **關機時的解構子呼叫用了 `global` 的函式會以內部錯誤結束**（P0）。`{main}` 的變數那時已經交給執行框架，`global` 現在改從那張符號表找。
+- **runtime 包過的錯誤沒有變成未捕捉的錯誤**（P1）。`__get`、`__toString` 裡拋出的錯誤經過 W-13 的回呼邊界後，少了 `Uncaught` 與 stack trace，還被回報成內部錯誤。
+- **`$o->typed = &$var` 與 `A::$typed = &$var` 沒有檢查型別**（P1）。現在由 PropSet／StaticSet 的 MemberBindRef 模式處理，值先依屬性的型別檢查，參照再登記為這個屬性的來源。
+- **在 `?int` 這類屬性裡自動建立陣列**（P1）。`$o->i[] = 1` 現在拋出 `Cannot auto-initialize an array inside property`。這原本列在已知缺口。
+- **建構子沒有完成的物件仍被解構**（P1）。建構子拋出錯誤、`exit`，或引數求值失敗時，PHP 不會呼叫這個物件的解構子，現在照做。這也原本列在已知缺口。
+- **只被呼叫引數持有的物件太早解構**（P2）。未捕捉錯誤的 backtrace 持有每個 frame 的引數，PHP 因此先印錯誤才解構它們。現在錯誤回報後才釋放。
+- **可見度與訊息**（P2）：兄弟類別重新宣告的 protected 屬性可以從共同祖先的其他子類別存取（W-13 改用最初宣告它的類別判斷）。private 常數不被繼承。`static::m()` 不套用「呼叫範圍自己的 private 方法優先」的規則。`parent::__construct()` 沒有父建構子時是 `Cannot call constructor`。
+- **trait 組合的檢查**（P2）：類別方法與 trait 的抽象方法簽章不相容、別名指向不存在的 trait 或方法、同名方法來自兩個 trait 卻沒有指明、trait 與類別的屬性定義衝突，現在都是 PHP 的 fatal。
+- **`++`／`--` 超出整數範圍**（P2）：typed int 屬性拋出 `Cannot increment property ... past its maximal value`，原本的訊息是指定 float 失敗，`--` 在最小值甚至沒有錯誤。
+- **其他**（P2）：不定參數的型別錯誤在 backtrace 裡把第一個引數印成 NULL。常數運算式的 frame 印成 `[constant expression]()`。`clone($x)` 寫成呼叫的形式、`#[AllowDynamicProperties]`、`foreach (... as $o->p)`、`isset($this)` 原本被拒絕，現在可以執行。宣告和內建類別同名的類別回報 PHP 的 `Cannot redeclare class stdClass`。手寫 bytecode 不能再宣告 stdClass 或 Stringable，型別字串也要通過驗證。
+- 審查建議的效能改進採用了一項：`kill` 遇到純量直接略過，不清空也不呼叫釋放。其餘建議（類別描述跨請求共用、動態屬性的快速路徑、`new` 用每個類別的預設值樣板、型別遮罩）列在已知缺口。
+
+審查留下、這一段不修的差異都列在已知缺口。回歸 fixture 共 47 個（`review7a_*` 與 `fatal_review7a_*`）。
+
+測試程式加到 693 個（新增 262 個 `class_*`、`object_*`、`method_*`、`prop_*`、`type_*`、`magic_method_*` 與對應的 `fatal_*`，以及 47 個審查的回歸 fixture），三個 profile 各 2,079 項全部和 PHP 8.5.12 逐位元組相同。
 
 ### 公開介面沒有變
 
@@ -340,15 +362,19 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`define()`、`constant()`、`defined()`**：內建函式，屬於模組工作包；`const` 以外沒有辦法在執行期宣告常數。
 - **執行期 fatal 的公開介面**：宣告類別失敗的 fatal 以 `PHPError` 的 `CompileError` 種類回報，`Diagnostic` 沒有欄位放 fatal 後面的 stack trace，所以 log 管道的那一筆只有訊息與位置。display 管道的文字是完整的。加一個 `FatalError` 種類與 `Diagnostic.Trace` 欄位是只增加的公開介面變更，等專案負責人決定。對照測試在 log 模式自己補上 `#0 {main}`，fixture 只在頂層觸發這種 fatal。
 - **類別描述每次執行重建**：`Program` 只共用類別表，W-13 的類別物件每次請求從頭建立。宣告很多類別的程式每次請求都付這個成本，等編譯快取的工作包（W-23）把描述拆成唯讀與當次兩層。
-- **遞迴呼叫比 main 慢約 3%**：frame 物件與視窗不能搬動（指令中途會有 PHP 程式進出），`BenchmarkVMDispatch/fib` 因此慢 3.2%。其他四個工作量沒有變慢。
 - **把元素或屬性傳給方法的傳參照參數**：`$o->m($a[0])`、`$o->m($p->q)`、`$f($a[0])` 的被呼叫者要到執行期才知道。PHP 在參數傳參照時改用寫入方式取元素（FETCH_DIM_FUNC_ARG），這裡還沒有對應的指令，遇到傳參照的參數以 Unsupported 結束，不會把複本交給函式。傳變數（`$o->m($x)`）與直接呼叫已知的函式（`f($o->p)`）不受影響。
-- **typed 屬性經由元素位置寫入**：`$o->p[] = 1` 這類寫入透過屬性的位置直接改陣列。屬性的型別不允許陣列卻是 null 或未初始化時，PHP 拋出 `Cannot auto-initialize an array inside property`，Phego 會建立陣列。`A::$s[k] = v` 對 typed static 屬性也一樣不檢查型別。
+- **兩個不同型別的 typed 屬性綁在同一個參照**：`$a->i = &$a->s`（一個 int、一個 string）PHP 以 `Reference with value of type ... is not compatible with property ...` 拒絕。Phego 只檢查值能不能指定給目標屬性，之後寫入才報出不同的錯誤。透過參照 `++` 一個 typed int 屬性超出範圍時，訊息也和 PHP 不同。
 - **透過字串或陣列呼叫方法**：`$f = 'A::m'; $f()` 與 `[$o, 'm']()` 在執行期以 Unsupported 結束。`$o()`（`__invoke`）與函式名稱字串可以。
 - **`??=` 的目標是屬性底下的元素、而且運算元有副作用**：`$o->p[f()] ??= 1` 在 `Compile` 回報不支援。PHP 把目標編譯兩次但共用運算元的結果，這裡只在運算元是變數與字面值時才這樣做。
 - **回傳參照的函式與方法**：在 `Compile` 回報不支援。
 - **stdClass 與 Stringable 以外的內建類別與介面**：`new ArrayObject`、`extends Exception`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
-- **巢狀呼叫的深度上限是 4,096 層**：解構子、magic method、`__toString` 互相巢狀超過這個深度時拋出 PHP 的 `Maximum call stack size ... reached`。PHP 的門檻取決於 C 堆疊大小，兩邊觸發的深度不同。
-- **建構子拋出錯誤的物件仍會解構**：PHP 把建構失敗的物件標成不呼叫解構子。這一段沒有 try／catch，只有未捕捉的錯誤，留給七 C。
+- **巢狀呼叫的深度上限是 12,000 層**：解構子、magic method、`__toString` 互相巢狀超過這個深度時拋出 PHP 的 `Maximum call stack size ... reached`。PHP 的門檻取決於 C 堆疊大小，兩邊觸發的深度不同。
+- **private 或 protected 的解構子**：PHP 在範圍外釋放物件時拋出 `Call to private D::__destruct() from global scope`，請求結束時則發出警告後略過。Phego 照樣執行它。
+- **自我參照的類別常數**：`const X = self::Y; const Y = self::X;` PHP 的訊息是 `Cannot declare self-referencing constant self::Y`，backtrace 只有一格。Phego 寫成 `A::X`，多一格。
+- **`(object)` 轉型的陣列帶有 mangled 的 key**（`"\0A\0p"`）：從類別外走訪時 PHP 看得到三個屬性，Phego 把它們當成 private／protected 而略過。
+- **`function &__get`** 與其他回傳參照的 magic method 在 `Compile` 回報不支援（同回傳參照的函式）。
+- **動態屬性沒有快速路徑**：inline cache 只處理宣告的屬性，stdClass 與其他動態屬性每次都走 W-13 的完整操作，約慢一倍。`new` 每個物件有三次配置，預設值每次從快照匯入。typed 屬性的快速路徑只認六種單純型別，`?int`、union 與類別型別都走完整的轉換。這三項都是審查提出、還沒做的改進。
+- **型別字串只驗證形狀**：手寫 bytecode 可以宣告 static 的 `__construct` 或參數個數不對的 magic method，PHP 的編譯器會拒絕。執行期不會因此出現記憶體安全問題，行為則沒有定義成和 PHP 相同。
 - **暫存器釋放會登記 GC 的可能根**：讀取變數裡的物件到暫存器再釋放，會把它登記成循環回收的候選，PHP 讀取變數不動參照計數。大量不同的物件各被讀過一次時，自動回收可能比 PHP 早觸發，只有循環垃圾的解構時機看得出來。
 - **走訪物件時 key 一律是字串**：PHP 對整數樣子的屬性名稱給整數 key。
 - **簽章相容的判斷是保守的近似**：參數與回傳型別以 union 的成員逐一比對，交集型別（`A&B`）與 `callable`、`iterable` 的特殊規則沒有完整實作，可能拒絕或接受少數 PHP 判斷不同的宣告。
