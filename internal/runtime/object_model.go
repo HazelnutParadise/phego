@@ -48,7 +48,10 @@ type methodSpec struct {
 	static           bool
 	final            bool
 	abstract         bool
-	call             func(*heap, value, []value) (value, error)
+	// fn is, for a method a program declares, the index of its bytecode
+	// function plus one. It reuses the padding after the flags.
+	fn   int32
+	call func(*heap, value, []value) (value, error)
 }
 
 type classSpec struct {
@@ -469,7 +472,14 @@ func resolvePropertyIn(c *class, name string, scope *class, instance bool) (*pro
 		if instance && p.visibility == privateAccess && p.owner != c {
 			continue
 		}
-		if !canAccess(scope, p.owner, p.visibility) {
+		owner := p.owner
+		if p.visibility == protectedAccess && p.prototypeOwner != nil {
+			// zend_check_protected(property_info->prototype->ce, scope): a
+			// redeclared protected property stays reachable from every
+			// class that shares the ancestor that first declared it.
+			owner = p.prototypeOwner
+		}
+		if !canAccess(scope, owner, p.visibility) {
 			return nil, &Throwable{"Error", "Cannot access " + accessName(p.visibility) + " property " + c.name + "::$" + name}
 		}
 		return p, nil
@@ -494,4 +504,16 @@ func (h *heap) reflectObjectProperties(c *class) [][]any {
 		}
 	}
 	return out
+}
+
+// canSet reports whether scope may write p. A protected(set) property is
+// checked against the class that first declared it, as PHP checks the
+// prototype (zend_asymmetric_property_has_set_access): two classes that
+// redeclare a protected property of a common ancestor may write each other's.
+func canSet(scope *class, p *propertyInfo) bool {
+	owner := p.owner
+	if p.setVisibility == protectedAccess && p.prototypeOwner != nil {
+		owner = p.prototypeOwner
+	}
+	return canAccess(scope, owner, p.setVisibility)
 }

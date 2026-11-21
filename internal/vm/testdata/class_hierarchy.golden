@@ -1,0 +1,205 @@
+-- source --
+<?php
+interface Shape {
+    const SIDES = 0;
+    public function area(): float;
+}
+trait Named {
+    public function name() { return 'named'; }
+    public function hello() { return 'hi'; }
+}
+trait Greets {
+    public function hello() { return 'hello'; }
+}
+abstract class Base implements Shape {
+    use Named, Greets {
+        Greets::hello insteadof Named;
+        Named::hello as protected namedHello;
+        name as label;
+    }
+    const LIMIT = 10, DOUBLE = self::LIMIT * 2;
+    protected static int $count = 0;
+    public ?string $tag = null;
+    public array $list = [1, 2];
+    private readonly int $id;
+    public float $ratio = 1 / 3;
+    abstract protected function kind(): string;
+}
+final class Square extends Base {
+    public function __construct(private float $side = 1.0) {}
+    public function area(): float { return $this->side ** 2; }
+    protected function kind(): string { return 'square'; }
+}
+echo (new Square(2.0))->area(), Square::DOUBLE, Base::class;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=976 lines=33
+const 0: string "Shape"
+const 1: string "SIDES"
+const 2: int 0
+const 3: string "area"
+const 4: string "Shape::area(): float"
+const 5: string "Named"
+const 6: string "name"
+const 7: string "Named::name()"
+const 8: string "hello"
+const 9: string "Named::hello()"
+const 10: string "Greets"
+const 11: string "Greets::hello()"
+const 12: string "Base"
+const 13: string "namedHello"
+const 14: string "label"
+const 15: string "LIMIT"
+const 16: int 10
+const 17: string "DOUBLE"
+const 18: string "count"
+const 19: string "int"
+const 20: string "tag"
+const 21: string "?string"
+const 22: null
+const 23: string "list"
+const 24: string "array"
+const 25: string "id"
+const 26: string "ratio"
+const 27: string "float"
+const 28: float 0.3333333333333333 (0x3fd5555555555555)
+const 29: string "kind"
+const 30: string "Base::kind(): string"
+const 31: string "Square"
+const 32: string "side"
+const 33: string "__construct"
+const 34: string "Square::__construct(float $side = 1)"
+const 35: string "Square::area(): float"
+const 36: string "Square::kind(): string"
+const 37: float 2 (0x4000000000000000)
+const 38: string "named"
+const 39: string "hi"
+const 40: int 2
+const 41: int 1
+const 42: string "string"
+const 43: float 1 (0x3ff0000000000000)
+const 44: string "square"
+class 0 "Shape" line=2 flags=interface+hoisted
+  const "SIDES" public = int 0
+  method "area" public+abstract func 1 "area" signature "Shape::area(): float" ; line 4
+class 1 "Named" line=6 flags=trait+hoisted
+  method "name" public func 2 "name" signature "Named::name()" ; line 7
+  method "hello" public func 3 "hello" signature "Named::hello()" ; line 8
+class 2 "Greets" line=10 flags=trait+hoisted
+  method "hello" public func 4 "hello" signature "Greets::hello()" ; line 11
+class 3 "Base" line=13 flags=abstract
+  implements "Shape"
+  uses "Named" "Greets"
+  rule "Greets"::"hello" insteadof "Named" ; line 14
+  rule "Named"::"hello" as protected "namedHello" ; line 14
+  rule "name" as "label" ; line 14
+  const "LIMIT" public = int 10
+  const "DOUBLE" public = init func 5 "{constant expression}"
+  prop "count" protected+static type "int" = int 0
+  prop "tag" public type "?string" = null
+  prop "list" public type "array" = init func 6 "{constant expression}"
+  prop "id" private+readonly type "int"
+  prop "ratio" public type "float" = float 0.3333333333333333 (0x3fd5555555555555)
+  method "kind" protected+abstract func 7 "kind" signature "Base::kind(): string" ; line 25
+class 4 "Square" line=27 flags=final extends "Base"
+  prop "side" private type "float"
+  method "__construct" public func 8 "__construct" signature "Square::__construct(float $side = 1)" ; line 28
+  method "area" public func 9 "area" signature "Square::area(): float" ; line 29
+  method "kind" protected func 10 "kind" signature "Square::kind(): string" ; line 30
+func 0 "{main}" params=0 locals=0 registers=4 maxstack=2 flags=nothis
+  registers VVVV
+  0: DeclareClass 0 0 3 0 ; line 13 ; class 3 "Base"
+  1: DeclareClass 0 0 4 0 ; line 27 ; class 4 "Square"
+  2: New args 1 31 8 ; line 32 ; class "Square", target 8
+  3: Const 0 3 37 0 ; line 32 ; float 2 (0x4000000000000000)
+  4: Push temp 3 0 0 ; line 32
+  5: Checkpoint 0 0 0 0 ; line 32
+  6: CallPending 0 2 0 0 ; line 32
+  7: Drop 0 2 0 0 ; line 32
+  8: InitMethod 0 1 3 0 ; line 32 ; name "area"
+  9: Checkpoint 0 0 0 0 ; line 32
+  10: CallPending 0 0 0 0 ; line 32
+  11: Output 0 0 0 0 ; line 32
+  12: ClassConst 0 0 31 17 ; line 32 ; class "Square", const "DOUBLE"
+  13: Output 0 0 0 0 ; line 32
+  14: Const 0 0 12 0 ; line 32 ; string "Base"
+  15: Output 0 0 0 0 ; line 32
+  16: Const 0 0 22 0 ; line 33 ; null
+  17: Return 0 0 0 0 ; line 33
+func 1 "area" params=0 locals=0 registers=1 maxstack=0 returns "float"
+  registers V
+  0: Const 0 0 22 0 ; line 4 ; null
+  1: Return 0 0 0 0 ; line 4
+func 2 "name" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 38 0 ; line 7 ; string "named"
+  1: Return 0 0 0 0 ; line 7
+  2: Const 0 0 22 0 ; line 7 ; null
+  3: Return 0 0 0 0 ; line 7
+func 3 "hello" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 39 0 ; line 8 ; string "hi"
+  1: Return 0 0 0 0 ; line 8
+  2: Const 0 0 22 0 ; line 8 ; null
+  3: Return 0 0 0 0 ; line 8
+func 4 "hello" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Const 0 0 8 0 ; line 11 ; string "hello"
+  1: Return 0 0 0 0 ; line 11
+  2: Const 0 0 22 0 ; line 11 ; null
+  3: Return 0 0 0 0 ; line 11
+func 5 "{constant expression}" params=0 locals=0 registers=3 maxstack=0 flags=nothis
+  registers VVV
+  0: ClassConst self 0 0 15 ; line 19 ; class self, const "LIMIT"
+  1: Const 0 1 40 0 ; line 19 ; int 2
+  2: Binary Multiply 2 0 1 ; line 19
+  3: Return 0 2 0 0 ; line 19
+  4: Const 0 0 22 0 ; line 19 ; null
+  5: Return 0 0 0 0 ; line 19
+func 6 "{constant expression}" params=0 locals=0 registers=2 maxstack=0 flags=nothis
+  registers VV
+  0: NewArray 0 0 0 0 ; line 22
+  1: Const 0 1 41 0 ; line 22 ; int 1
+  2: ArrayAdd 0 0 1 0 ; line 22
+  3: Const 0 1 40 0 ; line 22 ; int 2
+  4: ArrayAdd 0 0 1 0 ; line 22
+  5: Return 0 0 0 0 ; line 22
+  6: Const 0 0 22 0 ; line 22 ; null
+  7: Return 0 0 0 0 ; line 22
+func 7 "kind" params=0 locals=0 registers=1 maxstack=0 returns "string"
+  registers V
+  0: Const 0 0 22 0 ; line 25 ; null
+  1: Return 0 0 0 0 ; line 25
+func 8 "__construct" params=1 locals=1 registers=4 maxstack=0
+  param 0 "side" optional type "float"
+  local 0 "side"
+  registers VLVV
+  0: Local 0 1 0 0 ; line 28
+  1: ParamDefault 0 0 3 0 ; line 28
+  2: Const 0 0 43 0 ; line 28 ; float 1 (0x3ff0000000000000)
+  3: Store 0 1 0 0 ; line 28
+  4: This 0 2 0 0 ; line 28
+  5: Load 0 3 1 0 ; line 28
+  6: PropSet 0 2 32 3 ; line 28 ; name "side"
+  7: Const 0 2 22 0 ; line 28 ; null
+  8: Return 0 2 0 0 ; line 28
+func 9 "area" params=0 locals=0 registers=3 maxstack=0 returns "float"
+  registers VVV
+  0: This 0 0 0 0 ; line 29
+  1: PropGet 0 1 0 32 ; line 29 ; name "side"
+  2: Const 0 2 40 0 ; line 29 ; int 2
+  3: Binary Power 0 1 2 ; line 29
+  4: VerifyReturn value 0 0 0 ; line 29
+  5: Return 0 0 0 0 ; line 29
+  6: Const 0 0 22 0 ; line 29 ; null
+  7: VerifyReturn none 0 0 0 ; line 29
+  8: Return 0 0 0 0 ; line 29
+func 10 "kind" params=0 locals=0 registers=1 maxstack=0 returns "string"
+  registers V
+  0: Const 0 0 44 0 ; line 30 ; string "square"
+  1: VerifyReturn value 0 0 0 ; line 30
+  2: Return 0 0 0 0 ; line 30
+  3: Const 0 0 22 0 ; line 30 ; null
+  4: VerifyReturn none 0 0 0 ; line 30
+  5: Return 0 0 0 0 ; line 30

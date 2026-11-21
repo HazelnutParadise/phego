@@ -43,6 +43,11 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 	switch target.Op {
 	case ir.OpVar:
 		l := fc.varLoc(target.Var)
+		if source.Op == ir.OpProp || source.Op == ir.OpStaticProp {
+			r := fc.memberRef(source)
+			fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), l, r, 0)
+			return fc.refResult(l, used)
+		}
 		src := fc.refSource(source, n.Line)
 		fc.emit(bytecode.OpBind, 0, l, src, 0)
 		return fc.refResult(l, used)
@@ -50,7 +55,12 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 		t := fc.dimTarget(target, n.Line)
 		mark := fc.top
 		var src, flags uint32
-		if source.Op == ir.OpVar {
+		if source.Op == ir.OpProp || source.Op == ir.OpStaticProp {
+			src, flags = fc.memberRef(source), uint32(bytecode.BindValue)
+			if used {
+				fc.unsupported("value of an assignment by reference between two elements", n.Line)
+			}
+		} else if source.Op == ir.OpVar {
 			src = fc.refSource(source, n.Line)
 		} else {
 			e := fc.refSource(source, n.Line)
@@ -67,6 +77,9 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 			return fc.refResult(src, used)
 		}
 		return reg(fc.alloc())
+	}
+	if target.Op == ir.OpProp || target.Op == ir.OpStaticProp {
+		return fc.bindMember(n, used)
 	}
 	fc.unsupportedNode(target)
 	return operand{}
@@ -88,6 +101,9 @@ func (fc *fnCompiler) refResult(l uint32, used bool) operand {
 // variable or element becomes a reference at the argument's position, and
 // the register that holds it is pushed with the other arguments.
 func (fc *fnCompiler) refArg(n *ir.Node, line int) uint32 {
+	if n.Op == ir.OpProp || n.Op == ir.OpStaticProp {
+		return fc.memberRef(n)
+	}
 	if n.Op != ir.OpVar && n.Op != ir.OpDim {
 		fc.unsupported("passing a value that is not a variable by reference", positive(n.Line, line))
 	}
@@ -107,6 +123,9 @@ func (fc *fnCompiler) foreachRefInit(it uint32, subject *ir.Node) int {
 	switch subject.Op {
 	case ir.OpVar, ir.OpDim:
 		src = fc.refSource(subject, subject.Line)
+	case ir.OpProp, ir.OpStaticProp:
+		// The property becomes a reference the loop shares.
+		src = fc.memberRef(subject)
 	default:
 		src = fc.value(subject)
 	}

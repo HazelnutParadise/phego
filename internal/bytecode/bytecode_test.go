@@ -367,13 +367,13 @@ func repairWireIntegrity(b []byte) {
 }
 
 func TestSafetyMetadataIsIntrinsic(t *testing.T) {
-	for op := OpCheckpoint; op <= OpCallPending; op++ {
+	for op := OpCheckpoint; op <= OpVerifyReturn; op++ {
 		s, ok := op.Safety()
 		if !ok || s.Steps < 1 || !s.CheckCancel {
 			t.Errorf("opcode %d safety=%+v known=%v", op, s, ok)
 		}
 	}
-	for _, op := range []Opcode{0, OpCallPending + 1, 0xffff} {
+	for _, op := range []Opcode{0, OpVerifyReturn + 1, 0xffff} {
 		if _, ok := op.Safety(); ok {
 			t.Errorf("unknown opcode %d reported known", op)
 		}

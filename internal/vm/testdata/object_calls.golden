@@ -1,0 +1,277 @@
+-- source --
+<?php
+class A {
+    public $p = 1;
+    public function __construct(...$args) {}
+    public function m($x, &$y) { return $this; }
+    public static function s($x) { return new static; }
+}
+class B {}
+function f() { return 1; }
+$a = new A;
+$b = new B();
+$c = new B(f());
+$d = new A($a, f(), 1 + 2);
+$name = 'A';
+$e = new $name($a);
+$v = 1;
+$a->m($v, $v);
+$a->m(f(), $w);
+$a->m($v + 1, $a->p);
+A::s($v);
+A::s(f());
+$a?->m($v, $v)?->m(1, $z);
+$n = null;
+echo $n?->m(f(), $q);
+$meth = 'm';
+$a->$meth($v, $v);
+$call = 'f';
+$call(f());
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=528 lines=29
+const 0: string "A"
+const 1: string "p"
+const 2: int 1
+const 3: string "__construct"
+const 4: string "A::__construct(...$args)"
+const 5: string "m"
+const 6: string "A::m($x, &$y)"
+const 7: string "s"
+const 8: string "A::s($x)"
+const 9: string "B"
+const 10: int 2
+const 11: null
+const 12: string "f"
+const 13: string "a"
+const 14: string "b"
+const 15: string "c"
+const 16: string "d"
+const 17: string "name"
+const 18: string "e"
+const 19: string "v"
+const 20: string "w"
+const 21: string "z"
+const 22: string "n"
+const 23: string "q"
+const 24: string "meth"
+const 25: string "call"
+const 26: string "args"
+const 27: string "x"
+const 28: string "y"
+class 0 "A" line=2 flags=hoisted
+  prop "p" public = int 1
+  method "__construct" public func 2 "__construct" signature "A::__construct(...$args)" ; line 4
+  method "m" public func 3 "m" signature "A::m($x, &$y)" ; line 5
+  method "s" public+static func 4 "s" signature "A::s($x)" ; line 6
+class 1 "B" line=8 flags=hoisted
+func 0 "{main}" params=0 locals=13 registers=19 maxstack=4 flags=nothis
+  local 0 "a"
+  local 1 "b"
+  local 2 "c"
+  local 3 "d"
+  local 4 "name"
+  local 5 "e"
+  local 6 "v"
+  local 7 "w"
+  local 8 "z"
+  local 9 "n"
+  local 10 "q"
+  local 11 "meth"
+  local 12 "call"
+  registers LLLLLLLLLLLLLVVVVVV
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Local 0 3 3 0 ; line 1
+  4: Local 0 4 4 0 ; line 1
+  5: Local 0 5 5 0 ; line 1
+  6: Local 0 6 6 0 ; line 1
+  7: Local 0 7 7 0 ; line 1
+  8: Local 0 8 8 0 ; line 1
+  9: Local 0 9 9 0 ; line 1
+  10: Local 0 10 10 0 ; line 1
+  11: Local 0 11 11 0 ; line 1
+  12: Local 0 12 12 0 ; line 1
+  13: New 0 13 0 17 ; line 10 ; class "A", target 17
+  14: Checkpoint 0 0 0 0 ; line 10
+  15: CallPending 0 14 0 0 ; line 10
+  16: Drop 0 14 0 0 ; line 10
+  17: Store 0 0 13 0 ; line 10
+  18: New 0 13 9 22 ; line 11 ; class "B", target 22
+  19: Checkpoint 0 0 0 0 ; line 11
+  20: CallPending 0 14 0 0 ; line 11
+  21: Drop 0 14 0 0 ; line 11
+  22: Store 0 1 13 0 ; line 11
+  23: New args 13 9 29 ; line 12 ; class "B", target 29
+  24: Call 0 15 1 0 ; line 12 ; f
+  25: Push result 15 0 0 ; line 12
+  26: Checkpoint 0 0 0 0 ; line 12
+  27: CallPending 0 14 0 0 ; line 12
+  28: Drop 0 14 0 0 ; line 12
+  29: Store 0 2 13 0 ; line 12
+  30: New args 13 0 41 ; line 13 ; class "A", target 41
+  31: Push auto 0 0 0 ; line 13
+  32: Call 0 15 1 0 ; line 13 ; f
+  33: Push result 15 0 0 ; line 13
+  34: Const 0 15 2 0 ; line 13 ; int 1
+  35: Const 0 16 10 0 ; line 13 ; int 2
+  36: Binary Add 17 15 16 ; line 13
+  37: Push temp 17 0 0 ; line 13
+  38: Checkpoint 0 0 0 0 ; line 13
+  39: CallPending 0 14 0 0 ; line 13
+  40: Drop 0 14 0 0 ; line 13
+  41: Store 0 3 13 0 ; line 13
+  42: Const 0 13 0 0 ; line 14 ; string "A"
+  43: Store 0 4 13 0 ; line 14
+  44: Load 0 14 4 0 ; line 15
+  45: New value+args 13 14 50 ; line 15 ; class r14, target 50
+  46: Push auto 0 0 0 ; line 15
+  47: Checkpoint 0 0 0 0 ; line 15
+  48: CallPending 0 15 0 0 ; line 15
+  49: Drop 0 15 0 0 ; line 15
+  50: Store 0 5 13 0 ; line 15
+  51: Const 0 13 2 0 ; line 16 ; int 1
+  52: Store 0 6 13 0 ; line 16
+  53: Load 0 14 0 0 ; line 17
+  54: InitMethod 0 14 5 0 ; line 17 ; name "m"
+  55: Push auto 6 0 0 ; line 17
+  56: Push auto 6 0 0 ; line 17
+  57: Checkpoint 0 0 0 0 ; line 17
+  58: CallPending 0 13 0 0 ; line 17
+  59: Drop 0 13 0 0 ; line 17
+  60: Load 0 14 0 0 ; line 18
+  61: InitMethod 0 14 5 0 ; line 18 ; name "m"
+  62: Call 0 15 1 0 ; line 18 ; f
+  63: Push result 15 0 0 ; line 18
+  64: Push auto 7 0 0 ; line 18
+  65: Checkpoint 0 0 0 0 ; line 18
+  66: CallPending 0 13 0 0 ; line 18
+  67: Drop 0 13 0 0 ; line 18
+  68: Load 0 14 0 0 ; line 19
+  69: InitMethod 0 14 5 0 ; line 19 ; name "m"
+  70: Const 0 15 2 0 ; line 19 ; int 1
+  71: Load 0 16 6 0 ; line 19
+  72: Binary Add 17 16 15 ; line 19
+  73: Push temp 17 0 0 ; line 19
+  74: Load 0 15 0 0 ; line 19
+  75: PropGet 0 16 15 1 ; line 19 ; name "p"
+  76: Push element 16 0 0 ; line 19
+  77: Checkpoint 0 0 0 0 ; line 19
+  78: CallPending 0 13 0 0 ; line 19
+  79: Drop 0 13 0 0 ; line 19
+  80: InitStatic 0 0 7 0 ; line 20 ; class "A", name "s"
+  81: Push auto 6 0 0 ; line 20
+  82: Checkpoint 0 0 0 0 ; line 20
+  83: CallPending 0 13 0 0 ; line 20
+  84: Drop 0 13 0 0 ; line 20
+  85: InitStatic 0 0 7 0 ; line 21 ; class "A", name "s"
+  86: Call 0 14 1 0 ; line 21 ; f
+  87: Push result 14 0 0 ; line 21
+  88: Checkpoint 0 0 0 0 ; line 21
+  89: CallPending 0 13 0 0 ; line 21
+  90: Drop 0 13 0 0 ; line 21
+  91: Load 0 16 0 0 ; line 22
+  92: Const 0 17 11 0 ; line 22 ; null
+  93: Binary Identical 18 16 17 ; line 22
+  94: Branch 0 18 95 97 ; line 22
+  95: Move 0 13 17 0 ; line 22
+  96: Jump 0 114 0 0 ; line 22
+  97: InitMethod 0 16 5 0 ; line 22 ; name "m"
+  98: Push auto 6 0 0 ; line 22
+  99: Push auto 6 0 0 ; line 22
+  100: Checkpoint 0 0 0 0 ; line 22
+  101: CallPending 0 15 0 0 ; line 22
+  102: Const 0 16 11 0 ; line 22 ; null
+  103: Binary Identical 17 15 16 ; line 22
+  104: Branch 0 17 105 107 ; line 22
+  105: Move 0 13 16 0 ; line 22
+  106: Jump 0 114 0 0 ; line 22
+  107: InitMethod 0 15 5 0 ; line 22 ; name "m"
+  108: Const 0 16 2 0 ; line 22 ; int 1
+  109: Push temp 16 0 0 ; line 22
+  110: Push auto 8 0 0 ; line 22
+  111: Checkpoint 0 0 0 0 ; line 22
+  112: CallPending 0 14 0 0 ; line 22
+  113: Move 0 13 14 0 ; line 22
+  114: Drop 0 13 0 0 ; line 22
+  115: Const 0 13 11 0 ; line 23 ; null
+  116: Store 0 9 13 0 ; line 23
+  117: Load 0 15 9 0 ; line 24
+  118: Const 0 16 11 0 ; line 24 ; null
+  119: Binary Identical 17 15 16 ; line 24
+  120: Branch 0 17 121 123 ; line 24
+  121: Move 0 13 16 0 ; line 24
+  122: Jump 0 130 0 0 ; line 24
+  123: InitMethod 0 15 5 0 ; line 24 ; name "m"
+  124: Call 0 16 1 0 ; line 24 ; f
+  125: Push result 16 0 0 ; line 24
+  126: Push auto 10 0 0 ; line 24
+  127: Checkpoint 0 0 0 0 ; line 24
+  128: CallPending 0 14 0 0 ; line 24
+  129: Move 0 13 14 0 ; line 24
+  130: Output 0 13 0 0 ; line 24
+  131: Const 0 13 5 0 ; line 25 ; string "m"
+  132: Store 0 11 13 0 ; line 25
+  133: Load 0 14 0 0 ; line 26
+  134: Load 0 15 11 0 ; line 26
+  135: InitMethod namereg 14 15 0 ; line 26 ; name r15
+  136: Push auto 6 0 0 ; line 26
+  137: Push auto 6 0 0 ; line 26
+  138: Checkpoint 0 0 0 0 ; line 26
+  139: CallPending 0 13 0 0 ; line 26
+  140: Drop 0 13 0 0 ; line 26
+  141: Const 0 13 12 0 ; line 27 ; string "f"
+  142: Store 0 12 13 0 ; line 27
+  143: Load 0 14 12 0 ; line 28
+  144: InitMethod callable 14 0 0 ; line 28
+  145: Call 0 15 1 0 ; line 28 ; f
+  146: Push result 15 0 0 ; line 28
+  147: Checkpoint 0 0 0 0 ; line 28
+  148: CallPending 0 13 0 0 ; line 28
+  149: Drop 0 13 0 0 ; line 28
+  150: Const 0 13 11 0 ; line 29 ; null
+  151: Return 0 13 0 0 ; line 29
+func 1 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
+  registers V
+  0: Const 0 0 2 0 ; line 9 ; int 1
+  1: Return 0 0 0 0 ; line 9
+  2: Const 0 0 11 0 ; line 9 ; null
+  3: Return 0 0 0 0 ; line 9
+func 2 "__construct" params=0 locals=1 registers=2 maxstack=0
+  param 0 "args" variadic
+  local 0 "args"
+  registers LV
+  0: Local 0 0 0 0 ; line 4
+  1: RecvVariadic 0 1 0 0 ; line 4
+  2: Bind value 0 1 0 ; line 4
+  3: Const 0 1 11 0 ; line 4 ; null
+  4: Return 0 1 0 0 ; line 4
+func 3 "m" params=2 locals=2 registers=5 maxstack=0
+  param 0 "x"
+  param 1 "y" byref
+  local 0 "x"
+  local 1 "y"
+  registers VVLLV
+  0: Local 0 2 0 0 ; line 5
+  1: Local 0 3 1 0 ; line 5
+  2: Store 0 2 0 0 ; line 5
+  3: Bind value 3 1 0 ; line 5
+  4: This 0 4 0 0 ; line 5
+  5: Return 0 4 0 0 ; line 5
+  6: Const 0 4 11 0 ; line 5 ; null
+  7: Return 0 4 0 0 ; line 5
+func 4 "s" params=1 locals=1 registers=4 maxstack=1 flags=nothis
+  param 0 "x"
+  local 0 "x"
+  registers VLVV
+  0: Local 0 1 0 0 ; line 6
+  1: Store 0 1 0 0 ; line 6
+  2: New static 2 0 6 ; line 6 ; class static, target 6
+  3: Checkpoint 0 0 0 0 ; line 6
+  4: CallPending 0 3 0 0 ; line 6
+  5: Drop 0 3 0 0 ; line 6
+  6: Return 0 2 0 0 ; line 6
+  7: Const 0 2 11 0 ; line 6 ; null
+  8: Return 0 2 0 0 ; line 6

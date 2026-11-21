@@ -181,15 +181,16 @@ func TestFormat11RejectsInvalidOperands(t *testing.T) {
 		"cast aux zero":                      {Op: OpCast, A: 3, B: 0},
 		"incdec aux zero":                    {Op: OpIncDec, A: 3, B: 2},
 		"binary aux zero":                    {Op: OpBinary, A: 3, B: 0, C: 0},
-		"unary aux high":                     {Op: OpUnary, Aux: uint16(BitNot) + 1, A: 3, B: 0},
-		"cast aux high":                      {Op: OpCast, Aux: uint16(CastArray) + 1, A: 3, B: 0},
-		"incdec aux high":                    {Op: OpIncDec, Aux: uint16(PostDec) + 1, A: 3, B: 2},
-		"binary aux high":                    {Op: OpBinary, Aux: uint16(BoolXor) + 1, A: 3, B: 0, C: 0},
-		"exit aux high":                      {Op: OpExit, Aux: 2, A: 0},
-		"load aux high":                      {Op: OpLoad, Aux: 2, A: 3, B: 2},
-		"array get aux 3":                    {Op: OpArrayGet, Aux: 3, A: 3, B: 1, C: 0},
-		"first unknown op":                   {Op: OpArrayAdd + 1},
-		"unknown op status":                  {Op: OpArrayAdd + 1, A: 0},
+		// Format 1.7 extends the unary operators to Increment and Decrement.
+		"unary aux high":    {Op: OpUnary, Aux: uint16(Decrement) + 1, A: 3, B: 0},
+		"cast aux high":     {Op: OpCast, Aux: uint16(CastObject) + 1, A: 3, B: 0},
+		"incdec aux high":   {Op: OpIncDec, Aux: uint16(PostDec) + 1, A: 3, B: 2},
+		"binary aux high":   {Op: OpBinary, Aux: uint16(BoolXor) + 1, A: 3, B: 0, C: 0},
+		"exit aux high":     {Op: OpExit, Aux: 2, A: 0},
+		"load aux high":     {Op: OpLoad, Aux: 2, A: 3, B: 2},
+		"array get aux 3":   {Op: OpArrayGet, Aux: 3, A: 3, B: 1, C: 0},
+		"first unknown op":  {Op: OpArrayAdd + 1},
+		"unknown op status": {Op: OpArrayAdd + 1, A: 0},
 	}
 	for name, in := range cases {
 		t.Run(name, func(t *testing.T) { requireBuildError(t, format11Image(in), ErrInvalid) })

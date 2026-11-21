@@ -16,7 +16,7 @@ const 3: string "k"
 const 4: int 2
 const 5: string "C"
 const 6: null
-func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0 flags=nothis
   registers VVV
   0: Const 0 0 0 0 ; line 2 ; int 1
   1: DeclareConst 0 0 1 0 ; line 2

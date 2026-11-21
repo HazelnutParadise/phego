@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -15,6 +16,11 @@ import (
 const (
 	vmPushRef  uint16 = 1 // a Location sent by reference (ZEND_SEND_REF)
 	vmPushLoad uint16 = 2 // a Location whose value is sent (ZEND_SEND_VAR)
+	// Format 1.7, for a callee found at run time.
+	vmPushAuto    uint16 = 3 // a Location sent as the callee declares (ZEND_SEND_VAR_EX)
+	vmPushTemp    uint16 = 4 // a Value no variable holds (ZEND_SEND_VAL_EX)
+	vmPushResult  uint16 = 5 // a call's result (ZEND_SEND_VAR_NO_REF_EX)
+	vmPushElement uint16 = 6 // the value of an element or a property
 )
 
 // vmPendingCall is a call InitCall started and CallPending has not made
@@ -29,6 +35,19 @@ type vmPendingCall struct {
 	// variadic parameter collects (extra_named_params): an array the call
 	// owns, or the zero value.
 	named value
+	// Format 1.7: the object (an owner), the lexical class and the called
+	// class of a method call. magic is the name of a method that __call or
+	// __callStatic receives, whose function is magicFn.
+	this          *object
+	scope, called *class
+	magic         string
+	magicFn       int
+	// ctor marks a constructor's call: when it does not complete, the
+	// object's destructor is never called (zend_object_store_ctor_failed).
+	ctor bool
+	// pass marks the call a class without a constructor gets for the
+	// arguments of new: they are evaluated and discarded.
+	pass bool
 }
 
 // vmCallInfo is what a frame entered by CallPending knows beyond a plain
@@ -57,6 +76,16 @@ func (f *vmFrame) passed(p uint32) bool {
 	return int(p) < f.nargs && (f.call == nil || !f.call.isOmitted(p))
 }
 
+// errNoFrame is callPending's report that the call needed no frame.
+var errNoFrame = errors.New("call made without a frame")
+
+// vmTraitStatic names the static variables of a trait method as used by
+// one class.
+type vmTraitStatic struct {
+	fn    int
+	scope *class
+}
+
 // --- global ---
 
 // bindGlobal is ZEND_BIND_GLOBAL: the variable A becomes a reference to
@@ -70,7 +99,15 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 	}
 	name := s.prog.consts[in.b].text
 	var src *value
-	if i, ok := s.prog.mainLocal[name]; ok {
+	if s.globalsKept {
+		// {main} ended: its variables are the execution's symbol table now
+		// (a destructor at request shutdown calls a function with global).
+		if src = s.keptGlobal(name); src == nil {
+			if src, err = s.globalVar(name); err != nil {
+				return err
+			}
+		}
+	} else if i, ok := s.prog.mainLocal[name]; ok {
 		src = &s.frames[0].locals[i]
 	} else if src, err = s.globalVar(name); err != nil {
 		return err
@@ -81,6 +118,25 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 		return nil
 	}
 	return s.h.bind(dst, src)
+}
+
+// keptGlobal is the global variable name in the symbol table keepGlobals
+// handed to the execution, created holding null when it is one of {main}'s
+// variables that is not there, or nil when {main} never names it.
+func (s *vmState) keptGlobal(name string) *value {
+	a := s.x.globals.array
+	key := arrayKey{isString: true, text: name}
+	if b, ok := a.lookup(key); ok {
+		return &b.val
+	}
+	if _, mine := s.prog.mainLocal[name]; !mine {
+		// Not one of {main}'s variables: the run's own global, which
+		// starts from the host's value when the host gave one.
+		return nil
+	}
+	a.insert(key, nullValue(), s.prog.width)
+	b, _ := a.lookup(key)
+	return &b.val
 }
 
 // globalVar is the global variable that is not one of {main}'s: created on
@@ -124,6 +180,18 @@ func (s *vmState) staticSlot(f *vmFrame, r uint32) (*value, error) {
 		return nil, s.unsupported("a static variable that is not a local")
 	}
 	fi := f.fn.index
+	if s.prog.fnTrait != nil && s.prog.fnTrait[fi] && f.scope != nil {
+		key := vmTraitStatic{fi, f.scope}
+		slots := s.traitStatics[key]
+		if slots == nil {
+			if s.traitStatics == nil {
+				s.traitStatics = map[vmTraitStatic][]value{}
+			}
+			slots = make([]value, f.fn.locals)
+			s.traitStatics[key] = slots
+		}
+		return &slots[l-1], nil
+	}
 	if s.statics == nil {
 		s.statics = make([][]value, len(s.prog.funcs))
 	}
@@ -189,9 +257,28 @@ func (s *vmState) recvVariadic(f *vmFrame, in *vmInstr) error {
 	// hand-written bytecode sent is read here, as a by-value parameter's
 	// Store reads its register.
 	byRef := f.fn.variadicByRef
+	typ := ""
+	if len(f.fn.paramTypes) > f.fn.params {
+		typ = f.fn.paramTypes[f.fn.params]
+	}
+	strict := false
+	if n := len(s.frames); n >= 2 && !f.boundary {
+		strict = s.frames[n-2].fn.strict
+	}
+	ms := methodSpec{owner: f.scope, name: f.fn.name, static: f.this == nil}
 	for i, v := range f.extra {
 		if !byRef {
 			v = v.deref()
+		}
+		if typ != "" && !vmTypeAccepts(typ, v.deref()) {
+			out, ok, err := s.h.coerceTypedValue(&ms, f.called, typ, v.deref(), strict)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				return s.argumentTypeError(f, f.fn.params+i, typ, v.deref())
+			}
+			v = out
 		}
 		if v.kind >= valueArray {
 			retain(v)
@@ -230,11 +317,19 @@ func (s *vmState) pendingCall() (*vmPendingCall, error) {
 func (s *vmState) dropCalls(depth int) error {
 	var first error
 	for n := len(s.calls); n > 0 && s.calls[n-1].depth >= depth; n = len(s.calls) {
-		named := s.calls[n-1].named
+		named, this := s.calls[n-1].named, s.calls[n-1].this
+		if s.calls[n-1].ctor && this != nil {
+			this.destructorCalled = true
+		}
 		s.calls[n-1] = vmPendingCall{}
 		s.calls = s.calls[:n-1]
 		if err := s.releaseValue(named); err != nil && first == nil {
 			first = err
+		}
+		if this != nil {
+			if err := s.releaseObject(this); err != nil && first == nil {
+				first = err
+			}
 		}
 	}
 	return first
@@ -340,7 +435,12 @@ func (s *vmState) sendNamed(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	v, err := s.pushValue(f, in)
+	var v value
+	if in.aux >= vmPushAuto {
+		v, err = s.sendByCallee(f, in, rec, index)
+	} else {
+		v, err = s.pushValue(f, in)
+	}
 	if err != nil {
 		return err
 	}
@@ -496,7 +596,7 @@ func (fn *vmFunction) paramIndex(name string) int {
 // parameter without a default throws in that frame, at the instruction
 // that receives the parameter; the other holes are filled by the callee's
 // prologue, which evaluates their defaults as for arguments not passed.
-func (s *vmState) callPending(in *vmInstr) error {
+func (s *vmState) callPending(in *vmInstr) (err error) {
 	if in.aux != 0 {
 		return s.unsupported("calls returning a location")
 	}
@@ -504,21 +604,53 @@ func (s *vmState) callPending(in *vmInstr) error {
 	if err != nil {
 		return err
 	}
+	if rec.pass {
+		f := s.frames[len(s.frames)-1]
+		err = s.dropArgs(len(s.args) - rec.base)
+		named, this := rec.named, rec.this
+		*rec = vmPendingCall{}
+		s.calls = s.calls[:len(s.calls)-1]
+		if rerr := s.releaseValue(named); err == nil {
+			err = rerr
+		}
+		if this != nil {
+			if rerr := s.releaseObject(this); err == nil {
+				err = rerr
+			}
+		}
+		if rerr := s.setReg(f.regs, in.a, nullValue()); err == nil {
+			err = rerr
+		}
+		if err == nil {
+			err = errNoFrame
+		}
+		return err
+	}
+	if rec.magic != "" {
+		if err := s.packMagic(rec); err != nil {
+			return err
+		}
+	}
 	fn := &s.prog.funcs[rec.fn]
 	argc := len(s.args) - rec.base
 	if argc < 0 {
 		return s.internal("pending call with %d arguments below its base", -argc)
 	}
-	info := &vmCallInfo{named: rec.named, holePC: -1}
+	// The call's extra knowledge stays on the stack unless the frame needs
+	// it: only omitted parameters or collected names make it escape.
+	var local vmCallInfo
+	local.named, local.holePC = rec.named, -1
+	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called, ctor: rec.ctor}
+	rec.this = nil
 	first, last := -1, -1
 	args := s.args[rec.base:]
 	for i := 0; i < argc && i < fn.params; i++ {
 		switch a := &args[i]; {
 		case a.kind == valueUndefined:
-			if info.omitted == nil {
-				info.omitted = make([]uint64, (fn.params+63)/64)
+			if local.omitted == nil {
+				local.omitted = make([]uint64, (fn.params+63)/64)
 			}
-			info.omitted[i/64] |= 1 << (i % 64)
+			local.omitted[i/64] |= 1 << (i % 64)
 			if first < 0 {
 				first = i
 			}
@@ -542,25 +674,33 @@ func (s *vmState) callPending(in *vmInstr) error {
 			missing, last = first, first
 		}
 		if last < len(fn.paramPC) {
-			info.holePC = fn.paramPC[last]
+			local.holePC = fn.paramPC[last]
 		}
 	}
-	if info.omitted == nil && info.named.kind != valueArray {
-		info = nil
+	var info *vmCallInfo
+	if local.omitted != nil || local.named.kind == valueArray {
+		kept := local
+		info = &kept
 	}
 	if missing >= 0 {
 		info.missing = true
 	}
 	s.entering = info
+	s.into = into
 	err = s.push(fn, argc, in.a)
 	s.entering = nil
+	if s.into.this != nil {
+		// push failed before it made the frame.
+		_ = s.releaseObject(s.into.this)
+	}
+	s.into = vmEnter{}
 	if err != nil {
 		return err
 	}
 	if missing < 0 {
 		return nil
 	}
-	callee := &s.frames[len(s.frames)-1]
+	callee := s.frames[len(s.frames)-1]
 	callee.unreceived = true
 	if pc := fn.paramPC[missing]; pc >= 0 {
 		callee.pc = int(pc)
@@ -569,7 +709,7 @@ func (s *vmState) callPending(in *vmInstr) error {
 	if missing < len(fn.paramNames) {
 		name = fn.paramNames[missing]
 	}
-	return &Throwable{"ArgumentCountError", fn.name + "(): Argument #" + strconv.Itoa(missing+1) + " ($" + name + ") not passed"}
+	return &Throwable{"ArgumentCountError", s.funcName(callee) + "(): Argument #" + strconv.Itoa(missing+1) + " ($" + name + ") not passed"}
 }
 
 // derefArguments gives the by-value parameters of fn the values of the

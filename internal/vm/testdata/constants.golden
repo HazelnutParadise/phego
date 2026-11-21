@@ -17,7 +17,7 @@ const 6: string "ns\\E_STRICT"
 const 7: string "ns\\UNDEF"
 const 8: string "UNDEF"
 const 9: null
-func 0 "{main}" params=0 locals=0 registers=3 maxstack=0
+func 0 "{main}" params=0 locals=0 registers=3 maxstack=0 flags=nothis
   registers VVV
   0: Const 0 0 0 0 ; line 3 ; int 1
   1: DeclareConst 0 0 1 0 ; line 3

@@ -1,0 +1,23 @@
+goos: darwin
+cpu: Apple M3
+BenchmarkW17Stage7/function_call-8         	      30	  17955440 ns/op	   10072 B/op	      46 allocs/op
+BenchmarkW17Stage7/function_call-8         	      30	  17749492 ns/op	   10068 B/op	      46 allocs/op
+BenchmarkW17Stage7/function_call-8         	      30	  17751933 ns/op	   10048 B/op	      46 allocs/op
+BenchmarkW17Stage7/method_call-8           	      30	  27934279 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/method_call-8           	      30	  27962301 ns/op	   14000 B/op	      87 allocs/op
+BenchmarkW17Stage7/method_call-8           	      30	  27961512 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/static_call-8           	      30	  22369649 ns/op	   12331 B/op	      71 allocs/op
+BenchmarkW17Stage7/static_call-8           	      30	  22330807 ns/op	   12328 B/op	      71 allocs/op
+BenchmarkW17Stage7/static_call-8           	      30	  22554025 ns/op	   12328 B/op	      71 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      30	  16702108 ns/op	   13468 B/op	      82 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      30	  16849864 ns/op	   13464 B/op	      82 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      30	  16910197 ns/op	   13464 B/op	      82 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      30	  35041100 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      30	  34462588 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      30	  34519581 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      30	  30085857 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      30	  29909560 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      30	  29951050 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      30	  71848397 ns/op	29615313 B/op	  300098 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      30	  71991769 ns/op	29615274 B/op	  300098 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      30	  71728907 ns/op	29615294 B/op	  300098 allocs/op

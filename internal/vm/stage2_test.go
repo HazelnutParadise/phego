@@ -516,20 +516,23 @@ func TestStage2Unsupported(t *testing.T) {
 		feature, src string
 		line         int
 	}{
-		{"property access", "echo 1;\nforeach ($a as [$x, $o->p]) {}", 3},
-		{"static property access", "echo 1;\nforeach ($a as $k => list(A::$s)) {}", 3},
-		{"property access", "echo 1;\nforeach ($a as $o->p) {}", 3},
-		{"property access", "echo 1;\nforeach ($a as\n $o->p[1]) {}", 4},
+		// Stage 7A compiles property targets; a variable variable target
+		// stays refused.
+		{"variable variables", "echo 1;\nforeach ($a as [$x, $$n]) {}", 3},
+		{"variable variables", "echo 1;\nforeach ($a as $k => list($$n)) {}", 3},
+		{"variable variables", "echo 1;\nforeach ($a as $$n) {}", 3},
+		{"variable variables", "echo 1;\nforeach ($a as\n $$n[1]) {}", 4},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0][1] = 1;", 4},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0] .= 1;", 4},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0]++;", 4},
-		{"property access", "echo 1;\nunset($o->p[1][2]);", 3},
-		{"property access", "echo 1;\n$o->p[1] ??= 2;", 3},
-		{"static property access", "echo 1;\nA::$b[1][2] = 3;", 3},
-		{"class constant", "echo 1;\nfunction f($a = 1,\n  $b = A::X) {}", 4},
-		{"class constant", "echo 1;\nfunction f($a = self::X) {}", 3},
-		{"typed parameter", "echo 1;\nfunction f(int $a = 1) {}", 3},
-		{"typed parameter", "echo 1;\nfunction f(int &...$a) {}", 3},
+		{"variable variables", "echo 1;\nunset($$n[1][2]);", 3},
+		{"??= on an element of a property with computed operands", "echo 1;\n$o->p[f()] ??= 2;", 3},
+		{"variable variables", "echo 1;\n$$n[1][2] = 3;", 3},
+		// Constant expressions that PHP 8.5 allows in a default.
+		{"closure", "echo 1;\nfunction f($a = 1,\n  $b = static function () {}) {}", 4},
+		{"first-class callable", "echo 1;\nfunction f($a = \\strlen(...)) {}", 3},
+		{"parameter attribute", "echo 1;\nfunction f(#[A] int $a = 1) {}", 3},
+		{"parameter attribute", "echo 1;\nfunction f(#[A] int &...$a) {}", 3},
 	} {
 		t.Run(tc.feature, func(t *testing.T) {
 			img, err := compileWidth(t, "<?php\n"+tc.src+"\n", 64, testFile)

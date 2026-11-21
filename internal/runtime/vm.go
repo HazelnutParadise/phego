@@ -200,6 +200,9 @@ func (s *vmState) result(res executionResult) RunResult {
 		}
 	case endFatal:
 		out.End, out.Err = Fatal, c.err
+		if c.err != nil {
+			out.Throwable = &ThrownError{Message: c.err.Error(), File: s.lastFile, Line: s.lastLine}
+		}
 	case endCancel:
 		out.End, out.Err = Cancelled, c.err
 	case endLimit:

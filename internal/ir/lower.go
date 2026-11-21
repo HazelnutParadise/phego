@@ -1106,6 +1106,9 @@ func (l *lowerer) functionBody(f *Func, params, ret, body *frontend.Node, uses *
 	defer func() { l.class = savedClass }()
 	f.Class = l.class
 	f.HasBody = body != nil
+	if body != nil {
+		f.EndLine = body.CloseLine
+	}
 	if ret != nil {
 		f.Return = l.typeOf(ret, false)
 		if f.Return.String == "void" && f.ByRef {

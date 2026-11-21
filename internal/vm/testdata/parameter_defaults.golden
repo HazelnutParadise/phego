@@ -29,7 +29,7 @@ const 11: string "b"
 const 12: string "c"
 const 13: string "d"
 const 14: string "e"
-func 0 "{main}" params=0 locals=0 registers=8 maxstack=6
+func 0 "{main}" params=0 locals=0 registers=8 maxstack=6 flags=nothis
   registers VVVVVVVV
   0: Const 0 1 0 0 ; line 11 ; string "f"
   1: Const 0 2 1 0 ; line 11 ; int 1
@@ -72,7 +72,12 @@ func 0 "{main}" params=0 locals=0 registers=8 maxstack=6
   38: Output 0 0 0 0 ; line 11
   39: Const 0 0 7 0 ; line 12 ; null
   40: Return 0 0 0 0 ; line 12
-func 1 "f" params=5 locals=5 registers=14 maxstack=0
+func 1 "f" params=5 locals=5 registers=14 maxstack=0 flags=nothis
+  param 0 "a"
+  param 1 "b" optional
+  param 2 "c" optional
+  param 3 "d" optional
+  param 4 "e" optional
   local 0 "a"
   local 1 "b"
   local 2 "c"
@@ -107,5 +112,5 @@ func 1 "f" params=5 locals=5 registers=14 maxstack=0
   25: Store 0 9 4 0 ; line 7
   26: Load 0 10 6 0 ; line 9
   27: Return 0 10 0 0 ; line 9
-  28: Const 0 10 7 0 ; line 9 ; null
-  29: Return 0 10 0 0 ; line 9
+  28: Const 0 10 7 0 ; line 10 ; null
+  29: Return 0 10 0 0 ; line 10

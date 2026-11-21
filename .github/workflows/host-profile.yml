@@ -103,8 +103,8 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Download and verify the official PHP 8.5.12 build
-        # Digest from https://windows.php.net/downloads/releases/sha256sum.txt, recorded while
-        # 8.5.12 was current. windows.php.net moves a superseded release to archives/.
+        # Digest from https://windows.php.net/downloads/releases/sha256sum.txt while 8.5.12 was current.
+        # A superseded release moves to releases/archives/, where it stays.
         run: |
           $ErrorActionPreference = 'Stop'
           $evidence = Join-Path $env:RUNNER_TEMP 'evidence'

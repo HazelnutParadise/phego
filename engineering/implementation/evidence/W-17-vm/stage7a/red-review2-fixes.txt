@@ -1,0 +1,526 @@
+=== fatal_review7b_b12_p01
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p01.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p01.php(4): C->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p01.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+call __construct
+EXIT 0
+=== fatal_review7b_b12_p03
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p03.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p03.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p03.php on line 2
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Call to undefined method A::__construct() in /w/fatal_review7b_b12_p03.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p03.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p03.php on line 2
+EXIT 255
+=== fatal_review7b_b12_p04
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p04.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p04.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p04.php on line 2
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Call to undefined method A::__construct() in /w/fatal_review7b_b12_p04.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p04.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p04.php on line 2
+EXIT 255
+=== fatal_review7b_b12_p05
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p05.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p05.php(4): C::f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p05.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+cs __construct
+EXIT 0
+=== fatal_review7b_b12_p07
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to undefined method P::__construct() in /w/fatal_review7b_b12_p07.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p07.php(4): C->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p07.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p07.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p07.php(4): C->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p07.php on line 3
+EXIT 255
+=== fatal_review7b_b12_p09
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/fatal_review7b_b12_p09.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p09.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p09.php on line 2
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Call to undefined method A::__construct() in /w/fatal_review7b_b12_p09.php:2
+Stack trace:
+#0 /w/fatal_review7b_b12_p09.php(3): A->f()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p09.php on line 2
+EXIT 255
+=== fatal_review7b_b12_p10
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call private A::__construct() in /w/fatal_review7b_b12_p10.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p10.php(4): B->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p10.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Call to private method A::__construct() from scope B in /w/fatal_review7b_b12_p10.php:3
+Stack trace:
+#0 /w/fatal_review7b_b12_p10.php(4): B->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b12_p10.php on line 3
+EXIT 255
+=== fatal_review7b_b13_t16
+--- PHP 8.5.12
+
+Fatal error: Cannot make static method T::m() non static in class C in /w/fatal_review7b_b13_t16.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m() must be compatible with T::m() in /w/fatal_review7b_b13_t16.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+=== fatal_review7b_b13_t17
+--- PHP 8.5.12
+
+Fatal error: Cannot make non static method T::m() static in class C in /w/fatal_review7b_b13_t17.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m() must be compatible with T::m() in /w/fatal_review7b_b13_t17.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+=== fatal_review7b_b14_h07
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot indirectly modify readonly property A::$i in /w/fatal_review7b_b14_h07.php:2
+Stack trace:
+#0 /w/fatal_review7b_b14_h07.php(3): A->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b14_h07.php on line 2
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/fatal_review7b_b14_h07.php:2
+Stack trace:
+#0 /w/fatal_review7b_b14_h07.php(3): A->__construct()
+#1 {main}
+  thrown in /w/fatal_review7b_b14_h07.php on line 2
+EXIT 255
+=== fatal_review7b_b1_a01
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$p of type int|false in /w/fatal_review7b_b1_a01.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a01.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/fatal_review7b_b1_a01.php on line 4
+obj
+EXIT 0
+=== fatal_review7b_b1_a02
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$p of type bool in /w/fatal_review7b_b1_a02.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a02.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Deprecated: Automatic conversion of false to array is deprecated in /w/fatal_review7b_b1_a02.php on line 4
+EXIT 0
+=== fatal_review7b_b1_a04
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Typed property A::$i must not be accessed before initialization in /w/fatal_review7b_b1_a04.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a04.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type int in /w/fatal_review7b_b1_a04.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a04.php on line 4
+EXIT 255
+=== fatal_review7b_b1_a08
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Typed static property A::$s must not be accessed before initialization in /w/fatal_review7b_b1_a08.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a08.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$s of type int in /w/fatal_review7b_b1_a08.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_a08.php on line 4
+EXIT 255
+=== fatal_review7b_b1_r10
+--- PHP 8.5.12
+int(3)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/fatal_review7b_b1_r10.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_r10.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/fatal_review7b_b1_r10.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_r10.php on line 4
+EXIT 255
+=== fatal_review7b_b1_r12
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Attempt to modify property "i" on null in /w/fatal_review7b_b1_r12.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_r12.php on line 4
+EXIT 255
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Attempt to assign property "i" on null in /w/fatal_review7b_b1_r12.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b1_r12.php on line 4
+EXIT 255
+=== fatal_review7b_b6_n01
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n01.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b6_n01.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+dtor
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n01.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/fatal_review7b_b6_n01.php on line 3
+EXIT 255
+=== fatal_review7b_b6_n02
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n02.php:3
+Stack trace:
+#0 /w/fatal_review7b_b6_n02.php(4): f()
+#1 {main}
+  thrown in /w/fatal_review7b_b6_n02.php on line 3
+EXIT 255
+--- Phego before the fix (f97a4d7)
+dtor
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n02.php:3
+Stack trace:
+#0 /w/fatal_review7b_b6_n02.php(4): f()
+#1 {main}
+  thrown in /w/fatal_review7b_b6_n02.php on line 3
+EXIT 255
+=== fatal_review7b_b6_n03
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n03.php:3
+Stack trace:
+#0 /w/fatal_review7b_b6_n03.php(4): f(Array)
+#1 {main}
+  thrown in /w/fatal_review7b_b6_n03.php on line 3
+D
+EXIT 255
+--- Phego before the fix (f97a4d7)
+D
+
+Fatal error: Uncaught Error: Call to undefined function nope() in /w/fatal_review7b_b6_n03.php:3
+Stack trace:
+#0 /w/fatal_review7b_b6_n03.php(4): f(Array)
+#1 {main}
+  thrown in /w/fatal_review7b_b6_n03.php on line 3
+EXIT 255
+=== review7b_b10_v05
+--- PHP 8.5.12
+setn
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Cannot modify protected(set) property B::$p from scope C in /w/review7b_b10_v05.php:4
+Stack trace:
+#0 /w/review7b_b10_v05.php(5): C->set(Object(B))
+#1 {main}
+  thrown in /w/review7b_b10_v05.php on line 4
+EXIT 255
+=== review7b_b10_v11
+--- PHP 8.5.12
+Ry
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Cannot indirectly modify protected(set) property B::$p from scope C in /w/review7b_b10_v11.php:4
+Stack trace:
+#0 /w/review7b_b10_v11.php(5): C->get(Object(B))
+#1 {main}
+  thrown in /w/review7b_b10_v11.php on line 4
+EXIT 255
+=== review7b_b10_v13
+--- PHP 8.5.12
+3
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught Error: Cannot modify protected(set) property B::$p from scope C in /w/review7b_b10_v13.php:4
+Stack trace:
+#0 /w/review7b_b10_v13.php(5): C->get(Object(B))
+#1 {main}
+  thrown in /w/review7b_b10_v13.php on line 4
+EXIT 255
+=== review7b_b11_k18
+--- PHP 8.5.12
+1
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Class B inherits both A::X and I::X, which is ambiguous in /w/review7b_b11_k18.php on line 4
+Stack trace:
+#0 {main}
+EXIT 255
+=== review7b_b13_t20
+--- PHP 8.5.12
+ok
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m(C $a) must be compatible with T::m(self $a) in /w/review7b_b13_t20.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+=== review7b_b14_h02
+--- PHP 8.5.12
+get i
+
+Notice: Indirect modification of overloaded property A::$i has no effect in /w/review7b_b14_h02.php on line 3
+end
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/review7b_b14_h02.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b14_h02.php on line 3
+EXIT 255
+=== review7b_b15_i02
+--- PHP 8.5.12
+nee
+EXIT 0
+--- Phego before the fix (f97a4d7)
+ne
+Fatal error: Uncaught Error: Using $this when not in object context in /w/review7b_b15_i02.php:2
+Stack trace:
+#0 /w/review7b_b15_i02.php(3): A::g()
+#1 {main}
+  thrown in /w/review7b_b15_i02.php on line 2
+EXIT 255
+=== review7b_b17_y02
+--- PHP 8.5.12
+ok
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m(): C must be compatible with T::m(): self in /w/review7b_b17_y02.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+=== review7b_b17_y03
+--- PHP 8.5.12
+ok
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m(C $x): C must be compatible with T::m(self $x): self in /w/review7b_b17_y03.php on line 3
+Stack trace:
+#0 {main}
+EXIT 255
+=== review7b_b17_y08
+--- PHP 8.5.12
+ok
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Declaration of C::m(P $x) must be compatible with T::m(parent $x) in /w/review7b_b17_y08.php on line 4
+Stack trace:
+#0 {main}
+EXIT 255
+=== review7b_b1_a05
+--- PHP 8.5.12
+
+Warning: Undefined array key 0 in /w/review7b_b1_a05.php on line 4
+obj
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/review7b_b1_a05.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b1_a05.php on line 4
+EXIT 255
+=== review7b_b1_a06
+--- PHP 8.5.12
+
+Warning: Undefined array key 0 in /w/review7b_b1_a06.php on line 4
+obj
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/review7b_b1_a06.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b1_a06.php on line 4
+EXIT 255
+=== review7b_b1_a07
+--- PHP 8.5.12
+
+Warning: Undefined array key 0 in /w/review7b_b1_a07.php on line 4
+array
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$s of type ?int in /w/review7b_b1_a07.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b1_a07.php on line 4
+EXIT 255
+=== review7b_b2_s01
+--- PHP 8.5.12
+int(1)
+int(3)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+int(1)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/review7b_b2_s01.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b2_s01.php on line 4
+EXIT 255
+=== review7b_b2_s04
+--- PHP 8.5.12
+
+Warning: Undefined array key 0 in /w/review7b_b2_s04.php on line 4
+array
+int(5)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/review7b_b2_s04.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b2_s04.php on line 4
+EXIT 255
+=== review7b_b2_s08
+--- PHP 8.5.12
+int(2)
+int(6)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+int(2)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$s of type int in /w/review7b_b2_s08.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b2_s08.php on line 4
+EXIT 255
+=== review7b_b2_s13
+--- PHP 8.5.12
+string(9.2233720368548E+18)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot increment property A::$i of type string|int past its maximal value in /w/review7b_b2_s13.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b2_s13.php on line 4
+EXIT 255
+=== review7b_b3_t01
+--- PHP 8.5.12
+int(3)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/review7b_b3_t01.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b3_t01.php on line 4
+EXIT 255
+=== review7b_b3_t01b
+--- PHP 8.5.12
+int(3)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/review7b_b3_t01b.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b3_t01b.php on line 4
+EXIT 255
+=== review7b_b4_u01
+--- PHP 8.5.12
+int(3)
+EXIT 0
+--- Phego before the fix (f97a4d7)
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/review7b_b4_u01.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/review7b_b4_u01.php on line 5
+EXIT 255

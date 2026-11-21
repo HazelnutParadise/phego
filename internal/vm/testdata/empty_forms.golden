@@ -16,7 +16,7 @@ const 5: int 1
 const 6: null
 const 7: string "a"
 const 8: string "u"
-func 0 "{main}" params=0 locals=2 registers=7 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=7 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "u"
   registers LLVVVVV
@@ -57,7 +57,7 @@ func 0 "{main}" params=0 locals=2 registers=7 maxstack=0
   34: Output 0 2 0 0 ; line 3
   35: Const 0 2 6 0 ; line 5 ; null
   36: Return 0 2 0 0 ; line 5
-func 1 "f" params=0 locals=0 registers=1 maxstack=0
+func 1 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 2 0 ; line 4 ; int 0
   1: Return 0 0 0 0 ; line 4

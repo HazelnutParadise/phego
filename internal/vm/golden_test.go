@@ -66,6 +66,38 @@ var goldenPrograms = []struct{ name, src string }{
 	{"match_forms", "<?php\necho match ($x) { 1, 2 => 'a', 3 => 'b', default => 'c' };\necho match ($x) { 1 => 'a', $y => 'b' };\necho match (true) { $x > 1 => 'big', default => 'small' };\necho match (f()) {};\nfunction f() { return 1; }\n"},
 	{"empty_forms", "<?php\n$a = ['k' => ['j' => 0]];\necho empty($u), empty($a['k']['j']), empty($a['k']['x']['y']), empty(f()), empty(1 + 1);\nfunction f() { return 0; }\n"},
 	{"silence", "<?php\necho @$u, @$a['k'], @(1 + $v), @f();\n@$w;\n$r = @$x++;\nfunction f() { return @$y; }\n"},
+	// Stage 7A: classes and objects.
+	{"class_hierarchy", "<?php\ninterface Shape {\n    const SIDES = 0;\n    public function area(): float;\n}\n" +
+		"trait Named {\n    public function name() { return 'named'; }\n    public function hello() { return 'hi'; }\n}\n" +
+		"trait Greets {\n    public function hello() { return 'hello'; }\n}\n" +
+		"abstract class Base implements Shape {\n    use Named, Greets {\n        Greets::hello insteadof Named;\n        Named::hello as protected namedHello;\n        name as label;\n    }\n" +
+		"    const LIMIT = 10, DOUBLE = self::LIMIT * 2;\n    protected static int $count = 0;\n    public ?string $tag = null;\n" +
+		"    public array $list = [1, 2];\n    private readonly int $id;\n    public float $ratio = 1 / 3;\n" +
+		"    abstract protected function kind(): string;\n}\n" +
+		"final class Square extends Base {\n    public function __construct(private float $side = 1.0) {}\n" +
+		"    public function area(): float { return $this->side ** 2; }\n    protected function kind(): string { return 'square'; }\n}\n" +
+		"echo (new Square(2.0))->area(), Square::DOUBLE, Base::class;\n"},
+	{"object_calls", "<?php\nclass A {\n    public $p = 1;\n    public function __construct(...$args) {}\n" +
+		"    public function m($x, &$y) { return $this; }\n    public static function s($x) { return new static; }\n}\n" +
+		"class B {}\nfunction f() { return 1; }\n" +
+		"$a = new A;\n$b = new B();\n$c = new B(f());\n$d = new A($a, f(), 1 + 2);\n$name = 'A';\n$e = new $name($a);\n" +
+		"$v = 1;\n$a->m($v, $v);\n$a->m(f(), $w);\n$a->m($v + 1, $a->p);\nA::s($v);\nA::s(f());\n" +
+		"$a?->m($v, $v)?->m(1, $z);\n$n = null;\necho $n?->m(f(), $q);\n$meth = 'm';\n$a->$meth($v, $v);\n" +
+		"$call = 'f';\n$call(f());\n"},
+	{"property_writes", "<?php\nclass C {\n    public $p;\n    public $a;\n    public $arr = [];\n    public static $s;\n    public static $t = [];\n}\n" +
+		"$o = new C;\n$o->p = 1;\n$o->a = new C;\n$o->a->p = 2;\n$o->arr[1] = 3;\n$o->arr[] = 4;\n$list = [new C];\n$list[0]->p = 5;\n" +
+		"C::$s = 6;\nC::$t['k'] = 7;\n$o->p += 8;\n$o->arr[1] .= 'x';\n$o->p++;\n--$o->a->p;\n$o->p ??= 9;\n" +
+		"unset($o->p, $o->arr[1]);\necho isset($o->p), isset($o->a->p), empty($o->arr), isset(C::$s), empty(C::$t['k']);\n" +
+		"$r = &$o->p;\n$x = 10;\n$o->p = &$x;\nforeach ($o->arr as &$item) {\n    $item++;\n}\n"},
+	{"typed_functions", "<?php\ndeclare(strict_types=1);\n" +
+		"function value(int $a, ?string $b = null, int|float ...$rest): int {\n    return $a;\n}\n" +
+		"function none(): void {\n    return;\n}\nfunction nothing(): void {\n}\n" +
+		"function stop(): never {\n    exit(1);\n}\n" +
+		"function maybe(?int $x): ?int {\n    if ($x) {\n        return $x;\n    }\n    return null;\n}\n" +
+		"function byRef(array &$a): array {\n    return $a;\n}\n" +
+		"class P {\n    public function __construct(public int $x = 0, protected readonly ?string $y = null) {}\n" +
+		"    public function get(): static {\n        return $this;\n    }\n}\n" +
+		"echo value(1), maybe(2), (new P(1))->get()->x;\n"},
 }
 
 func TestGoldenDisassembly(t *testing.T) {

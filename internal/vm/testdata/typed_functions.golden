@@ -1,0 +1,186 @@
+-- source --
+<?php
+declare(strict_types=1);
+function value(int $a, ?string $b = null, int|float ...$rest): int {
+    return $a;
+}
+function none(): void {
+    return;
+}
+function nothing(): void {
+}
+function stop(): never {
+    exit(1);
+}
+function maybe(?int $x): ?int {
+    if ($x) {
+        return $x;
+    }
+    return null;
+}
+function byRef(array &$a): array {
+    return $a;
+}
+class P {
+    public function __construct(public int $x = 0, protected readonly ?string $y = null) {}
+    public function get(): static {
+        return $this;
+    }
+}
+echo value(1), maybe(2), (new P(1))->get()->x;
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=581 lines=30
+const 0: string "P"
+const 1: string "x"
+const 2: string "int"
+const 3: string "y"
+const 4: string "?string"
+const 5: string "__construct"
+const 6: string "P::__construct(int $x = 0, ?string $y = null)"
+const 7: string "get"
+const 8: string "P::get(): static"
+const 9: string "value"
+const 10: int 1
+const 11: int 2
+const 12: null
+const 13: string "a"
+const 14: string "b"
+const 15: string "rest"
+const 16: string "int|float"
+const 17: string "void"
+const 18: string "never"
+const 19: string "?int"
+const 20: string "array"
+const 21: int 0
+const 22: string "static"
+class 0 "P" line=23 flags=hoisted
+  prop "x" public type "int"
+  prop "y" protected+readonly type "?string"
+  method "__construct" public func 7 "__construct" signature "P::__construct(int $x = 0, ?string $y = null)" ; line 24
+  method "get" public func 8 "get" signature "P::get(): static" ; line 25
+func 0 "{main}" params=0 locals=0 registers=4 maxstack=2 flags=strict+nothis
+  registers VVVV
+  0: Const 0 1 9 0 ; line 29 ; string "value"
+  1: Const 0 2 10 0 ; line 29 ; int 1
+  2: Push 0 2 0 0 ; line 29
+  3: CallValue 0 0 1 1 ; line 29
+  4: Output 0 0 0 0 ; line 29
+  5: Const 0 1 11 0 ; line 29 ; int 2
+  6: Push 0 1 0 0 ; line 29
+  7: Call 0 0 5 1 ; line 29 ; maybe
+  8: Output 0 0 0 0 ; line 29
+  9: New args 1 0 15 ; line 29 ; class "P", target 15
+  10: Const 0 3 10 0 ; line 29 ; int 1
+  11: Push temp 3 0 0 ; line 29
+  12: Checkpoint 0 0 0 0 ; line 29
+  13: CallPending 0 2 0 0 ; line 29
+  14: Drop 0 2 0 0 ; line 29
+  15: InitMethod 0 1 7 0 ; line 29 ; name "get"
+  16: Checkpoint 0 0 0 0 ; line 29
+  17: CallPending 0 0 0 0 ; line 29
+  18: PropGet 0 1 0 1 ; line 29 ; name "x"
+  19: Output 0 1 0 0 ; line 29
+  20: Const 0 0 12 0 ; line 30 ; null
+  21: Return 0 0 0 0 ; line 30
+func 1 "value" params=2 locals=3 registers=6 maxstack=0 flags=strict+nothis returns "int"
+  param 0 "a" type "int"
+  param 1 "b" optional type "?string"
+  param 2 "rest" variadic type "int|float"
+  local 0 "a"
+  local 1 "b"
+  local 2 "rest"
+  registers VVLLLV
+  0: Local 0 2 0 0 ; line 3
+  1: Local 0 3 1 0 ; line 3
+  2: Local 0 4 2 0 ; line 3
+  3: Store 0 2 0 0 ; line 3
+  4: ParamDefault 0 1 6 0 ; line 3
+  5: Const 0 1 12 0 ; line 3 ; null
+  6: Store 0 3 1 0 ; line 3
+  7: RecvVariadic 0 5 0 0 ; line 3
+  8: Bind value 4 5 0 ; line 3
+  9: Load 0 5 2 0 ; line 4
+  10: VerifyReturn value 5 0 0 ; line 4
+  11: Return 0 5 0 0 ; line 4
+  12: Const 0 5 12 0 ; line 5 ; null
+  13: VerifyReturn none 5 0 0 ; line 5
+  14: Return 0 5 0 0 ; line 5
+func 2 "none" params=0 locals=0 registers=1 maxstack=0 flags=strict+nothis returns "void"
+  registers V
+  0: Const 0 0 12 0 ; line 7 ; null
+  1: Return 0 0 0 0 ; line 7
+  2: Const 0 0 12 0 ; line 8 ; null
+  3: Return 0 0 0 0 ; line 8
+func 3 "nothing" params=0 locals=0 registers=1 maxstack=0 flags=strict+nothis returns "void"
+  registers V
+  0: Const 0 0 12 0 ; line 10 ; null
+  1: Return 0 0 0 0 ; line 10
+func 4 "stop" params=0 locals=0 registers=2 maxstack=0 flags=strict+nothis returns "never"
+  registers VV
+  0: Const 0 0 10 0 ; line 12 ; int 1
+  1: Exit 1 0 0 0 ; line 12
+  2: Const 0 0 12 0 ; line 13 ; null
+  3: VerifyReturn never 0 0 0 ; line 13
+  4: Return 0 0 0 0 ; line 13
+func 5 "maybe" params=1 locals=1 registers=3 maxstack=0 flags=strict+nothis returns "?int"
+  param 0 "x" type "?int"
+  local 0 "x"
+  registers VLV
+  0: Local 0 1 0 0 ; line 14
+  1: Store 0 1 0 0 ; line 14
+  2: Load 0 2 1 0 ; line 15
+  3: Branch 0 2 4 8 ; line 15
+  4: Load 0 2 1 0 ; line 16
+  5: VerifyReturn value 2 0 0 ; line 16
+  6: Return 0 2 0 0 ; line 16
+  7: Jump 0 8 0 0 ; line 16
+  8: Const 0 2 12 0 ; line 18 ; null
+  9: VerifyReturn value 2 0 0 ; line 18
+  10: Return 0 2 0 0 ; line 18
+  11: Const 0 2 12 0 ; line 19 ; null
+  12: VerifyReturn none 2 0 0 ; line 19
+  13: Return 0 2 0 0 ; line 19
+func 6 "byRef" params=1 locals=1 registers=3 maxstack=0 flags=strict+nothis returns "array"
+  param 0 "a" byref type "array"
+  local 0 "a"
+  registers VLV
+  0: Local 0 1 0 0 ; line 20
+  1: Bind value 1 0 0 ; line 20
+  2: Load 0 2 1 0 ; line 21
+  3: VerifyReturn value 2 0 0 ; line 21
+  4: Return 0 2 0 0 ; line 21
+  5: Const 0 2 12 0 ; line 22 ; null
+  6: VerifyReturn none 2 0 0 ; line 22
+  7: Return 0 2 0 0 ; line 22
+func 7 "__construct" params=2 locals=2 registers=6 maxstack=0 flags=strict
+  param 0 "x" optional type "int"
+  param 1 "y" optional type "?string"
+  local 0 "x"
+  local 1 "y"
+  registers VVLLVV
+  0: Local 0 2 0 0 ; line 24
+  1: Local 0 3 1 0 ; line 24
+  2: ParamDefault 0 0 4 0 ; line 24
+  3: Const 0 0 21 0 ; line 24 ; int 0
+  4: Store 0 2 0 0 ; line 24
+  5: ParamDefault 0 1 7 0 ; line 24
+  6: Const 0 1 12 0 ; line 24 ; null
+  7: Store 0 3 1 0 ; line 24
+  8: This 0 4 0 0 ; line 24
+  9: Load 0 5 2 0 ; line 24
+  10: PropSet 0 4 1 5 ; line 24 ; name "x"
+  11: This 0 4 0 0 ; line 24
+  12: Load 0 5 3 0 ; line 24
+  13: PropSet 0 4 3 5 ; line 24 ; name "y"
+  14: Const 0 4 12 0 ; line 24 ; null
+  15: Return 0 4 0 0 ; line 24
+func 8 "get" params=0 locals=0 registers=1 maxstack=0 flags=strict returns "static"
+  registers V
+  0: This 0 0 0 0 ; line 26
+  1: VerifyReturn value 0 0 0 ; line 26
+  2: Return 0 0 0 0 ; line 26
+  3: Const 0 0 12 0 ; line 27 ; null
+  4: VerifyReturn none 0 0 0 ; line 27
+  5: Return 0 0 0 0 ; line 27

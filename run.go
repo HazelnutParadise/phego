@@ -193,10 +193,15 @@ func (e *Engine) result(ctx context.Context, res runtime.RunResult) (*Result, er
 			err = internalError("an uncaught throwable without a description", res.Err)
 		}
 	case runtime.Fatal:
-		// PHPErrorKind has no kind for a run-time fatal error yet and stage
-		// 1 raises none, so reaching one is an engine fault; it is never
-		// reported as success.
-		err = internalError("running the program (a PHP fatal error without a reportable kind)", res.Err)
+		// A fatal error raised while a class is declared at run time
+		// (E_COMPILE_ERROR or E_ERROR from linking it). PHPErrorKind has no
+		// kind of its own for it yet; CompileError is the closest one and
+		// says what PHP was doing.
+		if t := res.Throwable; t != nil {
+			err = &PHPError{Kind: CompileError, Message: t.Message, File: t.File, Line: t.Line}
+		} else {
+			err = internalError("running the program (a PHP fatal error without a description)", res.Err)
+		}
 	case runtime.Cancelled:
 		r.Status, err = StatusCancelled, res.Err
 		if errors.Is(context.Cause(ctx), errClosedDuringWork) {

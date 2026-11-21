@@ -367,8 +367,24 @@ func (w *writer) payload(i Image, minor uint16) error {
 				if err := w.u8(uint8(p.Flags)); err != nil {
 					return err
 				}
+				if minor >= 7 {
+					if err := w.u32(p.Type); err != nil {
+						return err
+					}
+				}
 			}
 		}
+		if minor >= 7 {
+			if err := w.u8(uint8(f.Flags)); err != nil {
+				return err
+			}
+			if err := w.u32(f.ReturnType); err != nil {
+				return err
+			}
+		}
+	}
+	if minor >= 7 {
+		return w.classes(i.Classes)
 	}
 	return nil
 }
@@ -752,7 +768,8 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 			if maxParams < ^uint32(0) {
 				maxParams++
 			}
-			np, ee := r.count(parameterWire, maxParams)
+			wireSize := parameterWireSize(minor)
+			np, ee := r.count(wireSize, maxParams)
 			if ee != nil {
 				return Image{}, ee
 			}
@@ -762,13 +779,28 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 				}
 				f.Parameters = make([]Parameter, int(np))
 				for j := range f.Parameters {
-					p, ee := r.take(parameterWire)
+					p, ee := r.take(wireSize)
 					if ee != nil {
 						return Image{}, ee
 					}
 					f.Parameters[j] = Parameter{Name: binary.LittleEndian.Uint32(p), Flags: ParameterFlags(p[4])}
+					if minor >= 7 {
+						f.Parameters[j].Type = binary.LittleEndian.Uint32(p[5:])
+					}
 				}
 			}
+		}
+		if minor >= 7 {
+			p, ee := r.take(5)
+			if ee != nil {
+				return Image{}, ee
+			}
+			f.Flags, f.ReturnType = FunctionFlags(p[0]), binary.LittleEndian.Uint32(p[1:])
+		}
+	}
+	if minor >= 7 {
+		if i.Classes, err = r.classes(b); err != nil {
+			return Image{}, err
 		}
 	}
 	if r.pos != len(data) {
@@ -778,7 +810,15 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 	return i, nil
 }
 
-// parameterWire is the encoded size of one Parameter: Name:u32, Flags:u8.
+// parameterWire is the encoded size of one Parameter up to format 1.6:
+// Name:u32, Flags:u8. Format 1.7 adds Type:u32.
 const parameterWire = 5
+
+func parameterWireSize(minor uint16) uint64 {
+	if minor >= 7 {
+		return parameterWire + 4
+	}
+	return parameterWire
+}
 
 func readRequired(r *reader) (CapabilitySet, error) { v, e := r.u16(); return CapabilitySet(v), e }
