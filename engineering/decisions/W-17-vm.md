@@ -248,9 +248,9 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 | 屬性讀寫 | 每條指令一個當次執行的 inline cache：記下物件的類別、所在範圍與屬性的位置。命中時直接讀寫宣告屬性的位置，條件不符就走 W-13 的完整操作 | `$o->n = $o->n + 1` 的迴圈每圈由約 428 ns 降到約 186 ns |
 | 方法查找 | 同一個 cache 記下解析到的方法 | 省掉每次呼叫的名稱轉小寫與查表 |
 | 呼叫的附帶資料 | 只有具名引數或略過的參數才配置 | 方法呼叫由每次 96 B、1 次配置降到 0 |
-| frame | 逐欄位寫入、指標沒變就不寫 | 整個結構一次指定會經過 GC 的 bulk write barrier，`fib` 比 main 慢 10.6%。改完後慢 3.2%，審查後的修正再量一次是快 2.4% |
+| frame | 逐欄位寫入、指標沒變就不寫 | 整個結構一次指定會經過 GC 的 bulk write barrier，`fib` 比 main 慢 10.6%。改完後慢 3.2%，兩次審查的修正後再量是快 2.0% |
 
-cache 只存當次執行的類別描述指標與位置編號，不存值，也不放進 `Program`。分派迴圈多了二十個 case。和 main（1374780）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，審查修正後的最後一輪，五個工作量都比 main 快：算術 16.6%、分支 13.2%、陣列 7.7%、遞迴的 `fib` 2.4%、字串 2.3%，6 輪的範圍不重疊。原始輸出在 [stage7a/bench-main.txt](../implementation/evidence/W-17-vm/stage7a/bench-main.txt)、[stage7a/bench-stage7a.txt](../implementation/evidence/W-17-vm/stage7a/bench-stage7a.txt) 與 [stage7a/bench-objects.txt](../implementation/evidence/W-17-vm/stage7a/bench-objects.txt)。
+cache 只存當次執行的類別描述指標與位置編號，不存值，也不放進 `Program`。分派迴圈多了二十個 case。和 main（1374780）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，兩次審查修正後的最後一輪，五個工作量都比 main 快：算術 16.4%、分支 13.2%、陣列 7.9%、字串 2.5%、遞迴的 `fib` 2.0%，6 輪的範圍不重疊。原始輸出在 [stage7a/bench-main.txt](../implementation/evidence/W-17-vm/stage7a/bench-main.txt)、[stage7a/bench-stage7a.txt](../implementation/evidence/W-17-vm/stage7a/bench-stage7a.txt) 與 [stage7a/bench-objects.txt](../implementation/evidence/W-17-vm/stage7a/bench-objects.txt)。
 
 ### 修在 W-13 與 lowering 的地方
 
