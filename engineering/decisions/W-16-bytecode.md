@@ -41,13 +41,13 @@ Program 僅保存不可變的編譯資料。暫存器、local、引數、pending
 |---|---|---|
 | 0 | 8 | `PHEGOBC` 加 NUL |
 | 8 | 2 | major，版本 1 |
-| 10 | 2 | minor，`Encode` 寫入 7，`Load` 接受 0 到 7 |
+| 10 | 2 | minor，`Encode` 寫入 8，`Load` 接受 0 到 8 |
 | 12 | 4 | 表頭大小，必須為 64 |
 | 16 | 8 | 整份檔案長度，必須與輸入完全相等 |
 | 24 | 32 | SHA-256，計算 `data[:24]` 接 `data[56:]` |
 | 56 | 8 | features，目前必須為零 |
 
-所有整數均採 little-endian。解析器拒絕不同 major、大於 7 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
+所有整數均採 little-endian。解析器拒絕不同 major、大於 8 的 minor、未知旗標、截斷及尾端多出的 bytes。內嵌摘要包含 features；只有摘要欄位本身不參與計算。載入器不嘗試猜測舊版或自動轉換。
 
 ## Payload 的區段順序
 
@@ -220,6 +220,8 @@ SendUnpack 只接受陣列（參照先解開）：整數 key 的元素依序成�
 
 CallPending 取出最內層開始的呼叫，以堆疊上屬於它的引數進入函式。留有空位的參數（具名引數跳過的）若有預設值，由被呼叫函式的 ParamDefault 當成沒傳來求值並照樣進入預設值快取。沒有預設值時在被呼叫函式的 frame 內、接收該參數的指令位置拋出 `ArgumentCountError: f(): Argument #N ($name) not passed`。編譯器在 CallPending 前面放一條 Checkpoint，帶最後一個引數的行號（PHP 的 ZEND_CHECK_UNDEF_ARGS 在那一行）。被呼叫函式還在填空位時，backtrace 用那一行當呼叫位置。
 
+格式 1.8 由 W-17 第七階段 B 加入，用來表達 closure、箭頭函式與 first-class callable。新增四個指令，編號接在 VerifyReturn 之後：Closure=76、BindLexical=77、CallableConvert=78、ArgByRef=79。另外新增 Return 的 Aux 1（ReturnNotice），函式 Flags 的 bit 2 FuncClosure 與 bit 3 FuncUsesThis。payload 多一張表：每個函式在 Flags 與 ReturnType 後面接捕捉清單，先是筆數，每筆是 Local（u32）與 Flags（u8）。`Encode` 一律寫入 minor 8。minor 0 到 7 的檔案照樣能載入，出現上述任一項時，`Load` 以 `ErrInvalid` 拒絕並指出需要 1.8，以及檔案宣告的是哪一版。
+
 ### 格式 1.7 的類別表
 
 類別表和函式表一樣是唯讀的編譯資料：名稱、旗標，以及放方法本體與常數運算式的函式索引。物件、static 屬性的值、類別常數求值後的結果都不在裡面，它們屬於當次執行。
@@ -273,6 +275,31 @@ PropRef 與 StaticRef 寫入的暫存器算成可能存放參照，受 1.6 那�
 驗證器把 InitCall 當成引數堆疊上的一個標記，SendUnpack 當成一筆「個數不明」的項目，所以分支合流時兩邊開始的呼叫必須相同，迴圈無法累積未完成的呼叫，MaxStack 也限制了巢狀深度。Call、CallValue 與 HostCall 不能取用標記或個數不明的項目，在格式 1.6 的檔案裡也不能取用帶名稱的引數：被不定參數收下的名稱在執行期不留下待處理的引數，讓別的呼叫取用它就會拿到下面那一筆。帶名稱的引數只有 CallPending 能收。CallPending 需要標記，並把標記以上的項目全部取走，目的暫存器的類別要符合被呼叫函式的 ReturnKind。
 
 格式 1.6 的檔案另外受一條規則保護：被 Call 直接呼叫、而且記錄了參數表的函式，只在宣告傳參照的參數收到參照。驗證器追蹤哪些 Value 暫存器可能存放參照（MakeRef、傳參照的迭代器與它取出的元素、宣告為傳參照或沒有參數表的函式的參數暫存器，以及從它們 Move 來的），Push 這種暫存器或 Location 的引數標記為參照，Call 把它對到傳值參數時以 `ErrInvalid` 拒絕。只有可能持有參照的函式才多付這一份位元集。函式回傳時 Return 把暫存器裡的參照換成它的值，所以呼叫結果不會是參照。以名稱呼叫（CallValue）與 CallPending 則在執行期把送給傳值參數的參照換成值。
+
+### 格式 1.8 的 closure 函式與捕捉清單
+
+closure 的本體是一個帶 FuncClosure 的函式，`use` 清單是它的捕捉清單，兩者都是唯讀的編譯資料。Closure 物件、捕捉到的值、綁定的 `$this` 與範圍、closure 自己的 static 變數都屬於當次執行，不在 Program 裡。
+
+- **FuncClosure**：這個函式只能由 Closure 指令指名。Call 與 InitCall 不能以索引呼叫它，類別表的方法與程式進入點不能是它，執行期以名稱查函式時也找不到它。
+- **FuncNoThis 用在 closure 函式**表示 static closure：建立時不綁定 `$this`，之後也不接受物件。
+- **FuncUsesThis**：closure 的本體用到 `$this`（ZEND_ACC_USES_THIS，不含它裡面再建立的 closure）。`Closure::bind` 以此拒絕把這種 closure 的 `$this` 解除。只有 closure 函式能帶這個旗標。
+- **捕捉清單**的第 i 筆說明第 i 個捕捉的變數進入 closure 的哪個 local。Flags 的 bit 0 CaptureByRef 是 `use (&$x)`，bit 1 CaptureImplicit 是箭頭函式的自動捕捉（外層變數未定義時不警告，closure 裡的 local 保持未定義）。兩者不能同時設定。
+
+驗證器檢查：只有 closure 函式有捕捉清單，筆數不超過 Locals，每筆的 Local 在範圍內而且不重複，旗標是已知且不矛盾的組合，closure 函式回傳 Value。
+
+### 格式 1.8 的指令
+
+| 指令 | 操作數與行為 |
+|---|---|
+| Closure | A 結果，B 函式索引（必須是 closure 函式）。對應 ZEND_DECLARE_LAMBDA_FUNCTION：建立 Closure 物件，帶著目前 frame 的類別範圍與被呼叫的類別。frame 有 `$this` 而且 closure 不是 static 時綁定 `$this` |
+| BindLexical | A closure，B 變數的 Location，C 那個 closure 的函式索引，Aux 是捕捉清單的索引。對應 ZEND_BIND_LEXICAL：傳值捕捉複製變數當下的值，變數未定義時發出 `Undefined variable` 警告（自動捕捉除外）。傳參照捕捉把變數變成參照，closure 與變數共用它。傳值或傳參照由捕捉清單決定，指令不重複記錄。驗證器檢查 C 是 closure 函式、Aux 在它的清單範圍內，執行期再檢查 A 裡真的是那個函式的 closure |
+| CallableConvert | A 結果。對應 ZEND_CALLABLE_CONVERT：前一條 InitCall、InitMethod 或 InitStatic 開始的呼叫不執行，改成一個 Closure。開始的呼叫本來就是 closure 時，結果是同一個物件。驗證器要求引數堆疊頂端就是那個呼叫的標記，也就是還沒有送出任何引數，並把標記移除 |
+| ArgByRef | A 結果（bool）。對應 ZEND_CHECK_FUNC_ARG：最內層已開始的呼叫，它的被呼叫者是否以傳參照接收下一個位置引數。編譯器用它在兩種取法之間分支：傳參照時以寫入方式取元素或屬性並送出參照，否則讀值送出。驗證器要求指令在已開始的呼叫裡 |
+| Return 的 Aux 1 | ReturnNotice：宣告為回傳參照的函式回傳的不是變數，先發出 `Only variable references should be returned by reference` 再回傳值（ZEND_RETURN_BY_REF 加 ZEND_RETURNS_VALUE）。目前只有 `fn &() => ...` 會產生 |
+
+InitMethod 的 InitCallable 在 1.8 起接受所有 callable 的值：Closure 物件直接進入它的函式，其他物件走 `__invoke`，字串是函式名稱或 `A::m`，陣列是 `[物件或類別名稱, 方法名稱]`。這只改變執行期的行為，指令的編碼不變。
+
+1.7 的 PushElement 仍在格式裡，編譯器只在具名引數與含 nullsafe 的元素引數用它。其他從元素或屬性取出的位置引數改用 ArgByRef 分支，兩條分支各以 Aux 0 的 Push 送出，所以合流時引數堆疊的形狀相同。
 
 ## 例外區間與暫存器資料流
 

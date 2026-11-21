@@ -36,6 +36,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 五 | 頂層與 namespace 裡的 `const`（含相依的值、陣列值、重複宣告的警告、未定義常數的錯誤、namespace 裡退回全域的查詢）、`php -n` 的 1,792 個預先定義常數（三個 profile 各自的值、已棄用常數的通知）、以常數為參數預設值、magic constant、`match`（多條件、`default`、`match(true)`、沒有命中的 `UnhandledMatchError`）、`empty()`（變數、任意層元素、字串位移、運算式）、`@`（巢狀、函式呼叫內的警告、display 與 log 兩條路、不同的 `error_reporting`） | `define()`、`constant()`、`defined()`（內建函式），STDIN／STDOUT／STDERR（資源），CHAR_MAX 與 PHP_BUILD_DATE（依 CPU 架構而異），類別常數，trait 裡的 `__CLASS__`，`global`、`static`，不定參數，具名引數，物件，try／catch |
 | 六 | `global`（函式內與頂層、不存在時建立 null、`unset` 只解除函式裡的綁定、宿主以 `WithGlobal` 提供的值）、`static` 變數（字面值與任意運算式的初始值、第一次執行到才求值、多個宣告、遞迴）、不定參數（`...$rest`、`&...$refs`、接在有預設值的參數後面）、引數展開（`f(...$a)`、多段展開、字串 key 成為具名引數、對傳參照參數建立參照）、具名引數（任意順序、略過有預設值的參數、多出的名稱收進不定參數、傳參照） | `$GLOBALS`、`global $$name`，`func_get_args()` 等內建函式，展開物件與 Traversable，把不是變數的值以名稱傳給傳參照參數，參數型別，類別與方法，closure，try／catch |
 | 七 A | 類別、介面、trait 的宣告（含提早綁定與條件式宣告、繼承規則的 fatal）、`new`、屬性與 static 屬性的讀寫（typed、readonly、動態屬性、陣列寫入、複合指定、`++`／`--`、`??=`、`unset`、`isset`、`empty`、參照）、方法與 static 方法、`$this`、`self`／`parent`／`static`、`::class`、類別常數、參數與回傳型別、magic method、`instanceof`、`clone`、物件比較與轉型、走訪物件、nullsafe、`$callable()` | closure 與箭頭函式、first-class callable（七 B），try／catch／finally、`throw`、例外類別（七 C），enum、property hooks、非對稱可見度、屬性與類別上的 attribute、匿名類別、回傳參照、generator、stdClass 與 Stringable 以外的內建類別、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 |
+| 七 B | closure 物件（呼叫、具名與展開引數、傳參照參數、型別、`instanceof Closure`、比較、`clone`、轉型）、`use` 傳值與傳參照捕捉、closure 裡的 `static` 變數、方法裡自動綁定的 `$this` 與類別範圍、static closure、箭頭函式與自動捕捉、first-class callable（`f(...)`、`$o->m(...)`、`A::m(...)`、`static::m(...)`、`$closure(...)`、`'f'(...)`、`[$o, 'm'](...)`）、以字串 `A::m` 與陣列呼叫方法、`Closure::bind`／`bindTo`／`call`／`fromCallable`、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 | try／catch／finally、`throw`、例外類別（七 C），generator，回傳參照的函式與 closure（`fn &` 除外），內建函式的 `strlen(...)`、需要 callable 的內建函式、Reflection，其他七 A 右欄的項目 |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -303,6 +304,85 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 
 執行期宣告類別失敗是 PHP 的 fatal，但 `PHPErrorKind` 沒有對應的種類，`Diagnostic` 也沒有欄位放 fatal 後面的 stack trace。改公開介面要先經專案負責人同意，所以這一段先以 `CompileError` 回報這種錯誤，log 管道的那一筆不含 trace。兩者都列在已知缺口，等決定。
 
+## 階段七 B
+
+第七階段的第二段：closure、`use`、箭頭函式、first-class callable 與 `Closure` 類別的方法。格式升到 1.8，新增四個指令（Closure、BindLexical、CallableConvert、ArgByRef）、Return 的一個 Aux、函式的兩個旗標與捕捉清單。四個指令都沒有現有指令能組合出來：沒有指令能建立帶函式索引的物件、把變數交給另一個物件持有、把已開始的呼叫換成值，或在送出引數前查詢被呼叫者的宣告。1.0 到 1.7 的檔案照樣能載入，其中出現 1.8 的內容時以 `ErrInvalid` 拒絕並指出需要 1.8。操作數規則在 [W-16 文件](W-16-bytecode.md)。
+
+### 資料歸屬
+
+- **`Program` 只有 closure 的函式本體與捕捉清單**。本體是帶 FuncClosure 的函式，捕捉清單記下每個 `use` 變數進入哪個 local、傳值還是傳參照。兩者唯讀，可以由多個 goroutine 共用。
+- **Closure 物件屬於當次執行**。它是 W-13 的物件（類別 `Closure`：final、不能 `new`、不能有動態屬性），另外帶一份 closure 資料：函式、綁定的 `$this`、類別範圍、被呼叫的類別、捕捉到的值、closure 自己的 static 變數。這份資料和物件同一次配置，隨物件釋放。`Program` 沒有任何欄位指向它。`TestW17Stage7BStateBelongsToTheRun` 以 16 個 goroutine 各 50 次同時執行同一個 `Program`（`-race`），每次的 static 計數、傳參照捕捉與綁定的物件都從頭開始。
+- **closure 的 static 變數放在 Closure 物件裡**，同一個宣告建立的兩個 closure 各有一份。由函式或方法做成的 closure（`f(...)`、`Closure::fromCallable`）沒有自己的一份，和原本的函式共用，所以 `f(...)` 與直接呼叫 `f()` 看到同一個計數。
+
+### 建立與捕捉
+
+- **建立**照 ZEND_DECLARE_LAMBDA_FUNCTION：closure 帶走目前 frame 的類別範圍與被呼叫的類別。frame 有 `$this` 而且 closure 不是 static 時綁定 `$this`。
+- **捕捉**照 ZEND_BIND_LEXICAL，每個 `use` 變數一條 BindLexical，行號是那個變數所在的行，所以 `use` 換行寫時未定義變數的警告報在 `use` 那一行。傳值捕捉在建立當下複製值並發出未定義的警告。傳參照捕捉把變數變成參照，未定義時建立 null、不警告。
+- **箭頭函式**的自動捕捉由 lowering 照 find_implicit_binds 算出，外層變數未定義時不警告，closure 裡的變數保持未定義，要到讀取時才警告。PHP 會把只在內層箭頭函式出現的名稱也列進外層的清單（例如內層的參數），這些名稱在外層沒有變數，編譯器略過它們。
+- **進入 closure** 時，frame 直接從 Closure 物件拿到捕捉的值：傳值的複製一份，傳參照的綁上同一個參照。清單在編譯時決定，進入時是一個固定長度的迴圈，不查名稱也不多跑指令。
+- **複製**（`clone`、`bind`、`bindTo`）照 zend_array_dup 處理變數：值多一個持有者，沒有其他持有者的參照換成它的值。所以外層變數還在時，複本和原本共用傳參照捕捉；外層變數已經 `unset` 時，複本拿到獨立的一份。static 變數也照這條規則複製目前的值。
+
+### 呼叫
+
+- closure 的呼叫走七 A 的路徑：InitMethod（callable）記下被呼叫者，引數依被呼叫函式的宣告送出，CallPending 進入 frame。frame 多一個欄位持有 Closure 物件，回傳時在變數與 `$this` 之後釋放（zend_leave_helper 的順序），所以執行中把最後一個指向 closure 的變數蓋掉，closure 也活到這次呼叫結束。
+- **callable 的值**在同一處解析（`resolveCallable`）：Closure 物件、有 `__invoke` 的物件、函式名稱字串、`'A::m'`、`[$o, 'm']`、`['A', 'm']`，包含 `__call` 與 `__callStatic` 的退路。七 A 的已知缺口「透過字串或陣列呼叫方法」因此補上。錯誤訊息分兩套：動態呼叫照 ZEND_INIT_DYNAMIC_CALL，`Closure::fromCallable` 照 zend_is_callable_ex。
+- **first-class callable** 照 PHP 的編法：先像一般呼叫那樣開始（InitCall、InitMethod、InitStatic），再由 CallableConvert 把這個還沒送引數的呼叫換成 Closure。找不到函式、方法不可存取等錯誤因此在建立 closure 的那一行拋出，不是等到呼叫。對 closure 寫 `$f(...)` 得到同一個物件。
+- **把元素或屬性傳給傳參照的參數**：被呼叫者要到執行期才知道，所以編譯器先用 ArgByRef 問「這個位置要不要參照」（ZEND_CHECK_FUNC_ARG），再分支成以寫入方式取元素並送出參照，或讀值送出。兩條分支只會執行一條，元素裡的運算式不會求值兩次。這補上七 A 的已知缺口，具名引數與含 nullsafe 的元素仍照舊。
+
+### `Closure` 的方法
+
+`bind`、`bindTo`、`call`、`fromCallable` 與 `__invoke` 由 VM 自己實作，不經過 PHP 的 frame。
+
+- **能不能綁定**照 zend_valid_closure_binding，依序檢查並發出 PHP 的警告後回傳 null：static closure 不能綁物件、方法做成的 closure 不能綁到不相容的類別或解除 `$this`、用到 `$this` 的 closure 不能解除 `$this`、不能把範圍設成內建類別、函式或方法做成的 closure 不能換範圍。
+- 綁了物件卻沒有範圍時，範圍是 `Closure` 類別本身，和 PHP 相同。
+- **`call`** 不建立新的 closure：同一個 Closure 物件的函式以新的 `$this` 與它的類別當範圍執行，static 變數與捕捉的值和原本的 closure 共用。具名引數對應 closure 自己的參數。`call` 以傳值收引數，closure 的參數若是傳參照，發出 `must be passed by reference, value given` 的警告後照值傳。
+- 引數個數或型別不對時拋出的錯誤，backtrace 多一格 `Closure::bind(...)` 或 `Closure->bindTo(...)`。經由 `call` 或 `__invoke` 進入的 closure，它的 frame 在 backtrace 裡照 PHP 顯示成由內部函式呼叫（`[internal function]`），下面接 `Closure->call(...)` 或 `Closure->__invoke(...)` 那一格；引數個數與型別的錯誤訊息也不帶呼叫位置。
+- 這些方法本身也能當 callable：`Closure::bind(...)`、`[$f, 'bindTo'](...)`、`'Closure::bind'`。具名引數對應各方法的參數名稱（`closure`、`newThis`、`newScope`、`callback`）。`newScope` 收到 int、float 或 bool 時，在非 strict 的檔案照 PHP 轉成字串當類別名稱。
+- `Closure::getCurrent()`（PHP 8.5 新增）回傳目前正在執行的 closure，不在 closure 裡時拋出 `Current function is not a closure`。
+
+### 生命週期
+
+- 捕捉的值、綁定的 `$this` 與 static 變數都是 Closure 物件的持有者，循環回收會沿著它們走（zend_closure_get_gc）。`$this->cb = function () { ... $this ... }` 形成的循環因此要等回收或請求結束才解構，沒有循環的 closure 一被丟掉，捕捉的物件立刻解構。不靠 Go finalizer。
+- 暫存器裡的 closure 用完就釋放。`TestW17Stage7BLargeFunctionClosureLifetime` 把六個生命週期的 fixture 塞進大到要用逐暫存器活性分析的 `{main}`，輸出仍和 PHP 相同。
+
+### 其他照 PHP 的地方
+
+- closure 的名稱照 PHP 8.4 之後的寫法：`{closure:/w/cases/x.php:3}`、`{closure:f():3}`、`{closure:A::m():3}`，closure 裡的 closure 以外層 closure 的名稱當前綴（`{closure:{closure:A::m():3}:4}`）。lowering 原本一律往外找到具名函式，已修正。
+- 兩個不同的 Closure 物件只有在都是由同一個函式或方法做成、綁定的物件與類別也相同時才相等，其他情況不可比較（zend_closure_compare）。`(array) $closure` 得到只有它自己一個元素的陣列。
+- `fn &() => 運算式` 回傳的不是變數時，每次呼叫發出 `Only variable references should be returned by reference`。一般函式的回傳參照仍不支援。
+- 型別宣告 `callable` 現在認得程式自己宣告的函式名稱。W-13 的檢查原本看不到 VM 的函式表，一律當成不是 callable。
+
+### 獨立審查
+
+測試案例與審查都照派工規則逐層嘗試。OpenCode 的指令在這台機器上失敗，Copilot 的月額度用完，agy 的 Opus 額度用完，Codex 沒有符合條件的模型，所以測試案例由內建的 Haiku 撰寫（每個檔案都在固定映像跑過，再由主要作者逐一對照），審查由內建的 Opus 在全新的脈絡進行，只拿到需求與程式碼。
+
+審查者跑了 548 個 PHP 探測程式（arm64 映像），另外檢查了手寫的惡意 bytecode、16 個 goroutine 的隔離與 race。請求之間沒有外洩，沒有 Go panic，沒有 P0。找到的問題如下，都已修正並補上修正前會失敗的回歸測試，修正前的輸出在 [stage7b/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage7b/red-review-fixes.txt)。
+
+- **closure 當屬性預設值以內部錯誤結束**（P1，這次造成）。`class A { public $p = static function () {}; }` 原本在 `Compile` 被拒絕，closure 能編譯之後走到執行期，預設值是物件而無法存成快照。現在 `Compile` 帶位置拒絕，列在已知缺口。類別常數、全域 `const` 與參數預設值裡的 closure 可以執行。
+- **沒有類別範圍時 `self`／`parent`／`static` 的訊息**（P2）。`::class` 是 `Cannot use "self" in the global scope`，其他用法是 `Cannot access "self" when no class scope is active`，原本兩種都印成另一句。`$x instanceof self` 的左邊不是物件時 PHP 不去找類別，結果是 false，原本拋出錯誤。這些在 closure 之前走不到。
+- **`Closure::fromCallable` 不認得相對名稱與呼叫者的 `$this`**（P2）。`'self::m'`、`'static::m'`、`'parent::m'` 現在以呼叫者的範圍解析並發出 `Use of "self" in callables is deprecated`。在物件方法裡以 `'A::m'` 指名非 static 方法時，呼叫者的 `$this` 跟著過去。
+- **範圍內的寫法到執行期才被拒絕**（P2）。對 `__call` 做成的 closure 呼叫 `call`、以 callable 指名 `Closure` 的方法、對這些方法用具名引數、`Closure::getCurrent()`，現在都能執行。
+- **執行期才知道名稱的內建函式被當成未定義**（P2）。`$f = 'strlen'; $f(...)` 與 `Closure::fromCallable('strlen')` 原本拋出 PHP 的 `Call to undefined function`，看起來像程式自己的錯。現在以 Unsupported 結束。`callable` 型別接受內建函式的名稱，呼叫時才拒絕。這個問題在 main 的 `$f('abc')` 就有。
+- **`Closure` 方法的 backtrace 沒有持有引數**（P2）。`Closure::fromCallable(new D)` 失敗時，D 的解構子在錯誤訊息之前就執行。現在 backtrace 的每一格都持有它的引數，釋放順序也照 PHP：先是 `call` 的物件，再是引數。
+- **驗證器讓 closure 函式當類別常數或屬性的初始值函式**（P2）。手寫 bytecode 可以不經 Closure 物件直接進入 closure 的本體。現在類別成員的任何函式都不能是 closure 函式。
+- **其他**（P3）：抽象方法以 callable 指名時先報 `Cannot call abstract method`。捕捉清單不能指向參數的 local（載入時拒絕，因為驗證器看不出參數存進哪個 local）。CallableConvert 不能接在 `new` 開始的呼叫後面。Closure 類別只在當次執行第一次建立 closure 時登記，不再每次查表。`$f($a[])` 這類把 `[]` 傳給執行期才知道的被呼叫者，原本是編譯器的內部錯誤（main 上的方法呼叫也是），現在 `Compile` 帶位置拒絕。
+
+審查留下、這一段不修的差異都列在已知缺口。回歸 fixture 共 20 個（`closure_review_*`、`fatal_closure_review_*`、`fatal_callable_review_*`），另有 `internal/bytecode/format18_test.go`、`internal/runtime/vm_closure_test.go` 與 `internal/vm/compile_test.go` 的 Go 測試。CallableConvert 接在建構子呼叫後面的檢查沒有獨立的回歸測試：測試用的組譯器不能宣告類別，這一項只有審查者以引擎編譯再改寫映像的探測（`~/.cache/phego-work/review7b-1/tools/zz_hostile_test.go` 的 H4）。
+
+測試程式加到 863 個（新增 131 個：82 個七 B 的 fixture、29 個自我探測、20 個審查的回歸 fixture），三個 profile 各 2,589 項全部和 PHP 8.5.12 逐位元組相同。
+
+### 效能
+
+候選做法在同一個測試執行檔量過，原始輸出在 [stage7b](../implementation/evidence/W-17-vm/stage7b)。量測都在本機（Apple M3）進行，只用來比較同一輪裡的做法，不是對外的效能數字。
+
+| 項目 | 採用 | 量到的結果 |
+|---|---|---|
+| closure 資料的配置 | 和物件同一次配置 | 另外配置時建立一個 closure 是 3 次配置，合併後 1 次。十萬次建立由約 37.6 ms 降到 32.1 ms，帶三個捕捉的由約 48.3 ms 降到 42.3 ms（`bench-create-separate.txt` 對 `bench-create-shared.txt`） |
+| 捕捉的值進入 frame | 進入時依編譯好的清單直接複製，不查名稱也不多跑指令 | 三個傳值捕捉的 closure 每次呼叫約 391 ns，沒有捕捉的約 301 ns，差的 90 ns 包含本體多出的三次讀取與加法。同樣三個值改用引數傳給一般函式，每次多約 151 ns（332 ns 對 182 ns） |
+| closure 的呼叫 | 沿用七 A 的動態呼叫路徑，以物件上的一個欄位認出 Closure | 每次約 301 ns，和方法呼叫（約 285 ns）同級，比直接呼叫函式（約 182 ns）多約 120 ns。每次呼叫沒有配置。建立一個 closure 約 307 ns |
+
+分派迴圈多了四個 case，Return 多一個 Aux 的判斷，進入 frame 時多看 closure 的兩個欄位。和 main（4c64be5）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，中位數是算術 −2.1%、分支 −1.7%、字串 −0.2%、陣列 −1.2%、遞迴的 `fib` +0.8%，前兩項的 6 輪範圍不重疊，其餘重疊。七 A 的物件工作量（`BenchmarkW17Stage7`，各 3 輪）則慢 1.0% 到 1.9%：函式呼叫 +1.2%、方法呼叫 +1.0%、static 呼叫 +1.9%、建立物件 +1.5%，屬性讀寫 −0.5%，範圍大多不重疊。這是每次呼叫多出的欄位判斷與建立物件時多一次類別比較的成本，沒有再壓低。原始輸出在 `bench-main.txt`、`bench-stage7b.txt`、`bench-objects-main.txt` 與 `bench-objects-stage7b.txt`。
+
 ## 階段一的對照結果
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
@@ -379,11 +459,20 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`define()`、`constant()`、`defined()`**：內建函式，屬於模組工作包；`const` 以外沒有辦法在執行期宣告常數。
 - **執行期 fatal 的公開介面**：宣告類別失敗的 fatal 以 `PHPError` 的 `CompileError` 種類回報，`Diagnostic` 沒有欄位放 fatal 後面的 stack trace，所以 log 管道的那一筆只有訊息與位置。display 管道的文字是完整的。加一個 `FatalError` 種類與 `Diagnostic.Trace` 欄位是只增加的公開介面變更，等專案負責人決定。對照測試在 log 模式自己補上 `#0 {main}`，fixture 只在頂層觸發這種 fatal。
 - **類別描述每次執行重建**：`Program` 只共用類別表，W-13 的類別物件每次請求從頭建立。宣告很多類別的程式每次請求都付這個成本，等編譯快取的工作包（W-23）把描述拆成唯讀與當次兩層。
-- **把元素或屬性傳給方法的傳參照參數**：`$o->m($a[0])`、`$o->m($p->q)`、`$f($a[0])` 的被呼叫者要到執行期才知道。PHP 在參數傳參照時改用寫入方式取元素（FETCH_DIM_FUNC_ARG），這裡還沒有對應的指令，遇到傳參照的參數以 Unsupported 結束，不會把複本交給函式。傳變數（`$o->m($x)`）與直接呼叫已知的函式（`f($o->p)`）不受影響。
+- **以名稱把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數**：`$o->m(r: $a[0])` 與含 nullsafe 的 `$o->m($p?->q)` 遇到傳參照的參數以 Unsupported 結束，不會把複本交給函式。位置引數（`$o->m($a[0])`、`$f($p->q)`）在七 B 起照 PHP 處理。
+- **把 `$a[]` 傳給執行期才知道的被呼叫者**：`$f($a[])`、`$o->m($a[])` 在 `Compile` 回報不支援。PHP 在參數傳參照時新增元素，否則拋出 `Cannot use [] for reading`，目前沒有指令能在執行期拋出這個錯誤。
 - **兩個不同型別的 typed 屬性綁在同一個參照**：`$a->i = &$a->s`（一個 int、一個 string）PHP 以 `Reference with value of type ... is not compatible with property ...` 拒絕。Phego 只檢查值能不能指定給目標屬性，之後寫入才報出不同的錯誤。透過參照 `++` 一個 typed int 屬性超出範圍時，訊息也和 PHP 不同。
-- **透過字串或陣列呼叫方法**：`$f = 'A::m'; $f()` 與 `[$o, 'm']()` 在執行期以 Unsupported 結束。`$o()`（`__invoke`）與函式名稱字串可以。
 - **`??=` 的目標是屬性底下的元素、而且運算元有副作用**：`$o->p[f()] ??= 1` 在 `Compile` 回報不支援。PHP 把目標編譯兩次但共用運算元的結果，這裡只在運算元是變數與字面值時才這樣做。
-- **回傳參照的函式與方法**：在 `Compile` 回報不支援。
+- **closure 當屬性預設值**：`public $p = static function () {};` 與 static 屬性的同樣寫法在 `Compile` 回報不支援。屬性預設值目前以快照保存，放不了物件。類別常數、全域 `const` 與參數預設值裡的 closure 可以執行。
+- **循環回收不會在候選數量到門檻時自動啟動**：PHP 在可能的循環根累積到 10,001 個時回收一次，Phego 只在請求結束時回收。大量 `$this` 與 closure 互相持有的物件，解構子因此都排到 `end` 之後。這在 main 的一般物件循環就是如此，沒有內建函式能手動觸發。
+- **callable 裡的 `parent::m` 形式**：`['B', 'parent::m']`、`[$this, 'parent::m']` 與 `'B::parent::m'`，PHP 發出棄用通知後呼叫父類別的方法（最後一種是 `Class "B::parent" not found`），Phego 當成方法名稱而找不到。動態呼叫裡的 `'self::m'`、`'parent::m'`、`'static::m'` 字串也還不認得，只有 `Closure::fromCallable` 認得。
+- **`Closure::call` 釋放引數的順序**：PHP 先釋放新的 `$this` 再釋放引數，Phego 相反。只有兩者都只剩這一個持有者、而且都有解構子時看得出來。未捕捉錯誤時的順序已照 PHP。
+- **對 `Closure` 方法做成的 closure 呼叫 `call`**：`$b = $f->bindTo(...); $b->call($o)` 這類寫法以 Unsupported 結束。對一般 closure 與 `__call` 做成的 closure 呼叫 `call` 可以執行。
+- **執行期才知道名稱的內建函式到執行期才拒絕**：`$f = 'strlen'; $f('abc')`、`Closure::fromCallable('strlen')` 與 `callable` 型別的 `'abs'` 在執行到時以 Unsupported 結束，之前的輸出已經寫出。名稱是執行期的值，`Compile` 看不到。
+- **箭頭函式結束的行**：PHP 把行號計數器停在箭頭函式運算式結束的那一行，也就是 parser 多讀的下一個 token 所在的行。Phego 取運算式裡最大的行號，下一個 token 換行時會差一行，只影響同一個陳述式裡後面才發出的警告。
+- **逐暫存器活性分析的工作量上限**：超大函式超過上限後不再分析，只被暫存器持有的 closure 要等暫存器被覆寫才釋放。審查在大小限制內做不出會碰到上限的程式（3,000 個陳述式仍準時釋放，更大的被「program too large」拒絕），所以沒有觀察到差別，也還不能排除。
+- **closure 的捕捉另外配置**：有 `use` 的 closure 建立時多一次配置放捕捉的值。把少量捕捉放進物件同一塊記憶體是審查提出、還沒做的改進。
+- **回傳參照的函式與方法**：在 `Compile` 回報不支援。`fn &() => ...` 可以宣告與呼叫，但 `$r = &$f()` 仍屬「參照到函式呼叫結果」，在 `Compile` 回報不支援，所以還拿不到它回傳的參照。它回傳的是函式呼叫的結果時，一律發出 `Only variable references should be returned by reference`，PHP 只在那個結果不是參照時才發。
 - **stdClass 與 Stringable 以外的內建類別與介面**：`new ArrayObject`、`extends Exception`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
 - **巢狀呼叫的深度上限是 12,000 層**：解構子、magic method、`__toString` 互相巢狀超過這個深度時拋出 PHP 的 `Maximum call stack size ... reached`。PHP 的門檻取決於 C 堆疊大小，兩邊觸發的深度不同。
 - **回報未捕捉錯誤之後才解構的物件，它的解構子再出錯**：`f(new D)` 在 `f` 裡出錯，D 的解構子又拋出錯誤或 `exit` 時，PHP 印出第二個 fatal 或採用 `exit` 的結束碼。Phego 執行解構子，丟掉它的錯誤。未捕捉錯誤之後，關機解構子裡的 `exit("字串")` 把結束碼設成 0，PHP 維持 255。

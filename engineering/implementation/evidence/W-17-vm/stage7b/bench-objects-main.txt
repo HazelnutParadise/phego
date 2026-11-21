@@ -1,0 +1,22 @@
+# W-17 stage 7B, local run on Apple M3 (darwin/arm64), main 4c64be5 and the stage 7B tree built as separate test binaries and run alternately.
+BenchmarkW17Stage7/function_call-8         	      20	  18206254 ns/op	   10084 B/op	      46 allocs/op
+BenchmarkW17Stage7/method_call-8           	      20	  28224117 ns/op	   13978 B/op	      87 allocs/op
+BenchmarkW17Stage7/static_call-8           	      20	  22429715 ns/op	   12328 B/op	      71 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      20	  16757804 ns/op	   13500 B/op	      82 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      20	  34590598 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      20	  30272060 ns/op	   13982 B/op	      87 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      20	  72104500 ns/op	29615925 B/op	  300099 allocs/op
+BenchmarkW17Stage7/function_call-8         	      20	  17894812 ns/op	   10116 B/op	      46 allocs/op
+BenchmarkW17Stage7/method_call-8           	      20	  28045179 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/static_call-8           	      20	  22428512 ns/op	   12363 B/op	      71 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      20	  16673110 ns/op	   13464 B/op	      82 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      20	  34625562 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      20	  30199329 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      20	  72285290 ns/op	29615340 B/op	  300098 allocs/op
+BenchmarkW17Stage7/function_call-8         	      20	  17928319 ns/op	   10084 B/op	      46 allocs/op
+BenchmarkW17Stage7/method_call-8           	      20	  28188208 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/static_call-8           	      20	  22500140 ns/op	   12328 B/op	      71 allocs/op
+BenchmarkW17Stage7/property_read_write-8   	      20	  16779015 ns/op	   13464 B/op	      82 allocs/op
+BenchmarkW17Stage7/this_property_in_method-8         	      20	  34762090 ns/op	   14640 B/op	      94 allocs/op
+BenchmarkW17Stage7/typed_method-8                    	      20	  30207579 ns/op	   13976 B/op	      87 allocs/op
+BenchmarkW17Stage7/new_object-8                      	      20	  72252627 ns/op	29615906 B/op	  300099 allocs/op
