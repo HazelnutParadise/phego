@@ -98,6 +98,9 @@ func (s *vmState) objectOperand(f *vmFrame, in *vmInstr, operand uint32) (value,
 
 // this is ZEND_FETCH_THIS.
 func (s *vmState) this(f *vmFrame, in *vmInstr) error {
+	if in.aux == 1 {
+		return s.setReg(f.regs, in.a, boolValue(f.this != nil))
+	}
 	if f.this == nil {
 		return &Throwable{"Error", "Using $this when not in object context"}
 	}
@@ -194,7 +197,7 @@ func (s *vmState) propGet(f *vmFrame, in *vmInstr) error {
 // propSet is ZEND_ASSIGN_OBJ. With MemberResult the value register then
 // holds the assignment's value: what a typed property stored.
 func (s *vmState) propSet(f *vmFrame, in *vmInstr) error {
-	if in.cache != 0 {
+	if mode := bytecode.AuxMemberMode(in.aux); in.cache != 0 && (mode == 0 || mode != bytecode.MemberBindRef && f.regs[in.c].kind == valueInt) {
 		// The fast path: a declared, initialized property that is not a
 		// reference, and a value its type takes as it is.
 		if obj := f.regs[in.a]; obj.kind == valueObject {
@@ -232,6 +235,18 @@ func (s *vmState) propSet(f *vmFrame, in *vmInstr) error {
 	}
 	if obj.kind != valueObject {
 		return &Throwable{"Error", `Attempt to assign property "` + name + `" on ` + valueName(obj)}
+	}
+	switch mode := bytecode.AuxMemberMode(in.aux); mode {
+	case bytecode.MemberBindRef:
+		return s.bindProperty(f, in, obj.object, name)
+	case bytecode.MemberIncrement, bytecode.MemberDecrement:
+		if v.kind == valueFloat {
+			if p, perr := resolvePropertyIn(obj.object.class, name, f.scope, true); perr == nil && p != nil {
+				if err := incDecRangeError(p, mode == bytecode.MemberIncrement); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	file, line := s.where()
 	if err := s.h.writeObjectAt(obj, name, v, f.scope, f.fn.strict, methodCallSite{file: file, line: line}); err != nil {
@@ -299,6 +314,17 @@ func (s *vmState) fetchProp(f *vmFrame, in *vmInstr) error {
 		// property.
 		if slot, ok := o.props.lookup(p.key); ok && slot.deref().kind == valueObject {
 			return scratch(slot.deref())
+		}
+	}
+	if mode != bytecode.MemberUnset {
+		if p, perr := resolvePropertyIn(o.class, name, f.scope, true); perr == nil && p != nil && !p.static && !p.virtual {
+			var cur value
+			if slot, ok := o.props.lookup(p.key); ok {
+				cur = slot.deref()
+			}
+			if hole, err := s.typedPropertyHole(f, in.a, p, cur); hole || err != nil {
+				return err
+			}
 		}
 	}
 	address, err := s.h.resolveObjectReference(o, name, f.scope)
@@ -464,6 +490,18 @@ func (s *vmState) staticSet(f *vmFrame, in *vmInstr) error {
 	if v.kind == valueUndefined {
 		v = nullValue()
 	}
+	switch mode := bytecode.AuxMemberMode(in.aux); mode {
+	case bytecode.MemberBindRef:
+		return s.bindStaticProperty(f, in, c, name)
+	case bytecode.MemberIncrement, bytecode.MemberDecrement:
+		if v.kind == valueFloat {
+			if p, perr := s.h.resolveStatic(c, name, f.scope); perr == nil {
+				if err := incDecRangeError(p, mode == bytecode.MemberIncrement); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	if err := s.h.writeStatic(c, name, v, f.scope, f.fn.strict); err != nil {
 		return err
 	}
@@ -502,6 +540,9 @@ func (s *vmState) fetchStatic(f *vmFrame, in *vmInstr) error {
 	slot, ok := tbl.lookup(p.key)
 	if !ok {
 		slot = tbl.slot(p.key)
+	}
+	if hole, err := s.typedPropertyHole(f, in.a, p, slot.deref()); hole || err != nil {
+		return err
 	}
 	if slot.kind == valueUndefined && p.typeName != "" {
 		return &Throwable{"Error", "Typed static property " + p.label() + " must not be accessed before initialization"}
@@ -916,4 +957,117 @@ func (s *vmState) cacheProperty(c *vmCache, o *object, name string, scope *class
 	c.readable = true
 	c.writable = !p.readonly && canAccess(scope, p.owner, p.setVisibility)
 	c.typ = p.typeName
+}
+
+// typedPropertyHole reports whether a fetch for writing of the typed
+// property p, which holds v, must not create an array in it, and if so
+// makes the element register r name the hole.
+func (s *vmState) typedPropertyHole(f *vmFrame, r uint32, p *propertyInfo, v value) (bool, error) {
+	if p == nil || p.typeName == "" || (v.kind != valueNull && v.kind != valueUndefined) {
+		return false, nil
+	}
+	if methodTypeHas(p.typeName, "array") || methodTypeHas(p.typeName, "mixed") || methodTypeHas(p.typeName, "iterable") {
+		return false, nil
+	}
+	s.typedHole, s.typedHoleProp = nullValue(), p
+	return true, s.setElementLocation(f, r, &s.typedHole)
+}
+
+// incDecRangeError is the error of ++ or -- on a property of type int whose
+// result left the integer range (zend_incdec_typed_prop).
+func incDecRangeError(p *propertyInfo, increment bool) error {
+	if p.typeName == "" || !methodTypeHas(p.typeName, "int") || methodTypeHas(p.typeName, "float") || methodTypeHas(p.typeName, "mixed") {
+		return nil
+	}
+	if increment {
+		return &Throwable{"TypeError", "Cannot increment property " + p.label() + " of type " + p.typeName + " past its maximal value"}
+	}
+	return &Throwable{"TypeError", "Cannot decrement property " + p.label() + " of type " + p.typeName + " past its minimal value"}
+}
+
+// bindTyped checks the value of the reference in register r against the
+// typed property p before the property is bound to it
+// (zend_verify_prop_assignable_by_ref), and stores the converted value.
+func (s *vmState) bindTyped(f *vmFrame, r uint32, p *propertyInfo) error {
+	if p == nil || p.typeName == "" {
+		return nil
+	}
+	ref := &f.regs[r]
+	cur := ref.deref()
+	if cur.kind == valueUndefined {
+		cur = nullValue()
+	}
+	out, err := s.h.coerceProperty(p, cur, f.fn.strict, false)
+	if err != nil {
+		return err
+	}
+	if ref.kind == valueReference {
+		return s.h.assign(&ref.ref.target, out)
+	}
+	return nil
+}
+
+// bindProperty is ZEND_ASSIGN_OBJ_REF: the property becomes the reference
+// register C holds, after the value is checked against the property's type.
+func (s *vmState) bindProperty(f *vmFrame, in *vmInstr, o *object, name string) error {
+	h := s.h
+	p, err := resolvePropertyIn(o.class, name, f.scope, true)
+	if err != nil {
+		return err
+	}
+	if p != nil && !p.static {
+		if err := s.bindTyped(f, in.c, p); err != nil {
+			return err
+		}
+	}
+	address, err := h.resolveObjectReference(o, name, f.scope)
+	if err != nil {
+		return err
+	}
+	if address.slot == nil {
+		return s.unsupported("binding a reference to a property without a location")
+	}
+	if f.regs[in.c].kind != valueReference {
+		return s.internal("bind of a property to a register that holds no reference")
+	}
+	if err := h.bind(address.slot, &f.regs[in.c]); err != nil {
+		return err
+	}
+	if p != nil && p.typeName != "" && address.slot.kind == valueReference {
+		h.addPropertySource(address.slot.ref, propertySource{address.slot, address.property})
+	}
+	return s.clearReg(f, in.c)
+}
+
+// bindStaticProperty is ZEND_ASSIGN_STATIC_PROP_REF.
+func (s *vmState) bindStaticProperty(f *vmFrame, in *vmInstr, c *class, name string) error {
+	h := s.h
+	p, err := h.resolveStatic(c, name, f.scope)
+	if err != nil {
+		return err
+	}
+	if !canAccess(f.scope, p.owner, p.setVisibility) {
+		return &Throwable{"Error", "Cannot indirectly modify " + accessName(p.setVisibility) + "(set) property " + p.label() + " from " + h.calledScopeLabel(f.scope)}
+	}
+	if err := s.bindTyped(f, in.a, p); err != nil {
+		return err
+	}
+	if f.regs[in.a].kind != valueReference {
+		return s.internal("bind of a static property to a register that holds no reference")
+	}
+	tbl, err := h.staticTable(p.owner)
+	if err != nil {
+		return err
+	}
+	slot, ok := tbl.lookup(p.key)
+	if !ok {
+		slot = tbl.slot(p.key)
+	}
+	if err := h.bind(slot, &f.regs[in.a]); err != nil {
+		return err
+	}
+	if p.typeName != "" && slot.kind == valueReference {
+		h.addPropertySource(slot.ref, propertySource{slot, p})
+	}
+	return s.clearReg(f, in.a)
 }

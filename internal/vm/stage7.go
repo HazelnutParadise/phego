@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"sort"
+
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
 	"github.com/HazelnutParadise/phego/internal/phpname"
@@ -51,7 +53,8 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 	fail := func(feature string, line int) *UnsupportedError {
 		return &UnsupportedError{Feature: feature, File: c.unit.File, Line: positive(line, positive(cl.Line, 1))}
 	}
-	if isBuiltinClass(cl.Name) {
+	if isBuiltinClass(cl.Name) && !cl.Hoisted {
+		// PHP raises this redeclaration when the statement runs.
 		return fail("declaring a class with the name of builtin class "+cl.Name, cl.Line)
 	}
 	names := append([]*ir.Name{}, cl.Interfaces...)
@@ -69,8 +72,11 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 		return fail("enum declaration", cl.Line)
 	case cl.Anonymous:
 		return fail("anonymous class", cl.Line)
-	case len(cl.Attributes) > 0:
-		return fail("class attribute", cl.Attributes[0].Line)
+	}
+	for _, a := range cl.Attributes {
+		if !allowDynamicAttribute(a) {
+			return fail("class attribute", a.Line)
+		}
 	}
 	for _, k := range cl.Consts {
 		if len(k.Attributes) > 0 {
@@ -108,6 +114,12 @@ func (c *compiler) classCompileError(cl *ir.Class) *CompileError {
 	fail := func(line int, msg string) *CompileError {
 		return &CompileError{Message: msg, File: c.unit.File, Line: positive(line, positive(cl.Line, 1))}
 	}
+	if cl.Hoisted && isBuiltinClass(cl.Name) {
+		// zend_compile_class_decl binds the class while compiling and finds
+		// the name taken by a class of the engine.
+		i := sort.SearchStrings(builtinClasses, phpname.Lower(cl.Name))
+		return fail(cl.Line, "Cannot redeclare "+builtinClassDecl[i][1]+" "+builtinClassDecl[i][0])
+	}
 	if cl.Kind == ir.KindInterface {
 		for _, p := range cl.Props {
 			if !p.HasHooks {
@@ -124,6 +136,12 @@ func (c *compiler) classCompileError(cl *ir.Class) *CompileError {
 		}
 	}
 	return nil
+}
+
+// allowDynamicAttribute reports whether a is #[AllowDynamicProperties], the
+// one class attribute this stage understands.
+func allowDynamicAttribute(a ir.Attribute) bool {
+	return a.Name != nil && phpname.EqualFold(a.Name.Resolved, "AllowDynamicProperties") && len(a.Arguments) == 0
 }
 
 // constValue compiles the value of a class constant or a property default:
@@ -179,6 +197,9 @@ func (c *compiler) classTable(nfuncs int) (table []bytecode.Class, pending []*ir
 		}
 		if cl.Hoisted {
 			bc.Flags |= bytecode.ClassHoisted
+		}
+		if len(cl.Attributes) > 0 {
+			bc.Flags |= bytecode.ClassAllowDynamic
 		}
 		if cl.Parent != nil {
 			bc.Parent = c.stringConst(cl.Parent.Resolved) + 1
@@ -464,10 +485,16 @@ func (fc *fnCompiler) instanceOf(n *ir.Node) operand {
 }
 
 func (fc *fnCompiler) clone(n *ir.Node) operand {
-	if len(n.Kids) == 0 {
+	operand := (*ir.Node)(nil)
+	switch {
+	case len(n.Kids) > 0:
+		operand = n.Kids[0]
+	case len(n.Args) == 1 && !n.Args[0].Spread && n.Args[0].Name == "":
+		operand = n.Args[0].Value // clone($x), written as a call
+	default:
 		fc.unsupported("clone with arguments", n.Line)
 	}
-	v := fc.value(n.Kids[0])
+	v := fc.value(operand)
 	fc.at(n.Line)
 	res := fc.alloc()
 	fc.emit(bytecode.OpClone, 0, res, v, 0)
@@ -803,9 +830,9 @@ func (fc *fnCompiler) assignOpStatic(n *ir.Node, op bytecode.BinaryOp) operand {
 // (ZEND_PRE_INC_OBJ and its siblings).
 func (fc *fnCompiler) incDecProp(n *ir.Node) operand {
 	target := n.Kids[0]
-	step := bytecode.Increment
+	step, stepMode := bytecode.Increment, uint16(bytecode.MemberIncrement)<<4
 	if n.Text == "--" {
-		step = bytecode.Decrement
+		step, stepMode = bytecode.Decrement, uint16(bytecode.MemberDecrement)<<4
 	}
 	var old, next uint32
 	if target.Op == ir.OpStaticProp {
@@ -815,14 +842,14 @@ func (fc *fnCompiler) incDecProp(n *ir.Node) operand {
 		old, next = fc.alloc(), fc.alloc()
 		fc.emit(bytecode.OpStaticGet, bytecode.MemberAux(ref, name.isReg, bytecode.MemberRead, false), old, class, name.operand)
 		fc.emit(bytecode.OpUnary, uint16(step), next, old, 0)
-		fc.emit(bytecode.OpStaticSet, bytecode.MemberAux(ref, name.isReg, 0, false)|bytecode.MemberResult, next, class, name.operand)
+		fc.emit(bytecode.OpStaticSet, bytecode.MemberAux(ref, name.isReg, 0, false)|bytecode.MemberResult|stepMode, next, class, name.operand)
 	} else {
 		t := fc.propTarget(target)
 		obj, aux := fc.object(t, bytecode.MemberWrite)
 		old, next = fc.alloc(), fc.alloc()
 		fc.emit(bytecode.OpPropGet, aux|t.name.aux()|uint16(bytecode.MemberIncDec)<<4, old, obj, t.name.operand)
 		fc.emit(bytecode.OpUnary, uint16(step), next, old, 0)
-		fc.emit(bytecode.OpPropSet, aux|t.name.aux()|bytecode.MemberResult, obj, t.name.operand, next)
+		fc.emit(bytecode.OpPropSet, aux|t.name.aux()|bytecode.MemberResult|stepMode, obj, t.name.operand, next)
 	}
 	if n.Op == ir.OpPostInc {
 		return reg(old)
@@ -1020,18 +1047,29 @@ func (fc *fnCompiler) bindMember(n *ir.Node, used bool) operand {
 	if used {
 		fc.unsupported("value of an assignment by reference to a property", n.Line)
 	}
-	d := fc.delay(target)
-	var ref uint32
-	switch source.Op {
-	case ir.OpProp, ir.OpStaticProp:
-		ref = fc.memberRef(source)
-	default:
+	source2ref := func() uint32 {
+		switch source.Op {
+		case ir.OpProp, ir.OpStaticProp:
+			return fc.memberRef(source)
+		}
 		src := fc.refSource(source, n.Line)
-		ref = fc.alloc()
+		ref := fc.alloc()
 		fc.emit(bytecode.OpMakeRef, 0, ref, src, 0)
+		return ref
 	}
-	d.fetch(bytecode.MemberWrite)
-	fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), elemReg, ref, 0)
+	bind := uint16(bytecode.MemberBindRef) << 4
+	if target.Op == ir.OpStaticProp {
+		ref, class := fc.classRef(target.Name, target.Kids[0])
+		name := fc.memberName(target)
+		r := source2ref()
+		fc.at(target.Line)
+		fc.emit(bytecode.OpStaticSet, bytecode.MemberAux(ref, name.isReg, 0, false)|bind, r, class, name.operand)
+		return reg(fc.alloc())
+	}
+	t := fc.propTarget(target)
+	r := source2ref()
+	obj, aux := fc.object(t, bytecode.MemberWrite)
+	fc.emit(bytecode.OpPropSet, aux|t.name.aux()|bind, obj, t.name.operand, r)
 	return reg(fc.alloc())
 }
 

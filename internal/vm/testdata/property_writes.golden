@@ -136,12 +136,12 @@ func 0 "{main}" params=0 locals=5 registers=12 maxstack=1 flags=nothis
   62: Load 0 5 0 0 ; line 21
   63: PropGet incdec 6 5 1 ; line 21 ; name "p"
   64: Unary Increment 7 6 0 ; line 21
-  65: PropSet result 5 1 7 ; line 21 ; name "p"
+  65: PropSet 2+result 5 1 7 ; line 21 ; name "p"
   66: Load 0 5 0 0 ; line 22
   67: FetchProp 0 11 5 2 ; line 22 ; name "a"
   68: PropGet incdec+objloc 6 11 1 ; line 22 ; name "p"
   69: Unary Decrement 7 6 0 ; line 22
-  70: PropSet objloc+result 11 1 7 ; line 22 ; name "p"
+  70: PropSet 3+objloc+result 11 1 7 ; line 22 ; name "p"
   71: Load 0 6 0 0 ; line 23
   72: PropGet quiet 7 6 1 ; line 23 ; name "p"
   73: Const 0 8 17 0 ; line 23 ; null
@@ -184,17 +184,16 @@ func 0 "{main}" params=0 locals=5 registers=12 maxstack=1 flags=nothis
   110: Store 0 3 5 0 ; line 27
   111: MakeRef 0 5 3 0 ; line 28
   112: Load 0 6 0 0 ; line 28
-  113: FetchProp 0 11 6 1 ; line 28 ; name "p"
-  114: Bind value 11 5 0 ; line 28
-  115: Load 0 6 0 0 ; line 29
-  116: PropRef 0 7 6 3 ; line 29 ; name "arr"
-  117: IterInit ref+0 5 7 122 ; line 29
-  118: IterNext ref+1 5 4 121 ; line 29
-  119: IncDec PostInc 6 4 0 ; line 30
-  120: Jump 0 118 0 0 ; line 30
-  121: Drop 0 5 0 0 ; line 30
-  122: Const 0 5 17 0 ; line 32 ; null
-  123: Return 0 5 0 0 ; line 32
+  113: PropSet 1 6 1 5 ; line 28 ; name "p"
+  114: Load 0 6 0 0 ; line 29
+  115: PropRef 0 7 6 3 ; line 29 ; name "arr"
+  116: IterInit ref+0 5 7 121 ; line 29
+  117: IterNext ref+1 5 4 120 ; line 29
+  118: IncDec PostInc 6 4 0 ; line 30
+  119: Jump 0 117 0 0 ; line 30
+  120: Drop 0 5 0 0 ; line 30
+  121: Const 0 5 17 0 ; line 32 ; null
+  122: Return 0 5 0 0 ; line 32
 func 1 "{constant expression}" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: NewArray 0 0 0 0 ; line 5

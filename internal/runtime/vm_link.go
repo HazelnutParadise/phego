@@ -299,6 +299,26 @@ func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error 
 			return err
 		}
 	}
+	// A method the class declares must match the abstract method of the same
+	// name in a trait it uses (zend_add_trait_method).
+	for _, tr := range spec.traits {
+		if tr.schema == nil {
+			continue
+		}
+		for _, lower := range methodNames(tr) {
+			tm := tr.schema.methods[lower]
+			child := own[lower]
+			if tm == nil || !tm.abstract || child == nil {
+				continue
+			}
+			if _, declared := vc.sigs[lower]; !declared {
+				continue // the method comes from a trait itself
+			}
+			if tm.static != child.static || !s.signatureCompatible(child, self, tm, tr) {
+				return &vmFatal{message: "Declaration of " + signature(child) + " must be compatible with " + methodSignatureText(tr, tm), line: lines[lower]}
+			}
+		}
+	}
 	// An inherited concrete method must satisfy the interfaces too.
 	if spec.parent != nil && spec.parent.schema != nil {
 		for _, in := range spec.interfaces {

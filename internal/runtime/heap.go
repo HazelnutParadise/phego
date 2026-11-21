@@ -1465,6 +1465,9 @@ func (h *heap) shutdown(globals *value) error {
 		for {
 			before := a.count()
 			for i := len(a.buckets) - 1; i >= 0; i-- {
+				if i >= len(a.buckets) {
+					continue // remove trims trailing holes
+				}
 				b := a.buckets[i]
 				if b == nil || b.val.kind != valueObject || b.val.object.refcount != 1 {
 					continue

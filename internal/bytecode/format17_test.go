@@ -577,7 +577,7 @@ func TestFormat17ClassTableIsVerified(t *testing.T) {
 		"interface name not a str":   {func(i *Image) { c0(i).Interfaces = []uint32{k17Int} }, "interface or trait name"},
 		"trait name empty":           {func(i *Image) { c0(i).Traits = []uint32{k17empty} }, "interface or trait name"},
 		"trait name out of range":    {func(i *Image) { c0(i).Traits = []uint32{999} }, "interface or trait name"},
-		"unknown class flags":        {func(i *Image) { c0(i).Flags |= ClassHoisted << 1 }, "unknown class flags"},
+		"unknown class flags":        {func(i *Image) { c0(i).Flags |= ClassAllowDynamic << 1 }, "unknown class flags"},
 		"interface and final":        {func(i *Image) { i.Classes[1].Flags |= ClassFinal }, "contradictory"},
 		"interface and trait":        {func(i *Image) { i.Classes[1].Flags |= ClassTrait }, "contradictory"},
 		"interface and readonly":     {func(i *Image) { i.Classes[1].Flags |= ClassReadonly }, "contradictory"},
@@ -803,10 +803,9 @@ func TestFormat17RejectsInvalidOperands(t *testing.T) {
 		"init method object location":    {Op: OpInitMethod, Aux: objLoc, A: 0, B: k17m},
 		"init static mode":               {Op: OpInitStatic, Aux: mode(1), A: k17C, B: k17m},
 		"init static object location":    {Op: OpInitStatic, Aux: objLoc, A: k17C, B: k17m},
-		"this aux":                       {Op: OpThis, Aux: 1, A: 3},
+		"this aux":                       {Op: OpThis, Aux: 2, A: 3},
 		"prop get result":                {Op: OpPropGet, Aux: MemberResult, A: 3, B: 0, C: k17p},
 		"prop get class ref":             {Op: OpPropGet, Aux: uint16(ClassSelf), A: 3, B: 0, C: k17p},
-		"prop set mode":                  {Op: OpPropSet, Aux: mode(1), A: 0, B: k17p, C: 0},
 		"prop set class ref":             {Op: OpPropSet, Aux: uint16(ClassStatic), A: 0, B: k17p, C: 0},
 		"fetch prop mode 3":              {Op: OpFetchProp, Aux: mode(3), A: 4, B: 0, C: k17p},
 		"fetch prop class ref":           {Op: OpFetchProp, Aux: uint16(ClassSelf), A: 4, B: 0, C: k17p},
@@ -818,7 +817,6 @@ func TestFormat17RejectsInvalidOperands(t *testing.T) {
 		"prop unset mode":                {Op: OpPropUnset, Aux: mode(1), A: 0, B: k17p},
 		"prop unset class ref":           {Op: OpPropUnset, Aux: uint16(ClassSelf), A: 0, B: k17p},
 		"static get object location":     {Op: OpStaticGet, Aux: objLoc, A: 3, B: k17C, C: k17p},
-		"static set mode":                {Op: OpStaticSet, Aux: mode(1), A: 0, B: k17C, C: k17p},
 		"static set object location":     {Op: OpStaticSet, Aux: objLoc, A: 0, B: k17C, C: k17p},
 		"fetch static unset mode":        {Op: OpFetchStatic, Aux: mode(MemberUnset), A: 4, B: k17C, C: k17p},
 		"fetch static object location":   {Op: OpFetchStatic, Aux: objLoc, A: 4, B: k17C, C: k17p},
@@ -1175,4 +1173,60 @@ func TestFormat17ClassTableCorruption(t *testing.T) {
 		t.Fatalf("%d loads took %v", loaded+refused, d)
 	}
 	t.Logf("%d bytes of class table: %d loaded, %d refused", len(data)-start, loaded, refused)
+}
+
+// The write instructions take a mode (bind a reference, the write half of
+// ++ and --), OpThis takes the isset form, and a class may allow dynamic
+// properties: additions made while stage 7A was reviewed.
+func TestFormat17ReviewAdditions(t *testing.T) {
+	image := Image{Constants: []Constant{{Kind: String, Bytes: "p"}, {Kind: String, Bytes: "C"}}, Classes: []Class{{Name: 1, Flags: ClassAllowDynamic}}}
+	f := &Function{Registers: []RegisterKind{Value, Value}, Code: make([]Instruction, 1)}
+	for _, m := range []MemberMode{MemberBindRef, MemberIncrement, MemberDecrement} {
+		aux := uint16(m) << memberModeShift
+		for _, in := range []Instruction{
+			{Op: OpPropSet, Aux: aux, A: 0, B: 0, C: 1},
+			{Op: OpPropSet, Aux: aux | MemberResult, A: 0, B: 0, C: 1},
+			{Op: OpStaticSet, Aux: aux | uint16(ClassNamed), A: 0, B: 1, C: 0},
+		} {
+			if err := checkOperands17(image, f, in); err != nil {
+				t.Errorf("%+v: %v", in, err)
+			}
+		}
+	}
+	if err := checkOperands17(image, f, Instruction{Op: OpThis, Aux: 1, A: 0}); err != nil {
+		t.Errorf("OpThis with the isset form: %v", err)
+	}
+	if err := checkOperands17(image, f, Instruction{Op: OpThis, Aux: 2, A: 0}); err == nil {
+		t.Error("OpThis accepted Aux 2")
+	}
+	if got := ClassAllowDynamic; got != 1<<6 || classFlagsKnown&got == 0 {
+		t.Errorf("ClassAllowDynamic = %d, known %v", got, classFlagsKnown&got != 0)
+	}
+}
+
+// A declared type must spell a type: the runtime's type machinery never
+// sees a string that the PHP compiler could not have produced.
+func TestFormat17TypeStrings(t *testing.T) {
+	for typ, want := range map[string]bool{
+		"int": true, "?int": true, "int|string": true, "A\\B|null": true, "(A&B)|null": true, "A&B": true, "static": true,
+		"": false, "int|": false, "|int": false, "&&&": false, "?int|string": false, "?": false, "(A)": true, "()": false, "1abc": false, "a b": false, "(A&)|B": false,
+	} {
+		if got := validType(typ); got != want {
+			t.Errorf("validType(%q) = %v, want %v", typ, got, want)
+		}
+	}
+	image := Image{Constants: []Constant{{Kind: String, Bytes: "&&&"}, {Kind: String, Bytes: "void"}, {Kind: String, Bytes: "p"}}}
+	bad := []*Function{
+		{ReturnType: 1},
+		{Params: 1, Parameters: []Parameter{{Name: 2, Type: 1}}},
+		{Params: 1, Parameters: []Parameter{{Name: 2, Type: 2}}},
+	}
+	for i, f := range bad {
+		if err := verifyFunction17(image, 7, f); !errors.Is(err, ErrInvalid) {
+			t.Errorf("function %d: err = %v, want ErrInvalid", i, err)
+		}
+	}
+	if err := verifyFunction17(image, 7, &Function{ReturnType: 2}); err != nil {
+		t.Errorf("void return type: %v", err)
+	}
 }

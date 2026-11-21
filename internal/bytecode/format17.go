@@ -71,6 +71,13 @@ const (
 	// container that is not an object throws instead of warning.
 	MemberAssignOp MemberMode = 2
 	MemberIncDec   MemberMode = 3
+	// OpPropSet, OpStaticSet: C (A for StaticSet) holds a reference the
+	// property is bound to (ZEND_ASSIGN_OBJ_REF), or the value ++ or --
+	// computed, which a property of type int rejects when it left the
+	// integer range.
+	MemberBindRef   MemberMode = 1
+	MemberIncrement MemberMode = 2
+	MemberDecrement MemberMode = 3
 	// OpFetchProp, OpFetchStatic.
 	MemberWrite     MemberMode = 0
 	MemberReadWrite MemberMode = 1
@@ -191,11 +198,12 @@ func Roles17(in Instruction) (roles [3]Role, ok bool) {
 	case OpInitStatic:
 		return [3]Role{class(), name, RoleNone}, only(classRefMask|MemberNameReg) && validRef
 	case OpThis:
-		return [3]Role{RoleDef, RoleNone, RoleNone}, aux == 0
+		// Aux 1 asks whether there is a $this (isset($this)): A is a bool.
+		return [3]Role{RoleDef, RoleNone, RoleNone}, aux <= 1
 	case OpPropGet:
 		return [3]Role{RoleDef, obj, name}, only(MemberNameReg | memberModeMask | MemberObjLocation)
 	case OpPropSet:
-		return [3]Role{obj, name, RoleUseDef}, only(MemberNameReg | MemberObjLocation | MemberResult)
+		return [3]Role{obj, name, RoleUseDef}, only(MemberNameReg | memberModeMask | MemberObjLocation | MemberResult)
 	case OpFetchProp:
 		return [3]Role{RoleLocDef, obj, name}, only(MemberNameReg|memberModeMask|MemberObjLocation) && mode <= MemberUnset
 	case OpPropRef:
@@ -207,7 +215,7 @@ func Roles17(in Instruction) (roles [3]Role, ok bool) {
 	case OpStaticGet:
 		return [3]Role{RoleDef, class(), name}, only(classRefMask|MemberNameReg|memberModeMask) && validRef
 	case OpStaticSet:
-		return [3]Role{RoleUseDef, class(), name}, only(classRefMask|MemberNameReg|MemberResult) && validRef
+		return [3]Role{RoleUseDef, class(), name}, only(classRefMask|MemberNameReg|memberModeMask|MemberResult) && validRef
 	case OpFetchStatic:
 		return [3]Role{RoleLocDef, class(), name}, only(classRefMask|MemberNameReg|memberModeMask) && validRef && mode <= MemberReadWrite
 	case OpStaticRef:
@@ -287,9 +295,11 @@ const (
 	// (early binding): it exists before the first instruction runs. Every
 	// other class is declared by its OpDeclareClass.
 	ClassHoisted
-	// ClassNoDynamic is left for a later format; it must be zero.
+	// ClassAllowDynamic is #[AllowDynamicProperties]: creating a dynamic
+	// property on an object of the class is not deprecated.
+	ClassAllowDynamic
 
-	classFlagsKnown = ClassInterface | ClassTrait | ClassAbstract | ClassFinal | ClassReadonly | ClassHoisted
+	classFlagsKnown = ClassInterface | ClassTrait | ClassAbstract | ClassFinal | ClassReadonly | ClassHoisted | ClassAllowDynamic
 )
 
 // MemberFlags describes a constant, property or method of a class. The low
@@ -588,6 +598,11 @@ func verifyClasses(b *budget, image Image, minor uint16, cloneCost bool) error {
 			if !name(p.Name) || !optName(p.Type) || p.Flags&^(memberVisMask|MemberStatic|MemberReadonly|MemberFinal) != 0 || p.Flags.Visibility() > MemberPrivate {
 				return fail("invalid property")
 			}
+			if p.Type != 0 {
+				if typ := image.Constants[p.Type-1].Bytes; !validType(typ) || typ == "void" || typ == "never" || typ == "callable" {
+					return fail("a property's type does not spell a property type")
+				}
+			}
 			if !unique('p', image.Constants[p.Name].Bytes) {
 				return fail("duplicate property name")
 			}
@@ -653,14 +668,14 @@ func verifyFunction17(image Image, minor uint16, f *Function) error {
 		return invalid("unknown function flags")
 	}
 	str := func(i uint32) bool {
-		return i == 0 || uint64(i-1) < uint64(len(image.Constants)) && image.Constants[i-1].Kind == String && image.Constants[i-1].Bytes != ""
+		return i == 0 || uint64(i-1) < uint64(len(image.Constants)) && image.Constants[i-1].Kind == String && image.Constants[i-1].Bytes != "" && validType(image.Constants[i-1].Bytes)
 	}
 	if !str(f.ReturnType) {
-		return invalid("the return type is not a non-empty string constant")
+		return invalid("the return type is not a non-empty string constant that spells a type")
 	}
 	for i, p := range f.Parameters {
-		if !str(p.Type) {
-			return invalid(fmt.Sprintf("the type of parameter %d is not a non-empty string constant", i))
+		if !str(p.Type) || p.Type != 0 && (image.Constants[p.Type-1].Bytes == "void" || image.Constants[p.Type-1].Bytes == "never") {
+			return invalid(fmt.Sprintf("the type of parameter %d is not a non-empty string constant that spells a parameter type", i))
 		}
 	}
 	return nil
@@ -929,4 +944,67 @@ func cloneClasses(b *budget, src []Class) ([]Class, error) {
 		dst[i] = copyClass(src[i])
 	}
 	return dst, nil
+}
+
+// validType reports whether s has the shape of a PHP type declaration: an
+// optional "?" before one name, or names joined by "|", where a member may
+// be names joined by "&" (in parentheses inside a union). The runtime
+// treats the names as it does for compiled PHP; what the check keeps out is
+// a string the type machinery was never written for.
+func validType(s string) bool {
+	if len(s) > 1 && s[0] == '?' {
+		s = s[1:]
+		for i := 0; i < len(s); i++ {
+			if s[i] == '|' || s[i] == '&' || s[i] == '(' {
+				return false
+			}
+		}
+	}
+	name := func(n string) bool {
+		if n == "" {
+			return false
+		}
+		for i := 0; i < len(n); i++ {
+			c := n[i]
+			switch {
+			case c == '_' || c == '\\' || c >= 0x80 || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z':
+			case c >= '0' && c <= '9' && i > 0:
+			default:
+				return false
+			}
+		}
+		return true
+	}
+	intersection := func(m string) bool {
+		for {
+			i := 0
+			for i < len(m) && m[i] != '&' {
+				i++
+			}
+			if !name(m[:i]) {
+				return false
+			}
+			if i == len(m) {
+				return true
+			}
+			m = m[i+1:]
+		}
+	}
+	for {
+		i := 0
+		for i < len(s) && s[i] != '|' {
+			i++
+		}
+		member := s[:i]
+		if len(member) > 2 && member[0] == '(' && member[len(member)-1] == ')' {
+			member = member[1 : len(member)-1]
+		}
+		if !intersection(member) {
+			return false
+		}
+		if i == len(s) {
+			return true
+		}
+		s = s[i+1:]
+	}
 }

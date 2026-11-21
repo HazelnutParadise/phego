@@ -35,6 +35,10 @@ type vmFrame struct {
 	// boundary marks the frame a nested run (vmState.invoke) entered: its
 	// Return ends that run instead of resuming a caller in the same loop.
 	boundary bool
+	// ctor marks a constructor's frame until it returns: a frame popped
+	// with it still set did not complete, and its object is then never
+	// destructed.
+	ctor bool
 	// weak marks a frame the runtime entered itself: its arguments are
 	// converted in weak mode whatever the caller's strict_types.
 	weak  bool
@@ -120,6 +124,17 @@ type vmState struct {
 	fetchScratch value
 	// caches are the run's inline caches (vmCache), allocated on first use.
 	caches []vmCache
+	// typedHole stands for a typed property that holds null or nothing and
+	// whose type takes no array, while a FetchProp or FetchStatic names
+	// it: writing an element through it throws.
+	typedHole     value
+	typedHoleProp *propertyInfo
+	// traceHeld are the objects the backtrace of the uncaught error holds
+	// (an owner each) until the error is reported.
+	traceHeld []value
+	// globalsKept says {main}'s variables were handed to the execution as
+	// its symbol table (keepGlobals).
+	globalsKept bool
 	// linking is the class whose declaration is being checked.
 	linking *class
 	steps   int64
@@ -273,7 +288,12 @@ func (s *vmState) stop(err error) {
 	var c completion
 	var internal *vmInternalFrameThrow
 	var fatal *vmFatal
+	var located *vmUncaught
 	switch {
+	case errors.As(err, &c) && c.kind == endThrow && !errors.As(c.err, &located) && errors.As(c.err, &t):
+		// A throwable the runtime wrapped on its way out of a callback: it
+		// is reported like any other, from where the instruction is.
+		s.end = s.uncaught(t)
 	case errors.As(err, &c):
 		s.end = c
 	case errors.As(err, &fatal):
@@ -371,6 +391,9 @@ func (s *vmState) kill(f *vmFrame, in *vmInstr) error {
 	var first error
 	for _, r := range f.fn.kills[in.kill : in.kill+uint32(in.nkill)] {
 		v := f.regs[r]
+		if v.kind < valueArray {
+			continue // a scalar holds nothing; the register is rewritten before it is read
+		}
 		f.regs[r] = value{}
 		if err := s.releaseValue(v); err != nil && first == nil {
 			first = err
@@ -475,7 +498,7 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
-	fr.weak = into.internal
+	fr.weak, fr.ctor = into.internal, into.ctor
 	if argc < fn.required {
 		// ZEND_RECV checks each parameter in order: the type of an
 		// argument before a missing one is reported first.
@@ -587,6 +610,9 @@ func (s *vmState) pop(release bool) error {
 	this := f.this
 	if this != nil {
 		f.this = nil
+		if f.ctor {
+			this.destructorCalled = true
+		}
 	}
 	clear(f.locals)
 	clear(f.locs)
@@ -945,6 +971,7 @@ func (s *vmState) tooFewArguments(argc int) error {
 func (s *vmState) ret(v value) error {
 	f := s.frames[len(s.frames)-1]
 	dest := f.dest
+	f.ctor = false // the constructor completed
 	err := s.pop(true)
 	caller := s.frames[len(s.frames)-1]
 	old := caller.regs[dest]
@@ -994,4 +1021,5 @@ func (s *vmState) keepGlobals() {
 		}
 	}
 	s.x.globals = globals
+	s.globalsKept = true
 }

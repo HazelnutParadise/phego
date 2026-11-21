@@ -35,6 +35,20 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 	if t.Class == "TypeError" && strings.Contains(t.Message, ", called in ") {
 		in = " and defined in "
 	}
+	// The exception's backtrace holds the arguments of every frame: an
+	// object only an argument refers to outlives the unwinding and is
+	// destroyed after the error is reported.
+	for i := len(s.frames) - 1; i >= 1; i-- {
+		for _, a := range s.frameArgs(s.frames[i]) {
+			if a = a.deref(); a.kind == valueObject {
+				retain(a)
+				s.traceHeld = append(s.traceHeld, a)
+			}
+		}
+	}
+	if len(s.traceHeld) > 0 && s.x.afterFatal == nil {
+		s.x.afterFatal = s.releaseTraceHeld
+	}
 	text := "Uncaught " + head + in + vmFileName(file) + ":" + strconv.Itoa(line) + "\nStack trace:\n" + trace + "\n  thrown"
 	s.lastFile, s.lastLine = file, line
 	return completion{kind: endThrow, err: &vmUncaught{thrown: t, file: file, line: line, trace: trace, text: text}}
@@ -43,6 +57,9 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 // traceName is the function of frame f as a backtrace shows it: Class->m
 // for a method called on an object, Class::m for a static one.
 func traceName(f *vmFrame) string {
+	if f.fn.name == "{constant expression}" {
+		return "[constant expression]"
+	}
 	if f.scope == nil {
 		return f.fn.name
 	}
@@ -235,4 +252,14 @@ func escapeTraceString(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// releaseTraceHeld gives up the objects the reported error's backtrace
+// held.
+func (s *vmState) releaseTraceHeld() {
+	held := s.traceHeld
+	s.traceHeld = nil
+	for _, v := range held {
+		_ = s.h.release(v)
+	}
 }

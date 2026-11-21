@@ -76,6 +76,12 @@ func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 // exists before the key is read ($n = null; $n[$n] = 1 is a TypeError, as the
 // pinned PHP 8.5.12 prints "Cannot access offset of type array on array").
 func (s *vmState) writable(slot *value, appending bool) error {
+	if slot == &s.typedHole && s.typedHoleProp != nil {
+		// zend_handle_fetch_obj_flags: the element's container is a typed
+		// property that holds no array and whose type takes none.
+		p := s.typedHoleProp
+		return &Throwable{"TypeError", "Cannot auto-initialize an array inside property " + p.label() + " of type " + p.typeName}
+	}
 	switch c := slot.deref(); c.kind {
 	case valueArray:
 		return nil

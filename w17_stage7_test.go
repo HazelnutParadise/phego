@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 // W-17 stage 7A: REQ-001, REQ-016, REQ-025, REQ-026; T-009, T-010,
@@ -165,4 +167,47 @@ func TestW17Stage7LargeFunctionDestructorTiming(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Code the runtime calls back nests on the Go stack, so its depth is
+// bounded: a destructor that creates and drops an object of its own class,
+// and a __get that recurses, end with PHP's stack-limit Error instead of
+// exhausting the host's stack. (PHP's own bound depends on its C stack, so
+// the depth differs and these are not differential fixtures.)
+func TestW17Stage7NestedCallbacksAreBounded(t *testing.T) {
+	e := mustEngine(t, Config{})
+	for name, src := range map[string]string{
+		"destructor":  "<?php\nclass D { function __destruct() { $x = new D; } }\nnew D;\n",
+		"magic get":   "<?php\nclass G { function __get($n) { return $this->$n; } }\n$g = new G;\necho $g->a;\n",
+		"to string":   "<?php\nclass S { public $n; function __toString() { $s = new S; $s->n = $this->n + 1; return \"x\" . $s; } }\n$s = new S;\n$s->n = 0;\necho $s;\n",
+		"constructor": "<?php\nclass C { function __construct() { new C; } }\nnew C;\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			if name == "constructor" || name == "magic get" {
+				// A constructor is an ordinary call, and __get guards its own
+				// recursion: neither nests without bound. They must still end.
+				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				defer cancel()
+				_, err := e.Run(ctx, w17Nested(t, e, src))
+				if err == nil && name == "constructor" {
+					t.Fatal("unbounded constructor recursion completed")
+				}
+				return
+			}
+			_, err := e.Run(context.Background(), w17Nested(t, e, src))
+			var pe *PHPError
+			if !errors.As(err, &pe) || pe.Kind != UncaughtThrowable || !strings.Contains(pe.Message, "Maximum call stack size") {
+				t.Fatalf("err = %v, want PHP's stack-limit Error", err)
+			}
+		})
+	}
+}
+
+func w17Nested(t *testing.T, e *Engine, src string) *Program {
+	t.Helper()
+	p, err := e.Compile(context.Background(), "/w/nested.php", src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p
 }

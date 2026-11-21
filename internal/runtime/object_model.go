@@ -472,7 +472,14 @@ func resolvePropertyIn(c *class, name string, scope *class, instance bool) (*pro
 		if instance && p.visibility == privateAccess && p.owner != c {
 			continue
 		}
-		if !canAccess(scope, p.owner, p.visibility) {
+		owner := p.owner
+		if p.visibility == protectedAccess && p.prototypeOwner != nil {
+			// zend_check_protected(property_info->prototype->ce, scope): a
+			// redeclared protected property stays reachable from every
+			// class that shares the ancestor that first declared it.
+			owner = p.prototypeOwner
+		}
+		if !canAccess(scope, owner, p.visibility) {
 			return nil, &Throwable{"Error", "Cannot access " + accessName(p.visibility) + " property " + c.name + "::$" + name}
 		}
 		return p, nil

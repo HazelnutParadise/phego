@@ -22,12 +22,14 @@ type vmEnter struct {
 	// internal marks a call the runtime makes: its arguments are converted
 	// in weak mode whatever the caller's strict_types.
 	internal bool
+	// ctor marks a constructor's call (see vmPendingCall.ctor).
+	ctor bool
 }
 
 // vmMaxNesting bounds the nested loops of one run. PHP's own bound is the C
 // stack (zend.max_allowed_stack_size); the error it raises there is the one
 // reported here.
-const vmMaxNesting = 4096
+const vmMaxNesting = 12000
 
 // invoke runs fn to completion from inside an instruction and returns its
 // result as an owned value. args are borrowed. An error is the completion
@@ -36,6 +38,10 @@ func (s *vmState) invoke(fn *vmFunction, this value, scope, called *class, args 
 	if s.nesting >= vmMaxNesting {
 		return value{}, &Throwable{"Error", "Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?"}
 	}
+	// The nesting is counted until this call's frames are gone: releasing
+	// their values can run destructors, which nest in turn.
+	s.nesting++
+	defer func() { s.nesting-- }()
 	for _, a := range args {
 		a = a.deref()
 		if a.kind >= valueArray {
@@ -63,9 +69,7 @@ func (s *vmState) invoke(fn *vmFunction, this value, scope, called *class, args 
 	} else {
 		s.frames[len(s.frames)-1].boundary = true
 		s.floor = len(s.frames)
-		s.nesting++
 		s.loop()
-		s.nesting--
 	}
 	out := s.end
 	release := out.kind == endNormal || out.kind == endReturn || out.kind == endThrow || out.kind == endExit
@@ -395,8 +399,15 @@ func (s *vmState) initStatic(f *vmFrame, in *vmInstr) error {
 			called = f.called
 		}
 	}
-	m, found := h.resolveMethod(c, name, f.scope)
-	if found && m != nil && methodAccessible(f.scope, m) {
+	// zend_std_get_static_method looks in the named class only: the private
+	// method of the calling scope that an instance call prefers plays no
+	// part here.
+	var m *methodSpec
+	if c.schema != nil {
+		m = c.schema.methods[phpNameLower(name)]
+	}
+	found := m != nil
+	if found && methodAccessible(f.scope, m) {
 		if m.static {
 			return s.startCall(m, value{}, called)
 		}
@@ -418,6 +429,9 @@ func (s *vmState) initStatic(f *vmFrame, in *vmInstr) error {
 	}
 	if found && m != nil {
 		return &Throwable{"Error", "Call to " + accessName(m.visibility) + " method " + c.name + "::" + m.name + "() from " + methodScopeLabel(f.scope)}
+	}
+	if ref == bytecode.ClassParent && phpNameEqual(name, "__construct") {
+		return &Throwable{"Error", "Cannot call constructor"}
 	}
 	return &Throwable{"Error", "Call to undefined method " + c.name + "::" + name + "()"}
 }
@@ -451,7 +465,11 @@ func (s *vmState) newObject(f *vmFrame, in *vmInstr) (jump bool, err error) {
 	if !canAccess(f.scope, ctor.owner, ctor.visibility) {
 		return false, &Throwable{"Error", "Call to " + accessName(ctor.visibility) + " " + c.name + "::__construct() from " + methodScopeLabel(f.scope)}
 	}
-	return false, s.startCall(ctor, f.regs[in.a], c)
+	if err := s.startCall(ctor, f.regs[in.a], c); err != nil {
+		return false, err
+	}
+	s.calls[len(s.calls)-1].ctor = true
+	return false, nil
 }
 
 // packMagic turns the pending call's arguments into the two arguments of

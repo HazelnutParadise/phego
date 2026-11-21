@@ -90,6 +90,9 @@ var errExecutionLimit = errors.New("execution limit exceeded")
 // input; actions and output writers must cooperate with cancellation. Cleanup
 // uses a separate deadline-bearing context supplied by the host.
 type execution struct {
+	// afterFatal, when set by the VM, runs once after the uncaught error
+	// that ended the script was reported.
+	afterFatal     func()
 	ctx            context.Context
 	cleanupContext context.Context
 	request        *Request
@@ -736,5 +739,12 @@ func (x *execution) recordEnd(c completion) {
 		// The phase already ended; a failed display write is recorded as
 		// the execution's stop like any other output failure.
 		x.report("Fatal error", c.Error(), false)
+		if x.afterFatal != nil {
+			// What the reported error kept alive is released now, as PHP
+			// frees the exception object after zend_exception_error.
+			done := x.afterFatal
+			x.afterFatal = nil
+			done()
+		}
 	}
 }

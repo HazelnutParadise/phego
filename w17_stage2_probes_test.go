@@ -1164,7 +1164,7 @@ var w17Stage2Unsupported = []struct {
 }{
 	{"s2_dim_write_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0] = 1;\necho \"end\\n\";\n",
 		"array write through a non-variable", 4, "a\nend\n"},
-	{"s2_u_fe_property_target", "<?php\necho \"a\\n\";\nforeach ([1] as $o->p) {}\n", "property access", 3, ""},
+	{"s2_u_fe_variable_variable_target", "<?php\necho \"a\\n\";\nforeach ([1] as $$n) {}\n", "variable variables", 3, ""},
 	{"s2_u_fe_body_static_closure", "<?php\necho \"a\\n\";\nforeach ([1] as $v) {\n  static $s = function () {};\n}\n", "closure", 4, ""},
 	{"s2_u_cas_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\nf()[0] .= 1;\n", "array write through a non-variable", 4, ""},
 	{"s2_u_incdec_non_variable", "<?php\nfunction f() { return [1]; }\necho \"a\\n\";\n\nf()[0]++;\n", "array write through a non-variable", 5, ""},

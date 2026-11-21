@@ -42,6 +42,9 @@ type vmPendingCall struct {
 	scope, called *class
 	magic         string
 	magicFn       int
+	// ctor marks a constructor's call: when it does not complete, the
+	// object's destructor is never called (zend_object_store_ctor_failed).
+	ctor bool
 	// pass marks the call a class without a constructor gets for the
 	// arguments of new: they are evaluated and discarded.
 	pass bool
@@ -96,7 +99,11 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 	}
 	name := s.prog.consts[in.b].text
 	var src *value
-	if i, ok := s.prog.mainLocal[name]; ok {
+	if s.globalsKept {
+		// {main} ended: its variables are the execution's symbol table now
+		// (a destructor at request shutdown calls a function with global).
+		src = s.keptGlobal(name)
+	} else if i, ok := s.prog.mainLocal[name]; ok {
 		src = &s.frames[0].locals[i]
 	} else if src, err = s.globalVar(name); err != nil {
 		return err
@@ -107,6 +114,19 @@ func (s *vmState) bindGlobal(f *vmFrame, in *vmInstr) error {
 		return nil
 	}
 	return s.h.bind(dst, src)
+}
+
+// keptGlobal is the global variable name in the symbol table keepGlobals
+// handed to the execution, created holding null when it is not there.
+func (s *vmState) keptGlobal(name string) *value {
+	a := s.x.globals.array
+	key := arrayKey{isString: true, text: name}
+	if b, ok := a.lookup(key); ok {
+		return &b.val
+	}
+	a.insert(key, nullValue(), s.prog.width)
+	b, _ := a.lookup(key)
+	return &b.val
 }
 
 // globalVar is the global variable that is not one of {main}'s: created on
@@ -246,7 +266,6 @@ func (s *vmState) recvVariadic(f *vmFrame, in *vmInstr) error {
 				return err
 			}
 			if !ok {
-				f.pc, f.unreceived = 0, true
 				return s.argumentTypeError(f, f.fn.params+i, typ, v.deref())
 			}
 			v = out
@@ -289,6 +308,9 @@ func (s *vmState) dropCalls(depth int) error {
 	var first error
 	for n := len(s.calls); n > 0 && s.calls[n-1].depth >= depth; n = len(s.calls) {
 		named, this := s.calls[n-1].named, s.calls[n-1].this
+		if s.calls[n-1].ctor && this != nil {
+			this.destructorCalled = true
+		}
 		s.calls[n-1] = vmPendingCall{}
 		s.calls = s.calls[:n-1]
 		if err := s.releaseValue(named); err != nil && first == nil {
@@ -603,7 +625,7 @@ func (s *vmState) callPending(in *vmInstr) (err error) {
 	// it: only omitted parameters or collected names make it escape.
 	var local vmCallInfo
 	local.named, local.holePC = rec.named, -1
-	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called}
+	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called, ctor: rec.ctor}
 	rec.this = nil
 	first, last := -1, -1
 	args := s.args[rec.base:]

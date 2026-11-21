@@ -379,6 +379,10 @@ func (fc *fnCompiler) isset(n *ir.Node) operand {
 			fc.emit(bytecode.OpArrayIsset, 0, r, rb, rk)
 		case ir.OpProp, ir.OpNullsafe, ir.OpStaticProp:
 			r = fc.issetMember(k, false)
+		case ir.OpThis:
+			fc.at(k.Line)
+			r = fc.alloc()
+			fc.emit(bytecode.OpThis, 1, r, 0, 0)
 		default:
 			fc.unsupportedNode(k)
 		}

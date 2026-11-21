@@ -962,6 +962,10 @@ func (fc *fnCompiler) iterTarget(target *ir.Node, fetch func(dest uint32, flags 
 		fetch(tmp, 0)
 		t := fc.dimTarget(target, target.Line)
 		fc.writeDim(t, reg(tmp), false, false)
+	case ir.OpProp, ir.OpStaticProp:
+		tmp := fc.alloc()
+		fetch(tmp, 0)
+		fc.assignElement(target, tmp)
 	default:
 		fc.unsupportedNode(target)
 	}

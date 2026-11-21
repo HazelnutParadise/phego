@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/phpname"
@@ -315,6 +316,10 @@ func (s *vmState) declareClass(index int) error {
 	d := &s.prog.classes[index]
 	h := s.h
 	key := phpname.Lower(d.name)
+	if s.lookupClass(d.name) != nil && h.classes[key].vm == nil {
+		// A class the engine provides (stdClass, Stringable).
+		return &vmFatal{message: "Cannot redeclare " + classKind(h.classes[key]) + " " + h.classes[key].name}
+	}
 	if old := h.classes[key]; old != nil {
 		where := ""
 		if old.vm != nil {
@@ -324,12 +329,13 @@ func (s *vmState) declareClass(index int) error {
 	}
 	vc := &vmClass{decl: d, consts: map[string]*vmClassConst{}}
 	spec := classSpec{
-		name:        d.name,
-		final:       d.flags&bytecode.ClassFinal != 0,
-		abstract:    d.flags&bytecode.ClassAbstract != 0,
-		isInterface: d.flags&bytecode.ClassInterface != 0,
-		isTrait:     d.flags&bytecode.ClassTrait != 0,
-		readonly:    d.flags&bytecode.ClassReadonly != 0,
+		name:         d.name,
+		final:        d.flags&bytecode.ClassFinal != 0,
+		abstract:     d.flags&bytecode.ClassAbstract != 0,
+		isInterface:  d.flags&bytecode.ClassInterface != 0,
+		isTrait:      d.flags&bytecode.ClassTrait != 0,
+		readonly:     d.flags&bytecode.ClassReadonly != 0,
+		allowDynamic: d.flags&bytecode.ClassAllowDynamic != 0,
 	}
 	if d.parent != "" {
 		parent := s.lookupClass(d.parent)
@@ -417,6 +423,16 @@ func (s *vmState) declareClass(index int) error {
 			// PHP raises them as fatal errors.
 			return &vmFatal{message: t.Message}
 		}
+		const conflict = "incompatible trait property " // + Class::$name
+		if msg := err.Error(); strings.HasPrefix(msg, conflict) {
+			// zend_do_traits_property_binding.
+			prop := msg[strings.LastIndex(msg, "$")+1:]
+			for _, tr := range spec.traits {
+				if tr.vm != nil && tr.vm.propDecl(prop) != nil {
+					return &vmFatal{message: d.name + " and " + tr.name + " define the same property ($" + prop + ") in the composition of " + d.name + ". However, the definition differs and is considered incompatible. Class was composed"}
+				}
+			}
+		}
 		return s.internal("class %s: %v", d.name, err)
 	}
 	c.vm, vc.class = vc, c
@@ -427,6 +443,9 @@ func (s *vmState) declareClass(index int) error {
 			return
 		}
 		for name, k := range from.vm.consts {
+			if accessOf(k.decl.flags) == privateAccess {
+				continue // a private constant is not inherited
+			}
 			if _, own := vc.consts[name]; !own {
 				vc.consts[name] = k
 			}
@@ -553,6 +572,43 @@ func (s *vmState) classMethods(vc *vmClass, d *vmClassDecl, spec *classSpec) ([]
 			}
 		}
 		return nil
+	}
+	// zend_traits_init_trait_structures: every alias rule is checked before
+	// any method is copied.
+	for i := range d.rules {
+		r := &d.rules[i]
+		if len(r.insteadof) != 0 {
+			continue
+		}
+		lower := phpname.Lower(r.method)
+		fail := func(msg string) error { return &vmFatal{message: msg, line: d.line} }
+		if r.trait != "" {
+			t := traitOf(r.trait)
+			if t == nil {
+				if s.lookupClass(r.trait) == nil {
+					return nil, fail("Could not find trait " + r.trait)
+				}
+				return nil, fail("Required Trait " + r.trait + " wasn't added to " + d.name)
+			}
+			if t.schema.methods[lower] == nil {
+				return nil, fail("An alias was defined for " + t.name + "::" + r.method + " but this method does not exist")
+			}
+			continue
+		}
+		var have []*class
+		for _, t := range spec.traits {
+			if t.schema.methods[lower] != nil {
+				have = append(have, t)
+			}
+		}
+		switch {
+		case len(have) == 0 && r.alias != "":
+			return nil, fail("An alias (" + r.alias + ") was defined for method " + r.method + "(), but this method does not exist")
+		case len(have) == 0:
+			return nil, fail("The modifiers of the trait method " + r.method + "() are changed, but this method does not exist. Error")
+		case len(have) > 1 && r.alias != "":
+			return nil, fail("An alias was defined for method " + r.method + "(), which exists in both " + have[0].name + " and " + have[1].name + ". Use " + have[0].name + "::" + r.method + " or " + have[1].name + "::" + r.method + " to resolve the ambiguity")
+		}
 	}
 	// excluded[trait][method]: an insteadof rule removed the method.
 	excluded := map[*class]map[string]bool{}
