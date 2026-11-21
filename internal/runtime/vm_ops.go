@@ -76,6 +76,12 @@ func (s *vmState) arrayGet(regs []value, in *vmInstr) error {
 // exists before the key is read ($n = null; $n[$n] = 1 is a TypeError, as the
 // pinned PHP 8.5.12 prints "Cannot access offset of type array on array").
 func (s *vmState) writable(slot *value, appending bool) error {
+	if slot == &s.typedHole && s.typedHoleProp != nil {
+		// zend_handle_fetch_obj_flags: the element's container is a typed
+		// property that holds no array and whose type takes none.
+		p := s.typedHoleProp
+		return &Throwable{"TypeError", "Cannot auto-initialize an array inside property " + p.label() + " of type " + p.typeName}
+	}
 	switch c := slot.deref(); c.kind {
 	case valueArray:
 		return nil
@@ -154,7 +160,7 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 	}
 	if flags&bytecode.ValueLocation == 0 {
 		v := operandValue(f.regs, in.c)
-		if err := s.h.setElement(slot, k, v); err != nil {
+		if err := s.h.setElementPHP(slot, k, v, f.fn.strict); err != nil {
 			return err
 		}
 		return s.arraySetResult(f, in, v)
@@ -187,7 +193,7 @@ func (s *vmState) arraySet(f *vmFrame, in *vmInstr) error {
 		s.h.warn(levelWarning, "Undefined variable $"+s.localName(f, in.c))
 	}
 	if err == nil && !s.stopped() {
-		err = s.h.assign(e, v)
+		err = s.h.assignPHP(e, v, f.fn.strict)
 	}
 	if err == nil && !s.stopped() {
 		err = s.arraySetResult(f, in, v)
@@ -245,7 +251,7 @@ func (s *vmState) arrayAdd(f *vmFrame, in *vmInstr) error {
 		return nextElementError(s.h.appendValue(arr, v))
 	}
 	if flags&bytecode.AddKeyLocation == 0 {
-		return s.h.setElement(arr, operandValue(f.regs, in.c), v)
+		return s.h.setElementPHP(arr, operandValue(f.regs, in.c), v, f.fn.strict)
 	}
 	k, undefined, err := s.readVar(f, in.c)
 	if err != nil || s.stopped() {
@@ -254,7 +260,7 @@ func (s *vmState) arrayAdd(f *vmFrame, in *vmInstr) error {
 	if undefined {
 		k = stringValue("")
 	}
-	return s.h.setElement(arr, k, v)
+	return s.h.setElementPHP(arr, k, v, f.fn.strict)
 }
 
 // arrayUnset is ZEND_UNSET_DIM.
@@ -405,6 +411,12 @@ func (s *vmState) unset(f *vmFrame, in *vmInstr) error {
 // mul_function(x, -1) and mul_function(x, 1), and ZEND_BW_NOT.
 func (s *vmState) unary(op bytecode.UnaryOp, v value) (value, error) {
 	switch op {
+	case bytecode.Increment:
+		return s.increment(v.deref())
+	case bytecode.Decrement:
+		return s.decrement(v.deref())
+	}
+	switch op {
 	case bytecode.Not:
 		return boolValue(!s.h.toBool(v)), nil
 	case bytecode.Negate:
@@ -437,14 +449,23 @@ func (s *vmState) cast(kind bytecode.CastKind, v value) (value, error) {
 		}
 		str, err := h.toString(v)
 		return stringValue(str), err
+	case bytecode.CastObject:
+		return s.castObject(v)
 	case bytecode.CastArray:
 		switch v.kind {
 		case valueArray:
 			return v, nil
 		case valueUndefined, valueNull:
 			return h.newArrayValue(), nil
-		case valueObject, valueResource:
-			return value{}, s.unsupported("casting an object or resource to array")
+		case valueObject:
+			arr, err := s.objectArray(v.object, nil, false, false)
+			if err != nil {
+				return value{}, err
+			}
+			unown(arr)
+			return arr, nil
+		case valueResource:
+			return value{}, s.unsupported("casting a resource to array")
 		}
 		out := h.newArrayValue()
 		if err := h.setElement(&out, h.number(0), v); err != nil {
@@ -488,7 +509,7 @@ func (s *vmState) incDec(f *vmFrame, in *vmInstr) error {
 	}
 	if old.kind < valueArray && next.kind < valueArray && slot.kind < valueArray {
 		*slot = next
-	} else if err := s.h.assign(slot, next); err != nil {
+	} else if err := s.h.assignPHP(slot, next, f.fn.strict); err != nil {
 		return err
 	}
 	result := next
@@ -530,7 +551,10 @@ func (s *vmState) increment(v value) (value, error) {
 	case valueArray:
 		return value{}, &Throwable{"TypeError", "Cannot increment array"}
 	}
-	return value{}, s.unsupported("incrementing an object or resource")
+	if v.kind == valueObject {
+		return value{}, &Throwable{"TypeError", "Cannot increment " + v.object.class.name}
+	}
+	return value{}, s.unsupported("incrementing a resource")
 }
 
 // decrement is decrement_function.
@@ -570,7 +594,10 @@ func (s *vmState) decrement(v value) (value, error) {
 	case valueArray:
 		return value{}, &Throwable{"TypeError", "Cannot decrement array"}
 	}
-	return value{}, s.unsupported("decrementing an object or resource")
+	if v.kind == valueObject {
+		return value{}, &Throwable{"TypeError", "Cannot decrement " + v.object.class.name}
+	}
+	return value{}, s.unsupported("decrementing a resource")
 }
 
 // incrementString is increment_string's Perl-style increment.

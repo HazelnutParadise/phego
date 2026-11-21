@@ -16,6 +16,8 @@ type class struct {
 	destructor      func(h *heap, this value) error
 	destructorOwner *class // immutable identity for prototype destructor callbacks
 	schema          *classSchema
+	// vm is the VM's record of a class a program declared in this run.
+	vm *vmClass
 }
 
 type object struct {
@@ -48,9 +50,13 @@ type weakMap struct {
 // heap owns the mutable PHP values of one request. It is not safe for
 // concurrent use; an Execution must not share it with another request.
 type heap struct {
-	width         int
-	arch          string // guest architecture of the PHP profile (see newHeapFor)
-	os            string // guest system of the PHP profile (see newHeapFor)
+	width int
+	arch  string // guest architecture of the PHP profile (see newHeapFor)
+	os    string // guest system of the PHP profile (see newHeapFor)
+	// deleteDepth counts nested object frees; deleteQueue holds the objects
+	// past maxDeleteDepth for the outermost one (see deleteObject).
+	deleteDepth   int
+	deleteQueue   []*object
 	nextHandle    uint64
 	freeHandles   []uint64
 	noHandleReuse bool
@@ -84,6 +90,9 @@ type heap struct {
 	classes               map[string]*class
 	currentHook           activePropertyHook
 	currentCalledScope    *class
+	// vm is the interpreter state of the run, for the methods of classes a
+	// program declares: their bodies are bytecode functions.
+	vm *vmState
 }
 
 // newHeap uses the profile PHP 8.5.12 would run as on this host: amd64 on an
@@ -444,6 +453,41 @@ func (h *heap) deleteObject(o *object) error {
 	if err := h.validateObject(o); err != nil {
 		return err
 	}
+	if h.deleteDepth >= maxDeleteDepth && (o.destructorCalled || !objectHasDestructor(o)) {
+		// Freeing an object frees what it owns, which nests once per link
+		// of a chain of objects. Past this depth an object without a
+		// destructor to run waits for the outermost delete, which takes
+		// the queue in order: a chain of any length is freed without
+		// growing the Go stack. An object with a destructor still nests,
+		// so that destructors run at PHP's moment; the callback nesting
+		// limit bounds those.
+		h.deleteQueue = append(h.deleteQueue, o)
+		return nil
+	}
+	h.deleteDepth++
+	first := h.deleteObjectNow(o)
+	h.deleteDepth--
+	if h.deleteDepth == 0 {
+		for len(h.deleteQueue) > 0 {
+			next := h.deleteQueue[0]
+			h.deleteQueue[0] = nil
+			h.deleteQueue = h.deleteQueue[1:]
+			if next.refcount != 0 || next.freed {
+				continue
+			}
+			h.deleteDepth++
+			first = h.mergeObjectErrors(first, h.deleteObjectNow(next))
+			h.deleteDepth--
+		}
+		h.deleteQueue = nil
+	}
+	return first
+}
+
+// maxDeleteDepth bounds how deeply object frees nest on the Go stack.
+const maxDeleteDepth = 512
+
+func (h *heap) deleteObjectNow(o *object) error {
 	var first error
 	if !o.destructorCalled {
 		o.destructorCalled = true
@@ -825,6 +869,13 @@ func (h *heap) appendElement(slot *value) (*value, error) {
 }
 
 func (h *heap) setElement(slot *value, key, v value) error {
+	return h.setElementPHP(slot, key, v, true)
+}
+
+// setElementPHP is setElement for PHP code: strict is the writing file's
+// strict_types, which decides how a value written through a reference held
+// by a typed property is converted.
+func (h *heap) setElementPHP(slot *value, key, v value, strict bool) error {
 	if err := h.runtimeCheck(); err != nil {
 		return err
 	}
@@ -834,7 +885,7 @@ func (h *heap) setElement(slot *value, key, v value) error {
 	if err := ownArrayLocation(slot); err != nil {
 		return err
 	}
-	return h.storeElement(v, func() (*value, error) { return h.element(slot, key) })
+	return h.storeElement(v, strict, func() (*value, error) { return h.element(slot, key) })
 }
 
 func (h *heap) appendValue(slot *value, v value) error {
@@ -847,7 +898,7 @@ func (h *heap) appendValue(slot *value, v value) error {
 	if err := ownArrayLocation(slot); err != nil {
 		return err
 	}
-	return h.storeElement(v, func() (*value, error) { return h.appendElement(slot) })
+	return h.storeElement(v, true, func() (*value, error) { return h.appendElement(slot) })
 }
 
 // Passing an unowned array as a writable location acquires its location owner
@@ -871,7 +922,7 @@ func ownArrayLocation(slot *value) error {
 // storeElement holds the right-hand side while the destination element is
 // created, so writing an array into itself separates it first: $a[] = $a
 // yields [1, [1]] rather than a recursive array.
-func (h *heap) storeElement(v value, element func() (*value, error)) error {
+func (h *heap) storeElement(v value, strict bool, element func() (*value, error)) error {
 	if err := h.claimValues(v); err != nil {
 		return err
 	}
@@ -879,7 +930,7 @@ func (h *heap) storeElement(v value, element func() (*value, error)) error {
 	retain(v)
 	e, err := element()
 	if err == nil {
-		err = h.assign(e, v)
+		err = h.assignPHP(e, v, strict)
 	}
 	if rerr := h.release(v); err == nil {
 		err = rerr
@@ -1460,6 +1511,9 @@ func (h *heap) shutdown(globals *value) error {
 		for {
 			before := a.count()
 			for i := len(a.buckets) - 1; i >= 0; i-- {
+				if i >= len(a.buckets) {
+					continue // remove trims trailing holes
+				}
 				b := a.buckets[i]
 				if b == nil || b.val.kind != valueObject || b.val.object.refcount != 1 {
 					continue

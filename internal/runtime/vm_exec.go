@@ -29,11 +29,28 @@ type vmFrame struct {
 	// elems holds the elements FetchDim found for the frame's element
 	// locations; a location register names one as -(index + 1).
 	elems []*value
-	base  int // offset of regs in the value slab
-	lbase int // offset of locs in the location slab
-	ebase int // offset of elems in the element slab
+	// freshV, freshL and freshE say the frame's window opened a new chunk
+	// of the value, location and element stacks (vmStack).
+	freshV, freshL, freshE bool
+	// boundary marks the frame a nested run (vmState.invoke) entered: its
+	// Return ends that run instead of resuming a caller in the same loop.
+	boundary bool
+	// ctor marks a constructor's frame until it returns: a frame popped
+	// with it still set did not complete, and its object is then never
+	// destructed.
+	ctor bool
+	// weak marks a frame the runtime entered itself: its arguments are
+	// converted in weak mode whatever the caller's strict_types.
+	weak  bool
 	dest  uint32
 	nargs int
+	// this is the object of a method call (an owner), scope the class the
+	// code was declared in or used by (the lexical scope of self and of
+	// visibility checks) and called the class of late static binding. All
+	// are zero for a plain function.
+	this   *object
+	scope  *class
+	called *class
 	// unreceived marks a frame whose call passed too few arguments: its pc
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
@@ -44,16 +61,19 @@ type vmFrame struct {
 }
 
 type vmState struct {
-	prog   *Program
-	x      *execution
-	h      *heap
-	frames []vmFrame
-	slab   []value
-	top    int
-	lslab  []int32
-	ltop   int
-	eslab  []*value
-	etop   int
+	prog *Program
+	x    *execution
+	h    *heap
+	// frames are the live frames, innermost last. Each is the frame object
+	// of its depth in frameObjs, so a *vmFrame stays valid while PHP code
+	// that an instruction calls (a destructor, a magic method) pushes and
+	// pops frames above it. The three stacks hand out windows that never
+	// move for the same reason.
+	frames    []*vmFrame
+	frameObjs []*vmFrame
+	vals      vmStack[value]
+	locs      vmStack[int32]
+	elems     vmStack[*value]
 	// defaults is RECV_INIT's run-time cache: per function index, per
 	// parameter, the default value an earlier call evaluated and PHP keeps
 	// (vmDefaultCacheable). Allocated on first use; it lives with the run,
@@ -73,8 +93,9 @@ type vmState struct {
 	// local, a reference once the variable is initialized. globalVars are
 	// the global variables {main} has no local for. Both live with the
 	// run, never in the shared Program.
-	statics    [][]value
-	globalVars map[string]*value
+	statics      [][]value
+	traitStatics map[vmTraitStatic][]value
+	globalVars   map[string]*value
 	// reporting is the run's error_reporting, EG(error_reporting): the
 	// INI value, lowered to the fatal levels inside @ (BeginSilence) and
 	// restored after it (EndSilence). x.errors.excluded mirrors it.
@@ -89,15 +110,42 @@ type vmState struct {
 	// constant declared later does not take over an unqualified name that
 	// already fell back to the global one.
 	constCache map[uint64]value
-	steps      int64
-	limit      int64
-	next       int64 // steps at which the next slow check runs
-	done       <-chan struct{}
-	scratch    []byte
-	globals    []Global
-	prelude    []RunDiagnostic
-	end        completion
-	ended      bool
+	// Format 1.7. declared are the classes the run declared and classCache
+	// the classes its instructions resolved by name, per constant index.
+	// into is what the next push gives its frame. floor is the frame depth
+	// at which the current loop returns to Go (1 for {main}) and nesting
+	// the number of loops running. fetchScratch holds the value a FetchProp
+	// names when the property has no location of its own.
+	declared     []*vmClass
+	classCache   []*class
+	into         vmEnter
+	floor        int
+	nesting      int
+	fetchScratch value
+	// caches are the run's inline caches (vmCache), allocated on first use.
+	caches []vmCache
+	// typedHole stands for a typed property that holds null or nothing and
+	// whose type takes no array, while a FetchProp or FetchStatic names
+	// it: writing an element through it throws.
+	typedHole     value
+	typedHoleProp *propertyInfo
+	// traceHeld are the objects the backtrace of the uncaught error holds
+	// (an owner each) until the error is reported.
+	traceHeld []value
+	// globalsKept says {main}'s variables were handed to the execution as
+	// its symbol table (keepGlobals).
+	globalsKept bool
+	// linking is the class whose declaration is being checked.
+	linking *class
+	steps   int64
+	limit   int64
+	next    int64 // steps at which the next slow check runs
+	done    <-chan struct{}
+	scratch []byte
+	globals []Global
+	prelude []RunDiagnostic
+	end     completion
+	ended   bool
 
 	// offsetBuf holds the bytes of offsetLast, the string the last string
 	// offset write built, when offsetValid is set, so that a write
@@ -124,6 +172,8 @@ func newVMState(p *Program, x *execution, cfg RunConfig) *vmState {
 	s.reporting = cfg.ErrorReporting
 	x.errors = errorChannels{display: cfg.DisplayErrors, log: cfg.LogErrors, where: s.where, excluded: ^cfg.ErrorReporting}
 	x.heap.sink = s.warn
+	x.heap.vm = s
+	s.floor = 1
 	return s
 }
 
@@ -132,7 +182,7 @@ func (s *vmState) where() (string, int) {
 	if len(s.frames) == 0 {
 		return s.lastFile, s.lastLine
 	}
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	return f.fn.files[f.pc], int(f.fn.lines[f.pc])
 }
 
@@ -146,7 +196,7 @@ func (s *vmState) location() (fn string, pc int, file string, line int) {
 	if len(s.frames) == 0 {
 		return "{main}", -1, s.lastFile, s.lastLine
 	}
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	return f.fn.name, f.pc, f.fn.files[f.pc], int(f.fn.lines[f.pc])
 }
 
@@ -191,12 +241,16 @@ func (s *vmState) enter() bool {
 		s.stop(err)
 		return false
 	}
+	if err := s.declareHoisted(); err != nil {
+		s.stop(err)
+		return false
+	}
 	return true
 }
 
 // bindGlobals imports host values into the {main} locals of the same name.
 func (s *vmState) bindGlobals(main *vmFunction) error {
-	f := &s.frames[0]
+	f := s.frames[0]
 	for _, g := range s.globals {
 		for i, name := range main.localNames {
 			if name == "" || name != g.Name {
@@ -233,9 +287,22 @@ func (s *vmState) stop(err error) {
 	var t *Throwable
 	var c completion
 	var internal *vmInternalFrameThrow
+	var fatal *vmFatal
+	var located *vmUncaught
 	switch {
+	case errors.As(err, &c) && c.kind == endThrow && !errors.As(c.err, &located) && errors.As(c.err, &t):
+		// A throwable the runtime wrapped on its way out of a callback: it
+		// is reported like any other, from where the instruction is.
+		s.end = s.uncaught(t)
 	case errors.As(err, &c):
 		s.end = c
+	case errors.As(err, &fatal):
+		_, _, s.lastFile, s.lastLine = s.location()
+		if fatal.line > 0 {
+			s.lastLine = fatal.line
+		}
+		s.x.errors.trailer = "Stack trace:\n" + s.backtrace("", nil) + "\n"
+		s.end = s.x.fail(endFatal, errors.New(fatal.message))
 	case errors.As(err, &internal):
 		s.end = s.uncaughtFrom(internal.thrown, internal.function, internal.args)
 	case errors.As(err, &t):
@@ -324,6 +391,9 @@ func (s *vmState) kill(f *vmFrame, in *vmInstr) error {
 	var first error
 	for _, r := range f.fn.kills[in.kill : in.kill+uint32(in.nkill)] {
 		v := f.regs[r]
+		if v.kind < valueArray {
+			continue // a scalar holds nothing; the register is rewritten before it is read
+		}
 		f.regs[r] = value{}
 		if err := s.releaseValue(v); err != nil && first == nil {
 			first = err
@@ -369,27 +439,45 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	if argc > len(s.args) {
 		return s.internal("call with %d arguments but %d pending", argc, len(s.args))
 	}
-	n := fn.nvals + fn.locals
-	fr := vmFrame{fn: fn, code: fn.code, dest: dest, nargs: argc}
-	if s.top+n > len(s.slab) {
-		s.growSlab(n)
+	fr := s.newFrame()
+	into := s.into
+	if into != (vmEnter{}) {
+		s.into = vmEnter{}
 	}
-	fr.base = s.top
-	win := s.slab[s.top : s.top+n : s.top+n]
-	s.top += n
+	// Field by field: the frame object lives on the heap, and assigning
+	// the whole struct goes through the garbage collector's bulk write
+	// barrier on every call.
+	fr.fn, fr.code, fr.pc, fr.dest, fr.nargs = fn, fn.code, 0, dest, argc
+	if fr.this != into.this || fr.scope != into.scope || fr.called != into.called {
+		fr.this, fr.scope, fr.called = into.this, into.scope, into.called
+	}
+	fr.boundary, fr.unreceived = false, false
+	if s.h.currentCalledScope != into.called {
+		s.h.currentCalledScope = into.called
+	}
+	// The windows, with the common case (room in the current chunk) written
+	// out: a generic method call here costs a recursive PHP function
+	// several percent.
+	var win []value
+	if top := s.vals.top + fn.nvals + fn.locals; top <= len(s.vals.cur) {
+		win = s.vals.cur[s.vals.top:top:top]
+		s.vals.top = top
+	} else {
+		win, fr.freshV = s.vals.grow(fn.nvals+fn.locals), true
+	}
 	fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
-	if s.ltop+fn.nlocs > len(s.lslab) {
-		s.growLocations(fn.nlocs)
+	if top := s.locs.top + fn.nlocs; top <= len(s.locs.cur) {
+		fr.locs = s.locs.cur[s.locs.top:top:top]
+		s.locs.top = top
+	} else {
+		fr.locs, fr.freshL = s.locs.grow(fn.nlocs), true
 	}
-	fr.lbase = s.ltop
-	fr.locs = s.lslab[s.ltop : s.ltop+fn.nlocs : s.ltop+fn.nlocs]
-	s.ltop += fn.nlocs
-	if s.etop+fn.nelems > len(s.eslab) {
-		s.growElements(fn.nelems)
+	if top := s.elems.top + fn.nelems; top <= len(s.elems.cur) {
+		fr.elems = s.elems.cur[s.elems.top:top:top]
+		s.elems.top = top
+	} else {
+		fr.elems, fr.freshE = s.elems.grow(fn.nelems), true
 	}
-	fr.ebase = s.etop
-	fr.elems = s.eslab[s.etop : s.etop+fn.nelems : s.etop+fn.nelems]
-	s.etop += fn.nelems
 	args := s.args[len(s.args)-argc:]
 	for i, a := range args {
 		if i < fn.params {
@@ -410,54 +498,79 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
+	fr.weak, fr.ctor = into.internal, into.ctor
 	if argc < fn.required {
+		// ZEND_RECV checks each parameter in order: the type of an
+		// argument before a missing one is reported first.
+		if fn.typed {
+			if err := s.checkArguments(fr, argc); err != nil {
+				return err
+			}
+		}
 		return s.tooFewArguments(argc)
 	}
 	return nil
 }
 
-// growSlab reallocates the value slab geometrically and re-slices every
-// live frame's window into it. The slab never shrinks during a run.
-func (s *vmState) growSlab(n int) {
-	size := max(2*len(s.slab), s.top+n, 16)
-	slab := make([]value, size)
-	copy(slab, s.slab[:s.top])
-	s.slab = slab
-	for i := range s.frames {
-		f := &s.frames[i]
-		nv := f.fn.nvals
-		win := slab[f.base : f.base+nv+f.fn.locals : f.base+nv+f.fn.locals]
-		f.regs, f.locals = win[:nv:nv], win[nv:]
+// newFrame is the frame object of the next depth. The objects are allocated
+// in blocks and reused, so entering a function allocates nothing.
+func (s *vmState) newFrame() *vmFrame {
+	d := len(s.frames)
+	if d == len(s.frameObjs) {
+		block := make([]vmFrame, max(16, min(d, 1024)))
+		for i := range block {
+			s.frameObjs = append(s.frameObjs, &block[i])
+		}
 	}
+	return s.frameObjs[d]
 }
 
-func (s *vmState) growElements(n int) {
-	size := max(2*len(s.eslab), s.etop+n, 4)
-	slab := make([]*value, size)
-	copy(slab, s.eslab[:s.etop])
-	s.eslab = slab
-	for i := range s.frames {
-		f := &s.frames[i]
-		f.elems = slab[f.ebase : f.ebase+f.fn.nelems : f.ebase+f.fn.nelems]
-	}
+// vmStack hands out consecutive windows of fixed chunks. A window never
+// moves: when the current chunk is full a larger one is started, and the
+// frame that opened it gives it back.
+type vmStack[T any] struct {
+	cur   []T
+	top   int
+	prev  []vmStackMark[T]
+	spare []T
 }
 
-func (s *vmState) growLocations(n int) {
-	size := max(2*len(s.lslab), s.ltop+n, 16)
-	slab := make([]int32, size)
-	copy(slab, s.lslab[:s.ltop])
-	s.lslab = slab
-	for i := range s.frames {
-		f := &s.frames[i]
-		f.locs = slab[f.lbase : f.lbase+f.fn.nlocs : f.lbase+f.fn.nlocs]
+type vmStackMark[T any] struct {
+	cur []T
+	top int
+}
+
+// grow starts a chunk that holds at least n elements.
+//
+//go:noinline
+func (k *vmStack[T]) grow(n int) []T {
+	k.prev = append(k.prev, vmStackMark[T]{k.cur, k.top})
+	if size := max(2*len(k.cur), n, 16); len(k.spare) >= max(n, len(k.cur)+1) {
+		k.cur, k.spare = k.spare, nil
+	} else {
+		k.cur = make([]T, size)
 	}
+	k.top = n
+	return k.cur[:n:n]
+}
+
+// shrink goes back to the chunk before the newest one, after the frame
+// that opened it gave its window back.
+//
+//go:noinline
+func (k *vmStack[T]) shrink() {
+	m := k.prev[len(k.prev)-1]
+	k.prev[len(k.prev)-1] = vmStackMark[T]{}
+	k.prev = k.prev[:len(k.prev)-1]
+	k.spare = k.cur
+	k.cur, k.top = m.cur, m.top
 }
 
 // pop releases the top frame's values and removes it. The values are
 // released for normal ends, returns, throws and exits, as callInScope does;
 // fatal errors and host stops keep them for request teardown.
 func (s *vmState) pop(release bool) error {
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	var first error
 	keep := func(err error) {
 		if err != nil && first == nil {
@@ -494,20 +607,60 @@ func (s *vmState) pop(release bool) error {
 			keep(err)
 		}
 	}
+	this := f.this
+	if this != nil {
+		f.this = nil
+		if f.ctor {
+			this.destructorCalled = true
+		}
+	}
 	clear(f.locals)
 	clear(f.locs)
 	clear(f.elems)
-	s.top = f.base
-	s.ltop = f.lbase
-	s.etop = f.ebase
-	s.frames[len(s.frames)-1] = vmFrame{}
+	s.vals.top -= len(f.regs) + len(f.locals)
+	s.locs.top -= len(f.locs)
+	s.elems.top -= len(f.elems)
+	if f.freshV {
+		s.vals.shrink()
+	}
+	if f.freshL {
+		s.locs.shrink()
+	}
+	if f.freshE {
+		s.elems.shrink()
+	}
+	// The frame object is reused. push writes every field it reads; only
+	// what could keep a value alive is cleared here, and only when set, so
+	// a plain call writes no pointer on its way out.
+	if f.extra != nil {
+		f.extra = nil
+	}
+	if f.call != nil {
+		f.call = nil
+	}
+	f.freshV, f.freshL, f.freshE = false, false, false
 	s.frames = s.frames[:len(s.frames)-1]
+	var outer *class
+	if n := len(s.frames); n > 0 {
+		outer = s.frames[n-1].called
+	}
+	if s.h.currentCalledScope != outer {
+		s.h.currentCalledScope = outer
+	}
+	// $this is released after the frame's variables (i_free_compiled_variables
+	// runs before OBJ_RELEASE(ZEND_THIS) in zend_leave_helper).
+	if release && this != nil {
+		keep(s.releaseObject(this))
+	}
 	return first
 }
 
 // unwind pops every frame after the loop ended.
 func (s *vmState) unwind() {
 	release := s.end.kind == endNormal || s.end.kind == endReturn || s.end.kind == endThrow || s.end.kind == endExit
+	if release && len(s.frames) > 0 {
+		s.keepGlobals()
+	}
 	for len(s.frames) > 0 {
 		if err := s.pop(release); err != nil && release {
 			release = false
@@ -518,7 +671,11 @@ func (s *vmState) unwind() {
 		_ = s.releaseValue(v)
 	}
 	s.args = nil
-	if release {
+	// What else the run holds (constants, static variables, the classes'
+	// constants and static properties) is storage PHP frees after every
+	// destructor ran: once the run declared a class it is left to the
+	// request's teardown, which releases it without calling PHP code.
+	if release && len(s.declared) == 0 {
 		for name, v := range s.consts {
 			delete(s.consts, name)
 			_ = s.releaseValue(v)
@@ -744,7 +901,11 @@ func (s *vmState) output(v value) completion {
 
 // callValue resolves a string callable naming a program function.
 func (s *vmState) callValue(callable value, argc int, dest uint32) error {
-	if callable = callable.deref(); callable.kind != valueString {
+	callable = callable.deref()
+	if callable.kind == valueObject {
+		return s.callObject(callable, argc, dest)
+	}
+	if callable.kind != valueString {
 		return s.unsupported("calling a non-string callable")
 	}
 	name := strings.TrimPrefix(callable.text, "\\")
@@ -789,8 +950,11 @@ func (s *vmState) dropArgs(argc int) error {
 // instruction that receives it, which carries the parameter's line. A
 // function with optional parameters expects "at least" its required ones.
 func (s *vmState) tooFewArguments(argc int) error {
-	callee := &s.frames[len(s.frames)-1]
-	caller := &s.frames[len(s.frames)-2]
+	callee := s.frames[len(s.frames)-1]
+	if len(s.frames) < 2 {
+		return &Throwable{"ArgumentCountError", "Too few arguments to function " + s.funcName(callee) + "(), " + strconv.Itoa(argc) + " passed and at least " + strconv.Itoa(callee.fn.required) + " expected"}
+	}
+	caller := s.frames[len(s.frames)-2]
 	callee.unreceived = true
 	if pc := callee.fn.paramPC[argc]; pc >= 0 {
 		callee.pc = int(pc)
@@ -800,15 +964,16 @@ func (s *vmState) tooFewArguments(argc int) error {
 		bound = "at least"
 	}
 	return &Throwable{"ArgumentCountError", fmt.Sprintf("Too few arguments to function %s(), %d passed in %s on line %d and %s %d expected",
-		callee.fn.name, argc, vmFileName(caller.fn.files[caller.pc]), caller.fn.lines[caller.pc], bound, callee.fn.required)}
+		s.funcName(callee), argc, vmFileName(caller.fn.files[caller.pc]), caller.fn.lines[caller.pc], bound, callee.fn.required)}
 }
 
 // ret returns v (owned) from the top frame to its caller.
 func (s *vmState) ret(v value) error {
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	dest := f.dest
+	f.ctor = false // the constructor completed
 	err := s.pop(true)
-	caller := &s.frames[len(s.frames)-1]
+	caller := s.frames[len(s.frames)-1]
 	old := caller.regs[dest]
 	caller.regs[dest] = v
 	if rerr := s.releaseValue(old); err == nil {
@@ -826,4 +991,35 @@ func take(regs []value, r uint32) value {
 		return nullValue()
 	}
 	return v
+}
+
+// keepGlobals hands the variables of {main} to the execution as PHP's
+// global symbol table, in the order they were created, when the run used
+// objects: request shutdown destroys the objects only a global variable
+// holds first, in reverse order, and then calls every other destructor
+// (zend_call_destructors). Without a class nothing can observe the order,
+// and the variables are released with the frame.
+func (s *vmState) keepGlobals() {
+	if s.h.liveObjects == 0 || s.frames[0].fn != &s.prog.funcs[s.prog.entry] {
+		return
+	}
+	f := s.frames[0]
+	globals := s.h.newArrayValue()
+	retain(globals)
+	for i := range f.locals {
+		v := f.locals[i]
+		if v.kind == valueUndefined || f.fn.localNames[i] == "" {
+			continue
+		}
+		f.locals[i] = value{}
+		globals.array.insert(arrayKey{isString: true, text: f.fn.localNames[i]}, v, s.prog.width)
+	}
+	for name, p := range s.globalVars {
+		if p.kind != valueUndefined {
+			globals.array.insert(arrayKey{isString: true, text: name}, *p, s.prog.width)
+			*p = value{}
+		}
+	}
+	s.x.globals = globals
+	s.globalsKept = true
 }

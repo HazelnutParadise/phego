@@ -14,7 +14,7 @@ const 2: string "b"
 const 3: int 1
 const 4: int 2
 const 5: int 3
-func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "b"
   registers LLVVV
@@ -34,19 +34,19 @@ func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
   13: Output 0 4 0 0 ; line 5
   14: Const 0 2 0 0 ; line 6 ; null
   15: Return 0 2 0 0 ; line 6
-func 1 "f" params=0 locals=0 registers=1 maxstack=0
+func 1 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 3 0 ; line 2 ; int 1
   1: Return 0 0 0 0 ; line 2
   2: Const 0 0 0 0 ; line 2 ; null
   3: Return 0 0 0 0 ; line 2
-func 2 "g" params=0 locals=0 registers=1 maxstack=0
+func 2 "g" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 4 0 ; line 3 ; int 2
   1: Return 0 0 0 0 ; line 3
   2: Const 0 0 0 0 ; line 3 ; null
   3: Return 0 0 0 0 ; line 3
-func 3 "h" params=0 locals=0 registers=1 maxstack=0
+func 3 "h" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 5 0 ; line 4 ; int 3
   1: Return 0 0 0 0 ; line 4

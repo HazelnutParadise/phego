@@ -23,7 +23,7 @@ const 5: string "v"
 const 6: string "out"
 const 7: string "ks"
 const 8: string "m"
-func 0 "{main}" params=0 locals=6 registers=10 maxstack=0
+func 0 "{main}" params=0 locals=6 registers=10 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "v"
   local 2 "k"

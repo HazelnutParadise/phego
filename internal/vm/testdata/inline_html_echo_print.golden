@@ -12,7 +12,7 @@ const 3: float 2.5 (0x4004000000000000)
 const 4: string "p"
 const 5: string "tail"
 const 6: null
-func 0 "{main}" params=0 locals=0 registers=2 maxstack=0
+func 0 "{main}" params=0 locals=0 registers=2 maxstack=0 flags=nothis
   registers VV
   0: Const 0 0 0 0 ; line 1 ; string "<p>head</p>\n"
   1: Output 0 0 0 0 ; line 1

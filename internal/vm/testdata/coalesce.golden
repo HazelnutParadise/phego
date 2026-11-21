@@ -15,7 +15,7 @@ const 5: string "n"
 const 6: string "x"
 const 7: string "chain"
 const 8: string "a"
-func 0 "{main}" params=0 locals=2 registers=8 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=8 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "u"
   registers LLVVVVVV

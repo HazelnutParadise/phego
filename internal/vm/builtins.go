@@ -21,3 +21,22 @@ func isBuiltin(name string) bool {
 	i := sort.SearchStrings(builtinFunctions, n)
 	return i < len(builtinFunctions) && builtinFunctions[i] == n
 }
+
+// builtinClasses (classes_gen.go) lists the classes, interfaces and traits
+// PHP 8.5.12 declares under php -n, lower-cased and sorted. Only a few of
+// them exist in Phego yet (supportedBuiltinClasses); naming any other is
+// reported at compile time instead of failing as an undefined class at run
+// time.
+//
+//go:generate sh -c "docker run --rm --network none --cap-drop ALL -v \"$PWD/gen\":/g:ro php@sha256:add6a138b6bd07edd645088917c081579f6e0d52d3c4361aff9d9309e6ebf9d9 php -n /g/classes.php > classes_gen.go && gofmt -l classes_gen.go"
+
+// isBuiltinClass reports whether name, in any case, is a class-like PHP
+// declares itself.
+func isBuiltinClass(name string) bool {
+	n := phpname.Lower(name)
+	i := sort.SearchStrings(builtinClasses, n)
+	return i < len(builtinClasses) && builtinClasses[i] == n
+}
+
+// supportedBuiltinClasses are the builtin classes the runtime provides.
+var supportedBuiltinClasses = map[string]bool{"stdclass": true, "stringable": true}

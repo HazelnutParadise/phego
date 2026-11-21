@@ -20,7 +20,7 @@ const 8: string "X"
 const 9: string "Y"
 const 10: string "s"
 const 11: string "r"
-func 0 "{main}" params=0 locals=2 registers=8 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=8 maxstack=0 flags=nothis
   local 0 "s"
   local 1 "r"
   registers LLVVVVVV

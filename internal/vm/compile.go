@@ -47,7 +47,7 @@ func (e *CompileError) Error() string {
 const (
 	guestPlatform    = "php-8.5.12"
 	target           = "portable-go"
-	compilerManifest = "phego/internal/vm stage-6 format-1.6"
+	compilerManifest = "phego/internal/vm stage-7a format-1.7"
 	modulesManifest  = "phego/modules/none"
 	runtimeManifest  = "phego/runtime-abi/w17-1"
 	policyManifest   = "phego/policy/unbound"
@@ -104,6 +104,8 @@ func CompileWith(ctx context.Context, unit *ir.Unit, source []byte, opts Options
 			switch x := r.(type) {
 			case *UnsupportedError:
 				err = x
+			case *CompileError:
+				err = x
 			case ctxError:
 				err = x.err
 			case internalError:
@@ -145,6 +147,10 @@ type compiler struct {
 	declaredConsts map[string]bool
 	lines          uint32
 	line           int // line of the node being compiled, for internal errors
+	// classIndex is each compiled class's index in the class table.
+	classIndex map[*ir.Class]uint32
+	// declaredClass holds the lower-case names of the unit's classes.
+	declaredClass map[string]bool
 }
 
 func (c *compiler) compile(source []byte) (bytecode.Image, error) {
@@ -171,9 +177,17 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 		c.declared[f] = i
 	}
 	funcs := append([]*ir.Func{unit.Main}, unit.Functions...)
+	classes, members, classErr := c.classTable(len(funcs))
+	funcs = append(funcs, members...)
+	if uint64(len(funcs)) > uint64(limits.MaxFunctions) {
+		return bytecode.Image{}, &UnsupportedError{Feature: "program too large", File: unit.File, Line: 1}
+	}
 	out := make([]bytecode.Function, len(funcs))
 	var first *UnsupportedError
 	firstRank := 0
+	if classErr != nil {
+		first, firstRank = classErr, classErr.Line*2+1
+	}
 	for i, f := range funcs {
 		fn, err := c.function(f)
 		if err != nil {
@@ -225,6 +239,7 @@ func (c *compiler) compile(source []byte) (bytecode.Image, error) {
 		Constants: c.constants,
 		Sources:   []bytecode.Source{{Name: unit.File, Digest: digest, Bytes: uint32(len(source)), Lines: c.lines}},
 		Functions: out,
+		Classes:   classes,
 	}, nil
 }
 

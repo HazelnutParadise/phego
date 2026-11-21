@@ -465,19 +465,23 @@ func TestUnsupportedConstructs(t *testing.T) {
 		feature, src string
 		line         int
 	}{
-		{"typed parameter", "echo 1;\nfunction f(int $a) {}", 3},
-		{"typed parameter", "echo 1;\nfunction f(int ...$a) {}", 3},
-		{"return type", "echo 1;\nfunction f(): int { return 1; }", 3},
+		// Stage 7A compiles typed parameters and return types; an
+		// attribute on a typed parameter and a method that returns by
+		// reference stay refused.
+		{"class attribute", "echo 1;\n#[Foo]\nclass A {}", 3},
+		{"parameter attribute", "echo 1;\nfunction f(#[A] int ...$a) {}", 3},
+		{"return by reference", "echo 1;\nclass A {\n  public function &m(): array { return $this->a; }\n}", 4},
 		{"return by reference", "echo 1;\nfunction &f() { return $x; }", 3},
 		{"function attribute", "echo 1;\n#[Foo]\nfunction f() {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[\\SensitiveParameter] $a) {}", 3},
 		{"closure", "echo 1;\n$f = function () {};", 3},
 		{"arrow function", "echo 1;\n$f = fn() => 1;", 3},
-		{"class declaration", "echo 1;\nclass A {}", 3},
-		{"new", "echo 1;\n$o = new A;", 3},
+		{"enum declaration", "echo 1;\nenum E {}", 3},
+		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
+		{"anonymous class", "echo 1;\n$o = new class {};", 3},
 		{"try", "echo 1;\ntry { echo 2; } finally { echo 3; }", 3},
 		{"throw", "echo 1;\nthrow $e;", 3},
-		{"new", "echo 1;\nfunction f() { static $x = new A; }", 3},
+		{"clone with arguments", "echo 1;\nfunction f() { static $x = clone($a, ['p' => 1]); }", 3},
 		{"variable variables", "echo 1;\nfunction f() { global $$x; }", 3},
 		{"superglobal", "echo 1;\nfunction f() { global $GLOBALS; }", 3},
 		{"builtin function define()", "echo 1;\ndefine('A', 1);", 3},
@@ -492,42 +496,48 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"include", "echo 1;\ninclude 'x.php';", 3},
 		{"require_once", "echo 1;\nrequire_once 'x.php';", 3},
 		{"eval", "echo 1;\neval('echo 1;');", 3},
-		{"property access", "echo 1;\necho match ($o->p) { 1 => 2, default => 3 };", 3},
-		{"class constant", "echo 1;\necho match ($x) { A::B => 2, default => 3 };", 3},
-		{"property access", "echo 1;\n[$a, $o->p] = $c;", 3},
-		{"static property access", "echo 1;\n['k' => A::$s] = $c;", 3},
+		{"class constant with a computed name", "echo 1;\necho match ($x) { A::{$n} => 2, default => 3 };", 3},
+		{"variable variables", "echo 1;\n['k' => $$n] = $c;", 3},
 		{"property access", "echo 1;\n[&$o->p] = $c;", 3},
 		{"variable variables", "echo 1;\n$$n = 1;", 3},
 		{"named arguments", "echo 1;\nfunction f($a) {}\nexit(status: 1);", 4},
-		{"new", "echo 1;\nfunction f($a) {}\nf(a: new A);", 4},
+		{"anonymous class", "echo 1;\nfunction f($a) {}\nf(a: new class {});", 4},
 		{"argument unpacking", "echo 1;\nfunction f($a) {}\nexit(...$x);", 4},
 		{"closure", "echo 1;\nfunction f($a) {}\nf(...function () {});", 4},
 		{"array spread", "echo 1;\n$a = [...$x];", 3},
-		{"dynamic call", "echo 1;\n$f = 'g';\n$f();", 4},
-		{"property access", "echo 1;\necho \"{$o->p}\";", 3},
-		{"method call", "echo 1;\n$o->m();", 3},
-		{"static method call", "echo 1;\nA::m();", 3},
-		{"class constant", "echo 1;\necho A::B;", 3},
-		{"static property access", "echo 1;\necho A::$b;", 3},
+		{"first-class callable", "echo 1;\n$f = 'g';\n$g = $f(...);", 4},
+		{"variable variables", "echo 1;\necho \"{$$n}\";", 3},
+		{"first-class callable", "echo 1;\n$f = $o->m(...);", 3},
+		{"first-class callable", "echo 1;\n$f = A::m(...);", 3},
+		{"class constant with a computed name", "echo 1;\necho A::{'B'};", 3},
+		{"class constant with a computed name", "echo 1;\nclass A { const C = 1; function m() { return static::{'C'}; } }", 3},
 		{"goto", "echo 1;\ngoto a;\na:\necho 2;", 3},
-		{"declare", "declare(ticks=1);\necho 1;", 2},
-		{"yield", "echo 1;\nfunction g() { yield 1; }", 3},
-		{"clone", "echo 1;\n$b = clone $a;", 3},
-		{"instanceof", "echo 1;\n$b = $a instanceof A;", 3},
+		{"enum declaration", "enum E {}\necho 1;", 2},
+		{"generator", "echo 1;\nfunction g() { yield 1; }", 3},
+		{"generator", "echo 1;\nfunction g() { yield from h(); }", 3},
+		{"generator", "echo 1;\nclass A { function m() { yield 1; } }", 3},
+		{"clone with arguments", "echo 1;\n$b = clone($a, ['x' => 1]);", 3},
+		{"property hook", "echo 1;\nclass A {\n  public int $p { get => 1; }\n}", 4},
 		{"shell execution", "echo 1;\n$b = `ls`;", 3},
 		{"conditional function declaration", "echo 1;\nif ($c) { function f() {} }", 3},
 		{"superglobal", "echo 1;\necho $_GET;", 3},
-		{"$this", "echo 1;\necho $this;", 3},
-		{"property access", "echo 1;\necho @$o->p;", 3},
-		{"property access", "echo 1;\necho empty($o->p);", 3},
-		{"static property access", "echo 1;\necho empty(A::$p);", 3},
+		{"asymmetric property visibility", "echo 1;\nclass A {\n  public private(set) int $p;\n}", 4},
+		{"method attribute", "echo 1;\nclass A {\n  #[Foo]\n  function m() {}\n}", 4},
+		{"property attribute", "echo 1;\nclass A {\n  #[Foo]\n  public $p;\n}", 4},
+		{"class constant attribute", "echo 1;\nclass A {\n  #[Foo]\n  const C = 1;\n}", 4},
+		{"parameter attribute", "echo 1;\nclass A {\n  public function __construct(#[X] public $p) {}\n}", 4},
 		{"reference to the result of a call", "echo 1;\nfunction f() {}\n$a = &f();", 4},
 		{"passing a value that is not a variable by reference", "echo 1;\nfunction f(&$a) {}\nf(1);", 4},
 		{"value of an assignment by reference between two elements", "echo 1;\n$x = ($a[0] = &$b[0]);", 3},
-		{"property access", "echo 1;\n$a = &$o->p;", 3},
+		{"superglobal", "echo 1;\n$GLOBALS['x'] = 1;", 3},
+		{"superglobal", "echo 1;\nclass A { function m() { return $GLOBALS; } }", 3},
 		{"by-reference array element", "echo 1;\n$a = [&$b];", 3},
 		{"first-class callable", "echo 1;\nfunction f() {}\n$g = f(...);", 4},
-		{"object cast", "echo 1;\n$o = (object)$a;", 3},
+		{"throw", "echo 1;\n$x = $a ?? throw $e;", 3},
+		{"require", "echo 1;\nrequire 'x.php';", 3},
+		{"closure", "echo 1;\nclass A { function m() { return function () {}; } }", 3},
+		{"try", "echo 1;\nclass A { function m() { try { } finally { } } }", 3},
+		{"goto", "echo 1;\nclass A { function m() { goto a; a: } }", 3},
 		{"__halt_compiler", "echo 1;\n__halt_compiler();", 3},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0] = 1;", 4},
 		{"pipe operator", "echo 1;\nfunction f($a) {}\necho 1 |> f(...);", 4},
@@ -561,6 +571,31 @@ func TestUnsupportedConstructs(t *testing.T) {
 				t.Fatalf("Error() = %q, want %q", ue.Error(), want)
 			}
 		})
+	}
+}
+
+// A nullsafe operator in a write context never reaches the compiler: it is
+// PHP's compile-time fatal error, which ir.Lower reports with the line of
+// the write (zend_compile_var with BP_VAR_W).
+func TestNullsafeWriteIsACompileError(t *testing.T) {
+	for _, tc := range []struct {
+		src, msg string
+		line     int
+	}{
+		{"echo 1;\n$o?->p = 1;", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\n$o?->p[1][2] = 3;", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\n$o?->p++;", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\n$o?->p .= 1;", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\nunset($o?->p);", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\nforeach ($a as $o?->p) {}", "Can't use nullsafe operator in write context", 3},
+		{"echo 1;\n$r = &$o?->p;", "Cannot take reference of a nullsafe chain", 3},
+		{"echo 1;\n[$o?->p] = $x;", "Assignments can only happen to writable values", 3},
+	} {
+		_, err := lowerSource("<?php\n"+tc.src+"\n", 64, testFile)
+		var ce *ir.CompileError
+		if !errors.As(err, &ce) || ce.Message != tc.msg || ce.Line != tc.line {
+			t.Errorf("%q: got %v, want %q on line %d", tc.src, err, tc.msg, tc.line)
+		}
 	}
 }
 
@@ -624,12 +659,19 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		feature string
 		line    int
 	}{
-		// A function body before the main code that writes a property.
-		{"<?php\nfunction f() { return $this; }\necho 1;\n$o->p = 1;\n", "$this", 2},
+		// A function body before the main code that has a closure.
+		{"<?php\nfunction f() { return fn() => 1; }\necho 1;\n$f = function () {};\n", "arrow function", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\n$o->p = 1;\nfunction f() { return $this; }\n", "property access", 3},
+		{"<?php\necho 1;\n$f = function () {};\nfunction f() { return fn() => 1; }\n", "closure", 3},
 		// Within a statement, the left operand first.
-		{"<?php\necho $this . $o->p;\n", "$this", 2},
+		{"<?php\necho $$a . (fn() => 1)();\n", "variable variables", 2},
+		// A class declaration and a function, in either order.
+		{"<?php\nfunction f() { return fn() => 1; }\nenum E {}\n", "arrow function", 2},
+		{"<?php\nenum E {}\nfunction f() { return fn() => 1; }\n", "enum declaration", 2},
+		// A method body before the main code, and a class part before a
+		// later method.
+		{"<?php\nclass A { function m() { return $$x; } }\n$f = fn() => 1;\n", "variable variables", 2},
+		{"<?php\nclass A {\n  #[X]\n  const C = 1;\n  function m() { return $$x; }\n}\n", "class constant attribute", 3},
 	}
 	for _, tc := range cases {
 		_, err := compileWidth(t, tc.src, 64, testFile)
@@ -677,12 +719,65 @@ var compileFatal = map[string]string{
 	"fatal_list_lines_foreach_mixed_after_ref": "Cannot mix keyed and unkeyed array entries in assignments",
 	"fatal_list_lines_mixed_after_var":         "Cannot mix keyed and unkeyed array entries in assignments",
 	"fatal_const_redeclare_builtin":            "Cannot redeclare constant 'true'",
+	// Stage 7A: the class, method, property and type declarations PHP
+	// rejects while compiling the file.
+	"fatal_class_abstract_method_in_concrete":        "Class NotAbstract declares abstract method missing() and must therefore be declared abstract",
+	"fatal_class_abstract_not_implemented":           "Class Circle contains 1 abstract method and must therefore be declared abstract or implement the remaining method (Shape::perimeter)",
+	"fatal_class_access_level":                       "Access level to Child::open() must be public (as in class Base)",
+	"fatal_class_const_visibility_reduced":           "Access level to Child::NAME must be public (as in class Base)",
+	"fatal_class_extends_final":                      "Class Breaker cannot extend final class Sealed",
+	"fatal_class_extends_interface":                  "Class Wrong cannot extend interface Iface",
+	"fatal_class_extends_trait":                      "Class Wrong cannot extend trait T",
+	"fatal_class_final_const_override":               "Child::LIMIT cannot override final constant Base::LIMIT",
+	"fatal_class_final_method_override":              "Cannot override final method Base::locked()",
+	"fatal_class_incompatible_signature":             "Declaration of Child::run(int $a): string must be compatible with Base::run(int $a, string $b = 'x'): string",
+	"fatal_class_parent_without_parent":              "Cannot use \"parent\" when current class scope has no parent",
+	"fatal_class_self_outside_class":                 "Cannot use \"self\" when no class scope is active",
+	"fatal_magic_method_construct_return_type":       "Method Bad::__construct() cannot declare a return type",
+	"fatal_magic_method_construct_static":            "Method Bad::__construct() cannot be static",
+	"fatal_magic_method_destruct_args":               "Method Bad::__destruct() cannot take arguments",
+	"fatal_magic_method_get_arg_count":               "Method Bad::__get() must take exactly 1 argument",
+	"fatal_magic_method_get_static":                  "Method Bad::__get() cannot be static",
+	"fatal_magic_method_set_arg_count":               "Method Bad::__set() must take exactly 2 arguments",
+	"fatal_magic_method_tostring_non_string_compile": "Bad::__toString(): Return type must be string when declared",
+	"fatal_method_non_static_override_static":        "Cannot make static method Base::m() non static in class Child",
+	"fatal_method_redeclare":                         "Cannot redeclare A::M()",
+	"fatal_method_this_param":                        "Cannot use $this as parameter",
+	"fatal_method_this_reassign":                     "Cannot re-assign $this",
+	"fatal_prop_access_level_redeclare":              "Access level to Child::$v must be public (as in class Base)",
+	"fatal_prop_readonly_default":                    "Readonly property Bad::$x cannot have default value",
+	"fatal_prop_readonly_no_type":                    "Readonly property Bad::$x must have type",
+	"fatal_prop_readonly_static":                     "Static property Bad::$x cannot be readonly",
+	"fatal_prop_redeclare":                           "Cannot redeclare Bad::$x",
+	"fatal_prop_static_redeclared_non_static":        "Cannot redeclare static Base::$v as non static Child::$v",
+	"fatal_prop_this_unset":                          "Cannot unset $this",
+	"fatal_prop_type_redeclare_mismatch":             "Type of Child::$v must be int (as in class Base)",
+	"fatal_prop_typed_default_invalid":               "Cannot use string as default value for property Bad::$x of type int",
+	"fatal_prop_typed_default_null":                  "Default value for property of type int may not be null. Use the nullable type ?int to allow null default value",
+	"fatal_prop_void_type":                           "Property Bad::$x cannot have type void",
+	"fatal_type_duplicate_union":                     "Duplicate type int is redundant",
+	"fatal_type_never_return_statement":              "A never-returning function must not return",
+	"fatal_type_param_default_mismatch":              "Cannot use string as default value for parameter $x of type int",
+	"fatal_type_void_nullable":                       "Void can only be used as a standalone type",
+	"fatal_type_void_param":                          "void cannot be used as a parameter type",
+	"fatal_type_void_return_null":                    "A void function must not return a value (did you mean \"return;\" instead of \"return null;\"?)",
+	"fatal_type_void_return_value":                   "A void function must not return a value",
+}
+
+// Fixtures whose PHP compile-time fatal error the compiler itself reports
+// (classCompileError), with the line PHP names.
+var compilerFatal = map[string]CompileError{
+	"fatal_class_abstract_method_body":   {Message: "Abstract function A::m() cannot contain body", Line: 5},
+	"fatal_class_access_level_interface": {Message: "Access type for interface method I::hidden() must be public", Line: 5},
+	"fatal_class_interface_property":     {Message: "Interfaces may only include hooked properties", Line: 5},
+	"fatal_review7a_stdclass":            {Message: "Cannot redeclare class stdClass", Line: 2},
+	"fatal_review7a_stringable":          {Message: "Cannot redeclare interface Stringable", Line: 2},
 }
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 384 {
-		t.Fatalf("want 384 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 732 {
+		t.Fatalf("want 732 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
@@ -712,6 +807,13 @@ func TestReferenceFixturesCompile(t *testing.T) {
 					t.Fatalf("lower: %v", err)
 				}
 				img, err := Compile(context.Background(), unit, src)
+				if want, ok := compilerFatal[name]; ok {
+					var ce *CompileError
+					if !errors.As(err, &ce) || ce.Message != want.Message || ce.Line != want.Line || ce.File != file {
+						t.Fatalf("want compile fatal %+v, got %v", want, err)
+					}
+					return
+				}
 				if want, ok := outsideSubset[name]; ok {
 					var ue *UnsupportedError
 					if !errors.As(err, &ue) || ue.Feature != want.Feature || ue.Line != want.Line || ue.File != file {

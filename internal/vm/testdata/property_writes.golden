@@ -1,0 +1,208 @@
+-- source --
+<?php
+class C {
+    public $p;
+    public $a;
+    public $arr = [];
+    public static $s;
+    public static $t = [];
+}
+$o = new C;
+$o->p = 1;
+$o->a = new C;
+$o->a->p = 2;
+$o->arr[1] = 3;
+$o->arr[] = 4;
+$list = [new C];
+$list[0]->p = 5;
+C::$s = 6;
+C::$t['k'] = 7;
+$o->p += 8;
+$o->arr[1] .= 'x';
+$o->p++;
+--$o->a->p;
+$o->p ??= 9;
+unset($o->p, $o->arr[1]);
+echo isset($o->p), isset($o->a->p), empty($o->arr), isset(C::$s), empty(C::$t['k']);
+$r = &$o->p;
+$x = 10;
+$o->p = &$x;
+foreach ($o->arr as &$item) {
+    $item++;
+}
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=519 lines=32
+const 0: string "C"
+const 1: string "p"
+const 2: string "a"
+const 3: string "arr"
+const 4: string "s"
+const 5: string "t"
+const 6: int 1
+const 7: int 2
+const 8: int 3
+const 9: int 4
+const 10: int 0
+const 11: int 5
+const 12: int 6
+const 13: int 7
+const 14: string "k"
+const 15: int 8
+const 16: string "x"
+const 17: null
+const 18: int 9
+const 19: int 10
+const 20: string "o"
+const 21: string "list"
+const 22: string "r"
+const 23: string "item"
+class 0 "C" line=2 flags=hoisted
+  prop "p" public
+  prop "a" public
+  prop "arr" public = init func 1 "{constant expression}"
+  prop "s" public+static
+  prop "t" public+static = init func 2 "{constant expression}"
+func 0 "{main}" params=0 locals=5 registers=12 maxstack=1 flags=nothis
+  local 0 "o"
+  local 1 "list"
+  local 2 "r"
+  local 3 "x"
+  local 4 "item"
+  registers LLLLLVVVVVVL
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Local 0 3 3 0 ; line 1
+  4: Local 0 4 4 0 ; line 1
+  5: New 0 5 0 9 ; line 9 ; class "C", target 9
+  6: Checkpoint 0 0 0 0 ; line 9
+  7: CallPending 0 6 0 0 ; line 9
+  8: Drop 0 6 0 0 ; line 9
+  9: Store 0 0 5 0 ; line 9
+  10: Const 0 5 6 0 ; line 10 ; int 1
+  11: Load 0 6 0 0 ; line 10
+  12: PropSet 0 6 1 5 ; line 10 ; name "p"
+  13: New 0 5 0 17 ; line 11 ; class "C", target 17
+  14: Checkpoint 0 0 0 0 ; line 11
+  15: CallPending 0 6 0 0 ; line 11
+  16: Drop 0 6 0 0 ; line 11
+  17: Load 0 6 0 0 ; line 11
+  18: PropSet 0 6 2 5 ; line 11 ; name "a"
+  19: Const 0 5 7 0 ; line 12 ; int 2
+  20: Load 0 6 0 0 ; line 12
+  21: FetchProp 0 11 6 2 ; line 12 ; name "a"
+  22: PropSet objloc 11 1 5 ; line 12 ; name "p"
+  23: Const 0 5 8 0 ; line 13 ; int 3
+  24: Load 0 6 0 0 ; line 13
+  25: FetchProp 0 11 6 3 ; line 13 ; name "arr"
+  26: Const 0 7 6 0 ; line 13 ; int 1
+  27: ArraySet 0 11 7 5 ; line 13
+  28: Const 0 5 9 0 ; line 14 ; int 4
+  29: Load 0 6 0 0 ; line 14
+  30: FetchProp 0 11 6 3 ; line 14 ; name "arr"
+  31: ArrayAppend 0 11 5 0 ; line 14
+  32: NewArray 0 5 0 0 ; line 15
+  33: New 0 6 0 37 ; line 15 ; class "C", target 37
+  34: Checkpoint 0 0 0 0 ; line 15
+  35: CallPending 0 7 0 0 ; line 15
+  36: Drop 0 7 0 0 ; line 15
+  37: ArrayAdd 0 5 6 0 ; line 15
+  38: Store 0 1 5 0 ; line 15
+  39: Const 0 5 10 0 ; line 16 ; int 0
+  40: Const 0 6 11 0 ; line 16 ; int 5
+  41: FetchDim Write 11 1 5 ; line 16
+  42: PropSet objloc 11 1 6 ; line 16 ; name "p"
+  43: Const 0 5 12 0 ; line 17 ; int 6
+  44: StaticSet 0 5 0 4 ; line 17 ; class "C", name "s"
+  45: Const 0 5 13 0 ; line 18 ; int 7
+  46: FetchStatic 0 11 0 5 ; line 18 ; class "C", name "t"
+  47: Const 0 6 14 0 ; line 18 ; string "k"
+  48: ArraySet 0 11 6 5 ; line 18
+  49: Const 0 5 15 0 ; line 19 ; int 8
+  50: Load 0 6 0 0 ; line 19
+  51: PropGet assignop 7 6 1 ; line 19 ; name "p"
+  52: Binary Add 8 7 5 ; line 19
+  53: PropSet result 6 1 8 ; line 19 ; name "p"
+  54: Const 0 5 16 0 ; line 20 ; string "x"
+  55: Load 0 6 0 0 ; line 20
+  56: FetchProp readwrite 11 6 3 ; line 20 ; name "arr"
+  57: Const 0 7 6 0 ; line 20 ; int 1
+  58: FetchDim ReadWrite+assignop 11 11 7 ; line 20
+  59: Load 1 7 11 0 ; line 20
+  60: Binary Concat 6 7 5 ; line 20
+  61: Store 0 11 6 0 ; line 20
+  62: Load 0 5 0 0 ; line 21
+  63: PropGet incdec 6 5 1 ; line 21 ; name "p"
+  64: Unary Increment 7 6 0 ; line 21
+  65: PropSet 2+result 5 1 7 ; line 21 ; name "p"
+  66: Load 0 5 0 0 ; line 22
+  67: FetchProp 0 11 5 2 ; line 22 ; name "a"
+  68: PropGet incdec+objloc 6 11 1 ; line 22 ; name "p"
+  69: Unary Decrement 7 6 0 ; line 22
+  70: PropSet 3+objloc+result 11 1 7 ; line 22 ; name "p"
+  71: Load 0 6 0 0 ; line 23
+  72: PropGet quiet 7 6 1 ; line 23 ; name "p"
+  73: Const 0 8 17 0 ; line 23 ; null
+  74: Binary Identical 9 7 8 ; line 23
+  75: Branch 0 9 78 76 ; line 23
+  76: Move 0 5 7 0 ; line 23
+  77: Jump 0 81 0 0 ; line 23
+  78: Const 0 10 18 0 ; line 23 ; int 9
+  79: Move 0 5 10 0 ; line 23
+  80: PropSet result 6 1 5 ; line 23 ; name "p"
+  81: Load 0 5 0 0 ; line 24
+  82: PropUnset 0 5 1 0 ; line 24 ; name "p"
+  83: Load 0 5 0 0 ; line 24
+  84: FetchProp unset 11 5 3 ; line 24 ; name "arr"
+  85: Const 0 6 6 0 ; line 24 ; int 1
+  86: ArrayUnset 0 11 6 0 ; line 24
+  87: Load 1 6 0 0 ; line 25
+  88: PropIsset isset 7 6 1 ; line 25 ; name "p"
+  89: Move 0 5 7 0 ; line 25
+  90: Output 0 5 0 0 ; line 25
+  91: Load 1 6 0 0 ; line 25
+  92: PropGet quiet 7 6 2 ; line 25 ; name "a"
+  93: PropIsset isset 8 7 1 ; line 25 ; name "p"
+  94: Move 0 5 8 0 ; line 25
+  95: Output 0 5 0 0 ; line 25
+  96: Load 1 5 0 0 ; line 25
+  97: PropIsset empty 6 5 3 ; line 25 ; name "arr"
+  98: Output 0 6 0 0 ; line 25
+  99: StaticGet isset 6 0 4 ; line 25 ; class "C", name "s"
+  100: Move 0 5 6 0 ; line 25
+  101: Output 0 5 0 0 ; line 25
+  102: StaticGet quiet 5 0 5 ; line 25 ; class "C", name "t"
+  103: Const 0 6 14 0 ; line 25 ; string "k"
+  104: ArrayIsset empty 7 5 6 ; line 25
+  105: Output 0 7 0 0 ; line 25
+  106: Load 0 5 0 0 ; line 26
+  107: PropRef 0 6 5 1 ; line 26 ; name "p"
+  108: Bind value 2 6 0 ; line 26
+  109: Const 0 5 19 0 ; line 27 ; int 10
+  110: Store 0 3 5 0 ; line 27
+  111: MakeRef 0 5 3 0 ; line 28
+  112: Load 0 6 0 0 ; line 28
+  113: PropSet 1 6 1 5 ; line 28 ; name "p"
+  114: Load 0 6 0 0 ; line 29
+  115: PropRef 0 7 6 3 ; line 29 ; name "arr"
+  116: IterInit ref+0 5 7 121 ; line 29
+  117: IterNext ref+1 5 4 120 ; line 29
+  118: IncDec PostInc 6 4 0 ; line 30
+  119: Jump 0 117 0 0 ; line 30
+  120: Drop 0 5 0 0 ; line 30
+  121: Const 0 5 17 0 ; line 32 ; null
+  122: Return 0 5 0 0 ; line 32
+func 1 "{constant expression}" params=0 locals=0 registers=1 maxstack=0 flags=nothis
+  registers V
+  0: NewArray 0 0 0 0 ; line 5
+  1: Return 0 0 0 0 ; line 5
+  2: Const 0 0 17 0 ; line 5 ; null
+  3: Return 0 0 0 0 ; line 5
+func 2 "{constant expression}" params=0 locals=0 registers=1 maxstack=0 flags=nothis
+  registers V
+  0: NewArray 0 0 0 0 ; line 7
+  1: Return 0 0 0 0 ; line 7
+  2: Const 0 0 17 0 ; line 7 ; null
+  3: Return 0 0 0 0 ; line 7

@@ -12,7 +12,7 @@ const 1: int 4
 const 2: null
 const 3: string "a"
 const 4: string "b"
-func 0 "{main}" params=0 locals=2 registers=5 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=5 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "b"
   registers LLVVV

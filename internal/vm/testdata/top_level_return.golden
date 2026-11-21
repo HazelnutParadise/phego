@@ -12,7 +12,7 @@ const 0: null
 const 1: int 1
 const 2: int 2
 const 3: string "a"
-func 0 "{main}" params=0 locals=1 registers=3 maxstack=0
+func 0 "{main}" params=0 locals=1 registers=3 maxstack=0 flags=nothis
   local 0 "a"
   registers LVV
   0: Local 0 0 0 0 ; line 1

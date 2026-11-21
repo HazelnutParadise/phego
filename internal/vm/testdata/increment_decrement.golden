@@ -10,7 +10,7 @@ source 1 "/w/test.php" bytes=56 lines=5
 const 0: int 0
 const 1: null
 const 2: string "i"
-func 0 "{main}" params=0 locals=1 registers=4 maxstack=0
+func 0 "{main}" params=0 locals=1 registers=4 maxstack=0 flags=nothis
   local 0 "i"
   registers LVVV
   0: Local 0 0 0 0 ; line 1

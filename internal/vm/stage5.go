@@ -313,6 +313,17 @@ func (fc *fnCompiler) empty(n *ir.Node) operand {
 		r := fc.allocNot(mark, rb, rk)
 		fc.emit(bytecode.OpArrayIsset, bytecode.ArrayIssetEmpty, r, rb, rk)
 		return reg(r)
+	case ir.OpProp, ir.OpNullsafe, ir.OpStaticProp:
+		return reg(fc.issetMember(k, true))
+	case ir.OpThis:
+		// empty($this) asks whether there is an object, as isset($this)
+		// does, and does not throw outside one.
+		fc.at(k.Line)
+		v := fc.alloc()
+		fc.emit(bytecode.OpThis, 1, v, 0, 0)
+		r := fc.allocNot(mark, v)
+		fc.emit(bytecode.OpUnary, uint16(bytecode.Not), r, v, 0)
+		return reg(r)
 	}
 	v := fc.value(k)
 	r := fc.allocNot(mark, v)

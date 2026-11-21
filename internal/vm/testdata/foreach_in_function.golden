@@ -17,11 +17,13 @@ const 1: string "xs"
 const 2: string "want"
 const 3: string "k"
 const 4: string "x"
-func 0 "{main}" params=0 locals=0 registers=1 maxstack=0
+func 0 "{main}" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 0 0 ; line 10 ; null
   1: Return 0 0 0 0 ; line 10
-func 1 "first" params=2 locals=4 registers=10 maxstack=0
+func 1 "first" params=2 locals=4 registers=10 maxstack=0 flags=nothis
+  param 0 "xs"
+  param 1 "want"
   local 0 "xs"
   local 1 "want"
   local 2 "k"
@@ -48,5 +50,5 @@ func 1 "first" params=2 locals=4 registers=10 maxstack=0
   18: Drop 0 6 0 0 ; line 5
   19: Const 0 6 0 0 ; line 8 ; null
   20: Return 0 6 0 0 ; line 8
-  21: Const 0 6 0 0 ; line 8 ; null
-  22: Return 0 6 0 0 ; line 8
+  21: Const 0 6 0 0 ; line 9 ; null
+  22: Return 0 6 0 0 ; line 9

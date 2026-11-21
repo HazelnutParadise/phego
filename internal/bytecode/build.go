@@ -107,6 +107,9 @@ func cloneImage(b *budget, src Image) (Image, error) {
 			return Image{}, b.pollOrLimit()
 		}
 	}
+	if dst.Classes, err = cloneClasses(b, src.Classes); err != nil {
+		return Image{}, err
+	}
 	return dst, nil
 }
 
@@ -246,8 +249,16 @@ func encodedSize(b *budget, image Image, minor uint16) (uint64, error) {
 		if minor >= 1 && (uint64(len(f.LocalNames)) > uint64(^uint32(0)) || !add(4+uint64(len(f.LocalNames))*4)) {
 			return 0, ErrLimit
 		}
-		if minor >= 6 && (uint64(len(f.Parameters)) > uint64(^uint32(0)) || !add(4+uint64(len(f.Parameters))*parameterWire)) {
+		if minor >= 6 && (uint64(len(f.Parameters)) > uint64(^uint32(0)) || !add(4+uint64(len(f.Parameters))*parameterWireSize(minor))) {
 			return 0, ErrLimit
+		}
+		if minor >= 7 && !add(5) {
+			return 0, ErrLimit
+		}
+	}
+	if minor >= 7 {
+		if err := classesSize(b, image.Classes, add); err != nil {
+			return 0, err
 		}
 	}
 	return size, nil

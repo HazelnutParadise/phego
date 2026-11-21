@@ -15,7 +15,7 @@ const 3: string "k"
 const 4: null
 const 5: string "a"
 const 6: string "i"
-func 0 "{main}" params=0 locals=2 registers=4 maxstack=0
+func 0 "{main}" params=0 locals=2 registers=4 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "i"
   registers LLVL

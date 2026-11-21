@@ -16,7 +16,7 @@ const 4: null
 const 5: string "a"
 const 6: string "b"
 const 7: string "c"
-func 0 "{main}" params=0 locals=3 registers=6 maxstack=0
+func 0 "{main}" params=0 locals=3 registers=6 maxstack=0 flags=nothis
   local 0 "a"
   local 1 "b"
   local 2 "c"

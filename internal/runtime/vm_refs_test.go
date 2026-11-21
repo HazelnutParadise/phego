@@ -42,6 +42,16 @@ func TestPushMovesAByReferenceArgument(t *testing.T) {
 // what an instruction leaves in a register stays observable, as in a very
 // large PHP function.
 func withoutLiveness(f *vmFn) {
+	// The analysis for functions this large is switched off as well.
+	saved := vmLivenessSparseLimit
+	vmLivenessSparseLimit = 0
+	f.a.t.Cleanup(func() { vmLivenessSparseLimit = saved })
+	largeFunction(f)
+}
+
+// largeFunction makes f too large for the bit-set liveness analysis, as a
+// huge PHP function is: the per-register analysis handles it.
+func largeFunction(f *vmFn) {
 	for i := 0; i < 1024; i++ {
 		f.reg(bytecode.Value)
 	}

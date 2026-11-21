@@ -1,0 +1,1377 @@
+=== b1_d11_destructor_stores_global
+--- PHP 8.5.12
+end
+~1
+~2
+~3
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99
+~99--- Phego before the fix
+UNSUPPORTED phego: unsupported: superglobal in /w/cases/d11_destructor_stores_global.php on line 2
+=== b1_d15_uncaught_in_ctor
+--- PHP 8.5.12
+ctor
+
+Fatal error: Uncaught Error: Call to a member function foo() on null in /w/cases/d15_uncaught_in_ctor.php:2
+Stack trace:
+#0 /w/cases/d15_uncaught_in_ctor.php(3): D->__construct(1)
+#1 {main}
+  thrown in /w/cases/d15_uncaught_in_ctor.php on line 2
+
+[exit 255]
+--- Phego before the fix
+ctor
+~1
+
+Fatal error: Uncaught Error: Call to a member function foo() on null in /w/cases/d15_uncaught_in_ctor.php:2
+Stack trace:
+#0 /w/cases/d15_uncaught_in_ctor.php(3): D->__construct(1)
+#1 {main}
+  thrown in /w/cases/d15_uncaught_in_ctor.php on line 2
+
+[exit 255]
+=== b1_d29_destruct_reads_other_global
+--- PHP 8.5.12
+end
+~2 other=null
+~1 other=null
+
+[exit 0]
+--- Phego before the fix
+end
+
+[exit 255]ERR phego: internal error while running the program: execution callback panicked: runtime error: index out of range [1] with length 1
+=== b1_d47_exit_in_ctor
+--- PHP 8.5.12
+~1
+
+[exit 4]
+--- Phego before the fix
+~2
+~1
+
+[exit 4]
+=== b2_l17_static_call_of_instance_method_from_child_instance
+--- PHP 8.5.12
+B
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: $this in /w/cases/l17_static_call_of_instance_method_from_child_instance.php on line 2
+=== b2_v04_protected_sibling_redeclared
+--- PHP 8.5.12
+r
+
+[exit 0]
+--- Phego before the fix
+
+Fatal error: Uncaught Error: Cannot access protected property R::$p in /w/cases/v04_protected_sibling_redeclared.php:3
+Stack trace:
+#0 /w/cases/v04_protected_sibling_redeclared.php(5): L->f(Object(R))
+#1 {main}
+  thrown in /w/cases/v04_protected_sibling_redeclared.php on line 3
+
+[exit 255]
+=== b2_v11_private_const_from_child
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Undefined constant B::X in /w/cases/v11_private_const_from_child.php:3
+Stack trace:
+#0 /w/cases/v11_private_const_from_child.php(4): B->f()
+#1 {main}
+  thrown in /w/cases/v11_private_const_from_child.php on line 3
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught Error: Cannot access private constant B::X in /w/cases/v11_private_const_from_child.php:3
+Stack trace:
+#0 /w/cases/v11_private_const_from_child.php(4): B->f()
+#1 {main}
+  thrown in /w/cases/v11_private_const_from_child.php on line 3
+
+[exit 255]
+=== b2_v16_private_static_method_via_static_redeclared
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to private method B::m() from scope A in /w/cases/v16_private_static_method_via_static_redeclared.php:2
+Stack trace:
+#0 /w/cases/v16_private_static_method_via_static_redeclared.php(4): A::c()
+#1 {main}
+  thrown in /w/cases/v16_private_static_method_via_static_redeclared.php on line 2
+
+[exit 255]
+--- Phego before the fix
+A::m
+
+[exit 0]
+=== b3_t20_typed_prop_incdec_overflow
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot increment property A::$i of type int past its maximal value in /w/cases/t20_typed_prop_incdec_overflow.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/t20_typed_prop_incdec_overflow.php on line 4
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: Cannot assign float to property A::$i of type int in /w/cases/t20_typed_prop_incdec_overflow.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/t20_typed_prop_incdec_overflow.php on line 4
+
+[exit 255]
+=== b3_t22_typed_prop_reference_two_props
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Reference with value of type int held by property A::$i of type int is not compatible with property A::$s of type string in /w/cases/t22_typed_prop_reference_two_props.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/t22_typed_prop_reference_two_props.php on line 5
+
+[exit 255]
+--- Phego before the fix
+1
+55
+
+Fatal error: Uncaught TypeError: Cannot assign string to reference held by property A::$i of type int in /w/cases/t22_typed_prop_reference_two_props.php:9
+Stack trace:
+#0 {main}
+  thrown in /w/cases/t22_typed_prop_reference_two_props.php on line 9
+
+[exit 255]
+=== b3_t31_self_param_type_subclass
+--- PHP 8.5.12
+B
+
+Fatal error: Uncaught TypeError: A::take(): Argument #1 ($o) must be of type A, class@anonymous given, called in /w/cases/t31_self_param_type_subclass.php on line 5 and defined in /w/cases/t31_self_param_type_subclass.php:2
+Stack trace:
+#0 /w/cases/t31_self_param_type_subclass.php(5): A->take(Object(class@anonymous))
+#1 {main}
+  thrown in /w/cases/t31_self_param_type_subclass.php on line 2
+
+[exit 255]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: anonymous class in /w/cases/t31_self_param_type_subclass.php on line 5
+=== b3_t45_typeerror_method_message
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: A::m(): Argument #3 must be of type string, array given, called in /w/cases/t45_typeerror_method_message.php on line 3 and defined in /w/cases/t45_typeerror_method_message.php:2
+Stack trace:
+#0 /w/cases/t45_typeerror_method_message.php(3): A->m(1, 'a', Array)
+#1 {main}
+  thrown in /w/cases/t45_typeerror_method_message.php on line 2
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: A::m(): Argument #3 must be of type string, array given, called in /w/cases/t45_typeerror_method_message.php on line 3 and defined in /w/cases/t45_typeerror_method_message.php:2
+Stack trace:
+#0 /w/cases/t45_typeerror_method_message.php(3): A->m(NULL, 'a', Array)
+#1 {main}
+  thrown in /w/cases/t45_typeerror_method_message.php on line 2
+
+[exit 255]
+=== b3_t53_typed_prop_null_autovivify
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/cases/t53_typed_prop_null_autovivify.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/t53_typed_prop_null_autovivify.php on line 4
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== b4_mg04_get_returns_ref
+--- PHP 8.5.12
+2
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: return by reference in /w/cases/mg04_get_returns_ref.php on line 2
+=== b4_mg33_get_guard_per_object
+--- PHP 8.5.12
+get x on 
+Warning: Undefined variable $GLOBALS_less in /w/cases/mg33_get_guard_per_object.php on line 2
+
+get x on 
+Warning: Undefined variable $GLOBALS_less in /w/cases/mg33_get_guard_per_object.php on line 2
+
+end
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [1] with length 1
+=== b5_pr20_object_cast_from_mangled
+--- PHP 8.5.12
+[1]=1 [1]=2 [1]=3 
+
+[exit 0]
+--- Phego before the fix
+[1]=3 
+
+[exit 0]
+=== b5_pr27_foreach_into_prop
+--- PHP 8.5.12
+123
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: property access in /w/cases/pr27_foreach_into_prop.php on line 3
+=== b5_pr36_allow_dynamic_properties_attr
+--- PHP 8.5.12
+1
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: class attribute in /w/cases/pr36_allow_dynamic_properties_attr.php on line 2
+=== b5_pr46_prop_default_undefined_constant_on_new
+--- PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Class "B" not found in /w/cases/pr46_prop_default_undefined_constant_on_new.php:2
+Stack trace:
+#0 /w/cases/pr46_prop_default_undefined_constant_on_new.php(4): [constant expression]()
+#1 {main}
+  thrown in /w/cases/pr46_prop_default_undefined_constant_on_new.php on line 2
+
+[exit 255]
+--- Phego before the fix
+before
+
+Fatal error: Uncaught Error: Class "B" not found in /w/cases/pr46_prop_default_undefined_constant_on_new.php:2
+Stack trace:
+#0 /w/cases/pr46_prop_default_undefined_constant_on_new.php(4): A::{constant expression}()
+#1 {main}
+  thrown in /w/cases/pr46_prop_default_undefined_constant_on_new.php on line 2
+
+[exit 255]
+=== b6_c15_byref_method_args
+--- PHP 8.5.12
+2a!1
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: passing an element or a property to a by-reference parameter of a callee found at run time in /w/cases/c15_byref_method_args.php on line 7
+=== b6_c27_parent_construct_missing
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot call constructor in /w/cases/c27_parent_construct_missing.php:3
+Stack trace:
+#0 /w/cases/c27_parent_construct_missing.php(4): B->__construct()
+#1 {main}
+  thrown in /w/cases/c27_parent_construct_missing.php on line 3
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught Error: Call to undefined method A::__construct() in /w/cases/c27_parent_construct_missing.php:3
+Stack trace:
+#0 /w/cases/c27_parent_construct_missing.php(4): B->__construct()
+#1 {main}
+  thrown in /w/cases/c27_parent_construct_missing.php on line 3
+
+[exit 255]
+=== b6_dc12_trait_insteadof_and_alias_visibility
+--- PHP 8.5.12
+
+Fatal error: An alias was defined for method hi(), which exists in both A and B. Use A::hi or B::hi to resolve the ambiguity in /w/cases/dc12_trait_insteadof_and_alias_visibility.php on line 4
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Trait method B::phi has not been applied as C::phi, because of collision with A::phi in /w/cases/dc12_trait_insteadof_and_alias_visibility.php on line 4
+Stack trace:
+#0 {main}
+
+[exit 255]
+=== b6_dc13_trait_property_conflict
+--- PHP 8.5.12
+
+Fatal error: C and T define the same property ($p) in the composition of C. However, the definition differs and is considered incompatible. Class was composed in /w/cases/dc13_trait_property_conflict.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+
+[exit 255]ERR phego: internal error while running the program: internal VM error: class C: incompatible trait property C::$p at /w/cases/dc13_trait_property_conflict.php:3 (function {main}, pc 0)
+=== b6_dc17_trait_abstract_signature_mismatch
+--- PHP 8.5.12
+
+Fatal error: Declaration of C::need(string $x): string must be compatible with T::need(int $x): string in /w/cases/dc17_trait_abstract_signature_mismatch.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== b6_dc27_const_cycle
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Cannot declare self-referencing constant self::Y in /w/cases/dc27_const_cycle.php:2
+Stack trace:
+#0 /w/cases/dc27_const_cycle.php(3): [constant expression]()
+#1 {main}
+  thrown in /w/cases/dc27_const_cycle.php on line 2
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught Error: Cannot declare self-referencing constant A::X in /w/cases/dc27_const_cycle.php:2
+Stack trace:
+#0 /w/cases/dc27_const_cycle.php(2): A::{constant expression}()
+#1 /w/cases/dc27_const_cycle.php(3): A::{constant expression}()
+#2 {main}
+  thrown in /w/cases/dc27_const_cycle.php on line 2
+
+[exit 255]
+=== b6_dc30_enum_unsupported
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: enum declaration in /w/cases/dc30_enum_unsupported.php on line 2
+=== b7_o08_typeerror_arg_object_release
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: f(): Argument #1 ($x) must be of type int, D given, called in /w/cases/o08_typeerror_arg_object_release.php on line 4 and defined in /w/cases/o08_typeerror_arg_object_release.php:3
+Stack trace:
+#0 /w/cases/o08_typeerror_arg_object_release.php(4): f(Object(D))
+#1 {main}
+  thrown in /w/cases/o08_typeerror_arg_object_release.php on line 3
+~1
+
+[exit 255]
+--- Phego before the fix
+~1
+
+Fatal error: Uncaught TypeError: f(): Argument #1 ($x) must be of type int, D given, called in /w/cases/o08_typeerror_arg_object_release.php on line 4 and defined in /w/cases/o08_typeerror_arg_object_release.php:3
+Stack trace:
+#0 /w/cases/o08_typeerror_arg_object_release.php(4): f(Object(D))
+#1 {main}
+  thrown in /w/cases/o08_typeerror_arg_object_release.php on line 3
+
+[exit 255]
+=== b7_o23_clone_temp_released
+--- PHP 8.5.12
+~1
+after
+~1
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: clone with arguments in /w/cases/o23_clone_temp_released.php on line 3
+=== b7_o31_destructor_private
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Call to private D::__destruct() from global scope in /w/cases/o31_destructor_private.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/o31_destructor_private.php on line 4
+
+[exit 255]
+--- Phego before the fix
+~D
+end
+
+[exit 0]
+=== b7_o32_destructor_private_shutdown
+--- PHP 8.5.12
+end
+
+Warning: Call to private D::__destruct() from global scope during shutdown ignored in Unknown on line 0
+
+[exit 0]
+--- Phego before the fix
+end
+~D
+
+[exit 0]
+=== b7_o34_linked_list_shutdown
+--- PHP 8.5.12
+end
+~1
+~2
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [0] with length 0
+=== b8_e02_shutdown_var_after_holder
+--- PHP 8.5.12
+~1
+~2
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [0] with length 0
+=== b8_e04_ctor_fail_arg_typeerror
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: D::__construct(): Argument #1 ($n) must be of type int, string given, called in /w/cases/e04_ctor_fail_arg_typeerror.php on line 3 and defined in /w/cases/e04_ctor_fail_arg_typeerror.php:2
+Stack trace:
+#0 /w/cases/e04_ctor_fail_arg_typeerror.php(3): D->__construct('x')
+#1 {main}
+  thrown in /w/cases/e04_ctor_fail_arg_typeerror.php on line 2
+
+[exit 255]
+--- Phego before the fix
+~D
+
+Fatal error: Uncaught TypeError: D::__construct(): Argument #1 ($n) must be of type int, string given, called in /w/cases/e04_ctor_fail_arg_typeerror.php on line 3 and defined in /w/cases/e04_ctor_fail_arg_typeerror.php:2
+Stack trace:
+#0 /w/cases/e04_ctor_fail_arg_typeerror.php(3): D->__construct('x')
+#1 {main}
+  thrown in /w/cases/e04_ctor_fail_arg_typeerror.php on line 2
+
+[exit 255]
+=== b8_e05_ctor_fail_partial_props
+--- PHP 8.5.12
+~C
+
+Fatal error: Uncaught Error: Call to a member function x() on null in /w/cases/e05_ctor_fail_partial_props.php:3
+Stack trace:
+#0 /w/cases/e05_ctor_fail_partial_props.php(4): D->__construct()
+#1 {main}
+  thrown in /w/cases/e05_ctor_fail_partial_props.php on line 3
+
+[exit 255]
+--- Phego before the fix
+~D
+~C
+
+Fatal error: Uncaught Error: Call to a member function x() on null in /w/cases/e05_ctor_fail_partial_props.php:3
+Stack trace:
+#0 /w/cases/e05_ctor_fail_partial_props.php(4): D->__construct()
+#1 {main}
+  thrown in /w/cases/e05_ctor_fail_partial_props.php on line 3
+
+[exit 255]
+=== b8_e07_typed_ref_foreach_list
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot assign string to property A::$i of type int in /w/cases/e07_typed_ref_foreach_list.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e07_typed_ref_foreach_list.php on line 5
+
+[exit 255]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: property access in /w/cases/e07_typed_ref_foreach_list.php on line 5
+=== b8_e10_typed_static_ref_assign_from_other
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Reference with value of type int held by property A::$i of type int is not compatible with property A::$s of type string in /w/cases/e10_typed_static_ref_assign_from_other.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e10_typed_static_ref_assign_from_other.php on line 3
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== b8_e18_protected_static_sibling_common
+--- PHP 8.5.12
+R
+
+[exit 0]
+--- Phego before the fix
+
+Fatal error: Uncaught Error: Cannot access protected property R::$s in /w/cases/e18_protected_static_sibling_common.php:3
+Stack trace:
+#0 /w/cases/e18_protected_static_sibling_common.php(5): L::r()
+#1 {main}
+  thrown in /w/cases/e18_protected_static_sibling_common.php on line 3
+
+[exit 255]
+=== b8_e21_intdiv_typed_prop_decrement_min
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot decrement property A::$i of type int past its minimal value in /w/cases/e21_intdiv_typed_prop_decrement_min.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e21_intdiv_typed_prop_decrement_min.php on line 4
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== b8_e22_typed_static_inc_overflow
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot increment property A::$i of type int past its maximal value in /w/cases/e22_typed_static_inc_overflow.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e22_typed_static_inc_overflow.php on line 3
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: Cannot assign float to property A::$i of type int in /w/cases/e22_typed_static_inc_overflow.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e22_typed_static_inc_overflow.php on line 3
+
+[exit 255]
+=== b8_e23_typed_prop_by_ref_inc_overflow
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot increment a reference held by property A::$i of type int past its maximal value in /w/cases/e23_typed_prop_by_ref_inc_overflow.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e23_typed_prop_by_ref_inc_overflow.php on line 5
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: Cannot assign float to reference held by property A::$i of type int in /w/cases/e23_typed_prop_by_ref_inc_overflow.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e23_typed_prop_by_ref_inc_overflow.php on line 5
+
+[exit 255]
+=== b8_e24_typed_nullable_autoviv_static
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/cases/e24_typed_nullable_autoviv_static.php:3
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e24_typed_nullable_autoviv_static.php on line 3
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== b8_e25_typed_bool_autoviv
+--- PHP 8.5.12
+ok
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$b of type ?bool in /w/cases/e25_typed_bool_autoviv.php:6
+Stack trace:
+#0 {main}
+  thrown in /w/cases/e25_typed_bool_autoviv.php on line 6
+
+[exit 255]
+--- Phego before the fix
+ok
+
+[exit 0]
+=== deep_r03_get_chain_5000
+--- PHP 8.5.12
+5000
+
+[exit 0]
+--- Phego before the fix
+
+Fatal error: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in Unknown on line 0
+
+[exit 255]ERR phego: internal error while an uncaught throwable without a description: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+=== deep_r04_get_chain_50000
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in /w/cases/r04_get_chain_50000.php:2
+Stack trace:
+#0 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#1 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#2 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#3 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#4 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#5 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#6 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#7 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#8 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#9 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#10 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#11 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#12 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#13 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#14 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#15 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#16 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#17 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#18 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#19 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#20 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#21 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#22 /w/cases/r04_get_chain_50000.php(2): A->__get('x')
+#23 /w/cases/r04_get_chain_50000.php(--- Phego before the fix
+
+Fatal error: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in Unknown on line 0
+
+[exit 255]ERR phego: internal error while an uncaught throwable without a description: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+=== deep_r05_tostring_chain_5000
+--- PHP 8.5.12
+e
+
+[exit 0]
+--- Phego before the fix
+
+Fatal error: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in Unknown on line 0
+
+[exit 255]ERR phego: internal error while an uncaught throwable without a description: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+=== deep_r06_tostring_chain_50000
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in /w/cases/r06_tostring_chain_50000.php:2
+Stack trace:
+#0 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#1 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#2 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#3 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#4 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#5 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#6 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#7 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#8 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#9 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#10 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#11 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#12 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#13 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#14 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#15 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#16 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#17 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#18 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#19 /w/cases/r06_tostring_chain_50000.php(2): S->__toString()
+#20 /w/cases/r06_tostring_chain_50000.php(2): S->__toStri--- Phego before the fix
+
+Fatal error: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in Unknown on line 0
+
+[exit 255]ERR phego: internal error while an uncaught throwable without a description: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+=== deep_r09_nodtor_chain_200000
+--- PHP 8.5.12
+
+[exit 139]
+--- Phego before the fix
+ok
+
+[exit 0]
+=== deep_r12_set_chain_20000
+--- PHP 8.5.12
+
+Fatal error: Uncaught Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in /w/cases/r12_set_chain_20000.php:2
+Stack trace:
+#0 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#1 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#2 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#3 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#4 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#5 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#6 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#7 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#8 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#9 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#10 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#11 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#12 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#13 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#14 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#15 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#16 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#17 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#18 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#19 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#20 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#21 /w/cases/r12_set_chain_20000.php(2): A->__set('x', 1)
+#22 /w/cases/r12_set_chain--- Phego before the fix
+
+Fatal error: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion? in Unknown on line 0
+
+[exit 255]ERR phego: internal error while an uncaught throwable without a description: Error: Maximum call stack size of 8339456 bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+=== deep_r13_nested_arrays_objects_release
+--- PHP 8.5.12
+
+[exit 139]
+--- Phego before the fix
+ok
+
+[exit 0]
+=== diag_u01_closure_line5
+--- PHP 8.5.12
+3
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: closure in /w/cases/u01_closure_line5.php on line 5
+=== diag_u02_arrow_fn
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: arrow function in /w/cases/u02_arrow_fn.php on line 4
+=== diag_u03_first_class_callable_method
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: first-class callable in /w/cases/u03_first_class_callable_method.php on line 4
+=== diag_u04_try_in_method
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: try in /w/cases/u04_try_in_method.php on line 4
+=== diag_u05_throw_expr
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: throw in /w/cases/u05_throw_expr.php on line 3
+=== diag_u06_user_exception_class
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: extending or implementing builtin class Exception in /w/cases/u06_user_exception_class.php on line 2
+=== diag_u07_property_hook
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: property hook in /w/cases/u07_property_hook.php on line 3
+=== diag_u08_include
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: include in /w/cases/u08_include.php on line 2
+=== diag_u09_enum_in_middle
+--- PHP 8.5.12
+a
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: enum declaration in /w/cases/u09_enum_in_middle.php on line 4
+=== diag_u10_new_in_initializer_builtin_class
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: builtin class ArrayObject in /w/cases/u10_new_in_initializer_builtin_class.php on line 2
+=== diag_u11_static_closure_in_default
+--- PHP 8.5.12
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: closure in /w/cases/u11_static_closure_in_default.php on line 6
+=== diag_u13_extends_builtin_exception
+--- PHP 8.5.12
+x
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: extending or implementing builtin class RuntimeException in /w/cases/u13_extends_builtin_exception.php on line 2
+=== diag_u14_callable_string_method
+--- PHP 8.5.12
+1
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: calling a method through a string in /w/cases/u14_callable_string_method.php on line 4
+=== diag_u15_array_callable
+--- PHP 8.5.12
+1
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: calling an array callable in /w/cases/u15_array_callable.php on line 4
+=== m1_g3_global_in_func_after_end
+--- PHP 8.5.12
+end
+q=1
+
+[exit 0]
+--- Phego before the fix
+end
+
+[exit 255]ERR phego: internal error while running the program: execution callback panicked: runtime error: index out of range [0] with length 0
+=== m1_g6_ctor_fail_arith
+--- PHP 8.5.12
+ctor
+
+Fatal error: Uncaught TypeError: Unsupported operand types: array + int in /w/cases/g6_ctor_fail_arith.php:2
+Stack trace:
+#0 /w/cases/g6_ctor_fail_arith.php(3): D->__construct(1)
+#1 /w/cases/g6_ctor_fail_arith.php(4): f()
+#2 {main}
+  thrown in /w/cases/g6_ctor_fail_arith.php on line 2
+
+[exit 255]
+--- Phego before the fix
+ctor
+~1
+
+Fatal error: Uncaught TypeError: Unsupported operand types: array + int in /w/cases/g6_ctor_fail_arith.php:2
+Stack trace:
+#0 /w/cases/g6_ctor_fail_arith.php(3): D->__construct(1)
+#1 /w/cases/g6_ctor_fail_arith.php(4): f()
+#2 {main}
+  thrown in /w/cases/g6_ctor_fail_arith.php on line 2
+
+[exit 255]
+=== m2_a1_null_int_autoviv_then_read
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$i of type ?int in /w/cases/a1_null_int_autoviv_then_read.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/a1_null_int_autoviv_then_read.php on line 4
+
+[exit 255]
+--- Phego before the fix
+after
+notnull
+i=array[1]
+
+[exit 0]
+=== m2_a2_null_int_autoviv_key
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot auto-initialize an array inside property A::$s of type ?string in /w/cases/a2_null_int_autoviv_key.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/a2_null_int_autoviv_key.php on line 4
+
+[exit 255]
+--- Phego before the fix
+after
+
+[exit 0]
+=== m2_a3_trace_args_variadic
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: A::m(): Argument #3 must be of type string, array given, called in /w/cases/a3_trace_args_variadic.php on line 3 and defined in /w/cases/a3_trace_args_variadic.php:2
+Stack trace:
+#0 /w/cases/a3_trace_args_variadic.php(3): A->m(5, 'a', Array)
+#1 {main}
+  thrown in /w/cases/a3_trace_args_variadic.php on line 2
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: A::m(): Argument #3 must be of type string, array given, called in /w/cases/a3_trace_args_variadic.php on line 3 and defined in /w/cases/a3_trace_args_variadic.php:2
+Stack trace:
+#0 /w/cases/a3_trace_args_variadic.php(3): A->m(NULL, 'a', Array)
+#1 {main}
+  thrown in /w/cases/a3_trace_args_variadic.php on line 2
+
+[exit 255]
+=== m2_a4_trace_args_func_variadic
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: m(): Argument #3 must be of type string, array given, called in /w/cases/a4_trace_args_func_variadic.php on line 3 and defined in /w/cases/a4_trace_args_func_variadic.php:2
+Stack trace:
+#0 /w/cases/a4_trace_args_func_variadic.php(3): m(5, 'a', Array)
+#1 {main}
+  thrown in /w/cases/a4_trace_args_func_variadic.php on line 2
+
+[exit 255]
+--- Phego before the fix
+
+Fatal error: Uncaught TypeError: m(): Argument #3 must be of type string, array given, called in /w/cases/a4_trace_args_func_variadic.php on line 3 and defined in /w/cases/a4_trace_args_func_variadic.php:2
+Stack trace:
+#0 /w/cases/a4_trace_args_func_variadic.php(3): m(NULL, 'a', Array)
+#1 {main}
+  thrown in /w/cases/a4_trace_args_func_variadic.php on line 2
+
+[exit 255]
+=== m2_a8_ref_assign_typed_from_untyped
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot assign string to property A::$i of type int in /w/cases/a8_ref_assign_typed_from_untyped.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/a8_ref_assign_typed_from_untyped.php on line 5
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== m2_a9_ref_assign_typed_static
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot assign string to property A::$i of type int in /w/cases/a9_ref_assign_typed_static.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/a9_ref_assign_typed_static.php on line 4
+
+[exit 255]
+--- Phego before the fix
+
+[exit 0]
+=== m3_p1_two_objects_linked
+--- PHP 8.5.12
+end
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [1] with length 1
+=== m3_p2_linked_no_null
+--- PHP 8.5.12
+end
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [0] with length 0
+=== m3_p3_three
+--- PHP 8.5.12
+end
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [2] with length 1
+=== m3_p4_with_dtor
+--- PHP 8.5.12
+end
+~
+~
+
+[exit 0]
+--- Phego before the fix
+PANIC runtime error: index out of range [1] with length 1
+=== m4_e7_byref_ctor_element
+--- PHP 8.5.12
+1
+
+[exit 0]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: passing an element or a property to a by-reference parameter of a callee found at run time in /w/cases/e7_byref_ctor_element.php on line 4
+=== m6_s1_declare_stdclass
+--- PHP 8.5.12
+
+Fatal error: Cannot redeclare class stdClass in /w/cases/s1_declare_stdclass.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: declaring a class with the name of builtin class stdClass in /w/cases/s1_declare_stdclass.php on line 2
+=== m6_s2_declare_stringable
+--- PHP 8.5.12
+
+Fatal error: Cannot redeclare interface Stringable in /w/cases/s2_declare_stringable.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: declaring a class with the name of builtin class Stringable in /w/cases/s2_declare_stringable.php on line 2
+=== m6_s3_declare_stdclass_conditional
+--- PHP 8.5.12
+
+Fatal error: Cannot redeclare class stdClass in /w/cases/s3_declare_stdclass_conditional.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+UNSUPPORTED phego: unsupported: declaring a class with the name of builtin class stdClass in /w/cases/s3_declare_stdclass_conditional.php on line 2
+=== m6_s4_trait_rule_missing_trait
+--- PHP 8.5.12
+
+Fatal error: Could not find trait Nope in /w/cases/s4_trait_rule_missing_trait.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+x
+
+[exit 0]
+=== m6_s5_trait_alias_missing_method
+--- PHP 8.5.12
+
+Fatal error: An alias (yy) was defined for method zz(), but this method does not exist in /w/cases/s5_trait_alias_missing_method.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- Phego before the fix
+x
+
+[exit 0]
+=== m7_dec_min
+--- PHP 8.5.12
+
+Fatal error: Uncaught TypeError: Cannot decrement property A::$i of type int past its minimal value in /w/cases/dec_min.php:4
+Stack trace:
+#0 {main}
+  thrown in /w/cases/dec_min.php on line 4
+
+[exit 255]
+--- Phego before the fix
+-9223372036854775808|min
+
+[exit 0]
