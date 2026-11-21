@@ -1,11 +1,11 @@
 $ go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$|TestW17Stage6|TestW17Stage7' -v .
 === NAME  TestW17PHP8512Programs/64
-    w17_differential_test.go:165: profile 64: 2079 pass, 0 unsupported, 0 fail of 2079
+    w17_differential_test.go:165: profile 64: 2196 pass, 0 unsupported, 0 fail of 2196
 === NAME  TestW17PHP8512Programs/amd64
-    w17_differential_test.go:165: profile amd64: 2079 pass, 0 unsupported, 0 fail of 2079
+    w17_differential_test.go:165: profile amd64: 2196 pass, 0 unsupported, 0 fail of 2196
 === NAME  TestW17PHP8512Programs/32
-    w17_differential_test.go:165: profile 32: 2079 pass, 0 unsupported, 0 fail of 2079
---- PASS: TestW17PHP8512Programs (0.82s)
+    w17_differential_test.go:165: profile 32: 2196 pass, 0 unsupported, 0 fail of 2196
+--- PASS: TestW17PHP8512Programs (0.84s)
 --- PASS: TestW17ReviewProbes (0.00s)
 --- PASS: TestW17Stage2Probes (0.05s)
 --- PASS: TestW17Stage3RunsFormerlyUnsupportedProbes (0.00s)
@@ -13,8 +13,10 @@ $ go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes
 --- PASS: TestW17Stage6FailedInitializerIsNotRemembered (0.00s)
 --- PASS: TestW17Stage6UnsupportedIsRefusedAtCompile (0.00s)
 --- PASS: TestW17Stage7StateBelongsToTheRun (0.01s)
---- PASS: TestW17Stage7LargeFunctionDestructorTiming (0.72s)
---- PASS: TestW17Stage7NestedCallbacksAreBounded (2.78s)
+--- PASS: TestW17Stage7LargeFunctionDestructorTiming (0.73s)
+--- PASS: TestW17Stage7NestedCallbacksAreBounded (2.70s)
+--- PASS: TestW17Stage7LongObjectChainIsFreed (1.06s)
+--- PASS: TestW17Stage7ShutdownGlobalSeesHostValue (0.00s)
 PASS
-ok  	github.com/HazelnutParadise/phego	5.352s
+ok  	github.com/HazelnutParadise/phego	6.379s
 exit=0
