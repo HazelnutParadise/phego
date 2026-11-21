@@ -418,14 +418,43 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	fr := s.newFrame()
 	into := s.into
-	s.into = vmEnter{}
-	*fr = vmFrame{fn: fn, code: fn.code, dest: dest, nargs: argc, this: into.this, scope: into.scope, called: into.called}
-	s.h.currentCalledScope = into.called
+	if into != (vmEnter{}) {
+		s.into = vmEnter{}
+	}
+	// Field by field: the frame object lives on the heap, and assigning
+	// the whole struct goes through the garbage collector's bulk write
+	// barrier on every call.
+	fr.fn, fr.code, fr.pc, fr.dest, fr.nargs = fn, fn.code, 0, dest, argc
+	if fr.this != into.this || fr.scope != into.scope || fr.called != into.called {
+		fr.this, fr.scope, fr.called = into.this, into.scope, into.called
+	}
+	fr.boundary, fr.unreceived = false, false
+	if s.h.currentCalledScope != into.called {
+		s.h.currentCalledScope = into.called
+	}
+	// The windows, with the common case (room in the current chunk) written
+	// out: a generic method call here costs a recursive PHP function
+	// several percent.
 	var win []value
-	win, fr.freshV = s.vals.take(fn.nvals + fn.locals)
+	if top := s.vals.top + fn.nvals + fn.locals; top <= len(s.vals.cur) {
+		win = s.vals.cur[s.vals.top:top:top]
+		s.vals.top = top
+	} else {
+		win, fr.freshV = s.vals.grow(fn.nvals+fn.locals), true
+	}
 	fr.regs, fr.locals = win[:fn.nvals:fn.nvals], win[fn.nvals:]
-	fr.locs, fr.freshL = s.locs.take(fn.nlocs)
-	fr.elems, fr.freshE = s.elems.take(fn.nelems)
+	if top := s.locs.top + fn.nlocs; top <= len(s.locs.cur) {
+		fr.locs = s.locs.cur[s.locs.top:top:top]
+		s.locs.top = top
+	} else {
+		fr.locs, fr.freshL = s.locs.grow(fn.nlocs), true
+	}
+	if top := s.elems.top + fn.nelems; top <= len(s.elems.cur) {
+		fr.elems = s.elems.cur[s.elems.top:top:top]
+		s.elems.top = top
+	} else {
+		fr.elems, fr.freshE = s.elems.grow(fn.nelems), true
+	}
 	args := s.args[len(s.args)-argc:]
 	for i, a := range args {
 		if i < fn.params {
@@ -488,32 +517,30 @@ type vmStackMark[T any] struct {
 	top int
 }
 
-// take returns a zeroed window of n elements; fresh says it started a chunk.
-func (k *vmStack[T]) take(n int) (win []T, fresh bool) {
-	if k.top+n > len(k.cur) {
-		k.prev = append(k.prev, vmStackMark[T]{k.cur, k.top})
-		if size := max(2*len(k.cur), n, 16); len(k.spare) >= max(n, len(k.cur)+1) {
-			k.cur, k.spare = k.spare, nil
-		} else {
-			k.cur = make([]T, size)
-		}
-		k.top, fresh = 0, true
+// grow starts a chunk that holds at least n elements.
+//
+//go:noinline
+func (k *vmStack[T]) grow(n int) []T {
+	k.prev = append(k.prev, vmStackMark[T]{k.cur, k.top})
+	if size := max(2*len(k.cur), n, 16); len(k.spare) >= max(n, len(k.cur)+1) {
+		k.cur, k.spare = k.spare, nil
+	} else {
+		k.cur = make([]T, size)
 	}
-	win = k.cur[k.top : k.top+n : k.top+n]
-	k.top += n
-	return win, fresh
+	k.top = n
+	return k.cur[:n:n]
 }
 
-// give returns the newest window, which its owner has zeroed.
-func (k *vmStack[T]) give(n int, fresh bool) {
-	k.top -= n
-	if fresh {
-		m := k.prev[len(k.prev)-1]
-		k.prev[len(k.prev)-1] = vmStackMark[T]{}
-		k.prev = k.prev[:len(k.prev)-1]
-		k.spare = k.cur
-		k.cur, k.top = m.cur, m.top
-	}
+// shrink goes back to the chunk before the newest one, after the frame
+// that opened it gave its window back.
+//
+//go:noinline
+func (k *vmStack[T]) shrink() {
+	m := k.prev[len(k.prev)-1]
+	k.prev[len(k.prev)-1] = vmStackMark[T]{}
+	k.prev = k.prev[:len(k.prev)-1]
+	k.spare = k.cur
+	k.cur, k.top = m.cur, m.top
 }
 
 // pop releases the top frame's values and removes it. The values are
@@ -558,19 +585,41 @@ func (s *vmState) pop(release bool) error {
 		}
 	}
 	this := f.this
-	f.this = nil
+	if this != nil {
+		f.this = nil
+	}
 	clear(f.locals)
 	clear(f.locs)
 	clear(f.elems)
-	s.vals.give(len(f.regs)+len(f.locals), f.freshV)
-	s.locs.give(len(f.locs), f.freshL)
-	s.elems.give(len(f.elems), f.freshE)
-	*f = vmFrame{}
+	s.vals.top -= len(f.regs) + len(f.locals)
+	s.locs.top -= len(f.locs)
+	s.elems.top -= len(f.elems)
+	if f.freshV {
+		s.vals.shrink()
+	}
+	if f.freshL {
+		s.locs.shrink()
+	}
+	if f.freshE {
+		s.elems.shrink()
+	}
+	// The frame object is reused. push writes every field it reads; only
+	// what could keep a value alive is cleared here, and only when set, so
+	// a plain call writes no pointer on its way out.
+	if f.extra != nil {
+		f.extra = nil
+	}
+	if f.call != nil {
+		f.call = nil
+	}
+	f.freshV, f.freshL, f.freshE = false, false, false
 	s.frames = s.frames[:len(s.frames)-1]
+	var outer *class
 	if n := len(s.frames); n > 0 {
-		s.h.currentCalledScope = s.frames[n-1].called
-	} else {
-		s.h.currentCalledScope = nil
+		outer = s.frames[n-1].called
+	}
+	if s.h.currentCalledScope != outer {
+		s.h.currentCalledScope = outer
 	}
 	// $this is released after the frame's variables (i_free_compiled_variables
 	// runs before OBJ_RELEASE(ZEND_THIS) in zend_leave_helper).
