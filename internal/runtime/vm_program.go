@@ -24,6 +24,15 @@ type Program struct {
 	// mainLocal maps a variable name of the entry function to its local:
 	// the global variables a global statement binds.
 	mainLocal map[string]int
+	// classes is the decoded class table (format 1.7) and hoisted the
+	// indices of the classes that exist before {main} starts, in order.
+	// Both are immutable: a run builds its own classes from them.
+	classes []vmClassDecl
+	hoisted []int
+	// trampoline is the index of a function that no code calls: the
+	// callee of a call __call or __callStatic will receive, which takes
+	// any arguments by value.
+	trampoline int
 }
 
 // vmInstr is a bytecode instruction whose register operands are renumbered
@@ -72,6 +81,14 @@ type vmFunction struct {
 	// Location register to its slot there, -1 when no FetchDim defines it.
 	nelems int
 	elemOf []int32
+	// Format 1.7: the declared types of the parameters ("" for none; one
+	// more entry for a variadic parameter), the declared return type, and
+	// whether the code was compiled under strict_types. typed says some
+	// parameter has a type, which the call checks on entry.
+	paramTypes []string
+	returnType string
+	strict     bool
+	typed      bool
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
@@ -132,7 +149,25 @@ const (
 	roleTarget
 	roleCount
 	roleNameConst // Push B: 0 or a string constant index plus one
+	roleClass     // an index into the class table
 )
+
+// role17 maps a format 1.7 operand role to the decoder's.
+func role17(r bytecode.Role) int {
+	switch r {
+	case bytecode.RoleUse, bytecode.RoleDef, bytecode.RoleUseDef:
+		return roleValue
+	case bytecode.RoleLocDef, bytecode.RoleLocUse:
+		return roleLocation
+	case bytecode.RoleString:
+		return roleConst
+	case bytecode.RoleClass:
+		return roleClass
+	case bytecode.RoleTarget:
+		return roleTarget
+	}
+	return roleNone
+}
 
 func operandRoles(in bytecode.Instruction) (a, b, c int) {
 	switch in.Op {
@@ -256,6 +291,10 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 		return roleValue, roleConst, roleNone
 	case bytecode.OpBeginSilence, bytecode.OpEndSilence, bytecode.OpMatchError:
 		return roleValue, roleNone, roleNone
+	default:
+		if r, ok := bytecode.Roles17(in); ok {
+			return role17(r[0]), role17(r[1]), role17(r[2])
+		}
 	}
 	return roleNone, roleNone, roleNone
 }
@@ -310,6 +349,11 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 			}
 		}
 	}
+	if err := prog.decodeClasses(p); err != nil {
+		return nil, err
+	}
+	prog.trampoline = len(prog.funcs)
+	prog.funcs = append(prog.funcs, vmFunction{name: "__call", index: prog.trampoline, variadic: true, paramNames: []string{}, paramByRef: []bool{}, unsupported: "entering the magic call trampoline"})
 	// Call operands name callees; their return class must match the destination.
 	for i := range prog.funcs {
 		f := &prog.funcs[i]
@@ -405,6 +449,15 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			}
 		}
 	}
+	f.returnType = fv.ReturnType()
+	f.strict = fv.Flags()&bytecode.FuncStrict != 0
+	if n := fv.ParameterCount(); n > 0 {
+		f.paramTypes = make([]string, n)
+		for i := range f.paramTypes {
+			f.paramTypes[i] = fv.ParameterType(uint32(i))
+			f.typed = f.typed || f.paramTypes[i] != ""
+		}
+	}
 	f.code = make([]vmInstr, len(code))
 	f.lines = make([]int32, len(code))
 	f.files = make([]string, len(code))
@@ -457,6 +510,11 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 					return f, fail(pc, "function %d out of range", v)
 				}
 				decoded[i] = v
+			case roleClass:
+				if int(v) >= p.ClassCount() {
+					return f, fail(pc, "class %d out of range", v)
+				}
+				decoded[i] = v
 			case roleLocal:
 				if v >= locals {
 					return f, fail(pc, "local %d out of range", v)
@@ -487,8 +545,18 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			out.aux = 0
 			if kinds[in.A] == bytecode.Location {
 				out.aux = vmPushRef
-				if in.Aux == uint16(bytecode.PushLoad) {
+				switch bytecode.PushFlags(in.Aux) {
+				case bytecode.PushLoad:
 					out.aux = vmPushLoad
+				case bytecode.PushAuto:
+					out.aux = vmPushAuto
+				}
+			} else {
+				switch bytecode.PushFlags(in.Aux) {
+				case bytecode.PushTemp:
+					out.aux = vmPushTemp
+				case bytecode.PushResult:
+					out.aux = vmPushResult
 				}
 			}
 		case bytecode.OpSendUnpack:
@@ -517,7 +585,7 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 				aux, _ := bytecode.ArraySetAux(bytecode.ArrayWriteFlags(in.Aux)&(bytecode.KeyLocation|bytecode.ValueLocation), dense[r])
 				out.aux = aux
 			}
-		case bytecode.OpFetchDim:
+		case bytecode.OpFetchDim, bytecode.OpFetchProp, bytecode.OpFetchStatic:
 			// Each destination gets a slot in the frame's element window.
 			if f.elemOf[decoded[0]] < 0 {
 				f.elemOf[decoded[0]] = int32(f.nelems)
@@ -617,8 +685,18 @@ func vmLiveness(f *vmFunction) {
 				composite[in.a] = true
 			}
 		case bytecode.OpCast:
-			if bytecode.CastKind(in.aux) == bytecode.CastArray {
+			if k := bytecode.CastKind(in.aux); k == bytecode.CastArray || k == bytecode.CastObject {
 				composite[in.a] = true
+			}
+		case bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropSet, bytecode.OpPropRef, bytecode.OpStaticGet, bytecode.OpStaticSet,
+			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn:
+			// Format 1.7: every register these define or replace can hold
+			// an object, whose release runs its destructor.
+			roles, _ := bytecode.Roles17(bytecode.Instruction{Op: in.op, Aux: in.aux})
+			for i, v := range [3]uint32{in.a, in.b, in.c} {
+				if roles[i] == bytecode.RoleDef || roles[i] == bytecode.RoleUseDef {
+					composite[v] = true
+				}
 			}
 		case bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpArraySet, bytecode.OpMakeRef:
 			// The iterator, a fetched element, an assignment's result and a
@@ -666,7 +744,7 @@ func vmLiveness(f *vmFunction) {
 			if role == roleAny && i == 1 && in.op == bytecode.OpMove && in.aux == 0 {
 				visit(ops[i])
 			}
-			if role == roleAny && i == 0 && (in.op == bytecode.OpPush || in.op == bytecode.OpDrop || in.op == bytecode.OpSendUnpack) && in.aux == 0 {
+			if role == roleAny && i == 0 && (in.op == bytecode.OpPush && (in.aux == 0 || in.aux == vmPushTemp || in.aux == vmPushResult) || (in.op == bytecode.OpDrop || in.op == bytecode.OpSendUnpack) && in.aux == 0) {
 				visit(ops[i])
 			}
 			if role == roleAny && i == 1 && in.op == bytecode.OpIterInit && in.aux&vmIterSubjectLocation == 0 {
@@ -683,7 +761,7 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpBranch:
 			visit(int(in.b))
 			visit(int(in.c))
-		case bytecode.OpIterInit, bytecode.OpIterNext:
+		case bytecode.OpIterInit, bytecode.OpIterNext, bytecode.OpNew:
 			visit(pc + 1)
 			visit(int(in.c))
 		case bytecode.OpParamDefault, bytecode.OpStaticInit:
@@ -776,7 +854,9 @@ func definesA(op bytecode.Opcode) bool {
 	case bytecode.OpConst, bytecode.OpMove, bytecode.OpLocal, bytecode.OpLoad, bytecode.OpBinary, bytecode.OpCall, bytecode.OpCallValue,
 		bytecode.OpHostCall, bytecode.OpNewArray, bytecode.OpArrayGet, bytecode.OpInclude, bytecode.OpEval, bytecode.OpShell,
 		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef,
-		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending:
+		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending,
+		bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropRef, bytecode.OpPropIsset, bytecode.OpStaticGet, bytecode.OpStaticRef,
+		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone:
 		return true
 	}
 	return false

@@ -100,7 +100,7 @@ func TestFormat16RejectsInvalidOperands(t *testing.T) {
 		"dynamic call takes a named argument of a started call": {
 			{Op: OpInitCall, B: 1}, {Op: OpPush, A: 0, B: 2}, {Op: OpCallValue, A: 3, B: 0, C: 1}, {Op: OpCallPending, A: 3},
 		},
-		"push aux 2":                         {{Op: OpPush, Aux: 2, A: 2}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
+		"push aux above PushResult":          {{Op: OpPush, Aux: uint16(PushResult) + 1, A: 2}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
 		"push load of a value":               {{Op: OpPush, Aux: uint16(PushLoad), A: 0}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
 		"push load of an undefined location": {{Op: OpPush, Aux: uint16(PushLoad), A: 4}, {Op: OpCallValue, A: 3, B: 0, C: 1}},
 		"reference to a by-value parameter": {
@@ -234,7 +234,7 @@ func TestFormat16ParameterTable(t *testing.T) {
 		"too many":                 {func(i *Image) { i.Functions[1].Parameters = make([]Parameter, 4) }, "parameter table has 4 entries"},
 		"variadic on a register":   {func(i *Image) { i.Functions[1].Parameters[0].Flags = ParamVariadic }, "ParamVariadic marks exactly"},
 		"last is not variadic":     {func(i *Image) { i.Functions[1].Parameters = append(i.Functions[1].Parameters, Parameter{Name: 1}) }, "ParamVariadic marks exactly"},
-		"unknown flag":             {func(i *Image) { i.Functions[1].Parameters[1].Flags = 4 }, "unknown flags"},
+		"unknown flag":             {func(i *Image) { i.Functions[1].Parameters[1].Flags = ParamOptional << 1 }, "unknown flags"},
 		"name is not a string":     {func(i *Image) { i.Functions[1].Parameters[1].Name = 0 }, "not a string constant"},
 		"name is out of range":     {func(i *Image) { i.Functions[1].Parameters[0].Name = 99 }, "not a string constant"},
 		"name is far out of range": {func(i *Image) { i.Functions[1].Parameters[0].Name = 0xffffffff }, "not a string constant"},
@@ -255,35 +255,41 @@ func TestFormat16ParameterTable(t *testing.T) {
 
 func TestFormat16ParameterTableRoundTrip(t *testing.T) {
 	image := format16Image(format16ValidBodies()["pending call"]...)
-	data := encodeAtMinor(t, image, FormatMinor)
-	p, err := loadBytes(data)
-	if err != nil || p == nil {
-		t.Fatalf("Load=(%v,%v)", p, err)
-	}
-	main, _ := p.Function(0)
-	callee, _ := p.Function(1)
-	if main.ParameterCount() != 2 || callee.ParameterCount() != 2 {
-		t.Fatalf("parameter counts = %d, %d; want 2, 2", main.ParameterCount(), callee.ParameterCount())
-	}
-	for i, want := range []ParameterFlags{0, ParamVariadic} {
-		if name, flags, ok := main.Parameter(uint32(i)); !ok || name != "x" || flags != want {
-			t.Fatalf("main parameter %d = %q, %d, %v", i, name, flags, ok)
+	// The table is read from a format 1.6 file and from a file of the
+	// current format, whose parameter records are longer (format 1.7).
+	data := encodeAtMinor(t, image, 6)
+	current := encodeAtMinor(t, image, FormatMinor)
+	for _, file := range [][]byte{data, current} {
+		p, err := loadBytes(file)
+		if err != nil || p == nil {
+			t.Fatalf("Load=(%v,%v)", p, err)
+		}
+		main, _ := p.Function(0)
+		callee, _ := p.Function(1)
+		if main.ParameterCount() != 2 || callee.ParameterCount() != 2 {
+			t.Fatalf("parameter counts = %d, %d; want 2, 2", main.ParameterCount(), callee.ParameterCount())
+		}
+		for i, want := range []ParameterFlags{0, ParamVariadic} {
+			if name, flags, ok := main.Parameter(uint32(i)); !ok || name != "x" || flags != want {
+				t.Fatalf("main parameter %d = %q, %d, %v", i, name, flags, ok)
+			}
+		}
+		for i, want := range []ParameterFlags{0, ParamByRef} {
+			if name, flags, ok := callee.Parameter(uint32(i)); !ok || name != "x" || flags != want {
+				t.Fatalf("callee parameter %d = %q, %d, %v", i, name, flags, ok)
+			}
+		}
+		if _, _, ok := callee.Parameter(2); ok {
+			t.Fatal("parameter 2 of callee exists")
+		}
+		// Encode writes the current format, whatever the file declared.
+		again, err := p.Encode(context.Background())
+		if err != nil || string(again) != string(current) {
+			t.Fatalf("canonical re-encode differs: err=%v", err)
 		}
 	}
-	for i, want := range []ParameterFlags{0, ParamByRef} {
-		if name, flags, ok := callee.Parameter(uint32(i)); !ok || name != "x" || flags != want {
-			t.Fatalf("callee parameter %d = %q, %d, %v", i, name, flags, ok)
-		}
-	}
-	if _, _, ok := callee.Parameter(2); ok {
-		t.Fatal("parameter 2 of callee exists")
-	}
-	again, err := p.Encode(context.Background())
-	if err != nil || string(again) != string(data) {
-		t.Fatalf("canonical re-encode differs: err=%v", err)
-	}
-	// The payload ends with the callee's table: count 2, then two entries
-	// of a u32 name and a u8 of flags.
+	// The format 1.6 payload ends with the callee's table: count 2, then two
+	// entries of a u32 name and a u8 of flags.
 	tail := data[len(data)-14:]
 	if want := []byte{2, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, byte(ParamByRef)}; string(tail) != string(want) {
 		t.Fatalf("payload ends with % x, want % x", tail, want)
@@ -354,7 +360,8 @@ func TestFormat16IsGatedByTheDeclaredMinor(t *testing.T) {
 }
 
 func TestFormat16Opcodes(t *testing.T) {
-	// Seven opcodes follow format 1.5's MatchError; 56 is the first unknown one.
+	// Seven opcodes follow format 1.5's MatchError; format 1.7 continues at
+	// 56 (format17_test.go checks its opcodes and the first unknown one).
 	want := []Opcode{OpBindGlobal, OpStaticInit, OpBindStatic, OpRecvVariadic, OpInitCall, OpSendUnpack, OpCallPending}
 	for i, op := range want {
 		if op != Opcode(49+i) {
@@ -364,10 +371,10 @@ func TestFormat16Opcodes(t *testing.T) {
 			t.Fatalf("Safety(%d) = %+v, %v", op, s, ok)
 		}
 	}
-	if _, ok := Opcode(56).Safety(); ok {
-		t.Fatal("opcode 56 is known")
+	if OpDeclareClass != 56 {
+		t.Fatalf("OpDeclareClass = %d, want 56: format 1.6 opcodes may not be followed by a gap", OpDeclareClass)
 	}
-	if FormatMinor != 6 {
-		t.Fatalf("FormatMinor = %d, want 6", FormatMinor)
+	if FormatMinor < 6 {
+		t.Fatalf("FormatMinor = %d, want at least 6", FormatMinor)
 	}
 }

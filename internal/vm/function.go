@@ -48,6 +48,11 @@ type fnCompiler struct {
 	// inDefault is set while the code of a parameter default is compiled.
 	inDefault bool
 
+	// inBase is set while the object position of a member access is
+	// compiled, and short is the nullsafe chain being compiled (stage7.go).
+	inBase bool
+	short  *shortCircuit
+
 	loops []loop
 	// elemPCs are the instructions that name the element register, by the
 	// placeholder elemReg until finish knows where the temporaries end.
@@ -105,6 +110,7 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	fc.base = uint32(fc.params + locals)
 	fc.cur = positive(f.Line, 1)
 	fc.receive()
+	fc.promote()
 	for _, s := range f.Body {
 		fc.stmt(s)
 	}
@@ -115,6 +121,17 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	fc.cur = end
 	r := fc.alloc()
 	fc.emit(bytecode.OpConst, 0, r, c.literal(&ir.Literal{Kind: ir.LitNull}), 0)
+	// A function with a return type that reaches its end returned nothing
+	// (ZEND_VERIFY_RETURN_TYPE without an operand).
+	switch fc.returnType() {
+	case "", "void", "mixed":
+	case "never":
+		fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnNever), r, 0, 0)
+	default:
+		if f.HasBody && !f.Generator {
+			fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnNone), r, 0, 0)
+		}
+	}
 	fc.emit(bytecode.OpReturn, 0, r, 0, 0)
 	if fc.overReg != 0 {
 		fc.unsupported("expression too large", fc.overReg)
@@ -362,7 +379,7 @@ func (fc *fnCompiler) signature() {
 	if len(f.Attributes) > 0 {
 		fc.unsupported("function attribute", positive(f.Attributes[0].Line, f.Line))
 	}
-	if isBuiltin(f.Name) {
+	if f.Kind == ir.FuncNamed && isBuiltin(f.Name) {
 		// A hoisted declaration is a CompileError (compiler.compile). A
 		// conditional one fails in PHP when it runs, which stage 1 cannot
 		// compile anyway.
@@ -376,16 +393,12 @@ func (fc *fnCompiler) signature() {
 		switch {
 		case len(p.Attributes) > 0:
 			fc.unsupported("parameter attribute", positive(p.Attributes[0].Line, line))
-		case p.Type != nil:
-			fc.unsupported("typed parameter", line)
-		case len(p.Promoted) > 0:
-			fc.unsupported("promoted parameter", line)
 		case p.Var == nil:
 			panic(internalError{"parameter without a variable"})
 		}
 	}
-	if f.Return != nil {
-		fc.unsupported("return type", f.Line)
+	if f.Generator {
+		fc.unsupported("generator", f.Line)
 	}
 }
 
@@ -548,7 +561,25 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		if p.Variadic {
 			flags |= bytecode.ParamVariadic
 		}
-		parameters = append(parameters, bytecode.Parameter{Name: c.stringConst(p.Name), Flags: flags})
+		if p.Default != nil {
+			flags |= bytecode.ParamOptional
+		}
+		bp := bytecode.Parameter{Name: c.stringConst(p.Name), Flags: flags}
+		if p.Type != nil {
+			bp.Type = c.stringConst(p.Type.Zend()) + 1
+		}
+		parameters = append(parameters, bp)
+	}
+	var fnFlags bytecode.FunctionFlags
+	if f.Strict {
+		fnFlags |= bytecode.FuncStrict
+	}
+	if f.Kind != ir.FuncMethod || f.Static {
+		fnFlags |= bytecode.FuncNoThis
+	}
+	var returnType uint32
+	if t := fc.returnType(); t != "" {
+		returnType = c.stringConst(t) + 1
 	}
 	return bytecode.Function{
 		Name:       name,
@@ -561,6 +592,8 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		Positions:  positions,
 		LocalNames: names,
 		Parameters: parameters,
+		Flags:      fnFlags,
+		ReturnType: returnType,
 	}
 }
 
@@ -643,7 +676,28 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			r = fc.alloc()
 			fc.emit(bytecode.OpConst, 0, r, fc.c.literal(&ir.Literal{Kind: ir.LitNull}), 0)
 		}
+		switch fc.returnType() {
+		case "", "void", "mixed", "never":
+		default:
+			if r < fc.base {
+				// The check replaces the register with the converted value.
+				t := fc.alloc()
+				fc.emit(bytecode.OpMove, 0, t, r, 0)
+				r = t
+			}
+			fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnValue), r, 0, 0)
+		}
 		fc.emit(bytecode.OpReturn, 0, r, 0, 0)
+	case ir.OpClass:
+		fc.classDecl(n)
+	case ir.OpDeclare:
+		// strict_types, ticks and encoding without a block: the directive
+		// is in the unit; a block form runs its statements.
+		for _, k := range n.Kids {
+			if k != nil && k.Op == ir.OpBlock {
+				fc.stmt(k)
+			}
+		}
 	case ir.OpUnset:
 		for _, k := range n.Kids {
 			fc.unset(k)
@@ -665,6 +719,8 @@ func (fc *fnCompiler) unset(k *ir.Node) {
 	case ir.OpVar:
 		fc.at(k.Line)
 		fc.emit(bytecode.OpUnset, 0, fc.varLoc(k.Var), 0, 0)
+	case ir.OpProp:
+		fc.unsetProp(k)
 	case ir.OpDim:
 		// FETCH_DIM_UNSET for every level but the last, then UNSET_DIM,
 		// which reads a plain variable key itself after it reports an

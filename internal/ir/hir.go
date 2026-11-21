@@ -329,6 +329,21 @@ type Type struct {
 	zend     string // as zend_type_to_string prints it in compile errors
 }
 
+// Zend is the type as zend_type_to_string prints it in error messages.
+func (t *Type) Zend() string {
+	if t == nil {
+		return ""
+	}
+	if t.zend != "" {
+		return t.zend
+	}
+	return t.String
+}
+
+// MethodSignature is the declaration of method f of class as PHP prints it
+// in inheritance errors (zend_get_function_declaration).
+func MethodSignature(class string, f *Func) string { return methodSignature(class, f) }
+
 // ClassKind distinguishes class-like declarations.
 type ClassKind uint8
 
@@ -350,13 +365,19 @@ type Class struct {
 	Interfaces []*Name
 	Traits     []*Name
 	// TraitRules are the adaptations of the trait uses, in source order.
-	TraitRules       []*TraitRule
-	Backing          *Type
-	Consts           []*ClassConst
-	Props            []*Prop
-	Cases            []*ClassConst
-	Methods          []*Func
-	Anonymous        bool
+	TraitRules []*TraitRule
+	Backing    *Type
+	Consts     []*ClassConst
+	Props      []*Prop
+	Cases      []*ClassConst
+	Methods    []*Func
+	Anonymous  bool
+	// Hoisted marks a declaration PHP binds while it compiles the file
+	// (early binding): a top-level class without interfaces or traits
+	// whose parent, if any, was bound before it. Such a class exists
+	// before the first statement runs; every other one is declared when
+	// its statement is reached.
+	Hoisted          bool
 	Attributes       []Attribute
 	AttributeTargets int
 	IsAttribute      bool

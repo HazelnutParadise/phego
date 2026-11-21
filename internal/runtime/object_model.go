@@ -48,7 +48,10 @@ type methodSpec struct {
 	static           bool
 	final            bool
 	abstract         bool
-	call             func(*heap, value, []value) (value, error)
+	// fn is, for a method a program declares, the index of its bytecode
+	// function plus one. It reuses the padding after the flags.
+	fn   int32
+	call func(*heap, value, []value) (value, error)
 }
 
 type classSpec struct {

@@ -522,6 +522,10 @@ type errorChannels struct {
 	// excluded holds the error_reporting bits that are off; a diagnostic of
 	// such a level is neither displayed nor logged.
 	excluded int
+	// trailer is displayed once, after the location of the next fatal
+	// error: the backtrace PHP 8.5 appends to an error that is not an
+	// exception (fatal_error_backtraces).
+	trailer string
 }
 
 // diagnosticLevelBit is the E_* constant of a PHP diagnostic level.
@@ -594,6 +598,10 @@ func (x *execution) report(level, message string, skipRunning bool) completion {
 		text = x.errors.text(level, message)
 	case x.errors.where != nil:
 		text = "\n" + level + ": " + message + " in " + vmFileName(file) + " on line " + strconv.Itoa(line) + "\n"
+		if level == "Fatal error" && x.errors.trailer != "" {
+			text += x.errors.trailer
+			x.errors.trailer = ""
+		}
 	default:
 		text = "\n" + level + ": " + message + " in Unknown on line 0\n"
 	}

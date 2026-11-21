@@ -14,7 +14,7 @@ import (
 // large completion struct never crosses the per-instruction path.
 func (s *vmState) loop() {
 	h := s.h
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	code, regs := f.code, f.regs
 	pc := 0
 	for {
@@ -207,6 +207,21 @@ func (s *vmState) loop() {
 				}
 				break
 			}
+			if in.aux >= vmPushAuto {
+				// The callee, found when the call started, decides.
+				rec, err := s.pendingCall()
+				if err != nil {
+					s.stop(err)
+					return
+				}
+				v, err := s.sendByCallee(f, in, rec, len(s.args)-rec.base)
+				if err != nil {
+					s.stop(err)
+					return
+				}
+				s.args = append(s.args, v)
+				break
+			}
 			if in.aux != 0 {
 				// A Location: sent by reference, or its value read now.
 				v, err := s.pushValue(f, in)
@@ -242,7 +257,7 @@ func (s *vmState) loop() {
 			if s.poll() {
 				return
 			}
-			f = &s.frames[len(s.frames)-1]
+			f = s.frames[len(s.frames)-1]
 			code, regs = f.code, f.regs
 			pc = 0
 			continue
@@ -254,7 +269,7 @@ func (s *vmState) loop() {
 			if s.poll() {
 				return
 			}
-			f = &s.frames[len(s.frames)-1]
+			f = s.frames[len(s.frames)-1]
 			code, regs = f.code, f.regs
 			pc = 0
 			continue
@@ -270,7 +285,7 @@ func (s *vmState) loop() {
 				}
 				v = t
 			}
-			if len(s.frames) == 1 {
+			if len(s.frames) == s.floor {
 				s.ended = true
 				s.end = completion{kind: endReturn, value: v, returnOwned: true}
 				return
@@ -282,7 +297,7 @@ func (s *vmState) loop() {
 			if s.poll() {
 				return
 			}
-			f = &s.frames[len(s.frames)-1]
+			f = s.frames[len(s.frames)-1]
 			code, regs = f.code, f.regs
 			pc = f.pc + 1
 			continue
@@ -513,10 +528,124 @@ func (s *vmState) loop() {
 			if s.poll() {
 				return
 			}
-			f = &s.frames[len(s.frames)-1]
+			f = s.frames[len(s.frames)-1]
 			code, regs = f.code, f.regs
 			pc = 0
 			continue
+		case bytecode.OpDeclareClass:
+			if err := s.declareClass(int(in.b)); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpNew:
+			jump, err := s.newObject(f, in)
+			if err != nil {
+				s.stop(err)
+				return
+			}
+			if s.stopped() {
+				return
+			}
+			if jump {
+				if in.nkill != 0 {
+					if err := s.kill(f, in); err != nil {
+						s.stop(err)
+						return
+					}
+				}
+				pc = int(in.c)
+				continue
+			}
+		case bytecode.OpInitMethod:
+			if err := s.initMethod(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpInitStatic:
+			if err := s.initStatic(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpThis:
+			if err := s.this(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpPropGet:
+			if err := s.propGet(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpPropSet:
+			if err := s.propSet(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpFetchProp:
+			if err := s.fetchProp(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpPropRef:
+			if err := s.propRef(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpPropIsset:
+			if err := s.propIsset(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpPropUnset:
+			if err := s.propUnset(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpStaticGet:
+			if err := s.staticGet(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpStaticSet:
+			if err := s.staticSet(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpFetchStatic:
+			if err := s.fetchStatic(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpStaticRef:
+			if err := s.staticRef(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpClassConst:
+			if err := s.classConst(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpClassName:
+			if err := s.className(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpInstanceof:
+			if err := s.instanceOf(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpClone:
+			if err := s.clone(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpVerifyReturn:
+			if err := s.verifyReturn(f, in); err != nil {
+				s.stop(err)
+				return
+			}
 		case bytecode.OpParamDefault:
 			// RECV_INIT: the default's code is skipped for a passed argument,
 			// and for a default an earlier call evaluated and cached.

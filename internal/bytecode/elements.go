@@ -51,7 +51,7 @@ func verifyElementLocations(b *budget, f *Function) error {
 	n, nr := len(f.Code), len(f.Registers)
 	hasFetch := false
 	for _, in := range f.Code {
-		if in.Op == OpFetchDim {
+		if in.Op == OpFetchDim || in.Op == OpFetchProp || in.Op == OpFetchStatic {
 			hasFetch = true
 			break
 		}
@@ -76,7 +76,7 @@ func verifyElementLocations(b *budget, f *Function) error {
 	}
 	for pc, in := range f.Code {
 		switch in.Op {
-		case OpFetchDim:
+		case OpFetchDim, OpFetchProp, OpFetchStatic:
 			elem[in.A] = true
 		case OpLocal:
 			if local[in.A] == -1 {
@@ -142,11 +142,34 @@ func (w *elementWindow) step(in Instruction, elem []bool, other func(r, base uin
 		*w = elementWindow{reg: in.A, base: in.B, open: true}
 		return true, nil
 	}
+	// Format 1.7: a property fetched from an object in a Value register, or
+	// a static property, opens a sequence like a fetch from a reference in
+	// a register: its container is no variable, so no Location can be the
+	// base. A property fetched from the element itself is the next level.
+	if (in.Op == OpFetchProp && in.Aux&MemberObjLocation == 0) || in.Op == OpFetchStatic {
+		*w = elementWindow{reg: in.A, base: in.A, open: true}
+		return true, nil
+	}
 	if !w.open {
 		return false, nil
 	}
 	e := w.reg
 	switch in.Op {
+	case OpFetchProp:
+		// MemberObjLocation: checkOperands17 made B equal A.
+		return in.A == e && !w.loaded, nil
+	case OpPropGet:
+		// The object is read from the element; Binary and the PropSet of
+		// an assign-op follow.
+		if in.Aux&MemberObjLocation != 0 && in.B == e && !w.loaded {
+			w.loaded = true
+			return true, nil
+		}
+	case OpPropSet, OpPropUnset:
+		if in.Aux&MemberObjLocation != 0 && in.A == e {
+			w.open = false
+			return true, nil
+		}
 	case OpConst:
 		return true, nil
 	case OpLoad:
@@ -269,6 +292,14 @@ func locationOperands(in Instruction, f *Function) (regs [3]uint32, n int) {
 	case OpDrop, OpPush, OpCall:
 		if isLoc(in.A) {
 			add(in.A)
+		}
+	default:
+		if roles, ok := Roles17(in); ok {
+			for i, v := range [3]uint32{in.A, in.B, in.C} {
+				if roles[i] == RoleLocDef || roles[i] == RoleLocUse {
+					add(v)
+				}
+			}
 		}
 	}
 	return regs, n

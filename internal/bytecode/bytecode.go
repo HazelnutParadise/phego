@@ -17,11 +17,12 @@ import (
 // version Encode writes. Load accepts minor 0 (format 1.0), minor 1 (format
 // 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
 // minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth), minor 5
-// (format 1.5, the fifth) and minor 6 (format 1.6, the sixth); a file may
-// not use operations newer than the minor it declares.
+// (format 1.5, the fifth), minor 6 (format 1.6, the sixth) and minor 7
+// (format 1.7, stage 7A); a file may not use operations newer than the
+// minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 6
+	FormatMinor   uint16 = 7
 )
 
 // PushFlags is the Aux of OpPush (format 1.6).
@@ -43,15 +44,21 @@ const (
 	// the function's Params and has no parameter register: OpRecvVariadic
 	// collects its arguments.
 	ParamVariadic
+	// ParamOptional (format 1.7) marks a parameter with a default value.
+	ParamOptional
 
-	paramFlagsKnown = ParamByRef | ParamVariadic
+	paramFlagsKnown16 = ParamByRef | ParamVariadic
+	paramFlagsKnown   = paramFlagsKnown16 | ParamOptional
 )
 
 // Parameter is one entry of a function's parameter table (format 1.6): Name
-// is the index of a String constant holding the name without "$".
+// is the index of a String constant holding the name without "$". Type
+// (format 1.7) is zero for an untyped parameter, or the index plus one of a
+// String constant holding the declared type in PHP's canonical spelling.
 type Parameter struct {
 	Name  uint32
 	Flags ParameterFlags
+	Type  uint32
 }
 
 // The Aux of OpArrayGet. ArrayGetQuiet (format 1.1) is FETCH_DIM_IS: no
@@ -222,6 +229,27 @@ const (
 	OpInitCall     // B function index: starts a call whose arguments may be named or unpacked
 	OpSendUnpack   // A Value, or the Location of a plain variable: unpacks an array into the started call
 	OpCallPending  // A dest: calls the function of the innermost started call with the arguments sent since
+	// Format 1.7 (W-17 stage 7A). Operands are in format17.go and engineering/decisions/W-16-bytecode.md.
+	OpDeclareClass // B class index: declares the class when the instruction runs
+	OpNew          // A dest Value, B class operand, C target taken when the class has no constructor; else a call is started
+	OpInitMethod   // A object Value, B method name: starts a call of the object's method
+	OpInitStatic   // A class operand, B method name: starts a call of the class's method
+	OpThis         // A dest Value: $this
+	OpPropGet      // A dest Value, B object Value, C property name
+	OpPropSet      // A object, B property name, C value Value, replaced by the assignment's result
+	OpFetchProp    // A dest Location (the property), B object, C property name
+	OpPropRef      // A dest Value (receives a reference to the property), B object Value, C property name
+	OpPropIsset    // A dest Value (bool), B object Value, C property name
+	OpPropUnset    // A object, B property name
+	OpStaticGet    // A dest Value, B class operand, C property name
+	OpStaticSet    // A value Value, replaced by the assignment's result, B class operand, C property name
+	OpFetchStatic  // A dest Location (the static property), B class operand, C property name
+	OpStaticRef    // A dest Value (receives a reference), B class operand, C property name
+	OpClassConst   // A dest Value, B class operand, C constant name (a String constant)
+	OpClassName    // A dest Value, B class operand: the class's name (static::class, $object::class)
+	OpInstanceof   // A dest Value (bool), B value Value, C class operand
+	OpClone        // A dest Value, B value Value
+	OpVerifyReturn // A value Value, replaced by the value converted to the function's return type; Aux is a ReturnCheck
 )
 
 // BindFlags is the Aux of OpBind.
@@ -353,6 +381,11 @@ const (
 	Negate
 	Plus
 	BitNot
+	// Format 1.7: the value after ++ or --, for a property read into a
+	// register (ZEND_PRE_INC_OBJ computes on a copy when it cannot use the
+	// property in place).
+	Increment
+	Decrement
 )
 
 // CastKind is the Aux of OpCast.
@@ -364,6 +397,7 @@ const (
 	CastFloat
 	CastString
 	CastArray
+	CastObject // format 1.7
 )
 
 // IncDecOp is the Aux of OpIncDec. The result is the new value for the pre
@@ -448,6 +482,9 @@ type Position struct{ Source, Start, End, Line uint32 }
 // Parameters (format 1.6) is empty (nothing is known about the parameters,
 // as in every function of an older file), or has one entry per parameter
 // register, followed by one more with ParamVariadic for a variadic function.
+//
+// Flags and ReturnType are format 1.7: ReturnType is zero, or the index plus
+// one of a String constant holding the declared return type.
 type Function struct {
 	Name                     string
 	Params, Locals, MaxStack uint32
@@ -458,6 +495,8 @@ type Function struct {
 	Handlers                 []Handler
 	LocalNames               []uint32
 	Parameters               []Parameter
+	Flags                    FunctionFlags
+	ReturnType               uint32
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged
@@ -469,6 +508,7 @@ type Image struct {
 	Constants []Constant
 	Sources   []Source
 	Functions []Function
+	Classes   []Class // format 1.7
 }
 
 type Options struct {

@@ -43,6 +43,11 @@ func (fc *fnCompiler) assignRef(n *ir.Node, used bool) operand {
 	switch target.Op {
 	case ir.OpVar:
 		l := fc.varLoc(target.Var)
+		if source.Op == ir.OpProp || source.Op == ir.OpStaticProp {
+			r := fc.memberRef(source)
+			fc.emit(bytecode.OpBind, uint16(bytecode.BindValue), l, r, 0)
+			return fc.refResult(l, used)
+		}
 		src := fc.refSource(source, n.Line)
 		fc.emit(bytecode.OpBind, 0, l, src, 0)
 		return fc.refResult(l, used)
@@ -88,6 +93,9 @@ func (fc *fnCompiler) refResult(l uint32, used bool) operand {
 // variable or element becomes a reference at the argument's position, and
 // the register that holds it is pushed with the other arguments.
 func (fc *fnCompiler) refArg(n *ir.Node, line int) uint32 {
+	if n.Op == ir.OpProp || n.Op == ir.OpStaticProp {
+		return fc.memberRef(n)
+	}
 	if n.Op != ir.OpVar && n.Op != ir.OpDim {
 		fc.unsupported("passing a value that is not a variable by reference", positive(n.Line, line))
 	}

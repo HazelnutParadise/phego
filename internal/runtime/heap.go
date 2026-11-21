@@ -16,6 +16,8 @@ type class struct {
 	destructor      func(h *heap, this value) error
 	destructorOwner *class // immutable identity for prototype destructor callbacks
 	schema          *classSchema
+	// vm is the VM's record of a class a program declared in this run.
+	vm *vmClass
 }
 
 type object struct {
@@ -84,6 +86,9 @@ type heap struct {
 	classes               map[string]*class
 	currentHook           activePropertyHook
 	currentCalledScope    *class
+	// vm is the interpreter state of the run, for the methods of classes a
+	// program declares: their bodies are bytecode functions.
+	vm *vmState
 }
 
 // newHeap uses the profile PHP 8.5.12 would run as on this host: amd64 on an

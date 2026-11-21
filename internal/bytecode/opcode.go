@@ -40,6 +40,13 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 	case OpInitCall:
 		// Format 1.6. It records the callee of the call being built.
 		s.MayAllocate = true
+	case OpDeclareClass, OpNew, OpInitMethod, OpInitStatic, OpThis, OpPropGet, OpPropSet, OpFetchProp, OpPropRef, OpPropIsset, OpPropUnset,
+		OpStaticGet, OpStaticSet, OpFetchStatic, OpStaticRef, OpClassConst, OpClassName, OpInstanceof, OpClone, OpVerifyReturn:
+		// Format 1.7. Declaring a class, creating an object and every member
+		// access can throw, allocate and call PHP code: magic methods,
+		// constant initializers, conversions and the destructors of the
+		// values they replace.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:

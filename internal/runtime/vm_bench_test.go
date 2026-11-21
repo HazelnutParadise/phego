@@ -257,7 +257,7 @@ const (
 
 func loopClosures(s *vmState) {
 	closures := buildClosures(s.prog)
-	f := &s.frames[len(s.frames)-1]
+	f := s.frames[len(s.frames)-1]
 	cl := closures[f.fn.index]
 	pc := 0
 	for {
@@ -274,7 +274,7 @@ func loopClosures(s *vmState) {
 		if next == closureStop || s.ended {
 			return
 		}
-		f = &s.frames[len(s.frames)-1]
+		f = s.frames[len(s.frames)-1]
 		cl = closures[f.fn.index]
 		pc = f.pc
 	}

@@ -313,6 +313,8 @@ func (fc *fnCompiler) empty(n *ir.Node) operand {
 		r := fc.allocNot(mark, rb, rk)
 		fc.emit(bytecode.OpArrayIsset, bytecode.ArrayIssetEmpty, r, rb, rk)
 		return reg(r)
+	case ir.OpProp, ir.OpNullsafe, ir.OpStaticProp:
+		return reg(fc.issetMember(k, true))
 	}
 	v := fc.value(k)
 	r := fc.allocNot(mark, v)

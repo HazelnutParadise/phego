@@ -405,6 +405,12 @@ func (s *vmState) unset(f *vmFrame, in *vmInstr) error {
 // mul_function(x, -1) and mul_function(x, 1), and ZEND_BW_NOT.
 func (s *vmState) unary(op bytecode.UnaryOp, v value) (value, error) {
 	switch op {
+	case bytecode.Increment:
+		return s.increment(v.deref())
+	case bytecode.Decrement:
+		return s.decrement(v.deref())
+	}
+	switch op {
 	case bytecode.Not:
 		return boolValue(!s.h.toBool(v)), nil
 	case bytecode.Negate:

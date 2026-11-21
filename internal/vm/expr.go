@@ -53,7 +53,13 @@ func (fc *fnCompiler) discard(n *ir.Node) {
 	case n != nil && n.Op == ir.OpSilence:
 		fc.silence(n, false)
 	default:
-		fc.value(n)
+		r := fc.value(n)
+		// ZEND_FREE: a call's unused result is released at once, so an
+		// object it returned is destroyed here, not when the register is
+		// next written.
+		if n != nil && (isCall(n) || n.Op == ir.OpNew || n.Op == ir.OpClone || n.Op == ir.OpProp || n.Op == ir.OpNullsafe || n.Op == ir.OpStaticProp) && r >= fc.base {
+			fc.emit(bytecode.OpDrop, 0, r, 0, 0)
+		}
 	}
 	fc.top = mark
 }
@@ -152,6 +158,30 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.empty(n)
 	case ir.OpSilence:
 		return fc.silence(n, true)
+	case ir.OpThis:
+		return fc.this(n)
+	case ir.OpProp, ir.OpNullsafe:
+		return fc.propRead(n)
+	case ir.OpStaticProp:
+		return fc.staticPropRead(n)
+	case ir.OpClassConst:
+		return fc.classConst(n)
+	case ir.OpClassName:
+		return fc.className(n)
+	case ir.OpMagic:
+		if n.Text == "__CLASS__" {
+			return fc.className(&ir.Node{Op: ir.OpClassName, Line: n.Line, Name: &ir.Name{Kind: ir.ClassName, Special: "self"}, Kids: []*ir.Node{nil}})
+		}
+	case ir.OpNew:
+		return fc.newExpr(n)
+	case ir.OpMethodCall, ir.OpNullsafeMC:
+		return fc.methodCall(n)
+	case ir.OpStaticCall:
+		return fc.staticCall(n)
+	case ir.OpInstanceof:
+		return fc.instanceOf(n)
+	case ir.OpClone:
+		return fc.clone(n)
 	}
 	fc.unsupportedNode(n)
 	return operand{}
@@ -339,6 +369,8 @@ func (fc *fnCompiler) isset(n *ir.Node) operand {
 			rb, rk := fc.readChain(k)
 			r = fc.allocNot(mark, rb, rk)
 			fc.emit(bytecode.OpArrayIsset, 0, r, rb, rk)
+		case ir.OpProp, ir.OpNullsafe, ir.OpStaticProp:
+			r = fc.issetMember(k, false)
 		default:
 			fc.unsupportedNode(k)
 		}
@@ -405,6 +437,9 @@ type dimTarget struct {
 	base *ir.Var
 	loc  uint32
 	keys []dimKey
+	// prefix, when set, fetches the base that is not a plain variable (a
+	// property or a static property) into the element register.
+	prefix *delayed
 }
 
 // dimTarget compiles the keys of an element target, as
@@ -420,7 +455,13 @@ func (fc *fnCompiler) dimTarget(n *ir.Node, line int) dimTarget {
 		levels = append(levels, base)
 		base = base.Kids[0]
 	}
-	t := dimTarget{loc: fc.plainBase(base, line), base: base.Var, keys: make([]dimKey, 0, len(levels))}
+	var t dimTarget
+	if base != nil && (base.Op == ir.OpProp || base.Op == ir.OpStaticProp) {
+		d := fc.delay(base)
+		t = dimTarget{loc: elemReg, prefix: &d, keys: make([]dimKey, 0, len(levels))}
+	} else {
+		t = dimTarget{loc: fc.plainBase(base, line), base: base.Var, keys: make([]dimKey, 0, len(levels))}
+	}
 	for i := len(levels) - 1; i >= 0; i-- {
 		d := levels[i]
 		k := dimKey{dim: d.Line}
@@ -431,7 +472,7 @@ func (fc *fnCompiler) dimTarget(n *ir.Node, line int) dimTarget {
 			fc.at(key.Line)
 			k.kind, k.lit = keyConst, key.Value
 		default:
-			if o := fc.expr(key); o.cv >= 0 && !o.quiet {
+			if o := fc.expr(key); o.cv >= 0 && !o.quiet && t.prefix == nil {
 				k.kind, k.cv = keyVar, o.cv
 			} else {
 				k.kind, k.reg = keyReg, fc.materialize(o)
@@ -465,6 +506,11 @@ func (fc *fnCompiler) keyOperand(k dimKey) (r uint32, isLocation bool) {
 // FetchFlags use of the last of them; the others are containers of the next.
 func (fc *fnCompiler) fetchPath(t dimTarget, n int, mode, use bytecode.FetchFlags) uint32 {
 	container := t.loc
+	if t.prefix != nil {
+		// The property is fetched for writing; no variable is read from
+		// here to the instruction that uses the element.
+		t.prefix.fetch(bytecode.MemberMode(mode))
+	}
 	for i, k := range t.keys[:n] {
 		flags := mode
 		if i == n-1 {
@@ -501,7 +547,7 @@ func (fc *fnCompiler) writeDim(t dimTarget, v operand, self, used bool) operand 
 	fc.cur = last.line
 	var flags bytecode.ArrayWriteFlags
 	var rv uint32
-	if v.cv >= 0 && !v.quiet && !self {
+	if v.cv >= 0 && !v.quiet && !self && t.prefix == nil {
 		flags |= bytecode.ValueLocation
 		rv = fc.loc(v.cv)
 	} else {
@@ -638,6 +684,10 @@ func (fc *fnCompiler) assign(n *ir.Node, used bool) operand {
 		return reg(rv)
 	case ir.OpDim:
 		return fc.assignDim(n, used)
+	case ir.OpProp:
+		return fc.assignProp(n, used)
+	case ir.OpStaticProp:
+		return fc.assignStatic(n, used)
 	}
 	fc.unsupportedNode(target)
 	return operand{}
@@ -660,13 +710,19 @@ func (fc *fnCompiler) assignDim(n *ir.Node, used bool) operand {
 func (fc *fnCompiler) assignOp(n *ir.Node) operand {
 	target := n.Kids[0]
 	switch target.Op {
-	case ir.OpVar, ir.OpDim:
+	case ir.OpVar, ir.OpDim, ir.OpProp, ir.OpStaticProp:
 	default:
 		fc.unsupportedNode(target)
 	}
 	op, ok := binaryOps[n.Text]
 	if !ok || n.Text == ">" || n.Text == ">=" {
 		panic(internalError{"assignment operator " + n.Text + "="})
+	}
+	switch target.Op {
+	case ir.OpProp:
+		return fc.assignOpProp(n, op)
+	case ir.OpStaticProp:
+		return fc.assignOpStatic(n, op)
 	}
 	if target.Op == ir.OpDim {
 		return fc.assignOpDim(n, op)
@@ -771,6 +827,8 @@ func (fc *fnCompiler) coalesceSet(n *ir.Node) operand {
 	case ir.OpVar:
 	case ir.OpDim:
 		return fc.coalesceSetDim(n)
+	case ir.OpProp, ir.OpStaticProp:
+		return fc.coalesceSetMember(n)
 	default:
 		fc.unsupportedNode(target)
 	}
@@ -803,6 +861,8 @@ func (fc *fnCompiler) incDec(n *ir.Node) operand {
 	target := n.Kids[0]
 	switch target.Op {
 	case ir.OpVar, ir.OpDim:
+	case ir.OpProp, ir.OpStaticProp:
+		return fc.incDecProp(n)
 	default:
 		fc.unsupportedNode(target)
 	}

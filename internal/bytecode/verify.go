@@ -154,6 +154,9 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 		if err := verifyParameters(b, image, f, cloneCost); err != nil {
 			return 0, functionError(err, fi, -1)
 		}
+		if err := verifyFunction17(image, minor, f); err != nil {
+			return 0, functionError(err, fi, -1)
+		}
 		for _, k := range f.Registers {
 			if err := b.chargeWork(1); err != nil {
 				return 0, err
@@ -188,6 +191,9 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 			return 0, err
 		}
 		inferred |= caps
+	}
+	if err := verifyClasses(b, image, minor, cloneCost); err != nil {
+		return 0, err
 	}
 	if inferred&^image.Required != 0 {
 		return 0, fail(ErrCapability, "required capability omits an opcode requirement")
@@ -281,8 +287,11 @@ type argShape struct {
 	kind  RegisterKind
 	named bool
 	ref   bool
-	fn    uint32
-	name  string
+	// late marks an argument sent as the callee declares (PushAuto,
+	// PushTemp, PushResult): only the call it was sent to may take it.
+	late bool
+	fn   uint32
+	name string
 }
 
 // flowState is what is known where an instruction starts: the registers
@@ -311,7 +320,7 @@ func tracksReferences(f *Function) bool {
 	}
 	for _, in := range f.Code {
 		switch in.Op {
-		case OpMakeRef:
+		case OpMakeRef, OpPropRef, OpStaticRef:
 			return true
 		case OpIterInit, OpIterNext:
 			if IterFlags(in.Aux)&IterByRef != 0 {
@@ -441,9 +450,20 @@ func format16(in Instruction) bool {
 	return false
 }
 
+// is17 reports whether op is a format 1.7 opcode.
+func is17(op Opcode) bool { return op >= OpDeclareClass && op <= OpVerifyReturn }
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
+	// A format 1.7 opcode in an older file is reported as that: such a
+	// file has no class table, so its operands could never be valid.
+	if minor < 7 && is17(in.Op) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.7, but the file declares format 1.%d", minor))
+	}
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor < 7 && format17(in) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.7, but the file declares format 1.%d", minor))
 	}
 	if minor < 6 && format16(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.6, but the file declares format 1.%d", minor))
@@ -479,6 +499,9 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
 		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush:
 	default:
+		if is17(in.Op) {
+			return checkOperands17(image, f, in)
+		}
 		if in.Aux != 0 {
 			return invalid("unused aux field")
 		}
@@ -524,8 +547,10 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if uint64(in.A) >= uint64(len(f.Registers)) || in.C != 0 {
 			return invalid("invalid push operands")
 		}
-		if in.Aux > uint16(PushLoad) || (in.Aux == uint16(PushLoad) && f.Registers[in.A] != Location) {
-			return invalid("invalid push operands: Aux is 0 or PushLoad, which needs a Location in A")
+		wantsLocation := in.Aux == uint16(PushLoad) || in.Aux == uint16(PushAuto)
+		wantsValue := in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult)
+		if in.Aux > uint16(PushResult) || (wantsLocation && f.Registers[in.A] != Location) || (wantsValue && f.Registers[in.A] != Value) {
+			return invalid("invalid push operands: Aux is 0, PushLoad or PushAuto, which need a Location in A, or PushTemp or PushResult, which need a Value")
 		}
 		if in.B != 0 && (uint64(in.B-1) >= uint64(len(image.Constants)) || image.Constants[in.B-1].Kind != String) {
 			return invalid("invalid named argument")
@@ -575,12 +600,12 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid drop operands")
 		}
 	case OpUnary:
-		if in.Aux < uint16(Not) || in.Aux > uint16(BitNot) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
-			return invalid("invalid unary operands: A and B must be Value registers, C zero, Aux Not to BitNot")
+		if in.Aux < uint16(Not) || in.Aux > uint16(Decrement) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid unary operands: A and B must be Value registers, C zero, Aux Not to Decrement")
 		}
 	case OpCast:
-		if in.Aux < uint16(CastBool) || in.Aux > uint16(CastArray) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
-			return invalid("invalid cast operands: A and B must be Value registers, C zero, Aux CastBool to CastArray")
+		if in.Aux < uint16(CastBool) || in.Aux > uint16(CastObject) || !reg(in.A, Value) || !reg(in.B, Value) || in.C != 0 {
+			return invalid("invalid cast operands: A and B must be Value registers, C zero, Aux CastBool to CastObject")
 		}
 	case OpIncDec:
 		if in.Aux < uint16(PreInc) || in.Aux > uint16(PostDec) || !reg(in.A, Value) || !reg(in.B, Location) || in.C != 0 {
@@ -767,7 +792,7 @@ func successorCount(in Instruction, pc, n uint32) int {
 	switch in.Op {
 	case OpReturn, OpReturnRef, OpThrow, OpEndFinally, OpExit, OpMatchError:
 		return 0
-	case OpBranch, OpIterInit, OpIterNext, OpParamDefault, OpStaticInit:
+	case OpBranch, OpIterInit, OpIterNext, OpParamDefault, OpStaticInit, OpNew:
 		return 2
 	default:
 		return 1
@@ -784,9 +809,10 @@ func successor(in Instruction, pc, n uint32, which int) edge {
 			return edge{pc: in.B}
 		}
 		return edge{pc: in.C}
-	case OpIterInit, OpIterNext:
+	case OpIterInit, OpIterNext, OpNew:
 		// Edge 0 falls through; edge 1 is taken for a subject that cannot
-		// be iterated, or when the iteration is over.
+		// be iterated, when the iteration is over, or for a class without
+		// a constructor.
 		if which == 1 {
 			return edge{pc: in.C}
 		}
@@ -1097,7 +1123,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 		}
 		changed := false
 		for i := range stack {
-			if old.stack[i].kind != stack[i].kind || old.stack[i].named != stack[i].named || old.stack[i].fn != stack[i].fn || len(old.stack[i].name) != len(stack[i].name) {
+			if old.stack[i].kind != stack[i].kind || old.stack[i].named != stack[i].named || old.stack[i].late != stack[i].late || old.stack[i].fn != stack[i].fn || len(old.stack[i].name) != len(stack[i].name) {
 				return false, invalid("argument stack shape differs at control-flow join")
 			}
 			for off := 0; off < len(stack[i].name); {
@@ -1236,7 +1262,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 		// fallDef is a register the instruction defines on its fall-through
 		// edge (edge 0) only; fallRef says it may then hold a reference.
 		var fallDef uint32
-		hasFallDef, fallRef := false, false
+		hasFallDef, fallRef, fallMark := false, false, false
 		if err := b.chargeWork(uint64(len(stack)) + uint64(stateWords) + 1); err != nil {
 			return err
 		}
@@ -1285,6 +1311,18 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			case in.Aux == uint16(PushLoad):
 				// The variable's value is sent, not the variable.
 				a.kind = Value
+			case in.Aux == uint16(PushAuto):
+				// Sent as the callee declares: only a started call whose
+				// callee is found at run time takes it.
+				if m := mark(); m < 0 || stack[m].fn != UnknownCallee {
+					return invalidPC("push by the callee's declaration outside a call whose callee is resolved at run time")
+				}
+				a.kind, a.late = Value, true
+			case in.Aux == uint16(PushTemp) || in.Aux == uint16(PushResult):
+				a.late = true
+				if m := mark(); m < 0 || stack[m].fn != UnknownCallee {
+					return invalidPC("push by the callee's declaration outside a call whose callee is resolved at run time")
+				}
 			case a.kind == Location:
 				a.ref = true
 			case isRef(in.A):
@@ -1305,7 +1343,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			}
 			callee := &image.Functions[in.B]
 			for i := len(stack) - int(in.C); i < len(stack); i++ {
-				if stack[i].kind != Value || stack[i].named {
+				if stack[i].kind != Value || stack[i].named || stack[i].late {
 					return invalidPC("direct call requires positional value arguments")
 				}
 				// A callee that records its parameters receives a reference
@@ -1330,7 +1368,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 				// A named argument belongs to a started call and may leave
 				// no pending argument behind (a variadic parameter collects
 				// it), so only CallPending takes it (format 1.6).
-				if minor >= 6 && stack[i].named {
+				if minor >= 6 && (stack[i].named || stack[i].late) {
 					return invalidPC("dynamic call takes a named argument, which only a started call receives")
 				}
 			}
@@ -1344,7 +1382,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 				if stack[i].kind != Value {
 					return invalidPC("host call arguments must be values")
 				}
-				if minor >= 6 && stack[i].named {
+				if minor >= 6 && (stack[i].named || stack[i].late) {
 					return invalidPC("host call takes a named argument, which only a started call receives")
 				}
 			}
@@ -1369,7 +1407,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			if m < 0 {
 				return invalidPC("call-pending without a started call")
 			}
-			if f.Registers[in.A] != image.Functions[stack[m].fn].ReturnKind {
+			if want := Value; stack[m].fn != UnknownCallee && f.Registers[in.A] != image.Functions[stack[m].fn].ReturnKind || stack[m].fn == UnknownCallee && f.Registers[in.A] != want {
 				return invalidPC("call-pending destination does not match the callee's return kind")
 			}
 			stack = stack[:m]
@@ -1530,8 +1568,50 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			if len(stack) != 0 {
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
+		default:
+			if !is17(in.Op) {
+				break
+			}
+			roles, _ := Roles17(in)
+			ops := [3]uint32{in.A, in.B, in.C}
+			for i, role := range roles {
+				if role == RoleUse || role == RoleUseDef || role == RoleLocUse {
+					if err := read(ops[i]); err != nil {
+						return flowError(err, fi, pc)
+					}
+				}
+			}
+			for i, role := range roles {
+				if role == RoleDef || role == RoleUseDef || role == RoleLocDef {
+					write(ops[i])
+				}
+			}
+			switch in.Op {
+			case OpPropRef, OpStaticRef:
+				setRef(in.A)
+			case OpInitMethod, OpInitStatic:
+				if err := push(argShape{kind: shapeMark, fn: UnknownCallee}); err != nil {
+					return err
+				}
+			case OpNew:
+				// The class has no constructor on the jump edge: no call is
+				// started there.
+				fallMark = true
+			}
 		}
 		if in.Op == OpJump || in.Op == OpBranch || in.Op == OpLeave || (in.Op != OpReturn && in.Op != OpReturnRef && in.Op != OpThrow && in.Op != OpEndFinally && in.Op != OpExit && in.Op != OpMatchError) {
+			if fallMark {
+				if _, err := merge(int(in.C), scratchDefs, scratchRefs, stack); err != nil {
+					return flowError(err, fi, pc)
+				}
+				if err := push(argShape{kind: shapeMark, fn: UnknownCallee}); err != nil {
+					return err
+				}
+				if _, err := merge(pc+1, scratchDefs, scratchRefs, stack); err != nil {
+					return flowError(err, fi, pc)
+				}
+				continue
+			}
 			if hasFallDef {
 				// The jump edge is merged before the fall-through
 				// definition is added.

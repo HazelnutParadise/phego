@@ -15,6 +15,10 @@ import (
 const (
 	vmPushRef  uint16 = 1 // a Location sent by reference (ZEND_SEND_REF)
 	vmPushLoad uint16 = 2 // a Location whose value is sent (ZEND_SEND_VAR)
+	// Format 1.7, for a callee found at run time.
+	vmPushAuto   uint16 = 3 // a Location sent as the callee declares (ZEND_SEND_VAR_EX)
+	vmPushTemp   uint16 = 4 // a Value no variable holds (ZEND_SEND_VAL_EX)
+	vmPushResult uint16 = 5 // a call's result (ZEND_SEND_VAR_NO_REF_EX)
 )
 
 // vmPendingCall is a call InitCall started and CallPending has not made
@@ -29,6 +33,13 @@ type vmPendingCall struct {
 	// variadic parameter collects (extra_named_params): an array the call
 	// owns, or the zero value.
 	named value
+	// Format 1.7: the object (an owner), the lexical class and the called
+	// class of a method call. magic is the name of a method that __call or
+	// __callStatic receives, whose function is magicFn.
+	this          value
+	scope, called *class
+	magic         string
+	magicFn       int
 }
 
 // vmCallInfo is what a frame entered by CallPending knows beyond a plain
@@ -230,10 +241,13 @@ func (s *vmState) pendingCall() (*vmPendingCall, error) {
 func (s *vmState) dropCalls(depth int) error {
 	var first error
 	for n := len(s.calls); n > 0 && s.calls[n-1].depth >= depth; n = len(s.calls) {
-		named := s.calls[n-1].named
+		named, this := s.calls[n-1].named, s.calls[n-1].this
 		s.calls[n-1] = vmPendingCall{}
 		s.calls = s.calls[:n-1]
 		if err := s.releaseValue(named); err != nil && first == nil {
+			first = err
+		}
+		if err := s.releaseValue(this); err != nil && first == nil {
 			first = err
 		}
 	}
@@ -340,7 +354,12 @@ func (s *vmState) sendNamed(f *vmFrame, in *vmInstr) error {
 	if err != nil {
 		return err
 	}
-	v, err := s.pushValue(f, in)
+	var v value
+	if in.aux >= vmPushAuto {
+		v, err = s.sendByCallee(f, in, rec, index)
+	} else {
+		v, err = s.pushValue(f, in)
+	}
 	if err != nil {
 		return err
 	}
@@ -504,12 +523,19 @@ func (s *vmState) callPending(in *vmInstr) error {
 	if err != nil {
 		return err
 	}
+	if rec.magic != "" {
+		if err := s.packMagic(rec); err != nil {
+			return err
+		}
+	}
 	fn := &s.prog.funcs[rec.fn]
 	argc := len(s.args) - rec.base
 	if argc < 0 {
 		return s.internal("pending call with %d arguments below its base", -argc)
 	}
 	info := &vmCallInfo{named: rec.named, holePC: -1}
+	into := vmEnter{this: rec.this, scope: rec.scope, called: rec.called}
+	rec.this = value{}
 	first, last := -1, -1
 	args := s.args[rec.base:]
 	for i := 0; i < argc && i < fn.params; i++ {
@@ -552,15 +578,21 @@ func (s *vmState) callPending(in *vmInstr) error {
 		info.missing = true
 	}
 	s.entering = info
+	s.into = into
 	err = s.push(fn, argc, in.a)
 	s.entering = nil
+	if s.into.this.kind == valueObject {
+		// push failed before it made the frame.
+		_ = s.releaseValue(s.into.this)
+	}
+	s.into = vmEnter{}
 	if err != nil {
 		return err
 	}
 	if missing < 0 {
 		return nil
 	}
-	callee := &s.frames[len(s.frames)-1]
+	callee := s.frames[len(s.frames)-1]
 	callee.unreceived = true
 	if pc := fn.paramPC[missing]; pc >= 0 {
 		callee.pc = int(pc)
@@ -569,7 +601,7 @@ func (s *vmState) callPending(in *vmInstr) error {
 	if missing < len(fn.paramNames) {
 		name = fn.paramNames[missing]
 	}
-	return &Throwable{"ArgumentCountError", fn.name + "(): Argument #" + strconv.Itoa(missing+1) + " ($" + name + ") not passed"}
+	return &Throwable{"ArgumentCountError", s.funcName(callee) + "(): Argument #" + strconv.Itoa(missing+1) + " ($" + name + ") not passed"}
 }
 
 // derefArguments gives the by-value parameters of fn the values of the

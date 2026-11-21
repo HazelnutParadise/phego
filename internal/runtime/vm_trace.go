@@ -23,6 +23,40 @@ func (s *vmState) uncaught(t *Throwable) completion {
 // frame, called from the current instruction.
 func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) completion {
 	_, _, file, line := s.location()
+	trace := s.backtrace(internal, args)
+	head := t.Class
+	if t.Message != "" {
+		head += ": " + t.Message
+	}
+	// zend_verify_arg_error ends an argument TypeError's message with where
+	// the function was called, and PHP then words the throw location as
+	// where the function is defined.
+	in := " in "
+	if t.Class == "TypeError" && strings.Contains(t.Message, ", called in ") {
+		in = " and defined in "
+	}
+	text := "Uncaught " + head + in + vmFileName(file) + ":" + strconv.Itoa(line) + "\nStack trace:\n" + trace + "\n  thrown"
+	s.lastFile, s.lastLine = file, line
+	return completion{kind: endThrow, err: &vmUncaught{thrown: t, file: file, line: line, trace: trace, text: text}}
+}
+
+// traceName is the function of frame f as a backtrace shows it: Class->m
+// for a method called on an object, Class::m for a static one.
+func traceName(f *vmFrame) string {
+	if f.scope == nil {
+		return f.fn.name
+	}
+	if f.this.kind == valueObject {
+		return f.scope.name + "->" + f.fn.name
+	}
+	return f.scope.name + "::" + f.fn.name
+}
+
+// backtrace is the stack as Throwable::getTraceAsString prints it,
+// optionally starting with an internal function's frame called from the
+// current instruction.
+func (s *vmState) backtrace(internal string, args []value) string {
+	_, _, file, line := s.location()
 	var b strings.Builder
 	n := 0
 	frame := func(callerFile string, callerLine int, name string, args []value, named *phpArray) {
@@ -64,8 +98,30 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 	if internal != "" {
 		frame(file, line, internal, args, nil)
 	}
-	for i := len(s.frames) - 1; i >= 1; i-- {
-		f, caller := &s.frames[i], &s.frames[i-1]
+	main := &s.prog.funcs[s.prog.entry]
+	for i := len(s.frames) - 1; i >= 0; i-- {
+		f := s.frames[i]
+		if i == 0 {
+			if f.fn != main {
+				// Code the engine called with no PHP frame below it: a
+				// destructor at request shutdown.
+				b.WriteByte('#')
+				b.WriteString(strconv.Itoa(n))
+				b.WriteString(" [internal function]: ")
+				b.WriteString(traceName(f))
+				b.WriteByte('(')
+				for j, a := range s.frameArgs(f) {
+					if j > 0 {
+						b.WriteString(", ")
+					}
+					b.WriteString(traceArg(a))
+				}
+				b.WriteString(")\n")
+				n++
+			}
+			break
+		}
+		caller := s.frames[i-1]
 		line := int(caller.fn.lines[caller.pc])
 		var named *phpArray
 		if c := f.call; c != nil {
@@ -79,19 +135,12 @@ func (s *vmState) uncaughtFrom(t *Throwable, internal string, args []value) comp
 				line = int(caller.fn.lines[caller.pc-1])
 			}
 		}
-		frame(caller.fn.files[caller.pc], line, f.fn.name, s.frameArgs(f), named)
+		frame(caller.fn.files[caller.pc], line, traceName(f), s.frameArgs(f), named)
 	}
 	b.WriteByte('#')
 	b.WriteString(strconv.Itoa(n))
 	b.WriteString(" {main}")
-	trace := b.String()
-	head := t.Class
-	if t.Message != "" {
-		head += ": " + t.Message
-	}
-	text := "Uncaught " + head + " in " + vmFileName(file) + ":" + strconv.Itoa(line) + "\nStack trace:\n" + trace + "\n  thrown"
-	s.lastFile, s.lastLine = file, line
-	return completion{kind: endThrow, err: &vmUncaught{thrown: t, file: file, line: line, trace: trace, text: text}}
+	return b.String()
 }
 
 // frameArgs is debug_backtrace's view of a user frame's arguments: the

@@ -45,6 +45,7 @@ func (l *lowerer) bindClass(cl *Class, top bool) {
 		key := phpname.Lower(strings.TrimPrefix(cl.Name, "\\"))
 		if l.boundClasses[key] == nil {
 			l.boundClasses[key] = cl
+			cl.Hoisted = true
 		}
 	}
 }

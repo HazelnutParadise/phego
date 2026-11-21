@@ -182,7 +182,7 @@ func TestFormat11RejectsInvalidOperands(t *testing.T) {
 		"incdec aux zero":                    {Op: OpIncDec, A: 3, B: 2},
 		"binary aux zero":                    {Op: OpBinary, A: 3, B: 0, C: 0},
 		"unary aux high":                     {Op: OpUnary, Aux: uint16(BitNot) + 1, A: 3, B: 0},
-		"cast aux high":                      {Op: OpCast, Aux: uint16(CastArray) + 1, A: 3, B: 0},
+		"cast aux high":                      {Op: OpCast, Aux: uint16(CastObject) + 1, A: 3, B: 0},
 		"incdec aux high":                    {Op: OpIncDec, Aux: uint16(PostDec) + 1, A: 3, B: 2},
 		"binary aux high":                    {Op: OpBinary, Aux: uint16(BoolXor) + 1, A: 3, B: 0, C: 0},
 		"exit aux high":                      {Op: OpExit, Aux: 2, A: 0},
