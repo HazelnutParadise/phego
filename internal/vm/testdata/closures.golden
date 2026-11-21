@@ -1,0 +1,326 @@
+-- source --
+<?php
+function f($x) { return $x; }
+class K {
+    private $p = 1;
+    function make() {
+        return function ($a) { return $this->p + $a; };
+    }
+    static function sm() { return static fn() => static::class; }
+}
+$n = 1;
+$m = 2;
+$c = function ($a, &$b = null) use ($n,
+    &$m) {
+    static $calls = 0;
+    return $a + $n + $m + ++$calls;
+};
+$arrow = fn($y) => fn($z) => $y + $z + $n;
+$byRef = fn &() => $n + 1;
+$g = f(...);
+$h = $c(...);
+$k = new K;
+$i = $k->make(...);
+$j = K::sm(...);
+$s = 'f';
+$t = $s(...);
+$arr = [1];
+echo $c(1, $arr[0]), $g(2), Closure::bind($c, null)(3), $c->bindTo($k, K::class)(4), $c->call($k, 5);
+
+-- disassembly --
+entry 0
+source 1 "/w/test.php" bytes=631 lines=28
+const 0: string "K"
+const 1: string "p"
+const 2: int 1
+const 3: string "make"
+const 4: string "K::make()"
+const 5: string "sm"
+const 6: string "K::sm()"
+const 7: int 2
+const 8: string "f"
+const 9: int 0
+const 10: string "Closure"
+const 11: string "bind"
+const 12: null
+const 13: int 3
+const 14: string "bindTo"
+const 15: int 4
+const 16: string "call"
+const 17: int 5
+const 18: string "n"
+const 19: string "m"
+const 20: string "c"
+const 21: string "arrow"
+const 22: string "z"
+const 23: string "byRef"
+const 24: string "g"
+const 25: string "h"
+const 26: string "k"
+const 27: string "i"
+const 28: string "j"
+const 29: string "s"
+const 30: string "t"
+const 31: string "arr"
+const 32: string "x"
+const 33: string "a"
+const 34: string "b"
+const 35: string "calls"
+const 36: string "y"
+class 0 "K" line=3 flags=hoisted
+  prop "p" private = int 1
+  method "make" public func 2 "make" signature "K::make()" ; line 5
+  method "sm" public+static func 3 "sm" signature "K::sm()" ; line 8
+func 0 "{main}" params=0 locals=14 registers=21 maxstack=3 flags=nothis
+  local 0 "n"
+  local 1 "m"
+  local 2 "c"
+  local 3 "arrow"
+  local 4 "z"
+  local 5 "byRef"
+  local 6 "g"
+  local 7 "h"
+  local 8 "k"
+  local 9 "i"
+  local 10 "j"
+  local 11 "s"
+  local 12 "t"
+  local 13 "arr"
+  registers LLLLLLLLLLLLLLVVVVVVL
+  0: Local 0 0 0 0 ; line 1
+  1: Local 0 1 1 0 ; line 1
+  2: Local 0 2 2 0 ; line 1
+  3: Local 0 3 3 0 ; line 1
+  4: Local 0 4 4 0 ; line 1
+  5: Local 0 5 5 0 ; line 1
+  6: Local 0 6 6 0 ; line 1
+  7: Local 0 7 7 0 ; line 1
+  8: Local 0 8 8 0 ; line 1
+  9: Local 0 9 9 0 ; line 1
+  10: Local 0 10 10 0 ; line 1
+  11: Local 0 11 11 0 ; line 1
+  12: Local 0 12 12 0 ; line 1
+  13: Local 0 13 13 0 ; line 1
+  14: Const 0 14 2 0 ; line 10 ; int 1
+  15: Store 0 0 14 0 ; line 10
+  16: Const 0 14 7 0 ; line 11 ; int 2
+  17: Store 0 1 14 0 ; line 11
+  18: Closure 0 14 4 0 ; line 12 ; func 4 "{closure:/w/test.php:12}"
+  19: BindLexical capture 0 14 0 4 ; line 12 ; func 4 "{closure:/w/test.php:12}"
+  20: BindLexical capture 1 14 1 4 ; line 13 ; func 4 "{closure:/w/test.php:12}"
+  21: Store 0 2 14 0 ; line 12
+  22: Closure 0 14 5 0 ; line 17 ; func 5 "{closure:/w/test.php:17}"
+  23: BindLexical capture 0 14 0 5 ; line 17 ; func 5 "{closure:/w/test.php:17}"
+  24: Store 0 3 14 0 ; line 17
+  25: Closure 0 14 6 0 ; line 18 ; func 6 "{closure:/w/test.php:18}"
+  26: BindLexical capture 0 14 0 6 ; line 18 ; func 6 "{closure:/w/test.php:18}"
+  27: Store 0 5 14 0 ; line 18
+  28: InitCall 0 0 1 0 ; line 19
+  29: CallableConvert 0 14 0 0 ; line 19
+  30: Store 0 6 14 0 ; line 19
+  31: Load 0 15 2 0 ; line 20
+  32: InitMethod callable 15 0 0 ; line 20
+  33: CallableConvert 0 14 0 0 ; line 20
+  34: Store 0 7 14 0 ; line 20
+  35: New 0 14 0 39 ; line 21 ; class "K", target 39
+  36: Checkpoint 0 0 0 0 ; line 21
+  37: CallPending 0 15 0 0 ; line 21
+  38: Drop 0 15 0 0 ; line 21
+  39: Store 0 8 14 0 ; line 21
+  40: Load 0 15 8 0 ; line 22
+  41: InitMethod 0 15 3 0 ; line 22 ; name "make"
+  42: CallableConvert 0 14 0 0 ; line 22
+  43: Store 0 9 14 0 ; line 22
+  44: InitStatic 0 0 5 0 ; line 23 ; class "K", name "sm"
+  45: CallableConvert 0 14 0 0 ; line 23
+  46: Store 0 10 14 0 ; line 23
+  47: Const 0 14 8 0 ; line 24 ; string "f"
+  48: Store 0 11 14 0 ; line 24
+  49: Load 0 15 11 0 ; line 25
+  50: InitMethod callable 15 0 0 ; line 25
+  51: CallableConvert 0 14 0 0 ; line 25
+  52: Store 0 12 14 0 ; line 25
+  53: NewArray 0 14 0 0 ; line 26
+  54: Const 0 15 2 0 ; line 26 ; int 1
+  55: ArrayAdd 0 14 15 0 ; line 26
+  56: Store 0 13 14 0 ; line 26
+  57: Load 0 15 2 0 ; line 27
+  58: InitMethod callable 15 0 0 ; line 27
+  59: Const 0 16 2 0 ; line 27 ; int 1
+  60: Push temp 16 0 0 ; line 27
+  61: ArgByRef 0 16 0 0 ; line 27
+  62: Branch 0 16 63 68 ; line 27
+  63: Const 0 17 9 0 ; line 27 ; int 0
+  64: FetchDim Write+ref 20 13 17 ; line 27
+  65: MakeRef 0 17 20 0 ; line 27
+  66: Push 0 17 0 0 ; line 27
+  67: Jump 0 72 0 0 ; line 27
+  68: Const 0 17 9 0 ; line 27 ; int 0
+  69: Load 0 18 13 0 ; line 27
+  70: ArrayGet 0 19 18 17 ; line 27
+  71: Push 0 19 0 0 ; line 27
+  72: Checkpoint 0 0 0 0 ; line 27
+  73: CallPending 0 14 0 0 ; line 27
+  74: Output 0 14 0 0 ; line 27
+  75: Load 0 15 6 0 ; line 27
+  76: InitMethod callable 15 0 0 ; line 27
+  77: Const 0 16 7 0 ; line 27 ; int 2
+  78: Push temp 16 0 0 ; line 27
+  79: Checkpoint 0 0 0 0 ; line 27
+  80: CallPending 0 14 0 0 ; line 27
+  81: Output 0 14 0 0 ; line 27
+  82: InitStatic 0 10 11 0 ; line 27 ; class "Closure", name "bind"
+  83: Push auto 2 0 0 ; line 27
+  84: Const 0 16 12 0 ; line 27 ; null
+  85: Push temp 16 0 0 ; line 27
+  86: Checkpoint 0 0 0 0 ; line 27
+  87: CallPending 0 15 0 0 ; line 27
+  88: InitMethod callable 15 0 0 ; line 27
+  89: Const 0 16 13 0 ; line 27 ; int 3
+  90: Push temp 16 0 0 ; line 27
+  91: Checkpoint 0 0 0 0 ; line 27
+  92: CallPending 0 14 0 0 ; line 27
+  93: Output 0 14 0 0 ; line 27
+  94: Load 0 16 2 0 ; line 27
+  95: InitMethod 0 16 14 0 ; line 27 ; name "bindTo"
+  96: Push auto 8 0 0 ; line 27
+  97: Const 0 17 0 0 ; line 27 ; string "K"
+  98: Push temp 17 0 0 ; line 27
+  99: Checkpoint 0 0 0 0 ; line 27
+  100: CallPending 0 15 0 0 ; line 27
+  101: InitMethod callable 15 0 0 ; line 27
+  102: Const 0 16 15 0 ; line 27 ; int 4
+  103: Push temp 16 0 0 ; line 27
+  104: Checkpoint 0 0 0 0 ; line 27
+  105: CallPending 0 14 0 0 ; line 27
+  106: Output 0 14 0 0 ; line 27
+  107: Load 0 15 2 0 ; line 27
+  108: InitMethod 0 15 16 0 ; line 27 ; name "call"
+  109: Push auto 8 0 0 ; line 27
+  110: Const 0 16 17 0 ; line 27 ; int 5
+  111: Push temp 16 0 0 ; line 27
+  112: Checkpoint 0 0 0 0 ; line 27
+  113: CallPending 0 14 0 0 ; line 27
+  114: Output 0 14 0 0 ; line 27
+  115: Const 0 14 12 0 ; line 28 ; null
+  116: Return 0 14 0 0 ; line 28
+func 1 "f" params=1 locals=1 registers=3 maxstack=0 flags=nothis
+  param 0 "x"
+  local 0 "x"
+  registers VLV
+  0: Local 0 1 0 0 ; line 2
+  1: Store 0 1 0 0 ; line 2
+  2: Load 0 2 1 0 ; line 2
+  3: Return 0 2 0 0 ; line 2
+  4: Const 0 2 12 0 ; line 2 ; null
+  5: Return 0 2 0 0 ; line 2
+func 2 "make" params=0 locals=0 registers=1 maxstack=0
+  registers V
+  0: Closure 0 0 7 0 ; line 6 ; func 7 "{closure:K::make():6}"
+  1: Return 0 0 0 0 ; line 6
+  2: Const 0 0 12 0 ; line 7 ; null
+  3: Return 0 0 0 0 ; line 7
+func 3 "sm" params=0 locals=0 registers=1 maxstack=0 flags=nothis
+  registers V
+  0: Closure 0 0 8 0 ; line 8 ; func 8 "{closure:K::sm():8}"
+  1: Return 0 0 0 0 ; line 8
+  2: Const 0 0 12 0 ; line 8 ; null
+  3: Return 0 0 0 0 ; line 8
+func 4 "{closure:/w/test.php:12}" params=2 locals=5 registers=11 maxstack=0 flags=closure
+  capture 0 local 2
+  capture 1 local 3 byref
+  param 0 "a"
+  param 1 "b" byref optional
+  local 0 "a"
+  local 1 "b"
+  local 2 "n"
+  local 3 "m"
+  local 4 "calls"
+  registers VVLLLLLVVVV
+  0: Local 0 2 0 0 ; line 12
+  1: Local 0 3 1 0 ; line 12
+  2: Local 0 4 2 0 ; line 12
+  3: Local 0 5 3 0 ; line 12
+  4: Local 0 6 4 0 ; line 12
+  5: Store 0 2 0 0 ; line 12
+  6: ParamDefault 0 1 8 0 ; line 12
+  7: Const 0 1 12 0 ; line 12 ; null
+  8: Bind value 3 1 0 ; line 12
+  9: StaticInit 0 6 12 0 ; line 14
+  10: Const 0 7 9 0 ; line 14 ; int 0
+  11: BindStatic 0 6 7 0 ; line 14
+  12: Load 0 7 2 0 ; line 15
+  13: Load 0 8 4 0 ; line 15
+  14: Binary Add 9 7 8 ; line 15
+  15: Load 0 10 5 0 ; line 15
+  16: Binary Add 7 9 10 ; line 15
+  17: IncDec PreInc 8 6 0 ; line 15
+  18: Binary Add 9 7 8 ; line 15
+  19: Return 0 9 0 0 ; line 15
+  20: Const 0 7 12 0 ; line 16 ; null
+  21: Return 0 7 0 0 ; line 16
+func 5 "{closure:/w/test.php:17}" params=1 locals=2 registers=4 maxstack=0 flags=closure
+  capture 0 local 1 implicit
+  param 0 "y"
+  local 0 "y"
+  local 1 "n"
+  registers VLLV
+  0: Local 0 1 0 0 ; line 17
+  1: Local 0 2 1 0 ; line 17
+  2: Store 0 1 0 0 ; line 17
+  3: Closure 0 3 9 0 ; line 17 ; func 9 "{closure:{closure:/w/test.php:17}:17}"
+  4: BindLexical capture 0 3 1 9 ; line 17 ; func 9 "{closure:{closure:/w/test.php:17}:17}"
+  5: BindLexical capture 1 3 2 9 ; line 17 ; func 9 "{closure:{closure:/w/test.php:17}:17}"
+  6: Return 0 3 0 0 ; line 17
+  7: Const 0 3 12 0 ; line 17 ; null
+  8: Return 0 3 0 0 ; line 17
+func 6 "{closure:/w/test.php:18}" params=0 locals=1 registers=4 maxstack=0 flags=closure
+  capture 0 local 0 implicit
+  local 0 "n"
+  registers LVVV
+  0: Local 0 0 0 0 ; line 18
+  1: Const 0 1 2 0 ; line 18 ; int 1
+  2: Load 0 2 0 0 ; line 18
+  3: Binary Add 3 2 1 ; line 18
+  4: Return 1 3 0 0 ; line 18
+  5: Const 0 1 12 0 ; line 18 ; null
+  6: Return 0 1 0 0 ; line 18
+func 7 "{closure:K::make():6}" params=1 locals=1 registers=5 maxstack=0 flags=closure+usesthis
+  param 0 "a"
+  local 0 "a"
+  registers VLVVV
+  0: Local 0 1 0 0 ; line 6
+  1: Store 0 1 0 0 ; line 6
+  2: This 0 2 0 0 ; line 6
+  3: PropGet 0 3 2 1 ; line 6 ; name "p"
+  4: Load 0 4 1 0 ; line 6
+  5: Binary Add 2 3 4 ; line 6
+  6: Return 0 2 0 0 ; line 6
+  7: Const 0 2 12 0 ; line 6 ; null
+  8: Return 0 2 0 0 ; line 6
+func 8 "{closure:K::sm():8}" params=0 locals=0 registers=1 maxstack=0 flags=nothis+closure
+  registers V
+  0: ClassName static 0 0 0 ; line 8 ; class static
+  1: Return 0 0 0 0 ; line 8
+  2: Const 0 0 12 0 ; line 8 ; null
+  3: Return 0 0 0 0 ; line 8
+func 9 "{closure:{closure:/w/test.php:17}:17}" params=1 locals=3 registers=8 maxstack=0 flags=closure
+  capture 0 local 1 implicit
+  capture 1 local 2 implicit
+  param 0 "z"
+  local 0 "z"
+  local 1 "y"
+  local 2 "n"
+  registers VLLLVVVV
+  0: Local 0 1 0 0 ; line 17
+  1: Local 0 2 1 0 ; line 17
+  2: Local 0 3 2 0 ; line 17
+  3: Store 0 1 0 0 ; line 17
+  4: Load 0 4 2 0 ; line 17
+  5: Load 0 5 1 0 ; line 17
+  6: Binary Add 6 4 5 ; line 17
+  7: Load 0 7 3 0 ; line 17
+  8: Binary Add 4 6 7 ; line 17
+  9: Return 0 4 0 0 ; line 17
+  10: Const 0 4 12 0 ; line 17 ; null
+  11: Return 0 4 0 0 ; line 17

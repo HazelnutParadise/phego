@@ -268,6 +268,10 @@ func (s *vmState) lookupClass(name string) *class {
 		if s.h.registerClass(stdClassBuiltin) == nil {
 			return stdClassBuiltin
 		}
+	case "closure":
+		if s.h.registerClass(closureBuiltin) == nil {
+			return closureBuiltin
+		}
 	case "stringable":
 		if s.h.registerClass(stringableBuiltin) == nil {
 			return stringableBuiltin

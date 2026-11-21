@@ -63,7 +63,7 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 	}
 	for _, n := range append(names, cl.Traits...) {
 		lower := phpname.Lower(n.Resolved)
-		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "stringable" {
+		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "stringable" && lower != "closure" {
 			return fail("extending or implementing builtin class "+n.Resolved, cl.Line)
 		}
 	}
@@ -524,6 +524,15 @@ func isCall(n *ir.Node) bool {
 // OpInitStatic and makes the call. Each argument is sent as soon as it is
 // evaluated, in a mode the callee decides when the instruction runs.
 func (fc *fnCompiler) sendArgs(n *ir.Node, res uint32) {
+	if fc.converting == n {
+		// f(...): the started call becomes a Closure
+		// (ZEND_CALLABLE_CONVERT).
+		fc.converting = nil
+		fc.sent() // the call's mark, which the conversion takes
+		fc.pending--
+		fc.emit(bytecode.OpCallableConvert, 0, res, 0, 0)
+		return
+	}
 	entered := fc.pending
 	fc.sent() // the call's mark
 	fc.outside(func() {
@@ -548,6 +557,22 @@ func (fc *fnCompiler) sendArgs(n *ir.Node, res uint32) {
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushAuto), fc.varLoc(v.Var), name, 0)
 			case isCall(v):
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushResult), fc.value(v), name, 0)
+			case (v.Op == ir.OpDim || v.Op == ir.OpProp || v.Op == ir.OpStaticProp) && name == 0 && !hasNullsafe(v):
+				// ZEND_CHECK_FUNC_ARG: the callee decides whether the
+				// element is fetched for writing and sent as a reference
+				// (FETCH_DIM_FUNC_ARG) or read and sent as a value.
+				c := fc.alloc()
+				fc.emit(bytecode.OpArgByRef, 0, c, 0, 0)
+				byRef, byValue, done := fc.label(), fc.label(), fc.label()
+				fc.branch(c, byRef, byValue)
+				line := fc.cur
+				fc.bind(byRef)
+				fc.emit(bytecode.OpPush, 0, fc.refArg(v, n.Line), 0, 0)
+				fc.jump(done)
+				fc.top, fc.cur = mark+1, line
+				fc.bind(byValue)
+				fc.emit(bytecode.OpPush, 0, fc.value(v), 0, 0)
+				fc.bind(done)
 			case v.Op == ir.OpDim || v.Op == ir.OpProp || v.Op == ir.OpStaticProp:
 				fc.emit(bytecode.OpPush, uint16(bytecode.PushElement), fc.value(v), name, 0)
 			default:

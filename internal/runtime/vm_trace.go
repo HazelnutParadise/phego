@@ -152,7 +152,71 @@ func (s *vmState) backtrace(internal string, args []value) string {
 				line = int(caller.fn.lines[caller.pc-1])
 			}
 		}
-		frame(caller.fn.files[caller.pc], line, traceName(f), s.frameArgs(f), named)
+		switch f.via {
+		case closureCall:
+			// Closure::call enters the closure itself: the closure's frame
+			// has no PHP caller, and the method's frame follows it.
+			b.WriteByte('#')
+			b.WriteString(strconv.Itoa(n))
+			b.WriteString(" [internal function]: ")
+			b.WriteString(traceName(f))
+			b.WriteByte('(')
+			args := s.frameArgs(f)
+			for j, a := range args {
+				if j > 0 {
+					b.WriteString(", ")
+				}
+				b.WriteString(traceArg(a))
+			}
+			b.WriteString(")\n")
+			n++
+			if f.this != nil {
+				args = append([]value{{kind: valueObject, object: f.this}}, args...)
+			}
+			frame(caller.fn.files[caller.pc], line, "Closure->call", args, named)
+		case closureMagic:
+			// A closure of a magic method calls __call itself; the frame
+			// below is the method the closure stands for, with the
+			// arguments __call received as an array.
+			b.WriteByte('#')
+			b.WriteString(strconv.Itoa(n))
+			b.WriteString(" [internal function]: ")
+			b.WriteString(traceName(f))
+			b.WriteByte('(')
+			args := s.frameArgs(f)
+			for j, a := range args {
+				if j > 0 {
+					b.WriteString(", ")
+				}
+				b.WriteString(traceArg(a))
+			}
+			b.WriteString(")\n")
+			n++
+			name, sep, list := "", "::", []value(nil)
+			if f.this != nil {
+				sep = "->"
+			}
+			if f.scope != nil {
+				name = f.scope.name + sep
+			}
+			if f.closure != nil && f.closure.closure != nil {
+				name += f.closure.closure.magic
+			}
+			if len(args) > 1 {
+				if arr := args[1].deref(); arr.kind == valueArray {
+					pos := 0
+					for bk, ok := arr.array.next(&pos); ok; bk, ok = arr.array.next(&pos) {
+						list = append(list, bk.val)
+					}
+				}
+			}
+			frame(caller.fn.files[caller.pc], line, name, list, nil)
+		case closureInvoke:
+			frame(caller.fn.files[caller.pc], line, traceName(f), s.frameArgs(f), named)
+			frame(caller.fn.files[caller.pc], line, "Closure->__invoke", s.frameArgs(f), named)
+		default:
+			frame(caller.fn.files[caller.pc], line, traceName(f), s.frameArgs(f), named)
+		}
 	}
 	b.WriteByte('#')
 	b.WriteString(strconv.Itoa(n))

@@ -98,9 +98,24 @@ type vmFunction struct {
 	returnType string
 	strict     bool
 	typed      bool
+	// Format 1.8. closure marks a closure's body, which only a Closure
+	// object enters; noThis a static closure or method or a plain
+	// function; usesThis a closure body that uses $this. captures is the
+	// closure's use list.
+	closure  bool
+	noThis   bool
+	usesThis bool
+	captures []vmCapture
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
+}
+
+// vmCapture is one variable of a closure's use list: the local that
+// receives it when a call enters the closure.
+type vmCapture struct {
+	local           int32
+	byRef, implicit bool
 }
 
 // opFusedCompareBranch is an internal opcode outside the format's range. It
@@ -174,6 +189,8 @@ func role17(r bytecode.Role) int {
 		return roleClass
 	case bytecode.RoleTarget:
 		return roleTarget
+	case bytecode.RoleFunc:
+		return roleFunc
 	}
 	return roleNone
 }
@@ -363,7 +380,7 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 				}
 			}
 		}
-		if i != prog.entry {
+		if i != prog.entry && !f.closure {
 			key := phpname.Lower(f.name)
 			if _, dup := prog.byName[key]; !dup {
 				prog.byName[key] = i
@@ -472,6 +489,16 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	}
 	f.returnType = fv.ReturnType()
 	f.strict = fv.Flags()&bytecode.FuncStrict != 0
+	f.closure = fv.Flags()&bytecode.FuncClosure != 0
+	f.noThis = fv.Flags()&bytecode.FuncNoThis != 0
+	f.usesThis = fv.Flags()&bytecode.FuncUsesThis != 0
+	for i, n := 0, fv.CaptureCount(); i < n; i++ {
+		c, _ := fv.CaptureAt(i)
+		if int(c.Local) >= f.locals {
+			return f, fail(-1, "capture %d names local %d of %d", i, c.Local, f.locals)
+		}
+		f.captures = append(f.captures, vmCapture{local: int32(c.Local), byRef: c.Flags&bytecode.CaptureByRef != 0, implicit: c.Flags&bytecode.CaptureImplicit != 0})
+	}
 	if n := fv.ParameterCount(); n > 0 {
 		f.paramTypes = make([]string, n)
 		for i := range f.paramTypes {
@@ -720,7 +747,7 @@ func vmLiveness(f *vmFunction) {
 				composite[in.a] = true
 			}
 		case bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropSet, bytecode.OpPropRef, bytecode.OpStaticGet, bytecode.OpStaticSet,
-			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn:
+			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn, bytecode.OpClosure, bytecode.OpCallableConvert:
 			// Format 1.7: every register these define or replace can hold
 			// an object, whose release runs its destructor.
 			roles, _ := bytecode.Roles17(bytecode.Instruction{Op: in.op, Aux: in.aux})
@@ -1029,7 +1056,8 @@ func definesA(op bytecode.Opcode) bool {
 		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef,
 		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending,
 		bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropRef, bytecode.OpPropIsset, bytecode.OpStaticGet, bytecode.OpStaticRef,
-		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone:
+		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone,
+		bytecode.OpClosure, bytecode.OpCallableConvert, bytecode.OpArgByRef:
 		return true
 	}
 	return false

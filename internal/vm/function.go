@@ -18,8 +18,11 @@ import (
 //
 // L counts the PHP variables, in Func.Vars order.
 type fnCompiler struct {
-	c *compiler
-	f *ir.Func
+	// converting is the call node a first-class callable expression turns
+	// into a Closure instead of making it.
+	converting *ir.Node
+	c          *compiler
+	f          *ir.Func
 
 	vars    map[*ir.Var]int
 	nvars   int
@@ -391,7 +394,7 @@ func (fc *fnCompiler) signature() {
 		// compile anyway.
 		fc.unsupported("declaration of builtin function "+f.Name+"()", f.Line)
 	}
-	if f.ByRef {
+	if f.ByRef && f.Kind != ir.FuncArrow {
 		fc.unsupported("return by reference", f.Line)
 	}
 	for _, p := range f.Params {
@@ -580,8 +583,27 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	if f.Strict {
 		fnFlags |= bytecode.FuncStrict
 	}
-	if f.Kind != ir.FuncMethod || f.Static {
+	closure := f.Kind == ir.FuncClosure || f.Kind == ir.FuncArrow
+	if f.Static || f.Kind != ir.FuncMethod && !closure {
 		fnFlags |= bytecode.FuncNoThis
+	}
+	var captures []bytecode.Capture
+	if closure {
+		fnFlags |= bytecode.FuncClosure
+		if usesThis(f.Body) {
+			fnFlags |= bytecode.FuncUsesThis
+		}
+		for _, cp := range captureList(f) {
+			v := f.Var(cp.Name)
+			var flags bytecode.CaptureFlags
+			if cp.ByRef {
+				flags |= bytecode.CaptureByRef
+			}
+			if cp.Implicit {
+				flags |= bytecode.CaptureImplicit
+			}
+			captures = append(captures, bytecode.Capture{Local: uint32(fc.vars[v]), Flags: flags})
+		}
 	}
 	var returnType uint32
 	if t := fc.returnType(); t != "" {
@@ -600,6 +622,7 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		Parameters: parameters,
 		Flags:      fnFlags,
 		ReturnType: returnType,
+		Captures:   captures,
 	}
 }
 
@@ -672,8 +695,18 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			fc.jump(l.brk)
 		}
 	case ir.OpReturn:
-		if n.Flags&ir.FlagRef != 0 {
+		if n.Flags&ir.FlagRef != 0 && fc.f.Kind != ir.FuncArrow {
 			fc.unsupported("return by reference", n.Line)
+		}
+		var notice uint16
+		if fc.f.ByRef && len(n.Kids) > 0 && n.Kids[0] != nil {
+			// fn &() => expr returns the value of a variable silently;
+			// any other expression is not a reference to return.
+			switch n.Kids[0].Op {
+			case ir.OpVar, ir.OpDim, ir.OpProp, ir.OpStaticProp:
+			default:
+				notice = bytecode.ReturnNotice
+			}
 		}
 		var r uint32
 		if len(n.Kids) > 0 && n.Kids[0] != nil {
@@ -693,7 +726,7 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			}
 			fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnValue), r, 0, 0)
 		}
-		fc.emit(bytecode.OpReturn, 0, r, 0, 0)
+		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 	case ir.OpClass:
 		fc.classDecl(n)
 	case ir.OpDeclare:

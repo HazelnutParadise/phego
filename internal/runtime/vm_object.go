@@ -799,6 +799,9 @@ func (s *vmState) castObject(v value) (value, error) {
 
 // callObject is ZEND_INIT_DYNAMIC_CALL for an object: its __invoke.
 func (s *vmState) callObject(obj value, argc int, dest uint32) error {
+	if cd := obj.object.closure; cd != nil {
+		return s.callClosureValue(obj.object, cd, argc, dest)
+	}
 	m, ok := s.h.resolveMethod(obj.object.class, "__invoke", nil)
 	if !ok || m == nil || m.fn == 0 || m.call == nil {
 		if err := s.dropArgs(argc); err != nil {
@@ -818,9 +821,7 @@ func (s *vmState) callObject(obj value, argc int, dest uint32) error {
 	retain(obj)
 	s.into = vmEnter{this: obj.object, scope: m.owner, called: obj.object.class}
 	err := s.push(fn, argc, dest)
-	if s.into.this != nil {
-		_ = s.releaseObject(s.into.this)
-	}
+	s.dropInto()
 	s.into = vmEnter{}
 	return err
 }

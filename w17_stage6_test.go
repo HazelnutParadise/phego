@@ -123,17 +123,17 @@ func TestW17Stage6UnsupportedIsRefusedAtCompile(t *testing.T) {
 		{"dynamic global", "<?php\necho 1;\nfunction f($n) {\n  global $$n;\n}\n", "variable variables", 4},
 		{"func_get_args", "<?php\necho 1;\nfunction f(...$a) {\n  return func_get_args();\n}\n", "builtin function func_get_args()", 4},
 		{"unpacking an object", "<?php\necho 1;\nfunction f(...$a) {}\nf(...new ArrayIterator([1]));\n", "builtin class ArrayIterator", 4},
-		{"unpacking a generator", "<?php\necho 1;\nfunction f(...$a) {}\nf(...(function () { yield 1; })());\n", "closure", 4},
+		{"unpacking a generator", "<?php\necho 1;\nfunction f(...$a) {}\nf(...(function () { yield 1; })());\n", "generator", 4},
 		{"variadic attribute", "<?php\necho 1;\nfunction f(#[A] int ...$a) {}\n", "parameter attribute", 3},
-		{"static closure", "<?php\necho 1;\n$f = static function () {};\n", "closure", 3},
+		{"static closure returning by reference", "<?php\necho 1;\n$f = static function &() {};\n", "return by reference", 3},
 		{"enum case", "<?php\necho 1;\nenum A { case B; }\n", "enum declaration", 3},
 		{"static with a builtin class", "<?php\necho 1;\nfunction f() {\n  static $o = new ArrayObject;\n}\n", "builtin class ArrayObject", 4},
-		{"named first-class callable", "<?php\necho 1;\n$f = $o->m(...);\n", "first-class callable", 3},
+		{"first-class callable of a builtin function", "<?php\necho 1;\n$f = strlen(...);\n", "a closure of builtin function strlen()", 3},
 		{"anonymous class", "<?php\necho 1;\nnew class(a: 1) {};\n", "anonymous class", 3},
 		{"by-reference value by name", "<?php\necho 1;\nfunction f(&$r) {}\nf(r: 1 + 2);\n", "passing a value that is not a variable by reference", 4},
 		{"by-reference call result by name", "<?php\necho 1;\nfunction f(&$r) {}\nf(r: f($x));\n", "passing a value that is not a variable by reference", 4},
 		{"array spread", "<?php\necho 1;\n$a = [...$b];\n", "array spread", 3},
-		{"first-class callable", "<?php\necho 1;\nfunction f() {}\n$g = f(...);\n", "first-class callable", 4},
+		{"first-class callable of a namespaced builtin name", "<?php\necho 1;\nfunction f() {}\n$g = \\count(...);\n", "a closure of builtin function count()", 4},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			file := "/w/cases/s6_" + strings.ReplaceAll(c.name, " ", "_") + ".php"

@@ -39,4 +39,4 @@ func isBuiltinClass(name string) bool {
 }
 
 // supportedBuiltinClasses are the builtin classes the runtime provides.
-var supportedBuiltinClasses = map[string]bool{"stdclass": true, "stringable": true}
+var supportedBuiltinClasses = map[string]bool{"stdclass": true, "stringable": true, "closure": true}

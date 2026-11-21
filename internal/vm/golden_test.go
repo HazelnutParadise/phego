@@ -98,6 +98,14 @@ var goldenPrograms = []struct{ name, src string }{
 		"class P {\n    public function __construct(public int $x = 0, protected readonly ?string $y = null) {}\n" +
 		"    public function get(): static {\n        return $this;\n    }\n}\n" +
 		"echo value(1), maybe(2), (new P(1))->get()->x;\n"},
+	// Stage 7B: closures, arrow functions and first-class callables.
+	{"closures", "<?php\nfunction f($x) { return $x; }\nclass K {\n    private $p = 1;\n" +
+		"    function make() {\n        return function ($a) { return $this->p + $a; };\n    }\n" +
+		"    static function sm() { return static fn() => static::class; }\n}\n" +
+		"$n = 1;\n$m = 2;\n$c = function ($a, &$b = null) use ($n,\n    &$m) {\n    static $calls = 0;\n    return $a + $n + $m + ++$calls;\n};\n" +
+		"$arrow = fn($y) => fn($z) => $y + $z + $n;\n$byRef = fn &() => $n + 1;\n" +
+		"$g = f(...);\n$h = $c(...);\n$k = new K;\n$i = $k->make(...);\n$j = K::sm(...);\n$s = 'f';\n$t = $s(...);\n" +
+		"$arr = [1];\necho $c(1, $arr[0]), $g(2), Closure::bind($c, null)(3), $c->bindTo($k, K::class)(4), $c->call($k, 5);\n"},
 }
 
 func TestGoldenDisassembly(t *testing.T) {

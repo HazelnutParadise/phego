@@ -155,84 +155,90 @@ func 0 "{main}" params=0 locals=13 registers=19 maxstack=4 flags=nothis
   71: Load 0 16 6 0 ; line 19
   72: Binary Add 17 16 15 ; line 19
   73: Push temp 17 0 0 ; line 19
-  74: Load 0 15 0 0 ; line 19
-  75: PropGet 0 16 15 1 ; line 19 ; name "p"
-  76: Push element 16 0 0 ; line 19
-  77: Checkpoint 0 0 0 0 ; line 19
-  78: CallPending 0 13 0 0 ; line 19
-  79: Drop 0 13 0 0 ; line 19
-  80: InitStatic 0 0 7 0 ; line 20 ; class "A", name "s"
-  81: Push auto 6 0 0 ; line 20
-  82: Checkpoint 0 0 0 0 ; line 20
-  83: CallPending 0 13 0 0 ; line 20
-  84: Drop 0 13 0 0 ; line 20
-  85: InitStatic 0 0 7 0 ; line 21 ; class "A", name "s"
-  86: Call 0 14 1 0 ; line 21 ; f
-  87: Push result 14 0 0 ; line 21
-  88: Checkpoint 0 0 0 0 ; line 21
-  89: CallPending 0 13 0 0 ; line 21
-  90: Drop 0 13 0 0 ; line 21
-  91: Load 0 16 0 0 ; line 22
-  92: Const 0 17 11 0 ; line 22 ; null
-  93: Binary Identical 18 16 17 ; line 22
-  94: Branch 0 18 95 97 ; line 22
-  95: Move 0 13 17 0 ; line 22
-  96: Jump 0 114 0 0 ; line 22
-  97: InitMethod 0 16 5 0 ; line 22 ; name "m"
-  98: Push auto 6 0 0 ; line 22
-  99: Push auto 6 0 0 ; line 22
-  100: Checkpoint 0 0 0 0 ; line 22
-  101: CallPending 0 15 0 0 ; line 22
-  102: Const 0 16 11 0 ; line 22 ; null
-  103: Binary Identical 17 15 16 ; line 22
-  104: Branch 0 17 105 107 ; line 22
-  105: Move 0 13 16 0 ; line 22
-  106: Jump 0 114 0 0 ; line 22
-  107: InitMethod 0 15 5 0 ; line 22 ; name "m"
-  108: Const 0 16 2 0 ; line 22 ; int 1
-  109: Push temp 16 0 0 ; line 22
-  110: Push auto 8 0 0 ; line 22
-  111: Checkpoint 0 0 0 0 ; line 22
-  112: CallPending 0 14 0 0 ; line 22
-  113: Move 0 13 14 0 ; line 22
-  114: Drop 0 13 0 0 ; line 22
-  115: Const 0 13 11 0 ; line 23 ; null
-  116: Store 0 9 13 0 ; line 23
-  117: Load 0 15 9 0 ; line 24
-  118: Const 0 16 11 0 ; line 24 ; null
-  119: Binary Identical 17 15 16 ; line 24
-  120: Branch 0 17 121 123 ; line 24
-  121: Move 0 13 16 0 ; line 24
-  122: Jump 0 130 0 0 ; line 24
-  123: InitMethod 0 15 5 0 ; line 24 ; name "m"
-  124: Call 0 16 1 0 ; line 24 ; f
-  125: Push result 16 0 0 ; line 24
-  126: Push auto 10 0 0 ; line 24
-  127: Checkpoint 0 0 0 0 ; line 24
-  128: CallPending 0 14 0 0 ; line 24
-  129: Move 0 13 14 0 ; line 24
-  130: Output 0 13 0 0 ; line 24
-  131: Const 0 13 5 0 ; line 25 ; string "m"
-  132: Store 0 11 13 0 ; line 25
-  133: Load 0 14 0 0 ; line 26
-  134: Load 0 15 11 0 ; line 26
-  135: InitMethod namereg 14 15 0 ; line 26 ; name r15
-  136: Push auto 6 0 0 ; line 26
-  137: Push auto 6 0 0 ; line 26
-  138: Checkpoint 0 0 0 0 ; line 26
-  139: CallPending 0 13 0 0 ; line 26
-  140: Drop 0 13 0 0 ; line 26
-  141: Const 0 13 12 0 ; line 27 ; string "f"
-  142: Store 0 12 13 0 ; line 27
-  143: Load 0 14 12 0 ; line 28
-  144: InitMethod callable 14 0 0 ; line 28
-  145: Call 0 15 1 0 ; line 28 ; f
-  146: Push result 15 0 0 ; line 28
-  147: Checkpoint 0 0 0 0 ; line 28
-  148: CallPending 0 13 0 0 ; line 28
-  149: Drop 0 13 0 0 ; line 28
-  150: Const 0 13 11 0 ; line 29 ; null
-  151: Return 0 13 0 0 ; line 29
+  74: ArgByRef 0 15 0 0 ; line 19
+  75: Branch 0 15 76 80 ; line 19
+  76: Load 0 16 0 0 ; line 19
+  77: PropRef 0 17 16 1 ; line 19 ; name "p"
+  78: Push 0 17 0 0 ; line 19
+  79: Jump 0 83 0 0 ; line 19
+  80: Load 0 16 0 0 ; line 19
+  81: PropGet 0 17 16 1 ; line 19 ; name "p"
+  82: Push 0 17 0 0 ; line 19
+  83: Checkpoint 0 0 0 0 ; line 19
+  84: CallPending 0 13 0 0 ; line 19
+  85: Drop 0 13 0 0 ; line 19
+  86: InitStatic 0 0 7 0 ; line 20 ; class "A", name "s"
+  87: Push auto 6 0 0 ; line 20
+  88: Checkpoint 0 0 0 0 ; line 20
+  89: CallPending 0 13 0 0 ; line 20
+  90: Drop 0 13 0 0 ; line 20
+  91: InitStatic 0 0 7 0 ; line 21 ; class "A", name "s"
+  92: Call 0 14 1 0 ; line 21 ; f
+  93: Push result 14 0 0 ; line 21
+  94: Checkpoint 0 0 0 0 ; line 21
+  95: CallPending 0 13 0 0 ; line 21
+  96: Drop 0 13 0 0 ; line 21
+  97: Load 0 16 0 0 ; line 22
+  98: Const 0 17 11 0 ; line 22 ; null
+  99: Binary Identical 18 16 17 ; line 22
+  100: Branch 0 18 101 103 ; line 22
+  101: Move 0 13 17 0 ; line 22
+  102: Jump 0 120 0 0 ; line 22
+  103: InitMethod 0 16 5 0 ; line 22 ; name "m"
+  104: Push auto 6 0 0 ; line 22
+  105: Push auto 6 0 0 ; line 22
+  106: Checkpoint 0 0 0 0 ; line 22
+  107: CallPending 0 15 0 0 ; line 22
+  108: Const 0 16 11 0 ; line 22 ; null
+  109: Binary Identical 17 15 16 ; line 22
+  110: Branch 0 17 111 113 ; line 22
+  111: Move 0 13 16 0 ; line 22
+  112: Jump 0 120 0 0 ; line 22
+  113: InitMethod 0 15 5 0 ; line 22 ; name "m"
+  114: Const 0 16 2 0 ; line 22 ; int 1
+  115: Push temp 16 0 0 ; line 22
+  116: Push auto 8 0 0 ; line 22
+  117: Checkpoint 0 0 0 0 ; line 22
+  118: CallPending 0 14 0 0 ; line 22
+  119: Move 0 13 14 0 ; line 22
+  120: Drop 0 13 0 0 ; line 22
+  121: Const 0 13 11 0 ; line 23 ; null
+  122: Store 0 9 13 0 ; line 23
+  123: Load 0 15 9 0 ; line 24
+  124: Const 0 16 11 0 ; line 24 ; null
+  125: Binary Identical 17 15 16 ; line 24
+  126: Branch 0 17 127 129 ; line 24
+  127: Move 0 13 16 0 ; line 24
+  128: Jump 0 136 0 0 ; line 24
+  129: InitMethod 0 15 5 0 ; line 24 ; name "m"
+  130: Call 0 16 1 0 ; line 24 ; f
+  131: Push result 16 0 0 ; line 24
+  132: Push auto 10 0 0 ; line 24
+  133: Checkpoint 0 0 0 0 ; line 24
+  134: CallPending 0 14 0 0 ; line 24
+  135: Move 0 13 14 0 ; line 24
+  136: Output 0 13 0 0 ; line 24
+  137: Const 0 13 5 0 ; line 25 ; string "m"
+  138: Store 0 11 13 0 ; line 25
+  139: Load 0 14 0 0 ; line 26
+  140: Load 0 15 11 0 ; line 26
+  141: InitMethod namereg 14 15 0 ; line 26 ; name r15
+  142: Push auto 6 0 0 ; line 26
+  143: Push auto 6 0 0 ; line 26
+  144: Checkpoint 0 0 0 0 ; line 26
+  145: CallPending 0 13 0 0 ; line 26
+  146: Drop 0 13 0 0 ; line 26
+  147: Const 0 13 12 0 ; line 27 ; string "f"
+  148: Store 0 12 13 0 ; line 27
+  149: Load 0 14 12 0 ; line 28
+  150: InitMethod callable 14 0 0 ; line 28
+  151: Call 0 15 1 0 ; line 28 ; f
+  152: Push result 15 0 0 ; line 28
+  153: Checkpoint 0 0 0 0 ; line 28
+  154: CallPending 0 13 0 0 ; line 28
+  155: Drop 0 13 0 0 ; line 28
+  156: Const 0 13 11 0 ; line 29 ; null
+  157: Return 0 13 0 0 ; line 29
 func 1 "f" params=0 locals=0 registers=1 maxstack=0 flags=nothis
   registers V
   0: Const 0 0 2 0 ; line 9 ; int 1

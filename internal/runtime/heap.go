@@ -32,6 +32,9 @@ type object struct {
 	weakMaps         []*weakMap
 	lazy             *lazyObject
 	hooks            map[string]bool
+	// closure is what a Closure object holds beyond an object (W-17 stage
+	// 7B): its function, binding, captured variables and static variables.
+	closure *closureData
 }
 
 // weakReference observes an object without owning it. PHP returns the same
@@ -190,12 +193,24 @@ func (h *heap) newObjectShell(c *class) (value, error) {
 	if c != nil && c.schema != nil {
 		layout = c.schema.layout
 	}
-	storage := &struct {
-		object     object
-		properties propertyTable
-	}{}
-	o := &storage.object
-	*o = object{owner: h, handle: handle, class: c, props: &storage.properties}
+	var o *object
+	if c == closureBuiltin {
+		// A Closure's own data shares the allocation too.
+		storage := &struct {
+			object     object
+			properties propertyTable
+			closure    closureData
+		}{}
+		o = &storage.object
+		*o = object{owner: h, handle: handle, class: c, props: &storage.properties, closure: &storage.closure}
+	} else {
+		storage := &struct {
+			object     object
+			properties propertyTable
+		}{}
+		o = &storage.object
+		*o = object{owner: h, handle: handle, class: c, props: &storage.properties}
+	}
 	o.props.initializeLayout(layout)
 	if handle >= uint64(len(h.objects)) {
 		h.objects = append(h.objects, make([]*object, handle+1-uint64(len(h.objects)))...)
@@ -527,6 +542,7 @@ func (h *heap) freeObject(o *object) error {
 	}
 	first = h.mergeObjectErrors(first, h.freeLazyStorage(o, nil))
 	first = h.mergeObjectErrors(first, h.freeProperties(o, nil))
+	first = h.mergeObjectErrors(first, h.freeClosureStorage(o, nil))
 	if !h.noHandleReuse {
 		h.freeHandles = append(h.freeHandles, o.handle)
 	}
@@ -1223,6 +1239,19 @@ func edges(n gcNode, visit func(gcNode)) {
 			cell(x.lazy.initializer)
 			cell(x.lazy.target)
 		}
+		if cd := x.closure; cd != nil {
+			// zend_closure_get_gc: the bound object, then the variables
+			// the closure owns (a fake closure owns none).
+			if cd.this != nil {
+				visit(cd.this)
+			}
+			for _, v := range cd.captures {
+				cell(v)
+			}
+			for _, v := range cd.statics {
+				cell(v)
+			}
+		}
 		// A WeakMap entry value is kept alive through its key, so a value
 		// that refers back to its key forms a collectable cycle.
 		for _, m := range x.weakMaps {
@@ -1430,6 +1459,9 @@ func (h *heap) collectCyclePass() (int, error, bool) {
 				err = e
 			}
 			if e := h.freeProperties(x, dead); e != nil && err == nil {
+				err = e
+			}
+			if e := h.freeClosureStorage(x, dead); e != nil && err == nil {
 				err = e
 			}
 			if !h.noHandleReuse {

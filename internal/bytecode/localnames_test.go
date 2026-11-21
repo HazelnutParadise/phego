@@ -32,6 +32,9 @@ func afterNames(minor uint16) int {
 	if minor >= 7 {
 		n += 1 + 4 + 4
 	}
+	if minor >= 8 {
+		n += 4 // the empty capture table
+	}
 	return n
 }
 

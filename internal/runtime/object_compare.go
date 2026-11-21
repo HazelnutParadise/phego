@@ -53,6 +53,9 @@ func (h *heap) compareObjectValues(a, b value, arrays map[*phpArray]bool) (compa
 	if x.class != y.class {
 		return 1, nil
 	}
+	if x.closure != nil || y.closure != nil {
+		return compareClosures(x.closure, y.closure), nil
+	}
 	// WeakMap uses PHP's empty standard property comparison. Its entries are
 	// debug data, so comparing them must not inspect values or run callbacks.
 	if x.class == weakMapBuiltin {

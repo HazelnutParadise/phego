@@ -382,6 +382,19 @@ func (w *writer) payload(i Image, minor uint16) error {
 				return err
 			}
 		}
+		if minor >= 8 {
+			if err := w.u32(uint32(len(f.Captures))); err != nil {
+				return err
+			}
+			for _, c := range f.Captures {
+				if err := w.u32(c.Local); err != nil {
+					return err
+				}
+				if err := w.u8(uint8(c.Flags)); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	if minor >= 7 {
 		return w.classes(i.Classes)
@@ -796,6 +809,25 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 				return Image{}, ee
 			}
 			f.Flags, f.ReturnType = FunctionFlags(p[0]), binary.LittleEndian.Uint32(p[1:])
+		}
+		if minor >= 8 {
+			nc, ee := r.count(captureWire, b.lim.MaxLocals)
+			if ee != nil {
+				return Image{}, ee
+			}
+			if nc > 0 {
+				if ee = b.reserveMul(uint64(nc), 8); ee != nil {
+					return Image{}, ee
+				}
+				f.Captures = make([]Capture, int(nc))
+				for j := range f.Captures {
+					p, ee := r.take(captureWire)
+					if ee != nil {
+						return Image{}, ee
+					}
+					f.Captures[j] = Capture{Local: binary.LittleEndian.Uint32(p), Flags: CaptureFlags(p[4])}
+				}
+			}
 		}
 	}
 	if minor >= 7 {

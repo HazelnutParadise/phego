@@ -51,6 +51,14 @@ type vmFrame struct {
 	this   *object
 	scope  *class
 	called *class
+	// closure is the Closure object a closure's frame runs for (an owner):
+	// it holds the frame's static variables and outlives the call even
+	// when the last variable naming it is overwritten meanwhile.
+	closure *object
+	// via is the method of the Closure class the frame was entered
+	// through (closureCall, closureInvoke) or zero: a backtrace shows that
+	// method's frame below this one.
+	via uint8
 	// unreceived marks a frame whose call passed too few arguments: its pc
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
@@ -452,6 +460,12 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		fr.this, fr.scope, fr.called = into.this, into.scope, into.called
 	}
 	fr.boundary, fr.unreceived = false, false
+	if fr.closure != into.closure {
+		fr.closure = into.closure
+	}
+	if fr.via != into.via {
+		fr.via = into.via
+	}
 	if s.h.currentCalledScope != into.called {
 		s.h.currentCalledScope = into.called
 	}
@@ -488,6 +502,9 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	}
 	clear(args)
 	s.args = s.args[:len(s.args)-argc]
+	if len(fn.captures) != 0 && into.closure != nil {
+		s.bindCaptures(fr, into.closure.closure)
+	}
 	if e := s.entering; e != nil {
 		s.entering = nil
 		fr.call = e
@@ -498,7 +515,7 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
-	fr.weak, fr.ctor = into.internal, into.ctor
+	fr.weak, fr.ctor = into.internal || into.via != 0, into.ctor
 	if argc < fn.required {
 		// ZEND_RECV checks each parameter in order: the type of an
 		// argument before a missing one is reported first.
@@ -651,6 +668,14 @@ func (s *vmState) pop(release bool) error {
 	// runs before OBJ_RELEASE(ZEND_THIS) in zend_leave_helper).
 	if release && this != nil {
 		keep(s.releaseObject(this))
+	}
+	// The closure goes last (zend_leave_helper: OBJ_RELEASE of the closure
+	// after the variables).
+	if cl := f.closure; cl != nil {
+		f.closure = nil
+		if release {
+			keep(s.releaseObject(cl))
+		}
 	}
 	return first
 }
@@ -953,6 +978,19 @@ func (s *vmState) tooFewArguments(argc int) error {
 	callee := s.frames[len(s.frames)-1]
 	if len(s.frames) < 2 {
 		return &Throwable{"ArgumentCountError", "Too few arguments to function " + s.funcName(callee) + "(), " + strconv.Itoa(argc) + " passed and at least " + strconv.Itoa(callee.fn.required) + " expected"}
+	}
+	if callee.via != 0 {
+		// Called by an internal function (a method of Closure): there is
+		// no PHP call site to name.
+		callee.unreceived = true
+		if pc := callee.fn.paramPC[argc]; pc >= 0 {
+			callee.pc = int(pc)
+		}
+		bound := "exactly"
+		if callee.fn.required < callee.fn.params {
+			bound = "at least"
+		}
+		return &Throwable{"ArgumentCountError", fmt.Sprintf("Too few arguments to function %s(), %d passed and %s %d expected", s.funcName(callee), argc, bound, callee.fn.required)}
 	}
 	caller := s.frames[len(s.frames)-2]
 	callee.unreceived = true

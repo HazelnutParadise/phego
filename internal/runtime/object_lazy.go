@@ -430,6 +430,11 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 	if m := h.weakMapObjects[o]; m != nil {
 		return h.cloneWeakMap(m)
 	}
+	if o.closure != nil && h.vm != nil {
+		// zend_closure_clone: a new closure of the same function, scope,
+		// called class and object, with its own copy of the variables.
+		return h.vm.dupClosure(o.closure, o.closure.scope, o.closure.called, o.closure.this)
+	}
 	if o.class.schema != nil && o.class.schema.enumKind != enumNone {
 		return value{}, &Throwable{"Error", "Trying to clone an uncloneable object of class " + o.class.name}
 	}

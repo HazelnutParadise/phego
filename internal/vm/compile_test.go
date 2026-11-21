@@ -474,8 +474,8 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"return by reference", "echo 1;\nfunction &f() { return $x; }", 3},
 		{"function attribute", "echo 1;\n#[Foo]\nfunction f() {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[\\SensitiveParameter] $a) {}", 3},
-		{"closure", "echo 1;\n$f = function () {};", 3},
-		{"arrow function", "echo 1;\n$f = fn() => 1;", 3},
+		{"generator", "echo 1;\n$f = function () { yield 1; };", 3},
+		{"generator", "echo 1;\n$f = fn() => yield 1;", 3},
 		{"enum declaration", "echo 1;\nenum E {}", 3},
 		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
 		{"anonymous class", "echo 1;\n$o = new class {};", 3},
@@ -503,12 +503,12 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"named arguments", "echo 1;\nfunction f($a) {}\nexit(status: 1);", 4},
 		{"anonymous class", "echo 1;\nfunction f($a) {}\nf(a: new class {});", 4},
 		{"argument unpacking", "echo 1;\nfunction f($a) {}\nexit(...$x);", 4},
-		{"closure", "echo 1;\nfunction f($a) {}\nf(...function () {});", 4},
+		{"return by reference", "echo 1;\nfunction f($a) {}\nf(...function &() {});", 4},
 		{"array spread", "echo 1;\n$a = [...$x];", 3},
-		{"first-class callable", "echo 1;\n$f = 'g';\n$g = $f(...);", 4},
+		{"a closure of builtin function strlen()", "echo 1;\n$f = 'g';\n$g = strlen(...);", 4},
 		{"variable variables", "echo 1;\necho \"{$$n}\";", 3},
-		{"first-class callable", "echo 1;\n$f = $o->m(...);", 3},
-		{"first-class callable", "echo 1;\n$f = A::m(...);", 3},
+		{"return by reference", "echo 1;\n$f = static function &() {};", 3},
+		{"a closure of builtin function count()", "echo 1;\n$f = \\count(...);", 3},
 		{"class constant with a computed name", "echo 1;\necho A::{'B'};", 3},
 		{"class constant with a computed name", "echo 1;\nclass A { const C = 1; function m() { return static::{'C'}; } }", 3},
 		{"goto", "echo 1;\ngoto a;\na:\necho 2;", 3},
@@ -532,10 +532,10 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"superglobal", "echo 1;\n$GLOBALS['x'] = 1;", 3},
 		{"superglobal", "echo 1;\nclass A { function m() { return $GLOBALS; } }", 3},
 		{"by-reference array element", "echo 1;\n$a = [&$b];", 3},
-		{"first-class callable", "echo 1;\nfunction f() {}\n$g = f(...);", 4},
+		{"a closure of builtin function array_map()", "echo 1;\nfunction f() {}\n$g = array_map(...);", 4},
 		{"throw", "echo 1;\n$x = $a ?? throw $e;", 3},
 		{"require", "echo 1;\nrequire 'x.php';", 3},
-		{"closure", "echo 1;\nclass A { function m() { return function () {}; } }", 3},
+		{"generator", "echo 1;\nclass A { function m() { return function () { yield 1; }; } }", 3},
 		{"try", "echo 1;\nclass A { function m() { try { } finally { } } }", 3},
 		{"goto", "echo 1;\nclass A { function m() { goto a; a: } }", 3},
 		{"__halt_compiler", "echo 1;\n__halt_compiler();", 3},
@@ -660,13 +660,13 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		line    int
 	}{
 		// A function body before the main code that has a closure.
-		{"<?php\nfunction f() { return fn() => 1; }\necho 1;\n$f = function () {};\n", "arrow function", 2},
+		{"<?php\nfunction f() { return fn() => yield 1; }\necho 1;\n$f = function &() {};\n", "generator", 2},
 		// The main code before a later function.
-		{"<?php\necho 1;\n$f = function () {};\nfunction f() { return fn() => 1; }\n", "closure", 3},
+		{"<?php\necho 1;\n$f = function &() {};\nfunction f() { return fn() => yield 1; }\n", "return by reference", 3},
 		// Within a statement, the left operand first.
 		{"<?php\necho $$a . (fn() => 1)();\n", "variable variables", 2},
 		// A class declaration and a function, in either order.
-		{"<?php\nfunction f() { return fn() => 1; }\nenum E {}\n", "arrow function", 2},
+		{"<?php\nfunction f() { return fn() => yield 1; }\nenum E {}\n", "generator", 2},
 		{"<?php\nenum E {}\nfunction f() { return fn() => 1; }\n", "enum declaration", 2},
 		// A method body before the main code, and a class part before a
 		// later method.
@@ -706,6 +706,12 @@ var compileFatal = map[string]string{
 	"fatal_variadic_default":                   "Variadic parameter cannot have a default value",
 	"fatal_variadic_not_last":                  "Only the last parameter can be variadic",
 	"fatal_list_spread":                        "Spread operator is not supported in assignments",
+	"fatal_callable_new":                       "Cannot create Closure for new expression",
+	"fatal_callable_nullsafe":                  "Cannot combine nullsafe operator with Closure creation",
+	"fatal_use_autoglobal":                     "Cannot use auto-global as lexical variable",
+	"fatal_use_param_name":                     "Cannot use lexical variable $x as a parameter name",
+	"fatal_use_this":                           "Cannot use $this as lexical variable",
+	"fatal_use_twice":                          "Cannot use variable $a twice",
 	"fatal_list_empty":                         "Cannot use empty list",
 	"fatal_list_mixed_keys":                    "Cannot mix keyed and unkeyed array entries in assignments",
 	"fatal_list_mix_syntax":                    "Cannot mix [] and list()",
@@ -776,8 +782,8 @@ var compilerFatal = map[string]CompileError{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 732 {
-		t.Fatalf("want 732 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 843 {
+		t.Fatalf("want 843 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {
