@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """W-41 (REQ-067; T-133, T-134): the PHP CVE catalog, its cases and README block agree."""
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 import php_cve_catalog as cat
 
@@ -124,6 +126,48 @@ class TestSources(unittest.TestCase):
         listing = "php-8.5.12/ext/standard/tests/strings/bug22187.phpt\nphp-8.5.12/Zend/tests/bug53632.phpt\nphp-8.5.12/ext/openssl/tests/gh22187.phpt\n"
         cat.upstream_tests({"CVE-2026-4": rec}, listing)
         self.assertEqual(rec["php_src_tests"], ["Zend/tests/bug53632.phpt", "ext/openssl/tests/gh22187.phpt"])
+
+
+class FakeResponse:
+    def __init__(self, rows, link=""):
+        self.body, self.headers = json.dumps(rows).encode(), {"Link": link}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self, limit):
+        return self.body[:limit]
+
+
+class TestAdvisoryPaging(unittest.TestCase):
+    def run_pages(self, pages):
+        calls = []
+
+        def opener(request, timeout):
+            calls.append(request.full_url)
+            return pages[len(calls) - 1]
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = {"files": {}}
+            cat.fetch_advisories(Path(tmp), manifest, opener)
+            return calls, sorted(manifest["files"])
+
+    def test_follows_the_next_link(self):
+        nxt = '<https://api.github.com/x?after=abc>; rel="next"'
+        calls, files = self.run_pages([FakeResponse([{"ghsa_id": "GHSA-a"}], nxt), FakeResponse([{"ghsa_id": "GHSA-b"}])])
+        self.assertEqual(calls, [cat.ADVISORIES, "https://api.github.com/x?after=abc"])
+        self.assertEqual(files, ["ghsa-1.json", "ghsa-2.json"])
+
+    def test_a_repeated_page_fails(self):
+        nxt = '<https://api.github.com/x?after=abc>; rel="next"'
+        with self.assertRaisesRegex(ValueError, "repeated"):
+            self.run_pages([FakeResponse([{"ghsa_id": "GHSA-a"}], nxt), FakeResponse([{"ghsa_id": "GHSA-a"}], nxt)])
+
+    def test_an_object_instead_of_a_list_fails(self):
+        with self.assertRaisesRegex(ValueError, "list of advisories"):
+            self.run_pages([FakeResponse({"message": "rate limited"})])
 
 
 class TestClassification(unittest.TestCase):
