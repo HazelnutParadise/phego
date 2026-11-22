@@ -24,6 +24,12 @@ return $x;`},
 $x = 0;
 for ($i = 0; $i < 100000; $i++) { try { $x = $x + $i % 7; } catch (Exception $e) { $x = -1; } }
 return $x;`},
+	// The statements of the try/finally workload below without the try: its
+	// finally block does one more assignment than the plain loop.
+	{"loop_two_statements", `<?php
+$x = 0;
+for ($i = 0; $i < 100000; $i++) { $x = $x + $i % 7; $x = $x + 0; }
+return $x;`},
 	{"try_finally_in_loop_body", `<?php
 $x = 0;
 for ($i = 0; $i < 100000; $i++) { try { $x = $x + $i % 7; } finally { $x = $x + 0; } }
