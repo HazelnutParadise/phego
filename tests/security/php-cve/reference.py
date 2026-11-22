@@ -33,8 +33,12 @@ def collect(w17, width, arch):
     """Stage cases/ and the W-17 runner in one directory and collect from it."""
     with tempfile.TemporaryDirectory(prefix='phego-cve-ref-') as tmp:
         staging = Path(tmp)
+        # The container runs as nobody (65534); TemporaryDirectory is 0700.
+        staging.chmod(0o755)
         shutil.copytree(HERE / 'cases', staging / 'cases')
         shutil.copyfile(W17 / 'reference.php', staging / 'reference.php')
+        for path in [staging / 'cases', *staging.rglob('*')]:
+            path.chmod(0o755 if path.is_dir() else 0o644)
         data = w17.collect(width, arch, fixtures=staging)
     # The W-17 scrubber names its own directory as the mount source; this run
     # mounted a staging copy of cases/ plus the W-17 reference.php.
