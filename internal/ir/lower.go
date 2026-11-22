@@ -121,6 +121,34 @@ func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
 		if n == nil {
 			continue
 		}
+		if n.Kind == encodingWarningKind {
+			out = append(out, Diagnostic{Line: n.Line, Level: "Warning", Message: encodingWarning})
+			continue
+		}
+		if n.Kind == "declare" {
+			// zend_handle_encoding_declaration warns while parsing, once the
+			// directive list is closed and before the body is read.
+			var directives, rest []*frontend.Node
+			for _, c := range n.Children {
+				if c != nil && c.Kind == "directive" {
+					directives = append(directives, c)
+				} else {
+					rest = append(rest, c)
+				}
+			}
+			for i := len(rest) - 1; i >= 0; i-- {
+				stack = append(stack, rest[i])
+			}
+			for _, d := range directives {
+				if phpname.EqualFold(d.Children[0].Text, "encoding") {
+					stack = append(stack, &frontend.Node{Kind: encodingWarningKind, Line: n.CloseLine})
+				}
+			}
+			for i := len(directives) - 1; i >= 0; i-- {
+				stack = append(stack, directives[i])
+			}
+			continue
+		}
 		if n.Kind == "cast" {
 			if d, ok := castDeprecation(n); ok {
 				out = append(out, d)
@@ -136,6 +164,13 @@ func (l *lowerer) scannerDiagnostics(tree *frontend.Node) []Diagnostic {
 	}
 	return out
 }
+
+// encodingWarningKind marks, in scannerDiagnostics' work list, where the
+// parser reports a declare(encoding=...) directive.
+const (
+	encodingWarningKind = "\x00encoding warning"
+	encodingWarning     = "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings"
+)
 
 type compileFailure struct{ err error }
 
@@ -925,13 +960,7 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 	// PHP reports every declare diagnostic on the line of the first
 	// directive's name, not of the declare keyword.
 	line := directives[0].Line
-	// The encoding warning comes from the parser (zend_handle_encoding_
-	// declaration) at the closing parenthesis, before anything compiles.
-	for _, d := range directives {
-		if phpname.EqualFold(d.Children[0].Text, "encoding") {
-			l.diag(s.CloseLine, "Warning", "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings")
-		}
-	}
+	// The parser reports declare(encoding=...); see scannerDiagnostics.
 	values := make([]*Literal, len(directives))
 	for i, d := range directives {
 		name, value := d.Children[0].Text, d.Children[1]
