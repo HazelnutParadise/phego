@@ -1,0 +1,3 @@
+Linux ip-10-0-143-86 7.0.0-1014-aws #14~24.04.1-Ubuntu SMP PREEMPT Fri Sep 18 21:24:59 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+4
+model name	: Intel(R) Xeon(R) 6975P-C

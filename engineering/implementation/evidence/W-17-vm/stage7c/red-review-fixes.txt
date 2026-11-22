@@ -1,0 +1,153 @@
+# W-17 stage 7C: output of the reviewer's reproducers before the fixes (commit cf1f1cf).
+# PHP is the pinned arm64 image; each block is one probe of ~/.cache/phego-work/review7c-1.
+
+===== f01_dtor_at_return_trace.php
+--- php
+2
+#0 /w/cases/f01_dtor_at_return_trace.php(5): D->__destruct()
+#1 {main}
+
+[exit 0]
+--- phego before the fix
+2
+#0 /w/cases/f01_dtor_at_return_trace.php(3): D->__destruct()
+#1 /w/cases/f01_dtor_at_return_trace.php(5): f()
+#2 {main}
+
+[exit 0]
+
+===== f02_dtor_at_method_end_trace.php
+--- php
+#0 /w/cases/f02_dtor_at_method_end_trace.php(5): D->__destruct()
+#1 {main}
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/f02_dtor_at_method_end_trace.php(3): D->__destruct()
+#1 /w/cases/f02_dtor_at_method_end_trace.php(5): C->m(NULL)
+#2 {main}
+
+[exit 0]
+
+===== f03_dtor_during_unwind_trace.php
+--- php
+#0 /w/cases/f03_dtor_during_unwind_trace.php(5): D->__destruct()
+#1 {main}
+caught
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/f03_dtor_during_unwind_trace.php(3): D->__destruct()
+#1 /w/cases/f03_dtor_during_unwind_trace.php(5): f()
+#2 {main}
+caught
+
+[exit 0]
+
+===== f04_dtor_at_return_trace_noexc.php
+--- php
+#0 /w/cases/f04_dtor_at_return_trace_noexc.php(4): D->__destruct()
+#1 /w/cases/f04_dtor_at_return_trace_noexc.php(5): g()
+#2 {main}
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/f04_dtor_at_return_trace_noexc.php(3): D->__destruct()
+#1 /w/cases/f04_dtor_at_return_trace_noexc.php(4): f(NULL)
+#2 /w/cases/f04_dtor_at_return_trace_noexc.php(5): g()
+#3 {main}
+
+[exit 0]
+
+===== f07_dtor_arg_at_return.php
+--- php
+#0 /w/cases/f07_dtor_arg_at_return.php(4): D->__destruct()
+#1 /w/cases/f07_dtor_arg_at_return.php(5): g()
+#2 {main}
+g after
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/f07_dtor_arg_at_return.php(3): D->__destruct()
+#1 /w/cases/f07_dtor_arg_at_return.php(4): f(NULL)
+#2 /w/cases/f07_dtor_arg_at_return.php(5): g()
+#3 {main}
+g after
+
+[exit 0]
+
+===== g06_line_multiline_new.php
+--- php
+3
+7
+13 16
+
+[exit 0]
+--- phego before the fix
+2
+7
+13 16
+
+[exit 0]
+
+===== g07_line_throw_multiline.php
+--- php
+5
+
+[exit 0]
+--- phego before the fix
+4
+
+[exit 0]
+
+===== h09_throw_line_multi.php
+--- php
+5
+
+[exit 0]
+--- phego before the fix
+4
+
+[exit 0]
+
+===== a11c_prop_type_order.php
+--- php
+
+Fatal error: Type of E2::$file must be string (as in class Exception) in /w/cases/a11c_prop_type_order.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Type of E2::$line must be int (as in class Exception) in /w/cases/a11c_prop_type_order.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+===== internal/bytecode TestFormat19FollowsEndFinallyThroughALaterFinallyRange with the continuation worked out from the handler target (accepted, and the register read after it was dropped)
+--- FAIL: TestFormat19RejectsEndFinallyInsideALaterFinallyRange (0.00s)
+    format19_test.go:144: Build=(&{{{{8.5.12 64 false} linux-amd64 portable-go [65 207 103 148 186 66 0 184 57 197 53 49 85 95 15 57 152 223 76 187 1 164 213 203 11 148 227 202 94 35 148 125] [233 150
+
+===== review7c_return_releases_iterator.php
+--- php
+dtor iter
+dtor local
+end
+fin
+dtor iter2
+dtor local2
+end2
+
+[exit 0]
+--- phego before the fix
+dtor local
+dtor iter
+end
+fin
+dtor iter2
+dtor local2
+end2
+
+[exit 0]

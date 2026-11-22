@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego
+cpu: AMD EPYC 7763 64-Core Processor                
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                     sec/op                     │
+W17Stage7C/loop_plain-4                                                    20.49m ± 1%
+W17Stage7C/loop_inside_try-4                                               20.59m ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                        22.97m ± 2%
+W17Stage7C/try_finally_in_loop_body-4                                      33.11m ± 1%
+W17Stage7C/call_plain-4                                                    36.55m ± 1%
+W17Stage7C/call_with_try_in_callee-4                                       38.54m ± 1%
+W17Stage7C/throw_and_catch-4                                               336.0m ± 0%
+geomean                                                                    39.57m
+
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                      B/op                      │
+W17Stage7C/loop_plain-4                                                   10.48Ki ± 0%
+W17Stage7C/loop_inside_try-4                                              10.48Ki ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                       10.48Ki ± 0%
+W17Stage7C/try_finally_in_loop_body-4                                     10.58Ki ± 0%
+W17Stage7C/call_plain-4                                                   10.56Ki ± 0%
+W17Stage7C/call_with_try_in_callee-4                                      10.56Ki ± 0%
+W17Stage7C/throw_and_catch-4                                              80.88Mi ± 0%
+geomean                                                                   37.92Ki
+
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                   allocs/op                    │
+W17Stage7C/loop_plain-4                                                     44.00 ± 0%
+W17Stage7C/loop_inside_try-4                                                44.00 ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                         44.00 ± 0%
+W17Stage7C/try_finally_in_loop_body-4                                       45.00 ± 0%
+W17Stage7C/call_plain-4                                                     46.00 ± 0%
+W17Stage7C/call_with_try_in_callee-4                                        46.00 ± 0%
+W17Stage7C/throw_and_catch-4                                               700.1k ± 0%
+geomean                                                                     178.1

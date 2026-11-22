@@ -1,0 +1,39 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego
+cpu: AMD EPYC 9V45 96-Core Processor                
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                     sec/op                     │
+W17Stage7C/loop_plain-4                                                   11.18m ±  5%
+W17Stage7C/loop_inside_try-4                                              11.11m ±  1%
+W17Stage7C/try_catch_in_loop_body-4                                       11.26m ±  2%
+W17Stage7C/loop_two_statements-4                                          14.72m ±  2%
+W17Stage7C/try_finally_in_loop_body-4                                     18.25m ±  3%
+W17Stage7C/call_plain-4                                                   18.92m ± 12%
+W17Stage7C/call_with_try_in_callee-4                                      20.61m ±  3%
+W17Stage7C/throw_and_catch-4                                              196.2m ±  3%
+geomean                                                                   20.29m
+
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                      B/op                      │
+W17Stage7C/loop_plain-4                                                   10.48Ki ± 0%
+W17Stage7C/loop_inside_try-4                                              10.48Ki ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                       10.48Ki ± 0%
+W17Stage7C/loop_two_statements-4                                          10.48Ki ± 0%
+W17Stage7C/try_finally_in_loop_body-4                                     10.59Ki ± 0%
+W17Stage7C/call_plain-4                                                   10.56Ki ± 0%
+W17Stage7C/call_with_try_in_callee-4                                      10.56Ki ± 0%
+W17Stage7C/throw_and_catch-4                                              80.88Mi ± 0%
+geomean                                                                   32.29Ki
+
+                                      │ /home/runner/work/_temp/benchstat/try-cost.txt │
+                                      │                   allocs/op                    │
+W17Stage7C/loop_plain-4                                                     44.00 ± 0%
+W17Stage7C/loop_inside_try-4                                                44.00 ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                         44.00 ± 0%
+W17Stage7C/loop_two_statements-4                                            44.00 ± 0%
+W17Stage7C/try_finally_in_loop_body-4                                       45.00 ± 0%
+W17Stage7C/call_plain-4                                                     46.00 ± 0%
+W17Stage7C/call_with_try_in_callee-4                                        46.00 ± 0%
+W17Stage7C/throw_and_catch-4                                               700.1k ± 0%
+geomean                                                                     149.5

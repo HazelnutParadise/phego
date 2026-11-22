@@ -37,6 +37,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 六 | `global`（函式內與頂層、不存在時建立 null、`unset` 只解除函式裡的綁定、宿主以 `WithGlobal` 提供的值）、`static` 變數（字面值與任意運算式的初始值、第一次執行到才求值、多個宣告、遞迴）、不定參數（`...$rest`、`&...$refs`、接在有預設值的參數後面）、引數展開（`f(...$a)`、多段展開、字串 key 成為具名引數、對傳參照參數建立參照）、具名引數（任意順序、略過有預設值的參數、多出的名稱收進不定參數、傳參照） | `$GLOBALS`、`global $$name`，`func_get_args()` 等內建函式，展開物件與 Traversable，把不是變數的值以名稱傳給傳參照參數，參數型別，類別與方法，closure，try／catch |
 | 七 A | 類別、介面、trait 的宣告（含提早綁定與條件式宣告、繼承規則的 fatal）、`new`、屬性與 static 屬性的讀寫（typed、readonly、動態屬性、陣列寫入、複合指定、`++`／`--`、`??=`、`unset`、`isset`、`empty`、參照）、方法與 static 方法、`$this`、`self`／`parent`／`static`、`::class`、類別常數、參數與回傳型別、magic method、`instanceof`、`clone`、物件比較與轉型、走訪物件、nullsafe、`$callable()` | closure 與箭頭函式、first-class callable（七 B），try／catch／finally、`throw`、例外類別（七 C），enum、property hooks、非對稱可見度、屬性與類別上的 attribute、匿名類別、回傳參照、generator、stdClass 與 Stringable 以外的內建類別、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 |
 | 七 B | closure 物件（呼叫、具名與展開引數、傳參照參數、型別、`instanceof Closure`、比較、`clone`、轉型）、`use` 傳值與傳參照捕捉、closure 裡的 `static` 變數、方法裡自動綁定的 `$this` 與類別範圍、static closure、箭頭函式與自動捕捉、first-class callable（`f(...)`、`$o->m(...)`、`A::m(...)`、`static::m(...)`、`$closure(...)`、`'f'(...)`、陣列 `[$o, 'm']` 接 `(...)`）、以字串 `A::m` 與陣列呼叫方法、`Closure::bind`／`bindTo`／`call`／`fromCallable`、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 | try／catch／finally、`throw`、例外類別（七 C），generator，回傳參照的函式與 closure（`fn &` 除外），內建函式的 `strlen(...)`、需要 callable 的內建函式、Reflection，其他七 A 右欄的項目 |
+| 七 C | `try`／`catch`／`finally`（多個 catch、`catch (A \| B $e)`、不寫變數的 catch、依繼承比對、不存在的類別、巢狀、跨函式與 closure 的傳播、`return`／`break`／`continue` 經過 finally、finally 的 `return` 取代回傳值或例外、finally 再丟出時的 previous）、`throw` 陳述式與運算式、Core 與 SPL 的 26 個例外類別與它們的屬性和方法、繼承它們的類別、所有引擎錯誤都能捕捉、未捕捉回報的 `Next` 串接 | generator，回傳參照的函式，`set_exception_handler`、`set_error_handler` 等內建函式，Reflection，其他擴充的例外類別（`JsonException` 等）與 `FiberError`，enum、匿名類別、`goto`，其他七 A 右欄的項目 |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -397,6 +398,87 @@ Codex 的審查額度在 PR 開出時已用完，依本階段的規則改由另�
 
 分派迴圈多了四個 case，Return 多一個 Aux 的判斷，進入 frame 時多看 closure 的兩個欄位。和 main（4c64be5）交替各跑 6 輪 `BenchmarkVMDispatch/*/switch`，中位數是算術 −2.1%、分支 −1.7%、字串 −0.2%、陣列 −1.2%、遞迴的 `fib` +0.8%，前兩項的 6 輪範圍不重疊，其餘重疊。七 A 的物件工作量（`BenchmarkW17Stage7`，各 3 輪）則慢 1.0% 到 1.9%：函式呼叫 +1.2%、方法呼叫 +1.0%、static 呼叫 +1.9%、建立物件 +1.5%，屬性讀寫 −0.5%，範圍大多不重疊。這是每次呼叫多出的欄位判斷與建立物件時多一次類別比較的成本，沒有再壓低。原始輸出在 `bench-main.txt`、`bench-stage7b.txt`、`bench-objects-main.txt` 與 `bench-objects-stage7b.txt`。
 
+## 階段七 C
+
+第七階段的第三段：`try`／`catch`／`finally`、`throw` 與例外物件。格式升到 1.9，沒有新增指令：bytecode 1.0 已有例外表（Catch 與 Finally 兩種 Handler）與 Throw、Leave、EndFinally，這一段把它們接上編譯器與 VM，只放寬驗證器的資料流規則。1.0 到 1.8 的檔案照樣能載入，其中只有 1.9 規則才合法的讀取以 `ErrInvalid` 拒絕並指出需要 1.9。規則在 [W-16 文件](W-16-bytecode.md)的「格式 1.9」。catch 的類別比對用現有的 Instanceof，沒有做布局量測的必要（分派的 `switch` 多三個 case，都不在熱路徑上）。
+
+### 為什麼要 1.9
+
+1.0 的規則是處理區塊入口不保證任何暫存器有定義，Leave 之後也一樣。PHP 的 `foreach` 主體裡有 `try` 時，迭代器暫存器必須活過 catch 與會先執行 finally 的 `continue`，這在 1.0 的規則下寫不出來。1.9 讓保護區間裡每一條指令之前都有定義的暫存器在處理區塊仍有定義，Leave 的目標則沿用最後一個 finally 結束時的定義。
+
+### 和 W-14 的分工
+
+W-14 的 `tryCatch` 以 Go 的 closure 表達 try 的主體與處理區塊。VM 的 PHP frame 不是 Go 的 frame，巢狀的 try 若各自呼叫一層 `tryCatch`，Go 的堆疊會跟著 PHP 的巢狀深度成長，所以 VM 改以例外表展開，沿用的是 W-14 的規則與資料：
+
+- **分類**：只有 throw 會進處理區塊。`exit`、fatal、取消、輸出失敗、步數與內部錯誤照 W-14 的 completion 種類直接結束執行，不執行 finally，也不會被 catch 吞掉。
+- **finally 的 return 取代待處理的結果**：try 的回傳值在進 finally 前就離開暫存器，由待處理的完成狀態持有（W-14 的 `ownReturn`）。finally 自己 return 時，被取代的回傳值當下釋放，被取代的例外被丟棄（ZEND_DISCARD_EXCEPTION）。
+- **取代 throw 的 throw 保留前因**：finally 或展開途中的解構子丟出新例外時，原本的例外接在新例外的 previous 鏈尾端（zend_exception_set_previous），和 W-14 的 `replaceCompletion` 相同。
+- **處理完就結束待處理事件**：W-14 的執行框架會記下最近一次 throw（`phaseCompletion`），`tryCatch` 在進入處理區塊前還原它。VM 進入處理區塊時做同一件事，否則下一個從解構子丟出的例外會被接上已經處理完的那一個。
+
+### 例外類別與物件
+
+- **類別清單由固定映像產生**（`internal/runtime/gen/throwables.php` 產生 `throwables_gen.go`）：Core 與 SPL 擴充裡實作 Throwable 的 26 個類別與各自的父類別。`Exception`、`Error` 與 `ErrorException` 有自己的成員，寫在 `vm_exception.go`，其餘只是繼承。`FiberError` 有自己的建構子，等 fiber。其他擴充的例外類別（`JsonException`、`DateException` 等）還沒有，`Compile` 照舊拒絕。
+- **類別描述唯讀且跨請求共用**，和 `Closure` 一樣在套件初始化時建好。例外物件、trace 陣列、進行中的例外與 finally 的待處理狀態都屬於當次執行：物件在當次請求的 heap，待處理狀態在 frame 上，`Program` 沒有任何欄位指向它們。`TestW17Stage7CStateBelongsToTheRun` 以 16 個 goroutine 各 50 次同時執行同一個 `Program`（`-race`）。
+- **建立物件時就記下位置**（zend_default_exception_new）：`new` 一個實作 Throwable 的類別時，不管有沒有建構子、建構子有沒有呼叫 `parent::__construct`，`file`、`line` 與 `trace` 都在建立當下寫入，所以位置是建立的地方，不是丟出的地方。
+- **runtime 的 Go 錯誤在丟出時變成物件**：W-12、W-13 與 VM 的錯誤仍是 `*Throwable{Class, Message}`，指令回傳錯誤時由 `thrownObject` 建立對應類別的物件，位置與 trace 取自當時的指令。PHP 程式丟出的物件在穿過 Go 程式碼時包成 `*vmThrown`，回到指令後原物件繼續展開，不重建。W-14 以 completion 的 previous 表示的前因也在這裡接成物件的 previous 鏈。
+- **trace 是真的陣列**：每格有 `file`、`line`、`function`，方法另有 `class` 與 `type`，以及 `args`。`php -n` 的 `zend.exception_ignore_args` 是關的，所以 `args` 持有引數，只被引數指到的物件會活到例外物件釋放為止。七 A、七 B 為了重現這個時機而另外持有引數的做法（`traceHeld`）換成持有例外物件本身。`getTraceAsString()` 與未捕捉的輸出都從這個陣列產生文字。
+- **方法**是 `Closure` 那一套 native 方法的延伸：`__construct` 的引數照 zend_parse_parameters 轉換（弱型別模式下 null 發 Deprecated，錯誤的型別是帶 `Exception->__construct()` 內部 frame 的 TypeError），而且只有傳了訊息、不為零的 code 與 previous 才寫入，所以子類別以屬性預設值設定的 `$code` 不會被 `parent::__construct("m")` 蓋掉。`__toString` 從最舊的 previous 印到自己，中間以 `Next` 相接。
+- **不能直接實作 Throwable、不能 clone、屬性的型別要和父類別一致**，訊息照 PHP。繼承內建例外的類別和 PHP 一樣在編譯時就綁定（父類別是內部類別），所以可以寫在使用它的程式碼後面。
+
+### 編譯
+
+照 zend_compile_try 的形狀：try 區塊以 Leave 結束；Catch 處理區塊先依序用 Instanceof 比對每個 catch 的類別（不存在的類別什麼都比不中，也不報錯），比中就把例外指定給變數並執行區塊，都沒比中就把同一個物件再 Throw 出去；Finally 處理區塊以 EndFinally 結束。`throw` 編成 Throw，當運算式用時也一樣，因為控制不會回來。
+
+`break`、`continue` 跨出 try 時編成 Leave。PHP 在這裡依巢狀順序交錯釋放迴圈的迭代器與執行 finally（zend_handle_loops_and_finally），編譯器不展開這段程式：Leave 與 Return 經過的 finally 由 VM 依序執行，每進入一個處理區塊或抵達目標，VM 就釋放在那裡不再使用的暫存器，順序因此和 PHP 相同。
+
+### 執行
+
+- **展開**：指令回傳可捕捉的錯誤時，從目前 frame 的 pc 找最內層的保護區間。有就進入它的處理區塊：丟掉這個 frame 還沒送出的引數與還沒完成的呼叫，釋放在處理區塊不再使用的暫存器（PHP 的 cleanup_live_vars），Catch 把例外放進暫存器，Finally 把它記成待處理。沒有就彈出 frame，在呼叫者的呼叫指令上繼續找。彈出 frame 時釋放區域變數所觸發的解構子若丟出例外，它成為目前的例外，原本的接在 previous。
+- **巢狀執行**（解構子、magic method、`__toString`）沒有處理區塊接住時，例外以 Go 錯誤回到發起它的指令，在外層 frame 繼續展開。
+- **未捕捉**：`{main}` 也沒有處理區塊時照 zend_exception_error 回報。使用者覆寫了 `__toString` 就呼叫它並以它的結果當訊息；它自己又丟出例外時，回報的是那個例外，trace 的第一格是 `[internal function]`。
+- **沒有例外時不多做事**：try 區塊沒有進入指令，例外表只在丟出時查。函式有例外表時，進入 frame 多記一個整數（引數堆疊的深度）。
+- **活性分析**把保護區間裡每條指令到處理區塊入口的邊算進去，所以活過 try 的暫存器不會在區間內被提早釋放，區間內的暫存器照舊在最後一次使用後釋放，解構子的時機不變。逐暫存器的分析（超大函式）也一樣。完全沒有活性資訊的函式（超過分析的工作量上限）不釋放，和之前相同；Throw 把例外移出暫存器、Return 把回傳值移出暫存器，所以這種函式裡例外與回傳值也只有一個持有者（`TestStage7CUnwindingLeavesNoHolderInRegisters`）。
+- **手寫的 bytecode**：待處理狀態記著它屬於哪個 Finally，EndFinally 只接受自己那一個，否則以內部錯誤結束。驗證器原有的「一般控制不能進入處理區塊」「離開 Finally 區間要用 Leave」沒有放寬。
+
+### 效能
+
+量測用「Runtime layout benchmarks」工作流程，在 GitHub 的 ubuntu-24.04（amd64）runner 上以 benchstat 比較，原始輸出在 [stage7c](../implementation/evidence/W-17-vm/stage7c)。
+
+- **沒有例外表的程式**：main（3bff802）與本分支各自建置的測試執行檔交替跑 10 輪 `BenchmarkVMDispatch`（[dispatch.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/dispatch.benchstat.txt)）。`switch` 分派的五個工作量：算術 −3.8%、分支 −3.7%、`fib` +1.1%，字串串接與陣列量不出差異，全部十五格的幾何平均 −0.72%。每次執行多配置約 750 bytes，來自 frame 物件多出的三個欄位（frame 以 16 個為一塊配置）。
+- **try 的成本**：同一個測試執行檔裡各 100,000 圈的迴圈，各跑 10 次（[try-cost.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/try-cost.benchstat.txt)）。
+
+| 工作量 | 每次執行 | 對照 |
+|---|---|---|
+| 一般迴圈 | 11.18 ms ± 5% | |
+| 同一個迴圈放在 `try` 裡 | 11.11 ms ± 1% | 量不出差異 |
+| 迴圈主體是 `try`／`catch` | 11.26 ms ± 2% | 量不出差異，多的是 try 結尾的一個 Jump，PHP 也有 |
+| 主體兩個陳述式的迴圈 | 14.72 ms ± 2% | 下一列的對照 |
+| 主體是 `try`／`finally`，兩個陳述式各在一邊 | 18.25 ms ± 3% | +24%，每圈多 Leave 與 EndFinally 兩條指令，PHP 也多 FAST_CALL 與 FAST_RET |
+| 呼叫一般函式 | 18.92 ms ± 12% | |
+| 被呼叫的函式裡有 `try` | 20.61 ms ± 3% | +9%，在前一列的誤差範圍內 |
+| 每圈丟出並捕捉一個例外 | 196.2 ms ± 3% | 每次約 1.9 微秒、7 次配置 |
+
+第一次量測時每個 try 都以 Leave 結束，Leave 又以 map 查目標的活性資訊，`try`／`catch` 的迴圈慢 12%、`try`／`finally` 慢 62%（[try-cost-before-fix.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/try-cost-before-fix.benchstat.txt)，那一次的 `try`／`finally` 是和一般迴圈比）。改成沒有 finally 的 try 以 Jump 結束、活性資訊直接掛在處理區塊與 Leave 指令上之後，才是上表的數字。finally 進出的兩條指令各做一次暫存器掃描，還有縮短的空間，列在已知缺口。
+
+### 順便修掉的差異
+
+- `match` 沒有命中而主體是物件時，訊息是 `of type` 接類別名稱，原本寫成 `object`。
+- `exit` 的引數是物件時是可以捕捉的 TypeError，原本以不支援結束。
+
+### 獨立審查
+
+agy 的 Opus 額度用完，Codex 在這台機器上沒有符合條件的模型，所以由內建的 Opus 在全新的脈絡進行，只拿到需求與程式碼。審查跑了 277 個 PHP 探測（arm64 映像，另有 47 個在 386）、把 28 個解構時機的探測塞進超大函式、以 209 個程式各 8 個 goroutine 檢查同一個 `Program` 的並行執行（`-race`）、手寫帶例外表的 bytecode，以及逐套件的 race 檢查。沒有 P0 或 P1。下面是相對 main 的回歸，都已修正並加上修正前會失敗的回歸測試，修正前的輸出在 [stage7c/red-review-fixes.txt](../implementation/evidence/W-17-vm/stage7c/red-review-fixes.txt)：
+
+- **手寫 bytecode 能讓驗證器與 VM 對 EndFinally 的去向看法不同**（P2）。VM 從 EndFinally 所在的位置往外找下一個要執行的 finally，驗證器與活性分析原本從處理區塊的起點找。把一個 finally 的 EndFinally 放進另一個較晚開始的 finally 區間裡，驗證器就會接受讀取已經被第二個 finally 清掉的暫存器。現在三處用同一條規則：每個 EndFinally 接到哪些目標，照 VM 的走法在驗證開始時算好（`TestFormat19FollowsEndFinallyThroughALaterFinallyRange`）。審查建議直接拒絕這種擺法，但那會連 `finally` 裡再放 `try`／`finally` 的合法程式一起拒絕。
+- **`new` 與類別名稱不在同一行時，例外記到 `new` 那一行**（P2）。PHP 的 AST 節點取第一個子節點的行，也就是類別名稱那一行。`throw` 的運算元換行時，`Can only throw objects` 也報在運算元那一行（`review7c_line_multiline_new`、`review7c_line_throw_multiline`、`review7c_throw_line_multi`）。
+- **函式結束時才解構的物件，解構子裡建立的例外 trace 多一格**（P2）。PHP 在釋放區域變數前已經把目前的 frame 換成呼叫者（zend_leave_helper）。這在 main 上就不同，原本列在已知缺口，但只有未捕捉時看得到；例外可以捕捉之後，`getTrace()` 也看得到，所以一併修掉：正在釋放變數的 frame 標成「已離開」，backtrace 略過它，並以它下面那個 frame 當呼叫者。不搬動 frame 是因為 frame 物件與暫存器視窗依深度重用，先彈出再釋放會讓解構子的 frame 蓋到還沒釋放完的變數（五個 `review7c_dtor_*`）。
+- **`return` 在 `foreach` 裡時，迭代器比區域變數晚釋放**（自己查到的，main 上就有）。有 finally 的函式由 VM 照 PHP 的順序釋放，沒有的函式卻相反，兩者不該不同。編譯器現在在 Return 前釋放迭代器，和 PHP 的 FE_FREE 一樣（`review7c_return_releases_iterator`）。
+- **重新宣告內建例外的屬性時，型別不合的錯誤報錯的屬性**（P3）。PHP 依父類別的屬性順序檢查，原本依子類別的宣告順序（`fatal_review7c_prop_type_order`）。
+
+審查指出、main 上就有的差異列在已知缺口：`switch` 主體的暫存值太早釋放、巢狀呼叫的引數在例外時的釋放順序、方法與函式呼叫跨行時引擎錯誤的行號、執行期才知道名稱的內建類別、重新宣告內建類別的時機。審查另外提出的省記憶體做法（例外表的索引只涵蓋有 handler 的那一段指令）還沒做，也列在已知缺口。
+
+測試程式加到 1,040 個（新增 145 個 `exception_*`、`throw_*`、`try_*`、`finally_*`、`catch_engine_*` 與對應的 `fatal_*`，以及審查的 10 個回歸 fixture），三個 profile 各 3,120 項全部和 PHP 8.5.12 逐位元組相同。
+
 ## 階段一的對照結果
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
@@ -491,10 +573,20 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **逐暫存器活性分析的工作量上限**：超大函式超過上限後不再分析，只被暫存器持有的 closure 要等暫存器被覆寫才釋放。審查在大小限制內做不出會碰到上限的程式（3,000 個陳述式仍準時釋放，更大的被「program too large」拒絕），所以沒有觀察到差別，也還不能排除。
 - **closure 的捕捉另外配置**：有 `use` 的 closure 建立時多一次配置放捕捉的值。把少量捕捉放進物件同一塊記憶體是審查提出、還沒做的改進。
 - **回傳參照的函式與方法**：在 `Compile` 回報不支援。`fn &() => ...` 可以宣告與呼叫，但 `$r = &$f()` 仍屬「參照到函式呼叫結果」，在 `Compile` 回報不支援，所以還拿不到它回傳的參照。它回傳的是函式呼叫的結果時，一律發出 `Only variable references should be returned by reference`，PHP 只在那個結果不是參照時才發。
-- **stdClass 與 Stringable 以外的內建類別與介面**：`new ArrayObject`、`extends Exception`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
+- **stdClass、Closure、Stringable 與 Core／SPL 例外類別以外的內建類別與介面**：`new ArrayObject`、`extends JsonException`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
+- **其他擴充的例外類別與 `FiberError`**：`JsonException`、`DateException`、`Random\RandomException` 等在 `Compile` 回報不支援，等各自的模組。
+- **執行期才知道名稱的內建類別到執行期才拒絕**：`$c = 'ReflectionClass'; new $c` 這類寫法在執行到時以 PHP 的 `Class "ReflectionClass" not found` 結束，之前的輸出已經寫出，而且看起來像 PHP 的錯誤。名稱是執行期的值，`Compile` 看不到。
+- **`switch` 主體的暫存值太早釋放**：`switch (new D) { ... }` 的物件在比對完就釋放，PHP 留到 `switch` 結束（`break` 時在 finally 之後）。解構子和 `switch` 裡的輸出、finally 的相對順序因此不同。main 上就是如此。
+- **巢狀呼叫的引數在例外時的釋放順序**：`g(new D(1), g(new D(2), t()))` 在 `t()` 丟出例外時，PHP 先釋放最內層呼叫的引數（cleanup_unfinished_calls），Phego 依暫存器順序從外層開始。同一個呼叫裡的引數順序相同。要修得讓 VM 知道每個引數暫存器屬於哪個呼叫。
+- **方法與函式呼叫跨行時引擎錯誤的行號**：`$o\n->\nnom()` 與 `nofn\n(` 的 `Call to undefined ...`，PHP 報在名稱那一行，Phego 差一行。`new` 與 `throw` 已照 PHP。
+- **例外物件的屬性被 `unset` 之後**：子類別 `unset($this->message)` 再呼叫 `getMessage()`，PHP 發出 `Undefined property` 警告；`unset($this->file)` 之後則是 `must not be accessed before initialization` 的 Error。Phego 安靜地讀到 null。
+- **重新宣告內建類別的時機**：`echo "a"; class LengthException {}` PHP 先印出 `a` 才在執行期報 `Cannot redeclare`，Phego 在 `Compile` 就拒絕。
+- **例外表的索引和整個函式一樣長**：有 `try` 的函式，驗證器與 VM 各配置幾個和指令數一樣長的陣列。三個各約四萬行、都含 `try` 的函式會先碰到驗證的工作量上限，訊息是 `a program beyond the bytecode limits`。索引只涵蓋有 handler 的那一段可以省下這些。
+- **超過驗證上限時的說明文字**：資料流檢查碰到上限時，訊息後面接的是 `invalid register or control flow`，其實不是控制流程有錯。
+- **finally 的進出比一般指令重**：Leave 與 EndFinally 各掃描一次 frame 的暫存器來釋放不再使用的值，沒有例外時 `try`／`finally` 的迴圈因此比同樣工作量的迴圈慢 24%。編譯時就知道沒有東西要釋放的情況可以跳過掃描。
+- **沒有活性資訊的函式在處理區塊入口不釋放暫存器**：超過逐暫存器分析工作量上限的函式，try 區塊裡還沒用完的暫存值要等暫存器被覆寫或函式返回才釋放，解構子因此延後。例外物件與回傳值本身不受影響。
 - **巢狀呼叫的深度上限是 12,000 層**：解構子、magic method、`__toString` 互相巢狀超過這個深度時拋出 PHP 的 `Maximum call stack size ... reached`。PHP 的門檻取決於 C 堆疊大小，兩邊觸發的深度不同。
 - **回報未捕捉錯誤之後才解構的物件，它的解構子再出錯**：`f(new D)` 在 `f` 裡出錯，D 的解構子又拋出錯誤或 `exit` 時，PHP 印出第二個 fatal 或採用 `exit` 的結束碼。Phego 執行解構子，丟掉它的錯誤。未捕捉錯誤之後，關機解構子裡的 `exit("字串")` 把結束碼設成 0，PHP 維持 255。
-- **函式結束時釋放區域變數所觸發的解構子，backtrace 多一格**：PHP 那時已經離開被呼叫的函式，Phego 的 backtrace 還帶著它。
 - **trait 組合的少數錯誤訊息**：抽象方法由父類別或另一個 trait 滿足時的檢查順序、巢狀 trait 的抽象方法簽章文字、兩個 trait 屬性衝突時先列哪個名稱、`insteadof` 與別名規則的檢查順序，和 PHP 不同。這些都是 fatal，只差訊息。
 - **常數運算式裡的 `parent::X`、`self::X`**：存取不到時 PHP 的訊息照寫法印 `parent::X`，Phego 印解析後的類別名稱。
 - **類別常數不在第一次 `new` 時求值**：`class A { const Z = UNDEF; } new A;` PHP 在 `new` 時報錯，Phego 到讀取常數時才報。
