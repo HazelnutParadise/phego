@@ -697,7 +697,11 @@ func (s *vmState) exitStatus(v value) (int, completion, error) {
 		return 0, completion{}, &vmInternalFrameThrow{function: "exit", args: []value{v},
 			thrown: &Throwable{"TypeError", "exit(): Argument #1 ($status) must be of type string|int, array given"}}
 	}
-	return 0, completion{}, s.unsupported("exit with an object or resource status")
+	if v.kind == valueObject {
+		return 0, completion{}, &vmInternalFrameThrow{function: "exit", args: []value{v},
+			thrown: &Throwable{"TypeError", "exit(): Argument #1 ($status) must be of type string|int, " + valueName(v) + " given"}}
+	}
+	return 0, completion{}, s.unsupported("exit with a resource status")
 }
 
 // vmInternalFrameThrow is a throwable raised inside an internal function,

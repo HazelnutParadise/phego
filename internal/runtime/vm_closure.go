@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"errors"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 	"strconv"
 	"strings"
 )
@@ -81,7 +82,7 @@ var nativeNames = [...]string{closureBind: "bind", closureBindTo: "bindTo", clos
 
 // builtinClass reports a class the engine provides (ZEND_INTERNAL_CLASS).
 func builtinClass(c *class) bool {
-	return c == closureBuiltin || c == stdClassBuiltin || c == stringableBuiltin
+	return c == closureBuiltin || c == stdClassBuiltin || c == stringableBuiltin || c != nil && throwableBuiltins[phpname.Lower(c.name)] == c
 }
 
 // freeClosureStorage releases what a Closure object holds
@@ -700,6 +701,9 @@ func nativeThrow(name string, args []value, class, message string) error {
 // callPending goes on to make (Closure::call); otherwise the result is in
 // the destination register and the call is gone.
 func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err error) {
+	if rec.native >= excConstruct {
+		return false, s.callException(rec, in)
+	}
 	f := s.frames[len(s.frames)-1]
 	args := s.args[rec.base:]
 	for i := range args {

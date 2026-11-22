@@ -371,7 +371,17 @@ func verifyFunction(b *budget, image Image, minor uint16, index uint32, f *Funct
 	if err := verifyElementLocations(b, f); err != nil {
 		return 0, functionError(err, int(index), -1)
 	}
-	if err := verifyFlow(b, image, minor, f, uint32(index)); err != nil {
+	if err := verifyFlow(b, image, minor, f, uint32(index), handlers, minor >= 9); err != nil {
+		// A 1.0 to 1.8 file whose only fault is a register read after an
+		// exception handler or a finally block took over needs format 1.9.
+		if minor < 9 && len(f.Handlers) > 0 && errors.Is(err, ErrInvalid) && verifyFlow(b, image, minor, f, uint32(index), handlers, true) == nil {
+			var fe *Error
+			pc := -1
+			if errors.As(err, &fe) {
+				pc = fe.PC
+			}
+			return 0, functionError(invalid(fmt.Sprintf("register kept across an exception handler needs bytecode format 1.9, but the file declares format 1.%d", minor)), int(index), pc)
+		}
 		return 0, functionError(err, int(index), -1)
 	}
 	return caps, nil
@@ -963,8 +973,10 @@ type handlerIndex struct {
 	f *Function
 	// body is the innermost handler whose body contains pc; enter is the
 	// innermost whose protected range contains both pc-1 and pc; finally is
-	// the innermost Finally handler whose protected range contains pc.
-	body, enter, finally []int32
+	// the innermost Finally handler whose protected range contains pc; rng
+	// is the innermost handler of either kind whose protected range
+	// contains pc.
+	body, enter, finally, rng []int32
 }
 
 func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
@@ -983,7 +995,7 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 	// bytes), an int32 array per pc for body and enter, and for finally
 	// only when there is one, and per span 16 bytes plus a 4-byte open
 	// entry.
-	arrays := uint64(2)
+	arrays := uint64(3)
 	if finallies > 0 {
 		arrays++
 	}
@@ -993,10 +1005,10 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 	if err := b.reserveMul(uint64(n), arrays*4); err != nil {
 		return nil, err
 	}
-	if err := b.reserveMul(uint64(2*h+finallies), 16+4); err != nil {
+	if err := b.reserveMul(uint64(3*h+finallies), 16+4); err != nil {
 		return nil, err
 	}
-	if err := b.chargeWork(3*uint64(n) + 3*uint64(h)); err != nil {
+	if err := b.chargeWork(4*uint64(n) + 4*uint64(h)); err != nil {
 		return nil, err
 	}
 	bodies := make([]handlerSpan, 0, h)
@@ -1011,6 +1023,7 @@ func newHandlerIndex(b *budget, f *Function) (*handlerIndex, error) {
 	}
 	x.body = innermostSpans(bodies, n, false)
 	x.enter = innermostSpans(ranges, n, true)
+	x.rng = innermostSpans(append([]handlerSpan(nil), ranges...), n, false)
 	if finallies > 0 {
 		x.finally = innermostSpans(finals, n, false)
 	}
@@ -1085,8 +1098,36 @@ func (x *handlerIndex) innermostBody(pc int) (HandlerKind, bool) {
 	return x.f.Handlers[x.body[pc]].Kind, true
 }
 
-func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) error {
+// leaveThrough reports the Finally handler whose EndFinally completes a
+// Leave at pc to target: the outermost one the transfer leaves. It is -1
+// when the transfer leaves no finally range and is a plain jump.
+func (x *handlerIndex) leaveThrough(pc, target uint32) int32 {
+	if x.finally == nil {
+		return -1
+	}
+	f := x.f
+	inRange := func(h int32) bool { return target >= f.Handlers[h].Start && target < f.Handlers[h].End }
+	h := x.finally[pc]
+	if h < 0 || inRange(h) {
+		return -1
+	}
+	for {
+		next := x.finally[f.Handlers[h].Target]
+		if next < 0 || inRange(next) {
+			return h
+		}
+		h = next
+	}
+}
+
+// verifyFlow checks the registers and the argument stack along every path.
+// With keep (format 1.9) a handler's entry has the registers that are
+// defined before every instruction of its protected range, and a Leave
+// carries the registers that are still defined when the last finally block
+// it runs ends; before 1.9 a handler's entry and a Leave's target have none.
+func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, handlers *handlerIndex, keep bool) error {
 	n, nr := len(f.Code), len(f.Registers)
+	keep = keep && len(f.Handlers) > 0
 	words := (nr + 63) / 64
 	// Format 1.6 keeps references out of the by-value parameters of a
 	// direct call; only a function that can hold one tracks them. A call's
@@ -1195,7 +1236,33 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 	if track {
 		clear(seedRefs)
 	}
+	// conts are, per Finally handler, the targets of the Leaves its
+	// EndFinally completes.
+	var conts map[int32][]uint32
+	if keep {
+		if err := b.chargeWork(uint64(n)); err != nil {
+			return err
+		}
+		for pc, in := range f.Code {
+			if in.Op != OpLeave {
+				continue
+			}
+			if h := handlers.leaveThrough(uint32(pc), in.A); h >= 0 {
+				if err := b.reserve(16); err != nil {
+					return err
+				}
+				if conts == nil {
+					conts = map[int32][]uint32{}
+				}
+				conts[h] = append(conts[h], in.A)
+			}
+		}
+	}
 	for _, h := range f.Handlers {
+		if keep {
+			// The entry state comes from the instructions of the range.
+			break
+		}
 		if err := b.chargeWork(uint64(words) + 1); err != nil {
 			return err
 		}
@@ -1228,6 +1295,38 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 		depth := copy(scratchStack, st.stack)
 		stack := scratchStack[:depth]
 		in := f.Code[pc]
+		if keep {
+			// An instruction of a protected range can pass control to the
+			// innermost handler (a throw) and to the innermost finally
+			// block (a Return or a Leave), before it wrote anything.
+			hr := handlers.rng[pc]
+			hf := int32(-1)
+			if handlers.finally != nil {
+				hf = handlers.finally[pc]
+			}
+			targets := [2]int32{hr, hf}
+			if hf == hr {
+				targets[1] = -1
+			}
+			for _, hi := range targets {
+				if hi < 0 {
+					continue
+				}
+				h := f.Handlers[hi]
+				var had uint64
+				if h.Kind == Catch {
+					had = scratchDefs[h.Register/64] & (uint64(1) << (h.Register % 64))
+					scratchDefs[h.Register/64] |= uint64(1) << (h.Register % 64)
+				}
+				_, err := merge(int(h.Target), scratchDefs, scratchRefs, nil)
+				if h.Kind == Catch && had == 0 {
+					scratchDefs[h.Register/64] &^= uint64(1) << (h.Register % 64)
+				}
+				if err != nil {
+					return flowError(err, fi, pc)
+				}
+			}
+		}
 		read := func(r uint32) error {
 			if scratchDefs[r/64]&(uint64(1)<<(r%64)) == 0 {
 				return invalid("register read before definition")
@@ -1584,6 +1683,13 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			if len(stack) != 0 {
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
+			if keep && in.Op == OpEndFinally {
+				for _, t := range conts[handlers.body[pc]] {
+					if _, err := merge(int(t), scratchDefs, scratchRefs, stack); err != nil {
+						return flowError(err, fi, pc)
+					}
+				}
+			}
 		default:
 			if !is17(in.Op) {
 				break
@@ -1658,7 +1764,11 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 			}
 			for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 				e := successor(in, uint32(pc), uint32(n), ei)
-				if e.leave {
+				if e.leave && keep {
+					if handlers.leaveThrough(uint32(pc), e.pc) >= 0 {
+						continue // the last finally block's EndFinally reaches it
+					}
+				} else if e.leave {
 					for i := range scratchDefs {
 						scratchDefs[i] = 0
 					}

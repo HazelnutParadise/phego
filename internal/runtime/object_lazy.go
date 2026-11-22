@@ -435,7 +435,7 @@ func (h *heap) cloneObject(obj value, scope *class) (result value, err error) {
 		// called class and object, with its own copy of the variables.
 		return h.vm.dupClosure(o.closure, o.closure.scope, o.closure.called, o.closure.this)
 	}
-	if o.class.schema != nil && o.class.schema.enumKind != enumNone {
+	if o.class.schema != nil && o.class.schema.enumKind != enumNone || h.vm != nil && h.vm.throwables && isThrowableClass(o.class) {
 		return value{}, &Throwable{"Error", "Trying to clone an uncloneable object of class " + o.class.name}
 	}
 	m, hasClone := h.resolveMethod(o.class, "__clone", nil)

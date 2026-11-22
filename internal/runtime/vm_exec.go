@@ -63,6 +63,12 @@ type vmFrame struct {
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
 	extra      []value // arguments beyond the declared parameters, for backtraces
+	// Stage 7C, for a function with an exception table: argBase is the
+	// depth of the argument stack when the frame was entered, and pend
+	// the completions its running finally blocks suspended, innermost
+	// last.
+	argBase int
+	pend    []vmPending
 	// call is set for a frame CallPending entered with named arguments the
 	// variadic parameter collects, or with omitted parameters.
 	call *vmCallInfo
@@ -137,8 +143,15 @@ type vmState struct {
 	// it: writing an element through it throws.
 	typedHole     value
 	typedHoleProp *propertyInfo
-	// closureClass says the run registered the Closure class.
+	// closureClass says the run registered the Closure class, throwables
+	// that it registered a class that implements Throwable: until then no
+	// object can be an exception.
 	closureClass bool
+	throwables   bool
+	// traceFloor is the depth of the outermost frame a backtrace shows: 0,
+	// or the depth of a call PHP makes after the frames below are gone
+	// (the __toString of an uncaught exception).
+	traceFloor int
 	// traceHeld are the objects the backtrace of the uncaught error holds
 	// (an owner each) until the error is reported.
 	traceHeld []value
@@ -288,24 +301,24 @@ const (
 	vmGlobalElements = 1 << 20
 )
 
-// stop ends the loop with err classified as PHP-visible or host-level.
+// stop ends the run with err. A throwable is an exception no frame of the
+// run handles any more (the loop gives its handlers their chance through
+// raise); everything else is classified as PHP-visible or host-level.
 func (s *vmState) stop(err error) {
 	if s.ended {
 		return
 	}
+	ex, ok, fail := s.thrownObject(err)
+	if ok {
+		s.ended = true
+		s.end = s.escaped(ex)
+		return
+	}
+	err = fail
 	s.ended = true
-	var t *Throwable
 	var c completion
-	var internal *vmInternalFrameThrow
 	var fatal *vmFatal
-	var located *vmUncaught
 	switch {
-	case errors.As(err, &c) && c.kind == endThrow && !errors.As(c.err, &located) && errors.As(c.err, &t):
-		// A throwable the runtime wrapped on its way out of a callback: it
-		// is reported like any other, from where the instruction is.
-		s.end = s.uncaught(t)
-	case errors.As(err, &c):
-		s.end = c
 	case errors.As(err, &fatal):
 		_, _, s.lastFile, s.lastLine = s.location()
 		if fatal.line > 0 {
@@ -313,12 +326,8 @@ func (s *vmState) stop(err error) {
 		}
 		s.x.errors.trailer = "Stack trace:\n" + s.backtrace("", nil) + "\n"
 		s.end = s.x.fail(endFatal, errors.New(fatal.message))
-	case errors.As(err, &internal):
-		s.end = s.uncaughtFrom(internal.thrown, internal.function, internal.args)
-	case errors.As(err, &t):
-		s.end = s.uncaught(t)
-	case errors.Is(err, ErrNextElementOccupied):
-		s.end = s.uncaught(&Throwable{"Error", err.Error()})
+	case errors.As(err, &c):
+		s.end = c
 	default:
 		var u *UnsupportedError
 		var ie *InternalError
@@ -517,6 +526,9 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
+	if fn.handlers != nil {
+		fr.argBase = len(s.args)
+	}
 	fr.weak, fr.ctor = into.internal || into.via != 0, into.ctor
 	if argc < fn.required {
 		// ZEND_RECV checks each parameter in order: the type of an
@@ -617,6 +629,9 @@ func (s *vmState) pop(release bool) error {
 	}
 	if f.call != nil && release {
 		keep(s.releaseValue(f.call.named))
+	}
+	if len(f.pend) > 0 {
+		s.dropPending(f, release)
 	}
 	if len(s.calls) > 0 {
 		// Calls the frame started and never made: an error or exit ended
@@ -917,8 +932,7 @@ func (s *vmState) output(v value) completion {
 	default:
 		str, err := s.h.toString(v)
 		if err != nil {
-			s.stop(err)
-			return s.end
+			return completion{kind: endThrow, err: err}
 		}
 		if s.stopped() {
 			return s.end

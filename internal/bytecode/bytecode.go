@@ -22,7 +22,7 @@ import (
 // operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 8
+	FormatMinor   uint16 = 9
 )
 
 // PushFlags is the Aux of OpPush (format 1.6).

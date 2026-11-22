@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
@@ -77,14 +78,28 @@ func (s *vmState) invoke(fn *vmFunction, this value, scope, called *class, args 
 	for len(s.frames) > depth {
 		if perr := s.pop(release); perr != nil && release {
 			// A destructor of the frame's values failed: that is how the
-			// call ends.
+			// call ends. An exception the call was already leaving with
+			// becomes the previous of the destructor's.
 			if out.kind == endReturn && out.returnOwned {
 				_ = s.releaseValue(out.value)
 			}
+			var pending *vmThrown
+			if out.kind == endThrow {
+				errors.As(out.err, &pending)
+			}
 			s.ended, s.end = false, completion{}
 			s.stop(perr)
+			var next *vmThrown
+			if pending != nil && pending.object != nil {
+				if s.end.kind == endThrow && errors.As(s.end.err, &next) && next.object != nil {
+					s.setPrevious(next.object, pending.object)
+				} else {
+					_ = s.releaseObject(pending.object)
+				}
+				pending.object = nil
+			}
 			out = s.end
-			release = false
+			release = out.kind == endThrow
 		}
 	}
 	s.ended, s.end, s.floor = ended, end, floor
@@ -468,6 +483,13 @@ func (s *vmState) newObject(f *vmFrame, in *vmInstr) (jump bool, err error) {
 	}
 	if err := s.setReg(f.regs, in.a, obj); err != nil {
 		return false, err
+	}
+	if s.throwables && isThrowableClass(c) {
+		// zend_default_exception_new: the object records where it was
+		// created before any constructor runs.
+		if err := s.initException(obj.object, "", nil); err != nil {
+			return false, err
+		}
 	}
 	ctor, ok := s.h.resolveMethod(c, "__construct", f.scope)
 	if !ok || ctor == nil {

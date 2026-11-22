@@ -174,7 +174,7 @@ func (s *vmState) matchError(v value) error {
 	case valueArray:
 		desc = "of type array"
 	case valueObject:
-		desc = "of type object"
+		desc = "of type " + v.object.class.name
 	case valueResource:
 		desc = "of type resource"
 	default:

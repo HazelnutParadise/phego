@@ -70,7 +70,7 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 	}
 	for _, n := range append(names, cl.Traits...) {
 		lower := phpname.Lower(n.Resolved)
-		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "stringable" && lower != "closure" {
+		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "closure" && !supportedBuiltinClasses[lower] {
 			return fail("extending or implementing builtin class "+n.Resolved, cl.Line)
 		}
 	}

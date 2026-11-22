@@ -60,6 +60,10 @@ type fnCompiler struct {
 	instanceofOperand bool
 
 	loops []loop
+	// tries are the try statements around the code compiled now, and
+	// handlers the exception table so far (stage7c.go).
+	tries    []tryScope
+	handlers []pendingHandler
 	// elemPCs are the instructions that name the element register, by the
 	// placeholder elemReg until finish knows where the temporaries end.
 	elemPCs []int
@@ -623,6 +627,7 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		Flags:      fnFlags,
 		ReturnType: returnType,
 		Captures:   captures,
+		Handlers:   fc.handlerTable(plen),
 	}
 }
 
@@ -682,17 +687,12 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 		if depth < 1 || depth > len(fc.loops) {
 			panic(internalError{fmt.Sprintf("%s %d outside %d loops", n.Op, depth, len(fc.loops))})
 		}
-		// The iterators of the foreach loops left on the way are dropped.
-		for _, inner := range fc.loops[len(fc.loops)-depth+1:] {
-			if inner.hasIter {
-				fc.emit(bytecode.OpDrop, 0, inner.iter, 0, 0)
-			}
-		}
-		l := fc.loops[len(fc.loops)-depth]
+		li := len(fc.loops) - depth
+		l := fc.loops[li]
 		if n.Op == ir.OpContinue && !l.isSwitch {
-			fc.jump(l.cont)
+			fc.exitLoop(li, l.cont)
 		} else {
-			fc.jump(l.brk)
+			fc.exitLoop(li, l.brk)
 		}
 	case ir.OpReturn:
 		if n.Flags&ir.FlagRef != 0 && fc.f.Kind != ir.FuncArrow {
@@ -729,6 +729,10 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 	case ir.OpClass:
 		fc.classDecl(n)
+	case ir.OpTry:
+		fc.tryStmt(n)
+	case ir.OpThrow:
+		fc.throwExpr(n)
 	case ir.OpDeclare:
 		// strict_types, ticks and encoding without a block: the directive
 		// is in the unit; a block form runs its statements.

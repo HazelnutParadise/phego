@@ -114,6 +114,17 @@ type vmFunction struct {
 	noThis   bool
 	usesThis bool
 	captures []vmCapture
+	// Format 1.9 (stage 7C). handlers is the exception table; handlerAt,
+	// finallyAt and bodyAt index it per pc (nil without handlers).
+	// liveAt holds, for each handler target and each Leave target, the
+	// registers that are live there, in ascending order; liveKnown says
+	// the liveness analysis ran to its end.
+	handlers  []vmHandler
+	handlerAt []int32
+	finallyAt []int32
+	bodyAt    []int32
+	liveAt    map[int32][]uint32
+	liveKnown bool
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
@@ -457,9 +468,6 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	if fv.ReturnKind() != bytecode.Value {
 		f.unsupported = "functions returning by reference"
 	}
-	if fv.HandlerCount() > 0 && f.unsupported == "" {
-		f.unsupported = "try, catch and finally"
-	}
 	// Dense renumbering per register class.
 	dense := make([]uint32, nregs)
 	kinds := make([]bytecode.RegisterKind, nregs)
@@ -694,6 +702,16 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 			f.code[pc].c = uint32(i) + 1
 		}
 	}
+	decodeHandlers(&f, fv)
+	for i := range f.handlers {
+		h, _ := fv.Handler(uint32(i))
+		if f.handlers[i].catch {
+			if h.Register >= nregs || kinds[h.Register] != bytecode.Value {
+				return f, fail(-1, "handler %d names register %d, which is not a Value", i, h.Register)
+			}
+			f.handlers[i].reg = dense[h.Register]
+		}
+	}
 	if f.nvals > 0 {
 		vmLiveness(&f)
 	}
@@ -789,6 +807,11 @@ func vmLiveness(f *vmFunction) {
 	for r := 0; r < f.params; r++ {
 		composite[r] = true
 	}
+	for _, h := range f.handlers {
+		if h.catch {
+			composite[h.reg] = true
+		}
+	}
 	for changed := true; changed; {
 		changed = false
 		for _, in := range f.code {
@@ -803,7 +826,57 @@ func vmLiveness(f *vmFunction) {
 		any = any || c
 	}
 	if !any {
+		f.liveKnown = true
 		return
+	}
+	// conts are, per Finally handler, the targets of the Leaves its
+	// EndFinally completes; wanted are the pcs whose live registers the
+	// unwinding needs (handler targets and Leave targets).
+	var conts map[int32][]int
+	wanted := map[int32]bool{}
+	for _, h := range f.handlers {
+		wanted[h.target] = true
+	}
+	for pc, in := range f.code {
+		if in.op != bytecode.OpLeave {
+			continue
+		}
+		wanted[int32(in.a)] = true
+		for h := through(f, pc, int(in.a)); h >= 0; {
+			next := through(f, int(f.handlers[h].target), int(in.a))
+			if next < 0 {
+				if conts == nil {
+					conts = map[int32][]int{}
+				}
+				conts[h] = append(conts[h], int(in.a))
+			}
+			h = next
+		}
+	}
+	// exc visits the handlers an instruction of a protected range can
+	// pass control to: the innermost handler (a throw) and the innermost
+	// finally block (a Return or a Leave). def is the register the entry
+	// itself defines, or -1.
+	exc := func(pc int, visit func(target int, def int)) {
+		if f.handlerAt == nil {
+			return
+		}
+		hr, hf := f.handlerAt[pc], f.finallyAt[pc]
+		targets := [2]int32{hr, hf}
+		if hr == hf {
+			targets[1] = -1
+		}
+		for _, hi := range targets {
+			if hi < 0 {
+				continue
+			}
+			h := f.handlers[hi]
+			def := -1
+			if h.catch {
+				def = int(h.reg)
+			}
+			visit(int(h.target), def)
+		}
 	}
 	words := (f.nvals + 63) / 64
 	sparse := words*(n+1) > vmLivenessWords
@@ -845,7 +918,17 @@ func vmLiveness(f *vmFunction) {
 		case bytecode.OpParamDefault, bytecode.OpStaticInit:
 			visit(pc + 1)
 			visit(int(in.b))
-		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpLeave, bytecode.OpEndFinally, bytecode.OpMatchError:
+		case bytecode.OpLeave:
+			if through(f, pc, int(in.a)) < 0 {
+				visit(int(in.a))
+			}
+		case bytecode.OpEndFinally:
+			if f.bodyAt != nil {
+				for _, t := range conts[f.bodyAt[pc]] {
+					visit(t)
+				}
+			}
+		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpMatchError:
 		default:
 			if pc+1 < n {
 				visit(pc + 1)
@@ -855,7 +938,7 @@ func vmLiveness(f *vmFunction) {
 	if sparse {
 		// The bit sets would be too large: the same facts are computed one
 		// register at a time, in memory linear in the code.
-		vmLivenessSparse(f, composite, uses, def, succ)
+		vmLivenessSparse(f, composite, uses, def, succ, exc, wanted)
 		return
 	}
 	// live[pc] is the live-in set of pc; iterate to a fixed point in reverse.
@@ -882,6 +965,15 @@ func vmLiveness(f *vmFunction) {
 					out[d/64] |= exit[d/64] & (1 << (d % 64))
 				}
 			}
+			exc(pc, func(t, dr int) {
+				for w := 0; w < words; w++ {
+					x := live[t*words+w]
+					if dr >= 0 && dr/64 == w {
+						x &^= 1 << (dr % 64)
+					}
+					out[w] |= x
+				}
+			})
 			uses(in, func(r uint32) { set(out, r) })
 			cur := live[pc*words : (pc+1)*words]
 			for w := 0; w < words; w++ {
@@ -897,6 +989,15 @@ func vmLiveness(f *vmFunction) {
 		succ(pc, func(s int) {
 			for w := 0; w < words; w++ {
 				out[w] |= live[s*words+w]
+			}
+		})
+		exc(pc, func(t, dr int) {
+			for w := 0; w < words; w++ {
+				x := live[t*words+w]
+				if dr >= 0 && dr/64 == w {
+					x &^= 1 << (dr % 64)
+				}
+				out[w] |= x
 			}
 		})
 		in := f.code[pc]
@@ -927,6 +1028,19 @@ func vmLiveness(f *vmFunction) {
 			f.kills = f.kills[:start]
 		}
 	}
+	if len(wanted) > 0 {
+		f.liveAt = make(map[int32][]uint32, len(wanted))
+		for pc := range wanted {
+			var regs []uint32
+			for r := 0; r < f.nvals; r++ {
+				if composite[r] && has(live[int(pc)*words:(int(pc)+1)*words], uint32(r)) {
+					regs = append(regs, uint32(r))
+				}
+			}
+			f.liveAt[pc] = regs
+		}
+	}
+	f.liveKnown = true
 }
 
 // vmLivenessWords bounds the liveness bitsets of one function (8 MiB).
@@ -950,23 +1064,36 @@ var vmLivenessSparseLimit = vmLivenessSparseWork
 // copy-on-write here: it is when PHP runs the destructor of a temporary
 // object. An IterNext's element, defined on one edge only, is treated as
 // not defined there, which only keeps it longer.
-func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int))) {
+func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int)), exc func(int, func(int, int)), wanted map[int32]bool) {
 	n := len(f.code)
-	// Predecessors in compressed form.
+	// Predecessors in compressed form. via says how each edge is taken:
+	// -2 for normal control, else an exceptional edge into a handler,
+	// with the register the handler's entry defines or -1.
 	start := make([]int32, n+2)
 	for pc := 0; pc < n; pc++ {
 		succ(pc, func(s int) { start[s+2]++ })
+		exc(pc, func(s, _ int) { start[s+2]++ })
 	}
 	for i := 2; i < len(start); i++ {
 		start[i] += start[i-1]
 	}
 	preds := make([]int32, start[n+1])
+	via := make([]int32, start[n+1])
 	for pc := 0; pc < n; pc++ {
 		succ(pc, func(s int) {
-			preds[start[s+1]] = int32(pc)
+			preds[start[s+1]], via[start[s+1]] = int32(pc), -2
+			start[s+1]++
+		})
+		exc(pc, func(s, dr int) {
+			preds[start[s+1]], via[start[s+1]] = int32(pc), int32(dr)
 			start[s+1]++
 		})
 	}
+	var wantedPCs []int32
+	for pc := range wanted {
+		wantedPCs = append(wantedPCs, pc)
+	}
+	liveAt := make(map[int32][]uint32, len(wanted))
 	// Where each register is used and defined.
 	type touch struct {
 		pc  int32
@@ -1019,15 +1146,23 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 		for len(stack) > 0 {
 			p := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
-			for _, q := range preds[start[p]:start[p+1]] {
+			for pi := start[p]; pi < start[p+1]; pi++ {
+				q := preds[pi]
 				if work++; work > vmLivenessSparseLimit {
 					return
 				}
-				if stamp[q] == mark || defines(q, uint32(r)) {
+				// An exceptional edge leaves q before q wrote anything,
+				// and a catch handler's entry defines its register.
+				if stamp[q] == mark || via[pi] == int32(r) || via[pi] == -2 && defines(q, uint32(r)) {
 					continue
 				}
 				stamp[q] = mark
 				stack = append(stack, q)
+			}
+		}
+		for _, pc := range wantedPCs {
+			if stamp[pc] == mark {
+				liveAt[pc] = append(liveAt[pc], uint32(r))
 			}
 		}
 		last := int32(-1)
@@ -1039,11 +1174,13 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 			last = t.pc
 			liveOut := false
 			succ(int(t.pc), func(s int) { liveOut = liveOut || stamp[s] == mark })
+			exc(int(t.pc), func(s, dr int) { liveOut = liveOut || stamp[s] == mark && dr != r })
 			if !liveOut {
 				kills = append(kills, kill{t.pc, uint32(r)})
 			}
 		}
 	}
+	f.liveAt, f.liveKnown = liveAt, true
 	// Kill lists are contiguous per instruction.
 	count := make([]int32, n+1)
 	for _, k := range kills {

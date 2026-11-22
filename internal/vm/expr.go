@@ -178,6 +178,8 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		if n.Text == "__CLASS__" {
 			return fc.className(&ir.Node{Op: ir.OpClassName, Line: n.Line, Name: &ir.Name{Kind: ir.ClassName, Special: "self"}, Kids: []*ir.Node{nil}})
 		}
+	case ir.OpThrow:
+		return fc.throwExpr(n)
 	case ir.OpNew:
 		return fc.newExpr(n)
 	case ir.OpMethodCall, ir.OpNullsafeMC:
@@ -203,7 +205,7 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 func (fc *fnCompiler) unsupportedNode(n *ir.Node) {
 	feature, ok := map[ir.Op]string{
 		ir.OpForeach: "foreach", ir.OpClass: "class declaration", ir.OpNew: "new",
-		ir.OpTry: "try", ir.OpThrow: "throw", ir.OpStatic: "static variable",
+		ir.OpStatic: "static variable",
 		ir.OpGlobal: "global statement", ir.OpMagic: "magic constant", ir.OpEval: "eval",
 		ir.OpVarVar: "variable variables", ir.OpSuperGlobal: "superglobal", ir.OpThis: "$this",
 		ir.OpProp: "property access", ir.OpNullsafe: "nullsafe property access",

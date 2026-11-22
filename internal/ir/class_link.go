@@ -22,6 +22,13 @@ func (l *lowerer) bindClass(cl *Class, top bool) {
 			return
 		}
 		parent := l.boundClass(cl.Parent.Resolved)
+		if parent == nil && BuiltinThrowables[phpname.Lower(strings.TrimPrefix(cl.Parent.Resolved, "\\"))] {
+			// The parent is an internal class, which always exists: the
+			// class is bound now, and the run-time linker checks it
+			// against the parent's members.
+			l.hoistClass(cl, top)
+			return
+		}
 		if parent == nil || l.classBindingStatus(cl, parent) == bindingUnknown {
 			return
 		}
@@ -41,6 +48,11 @@ func (l *lowerer) bindClass(cl *Class, top bool) {
 		l.bindClassMembers(cl, parent)
 	}
 	l.checkBoundOverrides(cl)
+	l.hoistClass(cl, top)
+}
+
+// hoistClass records cl as bound while the file is compiled.
+func (l *lowerer) hoistClass(cl *Class, top bool) {
 	if top && !cl.Anonymous && cl.Name != "" {
 		key := phpname.Lower(strings.TrimPrefix(cl.Name, "\\"))
 		if l.boundClasses[key] == nil {
