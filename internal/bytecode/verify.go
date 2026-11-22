@@ -1098,26 +1098,90 @@ func (x *handlerIndex) innermostBody(pc int) (HandlerKind, bool) {
 	return x.f.Handlers[x.body[pc]].Kind, true
 }
 
-// leaveThrough reports the Finally handler whose EndFinally completes a
-// Leave at pc to target: the outermost one the transfer leaves. It is -1
+// leaveFirst reports the Finally handler a Leave at pc to target runs
+// first: the innermost one whose range holds pc and not target. It is -1
 // when the transfer leaves no finally range and is a plain jump.
-func (x *handlerIndex) leaveThrough(pc, target uint32) int32 {
+func (x *handlerIndex) leaveFirst(pc, target uint32) int32 {
 	if x.finally == nil {
 		return -1
 	}
-	f := x.f
-	inRange := func(h int32) bool { return target >= f.Handlers[h].Start && target < f.Handlers[h].End }
 	h := x.finally[pc]
-	if h < 0 || inRange(h) {
+	if h < 0 || target >= x.f.Handlers[h].Start && target < x.f.Handlers[h].End {
 		return -1
 	}
-	for {
-		next := x.finally[f.Handlers[h].Target]
-		if next < 0 || inRange(next) {
-			return h
-		}
-		h = next
+	return h
+}
+
+// leaveTargets works out, for every EndFinally, the targets of the Leaves
+// it completes. A Leave runs the finally block leaveFirst names; that
+// block's EndFinally goes on like a Leave from its own pc, as the VM does:
+// through the next finally range around it that the target is outside of,
+// or to the target.
+func (x *handlerIndex) leaveTargets(b *budget) (map[uint32][]uint32, error) {
+	f := x.f
+	if x.finally == nil {
+		return nil, nil
 	}
+	if err := b.chargeWork(2 * uint64(len(f.Code))); err != nil {
+		return nil, err
+	}
+	ends := map[int32][]uint32{} // the EndFinally instructions of each handler body
+	type pending struct {
+		h int32
+		t uint32
+	}
+	var work []pending
+	seen := map[pending]bool{}
+	add := func(h int32, t uint32) error {
+		p := pending{h, t}
+		if seen[p] {
+			return nil
+		}
+		if err := b.reserve(48); err != nil {
+			return err
+		}
+		seen[p] = true
+		work = append(work, p)
+		return nil
+	}
+	for pc, in := range f.Code {
+		switch in.Op {
+		case OpEndFinally:
+			if h := x.body[pc]; h >= 0 {
+				if err := b.reserve(8); err != nil {
+					return nil, err
+				}
+				ends[h] = append(ends[h], uint32(pc))
+			}
+		case OpLeave:
+			if h := x.leaveFirst(uint32(pc), in.A); h >= 0 {
+				if err := add(h, in.A); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	out := map[uint32][]uint32{}
+	for len(work) > 0 {
+		p := work[len(work)-1]
+		work = work[:len(work)-1]
+		for _, e := range ends[p.h] {
+			if err := b.chargeWork(1); err != nil {
+				return nil, err
+			}
+			if next := x.leaveFirst(e, p.t); next >= 0 {
+				if err := add(next, p.t); err != nil {
+					return nil, err
+				}
+				continue
+			}
+			if err := b.reserve(8); err != nil {
+				return nil, err
+			}
+			out[e] = append(out[e], p.t)
+		}
+	}
+	return out, nil
 }
 
 // verifyFlow checks the registers and the argument stack along every path.
@@ -1236,26 +1300,12 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 	if track {
 		clear(seedRefs)
 	}
-	// conts are, per Finally handler, the targets of the Leaves its
-	// EndFinally completes.
-	var conts map[int32][]uint32
+	// conts are, per EndFinally, the targets of the Leaves it completes.
+	var conts map[uint32][]uint32
 	if keep {
-		if err := b.chargeWork(uint64(n)); err != nil {
+		var err error
+		if conts, err = handlers.leaveTargets(b); err != nil {
 			return err
-		}
-		for pc, in := range f.Code {
-			if in.Op != OpLeave {
-				continue
-			}
-			if h := handlers.leaveThrough(uint32(pc), in.A); h >= 0 {
-				if err := b.reserve(16); err != nil {
-					return err
-				}
-				if conts == nil {
-					conts = map[int32][]uint32{}
-				}
-				conts[h] = append(conts[h], in.A)
-			}
 		}
 	}
 	for _, h := range f.Handlers {
@@ -1684,7 +1734,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
 			if keep && in.Op == OpEndFinally {
-				for _, t := range conts[handlers.body[pc]] {
+				for _, t := range conts[uint32(pc)] {
 					if _, err := merge(int(t), scratchDefs, scratchRefs, stack); err != nil {
 						return flowError(err, fi, pc)
 					}
@@ -1765,7 +1815,7 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 			for ei, ec := 0, successorCount(in, uint32(pc), uint32(n)); ei < ec; ei++ {
 				e := successor(in, uint32(pc), uint32(n), ei)
 				if e.leave && keep {
-					if handlers.leaveThrough(uint32(pc), e.pc) >= 0 {
+					if handlers.leaveFirst(uint32(pc), e.pc) >= 0 {
 						continue // the last finally block's EndFinally reaches it
 					}
 				} else if e.leave {

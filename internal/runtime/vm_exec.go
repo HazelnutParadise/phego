@@ -69,6 +69,11 @@ type vmFrame struct {
 	// last.
 	argBase int
 	pend    []vmPending
+	// leaving marks a frame whose function has returned or is being
+	// unwound while its variables are released: PHP has already made the
+	// caller the current frame (zend_leave_helper), so a backtrace taken
+	// by a destructor does not show it.
+	leaving bool
 	// call is set for a frame CallPending entered with named arguments the
 	// variadic parameter collects, or with omitted parameters.
 	call *vmCallInfo
@@ -470,7 +475,7 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 	if fr.this != into.this || fr.scope != into.scope || fr.called != into.called {
 		fr.this, fr.scope, fr.called = into.this, into.scope, into.called
 	}
-	fr.boundary, fr.unreceived = false, false
+	fr.boundary, fr.unreceived, fr.leaving = false, false, false
 	if fr.closure != into.closure {
 		fr.closure = into.closure
 	}
@@ -608,6 +613,7 @@ func (s *vmState) pop(release bool) error {
 			first = err
 		}
 	}
+	f.leaving = len(s.frames) > 1
 	if release {
 		for i := range f.locals {
 			v := f.locals[i]

@@ -75,6 +75,9 @@ func (s *vmState) traceFrames(internal string, args []value) []vmTraceFrame {
 	main := &s.prog.funcs[s.prog.entry]
 	for i := len(s.frames) - 1; i >= s.traceFloor; i-- {
 		f := s.frames[i]
+		if f.leaving && i > s.traceFloor {
+			continue // its function has already returned
+		}
 		if i == s.traceFloor {
 			if f.fn != main || i > 0 {
 				// Code the engine called with no PHP frame below it: a
@@ -84,6 +87,11 @@ func (s *vmState) traceFrames(internal string, args []value) []vmTraceFrame {
 			break
 		}
 		caller := s.frames[i-1]
+		for j := i - 1; caller.leaving && j > s.traceFloor; j-- {
+			// Called while that frame's variables are released: the
+			// call is made from the frame below it.
+			caller = s.frames[j-1]
+		}
 		line := int(caller.fn.lines[caller.pc])
 		var named *phpArray
 		if c := f.call; c != nil {

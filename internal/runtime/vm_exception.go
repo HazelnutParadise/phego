@@ -154,10 +154,17 @@ func (s *vmState) linkThrowable(d *vmClassDecl, spec *classSpec) error {
 	if spec.parent == nil || !isThrowableClass(spec.parent) {
 		return nil
 	}
-	for i := range d.props {
-		p := &d.props[i]
-		base, err := resolveProperty(spec.parent, p.name, spec.parent)
-		if err != nil || base == nil || base.owner == nil || base.owner.vm != nil || base.visibility == privateAccess {
+	// zend_do_inheritance walks the parent's properties, so the first
+	// mismatch reported is the first in the parent's order.
+	for bi := range spec.parent.schema.props {
+		base := &spec.parent.schema.props[bi]
+		var p *vmPropDecl
+		for i := range d.props {
+			if d.props[i].name == base.name {
+				p = &d.props[i]
+			}
+		}
+		if p == nil || base.owner == nil || base.owner.vm != nil || base.visibility == privateAccess {
 			continue
 		}
 		switch {

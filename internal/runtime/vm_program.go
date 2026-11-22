@@ -829,28 +829,59 @@ func vmLiveness(f *vmFunction) {
 		f.liveKnown = true
 		return
 	}
-	// conts are, per Finally handler, the targets of the Leaves its
-	// EndFinally completes; wanted are the pcs whose live registers the
-	// unwinding needs (handler targets and Leave targets).
-	var conts map[int32][]int
+	// conts are, per EndFinally, the targets of the Leaves it completes,
+	// worked out as the VM runs them (vmState.endFinally): a finally
+	// block's EndFinally goes on like a Leave from its own pc. wanted are
+	// the pcs whose live registers the unwinding needs (handler targets
+	// and Leave targets).
+	conts := map[int][]int{}
 	wanted := map[int32]bool{}
 	for _, h := range f.handlers {
 		wanted[h.target] = true
 	}
-	for pc, in := range f.code {
-		if in.op != bytecode.OpLeave {
-			continue
+	if f.finallyAt != nil {
+		ends := map[int32][]int{}
+		type pending struct {
+			h int32
+			t int
 		}
-		wanted[int32(in.a)] = true
-		for h := through(f, pc, int(in.a)); h >= 0; {
-			next := through(f, int(f.handlers[h].target), int(in.a))
-			if next < 0 {
-				if conts == nil {
-					conts = map[int32][]int{}
-				}
-				conts[h] = append(conts[h], int(in.a))
+		var work []pending
+		seen := map[pending]bool{}
+		add := func(h int32, t int) {
+			if p := (pending{h, t}); !seen[p] {
+				seen[p] = true
+				work = append(work, p)
 			}
-			h = next
+		}
+		for pc, in := range f.code {
+			switch in.op {
+			case bytecode.OpEndFinally:
+				if h := f.bodyAt[pc]; h >= 0 {
+					ends[h] = append(ends[h], pc)
+				}
+			case bytecode.OpLeave:
+				wanted[int32(in.a)] = true
+				if h := through(f, pc, int(in.a)); h >= 0 {
+					add(h, int(in.a))
+				}
+			}
+		}
+		for len(work) > 0 {
+			p := work[len(work)-1]
+			work = work[:len(work)-1]
+			for _, e := range ends[p.h] {
+				if next := through(f, e, p.t); next >= 0 {
+					add(next, p.t)
+				} else {
+					conts[e] = append(conts[e], p.t)
+				}
+			}
+		}
+	} else {
+		for _, in := range f.code {
+			if in.op == bytecode.OpLeave {
+				wanted[int32(in.a)] = true
+			}
 		}
 	}
 	// exc visits the handlers an instruction of a protected range can
@@ -923,10 +954,8 @@ func vmLiveness(f *vmFunction) {
 				visit(int(in.a))
 			}
 		case bytecode.OpEndFinally:
-			if f.bodyAt != nil {
-				for _, t := range conts[f.bodyAt[pc]] {
-					visit(t)
-				}
+			for _, t := range conts[pc] {
+				visit(t)
 			}
 		case bytecode.OpReturn, bytecode.OpReturnRef, bytecode.OpExit, bytecode.OpThrow, bytecode.OpMatchError:
 		default:

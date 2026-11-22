@@ -123,3 +123,26 @@ func TestFormat19RejectsUndefinedRegisters(t *testing.T) {
 		})
 	}
 }
+
+// An EndFinally goes on like a Leave from its own pc, as the VM runs it.
+// One placed inside another finally range that starts later in its body
+// continues through that block, whose EndFinally then reaches the target:
+// the data flow follows the same path, so the register the second block
+// dropped is not defined there (found by the stage 7C review, where the
+// continuation was worked out from the handler's target instead).
+func TestFormat19FollowsEndFinallyThroughALaterFinallyRange(t *testing.T) {
+	image := format19Image([]Handler{
+		{Start: 1, End: 3, Target: 3, BodyEnd: 9, Kind: Finally},
+		{Start: 4, End: 6, Target: 6, BodyEnd: 8, Kind: Finally}},
+		Instruction{Op: OpCheckpoint}, Instruction{Op: OpLeave, A: 9},
+		Instruction{Op: OpCheckpoint},
+		Instruction{Op: OpCheckpoint}, Instruction{Op: OpEndFinally},
+		Instruction{Op: OpDrop, A: 0}, Instruction{Op: OpEndFinally},
+		Instruction{Op: OpReturn, A: 0},
+		Instruction{Op: OpReturn, A: 0})
+	p, err := Build(context.Background(), image, testOptions())
+	var e *Error
+	if p != nil || !errors.Is(err, ErrInvalid) || !errors.As(err, &e) || e.PC != 9 || !strings.Contains(e.Detail, "read before definition") {
+		t.Fatalf("Build=(%v,%v), want the read of the dropped register at 9 refused", p, err)
+	}
+}

@@ -74,6 +74,23 @@ func (fc *fnCompiler) exitLoop(li, target int) {
 	fc.jump(target)
 }
 
+// dropIterators frees the iterators of the foreach loops a return leaves,
+// after the value was computed and before the variables are released, as
+// PHP emits FE_FREE before RETURN. When a finally block runs first the VM
+// frees them in nesting order instead (see exitLoop).
+func (fc *fnCompiler) dropIterators() {
+	for _, t := range fc.tries {
+		if t.finally {
+			return
+		}
+	}
+	for i := len(fc.loops) - 1; i >= 0; i-- {
+		if fc.loops[i].hasIter {
+			fc.emit(bytecode.OpDrop, 0, fc.loops[i].iter, 0, 0)
+		}
+	}
+}
+
 func (fc *fnCompiler) tryStmt(n *ir.Node) {
 	var catches []*ir.Node
 	var finally *ir.Node
@@ -144,7 +161,10 @@ func (fc *fnCompiler) tryStmt(n *ir.Node) {
 // and control never continues, so the result register is never written.
 func (fc *fnCompiler) throwExpr(n *ir.Node) operand {
 	r := fc.value(n.Kids[0])
-	fc.at(n.Line)
+	// ZEND_AST_THROW has the line of its operand (zend_ast_create takes
+	// the first child's), which is where "Can only throw objects" is
+	// reported.
+	fc.at(max(n.Line, n.Kids[0].Line))
 	fc.emit(bytecode.OpThrow, 0, r, 0, 0)
 	// The code after a throw is unreachable, but an expression still
 	// names a result: a register the verifier sees defined.
