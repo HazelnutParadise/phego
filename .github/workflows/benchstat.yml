@@ -46,6 +46,13 @@ jobs:
             after: HEAD
             bench: '^BenchmarkOutputWrite$'
             files: ''
+          # W-17 stage 7C: the instruction loop with the exception table
+          # against the loop before it, on programs that throw nothing.
+          - name: vm-stage7c
+            before: 3bff802
+            after: HEAD
+            bench: '^BenchmarkVMDispatch$'
+            files: ''
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -70,5 +77,37 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: benchstat-${{ matrix.name }}
+          path: ${{ runner.temp }}/benchstat
+          if-no-files-found: error
+
+  # W-17 stage 7C: the same loop inside and outside a try block, in one
+  # test binary (engineering/decisions/W-17-vm.md, stage 7C).
+  try-cost:
+    name: try-cost
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install benchstat
+        run: go install golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
+      - name: Measure
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/benchstat"
+          { uname -a; nproc; grep -m1 'model name' /proc/cpuinfo; } | tee "$RUNNER_TEMP/benchstat/try-cost.system.txt"
+          CGO_ENABLED=0 go test -c -o "$RUNNER_TEMP/phego.test" .
+          "$RUNNER_TEMP/phego.test" -test.run '^$' -test.bench '^BenchmarkW17Stage7C$' -test.benchtime 20x -test.count 10 | tee "$RUNNER_TEMP/benchstat/try-cost.txt"
+          "$(go env GOPATH)/bin/benchstat" "$RUNNER_TEMP/benchstat/try-cost.txt" | tee "$RUNNER_TEMP/benchstat/try-cost.benchstat.txt"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchstat-try-cost
           path: ${{ runner.temp }}/benchstat
           if-no-files-found: error
