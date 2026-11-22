@@ -117,13 +117,16 @@ type vmFunction struct {
 	// Format 1.9 (stage 7C). handlers is the exception table; handlerAt,
 	// finallyAt and bodyAt index it per pc (nil without handlers).
 	// liveAt holds, for each handler target and each Leave target, the
-	// registers that are live there, in ascending order; liveKnown says
-	// the liveness analysis ran to its end.
+	// registers that are live there, in ascending order, while the
+	// function is prepared; the VM reads them from vmHandler.live and,
+	// for the Leave whose operand b is an index plus one, from leaveLive.
+	// liveKnown says the liveness analysis ran to its end.
 	handlers  []vmHandler
 	handlerAt []int32
 	finallyAt []int32
 	bodyAt    []int32
 	liveAt    map[int32][]uint32
+	leaveLive [][]uint32
 	liveKnown bool
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
@@ -715,6 +718,20 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	if f.nvals > 0 {
 		vmLiveness(&f)
 	}
+	// Hand the facts to where the VM reads them without a lookup.
+	for i := range f.handlers {
+		f.handlers[i].live = f.liveAt[f.handlers[i].target]
+	}
+	for pc := range f.code {
+		if in := &f.code[pc]; in.op == bytecode.OpLeave {
+			in.b = 0
+			if live := f.liveAt[int32(in.a)]; len(live) > 0 {
+				f.leaveLive = append(f.leaveLive, live)
+				in.b = uint32(len(f.leaveLive))
+			}
+		}
+	}
+	f.liveAt = nil
 	return f, nil
 }
 

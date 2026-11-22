@@ -725,7 +725,11 @@ func (s *vmState) loop() {
 			rerr = s.throwValue(regs, in.a)
 			goto raise
 		case bytecode.OpLeave:
-			npc, err := s.leave(f, pc, int(in.a))
+			var live []uint32
+			if in.b != 0 {
+				live = f.fn.leaveLive[in.b-1]
+			}
+			npc, err := s.leave(f, pc, int(in.a), live)
 			pc = npc
 			if err != nil {
 				f.pc = pc

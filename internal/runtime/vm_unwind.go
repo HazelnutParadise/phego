@@ -17,6 +17,8 @@ type vmHandler struct {
 	start, end, target, bodyEnd int32
 	reg                         uint32
 	catch                       bool
+	// live are the registers that are live at target, in ascending order.
+	live []uint32
 }
 
 // The kinds of a pending completion: what an EndFinally goes on with.
@@ -35,6 +37,8 @@ type vmPending struct {
 	target int
 	val    value
 	ex     *object
+	// live are the registers live at a jump's target.
+	live []uint32
 }
 
 // decodeHandlers copies the exception table and indexes it: per pc the
@@ -142,7 +146,7 @@ func (s *vmState) throwObject(ex *object) bool {
 		if hi >= 0 {
 			h := &fn.handlers[hi]
 			s.discardPending(f, int(h.target), ex)
-			if err := s.enterHandler(f, int(h.target)); err != nil {
+			if err := s.enterHandler(f, h.live); err != nil {
 				var ok bool
 				if ex, ok = s.chain(ex, err); !ok {
 					return false
@@ -183,12 +187,12 @@ func (s *vmState) throwObject(ex *object) bool {
 	}
 }
 
-// enterHandler prepares frame f for the code at target, which a throw, a
-// return or a Leave enters: the arguments and calls the frame was building
-// are dropped (Handler.StackDepth is zero) and every register that is not
-// live there is released, in register order, as PHP frees the live
+// enterHandler prepares frame f for a handler a throw enters, where the
+// registers of live are live: the arguments and calls the frame was
+// building are dropped (Handler.StackDepth is zero) and every other
+// register is released, in register order, as PHP frees the live
 // temporaries of the code it leaves (cleanup_live_vars).
-func (s *vmState) enterHandler(f *vmFrame, target int) error {
+func (s *vmState) enterHandler(f *vmFrame, live []uint32) error {
 	var first error
 	keep := func(err error) {
 		if err != nil && first == nil {
@@ -204,19 +208,16 @@ func (s *vmState) enterHandler(f *vmFrame, target int) error {
 	if len(s.calls) > 0 {
 		keep(s.dropCalls(len(s.frames)))
 	}
-	keep(s.releaseDead(f, target))
+	keep(s.releaseDead(f, live))
 	return first
 }
 
-// releaseDead releases the registers of f that are not live at pc. A
-// function without liveness facts keeps its registers until they are
-// overwritten.
-func (s *vmState) releaseDead(f *vmFrame, pc int) error {
-	fn := f.fn
-	if !fn.liveKnown {
+// releaseDead releases the registers of f that are not in live. A function
+// without liveness facts keeps its registers until they are overwritten.
+func (s *vmState) releaseDead(f *vmFrame, live []uint32) error {
+	if !f.fn.liveKnown {
 		return nil
 	}
-	live := fn.liveAt[int32(pc)]
 	var first error
 	k := 0
 	for r := range f.regs {
@@ -310,18 +311,23 @@ func through(fn *vmFunction, pc, target int) int32 {
 	return h
 }
 
-// leave is OpLeave at pc: a jump to target that first runs the finally
-// blocks it leaves. It returns the pc to continue at.
-func (s *vmState) leave(f *vmFrame, pc, target int) (int, error) {
+// leave is OpLeave at pc: a jump to target, where the registers of live
+// are live, that first runs the finally blocks it leaves. It returns the
+// pc to continue at.
+func (s *vmState) leave(f *vmFrame, pc, target int, live []uint32) (int, error) {
 	fn := f.fn
 	if h := through(fn, pc, target); h >= 0 {
 		t := int(fn.handlers[h].target)
-		s.discardPending(f, t, nil)
-		f.pend = append(f.pend, vmPending{h: h, kind: pendJump, target: target})
-		return t, s.releaseDead(f, t)
+		if len(f.pend) != 0 {
+			s.discardPending(f, t, nil)
+		}
+		f.pend = append(f.pend, vmPending{h: h, kind: pendJump, target: target, live: live})
+		return t, s.releaseDead(f, fn.handlers[h].live)
 	}
-	s.discardPending(f, target, nil)
-	return target, s.releaseDead(f, target)
+	if len(f.pend) != 0 {
+		s.discardPending(f, target, nil)
+	}
+	return target, s.releaseDead(f, live)
 }
 
 // returnThrough is a Return of v (owned) at pc: when a finally block has
@@ -336,7 +342,7 @@ func (s *vmState) returnThrough(f *vmFrame, pc int, v value) (int, bool, error) 
 	t := int(f.fn.handlers[h].target)
 	s.discardPending(f, t, nil)
 	f.pend = append(f.pend, vmPending{h: h, kind: pendReturn, val: v})
-	return t, true, s.releaseDead(f, t)
+	return t, true, s.releaseDead(f, f.fn.handlers[h].live)
 }
 
 // endFinally is OpEndFinally at pc: it takes the completion the finally
@@ -351,7 +357,7 @@ func (s *vmState) endFinally(f *vmFrame, pc int) (kind uint8, npc int, p vmPendi
 	f.pend[len(f.pend)-1] = vmPending{}
 	f.pend = f.pend[:len(f.pend)-1]
 	if p.kind == pendJump {
-		npc, err = s.leave(f, pc, p.target)
+		npc, err = s.leave(f, pc, p.target, p.live)
 	}
 	return p.kind, npc, p, err
 }

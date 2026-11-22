@@ -27,10 +27,12 @@ import (
 // beyond the Leave.
 
 // tryScope is a try statement being compiled: loops is how many loops
-// enclosed it, finally whether it has a finally block.
+// enclosed it, finally whether it has a finally block, and inCatch whether
+// one of its catch blocks is being compiled.
 type tryScope struct {
 	loops   int
 	finally bool
+	inCatch bool
 }
 
 // pendingHandler is a handler whose positions are instruction indexes of
@@ -48,7 +50,9 @@ func (fc *fnCompiler) leaveTo(l int) {
 }
 
 // exitLoop is a break or continue to label target of the loop at index li:
-// a plain jump, or a Leave when it leaves a try statement. The iterators of
+// a plain jump, or a Leave when it leaves a finally range or a catch block
+// (leaving the try block of a try without finally is an ordinary jump, as
+// in PHP, and costs what a jump costs). The iterators of
 // the foreach loops left on the way are dropped here, unless a finally
 // block runs first: PHP frees them in nesting order around the finally
 // blocks, which the VM does when the Leave completes.
@@ -56,7 +60,7 @@ func (fc *fnCompiler) exitLoop(li, target int) {
 	tries, finally := false, false
 	for _, t := range fc.tries {
 		if t.loops > li {
-			tries = true
+			tries = tries || t.finally || t.inCatch
 			finally = finally || t.finally
 		}
 	}
@@ -107,12 +111,19 @@ func (fc *fnCompiler) tryStmt(n *ir.Node) {
 	fc.tries = append(fc.tries, tryScope{loops: len(fc.loops), finally: finally != nil})
 	start := len(fc.code)
 	fc.stmt(n.Kids[0])
-	fc.leaveTo(after)
+	// The end of the try block: through the finally block when there is
+	// one, else a jump over the catch blocks (ZEND_JMP).
+	if finally != nil {
+		fc.leaveTo(after)
+	} else {
+		fc.jump(after)
+	}
 	end := len(fc.code)
 	if len(catches) > 0 {
 		fc.top = mark
 		r := fc.alloc()
 		target := len(fc.code)
+		fc.tries[len(fc.tries)-1].inCatch = true
 		for _, c := range catches {
 			fc.at(c.Line)
 			body, next := fc.label(), fc.label()
