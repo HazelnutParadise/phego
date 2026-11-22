@@ -1,0 +1,51 @@
+name: PHP CVE regressions
+
+# W-41; REQ-067; T-133, T-134. Replays the trigger of every catalogued PHP
+# vulnerability that has a case in tests/security/php-cve: the pinned PHP
+# 8.5.12 image of each profile must still produce the committed reference,
+# and Phego must produce the same output, error text and exit codes.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regressions:
+    name: CVE cases (${{ matrix.profile }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: "64"
+            width: 64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+          - profile: "32"
+            width: 32
+            arch: "386"
+            runner: ubuntu-24.04
+          - profile: amd64
+            width: 64
+            arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Regenerate and compare pinned PHP observations
+        run: python3 tests/security/php-cve/reference.py --width ${{ matrix.width }} --arch ${{ matrix.arch }}
+      - name: Compare with Phego
+        env:
+          CGO_ENABLED: '0'
+          PHEGO_PHP_CVE_PROFILE: ${{ matrix.profile }}
+        run: go test -count=1 -run '^TestPHPCVERegressions$' -v .
+      - name: Check the catalog against the cases and the README
+        run: python3 tools/php_cve_catalog.py check
