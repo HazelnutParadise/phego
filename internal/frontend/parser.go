@@ -755,7 +755,7 @@ func (p *parser) declareStatement() *Node {
 		name := p.identifier()
 		p.expect('=')
 		v := p.expr()
-		if phpname.EqualFold(name.Text, "encoding") && !encodingLiteral(v) {
+		if phpname.EqualFold(name.Text, "encoding") && !ZvalLiteral(v) {
 			invalidEncoding = true
 		}
 		n.Children = append(n.Children, node("directive", name.Line, name, v))
@@ -764,6 +764,7 @@ func (p *parser) declareStatement() *Node {
 		}
 	}
 	closing := p.expect(')')
+	n.CloseLine = closing.Line
 	// PHP checks only after the complete directive list and closing token.
 	if invalidEncoding {
 		p.failCompile(closing.Line, "Encoding must be a literal")
@@ -782,10 +783,11 @@ func (p *parser) declareStatement() *Node {
 	return n
 }
 
-// encodingLiteral recognizes PHP's parse-time ZVAL expressions. Parentheses,
+// ZvalLiteral recognizes PHP's parse-time ZVAL expressions, the only
+// values declare accepts. Parentheses,
 // plain heredocs and concatenations of literals are already ZVALs in PHP's
 // syntax tree; general constant expressions (including unary +/-) are not.
-func encodingLiteral(n *Node) bool {
+func ZvalLiteral(n *Node) bool {
 	var local [32]*Node
 	pending := append(local[:0], n)
 	for len(pending) != 0 {

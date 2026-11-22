@@ -1,10 +1,6 @@
 package runtime
 
-import (
-	"math"
-
-	"github.com/HazelnutParadise/phego/internal/phpnum"
-)
+import "github.com/HazelnutParadise/phego/internal/phpnum"
 
 // numericKind is the result class of PHP numeric string recognition.
 type numericKind uint8
@@ -41,26 +37,7 @@ func php8512Strtod(s string) (float64, int) { return phpnum.ParseFloat(s) }
 func php8512FormatFloat(f float64, precision int) string { return phpnum.FormatFloat(f, precision) }
 
 // floatFitsInt is ZEND_DOUBLE_FITS_LONG for the platform width.
-func floatFitsInt(d float64, width int) bool {
-	if width == 32 {
-		return !(d > math.MaxInt32 || d < math.MinInt32)
-	}
-	return !(d >= 0x1p63 || d < -0x1p63)
-}
+func floatFitsInt(d float64, width int) bool { return phpnum.DoubleFitsLong(d, width) }
 
-// floatToIntModular converts an out-of-range finite float with PHP's modular
-// arithmetic for the platform width.
-func floatToIntModular(d float64, width int) int64 {
-	if width == 32 {
-		m := math.Mod(d, 0x1p32)
-		if m < 0 {
-			m = math.Ceil(m) + 0x1p32
-		}
-		return int64(int32(uint32(m)))
-	}
-	m := math.Mod(d, 0x1p64)
-	if m < 0 {
-		m += 0x1p64
-	}
-	return int64(uint64(m))
-}
+// floatToIntModular is zend_dval_to_lval_slow for the platform width.
+func floatToIntModular(d float64, width int) int64 { return phpnum.DoubleToLongModular(d, width) }
