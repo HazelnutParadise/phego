@@ -294,3 +294,29 @@ func FormatFloat(f float64, precision int) string {
 	}
 	return b.String()
 }
+
+// DoubleFitsLong is ZEND_DOUBLE_FITS_LONG for the platform width.
+func DoubleFitsLong(d float64, width int) bool {
+	if width == 32 {
+		return !(d > math.MaxInt32 || d < math.MinInt32)
+	}
+	return !(d >= 0x1p63 || d < -0x1p63)
+}
+
+// DoubleToLongModular is zend_dval_to_lval_slow: it converts an
+// out-of-range finite float with PHP's modular arithmetic for the platform
+// width.
+func DoubleToLongModular(d float64, width int) int64 {
+	if width == 32 {
+		m := math.Mod(d, 0x1p32)
+		if m < 0 {
+			m = math.Ceil(m) + 0x1p32
+		}
+		return int64(int32(uint32(m)))
+	}
+	m := math.Mod(d, 0x1p64)
+	if m < 0 {
+		m += 0x1p64
+	}
+	return int64(uint64(m))
+}

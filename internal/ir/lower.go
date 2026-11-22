@@ -3,11 +3,13 @@ package ir
 import (
 	stdcontext "context"
 	"fmt"
+	"math"
 	"path"
 	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/frontend"
 	"github.com/HazelnutParadise/phego/internal/phpname"
+	"github.com/HazelnutParadise/phego/internal/phpnum"
 	"github.com/HazelnutParadise/phego/internal/profile"
 )
 
@@ -922,11 +924,18 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 	n := &Node{Op: OpDeclare, Line: s.Line}
 	for _, d := range directives {
 		name, value := d.Children[0].Text, d.Children[1]
-		if value.Kind != "literal" && !isConstantLiteral(value) {
+		// zend_compile_declare accepts only a ZEND_AST_ZVAL: true, null and
+		// other constant names stay ZEND_AST_CONST and are rejected.
+		if value.Kind != "literal" {
 			l.fail(s.Line, "declare(%s) value must be a literal", name)
 		}
 		switch phpname.Lower(name) {
 		case "ticks":
+			if v := l.constantValue(value); v != nil && v.Kind == LitFloat && !phpnum.DoubleFitsLong(v.Float, l.unit.Profile.IntWidth) {
+				// zval_get_long warns through zend_dval_to_lval while the
+				// declaration compiles.
+				l.diag(s.Line, "Warning", "The float "+phpnum.FormatFloat(v.Float, -1)+" is not representable as an int, cast occurred")
+			}
 		case "encoding":
 			if !l.isFirstStatement(s, false) {
 				l.fail(s.Line, "Encoding declaration pragma must be the very first statement in the script")
@@ -954,7 +963,7 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 	}
 	ticks := false
 	for _, d := range directives {
-		if v := l.constantValue(d.Children[1]); phpname.EqualFold(d.Children[0].Text, "ticks") && v != nil && v.Kind == LitInt && v.Int > 0 {
+		if v := l.constantValue(d.Children[1]); phpname.EqualFold(d.Children[0].Text, "ticks") && v != nil && declareTicks(v, l.unit.Profile.IntWidth) > 0 {
 			ticks = true
 		}
 	}
@@ -969,10 +978,43 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 	return n
 }
 
-// isConstantLiteral reports a name PHP's parser folds into a literal, such
-// as true or null.
-func isConstantLiteral(n *frontend.Node) bool {
-	return n.Kind == "name" && isBuiltinConstant(n.Text)
+// declareTicks is zval_get_long of a declare(ticks=...) literal, the tick
+// count zend_compile_declare stores: a float outside the integer range wraps
+// as zend_dval_to_lval does and a string takes its numeric prefix, capped.
+func declareTicks(v *Literal, width int) int64 {
+	switch v.Kind {
+	case LitInt:
+		return v.Int
+	case LitFloat:
+		if math.IsNaN(v.Float) || math.IsInf(v.Float, 0) {
+			return 0
+		}
+		if !phpnum.DoubleFitsLong(v.Float, width) {
+			return phpnum.DoubleToLongModular(v.Float, width)
+		}
+		return int64(v.Float)
+	case LitString:
+		n := phpnum.Parse(v.Str, width, true)
+		switch {
+		case n.Kind == phpnum.Integer:
+			return n.Int
+		case n.Kind == phpnum.Floating && math.IsNaN(n.Float):
+			return 0
+		case n.Kind == phpnum.Floating && !phpnum.DoubleFitsLong(n.Float, width):
+			// zend_dval_to_lval_cap saturates.
+			top := int64(math.MaxInt64)
+			if width == 32 {
+				top = math.MaxInt32
+			}
+			if n.Float > 0 {
+				return top
+			}
+			return -top - 1
+		case n.Kind == phpnum.Floating:
+			return int64(n.Float)
+		}
+	}
+	return 0
 }
 
 func (l *lowerer) try(s *frontend.Node) *Node {
