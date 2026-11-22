@@ -83,7 +83,9 @@ def main(argv=None):
                 raise ValueError(f'reference differs from {committed.name}; inspect the actual streams before '
                                  'updating expectations:\n  ' + '\n  '.join(problems))
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as exc:
-        print(f'php-cve reference failed: {exc}', file=sys.stderr)
+        detail = getattr(exc, 'stderr', None)
+        detail = '\n' + detail.decode(errors='replace') if isinstance(detail, bytes) and detail else ''
+        print(f'php-cve reference failed: {exc}{detail}', file=sys.stderr)
         return 1
     print(f'PASS: {len(data["cases"])} PHP CVE reference cases ({width}-bit {arch}, '
           f'{"written to " + committed.name if args.write else "matches " + committed.name})')
