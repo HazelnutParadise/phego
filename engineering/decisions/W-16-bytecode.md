@@ -313,6 +313,15 @@ Catch 入口只保證 exception register 已定義。Finally 入口不保證任�
 
 Leave 明示需要展開 finally 的控制轉移。其 continuation 必須重新定義暫存器或載入 local，驗證器不假設暫存值跨越 finally 後仍可讀取。Return、ReturnRef 與 Throw 交由 Runtime 的 completion 與 unwind 機制處理。EndFinally 所在位置最內層的處理區塊必須是 Finally，繼續當次 Execution 保存的 completion。
 
+### 格式 1.9：暫存器跨越處理區塊
+
+格式 1.9 由 W-17 第七階段 C 加入。它沒有新增指令、Aux 或表格，只放寬上面兩段的資料流規則，因為 1.0 的規則寫不出 PHP 的常見程式：`foreach` 的主體裡有 `try` 時，迭代器暫存器必須活過 catch，也必須活過會先執行 finally 的 `continue`。
+
+- **處理區塊的入口**：保護區間裡每一條指令執行前都已定義的暫存器，在 Target 仍然有定義（各指令入口狀態的交集）。區間內才定義、被清除，或只在部分路徑上有定義的暫存器沒有定義。Catch 的 exception register 照舊由入口定義。區間裡的指令可能把控制交給最內層的處理區塊（丟出例外），也可能交給最內層的 Finally（Return 或 Leave），兩個入口都取這個交集。
+- **Leave**：不離開任何 Finally 保護區間的 Leave 等同 Jump，目標沿用 Leave 當下的定義。會離開 Finally 的 Leave 不直接流向目標：目標的狀態來自它最後執行的那個 finally 的 EndFinally，也就是 finally 區塊結束時仍有定義的暫存器。哪個 EndFinally 接到哪些目標在驗證開始時算好，成本是一次指令掃描。
+- **版本把關**：1.0 到 1.8 的檔案仍照舊規則驗證，照舊規則合法的檔案在任何版本都能載入。舊版檔案裡只有新規則才合法的讀取，以 `ErrInvalid` 拒絕，訊息是 `register kept across an exception handler needs bytecode format 1.9, but the file declares format 1.N`。做法是舊規則失敗後以新規則重驗同一個函式，通過才給這個訊息，否則回報原本的錯誤。
+- **VM 不依賴這條規則**：進入處理區塊時，VM 依自己的活性分析釋放在目標不再使用的暫存器，讀到被釋放的暫存器得到 null。活性分析把保護區間裡每條指令到處理區塊入口的邊、Leave 經過 finally 到目標的邊都算進去，所以活過 try 的暫存器不會在區間內被提早釋放。
+
 取消、配額耗盡、輸出錯誤及引擎內部錯誤屬於宿主停止，不得被 PHP Catch 吞掉。保留回傳值、執行 finally、釋放 locals 及解構函式的順序依 `internal/runtime` 的生命週期契約，不能由 bytecode 自行指定任意記憶體清理。
 
 ## 後端必須履行指令安全契約
