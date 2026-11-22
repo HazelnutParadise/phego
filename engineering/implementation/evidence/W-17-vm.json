@@ -16,8 +16,8 @@
     "T-031",
     "T-032"
   ],
-  "source_base": "a4c2930",
-  "captured_at": "2026-11-22T04:30:25.278497+00:00",
+  "source_base": "85b8380",
+  "captured_at": "2026-11-22T04:39:29.325812+00:00",
   "source_sha256": {
     ".github/workflows/benchstat.yml": "c6a94f781f26070536c86c6f6be44c6dcd19516d49083e8aed5eb61f68ccd325",
     ".github/workflows/semantics-vm.yml": "b710ebbe8efcacd3f0e05e370058ed53eaed33e02e11c926bde27371cc3160e0",
@@ -50,12 +50,12 @@
     "internal/bytecode/opcode.go": "9b896940fc0a72ab79532bf723cb7326f453860d2d98d98afdb945a88f3c93d9",
     "internal/bytecode/verify.go": "231fdb448b2a4d790f16e6197a9f54a4a2253d07a1c14f132d43cd9b35e68712",
     "internal/bytecode/wire.go": "9a6b9c20ce947bf6936b02f44de7df128c8434b9916423f577f8c060392b88d6",
-    "internal/frontend/ast.go": "b09baf5ae2d3708652633459b1ddc657641982e3cec13322932f570266d28fbe",
-    "internal/frontend/diagnostics.go": "64d563e87a7ac5050e78bdf0aa7ad1b59d2a654c480a1cf5cf9cd4c61bb25a16",
+    "internal/frontend/ast.go": "05da9aaabdebae9946cacd23ade15153e9da5427d04f888c64c22173c7b477b9",
+    "internal/frontend/diagnostics.go": "15b290050804fd5e3e728f419639e83b73f9547aef9d18c28794bccbf91b83ee",
     "internal/frontend/expr.go": "8d4fd112e3dd43f05fdf34764ee371b78f9833a619b686de9e779feee587555d",
     "internal/frontend/lexer.go": "6058f6135b6e2dc33d6d8cb8ecfd014b4e2bc24b20df0c094e444984f4836f3c",
     "internal/frontend/modifiers.go": "f256768994dd187ca14ede42d79a1b347f0cf63d2c1f1ee5083637b3caf92ad3",
-    "internal/frontend/parser.go": "6f4f942c42758c73eb7c46e2833c59a5d7a0cfbe628e32b82f18aa317ec80c0a",
+    "internal/frontend/parser.go": "0b7e2ac6dd04692ffa690bf451d984a6b53b70015d9328be9f41062f1c4e052d",
     "internal/ir/attributes_compile.go": "194ff9840a3e3912ad213e930a316d19cfb816c5fdf54f3c5bef5ca010790159",
     "internal/ir/class_binding.go": "63bb7089fa868d6ee46d7773049389b1db17b4f6ded0a83a05324efb167f16c8",
     "internal/ir/class_compile.go": "8c1d662f1d1fe6f390dbefd28039364c4d4e43dd9fb99fe1f086e778fbf855e3",
@@ -68,7 +68,7 @@
     "internal/ir/effects.go": "00ad1ccfa4c22384dd48dc40eb9f57680f562a2e8d3bb50d9a13c4bdec4c2c0c",
     "internal/ir/expr.go": "fea40dcabb683db4a7930157ae4f47eb42aeb9b1f869560490d59a7772d16996",
     "internal/ir/hir.go": "bc71f75b4a079cbd7276234b8adf101cce01a8658a66ebe77dd332ad1559e59b",
-    "internal/ir/lower.go": "9566c3780abaccfcd9daef70e5f6bcb9c0cc3134361f964e77103b628f5e4878",
+    "internal/ir/lower.go": "aa94cd4dae0d4c194870057c5d620f5df7c7866a4ee9d0e37455245aa271e1db",
     "internal/ir/lower_test.go": "cd99eab41ac9290976f96b14be73d8b8315578a66d543acd4bbf449a16172e44",
     "internal/ir/names.go": "0eb61bca10378daf1db38fdda12cfa74d6ebfd8c7fbcece10f28d29faa038d9e",
     "internal/ir/throwables_gen.go": "5cae04ca8cb80a9ce73c5ce29a037bcde407c7c64012b564146859f31d428559",
@@ -407,15 +407,15 @@
     },
     "local/differential.log": {
       "path": "W-17-vm/local/differential.log",
-      "sha256": "3807238a635412e92ce9cf409dbbe448b38afc834ff71986c6d5bbe4ab3d5ae9"
+      "sha256": "a55a3b647801e7335844af13761bb2dbae95134eb8dabd49b638b48edefad0a9"
     },
     "local/go-test.log": {
       "path": "W-17-vm/local/go-test.log",
-      "sha256": "5feb41a2dbd09818115ea98fd87d11726fc82786daa9fafb203428fa73cbee1b"
+      "sha256": "6835a637864669fc02aa848a3658d69725d1dce06ae3fe5074d43a311c2487b5"
     },
     "local/race.log": {
       "path": "W-17-vm/local/race.log",
-      "sha256": "955e518ec9c7c18acca4b069af00e9a621f4b100fc1ae29f197f8a41d730c916"
+      "sha256": "28cd7d3627880c800a70f8888cbdfbcfa7e77356f7bf2b2af3e4f91d0f337c28"
     },
     "stage2/random-differential.txt": {
       "path": "W-17-vm/stage2/random-differential.txt",
