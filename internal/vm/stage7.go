@@ -608,7 +608,11 @@ func (fc *fnCompiler) newExpr(n *ir.Node) operand {
 	}
 	res := fc.alloc()
 	ref, class := fc.classRef(n.Name, n.Kids[0])
-	fc.at(n.Line)
+	if n.Name != nil {
+		// A class given by an expression leaves the line where compiling
+		// the expression ended, as PHP does.
+		fc.at(n.Line)
+	}
 	none := fc.label()
 	aux := uint16(ref)
 	if len(n.Args) > 0 {

@@ -49,50 +49,37 @@ func (fc *fnCompiler) leaveTo(l int) {
 	fc.fixups = append(fc.fixups, fixup{pc, 0, l})
 }
 
-// exitLoop is a break or continue to label target of the loop at index li:
-// a plain jump, or a Leave when it leaves a finally range or a catch block
-// (leaving the try block of a try without finally is an ordinary jump, as
-// in PHP, and costs what a jump costs). The iterators of
-// the foreach loops left on the way are dropped here, unless a finally
-// block runs first: PHP frees them in nesting order around the finally
-// blocks, which the VM does when the Leave completes.
+// exitLoop is a break or continue to label target of the loop at index li.
+// Outside any try statement it drops the iterators of the foreach loops it
+// leaves and jumps, as before. When it leaves a try statement it is a
+// Leave without the drops: a Drop inside a protected range would leave the
+// iterator undefined for the handler, and PHP frees loop variables around
+// the finally blocks in nesting order, so the VM frees what is dead where
+// the Leave arrives. Leaving only the try block of a try without finally,
+// with no iterator to free, is the plain jump PHP emits and costs what a
+// jump costs.
 func (fc *fnCompiler) exitLoop(li, target int) {
-	tries, finally := false, false
+	crossed, special := false, false
 	for _, t := range fc.tries {
 		if t.loops > li {
-			tries = tries || t.finally || t.inCatch
-			finally = finally || t.finally
+			crossed = true
+			special = special || t.finally || t.inCatch
 		}
 	}
-	if !finally {
-		for _, inner := range fc.loops[li+1:] {
-			if inner.hasIter {
-				fc.emit(bytecode.OpDrop, 0, inner.iter, 0, 0)
-			}
-		}
+	iterators := false
+	for _, inner := range fc.loops[li+1:] {
+		iterators = iterators || inner.hasIter
 	}
-	if tries {
+	if special || crossed && iterators {
 		fc.leaveTo(target)
 		return
 	}
+	for _, inner := range fc.loops[li+1:] {
+		if inner.hasIter {
+			fc.emit(bytecode.OpDrop, 0, inner.iter, 0, 0)
+		}
+	}
 	fc.jump(target)
-}
-
-// dropIterators frees the iterators of the foreach loops a return leaves,
-// after the value was computed and before the variables are released, as
-// PHP emits FE_FREE before RETURN. When a finally block runs first the VM
-// frees them in nesting order instead (see exitLoop).
-func (fc *fnCompiler) dropIterators() {
-	for _, t := range fc.tries {
-		if t.finally {
-			return
-		}
-	}
-	for i := len(fc.loops) - 1; i >= 0; i-- {
-		if fc.loops[i].hasIter {
-			fc.emit(bytecode.OpDrop, 0, fc.loops[i].iter, 0, 0)
-		}
-	}
 }
 
 func (fc *fnCompiler) tryStmt(n *ir.Node) {
@@ -171,11 +158,10 @@ func (fc *fnCompiler) tryStmt(n *ir.Node) {
 // throwExpr is throw as a statement or an expression: the value is thrown
 // and control never continues, so the result register is never written.
 func (fc *fnCompiler) throwExpr(n *ir.Node) operand {
-	r := fc.value(n.Kids[0])
-	// ZEND_AST_THROW has the line of its operand (zend_ast_create takes
-	// the first child's), which is where "Can only throw objects" is
+	// zend_compile_throw emits ZEND_THROW on the line compilation has
+	// reached after the operand: where "Can only throw objects" is
 	// reported.
-	fc.at(max(n.Line, n.Kids[0].Line))
+	r := fc.value(n.Kids[0])
 	fc.emit(bytecode.OpThrow, 0, r, 0, 0)
 	// The code after a throw is unreachable, but an expression still
 	// names a result: a register the verifier sees defined.

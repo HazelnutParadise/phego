@@ -76,7 +76,44 @@ func (s *vmState) traceFrames(internal string, args []value) []vmTraceFrame {
 	for i := len(s.frames) - 1; i >= s.traceFloor; i-- {
 		f := s.frames[i]
 		if f.leaving && i > s.traceFloor {
-			continue // its function has already returned
+			// Its function has already returned. The method of Closure
+			// that made the call (Closure::call, __invoke, the method a
+			// closure of __call stands for) is still running.
+			if f.via != 0 {
+				lc := s.frames[i-1]
+				lline := int(lc.fn.lines[lc.pc])
+				largs := s.frameArgs(f)
+				switch f.via {
+				case closureCall:
+					if f.this != nil {
+						largs = append([]value{{kind: valueObject, object: f.this}}, largs...)
+					}
+					add(lc.fn.files[lc.pc], lline, "Closure", "->", "call", largs, nil)
+				case closureInvoke:
+					add(lc.fn.files[lc.pc], lline, "Closure", "->", "__invoke", largs, nil)
+				case closureMagic:
+					mclass, sep, magic, list := "", "", "", []value(nil)
+					if f.scope != nil {
+						mclass, sep = f.scope.name, "::"
+						if f.this != nil {
+							sep = "->"
+						}
+					}
+					if f.closure != nil && f.closure.closure != nil {
+						magic = f.closure.closure.magic
+					}
+					if len(largs) > 1 {
+						if arr := largs[1].deref(); arr.kind == valueArray {
+							pos := 0
+							for bk, ok := arr.array.next(&pos); ok; bk, ok = arr.array.next(&pos) {
+								list = append(list, bk.val)
+							}
+						}
+					}
+					add(lc.fn.files[lc.pc], lline, mclass, sep, magic, list, nil)
+				}
+			}
+			continue
 		}
 		if i == s.traceFloor {
 			if f.fn != main || i > 0 {
@@ -87,10 +124,19 @@ func (s *vmState) traceFrames(internal string, args []value) []vmTraceFrame {
 			break
 		}
 		caller := s.frames[i-1]
+		viaInternal := false
 		for j := i - 1; caller.leaving && j > s.traceFloor; j-- {
 			// Called while that frame's variables are released: the
-			// call is made from the frame below it.
+			// call is made from the frame below it, or from Closure::call
+			// or the closure of a magic method that entered it, which
+			// are internal functions (__invoke is the closure's own
+			// call and has a PHP caller).
+			viaInternal = viaInternal || caller.via == closureCall || caller.via == closureMagic
 			caller = s.frames[j-1]
+		}
+		if viaInternal {
+			addInternal(f, s.frameArgs(f))
+			continue
 		}
 		line := int(caller.fn.lines[caller.pc])
 		var named *phpArray

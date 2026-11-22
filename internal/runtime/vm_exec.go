@@ -613,28 +613,17 @@ func (s *vmState) pop(release bool) error {
 			first = err
 		}
 	}
-	f.leaving = len(s.frames) > 1
-	if release {
-		for i := range f.locals {
-			v := f.locals[i]
-			f.locals[i] = value{}
-			keep(s.releaseValue(v))
-		}
-	}
+	// The temporaries and the calls the frame was building go first, while
+	// the frame is still the current one (cleanup_unfinished_calls and
+	// cleanup_live_vars when an exception unwinds it; a returning frame has
+	// none left but a foreach iterator). Then PHP makes the caller the
+	// current frame and frees the variables (zend_leave_helper).
 	for i := range f.regs {
 		v := f.regs[i]
 		f.regs[i] = value{}
 		if release {
 			keep(s.releaseValue(v))
 		}
-	}
-	for _, v := range f.extra {
-		if release {
-			keep(s.releaseValue(v))
-		}
-	}
-	if f.call != nil && release {
-		keep(s.releaseValue(f.call.named))
 	}
 	if len(f.pend) > 0 {
 		s.dropPending(f, release)
@@ -646,6 +635,29 @@ func (s *vmState) pop(release bool) error {
 		if release {
 			keep(err)
 		}
+	}
+	f.leaving = len(s.frames) > 1
+	if release {
+		for i := range f.locals {
+			v := f.locals[i]
+			if v.kind < valueArray {
+				// A scalar holds nothing. It stays until the window is
+				// cleared below, so the backtrace of a destructor run
+				// here still shows it as an argument of the method of
+				// Closure that made the call.
+				continue
+			}
+			f.locals[i] = value{}
+			keep(s.releaseValue(v))
+		}
+	}
+	for _, v := range f.extra {
+		if release {
+			keep(s.releaseValue(v))
+		}
+	}
+	if f.call != nil && release {
+		keep(s.releaseValue(f.call.named))
 	}
 	this := f.this
 	if this != nil {

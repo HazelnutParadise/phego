@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
@@ -167,12 +168,33 @@ func (s *vmState) linkThrowable(d *vmClassDecl, spec *classSpec) error {
 		if p == nil || base.owner == nil || base.owner.vm != nil || base.visibility == privateAccess {
 			continue
 		}
+		// do_inherit_property: static, readonly, access level, then type.
+		static, readonly := p.flags&bytecode.MemberStatic != 0, p.flags&bytecode.MemberReadonly != 0
+		fail := func(message string) error { return &vmFatal{message: message, line: d.line} }
 		switch {
+		case static != base.static:
+			from, to := "non static", "static"
+			if base.static {
+				from, to = "static", "non static"
+			}
+			return fail("Cannot redeclare " + from + " " + base.owner.name + "::$" + p.name + " as " + to + " " + d.name + "::$" + p.name)
+		case readonly != base.readonly:
+			from, to := "non-readonly", "readonly"
+			if base.readonly {
+				from, to = "readonly", "non-readonly"
+			}
+			return fail("Cannot redeclare " + from + " property " + base.owner.name + "::$" + p.name + " as " + to + " " + d.name + "::$" + p.name)
+		case accessOf(p.flags) > base.visibility:
+			weaker := ""
+			if base.visibility == protectedAccess {
+				weaker = " or weaker"
+			}
+			return fail("Access level to " + d.name + "::$" + p.name + " must be " + accessName(base.visibility) + " (as in class " + base.owner.name + ")" + weaker)
 		case base.typeName == p.typ:
 		case base.typeName == "":
-			return &vmFatal{message: "Type of " + d.name + "::$" + p.name + " must be omitted to match the parent definition in class " + base.owner.name, line: d.line}
+			return fail("Type of " + d.name + "::$" + p.name + " must be omitted to match the parent definition in class " + base.owner.name)
 		default:
-			return &vmFatal{message: "Type of " + d.name + "::$" + p.name + " must be " + base.typeName + " (as in class " + base.owner.name + ")", line: d.line}
+			return fail("Type of " + d.name + "::$" + p.name + " must be " + base.typeName + " (as in class " + base.owner.name + ")")
 		}
 	}
 	return nil

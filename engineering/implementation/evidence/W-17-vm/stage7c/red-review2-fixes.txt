@@ -1,0 +1,185 @@
+# W-17 stage 7C, second review: output of the reviewer's reproducers before the fixes (commit 0f22146).
+# PHP is the pinned arm64 image; each block is one probe of ~/.cache/phego-work/review7c-2.
+
+===== c01_ret_foreach_try_catch.php
+--- php
+dtor cv
+dtor o
+2
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/c01_ret_foreach_try_catch.php: invalid bytecode at byte -1, function 1, instruction 19: register read before definition
+
+===== g02_break2_in_try_nested_foreach.php
+--- php
+13
+after
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/g02_break2_in_try_nested_foreach.php: invalid bytecode at byte -1, function 0, instruction 16: register read before definition
+
+===== g09_switch_in_try_return.php
+--- php
+onenone
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/g09_switch_in_try_return.php: invalid bytecode at byte -1, function 1, instruction 8: register read before definition
+
+===== a01_unwind_tmp_vs_cv.php
+--- php
+dtor arg
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(5): D->__destruct()
+#1 /w/cases/a01_unwind_tmp_vs_cv.php(6): f()
+#2 {main}
+dtor cv
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+caught 3
+
+[exit 0]
+--- phego before the fix
+dtor cv
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+dtor arg
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+caught 3
+
+[exit 0]
+
+===== i02.php
+--- php
+dtor call: #0 [internal function]: D->__destruct()
+#1 /w/cases/i02.php(5): Closure->call(Object(C), 5)
+#2 {main}
+7
+
+[exit 0]
+--- phego before the fix
+dtor call: #0 /w/cases/i02.php(5): D->__destruct()
+#1 {main}
+7
+
+[exit 0]
+
+===== i19.php
+--- php
+#0 /w/cases/i19.php(4): D->__destruct()
+#1 /w/cases/i19.php(4): Closure->__invoke(5)
+#2 {main}
+5
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/i19.php(4): D->__destruct()
+#1 {main}
+5
+
+[exit 0]
+
+===== e07_throw_nonobj_coalesce.php
+--- php
+Can only throw objects 6
+
+[exit 0]
+--- phego before the fix
+Can only throw objects 5
+
+[exit 0]
+
+===== e08_throw_call_multiline.php
+--- php
+Can only throw objects 5
+
+[exit 0]
+--- phego before the fix
+Can only throw objects 4
+
+[exit 0]
+
+===== m06.php
+--- php
+4
+
+[exit 0]
+--- phego before the fix
+3
+
+[exit 0]
+
+===== m01.php
+--- php
+4
+
+[exit 0]
+--- phego before the fix
+3
+
+[exit 0]
+
+===== j08.php
+--- php
+
+Fatal error: Cannot redeclare non static Exception::$message as static E::$message in /w/cases/j08.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+[exit 0]
+
+===== j09.php
+--- php
+
+Fatal error: Cannot redeclare non-readonly property Exception::$message as readonly E::$message in /w/cases/j09.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Type of E::$message must be omitted to match the parent definition in class Exception in /w/cases/j09.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+===== k05.php
+--- php
+
+Fatal error: Access level to E::$code must be protected (as in class Exception) or weaker in /w/cases/k05.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Type of E::$file must be string (as in class Exception) in /w/cases/k05.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+===== k03.php
+--- php
+
+Fatal error: Access level to E::$message must be protected (as in class Exception) or weaker in /w/cases/k03.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Access level to E::$message must be protected (as in class Exception) in /w/cases/k03.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]

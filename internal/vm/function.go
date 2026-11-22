@@ -726,7 +726,6 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			}
 			fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnValue), r, 0, 0)
 		}
-		fc.dropIterators()
 		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 	case ir.OpClass:
 		fc.classDecl(n)
