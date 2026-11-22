@@ -722,7 +722,7 @@ func (s *vmState) loop() {
 			s.end = completion{kind: endExit, code: code}
 			return
 		case bytecode.OpThrow:
-			rerr = s.throwValue(regs[in.a])
+			rerr = s.throwValue(regs, in.a)
 			goto raise
 		case bytecode.OpLeave:
 			npc, err := s.leave(f, pc, int(in.a))

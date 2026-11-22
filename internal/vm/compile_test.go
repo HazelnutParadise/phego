@@ -486,8 +486,8 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"enum declaration", "echo 1;\nenum E {}", 3},
 		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
 		{"anonymous class", "echo 1;\n$o = new class {};", 3},
-		{"try", "echo 1;\ntry { echo 2; } finally { echo 3; }", 3},
-		{"throw", "echo 1;\nthrow $e;", 3},
+		{"goto", "echo 1;\ntry { goto a; a: echo 2; } finally { echo 3; }", 3},
+		{"anonymous class", "echo 1;\nthrow new class extends Exception {};", 3},
 		{"clone with arguments", "echo 1;\nfunction f() { static $x = clone($a, ['p' => 1]); }", 3},
 		{"variable variables", "echo 1;\nfunction f() { global $$x; }", 3},
 		{"superglobal", "echo 1;\nfunction f() { global $GLOBALS; }", 3},
@@ -540,10 +540,10 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"superglobal", "echo 1;\nclass A { function m() { return $GLOBALS; } }", 3},
 		{"by-reference array element", "echo 1;\n$a = [&$b];", 3},
 		{"a closure of builtin function array_map()", "echo 1;\nfunction f() {}\n$g = array_map(...);", 4},
-		{"throw", "echo 1;\n$x = $a ?? throw $e;", 3},
+		{"builtin class ArrayObject", "echo 1;\n$x = $a ?? throw new ArrayObject([]);", 3},
 		{"require", "echo 1;\nrequire 'x.php';", 3},
 		{"generator", "echo 1;\nclass A { function m() { return function () { yield 1; }; } }", 3},
-		{"try", "echo 1;\nclass A { function m() { try { } finally { } } }", 3},
+		{"generator", "echo 1;\nclass A { function m() { try { yield 1; } catch (Exception $e) { } finally { } } }", 3},
 		{"goto", "echo 1;\nclass A { function m() { goto a; a: } }", 3},
 		{"__halt_compiler", "echo 1;\n__halt_compiler();", 3},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0] = 1;", 4},
@@ -704,36 +704,12 @@ var parseFatal = map[string]string{
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
 var compileFatal = map[string]string{
-	"fatal_redeclare_function":                 "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
-	"fatal_param_default_redeclared_param":     "Redefinition of parameter $a",
-	"fatal_named_positional_after":             "Cannot use positional argument after named argument",
-	"fatal_static_duplicate":                   "Duplicate declaration of static variable $a",
-	"fatal_unpack_after_named":                 "Cannot use argument unpacking after named arguments",
-	"fatal_unpack_positional_after":            "Cannot use positional argument after argument unpacking",
-	"fatal_variadic_default":                   "Variadic parameter cannot have a default value",
-	"fatal_variadic_not_last":                  "Only the last parameter can be variadic",
-	"fatal_list_spread":                        "Spread operator is not supported in assignments",
-	"fatal_callable_new":                       "Cannot create Closure for new expression",
-	"fatal_callable_nullsafe":                  "Cannot combine nullsafe operator with Closure creation",
-	"fatal_use_autoglobal":                     "Cannot use auto-global as lexical variable",
-	"fatal_use_param_name":                     "Cannot use lexical variable $x as a parameter name",
-	"fatal_use_this":                           "Cannot use $this as lexical variable",
-	"fatal_use_twice":                          "Cannot use variable $a twice",
-	"fatal_list_empty":                         "Cannot use empty list",
-	"fatal_list_mixed_keys":                    "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_mix_syntax":                    "Cannot mix [] and list()",
-	"fatal_list_ref_non_referenceable":         "Cannot assign reference to non referenceable value",
-	"fatal_list_foreach_key_list":              "Cannot use list as key element",
-	"fatal_list_lines_mixed_after_ref":         "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_lines_spread_after_ref":        "Spread operator is not supported in assignments",
-	"fatal_list_lines_empty_after_ref_element": "Cannot use empty array entries in keyed array assignment",
-	"fatal_list_lines_mixed_after_ref_element": "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_lines_mixed_after_element":     "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_lines_foreach_mixed_after_ref": "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_list_lines_mixed_after_var":         "Cannot mix keyed and unkeyed array entries in assignments",
-	"fatal_const_redeclare_builtin":            "Cannot redeclare constant 'true'",
 	// Stage 7A: the class, method, property and type declarations PHP
 	// rejects while compiling the file.
+	"fatal_callable_new":                             "Cannot create Closure for new expression",
+	"fatal_callable_nullsafe":                        "Cannot combine nullsafe operator with Closure creation",
+	"fatal_catch_static":                             "Bad class name in the catch statement",
+	"fatal_catch_this":                               "Cannot re-assign $this",
 	"fatal_class_abstract_method_in_concrete":        "Class NotAbstract declares abstract method missing() and must therefore be declared abstract",
 	"fatal_class_abstract_not_implemented":           "Class Circle contains 1 abstract method and must therefore be declared abstract or implement the remaining method (Shape::perimeter)",
 	"fatal_class_access_level":                       "Access level to Child::open() must be public (as in class Base)",
@@ -746,6 +722,22 @@ var compileFatal = map[string]string{
 	"fatal_class_incompatible_signature":             "Declaration of Child::run(int $a): string must be compatible with Base::run(int $a, string $b = 'x'): string",
 	"fatal_class_parent_without_parent":              "Cannot use \"parent\" when current class scope has no parent",
 	"fatal_class_self_outside_class":                 "Cannot use \"self\" when no class scope is active",
+	"fatal_const_redeclare_builtin":                  "Cannot redeclare constant 'true'",
+	"fatal_finally_break_out":                        "jump out of a finally block is disallowed",
+	"fatal_finally_continue_out":                     "jump out of a finally block is disallowed",
+	"fatal_list_empty":                               "Cannot use empty list",
+	"fatal_list_foreach_key_list":                    "Cannot use list as key element",
+	"fatal_list_lines_empty_after_ref_element":       "Cannot use empty array entries in keyed array assignment",
+	"fatal_list_lines_foreach_mixed_after_ref":       "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_element":           "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_ref":               "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_ref_element":       "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_mixed_after_var":               "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_lines_spread_after_ref":              "Spread operator is not supported in assignments",
+	"fatal_list_mix_syntax":                          "Cannot mix [] and list()",
+	"fatal_list_mixed_keys":                          "Cannot mix keyed and unkeyed array entries in assignments",
+	"fatal_list_ref_non_referenceable":               "Cannot assign reference to non referenceable value",
+	"fatal_list_spread":                              "Spread operator is not supported in assignments",
 	"fatal_magic_method_construct_return_type":       "Method Bad::__construct() cannot declare a return type",
 	"fatal_magic_method_construct_static":            "Method Bad::__construct() cannot be static",
 	"fatal_magic_method_destruct_args":               "Method Bad::__destruct() cannot take arguments",
@@ -757,6 +749,8 @@ var compileFatal = map[string]string{
 	"fatal_method_redeclare":                         "Cannot redeclare A::M()",
 	"fatal_method_this_param":                        "Cannot use $this as parameter",
 	"fatal_method_this_reassign":                     "Cannot re-assign $this",
+	"fatal_named_positional_after":                   "Cannot use positional argument after named argument",
+	"fatal_param_default_redeclared_param":           "Redefinition of parameter $a",
 	"fatal_prop_access_level_redeclare":              "Access level to Child::$v must be public (as in class Base)",
 	"fatal_prop_readonly_default":                    "Readonly property Bad::$x cannot have default value",
 	"fatal_prop_readonly_no_type":                    "Readonly property Bad::$x must have type",
@@ -768,6 +762,9 @@ var compileFatal = map[string]string{
 	"fatal_prop_typed_default_invalid":               "Cannot use string as default value for property Bad::$x of type int",
 	"fatal_prop_typed_default_null":                  "Default value for property of type int may not be null. Use the nullable type ?int to allow null default value",
 	"fatal_prop_void_type":                           "Property Bad::$x cannot have type void",
+	"fatal_redeclare_function":                       "Cannot redeclare function SAME() (previously declared in /w/cases/fatal_redeclare_function.php:3)",
+	"fatal_static_duplicate":                         "Duplicate declaration of static variable $a",
+	"fatal_try_without_catch":                        "Cannot use try without catch or finally",
 	"fatal_type_duplicate_union":                     "Duplicate type int is redundant",
 	"fatal_type_never_return_statement":              "A never-returning function must not return",
 	"fatal_type_param_default_mismatch":              "Cannot use string as default value for parameter $x of type int",
@@ -775,6 +772,14 @@ var compileFatal = map[string]string{
 	"fatal_type_void_param":                          "void cannot be used as a parameter type",
 	"fatal_type_void_return_null":                    "A void function must not return a value (did you mean \"return;\" instead of \"return null;\"?)",
 	"fatal_type_void_return_value":                   "A void function must not return a value",
+	"fatal_unpack_after_named":                       "Cannot use argument unpacking after named arguments",
+	"fatal_unpack_positional_after":                  "Cannot use positional argument after argument unpacking",
+	"fatal_use_autoglobal":                           "Cannot use auto-global as lexical variable",
+	"fatal_use_param_name":                           "Cannot use lexical variable $x as a parameter name",
+	"fatal_use_this":                                 "Cannot use $this as lexical variable",
+	"fatal_use_twice":                                "Cannot use variable $a twice",
+	"fatal_variadic_default":                         "Variadic parameter cannot have a default value",
+	"fatal_variadic_not_last":                        "Only the last parameter can be variadic",
 }
 
 // Fixtures whose PHP compile-time fatal error the compiler itself reports
@@ -789,8 +794,8 @@ var compilerFatal = map[string]CompileError{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 885 {
-		t.Fatalf("want 885 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 1030 {
+		t.Fatalf("want 1030 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

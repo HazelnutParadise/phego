@@ -356,9 +356,11 @@ func (s *vmState) endFinally(f *vmFrame, pc int) (kind uint8, npc int, p vmPendi
 	return p.kind, npc, p, err
 }
 
-// throwValue is OpThrow: the error that throws v.
-func (s *vmState) throwValue(v value) error {
-	v = v.deref()
+// throwValue is OpThrow of register r: the error that throws its value.
+// The exception moves out of the register, so the thrown object has no
+// holder there whether or not the function has liveness facts.
+func (s *vmState) throwValue(regs []value, r uint32) error {
+	v := regs[r].deref()
 	if v.kind != valueObject {
 		return &Throwable{"Error", "Can only throw objects"}
 	}
@@ -366,5 +368,11 @@ func (s *vmState) throwValue(v value) error {
 		return &Throwable{"Error", "Cannot throw objects that do not implement Throwable"}
 	}
 	retain(v)
+	old := regs[r]
+	regs[r] = value{}
+	if err := s.releaseValue(old); err != nil {
+		_ = s.releaseValue(v)
+		return err
+	}
 	return &vmThrown{object: v.object}
 }
