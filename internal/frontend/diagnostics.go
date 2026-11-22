@@ -192,7 +192,7 @@ func diagnosticEncoding(tokens []Token, line int) (diagnostic *SyntaxError, comp
 		name := q.identifier()
 		q.expect('=')
 		value := q.expr()
-		if phpname.EqualFold(name.Text, "encoding") && !encodingLiteral(value) {
+		if phpname.EqualFold(name.Text, "encoding") && !ZvalLiteral(value) {
 			return &SyntaxError{Line: line, Message: "Encoding must be a literal", Compile: true}, true
 		}
 		if !q.accept(',') {

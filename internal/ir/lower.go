@@ -922,48 +922,61 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		directives = directives[:len(directives)-1]
 	}
 	n := &Node{Op: OpDeclare, Line: s.Line}
+	// PHP reports every declare diagnostic on the line of the first
+	// directive's name, not of the declare keyword.
+	line := directives[0].Line
+	// The encoding warning comes from the parser (zend_handle_encoding_
+	// declaration) at the closing parenthesis, before anything compiles.
 	for _, d := range directives {
+		if phpname.EqualFold(d.Children[0].Text, "encoding") {
+			l.diag(s.CloseLine, "Warning", "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings")
+		}
+	}
+	values := make([]*Literal, len(directives))
+	for i, d := range directives {
 		name, value := d.Children[0].Text, d.Children[1]
 		// zend_compile_declare accepts only a ZEND_AST_ZVAL: true, null and
-		// other constant names stay ZEND_AST_CONST and are rejected.
-		if value.Kind != "literal" {
-			l.fail(s.Line, "declare(%s) value must be a literal", name)
+		// other constant names stay ZEND_AST_CONST and are rejected, while
+		// parentheses, plain heredocs and concatenated literals fold to one.
+		if !frontend.ZvalLiteral(value) {
+			l.fail(line, "declare(%s) value must be a literal", name)
 		}
+		values[i] = l.declareValue(value)
 		switch phpname.Lower(name) {
 		case "ticks":
-			if v := l.constantValue(value); v != nil && v.Kind == LitFloat && !phpnum.DoubleFitsLong(v.Float, l.unit.Profile.IntWidth) {
+			if v := values[i]; v != nil && v.Kind == LitFloat && !phpnum.DoubleFitsLong(v.Float, l.unit.Profile.IntWidth) {
 				// zval_get_long warns through zend_dval_to_lval while the
 				// declaration compiles.
-				l.diag(s.Line, "Warning", "The float "+phpnum.FormatFloat(v.Float, -1)+" is not representable as an int, cast occurred")
+				l.diag(line, "Warning", "The float "+phpnum.FormatFloat(v.Float, -1)+" is not representable as an int, cast occurred")
 			}
 		case "encoding":
 			if !l.isFirstStatement(s, false) {
-				l.fail(s.Line, "Encoding declaration pragma must be the very first statement in the script")
+				l.fail(line, "Encoding declaration pragma must be the very first statement in the script")
 			}
-			l.diag(s.Line, "Warning", "declare(encoding=...) ignored because Zend multibyte feature is turned off by settings")
 		case "strict_types":
 			if !l.isFirstStatement(s, true) {
-				l.fail(s.Line, "strict_types declaration must be the very first statement in the script")
+				l.fail(line, "strict_types declaration must be the very first statement in the script")
 			}
 			if body != nil {
-				l.fail(s.Line, "strict_types declaration must not use block mode")
+				l.fail(line, "strict_types declaration must not use block mode")
 			}
-			v := l.constantValue(value)
+			v := values[i]
 			if v == nil || v.Kind != LitInt || (v.Int != 0 && v.Int != 1) {
-				l.fail(s.Line, "strict_types declaration must have 0 or 1 as its value")
+				l.fail(line, "strict_types declaration must have 0 or 1 as its value")
 			}
 			if v.Int == 1 {
 				l.unit.Strict = true
 				l.fn.Strict = true
 			}
 		default:
-			l.diag(s.Line, "Warning", fmt.Sprintf("Unsupported declare '%s'", name))
+			l.diag(line, "Warning", fmt.Sprintf("Unsupported declare '%s'", name))
 		}
-		n.Kids = append(n.Kids, l.seal(&Node{Op: OpDirective, Line: d.Line, Text: phpname.Lower(name), Value: l.constantValue(value)}))
+		n.Kids = append(n.Kids, l.seal(&Node{Op: OpDirective, Line: d.Line, Text: phpname.Lower(name), Value: values[i]}))
 	}
 	ticks := false
-	for _, d := range directives {
-		if v := l.constantValue(d.Children[1]); phpname.EqualFold(d.Children[0].Text, "ticks") && v != nil && declareTicks(v, l.unit.Profile.IntWidth) > 0 {
+	for i, d := range directives {
+		// Any non-zero count ticks; PHP keeps it as an unsigned int.
+		if v := values[i]; phpname.EqualFold(d.Children[0].Text, "ticks") && v != nil && declareTicks(v, l.unit.Profile.IntWidth) != 0 {
 			ticks = true
 		}
 	}
@@ -976,6 +989,26 @@ func (l *lowerer) declare(s *frontend.Node) *Node {
 		l.ticks = true // the rest of the file ticks
 	}
 	return n
+}
+
+// declareValue folds a declare value PHP holds as one ZVAL: a literal, a
+// parenthesized one, a heredoc without interpolation or a concatenation of
+// literals. Anything else is nil (and already rejected).
+func (l *lowerer) declareValue(value *frontend.Node) *Literal {
+	if value.Kind == "literal" {
+		return l.constantValue(value)
+	}
+	if !frontend.ZvalLiteral(value) {
+		return nil
+	}
+	saved := l.constants
+	l.constants = l.syntaxBudget(value)
+	defer func() { l.constants = saved }()
+	l.preEvaluateSyntax(value)
+	if n := l.expr(value); n.Op == OpLiteral {
+		return n.Value
+	}
+	return nil
 }
 
 // declareTicks is zval_get_long of a declare(ticks=...) literal, the tick
@@ -998,8 +1031,8 @@ func declareTicks(v *Literal, width int) int64 {
 		switch {
 		case n.Kind == phpnum.Integer:
 			return n.Int
-		case n.Kind == phpnum.Floating && math.IsNaN(n.Float):
-			return 0
+		case n.Kind == phpnum.Floating && (math.IsNaN(n.Float) || math.IsInf(n.Float, 0)):
+			return 0 // zend_dval_to_lval_cap maps a non-finite value to 0
 		case n.Kind == phpnum.Floating && !phpnum.DoubleFitsLong(n.Float, width):
 			// zend_dval_to_lval_cap saturates.
 			top := int64(math.MaxInt64)
