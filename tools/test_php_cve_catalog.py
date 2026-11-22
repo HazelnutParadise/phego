@@ -106,6 +106,8 @@ class TestTriageRules(unittest.TestCase):
             self.entries(rec, {"component": "engine", "note": "fixed later", "tests": ["x"]})
         self.assertFalse(cat.fixed_after_pinned(record("CVE-2026-2", ["8.4.20", "8.5.12"])))
         self.assertFalse(cat.fixed_after_pinned(record("CVE-2026-3", ["8.4.28"])))
+        self.assertTrue(cat.fixed_after_pinned(record("CVE-2026-4", ["8.6.0"])))
+        self.assertTrue(cat.fixed_after_pinned(record("CVE-2026-5", ["8.3.30", "8.6.0"])))
 
 
 class TestSources(unittest.TestCase):
@@ -164,6 +166,15 @@ class TestAdvisoryPaging(unittest.TestCase):
         nxt = '<https://api.github.com/x?after=abc>; rel="next"'
         with self.assertRaisesRegex(ValueError, "repeated"):
             self.run_pages([FakeResponse([{"ghsa_id": "GHSA-a"}], nxt), FakeResponse([{"ghsa_id": "GHSA-a"}], nxt)])
+
+    def test_an_empty_page_with_a_next_link_fails(self):
+        nxt = '<https://api.github.com/x?after=abc>; rel="next"'
+        with self.assertRaisesRegex(ValueError, "no advisories"):
+            self.run_pages([FakeResponse([], nxt)])
+
+    def test_a_next_link_off_github_fails(self):
+        with self.assertRaisesRegex(ValueError, "outside api.github.com"):
+            self.run_pages([FakeResponse([{"ghsa_id": "GHSA-a"}], '<https://example.com/x>; rel="next"')])
 
     def test_an_object_instead_of_a_list_fails(self):
         with self.assertRaisesRegex(ValueError, "list of advisories"):

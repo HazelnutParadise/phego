@@ -214,6 +214,10 @@ def fetch_advisories(cache, manifest, opener=urllib.request.urlopen):
         (cache / name).write_bytes(body)
         manifest["files"][name] = {"url": url, "sha256": hashlib.sha256(body).hexdigest()}
         nxt = re.search(r'<([^>]+)>;\s*rel="next"', link)
+        if nxt and not page:
+            raise ValueError(f"{url} returned no advisories but a next page")
+        if nxt and not nxt.group(1).startswith("https://api.github.com/"):
+            raise ValueError(f"{url} points its next page outside api.github.com")
         url, page_number = (nxt.group(1) if nxt else None), page_number + 1
 
 
