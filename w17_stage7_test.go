@@ -122,6 +122,13 @@ func w17LargePadding() string {
 // large for the ordinary liveness analysis: a temporary object is released
 // where PHP releases it whatever the size of the function.
 func TestW17Stage7LargeFunctionDestructorTiming(t *testing.T) {
+	w17LargeFunctionFixtures(t, []string{"magic_method_destruct_scope", "magic_method_destruct_unset", "magic_method_destruct_output_order", "magic_method_destruct_end_order", "object_in_arrays", "method_chaining_fluent"})
+}
+
+// w17LargeFunctionFixtures runs the named fixtures with {main} padded past
+// the size of the ordinary liveness analysis and compares the output with
+// the PHP 8.5.12 reference of the unpadded fixture.
+func w17LargeFunctionFixtures(t *testing.T, names []string) {
 	raw, err := os.ReadFile(filepath.Join("tests", "vm", "w17", "reference-64.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -148,7 +155,7 @@ func TestW17Stage7LargeFunctionDestructorTiming(t *testing.T) {
 	}
 	e := mustEngine(t, Config{IntSize: 64})
 	pad := w17LargePadding()
-	for _, name := range []string{"magic_method_destruct_scope", "magic_method_destruct_unset", "magic_method_destruct_output_order", "magic_method_destruct_end_order", "object_in_arrays", "method_chaining_fluent"} {
+	for _, name := range names {
 		t.Run(name, func(t *testing.T) {
 			src, err := os.ReadFile(filepath.Join("tests", "vm", "w17", "cases", name+".php"))
 			if err != nil {

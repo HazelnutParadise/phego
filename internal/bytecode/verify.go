@@ -195,6 +195,9 @@ func verifyImage(b *budget, image Image, minor uint16, cloneCost bool) (Capabili
 	if err := verifyClasses(b, image, minor, cloneCost); err != nil {
 		return 0, err
 	}
+	if image.Functions[image.Entry].Flags&FuncClosure != 0 {
+		return 0, invalid("the entry function is a closure function")
+	}
 	if inferred&^image.Required != 0 {
 		return 0, fail(ErrCapability, "required capability omits an opcode requirement")
 	}
@@ -451,16 +454,29 @@ func format16(in Instruction) bool {
 }
 
 // is17 reports whether op is a format 1.7 opcode.
-func is17(op Opcode) bool { return op >= OpDeclareClass && op <= OpVerifyReturn }
+func is17(op Opcode) bool { return op >= OpDeclareClass && op <= OpArgByRef }
+
+// is18 reports whether op is a format 1.8 opcode. The 1.8 opcodes share
+// the operand roles (Roles17) and the data-flow rules of the 1.7 ones.
+func is18(op Opcode) bool { return op >= OpClosure && op <= OpArgByRef }
 
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	// A format 1.7 opcode in an older file is reported as that: such a
 	// file has no class table, so its operands could never be valid.
+	if minor < 8 && is18(in.Op) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.8, but the file declares format 1.%d", minor))
+	}
 	if minor < 7 && is17(in.Op) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.7, but the file declares format 1.%d", minor))
 	}
 	if err := checkOperands(image, f, in); err != nil {
 		return err
+	}
+	if minor >= 8 && (in.Op == OpCall || in.Op == OpInitCall) && image.Functions[in.B].Flags&FuncClosure != 0 {
+		return invalid("a closure function is entered only through its Closure object, not by a direct call")
+	}
+	if minor < 8 && in.Op == OpReturn && in.Aux != 0 {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.8, but the file declares format 1.%d", minor))
 	}
 	if minor < 7 && format17(in) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.7, but the file declares format 1.%d", minor))
@@ -497,7 +513,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
-		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush:
+		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush, OpReturn:
 	default:
 		if is17(in.Op) {
 			return checkOperands17(image, f, in)
@@ -568,7 +584,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 			return invalid("invalid host call operands")
 		}
 	case OpReturn:
-		if !reg(in.A, Value) || f.ReturnKind != Value || !zero {
+		if in.Aux > ReturnNotice || !reg(in.A, Value) || f.ReturnKind != Value || !zero {
 			return invalid("invalid return operands")
 		}
 	case OpReturnRef:
@@ -1593,6 +1609,17 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32) er
 				if err := push(argShape{kind: shapeMark, fn: UnknownCallee}); err != nil {
 					return err
 				}
+			case OpArgByRef:
+				if mark() < 0 {
+					return invalidPC("arg-by-ref outside a started call")
+				}
+			case OpCallableConvert:
+				// ZEND_CALLABLE_CONVERT replaces the call frame the
+				// preceding INIT built, before any argument is sent.
+				if m := mark(); m < 0 || m != len(stack)-1 {
+					return invalidPC("callable-convert needs a started call without arguments")
+				}
+				stack = stack[:len(stack)-1]
 			case OpNew:
 				// The class has no constructor on the jump edge: no call is
 				// started there.

@@ -29,6 +29,14 @@ type Program struct {
 	// Both are immutable: a run builds its own classes from them.
 	classes []vmClassDecl
 	hoisted []int
+	// Builtin reports a lower-case name of a function PHP declares itself
+	// and Phego does not provide: a callable that names one is refused as
+	// unsupported, not reported as an undefined function. Set once, before
+	// the first run, by the engine that built the Program; nil knows none.
+	Builtin func(lower string) bool
+	// memberFunc marks the functions that are a class member's body or
+	// initializer.
+	memberFunc []bool
 	// trampoline is the index of a function that no code calls: the
 	// callee of a call __call or __callStatic will receive, which takes
 	// any arguments by value.
@@ -98,9 +106,24 @@ type vmFunction struct {
 	returnType string
 	strict     bool
 	typed      bool
+	// Format 1.8. closure marks a closure's body, which only a Closure
+	// object enters; noThis a static closure or method or a plain
+	// function; usesThis a closure body that uses $this. captures is the
+	// closure's use list.
+	closure  bool
+	noThis   bool
+	usesThis bool
+	captures []vmCapture
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
+}
+
+// vmCapture is one variable of a closure's use list: the local that
+// receives it when a call enters the closure.
+type vmCapture struct {
+	local           int32
+	byRef, implicit bool
 }
 
 // opFusedCompareBranch is an internal opcode outside the format's range. It
@@ -174,6 +197,8 @@ func role17(r bytecode.Role) int {
 		return roleClass
 	case bytecode.RoleTarget:
 		return roleTarget
+	case bytecode.RoleFunc:
+		return roleFunc
 	}
 	return roleNone
 }
@@ -326,7 +351,7 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 		return nil, err
 	}
 	n := p.FunctionCount()
-	prog := &Program{consts: pool, funcs: make([]vmFunction, n), byName: make(map[string]int, n), entry: int(p.Entry()), width: width}
+	prog := &Program{consts: pool, funcs: make([]vmFunction, n), byName: make(map[string]int, n), entry: int(p.Entry()), width: width, memberFunc: make([]bool, n)}
 	if prog.entry < 0 || prog.entry >= n {
 		return nil, fmt.Errorf("NewProgram: entry function %d out of range", prog.entry)
 	}
@@ -363,7 +388,7 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 				}
 			}
 		}
-		if i != prog.entry {
+		if i != prog.entry && !f.closure {
 			key := phpname.Lower(f.name)
 			if _, dup := prog.byName[key]; !dup {
 				prog.byName[key] = i
@@ -372,6 +397,13 @@ func NewProgram(p *bytecode.Program) (*Program, error) {
 	}
 	if err := prog.decodeClasses(p); err != nil {
 		return nil, err
+	}
+	// A method or an initializer is no function: a callable string that
+	// spells its bare name must not reach it.
+	for name, i := range prog.byName {
+		if prog.memberFunc[i] {
+			delete(prog.byName, name)
+		}
 	}
 	prog.trampoline = len(prog.funcs)
 	prog.funcs = append(prog.funcs, vmFunction{name: "__call", index: prog.trampoline, variadic: true, paramNames: []string{}, paramByRef: []bool{}, unsupported: "entering the magic call trampoline"})
@@ -472,6 +504,16 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	}
 	f.returnType = fv.ReturnType()
 	f.strict = fv.Flags()&bytecode.FuncStrict != 0
+	f.closure = fv.Flags()&bytecode.FuncClosure != 0
+	f.noThis = fv.Flags()&bytecode.FuncNoThis != 0
+	f.usesThis = fv.Flags()&bytecode.FuncUsesThis != 0
+	for i, n := 0, fv.CaptureCount(); i < n; i++ {
+		c, _ := fv.CaptureAt(i)
+		if int(c.Local) >= f.locals {
+			return f, fail(-1, "capture %d names local %d of %d", i, c.Local, f.locals)
+		}
+		f.captures = append(f.captures, vmCapture{local: int32(c.Local), byRef: c.Flags&bytecode.CaptureByRef != 0, implicit: c.Flags&bytecode.CaptureImplicit != 0})
+	}
 	if n := fv.ParameterCount(); n > 0 {
 		f.paramTypes = make([]string, n)
 		for i := range f.paramTypes {
@@ -637,6 +679,13 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 		}
 	}
 	f.paramLocal, f.paramPC = parameterPrologue(f, code)
+	for i, c := range f.captures {
+		for _, l := range f.paramLocal {
+			if l == c.local {
+				return f, fail(-1, "capture %d names the local of a parameter", i)
+			}
+		}
+	}
 	// The instruction that receives a typed parameter checks it: its
 	// decoded c is the parameter plus one, as for a parameter with a
 	// default.
@@ -720,7 +769,7 @@ func vmLiveness(f *vmFunction) {
 				composite[in.a] = true
 			}
 		case bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropSet, bytecode.OpPropRef, bytecode.OpStaticGet, bytecode.OpStaticSet,
-			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn:
+			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn, bytecode.OpClosure, bytecode.OpCallableConvert:
 			// Format 1.7: every register these define or replace can hold
 			// an object, whose release runs its destructor.
 			roles, _ := bytecode.Roles17(bytecode.Instruction{Op: in.op, Aux: in.aux})
@@ -1029,7 +1078,8 @@ func definesA(op bytecode.Opcode) bool {
 		bytecode.OpUnary, bytecode.OpCast, bytecode.OpIncDec, bytecode.OpIsset, bytecode.OpArrayIsset, bytecode.OpIterInit, bytecode.OpMakeRef,
 		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending,
 		bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropRef, bytecode.OpPropIsset, bytecode.OpStaticGet, bytecode.OpStaticRef,
-		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone:
+		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone,
+		bytecode.OpClosure, bytecode.OpCallableConvert, bytecode.OpArgByRef:
 		return true
 	}
 	return false

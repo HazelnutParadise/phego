@@ -1,0 +1,358 @@
+# W-17 stage 7B, independent review: the regression fixtures before the fixes.
+# Commit 6de0461. For each fixture: Phego's output in display mode, then PHP 8.5.12's (pinned linux/arm64 image, php -n).
+
+=== closure_review_bind_scalar_scope: Phego before the fix
+
+Fatal error: Uncaught TypeError: Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, true given in /w/cases/closure_review_bind_scalar_scope.php:4
+Stack trace:
+#0 /w/cases/closure_review_bind_scalar_scope.php(4): Closure->bindTo(NULL, true)
+#1 {main}
+  thrown in /w/cases/closure_review_bind_scalar_scope.php on line 4
+
+[exit 255]
+=== closure_review_bind_scalar_scope: PHP 8.5.12
+
+Warning: Class "1" not found in /w/cases/closure_review_bind_scalar_scope.php on line 4
+NULL
+
+Warning: Class "1.5" not found in /w/cases/closure_review_bind_scalar_scope.php on line 6
+NULL
+1
+
+Warning: Class "5" not found in /w/cases/closure_review_bind_scalar_scope.php on line 10
+NULL
+
+Warning: Class "" not found in /w/cases/closure_review_bind_scalar_scope.php on line 12
+NULL
+
+[exit 0]
+
+=== closure_review_call_magic: Phego before the fix
+UNSUPPORTED phego: unsupported: Closure::call() on a closure of a magic method in /w/cases/closure_review_call_magic.php on line 5
+=== closure_review_call_magic: PHP 8.5.12
+c:one:zz,1
+c:two:zz,2,3
+c:one:zz,4
+
+[exit 0]
+
+=== closure_review_from_callable_relative: Phego before the fix
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: class "self" not found in /w/cases/closure_review_from_callable_relative.php:3
+Stack trace:
+#0 /w/cases/closure_review_from_callable_relative.php(3): Closure::fromCallable('self::m')
+#1 /w/cases/closure_review_from_callable_relative.php(11): A::t()
+#2 {main}
+  thrown in /w/cases/closure_review_from_callable_relative.php on line 3
+
+[exit 255]
+=== closure_review_from_callable_relative: PHP 8.5.12
+
+Deprecated: Use of "self" in callables is deprecated in /w/cases/closure_review_from_callable_relative.php on line 3
+B
+
+Deprecated: Use of "static" in callables is deprecated in /w/cases/closure_review_from_callable_relative.php on line 4
+B
+
+Deprecated: Use of "parent" in callables is deprecated in /w/cases/closure_review_from_callable_relative.php on line 10
+B
+thisthis
+
+[exit 0]
+
+=== closure_review_get_current: Phego before the fix
+
+Fatal error: Uncaught Error: Call to undefined method Closure::getCurrent() in /w/cases/closure_review_get_current.php:2
+Stack trace:
+#0 /w/cases/closure_review_get_current.php(3): {closure:/w/cases/closure_review_get_current.php:2}()
+#1 {main}
+  thrown in /w/cases/closure_review_get_current.php on line 2
+
+[exit 255]
+=== closure_review_get_current: PHP 8.5.12
+same
+120
+closure
+
+[exit 0]
+
+=== closure_review_instanceof_self: Phego before the fix
+
+Fatal error: Uncaught Error: Cannot use "self" when no class scope is active in /w/cases/closure_review_instanceof_self.php:2
+Stack trace:
+#0 /w/cases/closure_review_instanceof_self.php(3): {closure:/w/cases/closure_review_instanceof_self.php:2}(1)
+#1 {main}
+  thrown in /w/cases/closure_review_instanceof_self.php on line 2
+
+[exit 255]
+=== closure_review_instanceof_self: PHP 8.5.12
+nonono
+no
+
+[exit 0]
+
+=== closure_review_named_native: Phego before the fix
+UNSUPPORTED phego: unsupported: named arguments to Closure::bindTo() in /w/cases/closure_review_named_native.php on line 4
+=== closure_review_named_native: PHP 8.5.12
+ad
+unboundd
+ay
+
+Fatal error: Uncaught Error: Unknown named parameter $callable in /w/cases/closure_review_named_native.php:8
+Stack trace:
+#0 {main}
+  thrown in /w/cases/closure_review_named_native.php on line 8
+
+[exit 255]
+
+=== closure_review_native_callables: Phego before the fix
+UNSUPPORTED phego: unsupported: a closure of a method of the Closure class in /w/cases/closure_review_native_callables.php on line 4
+=== closure_review_native_callables: PHP 8.5.12
+a
+a
+a
+a
+p1
+a
+same
+equal
+
+[exit 0]
+
+=== fatal_callable_review_abstract_array: Phego before the fix
+bx
+
+Fatal error: Uncaught Error: Non-static method A::x() cannot be called statically in /w/cases/fatal_callable_review_abstract_array.php:7
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_callable_review_abstract_array.php on line 7
+
+[exit 255]
+=== fatal_callable_review_abstract_array: PHP 8.5.12
+bx
+
+Fatal error: Uncaught Error: Cannot call abstract method A::x() in /w/cases/fatal_callable_review_abstract_array.php:7
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_callable_review_abstract_array.php on line 7
+
+[exit 255]
+
+=== fatal_callable_review_abstract_string: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Non-static method I::m() cannot be called statically in /w/cases/fatal_callable_review_abstract_string.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_callable_review_abstract_string.php on line 5
+
+[exit 255]
+=== fatal_callable_review_abstract_string: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot call abstract method I::m() in /w/cases/fatal_callable_review_abstract_string.php:5
+Stack trace:
+#0 {main}
+  thrown in /w/cases/fatal_callable_review_abstract_string.php on line 5
+
+[exit 255]
+
+=== fatal_closure_review_get_current: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Call to undefined method Closure::getCurrent() in /w/cases/fatal_closure_review_get_current.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review_get_current.php(5): plain()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_get_current.php on line 2
+
+[exit 255]
+=== fatal_closure_review_get_current: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Current function is not a closure in /w/cases/fatal_closure_review_get_current.php:2
+Stack trace:
+#0 /w/cases/fatal_closure_review_get_current.php(2): Closure::getCurrent()
+#1 /w/cases/fatal_closure_review_get_current.php(5): plain()
+#2 {main}
+  thrown in /w/cases/fatal_closure_review_get_current.php on line 2
+
+[exit 255]
+
+=== fatal_closure_review_new_static: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "static" when no class scope is active in /w/cases/fatal_closure_review_new_static.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_new_static.php(4): {closure:/w/cases/fatal_closure_review_new_static.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_new_static.php on line 3
+
+[exit 255]
+=== fatal_closure_review_new_static: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "static" when no class scope is active in /w/cases/fatal_closure_review_new_static.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_new_static.php(4): {closure:/w/cases/fatal_closure_review_new_static.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_new_static.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review_parent_class: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "parent" when no class scope is active in /w/cases/fatal_closure_review_parent_class.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_parent_class.php(4): {closure:/w/cases/fatal_closure_review_parent_class.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_parent_class.php on line 3
+
+[exit 255]
+=== fatal_closure_review_parent_class: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot use "parent" in the global scope in /w/cases/fatal_closure_review_parent_class.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_parent_class.php(4): {closure:/w/cases/fatal_closure_review_parent_class.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_parent_class.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review_self_call: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "self" when no class scope is active in /w/cases/fatal_closure_review_self_call.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_self_call.php(4): {closure:/w/cases/fatal_closure_review_self_call.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_self_call.php on line 3
+
+[exit 255]
+=== fatal_closure_review_self_call: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "self" when no class scope is active in /w/cases/fatal_closure_review_self_call.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_self_call.php(4): {closure:/w/cases/fatal_closure_review_self_call.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_self_call.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review_self_class: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "self" when no class scope is active in /w/cases/fatal_closure_review_self_class.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_self_class.php(4): {closure:/w/cases/fatal_closure_review_self_class.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_self_class.php on line 3
+
+[exit 255]
+=== fatal_closure_review_self_class: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot use "self" in the global scope in /w/cases/fatal_closure_review_self_class.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_self_class.php(4): {closure:/w/cases/fatal_closure_review_self_class.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_self_class.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review_static_prop: Phego before the fix
+before
+
+Fatal error: Uncaught Error: Cannot use "static" when no class scope is active in /w/cases/fatal_closure_review_static_prop.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_static_prop.php(4): {closure:/w/cases/fatal_closure_review_static_prop.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_static_prop.php on line 3
+
+[exit 255]
+=== fatal_closure_review_static_prop: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Cannot access "static" when no class scope is active in /w/cases/fatal_closure_review_static_prop.php:3
+Stack trace:
+#0 /w/cases/fatal_closure_review_static_prop.php(4): {closure:/w/cases/fatal_closure_review_static_prop.php:3}()
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_static_prop.php on line 3
+
+[exit 255]
+
+=== fatal_closure_review_trace_holds_bindto: Phego before the fix
+before
+dbt
+
+Fatal error: Uncaught TypeError: Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given in /w/cases/fatal_closure_review_trace_holds_bindto.php:5
+Stack trace:
+#0 /w/cases/fatal_closure_review_trace_holds_bindto.php(5): Closure->bindTo(Object(D), Array)
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_bindto.php on line 5
+
+[exit 255]
+=== fatal_closure_review_trace_holds_bindto: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given in /w/cases/fatal_closure_review_trace_holds_bindto.php:5
+Stack trace:
+#0 /w/cases/fatal_closure_review_trace_holds_bindto.php(5): Closure->bindTo(Object(D), Array)
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_bindto.php on line 5
+dbt
+
+[exit 255]
+
+=== fatal_closure_review_trace_holds_call: Phego before the fix
+before
+dcallthrow
+
+Fatal error: Uncaught Error: Call to a member function q() on null in /w/cases/fatal_closure_review_trace_holds_call.php:4
+Stack trace:
+#0 [internal function]: D->{closure:/w/cases/fatal_closure_review_trace_holds_call.php:4}(Object(D))
+#1 /w/cases/fatal_closure_review_trace_holds_call.php(5): Closure->call(Object(D), Object(D))
+#2 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_call.php on line 4
+darg
+
+[exit 255]
+=== fatal_closure_review_trace_holds_call: PHP 8.5.12
+before
+
+Fatal error: Uncaught Error: Call to a member function q() on null in /w/cases/fatal_closure_review_trace_holds_call.php:4
+Stack trace:
+#0 [internal function]: D->{closure:/w/cases/fatal_closure_review_trace_holds_call.php:4}(Object(D))
+#1 /w/cases/fatal_closure_review_trace_holds_call.php(5): Closure->call(Object(D), Object(D))
+#2 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_call.php on line 4
+dcallthrow
+darg
+
+[exit 255]
+
+=== fatal_closure_review_trace_holds_from_callable: Phego before the fix
+before
+dfc
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: no array or string given in /w/cases/fatal_closure_review_trace_holds_from_callable.php:4
+Stack trace:
+#0 /w/cases/fatal_closure_review_trace_holds_from_callable.php(4): Closure::fromCallable(Object(D))
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_from_callable.php on line 4
+
+[exit 255]
+=== fatal_closure_review_trace_holds_from_callable: PHP 8.5.12
+before
+
+Fatal error: Uncaught TypeError: Failed to create closure from callable: no array or string given in /w/cases/fatal_closure_review_trace_holds_from_callable.php:4
+Stack trace:
+#0 /w/cases/fatal_closure_review_trace_holds_from_callable.php(4): Closure::fromCallable(Object(D))
+#1 {main}
+  thrown in /w/cases/fatal_closure_review_trace_holds_from_callable.php on line 4
+dfc
+
+[exit 255]

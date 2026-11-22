@@ -106,6 +106,15 @@ func cloneImage(b *budget, src Image) (Image, error) {
 		if dst.Functions[i].Parameters, ok = cloneParameters(b, f.Parameters); !ok {
 			return Image{}, b.pollOrLimit()
 		}
+		if len(f.Captures) != 0 {
+			if b.chargeWork(uint64(len(f.Captures))) != nil {
+				return Image{}, b.pollOrLimit()
+			}
+			dst.Functions[i].Captures = make([]Capture, len(f.Captures))
+			if !copyChunks(b, dst.Functions[i].Captures, f.Captures) {
+				return Image{}, b.pollOrLimit()
+			}
+		}
 	}
 	if dst.Classes, err = cloneClasses(b, src.Classes); err != nil {
 		return Image{}, err
@@ -253,6 +262,9 @@ func encodedSize(b *budget, image Image, minor uint16) (uint64, error) {
 			return 0, ErrLimit
 		}
 		if minor >= 7 && !add(5) {
+			return 0, ErrLimit
+		}
+		if minor >= 8 && (uint64(len(f.Captures)) > uint64(^uint32(0)) || !add(4+uint64(len(f.Captures))*captureWire)) {
 			return 0, ErrLimit
 		}
 	}

@@ -213,11 +213,11 @@ func TestFormat17Opcodes(t *testing.T) {
 			t.Fatalf("Safety(%d) = %+v, %v", op, s, ok)
 		}
 	}
-	if _, ok := Opcode(76).Safety(); ok {
-		t.Fatal("opcode 76 is known")
+	if _, ok := Opcode(80).Safety(); ok {
+		t.Fatal("opcode 80 is known")
 	}
-	if FormatMinor != 7 {
-		t.Fatalf("FormatMinor = %d, want 7", FormatMinor)
+	if FormatMinor != 8 {
+		t.Fatalf("FormatMinor = %d, want 8", FormatMinor)
 	}
 	if CastObject != CastArray+1 || PushAuto != PushLoad+1 || PushTemp != PushAuto+1 || PushResult != PushTemp+1 || PushElement != PushResult+1 {
 		t.Fatalf("format 1.7 Aux values are renumbered: cast %d, push %d %d %d %d", CastObject, PushAuto, PushTemp, PushResult, PushElement)
@@ -242,7 +242,7 @@ func TestFormat17AcceptsAndRoundTripsValidBodies(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got := binary.LittleEndian.Uint16(data[10:12]); got != 7 {
+			if got := binary.LittleEndian.Uint16(data[10:12]); got != FormatMinor {
 				t.Fatalf("Encode wrote minor %d", got)
 			}
 			q, err := loadBytes(data)
@@ -537,7 +537,7 @@ func TestFormat17FunctionFields(t *testing.T) {
 		edit   func(*Image)
 		detail string
 	}{
-		"unknown function flag":        {func(i *Image) { i.Functions[0].Flags = FuncNoThis << 1 }, "unknown function flags"},
+		"unknown function flag":        {func(i *Image) { i.Functions[0].Flags = FuncUsesThis << 1 }, "unknown function flags"},
 		"return type out of range":     {func(i *Image) { i.Functions[f17am].ReturnType = 999 }, "return type"},
 		"return type far out of range": {func(i *Image) { i.Functions[f17am].ReturnType = 0xffffffff }, "return type"},
 		"return type not a string":     {func(i *Image) { i.Functions[f17am].ReturnType = k17Int + 1 }, "return type"},

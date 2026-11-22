@@ -37,6 +37,8 @@ var opNames = [...]string{
 	bytecode.OpStaticSet: "StaticSet", bytecode.OpFetchStatic: "FetchStatic", bytecode.OpStaticRef: "StaticRef",
 	bytecode.OpClassConst: "ClassConst", bytecode.OpClassName: "ClassName", bytecode.OpInstanceof: "Instanceof",
 	bytecode.OpClone: "Clone", bytecode.OpVerifyReturn: "VerifyReturn",
+	bytecode.OpClosure: "Closure", bytecode.OpBindLexical: "BindLexical", bytecode.OpCallableConvert: "CallableConvert",
+	bytecode.OpArgByRef: "ArgByRef",
 }
 
 var binaryNames = [...]string{
@@ -137,6 +139,8 @@ func memberAuxName(in bytecode.Instruction) string {
 	aux := in.Aux
 	var parts []string
 	switch in.Op {
+	case bytecode.OpBindLexical:
+		return "capture " + strconv.Itoa(int(aux))
 	case bytecode.OpVerifyReturn:
 		return name([]string{bytecode.ReturnValue: "value", bytecode.ReturnNone: "none", bytecode.ReturnNever: "never"}, int(aux))
 	case bytecode.OpInitMethod:
@@ -268,6 +272,12 @@ func operands17(image bytecode.Image, in bytecode.Instruction) string {
 			parts = append(parts, "class "+strconv.FormatUint(uint64(v), 10)+" "+n)
 		case role == bytecode.RoleTarget:
 			parts = append(parts, "target "+strconv.FormatUint(uint64(v), 10))
+		case role == bytecode.RoleFunc:
+			n := "?"
+			if int(v) < len(image.Functions) {
+				n = strconv.Quote(image.Functions[v].Name)
+			}
+			parts = append(parts, "func "+strconv.FormatUint(uint64(v), 10)+" "+n)
 		}
 	}
 	return strings.Join(parts, ", ")
@@ -316,7 +326,7 @@ func constantText(c bytecode.Constant) string {
 var functionFlagNames = []struct {
 	flag bytecode.FunctionFlags
 	name string
-}{{bytecode.FuncStrict, "strict"}, {bytecode.FuncNoThis, "nothis"}}
+}{{bytecode.FuncStrict, "strict"}, {bytecode.FuncNoThis, "nothis"}, {bytecode.FuncClosure, "closure"}, {bytecode.FuncUsesThis, "usesthis"}}
 
 var classFlagNames = []struct {
 	flag bytecode.ClassFlags
@@ -465,7 +475,7 @@ func Disassemble(image bytecode.Image) string {
 					flags = append(flags, n.name)
 				}
 			}
-			if rest := f.Flags &^ (bytecode.FuncStrict | bytecode.FuncNoThis); rest != 0 {
+			if rest := f.Flags &^ (bytecode.FuncStrict | bytecode.FuncNoThis | bytecode.FuncClosure | bytecode.FuncUsesThis); rest != 0 {
 				flags = append(flags, strconv.Itoa(int(rest)))
 			}
 			fmt.Fprintf(&b, " flags=%s", strings.Join(flags, "+"))
@@ -474,6 +484,16 @@ func Disassemble(image bytecode.Image) string {
 			fmt.Fprintf(&b, " returns %s", opt(f.ReturnType))
 		}
 		b.WriteByte('\n')
+		for i, c := range f.Captures {
+			fmt.Fprintf(&b, "  capture %d local %d", i, c.Local)
+			if c.Flags&bytecode.CaptureByRef != 0 {
+				b.WriteString(" byref")
+			}
+			if c.Flags&bytecode.CaptureImplicit != 0 {
+				b.WriteString(" implicit")
+			}
+			b.WriteByte('\n')
+		}
 		for i, p := range f.Parameters {
 			fmt.Fprintf(&b, "  param %d %s", i, str(p.Name))
 			for _, n := range []struct {

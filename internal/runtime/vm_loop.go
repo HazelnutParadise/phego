@@ -281,6 +281,12 @@ func (s *vmState) loop() {
 			pc = 0
 			continue
 		case bytecode.OpReturn:
+			if in.aux != 0 {
+				s.h.warn(levelNotice, "Only variable references should be returned by reference")
+				if s.stopped() {
+					return
+				}
+			}
 			v := take(regs, in.a)
 			if v.kind == valueReference {
 				// A function returns the value of a reference.
@@ -656,6 +662,34 @@ func (s *vmState) loop() {
 				s.stop(err)
 				return
 			}
+		case bytecode.OpClosure:
+			if err := s.makeClosure(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpBindLexical:
+			if err := s.bindLexical(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpCallableConvert:
+			if err := s.callableConvert(f, in); err != nil {
+				s.stop(err)
+				return
+			}
+		case bytecode.OpArgByRef:
+			// ZEND_CHECK_FUNC_ARG.
+			rec, err := s.pendingCall()
+			if err != nil {
+				s.stop(err)
+				return
+			}
+			pos := len(s.args) - rec.base - rec.shift
+			byRef := rec.native == 0 && pos >= 0 && s.prog.funcs[rec.fn].byRefAt(pos)
+			if err := s.setReg(regs, in.a, boolValue(byRef)); err != nil {
+				s.stop(err)
+				return
+			}
 		case bytecode.OpParamDefault:
 			// RECV_INIT: the default's code is skipped for a passed argument,
 			// and for a default an earlier call evaluated and cached.
@@ -773,6 +807,14 @@ func opcodeName(op bytecode.Opcode) string {
 		return "Clone"
 	case bytecode.OpVerifyReturn:
 		return "VerifyReturn"
+	case bytecode.OpClosure:
+		return "Closure"
+	case bytecode.OpBindLexical:
+		return "BindLexical"
+	case bytecode.OpCallableConvert:
+		return "CallableConvert"
+	case bytecode.OpArgByRef:
+		return "ArgByRef"
 	}
 	return "opcode " + strconv.Itoa(int(op))
 }
