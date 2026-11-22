@@ -3061,7 +3061,7 @@
     "third_party/php-sort/PHP-LICENSE": "b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a",
     "third_party/php-sort/UPSTREAM.json": "38d0c4134ca1ef01f3e098afda158ed5fbb655f60588e9f3d323cb557b967867",
     "third_party/php-sort/Zend-LICENSE": "509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b",
-    "tools/AGENTS.md": "0abd9d75d1ac41aac94205113919e0b8b4ce1264af83f57b782eb5061e840a2b",
+    "tools/AGENTS.md": "08ab7e7868ca3fc8d0e530ff5cfe9d501f7c3eeba499a0bd330af34709c188e2",
     "tools/archive_license_inventory.py": "a90cc1bdc88cb96eb154a503e204513f650eab01244fd8b485523f903452b9c6",
     "tools/benchstat-pair.sh": "5d7a90a53a00a8f574c178e00b5566ad43ee9ab69fbadddbbdd9bbd9df031fbc",
     "tools/benchstat-variants.sh": "50bd5ab6f4b27172c142928731636342cc91ebb977600b3a445bfdd233e6a214",
