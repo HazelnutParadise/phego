@@ -1502,6 +1502,12 @@ func (l *lowerer) staticCall(n *frontend.Node) *Node {
 
 func (l *lowerer) newExpr(n *frontend.Node) *Node {
 	nd := &Node{Op: OpNew, Line: n.Line, Kids: []*Node{nil}}
+	if c := n.Children[0]; c != nil && c.Line > n.Line {
+		// zend_ast_create gives ZEND_AST_NEW the line of its first child,
+		// the class: an exception created by "new" on one line and the
+		// class name on the next records the class name's line.
+		nd.Line = c.Line
+	}
 	l.classOperand(nd, n.Children[0])
 	if a := n.Children[1]; a != nil {
 		if a.Kind == "callable_args" {

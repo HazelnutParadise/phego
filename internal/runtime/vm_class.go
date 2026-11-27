@@ -283,6 +283,19 @@ func (s *vmState) lookupClass(name string) *class {
 			return stringableBuiltin
 		}
 	}
+	if c := throwableBuiltins[lower]; c != nil {
+		// A class is registered with its parents; the interfaces come
+		// along by name.
+		for _, i := range [2]*class{stringableBuiltin, throwableBuiltin} {
+			if s.h.classes[phpname.Lower(i.name)] == nil && s.h.registerClass(i) != nil {
+				return nil
+			}
+		}
+		if s.h.registerClass(c) == nil {
+			s.throwables = true
+			return c
+		}
+	}
 	return nil
 }
 
@@ -421,6 +434,9 @@ func (s *vmState) declareClass(index int) error {
 				return h.discard(v)
 			}
 		}
+	}
+	if err := s.linkThrowable(d, &spec); err != nil {
+		return err
 	}
 	if err := s.linkCheck(vc, d, &spec); err != nil {
 		return err

@@ -70,7 +70,7 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 	}
 	for _, n := range append(names, cl.Traits...) {
 		lower := phpname.Lower(n.Resolved)
-		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "stringable" && lower != "closure" {
+		if !c.declaredClass[lower] && isBuiltinClass(lower) && lower != "closure" && !supportedBuiltinClasses[lower] {
 			return fail("extending or implementing builtin class "+n.Resolved, cl.Line)
 		}
 	}
@@ -608,7 +608,11 @@ func (fc *fnCompiler) newExpr(n *ir.Node) operand {
 	}
 	res := fc.alloc()
 	ref, class := fc.classRef(n.Name, n.Kids[0])
-	fc.at(n.Line)
+	if n.Name != nil {
+		// A class given by an expression leaves the line where compiling
+		// the expression ended, as PHP does.
+		fc.at(n.Line)
+	}
 	none := fc.label()
 	aux := uint16(ref)
 	if len(n.Args) > 0 {

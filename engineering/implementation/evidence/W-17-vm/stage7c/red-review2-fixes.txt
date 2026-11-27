@@ -1,0 +1,492 @@
+# W-17 stage 7C, second review: output of the reviewer's reproducers before the fixes (commit 0f22146).
+# PHP is the pinned arm64 image; each block is one probe of ~/.cache/phego-work/review7c-2.
+
+===== c01_ret_foreach_try_catch.php
+--- php
+dtor cv
+dtor o
+2
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/c01_ret_foreach_try_catch.php: invalid bytecode at byte -1, function 1, instruction 19: register read before definition
+
+===== g02_break2_in_try_nested_foreach.php
+--- php
+13
+after
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/g02_break2_in_try_nested_foreach.php: invalid bytecode at byte -1, function 0, instruction 16: register read before definition
+
+===== g09_switch_in_try_return.php
+--- php
+onenone
+
+[exit 0]
+--- phego before the fix
+
+[exit 0]ERR phego: internal error while verifying /w/cases/g09_switch_in_try_return.php: invalid bytecode at byte -1, function 1, instruction 8: register read before definition
+
+===== a01_unwind_tmp_vs_cv.php
+--- php
+dtor arg
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(5): D->__destruct()
+#1 /w/cases/a01_unwind_tmp_vs_cv.php(6): f()
+#2 {main}
+dtor cv
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+caught 3
+
+[exit 0]
+--- phego before the fix
+dtor cv
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+dtor arg
+#0 /w/cases/a01_unwind_tmp_vs_cv.php(6): D->__destruct()
+#1 {main}
+caught 3
+
+[exit 0]
+
+===== i02.php
+--- php
+dtor call: #0 [internal function]: D->__destruct()
+#1 /w/cases/i02.php(5): Closure->call(Object(C), 5)
+#2 {main}
+7
+
+[exit 0]
+--- phego before the fix
+dtor call: #0 /w/cases/i02.php(5): D->__destruct()
+#1 {main}
+7
+
+[exit 0]
+
+===== i19.php
+--- php
+#0 /w/cases/i19.php(4): D->__destruct()
+#1 /w/cases/i19.php(4): Closure->__invoke(5)
+#2 {main}
+5
+
+[exit 0]
+--- phego before the fix
+#0 /w/cases/i19.php(4): D->__destruct()
+#1 {main}
+5
+
+[exit 0]
+
+===== e07_throw_nonobj_coalesce.php
+--- php
+Can only throw objects 6
+
+[exit 0]
+--- phego before the fix
+Can only throw objects 5
+
+[exit 0]
+
+===== e08_throw_call_multiline.php
+--- php
+Can only throw objects 5
+
+[exit 0]
+--- phego before the fix
+Can only throw objects 4
+
+[exit 0]
+
+===== m06.php
+--- php
+4
+
+[exit 0]
+--- phego before the fix
+3
+
+[exit 0]
+
+===== m01.php
+--- php
+4
+
+[exit 0]
+--- phego before the fix
+3
+
+[exit 0]
+
+===== j08.php
+--- php
+
+Fatal error: Cannot redeclare non static Exception::$message as static E::$message in /w/cases/j08.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+[exit 0]
+
+===== j09.php
+--- php
+
+Fatal error: Cannot redeclare non-readonly property Exception::$message as readonly E::$message in /w/cases/j09.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Type of E::$message must be omitted to match the parent definition in class Exception in /w/cases/j09.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+===== k05.php
+--- php
+
+Fatal error: Access level to E::$code must be protected (as in class Exception) or weaker in /w/cases/k05.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Type of E::$file must be string (as in class Exception) in /w/cases/k05.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+===== k03.php
+--- php
+
+Fatal error: Access level to E::$message must be protected (as in class Exception) or weaker in /w/cases/k03.php on line 2
+Stack trace:
+#0 {main}
+
+[exit 255]
+--- phego before the fix
+
+Fatal error: Access level to E::$message must be protected (as in class Exception) in /w/cases/k03.php on line 3
+Stack trace:
+#0 {main}
+
+[exit 255]
+
+# Follow-up review of the second fixes: output before the third fixes (commit 6842c7a), probes of ~/.cache/phego-work/review7c-3.
+
+===== e07_catch_return.php
+--- php
+catch
+d2
+d1
+1
+end
+
+[exit 0]
+--- phego before the fix
+d2
+catch
+d1
+1
+end
+
+[exit 0]
+
+===== c05_continue2_catch.php
+--- php
+c13
+d4
+d3
+c23
+d4
+d1
+after
+d2
+d3
+end
+
+[exit 0]
+--- phego before the fix
+d4
+c13
+d3
+d4
+c23
+d1
+after
+d2
+d3
+end
+
+[exit 0]
+
+===== e05_nested_catch_break2.php
+--- php
+catch
+d4
+d2
+after
+d1
+d3
+end
+
+[exit 0]
+--- phego before the fix
+d4
+catch
+d2
+after
+d1
+d3
+end
+
+[exit 0]
+
+===== f03_return_three_levels.php
+--- php
+d6
+d4
+d2
+d1
+d3
+d5
+end
+
+[exit 0]
+--- phego before the fix
+d2
+d4
+d6
+d1
+d3
+d5
+end
+
+[exit 0]
+
+# Fourth review: output before the last fixes (the tree reviewed, 6842c7a plus the exit stubs), probes of ~/.cache/phego-work/review7c-4.
+
+===== u01.php
+--- php
+~Tb Qtb Px end
+~a 
+[exit 0]
+--- phego before the fix
+~Tb 
+Fatal error: Uncaught Exception: tb in /w/cases/u01.php:3
+Stack trace:
+#0 /w/cases/u01.php(4): T->__destruct()
+#1 {main}
+  thrown in /w/cases/u01.php on line 3
+~a 
+[exit 255]
+
+===== r01.php
+--- php
+~Tb Qtb F fell
+
+[exit 0]
+--- phego before the fix
+~Tb Utb
+
+[exit 0]
+
+===== r03.php
+--- php
+~Tb F Qtb fell
+
+[exit 0]
+--- phego before the fix
+~Tb Qtb fell
+
+[exit 0]
+
+# Fifth review: output before its fixes (commit 077f7ca), probes of ~/.cache/phego-work/review7c-6.
+
+===== c1.php
+--- php
+~D3
+~D1
+F
+~D2
+ret
+done
+
+[exit 0]
+--- phego before the fix
+~D1
+~D3
+F
+~D2
+ret
+done
+
+[exit 0]
+
+===== c4.php
+--- php
+~T1
+C t1<
+F
+~T2
+G t2<
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+G t2<t1<
+done
+
+[exit 0]
+
+===== c6.php
+--- php
+~T1
+F
+~D2
+ret
+done
+
+[exit 0]
+--- phego before the fix
+~D2
+~T1
+G t1<
+done
+
+[exit 0]
+
+===== fin.php
+--- php
+~T
+F
+G t
+
+[exit 0]
+--- phego before the fix
+~T
+G t
+
+[exit 0]
+
+===== cv2.php
+--- php
+~T1
+~T2
+t2<t1
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+t1<-
+done
+
+[exit 0]
+
+===== cv3.php
+--- php
+~T1
+~T2
+t2<t1
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+t1<-
+done
+
+[exit 0]
+
+# Sixth review: output before its fix (commit 3550242), probes of ~/.cache/phego-work/review7c-7.
+
+===== e2.php
+--- php
+bye
+~T1
+
+Fatal error: Uncaught Exception: T1 in /w/cases/e2.php:2
+Stack trace:
+#0 /w/cases/e2.php(3): T->__destruct()
+#1 {main}
+  thrown in /w/cases/e2.php on line 2
+
+[exit 255]
+--- phego before the fix
+bye
+~T1
+
+Fatal error: Uncaught Exception: T1 in /w/cases/e2.php:2
+Stack trace:
+#0 /w/cases/e2.php(3): T->__destruct()
+#1 {main}
+  thrown in /w/cases/e2.php on line 2
+
+[exit 255]
+
+===== e3.php
+--- php
+bye
+~T1
+caught
+
+[exit 0]
+--- phego before the fix
+bye
+~T1
+caught
+
+[exit 0]
+
+===== c9.php
+--- php
+bye
+~T1
+~T2
+
+Fatal error: Uncaught Exception: T1 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+
+Next Exception: T2 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+  thrown in /w/cases/c9.php on line 3
+
+[exit 255]
+--- phego before the fix
+bye
+~T1
+~T2
+
+Fatal error: Uncaught Exception: T1 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+
+Next Exception: T2 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+  thrown in /w/cases/c9.php on line 3
+
+[exit 255]

@@ -264,20 +264,27 @@ func TestStage2ForeachShape(t *testing.T) {
 		})
 	}
 	// Leaving an inner foreach for an outer loop drops the inner iterator:
-	// "break 2" and "continue 2" each emit a Drop before their Jump.
+	// "break 2" and "continue 2" each jump to a stub after the inner loop,
+	// a Drop followed by the Jump to the outer loop's target (stage 7C:
+	// the Drop must not sit inside a try block around the break).
 	img = compile(t, "<?php\nforeach ($a as $x) { foreach ($b as $y) { if ($y) break 2; if ($x) continue 2; } }\n")
-	drops := 0
 	code := img.Functions[0].Code
 	inner := instructions(img, 0, bytecode.OpIterInit)[1].A
+	var innerDrops []int
 	for pc, in := range code {
-		// The Drop that is the taken branch of an if, followed by the Jump
-		// out of the inner loop.
-		if in.Op == bytecode.OpDrop && in.A == inner && code[pc-1].Op == bytecode.OpBranch && code[pc+1].Op == bytecode.OpJump {
-			drops++
+		if in.Op == bytecode.OpDrop && in.A == inner {
+			innerDrops = append(innerDrops, pc)
 		}
 	}
-	if drops != 2 || len(instructions(img, 0, bytecode.OpDrop)) != 4 {
-		t.Fatalf("%d Drop of the inner iterator on the way out, %d Drop in all; want 2 and 4\n%s", drops, len(instructions(img, 0, bytecode.OpDrop)), Disassemble(img))
+	// The inner loop's own Drop, then the two stubs, each followed by a
+	// Jump to a different target of the outer loop.
+	ok := len(innerDrops) == 3 && len(instructions(img, 0, bytecode.OpDrop)) == 4
+	if ok {
+		first, second := code[innerDrops[1]+1], code[innerDrops[2]+1]
+		ok = first.Op == bytecode.OpJump && second.Op == bytecode.OpJump && first.A != second.A
+	}
+	if !ok {
+		t.Fatalf("Drops of the inner iterator at %v, %d Drop in all; want the loop's own and two stubs, and 4 in all\n%s", innerDrops, len(instructions(img, 0, bytecode.OpDrop)), Disassemble(img))
 	}
 	for _, tc := range []struct{ name, src, want string }{
 		{"values and keys", `foreach (["x" => 1, 5 => "five"] as $k => $v) { echo $k, "=", $v, ";"; }`, "x=1;5=five;"},

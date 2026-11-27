@@ -331,15 +331,15 @@ func TestRunRefusesClosedAndForeignEngines(t *testing.T) {
 func TestUnsupportedConstructIsLocated(t *testing.T) {
 	e := mustEngine(t, Config{})
 	// Stage 2 runs "$a[0] += 1", stage 3 "$a[0] = &$b" and stage 4
-	// "[$x] = $a", and stage 7A objects, the constructs this test used
-	// before; exceptions are still outside the VM.
-	src := "<?php\n$a = [1];\nthrow $a;\n"
+	// "[$x] = $a", stage 7A objects and stage 7C throw, the constructs this
+	// test used before; goto is still outside the VM.
+	src := "<?php\n$a = [1];\ngoto done;\ndone:\n"
 	_, err := e.Compile(context.Background(), "app/x.php", src)
 	var ue *UnsupportedError
-	if !errors.As(err, &ue) || ue.Feature != "throw" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
+	if !errors.As(err, &ue) || ue.Feature != "goto" || ue.File != "app/x.php" || ue.Line != 3 || ue.Option != "" {
 		t.Fatalf("%#v", err)
 	}
-	if got := err.Error(); got != "phego: unsupported: throw in app/x.php on line 3" {
+	if got := err.Error(); got != "phego: unsupported: goto in app/x.php on line 3" {
 		t.Fatalf("Error() = %q", got)
 	}
 	d, ok := Diagnose(err)
@@ -350,11 +350,11 @@ func TestUnsupportedConstructIsLocated(t *testing.T) {
 	if err := diag.Render(&b, d, diag.Options{Source: func(string) ([]byte, bool) { return []byte(src), true }}); err != nil {
 		t.Fatal(err)
 	}
-	const golden = `error[PHG3001]: unsupported PHP construct: throw
+	const golden = `error[PHG3001]: unsupported PHP construct: goto
  --> app/x.php:3:1
   |
-3 | throw $a;
-  | ^^^^^^^^^ this build's VM cannot run this yet
+3 | goto done;
+  | ^^^^^^^^^^ this build's VM cannot run this yet
   |
   = note: this build's first VM stage does not run that construct yet, so the program is refused instead of running partly
   = help: run the program on a Phego build whose VM implements the construct; engineering/decisions/W-17-vm.md lists the stages

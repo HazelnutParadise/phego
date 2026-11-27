@@ -3,6 +3,8 @@ package vm
 import (
 	"sort"
 
+	"github.com/HazelnutParadise/phego/internal/ir"
+
 	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
@@ -39,7 +41,13 @@ func isBuiltinClass(name string) bool {
 }
 
 // supportedBuiltinClasses are the builtin classes the runtime provides.
-var supportedBuiltinClasses = map[string]bool{"stdclass": true, "stringable": true, "closure": true}
+var supportedBuiltinClasses = func() map[string]bool {
+	out := map[string]bool{"stdclass": true, "stringable": true, "closure": true, "throwable": true}
+	for name := range ir.BuiltinThrowables {
+		out[name] = true
+	}
+	return out
+}()
 
 // IsBuiltinFunction reports whether lower, a lower-case function name
 // without a leading backslash, is a function PHP 8.5.12 declares under

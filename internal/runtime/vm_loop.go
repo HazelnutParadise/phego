@@ -17,6 +17,10 @@ func (s *vmState) loop() {
 	f := s.frames[len(s.frames)-1]
 	code, regs := f.code, f.regs
 	pc := 0
+	// rerr is the error of the instruction that jumps to raise, and rv the
+	// value of the Return that jumps to ret.
+	var rerr error
+	var rv value
 	for {
 		f.pc = pc
 		s.steps++
@@ -40,8 +44,8 @@ func (s *vmState) loop() {
 			regs[in.a] = s.prog.consts[in.b]
 			if old.kind >= valueArray {
 				if err := s.releaseValue(old); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 			}
 			goto advance
@@ -49,8 +53,8 @@ func (s *vmState) loop() {
 			if in.aux == 1 {
 				f.locs[in.a] = f.locs[in.b]
 			} else if err := s.setReg(regs, in.a, regs[in.b]); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			goto advance
 		case bytecode.OpLocal:
@@ -60,8 +64,8 @@ func (s *vmState) loop() {
 			l := f.locs[in.b]
 			if l <= 0 || int(l) > len(f.locals) {
 				if err := s.loadElement(f, in); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				goto advance
 			}
@@ -81,8 +85,8 @@ func (s *vmState) loop() {
 			if old := regs[in.a]; v.kind < valueArray && old.kind < valueArray {
 				regs[in.a] = v
 			} else if err := s.setReg(regs, in.a, v); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			goto advance
 		case bytecode.OpStore:
@@ -92,16 +96,16 @@ func (s *vmState) loop() {
 				s.cacheDefault(f, in)
 				if f.fn.typed {
 					if err := s.checkParameter(f, int(in.c)-1); err != nil {
-						s.stop(err)
-						return
+						rerr = err
+						goto raise
 					}
 				}
 			}
 			l := f.locs[in.a]
 			if l <= 0 || int(l) > len(f.locals) {
 				if err := s.storeElement(f, in); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				goto advance
 			}
@@ -113,8 +117,8 @@ func (s *vmState) loop() {
 			if slot.kind < valueArray && v.kind < valueArray {
 				*slot = v
 			} else if err := h.assignPHP(slot, v, f.fn.strict); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			goto advance
 		case bytecode.OpBinary:
@@ -124,8 +128,8 @@ func (s *vmState) loop() {
 			if !ok {
 				var err error
 				if r, err = s.binary(op, a, b); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				if s.stopped() {
 					return
@@ -134,8 +138,8 @@ func (s *vmState) loop() {
 			if old := regs[in.a]; r.kind < valueArray && old.kind < valueArray {
 				regs[in.a] = r
 			} else if err := s.setReg(regs, in.a, r); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			goto advance
 		case opFusedCompareBranch:
@@ -145,16 +149,16 @@ func (s *vmState) loop() {
 			if !ok {
 				var err error
 				if r, err = s.binary(op, a, b); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				if s.stopped() {
 					return
 				}
 			}
 			if err := s.setReg(regs, in.a, r); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			// The Branch at pc+1, with its own step and location.
 			pc++
@@ -193,8 +197,8 @@ func (s *vmState) loop() {
 			}
 			if in.nkill != 0 {
 				if err := s.kill(f, in); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 			}
 			target := int(in.c)
@@ -209,8 +213,8 @@ func (s *vmState) loop() {
 		case bytecode.OpPush:
 			if in.b != 0 {
 				if err := s.sendNamed(f, in); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				break
 			}
@@ -218,13 +222,13 @@ func (s *vmState) loop() {
 				// The callee, found when the call started, decides.
 				rec, err := s.pendingCall()
 				if err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				v, err := s.sendByCallee(f, in, rec, len(s.args)-rec.base)
 				if err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				s.args = append(s.args, v)
 				break
@@ -233,8 +237,8 @@ func (s *vmState) loop() {
 				// A Location: sent by reference, or its value read now.
 				v, err := s.pushValue(f, in)
 				if err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				s.args = append(s.args, v)
 				break
@@ -254,12 +258,12 @@ func (s *vmState) loop() {
 			s.args = append(s.args, v)
 		case bytecode.OpCall:
 			if in.aux != 0 {
-				s.stop(s.unsupported("calls returning a location"))
-				return
+				rerr = s.unsupported("calls returning a location")
+				goto raise
 			}
 			if err := s.push(&s.prog.funcs[in.b], int(in.c), in.a); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if s.poll() {
 				return
@@ -270,8 +274,8 @@ func (s *vmState) loop() {
 			continue
 		case bytecode.OpCallValue:
 			if err := s.callValue(regs[in.b], int(in.c), in.a); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if s.poll() {
 				return
@@ -293,44 +297,30 @@ func (s *vmState) loop() {
 				t := v.ref.target
 				retain(t)
 				if err := s.releaseValue(v); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				v = t
 			}
-			if len(s.frames) == s.floor {
-				s.ended = true
-				s.end = completion{kind: endReturn, value: v, returnOwned: true}
-				return
-			}
-			if err := s.ret(v); err != nil {
-				s.stop(err)
-				return
-			}
-			if s.poll() {
-				return
-			}
-			f = s.frames[len(s.frames)-1]
-			code, regs = f.code, f.regs
-			pc = f.pc + 1
-			continue
+			rv = v
+			goto ret
 		case bytecode.OpOutput:
 			if c := s.output(regs[in.a]); c.kind != endNormal {
-				s.stop(c)
-				return
+				rerr = c
+				goto raise
 			}
 			if s.ended {
 				return
 			}
 		case bytecode.OpNewArray:
 			if err := s.setReg(regs, in.a, h.newArrayValue()); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArrayGet:
 			if err := s.arrayGet(regs, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpDrop:
 			if in.aux == 1 {
@@ -339,8 +329,8 @@ func (s *vmState) loop() {
 				v := regs[in.a]
 				regs[in.a] = value{}
 				if err := s.releaseValue(v); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 			}
 		case bytecode.OpUnary:
@@ -349,8 +339,8 @@ func (s *vmState) loop() {
 				err = s.setReg(regs, in.a, r)
 			}
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpCast:
 			r, err := s.cast(bytecode.CastKind(in.aux), regs[in.b])
@@ -358,53 +348,53 @@ func (s *vmState) loop() {
 				err = s.setReg(regs, in.a, r)
 			}
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpIncDec:
 			if err := s.incDec(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArraySet:
 			if err := s.arraySet(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArrayAppend:
 			if err := s.arrayAppend(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArrayUnset:
 			if err := s.arrayUnset(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpIsset:
 			if err := s.isset(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArrayAdd:
 			if err := s.arrayAdd(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArrayIsset:
 			if err := s.arrayIsset(regs, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpUnset:
 			if err := s.unset(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpFetchDim:
 			if err := s.fetchDim(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpIterInit, bytecode.OpIterNext:
 			var more bool
@@ -424,8 +414,8 @@ func (s *vmState) loop() {
 				more, err = s.iterNext(f, in)
 			}
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if s.stopped() {
 				return
@@ -435,8 +425,8 @@ func (s *vmState) loop() {
 			}
 			if in.nkill != 0 {
 				if err := s.kill(f, in); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 			}
 			target := int(in.c)
@@ -447,64 +437,64 @@ func (s *vmState) loop() {
 			continue
 		case bytecode.OpBind:
 			if err := s.bind(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpMakeRef:
 			if err := s.makeRef(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpIterKey:
 			if ri := s.refIter(regs[in.b]); ri != nil {
 				if err := s.iterKeyRef(f, in, ri); err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				goto advance
 			}
 			if err := s.iterKey(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpFetchConst:
 			if err := s.fetchConst(f, in, uint64(f.fn.index)<<32|uint64(pc)); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpDeclareConst:
 			if err := s.declareConst(regs, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpBeginSilence:
 			// ZEND_BEGIN_SILENCE: the old error_reporting is saved in the
 			// register, then only the fatal levels stay on.
 			if err := s.setReg(regs, in.a, value{kind: valueInt, integer: int64(s.reporting)}); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			s.silence()
 			goto advance
 		case bytecode.OpEndSilence:
 			if err := s.unsilence(regs[in.a]); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			goto advance
 		case bytecode.OpMatchError:
-			s.stop(s.matchError(regs[in.a]))
-			return
+			rerr = s.matchError(regs[in.a])
+			goto raise
 		case bytecode.OpBindGlobal:
 			if err := s.bindGlobal(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpStaticInit:
 			bound, err := s.staticInit(f, in)
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if bound {
 				target := int(in.b)
@@ -517,29 +507,29 @@ func (s *vmState) loop() {
 			goto advance
 		case bytecode.OpBindStatic:
 			if err := s.bindStatic(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpRecvVariadic:
 			if err := s.recvVariadic(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpInitCall:
 			s.calls = append(s.calls, vmPendingCall{fn: int(in.b), base: len(s.args), depth: len(s.frames)})
 			goto advance
 		case bytecode.OpSendUnpack:
 			if err := s.sendUnpack(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpCallPending:
 			if err := s.callPending(in); err != nil {
 				if err == errNoFrame {
 					break
 				}
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if s.poll() {
 				return
@@ -550,14 +540,14 @@ func (s *vmState) loop() {
 			continue
 		case bytecode.OpDeclareClass:
 			if err := s.declareClass(int(in.b)); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpNew:
 			jump, err := s.newObject(f, in)
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			if s.stopped() {
 				return
@@ -565,8 +555,8 @@ func (s *vmState) loop() {
 			if jump {
 				if in.nkill != 0 {
 					if err := s.kill(f, in); err != nil {
-						s.stop(err)
-						return
+						rerr = err
+						goto raise
 					}
 				}
 				pc = int(in.c)
@@ -574,121 +564,121 @@ func (s *vmState) loop() {
 			}
 		case bytecode.OpInitMethod:
 			if err := s.initMethod(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpInitStatic:
 			if err := s.initStatic(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpThis:
 			if err := s.this(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpPropGet:
 			if err := s.propGet(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpPropSet:
 			if err := s.propSet(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpFetchProp:
 			if err := s.fetchProp(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpPropRef:
 			if err := s.propRef(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpPropIsset:
 			if err := s.propIsset(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpPropUnset:
 			if err := s.propUnset(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpStaticGet:
 			if err := s.staticGet(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpStaticSet:
 			if err := s.staticSet(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpFetchStatic:
 			if err := s.fetchStatic(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpStaticRef:
 			if err := s.staticRef(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpClassConst:
 			if err := s.classConst(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpClassName:
 			if err := s.className(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpInstanceof:
 			if err := s.instanceOf(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpClone:
 			if err := s.clone(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpVerifyReturn:
 			if err := s.verifyReturn(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpClosure:
 			if err := s.makeClosure(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpBindLexical:
 			if err := s.bindLexical(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpCallableConvert:
 			if err := s.callableConvert(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpArgByRef:
 			// ZEND_CHECK_FUNC_ARG.
 			rec, err := s.pendingCall()
 			if err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 			pos := len(s.args) - rec.base - rec.shift
 			byRef := rec.native == 0 && pos >= 0 && s.prog.funcs[rec.fn].byRefAt(pos)
 			if err := s.setReg(regs, in.a, boolValue(byRef)); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		case bytecode.OpParamDefault:
 			// RECV_INIT: the default's code is skipped for a passed argument,
@@ -697,8 +687,8 @@ func (s *vmState) loop() {
 			if !passed {
 				hit, err := s.cachedDefault(f, in.a)
 				if err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				passed = hit
 			}
@@ -716,24 +706,78 @@ func (s *vmState) loop() {
 			if in.aux == 1 {
 				n, c, err := s.exitStatus(regs[in.a])
 				if err != nil {
-					s.stop(err)
-					return
+					rerr = err
+					goto raise
 				}
 				if c.kind != endNormal {
-					s.stop(c)
-					return
+					rerr = c
+					goto raise
 				}
 				if s.stopped() {
 					return
 				}
 				code = n
 			}
+			// PHP 8 unwinds the frames of this run on exit (unwind_exit)
+			// without running finally blocks. A destructor that throws
+			// while a frame's values are released replaces the exit: the
+			// exception is thrown in the caller, where a catch can take it
+			// and the script goes on (zend_throw_exception_internal over
+			// an unwind_exit).
+			for len(s.frames) > s.floor {
+				if err := s.pop(true); err != nil {
+					rerr = err
+					goto raise
+				}
+			}
 			s.ended = true
 			s.end = completion{kind: endExit, code: code}
 			return
+		case bytecode.OpThrow:
+			rerr = s.throwValue(regs, in.a)
+			goto raise
+		case bytecode.OpLeave:
+			var live []uint32
+			if in.b != 0 {
+				live = f.fn.leaveLive[in.b-1]
+			}
+			npc, err := s.leave(f, pc, int(in.a), live)
+			pc = npc
+			if err != nil {
+				f.pc = pc
+				rerr = err
+				goto raise
+			}
+			if s.poll() {
+				return
+			}
+			continue
+		case bytecode.OpEndFinally:
+			kind, npc, p, err := s.endFinally(f, pc)
+			switch {
+			case kind == pendThrow:
+				rerr = &vmThrown{object: p.ex}
+				goto raise
+			case kind == pendReturn:
+				rv = p.val
+				goto ret
+			case kind != pendJump:
+				rerr = err
+				goto raise
+			}
+			pc = npc
+			if err != nil {
+				f.pc = pc
+				rerr = err
+				goto raise
+			}
+			if s.poll() {
+				return
+			}
+			continue
 		default:
-			s.stop(s.unsupported("the " + opcodeName(in.op) + " instruction"))
-			return
+			rerr = s.unsupported("the " + opcodeName(in.op) + " instruction")
+			goto raise
 		}
 		if s.stopped() {
 			return
@@ -741,11 +785,63 @@ func (s *vmState) loop() {
 	advance:
 		if in.nkill != 0 {
 			if err := s.kill(f, in); err != nil {
-				s.stop(err)
-				return
+				rerr = err
+				goto raise
 			}
 		}
 		pc++
+		continue
+	raise:
+		// The instruction failed: a handler of this or an outer frame takes
+		// over, or the run ends.
+		if !s.raise(rerr) {
+			return
+		}
+		rerr = nil
+		f = s.frames[len(s.frames)-1]
+		code, regs = f.code, f.regs
+		pc = f.pc
+		continue
+	ret:
+		// Return of rv (owned) from the top frame, through the finally
+		// blocks around the instruction.
+		if f.fn.handlers != nil {
+			npc, entered, err := s.returnThrough(f, pc, rv)
+			if entered {
+				rv = value{}
+				pc = npc
+				if err != nil {
+					f.pc = pc
+					rerr = err
+					goto raise
+				}
+				continue
+			}
+			if err := s.releaseRegisters(f); err != nil {
+				if rerr = s.releaseValue(rv); rerr == nil {
+					rerr = err
+				}
+				rv = value{}
+				goto raise
+			}
+		}
+		if len(s.frames) == s.floor {
+			s.ended = true
+			s.end = completion{kind: endReturn, value: rv, returnOwned: true}
+			return
+		}
+		if err := s.ret(rv); err != nil {
+			rv = value{}
+			rerr = err
+			goto raise
+		}
+		rv = value{}
+		if s.poll() {
+			return
+		}
+		f = s.frames[len(s.frames)-1]
+		code, regs = f.code, f.regs
+		pc = f.pc + 1
 	}
 }
 

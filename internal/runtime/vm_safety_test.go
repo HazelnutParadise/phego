@@ -280,10 +280,6 @@ func TestVMIntegerOverflow32(t *testing.T) {
 
 func TestVMUnsupportedConstructs(t *testing.T) {
 	cases := map[string]func(a *vmAsm){
-		"Throw": func(a *vmAsm) {
-			m := a.fn("{main}", 0, 2)
-			m.emit(bytecode.OpThrow, 0, m.k(1), 0, 0)
-		},
 		"HostCall": func(a *vmAsm) {
 			m := a.fn("{main}", 0, 2)
 			r := m.reg(bytecode.Value)
@@ -330,6 +326,16 @@ func TestVMUnsupportedConstructs(t *testing.T) {
 			}
 		})
 	}
+	t.Run("Throw of a value that is not an object", func(t *testing.T) {
+		// Stage 7C runs Throw: a scalar is PHP's own Error, not a refusal.
+		a := newAsm(t, 64)
+		m := a.fn("{main}", 0, 2)
+		m.emit(bytecode.OpThrow, 0, m.k(1), 0, 0)
+		res := runAsm(t, a)
+		if res.End != UncaughtThrowable || res.Throwable == nil || res.Throwable.Class != "Error" || res.Throwable.Message != "Can only throw objects" {
+			t.Fatalf("%v %v %+v", res.End, res.Err, res.Throwable)
+		}
+	})
 	t.Run("handlers", func(t *testing.T) {
 		img := newAsm(t, 64)
 		m := img.fn("{main}", 0, 2)
@@ -348,8 +354,10 @@ func TestVMUnsupportedConstructs(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Stage 7C runs the exception table: the Leave runs the finally
+		// block, and its EndFinally continues at the Leave's target.
 		res := p.Run(vmConfig(t, 64))
-		if res.End != Unsupported || !strings.Contains(res.Err.Error(), "try, catch and finally") || len(res.Output) != 0 {
+		if res.End != Completed || res.Err != nil || string(res.Output) != "never" {
 			t.Fatalf("%v %v %q", res.End, res.Err, res.Output)
 		}
 	})
