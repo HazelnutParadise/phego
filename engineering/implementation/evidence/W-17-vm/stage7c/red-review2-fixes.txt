@@ -414,3 +414,79 @@ t1<-
 done
 
 [exit 0]
+
+# Sixth review: output before its fix (commit 3550242), probes of ~/.cache/phego-work/review7c-7.
+
+===== e2.php
+--- php
+bye
+~T1
+
+Fatal error: Uncaught Exception: T1 in /w/cases/e2.php:2
+Stack trace:
+#0 /w/cases/e2.php(3): T->__destruct()
+#1 {main}
+  thrown in /w/cases/e2.php on line 2
+
+[exit 255]
+--- phego before the fix
+bye
+~T1
+
+Fatal error: Uncaught Exception: T1 in /w/cases/e2.php:2
+Stack trace:
+#0 /w/cases/e2.php(3): T->__destruct()
+#1 {main}
+  thrown in /w/cases/e2.php on line 2
+
+[exit 255]
+
+===== e3.php
+--- php
+bye
+~T1
+caught
+
+[exit 0]
+--- phego before the fix
+bye
+~T1
+caught
+
+[exit 0]
+
+===== c9.php
+--- php
+bye
+~T1
+~T2
+
+Fatal error: Uncaught Exception: T1 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+
+Next Exception: T2 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+  thrown in /w/cases/c9.php on line 3
+
+[exit 255]
+--- phego before the fix
+bye
+~T1
+~T2
+
+Fatal error: Uncaught Exception: T1 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+
+Next Exception: T2 in /w/cases/c9.php:3
+Stack trace:
+#0 /w/cases/c9.php(7): T->__destruct()
+#1 {main}
+  thrown in /w/cases/c9.php on line 3
+
+[exit 255]
