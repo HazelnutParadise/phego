@@ -1,18 +1,18 @@
 goos: linux
 goarch: amd64
 pkg: github.com/HazelnutParadise/phego
-cpu: AMD EPYC 9V45 96-Core Processor                
+cpu: Intel(R) Xeon(R) 6975P-C
                                       │ /home/runner/work/_temp/benchstat/try-cost.txt │
                                       │                     sec/op                     │
-W17Stage7C/loop_plain-4                                                   11.18m ±  5%
-W17Stage7C/loop_inside_try-4                                              11.11m ±  1%
-W17Stage7C/try_catch_in_loop_body-4                                       11.26m ±  2%
-W17Stage7C/loop_two_statements-4                                          14.72m ±  2%
-W17Stage7C/try_finally_in_loop_body-4                                     18.25m ±  3%
-W17Stage7C/call_plain-4                                                   18.92m ± 12%
-W17Stage7C/call_with_try_in_callee-4                                      20.61m ±  3%
-W17Stage7C/throw_and_catch-4                                              196.2m ±  3%
-geomean                                                                   20.29m
+W17Stage7C/loop_plain-4                                                    12.87m ± 3%
+W17Stage7C/loop_inside_try-4                                               12.87m ± 0%
+W17Stage7C/try_catch_in_loop_body-4                                        13.09m ± 0%
+W17Stage7C/loop_two_statements-4                                           16.80m ± 1%
+W17Stage7C/try_finally_in_loop_body-4                                      20.49m ± 0%
+W17Stage7C/call_plain-4                                                    20.32m ± 1%
+W17Stage7C/call_with_try_in_callee-4                                       21.69m ± 0%
+W17Stage7C/throw_and_catch-4                                               188.9m ± 0%
+geomean                                                                    22.35m
 
                                       │ /home/runner/work/_temp/benchstat/try-cost.txt │
                                       │                      B/op                      │

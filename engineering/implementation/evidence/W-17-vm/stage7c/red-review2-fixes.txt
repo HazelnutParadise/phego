@@ -183,3 +183,132 @@ Stack trace:
 #0 {main}
 
 [exit 255]
+
+# Follow-up review of the second fixes: output before the third fixes (commit 6842c7a), probes of ~/.cache/phego-work/review7c-3.
+
+===== e07_catch_return.php
+--- php
+catch
+d2
+d1
+1
+end
+
+[exit 0]
+--- phego before the fix
+d2
+catch
+d1
+1
+end
+
+[exit 0]
+
+===== c05_continue2_catch.php
+--- php
+c13
+d4
+d3
+c23
+d4
+d1
+after
+d2
+d3
+end
+
+[exit 0]
+--- phego before the fix
+d4
+c13
+d3
+d4
+c23
+d1
+after
+d2
+d3
+end
+
+[exit 0]
+
+===== e05_nested_catch_break2.php
+--- php
+catch
+d4
+d2
+after
+d1
+d3
+end
+
+[exit 0]
+--- phego before the fix
+d4
+catch
+d2
+after
+d1
+d3
+end
+
+[exit 0]
+
+===== f03_return_three_levels.php
+--- php
+d6
+d4
+d2
+d1
+d3
+d5
+end
+
+[exit 0]
+--- phego before the fix
+d2
+d4
+d6
+d1
+d3
+d5
+end
+
+[exit 0]
+
+# Fourth review: output before the last fixes (the tree reviewed, 6842c7a plus the exit stubs), probes of ~/.cache/phego-work/review7c-4.
+
+===== u01.php
+--- php
+~Tb Qtb Px end
+~a 
+[exit 0]
+--- phego before the fix
+~Tb 
+Fatal error: Uncaught Exception: tb in /w/cases/u01.php:3
+Stack trace:
+#0 /w/cases/u01.php(4): T->__destruct()
+#1 {main}
+  thrown in /w/cases/u01.php on line 3
+~a 
+[exit 255]
+
+===== r01.php
+--- php
+~Tb Qtb F fell
+
+[exit 0]
+--- phego before the fix
+~Tb Utb
+
+[exit 0]
+
+===== r03.php
+--- php
+~Tb F Qtb fell
+
+[exit 0]
+--- phego before the fix
+~Tb Qtb fell
+
+[exit 0]

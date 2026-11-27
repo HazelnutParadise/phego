@@ -429,7 +429,7 @@ W-14 的 `tryCatch` 以 Go 的 closure 表達 try 的主體與處理區塊。VM 
 
 照 zend_compile_try 的形狀：try 區塊以 Leave 結束；Catch 處理區塊先依序用 Instanceof 比對每個 catch 的類別（不存在的類別什麼都比不中，也不報錯），比中就把例外指定給變數並執行區塊，都沒比中就把同一個物件再 Throw 出去；Finally 處理區塊以 EndFinally 結束。`throw` 編成 Throw，當運算式用時也一樣，因為控制不會回來。
 
-`break`、`continue` 跨出 try 時編成 Leave。PHP 在這裡依巢狀順序交錯釋放迴圈的迭代器與執行 finally（zend_handle_loops_and_finally），編譯器不展開這段程式：Leave 與 Return 經過的 finally 由 VM 依序執行，每進入一個處理區塊或抵達目標，VM 就釋放在那裡不再使用的暫存器，順序因此和 PHP 相同。
+`break`、`continue` 與 `return` 離開 `foreach` 時，PHP 在跳躍或 RETURN 之前由內而外釋放迭代器（FE_FREE），中間依巢狀順序穿插 finally（zend_handle_loops_and_finally）。編譯器把「釋放迭代器，再前往目標」編成一小段程式，放在被釋放的最外層迴圈後面，原地只留一個跳到那裡的 Jump；離開的是 finally 區間或 catch 區塊時用 Leave，VM 會先執行經過的 finally。這段程式放在迴圈後面有兩個理由：Drop 若落在 try 的保護區間裡，之後到 catch 的例外邊就帶著沒有定義的迭代器，而 catch 之後迴圈還要繼續；PHP 也把釋放迴圈變數時丟出的例外算在迴圈結尾，迴圈裡的 catch 接不到（ZEND_FREE_ON_RETURN）。finally 在迴圈外面時，小段落裡的 Return 照樣先執行 finally。finally 在迴圈裡面、`return` 又在它裡面時，PHP 先執行 finally 才釋放外面的迴圈，而回傳值放在暫存器裡撐不過 finally，所以 Return 留在原地，回傳值由 VM 的待處理狀態持有，finally 之後 frame 結束時才釋放暫存器。沒有迭代器要釋放、也沒有離開 finally 或 catch 區塊的跳躍就是一般的 Jump。
 
 ### 執行
 
@@ -444,21 +444,21 @@ W-14 的 `tryCatch` 以 Go 的 closure 表達 try 的主體與處理區塊。VM 
 
 量測用「Runtime layout benchmarks」工作流程，在 GitHub 的 ubuntu-24.04（amd64）runner 上以 benchstat 比較，原始輸出在 [stage7c](../implementation/evidence/W-17-vm/stage7c)。
 
-- **沒有例外表的程式**：main（3bff802）與本分支各自建置的測試執行檔交替跑 10 輪 `BenchmarkVMDispatch`（[dispatch.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/dispatch.benchstat.txt)）。`switch` 分派的五個工作量：算術 −3.8%、分支 −3.7%、`fib` +1.1%，字串串接與陣列量不出差異，全部十五格的幾何平均 −0.72%。每次執行多配置約 750 bytes，來自 frame 物件多出的三個欄位（frame 以 16 個為一塊配置）。
+- **沒有例外表的程式**：main（3bff802）與本分支（97c8c50，四次審查的修正都在內）各自建置的測試執行檔交替跑 10 輪 `BenchmarkVMDispatch`（[dispatch.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/dispatch.benchstat.txt)）。`switch` 分派的五個工作量：算術 −3.6%、分支 −3.6%、字串串接 +1.5%，`fib` 與陣列量不出差異，全部十五格的幾何平均 −0.67%。每次執行多配置約 750 bytes，來自 frame 物件多出的欄位（frame 以 16 個為一塊配置）。
 - **try 的成本**：同一個測試執行檔裡各 100,000 圈的迴圈，各跑 10 次（[try-cost.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/try-cost.benchstat.txt)）。
 
 | 工作量 | 每次執行 | 對照 |
 |---|---|---|
-| 一般迴圈 | 11.18 ms ± 5% | |
-| 同一個迴圈放在 `try` 裡 | 11.11 ms ± 1% | 量不出差異 |
-| 迴圈主體是 `try`／`catch` | 11.26 ms ± 2% | 量不出差異，多的是 try 結尾的一個 Jump，PHP 也有 |
-| 主體兩個陳述式的迴圈 | 14.72 ms ± 2% | 下一列的對照 |
-| 主體是 `try`／`finally`，兩個陳述式各在一邊 | 18.25 ms ± 3% | +24%，每圈多 Leave 與 EndFinally 兩條指令，PHP 也多 FAST_CALL 與 FAST_RET |
-| 呼叫一般函式 | 18.92 ms ± 12% | |
-| 被呼叫的函式裡有 `try` | 20.61 ms ± 3% | +9%，在前一列的誤差範圍內 |
-| 每圈丟出並捕捉一個例外 | 196.2 ms ± 3% | 每次約 1.9 微秒、7 次配置 |
+| 一般迴圈 | 12.87 ms ± 3% | |
+| 同一個迴圈放在 `try` 裡 | 12.87 ms ± 0% | 量不出差異 |
+| 迴圈主體是 `try`／`catch` | 13.09 ms ± 0% | +1.7%，多的是 try 結尾的一個 Jump，PHP 也有 |
+| 主體兩個陳述式的迴圈 | 16.80 ms ± 1% | 下一列的對照 |
+| 主體是 `try`／`finally`，兩個陳述式各在一邊 | 20.49 ms ± 0% | +22%，每圈多 Leave 與 EndFinally 兩條指令，PHP 也多 FAST_CALL 與 FAST_RET |
+| 呼叫一般函式 | 20.32 ms ± 1% | |
+| 被呼叫的函式裡有 `try` | 21.69 ms ± 0% | +6.7%，函式有例外表時，返回前多一次暫存器掃描 |
+| 每圈丟出並捕捉一個例外 | 188.9 ms ± 0% | 每次約 1.9 微秒、7 次配置 |
 
-第一次量測時每個 try 都以 Leave 結束，Leave 又以 map 查目標的活性資訊，`try`／`catch` 的迴圈慢 12%、`try`／`finally` 慢 62%（[try-cost-before-fix.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/try-cost-before-fix.benchstat.txt)，那一次的 `try`／`finally` 是和一般迴圈比）。改成沒有 finally 的 try 以 Jump 結束、活性資訊直接掛在處理區塊與 Leave 指令上之後，才是上表的數字。finally 進出的兩條指令各做一次暫存器掃描，還有縮短的空間，列在已知缺口。
+第一次量測時每個 try 都以 Leave 結束，Leave 又以 map 查目標的活性資訊，`try`／`catch` 的迴圈慢 12%、`try`／`finally` 慢 62%（[try-cost-before-fix.benchstat.txt](../implementation/evidence/W-17-vm/stage7c/try-cost-before-fix.benchstat.txt)，那一次的 `try`／`finally` 是和一般迴圈比）。改成沒有 finally 的 try 以 Jump 結束、活性資訊直接掛在處理區塊與 Leave 指令上，才降到上表的數字。上表與分派的數字都是四次審查的修正完成後，在最終的 97c8c50 上量的；迴圈後小段落的做法沒有讓這些工作量變慢。finally 進出的兩條指令各做一次暫存器掃描，還有縮短的空間，列在已知缺口。
 
 ### 順便修掉的差異
 
@@ -481,15 +481,34 @@ agy 的 Opus 額度用完，Codex 在這台機器上沒有符合條件的模型�
 
 Codex 的審查用量在 PR 開出時已用完，依規則改由另一位獨立審查者檢查第一次審查之後的改動（修正、效能調整與合併 main），同樣是內建的 Opus、全新的脈絡、只拿到需求與程式碼：175 個探測在 arm64、61 個在 386，並和修正前的樹（ad3efef）與 main 各自對照，另有手寫 bytecode 與 157 個程式的並行執行檢查。找到一個 P1 與四個 P2，都已修正並加上修正前會失敗的回歸 fixture，修正前的輸出在 [stage7c/red-review2-fixes.txt](../implementation/evidence/W-17-vm/stage7c/red-review2-fixes.txt)：
 
-- **`foreach` 裡 `try`／`catch` 內的 `return`，以及從巢狀 `foreach` 的 `try` 裡 `break 2`／`continue 2`，被驗證器拒絕**（P1）。釋放迭代器的 Drop 落在 try 的保護區間裡，之後的指令到 catch 的例外邊就帶著沒有定義的迭代器，而 catch 之後還要繼續走訪。`return` 的情況是第一次審查的修法造成的回歸，`break`／`continue` 的情況從一開始就有。現在保護區間裡不放 Drop：`return` 不再由編譯器釋放迭代器，改由 frame 結束時先釋放暫存器、再釋放變數（下一項）；跨出 try 而且有迭代器要釋放的 `break`／`continue` 編成 Leave，由 VM 在抵達目標時釋放不再使用的暫存器（`review7c_r2_c01_ret_foreach_try_catch`、`review7c_r2_g02_break2_in_try_nested_foreach`、`review7c_r2_g09_switch_in_try_return`）。
-- **frame 結束時的釋放順序**（P2）。例外往外傳時，PHP 先釋放還沒完成的呼叫與暫存值（cleanup_unfinished_calls、cleanup_live_vars），這時 frame 還是目前的 frame，然後才換成呼叫者並釋放變數。原本先釋放變數，而且第一次審查加的「已離開」標記讓暫存值的解構子在 backtrace 裡少了這個函式。現在順序是暫存器、還沒完成的呼叫、標成已離開、變數、多出的引數、`$this`、closure（`review7c_r2_a01_unwind_tmp_vs_cv`）。這也讓 `return` 時迭代器先於變數釋放。
+- **`foreach` 裡 `try`／`catch` 內的 `return`，以及從巢狀 `foreach` 的 `try` 裡 `break 2`／`continue 2`，被驗證器拒絕**（P1）。釋放迭代器的 Drop 落在 try 的保護區間裡，之後的指令到 catch 的例外邊就帶著沒有定義的迭代器，而 catch 之後還要繼續走訪。`return` 的情況是第一次審查的修法造成的回歸，`break`／`continue` 的情況從一開始就有。這一輪先改成不放 Drop、交給 VM 依活性釋放，複查發現那又引進兩個回歸，最後的做法見下面「複查」（`review7c_r2_c01_ret_foreach_try_catch`、`review7c_r2_g02_break2_in_try_nested_foreach`、`review7c_r2_g09_switch_in_try_return`）。
+- **frame 結束時的釋放順序**（P2）。例外往外傳時，PHP 先釋放還沒完成的呼叫與暫存值（cleanup_unfinished_calls、cleanup_live_vars），這時 frame 還是目前的 frame，然後才換成呼叫者並釋放變數。原本先釋放變數，而且第一次審查加的「已離開」標記讓暫存值的解構子在 backtrace 裡少了這個函式。現在順序是暫存器、還沒完成的呼叫、標成已離開、變數、多出的引數、`$this`、closure（`review7c_r2_a01_unwind_tmp_vs_cv`）。
 - **略過已離開的 frame 時，連它的 `Closure::call`、`__invoke` 或 `__call` 那一格也丟了**（P2，第一次審查的修法造成）。這幾格是內部方法，還在執行中，照樣列出；由 `Closure::call` 或 magic method 的 closure 進入時，解構子那一格的呼叫者是內部函式（`review7c_r2_closure_call_dtor_trace`、`review7c_r2_closure_invoke_dtor_trace`）。
 - **`throw` 與以運算式指定類別的 `new` 的行號只修對一部分**（P2）。PHP 用的是編完運算元之後的行（最後編譯的子節點），不是第一個子節點的行。`throw` 不再自己設行號，動態類別的 `new` 也沿用類別運算式結束的行（`review7c_r2_e07_throw_nonobj_coalesce`、`review7c_r2_e08_throw_call_multiline`、`review7c_r2_new_dynamic_class_line`）。
 - **重新宣告內建例外的屬性時只檢查型別**（P2）。PHP 對每個屬性依序檢查 static、readonly、存取等級與型別，原本漏掉前三項或順序不對，`static $message` 甚至不報錯（四個 `fatal_review7c_r2_prop_*`）。
 
-列入已知缺口的：釋放迴圈變數時丟出的例外算在迴圈結尾（PHP 的 ZEND_FREE_ON_RETURN）、常數陣列當 `throw` 運算元時的行號、已離開的 frame 的陣列與物件引數在 backtrace 顯示成 NULL、對物件做陣列寫入（main 上就有）。
+列入已知缺口的：常數陣列當 `throw` 運算元時的行號、已離開的 frame 的陣列與物件引數在 backtrace 顯示成 NULL、對物件做陣列寫入（main 上就有）。
 
-測試程式加到 1,053 個（新增 145 個 `exception_*`、`throw_*`、`try_*`、`finally_*`、`catch_engine_*` 與對應的 `fatal_*`，以及兩次審查的 23 個回歸 fixture），三個 profile 各 3,159 項全部和 PHP 8.5.12 逐位元組相同。
+### 複查
+
+第二次審查的修正改到 frame 結束與迴圈跳出的路徑，所以請第三位審查者（同樣是全新的脈絡）只複查那一段改動：150 個探測在 arm64、20 個在 386、15 個在超大函式裡，並和修正前的樹（0f22146）對照。找到兩個由第二次修正引進的 P1，都已修正並加上回歸 fixture：
+
+- **catch 區塊裡 `return`、`break N`、`continue N` 離開 `foreach` 時，迭代器在進入 catch 時就被釋放**（P1）。不放 Drop 之後，catch 這條路上沒有指令用到迭代器，活性分析判它在 catch 入口已經沒用。陣列和裡面的物件因此在 catch 的輸出之前就解構。
+- **巢狀 `foreach` 裡 `return` 時，迭代器由外而內釋放**（P1）。frame 結束時依暫存器順序釋放，PHP 則在 RETURN 前由內而外。
+
+兩者的根因相同：迭代器的釋放順序與時機要照 PHP，就得由編譯器明確寫出來，不能交給活性判斷。最後的做法是上面「編譯」那一段的迴圈後小段落，由內而外的 Drop 之後才是 Jump 或 Return。這也讓釋放迴圈變數時丟出的例外照 PHP 算在迴圈結尾，原本打算列缺口的那一項不必列了（`review7c_r3_catch_return_in_foreach`、`review7c_r3_continue2_in_catch`、`review7c_r3_break2_in_catch`、`review7c_r3_return_three_foreach_levels`、`review7c_r3_return_in_finally_in_foreach`、`fatal_review7c_r3_iterator_free_throws_at_loop_end`）。
+
+複查指出、修正前就有的差異列在已知缺口：還沒完成的呼叫已經送出的引數在例外時的釋放時機、`Closure::call` 的引數存活時間、`exit` 時暫存值的釋放時機、`return` 經過 finally 時迭代器的釋放順序。
+
+迴圈後小段落的做法是複查之後才寫的，所以再請第四位審查者只看這一段：554 個探測（其中 460 個由腳本排列各種迴圈、`try` 位置與跳出方式產生），並以 30,000 個變異過的 bytecode 檢查驗證器與 VM。這段改動本身沒有只在新版出現的差異，沒有程式被驗證器拒絕。它另外找到兩個之前就有的問題，都和解構子在釋放迭代器時丟出例外有關，已修正：
+
+- **`try` 裡的 `foreach` 被例外中斷，迭代的物件解構時又丟出例外，結果沒有人接**（P1）。catch 用來放例外的暫存器和迭代器剛好是同一個編號，活性分析把它算成在 catch 入口還在用（catch 會讀它），於是迭代器沒有在進入 catch 前釋放，而是在放入例外時才被擠掉，那時丟出的例外已經算在 catch 區塊裡。現在 catch 暫存器的舊值和其他暫存值一起在進入處理區塊前釋放，第二個例外照 PHP 把第一個接在 previous，由同一個 try 接住（`review7c_r4_iterator_free_throws_into_catch`）。
+- **`return` 在 `foreach` 裡、外面有 finally，釋放迭代器時丟出例外，finally 沒有執行，旁邊的 catch 也沒接到**（P1）。finally 在迴圈外面時，現在同樣走迴圈後的小段落：先釋放迭代器（例外算在迴圈結尾，try 的 catch 接得到），才執行會經過 finally 的 Return（`review7c_r4_return_iterator_free_throws_catch_finally`、`review7c_r4_return_iterator_free_throws_finally_only`）。finally 在迴圈裡面的情況仍是已知缺口。
+
+審查另外指出小段落多出的跳躍可以再省（有小段落的迴圈正常結束時多一個 Jump），列在已知缺口。
+
+
+測試程式加到 1,062 個（新增 145 個 `exception_*`、`throw_*`、`try_*`、`finally_*`、`catch_engine_*` 與對應的 `fatal_*`，以及審查的 32 個回歸 fixture），三個 profile 各 3,186 項全部和 PHP 8.5.12 逐位元組相同。
 
 ## 階段一的對照結果
 
@@ -590,14 +609,18 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **執行期才知道名稱的內建類別到執行期才拒絕**：`$c = 'ReflectionClass'; new $c` 這類寫法在執行到時以 PHP 的 `Class "ReflectionClass" not found` 結束，之前的輸出已經寫出，而且看起來像 PHP 的錯誤。名稱是執行期的值，`Compile` 看不到。
 - **`switch` 主體的暫存值太早釋放**：`switch (new D) { ... }` 的物件在比對完就釋放，PHP 留到 `switch` 結束（`break` 時在 finally 之後）。解構子和 `switch` 裡的輸出、finally 的相對順序因此不同。main 上就是如此。
 - **巢狀呼叫的引數在例外時的釋放順序**：`g(new D(1), g(new D(2), t()))` 在 `t()` 丟出例外時，PHP 先釋放最內層呼叫的引數（cleanup_unfinished_calls），Phego 依暫存器順序從外層開始。同一個呼叫裡的引數順序相同。要修得讓 VM 知道每個引數暫存器屬於哪個呼叫。
+- **還沒完成的呼叫已經送出的引數**：`(new K)->m(new D(1), t())`、`new C(new D(1), t())` 與具名引數的呼叫，引數求值後立刻送上引數堆疊。`t()` 的例外穿過這個 frame 時，frame 不釋放它們，要等接住例外的 frame 進入處理區塊，或執行結束。解構子因此比 PHP 晚，backtrace 也少了原本的 frame。PHP 另外是先釋放還沒完成的呼叫、再釋放暫存值，Phego 相反。要修得讓每個 frame 記下引數堆疊的深度，目前只有帶例外表的函式會記。
+- **`Closure::call` 與 `__invoke` 的引數存活時間**：PHP 的內部 frame 自己持有一份引數，暫時的物件引數在 closure 的變數之後才釋放。Phego 在釋放參數變數時就釋放它。
+- **`exit` 時還在暫存器裡的值**：`$x = [new D(1), exit("bye\n")]` PHP 先印 `bye` 才解構 D(1)，Phego 相反。main 上就是如此。
+- **`return` 在迴圈裡的 finally 之內**：`foreach (...) { try { return 1; } finally { ... } }` 這類寫法，PHP 先執行 finally，再由內而外釋放迴圈的迭代器。Phego 在 finally 之後、frame 結束時由外而內釋放；釋放時解構子丟出的例外也因此算在函式外面，函式裡包住迴圈的 try 接不到。finally 在迴圈外面時已照 PHP。
+- **迴圈後的小段落多一個跳躍**：有 `break N`、`continue N` 或 `return` 要釋放迭代器的迴圈，正常結束時多執行一個跳過小段落的 Jump。把小段落放在迴圈回邊的 Jump 後面可以省掉，跳出點和迴圈之間沒有 try 時也可以照舊把 Drop 寫在原地。
 - **方法與函式呼叫跨行時引擎錯誤的行號**：`$o\n->\nnom()` 與 `nofn\n(` 的 `Call to undefined ...`，PHP 報在名稱那一行，Phego 差一行。`new` 與 `throw` 已照 PHP。
 - **例外物件的屬性被 `unset` 之後**：子類別 `unset($this->message)` 再呼叫 `getMessage()`，PHP 發出 `Undefined property` 警告；`unset($this->file)` 之後則是 `must not be accessed before initialization` 的 Error。Phego 安靜地讀到 null。
 - **重新宣告內建類別的時機**：`echo "a"; class LengthException {}` PHP 先印出 `a` 才在執行期報 `Cannot redeclare`，Phego 在 `Compile` 就拒絕。
 - **例外表的索引和整個函式一樣長**：有 `try` 的函式，驗證器與 VM 各配置幾個和指令數一樣長的陣列。三個各約四萬行、都含 `try` 的函式會先碰到驗證的工作量上限，訊息是 `a program beyond the bytecode limits`。索引只涵蓋有 handler 的那一段可以省下這些。
 - **超過驗證上限時的說明文字**：資料流檢查碰到上限時，訊息後面接的是 `invalid register or control flow`，其實不是控制流程有錯。
-- **finally 的進出比一般指令重**：Leave 與 EndFinally 各掃描一次 frame 的暫存器來釋放不再使用的值，沒有例外時 `try`／`finally` 的迴圈因此比同樣工作量的迴圈慢 24%。編譯時就知道沒有東西要釋放的情況可以跳過掃描。
+- **finally 的進出比一般指令重**：Leave 與 EndFinally 各掃描一次 frame 的暫存器來釋放不再使用的值，沒有例外時 `try`／`finally` 的迴圈因此比同樣工作量的迴圈慢 22%，有例外表的函式每次返回也多一次掃描（約 6%）。編譯時就知道沒有東西要釋放的情況可以跳過掃描。
 - **沒有活性資訊的函式在處理區塊入口不釋放暫存器**：超過逐暫存器分析工作量上限的函式，try 區塊裡還沒用完的暫存值要等暫存器被覆寫或函式返回才釋放，解構子因此延後。例外物件與回傳值本身不受影響。
-- **釋放迴圈變數時丟出的例外**：`return`、`break` 之前釋放 `foreach` 的主體，它的解構子丟出例外時，PHP 把例外算在迴圈結尾（ZEND_FREE_ON_RETURN），迴圈裡的 catch 接不到，待回傳的值也會釋放。Phego 把它算在 `return` 那一行，迴圈裡的 try 接得到。
 - **常數陣列當 `throw` 的運算元時的行號**：`throw [\n1,\n2];` 的 `Can only throw objects`，PHP 報在最後一個元素那一行，Phego 報在陣列開頭那一行。
 - **已離開的 frame 的引數**：函式結束時才解構的物件，backtrace 裡 `Closure->call(...)` 等內部方法那一格的陣列與物件引數顯示成 NULL，`__call` 的 closure 那一格沒有引數。純量引數照 PHP 顯示。
 - **對物件做陣列寫入**：`$o = new stdClass; $o[] = 1;` PHP 是可以捕捉的 `Cannot use object of type stdClass as array`，Phego 在執行到時以 Unsupported 結束。main 上就是如此。
