@@ -16,8 +16,8 @@
     "T-031",
     "T-032"
   ],
-  "source_base": "86c1a90",
-  "captured_at": "2026-11-27T16:16:40.315160+00:00",
+  "source_base": "c7aaafc",
+  "captured_at": "2026-11-27T17:31:41.094190+00:00",
   "source_sha256": {
     ".github/workflows/benchstat.yml": "c6a94f781f26070536c86c6f6be44c6dcd19516d49083e8aed5eb61f68ccd325",
     ".github/workflows/semantics-vm.yml": "b710ebbe8efcacd3f0e05e370058ed53eaed33e02e11c926bde27371cc3160e0",
@@ -107,12 +107,12 @@
     "internal/runtime/vm_concurrency_test.go": "930330e394bd63af91d1086a7b806520ddae96eea61c560b4630037f7457b86b",
     "internal/runtime/vm_consts.go": "435c0d471f240e0757fa039ce825e0299c8e609a2bf938a9be49e17860f844d9",
     "internal/runtime/vm_exception.go": "db823652cfeb3984d3515a800bde875fa93cffbbdd17ee5ad0dd65d405c4487e",
-    "internal/runtime/vm_exec.go": "d5724209f31e7459dd15da789c2abccd08c5f669f74e491db79fd5345c345662",
+    "internal/runtime/vm_exec.go": "ff93453998495870420703ea0dcbf3078755098563e3206509c8488918561c87",
     "internal/runtime/vm_fuzz_test.go": "8da58ada19e46ab3ac9eff4673dc77e0ad60aeed70093e0157a2a3a2bdb34260",
     "internal/runtime/vm_invoke.go": "72878cf192e8cc91a93828fc62a5445675e19b485cb446408c0298ebb774d4fe",
     "internal/runtime/vm_link.go": "47e1ebc7381d06ff8943316a24588557977a065deb44b76008224ad64e0e6425",
     "internal/runtime/vm_list_test.go": "3ac524cd61b52b82949516118c298bf6aea0b1943a832357f71272fd97757471",
-    "internal/runtime/vm_loop.go": "e4613ae48c76ace119963ece570cebeed345009c47caba128322a570d281c300",
+    "internal/runtime/vm_loop.go": "83ecb14af01950cbfb08e16e576e5081e931b3542daf3a4f1020756e8f72dab8",
     "internal/runtime/vm_object.go": "b235a2d871946112adc3143a3eb34fca2efcdcaa378c1658752c8475df003a70",
     "internal/runtime/vm_ops.go": "03aca3323da48e6136192cd00f1058ff6f9ba482d8a74975d2eb7a4cf92e0cdd",
     "internal/runtime/vm_oracle_test.go": "bf87fcd3e997a902e31e57c00dafc71599d1cdd7bf4b1f3c15b3fc70cc05b3a6",
@@ -132,7 +132,7 @@
     "internal/runtime/vm_stage6_test.go": "5934c51306242636935ec2b0990e2ddd19b3b3ad7511b49b24e0f57b3a738a45",
     "internal/runtime/vm_stage7c_test.go": "417a3a134cab0d7de09a36e8ca18c9d03076e85e5dc8a54751919db5f28d9bf0",
     "internal/runtime/vm_trace.go": "086f816f0eaa4d5ecea934f290b42c04058ef59646f902f196307a28aa48b08d",
-    "internal/runtime/vm_unwind.go": "6d9a660a4712dfb611fbe9e1ef1393855a45faa66c97aa28ef7bafe0b44e0519",
+    "internal/runtime/vm_unwind.go": "a14980c5d43d667f50ee185a7fc09c4dc50bd082822c17125c57cc6ab51f412b",
     "internal/runtime/vm_wiring_test.go": "227a6cbc5d56dee4db798b30d71ed783571c8fe4b85da016f35bd0f6ca0b3949",
     "internal/runtime/w17_codex_review_test.go": "a68950667445fc01534927fa0ca1b5093eba7a60d57359dd814dcac969a56482",
     "internal/runtime/w17_hardening_test.go": "bd7515420f57f5b0ba5890cc845fa390b7ffc2fa9869c420840db54a16f4d6b9",
@@ -140,7 +140,7 @@
     "internal/vm/builtins_gen.go": "a8c214fe9283cfe940f8cdc9ec1652e43f027dba0a61de797840ab01e8e532a8",
     "internal/vm/classes_gen.go": "275a71732834eccab6cf6dfe205d991d67103e556b2ae09e279d90c99c98b0b0",
     "internal/vm/compile.go": "32419ed13122bd816cf9b2f7e3c650770b5607fb1f73d7b6dd2d77ac69233b5c",
-    "internal/vm/compile_test.go": "a7c2a6546a0f8c87a425399f7261b357614163bd795033dbbbb3625ad2c43f12",
+    "internal/vm/compile_test.go": "35def58db7c58e59652ff3bcaf5682c0f127e7998564537670d84928d80b211d",
     "internal/vm/disasm.go": "43b1696f89f5219fc7fd13ae24e73a581752812464c9f1e8612855c96ee75903",
     "internal/vm/expr.go": "581ecfcf1c7ec309819631d982268c75a981ced5f0709aaf53d00d7b69dc5917",
     "internal/vm/function.go": "ca5b6f1ee3f1f346719a110200e3f95ca2b664240721eb936145cce4942cd753",
@@ -160,7 +160,7 @@
     "internal/vm/stage7.go": "aead981cc9861e8756941ac52a99f01f2db8f6ef36b268c5d1daf93ff4033f10",
     "internal/vm/stage7_test.go": "140bdd1825f24a6213d509e837acccc3e4fd4c321dbe749863d2b84f197176e7",
     "internal/vm/stage7b.go": "c56e991540d0284016eed634d2c5f1982c3247f370f9ed09f5888b9b4ed1623d",
-    "internal/vm/stage7c.go": "0e11e63225e3fc759b6c1e2f69ec4580ba4b9bdd0456fb3784ed6f12b8105bcd",
+    "internal/vm/stage7c.go": "d971c5efe8d36cdef0fff3368a1bfe5a4f508f35706d4f25086e01e8de5ccc45",
     "internal/vm/testdata/foreach_in_function.golden": "fe8b52b96cc87125673287753db784d0560665c669c64bcae14b1d8cfbe46fbc",
     "policy.go": "6a29c533314e4d09a2fa3ea9b31cf3c16646b30c90ce7590009a76f9962b5b07",
     "policy_review_test.go": "59d6d0c9f7a98ba254166acd8af8eccc27eee7f7930f245cf05b7058dc719db2",
@@ -174,7 +174,7 @@
     "tools/benchstat-variants.sh": "50bd5ab6f4b27172c142928731636342cc91ebb977600b3a445bfdd233e6a214",
     "tools/test_w17_reference.py": "bb93a25c9b2cdbc522fc1b6940fb7f76d8ac707f1f5cf49582e48c0fee4d83e2",
     "w17_codex_review_test.go": "149d727c033497a557d3aff1456bcec8d9dac11f3a38001841adec05087c9797",
-    "w17_differential_test.go": "716c3b93e2cb508834c68524927224d54e7b3b20a0cec4c710b9b606e7e566ed",
+    "w17_differential_test.go": "543832a364a403654780b51c704829effcf186903e482b2beae60498e28209fa",
     "w17_hardening_test.go": "3362dc10e3ce54522b4bd826d95605481d4f350cdd4f9db5127397085a6f91bc",
     "w17_review_probes_test.go": "04a08ab6a1a8bc508b9289f664ab523415fbe3d6861dda07a01f5691247abfbb",
     "w17_stage2_probes_test.go": "43b030da3d9bf126b6e093c091bda2359a6e76a28ada8219b79293d591f77ae9",
@@ -213,7 +213,7 @@
       "command": "go test -run 'TestW17PHP8512Programs$|TestW17ReviewProbes$|TestW17Stage2Probes$|TestW17Stage3RunsFormerlyUnsupportedProbes$|TestW17Stage6|TestW17Stage7' -v .",
       "exit_code": 0,
       "log": "W-17-vm/local/differential.log",
-      "result": "profile 32: 3186 pass, 0 unsupported, 0 fail of 3186; profile 64: 3186 pass, 0 unsupported, 0 fail of 3186; profile amd64: 3186 pass, 0 unsupported, 0 fail of 3186; review, stage-2, stage-3, stage-6 and stage-7 (A, B and C) tests pass; the log keeps the profile lines and the result line of each test"
+      "result": "profile 32: 3216 pass, 0 unsupported, 0 fail of 3216; profile 64: 3216 pass, 0 unsupported, 0 fail of 3216; profile amd64: 3216 pass, 0 unsupported, 0 fail of 3216; review, stage-2, stage-3, stage-6 and stage-7 (A, B and C) tests pass; the log keeps the profile lines and the result line of each test"
     },
     {
       "command": "VM layout benchmarks workflow (tools/benchstat-variants.sh), commit 5545d4f",
@@ -288,10 +288,10 @@
       "result": "one reviewer given the requirement and the code only (agy quota exhausted and no eligible Codex model, so the built-in Opus in a fresh context): 277 probes on arm64 and 47 on 386, 28 timing probes inside very large functions, 209 programs run by 8 goroutines each under -race, hand-written bytecode with handlers; no P0 or P1; four regressions against main and one difference main already had were fixed with ten regression fixtures and one verifier test; the findings main already had are listed as known gaps"
     },
     {
-      "command": "second, third and fourth independent reviews of stage 7C (the Codex review limit was reached) and the outputs before their fixes",
+      "command": "second to sixth independent reviews of stage 7C (the Codex review limit was reached) and the outputs before their fixes",
       "exit_code": 0,
       "log": "W-17-vm/stage7c/red-review2-fixes.txt",
-      "result": "each reviewer in a fresh context, given the requirement and the code only (agy quota exhausted, no eligible Codex model, so the built-in Opus): the second checked the changes after the first review with 175 probes on arm64 and 61 on 386 and found one P1 (return inside try/catch inside foreach refused by the verifier) and four P2; the third checked those fixes with 150 probes on arm64, 20 on 386 and 15 in very large functions and found two P1 regressions in how foreach iterators were freed; the fourth checked the stub layout that replaced them with 554 probes (460 generated) and 30,000 mutated bytecode images, found nothing that differs on the new tree only and two older P1 defects around destructors that throw while an iterator is freed; all fixed with 22 regression fixtures"
+      "result": "each reviewer in a fresh context, given the requirement and the code only (agy quota exhausted, no eligible Codex model, so the built-in Opus): the second checked the changes after the first review with 175 probes on arm64 and 61 on 386 and found one P1 (return inside try/catch inside foreach refused by the verifier) and four P2; the third checked those fixes with 150 probes on arm64, 20 on 386 and 15 in very large functions and found two P1 regressions in how foreach iterators were freed; the fourth checked the stub layout that replaced them with 554 probes (460 generated) and 30,000 mutated bytecode images, found nothing that differs on the new tree only and two older P1 defects around destructors that throw while an iterator is freed; the fifth (331 probes) confirmed those fixes and found an older P1 (return inside foreach inside try/finally inside foreach skipped the try's catch and finally when freeing an iterator threw) and a P2 (two throwing destructors in one frame kept only the first); the sixth (800 probes) confirmed those and found an older P1 (an exception thrown by a destructor during exit was dropped); all fixed with 32 regression fixtures, two rare cases left as known gaps"
     },
     {
       "command": "Runtime layout benchmarks workflow, job vm-stage7c: tools/benchstat-pair.sh for BenchmarkVMDispatch between 3bff802 (main) and 97c8c50, 10 alternating rounds on ubuntu-24.04",
@@ -310,6 +310,7 @@
     "Local run on darwin/arm64 (stage 7C); the 386, amd64 and arm64 references are replayed on the host architecture, and the references themselves were recorded in the pinned images under emulation where needed.",
     "The red runs recorded by the fixing engineers before the stage 2 session restart were not preserved as logs.",
     "T-029 to T-032 stay not_run: stages 1 to 7C cover a subset of PHP.",
+    "The stage 7C reviews ran their probes on the arm64 image and samples on 386, none on amd64; the fixtures, including the regression fixtures of the reviews, are compared on arm64, amd64 and 386.",
     "The stage 7C reviews ran their probes on the arm64 image and samples on 386, none on amd64; the fixtures, including the regression fixtures of the reviews, are compared on arm64, amd64 and 386.",
     "The stage 7B benchmarks are local runs on a busy development machine; the stage 7C numbers come from the benchstat workflow on a hosted amd64 runner only, and the try-cost table compares workloads within one binary, not two commits.",
     "The stage 7C fixtures were written by three workers and checked against the pinned arm64 image; they call no built-in function, so nothing that needs one (set_exception_handler, debug_backtrace, error handlers) is covered."
@@ -413,15 +414,15 @@
     },
     "local/differential.log": {
       "path": "W-17-vm/local/differential.log",
-      "sha256": "713eed8851000907eef7cc06f18e49ec8dffcad31ab9ed1af8fa14b218af34a7"
+      "sha256": "bbb62b1c2aeab56312b12db2f0667c1c32d318192cbb6571ff0123940b7555ad"
     },
     "local/go-test.log": {
       "path": "W-17-vm/local/go-test.log",
-      "sha256": "50a9f2f8055b38ae60bc72028f5672f69e10bd6b23e14005321377323fc2920b"
+      "sha256": "3a10857b01cd5215964fba02692a208f5198dac4c8b2151044d09b057b1659a4"
     },
     "local/race.log": {
       "path": "W-17-vm/local/race.log",
-      "sha256": "6c776cf875bf20fb3b2ad79ae642f637e0b998837b0ae85cbd5b0afd501f16e0"
+      "sha256": "43231586b8057d4adb1111646115969c37a76417dd2eced6bbfa44d39f6e04ad"
     },
     "stage2/random-differential.txt": {
       "path": "W-17-vm/stage2/random-differential.txt",
@@ -593,7 +594,7 @@
     },
     "stage7c/red-review2-fixes.txt": {
       "path": "W-17-vm/stage7c/red-review2-fixes.txt",
-      "sha256": "4b15b6030452d32556441e0925af5a307e10b7ead4e47d1c9a0d80ea15024a45"
+      "sha256": "e6332c9d1aa459eb2b53bb3e26a8e2494d7bf6401d5e264f5e5bf549839322cb"
     },
     "stage7c/try-cost-before-fix.benchstat.txt": {
       "path": "W-17-vm/stage7c/try-cost-before-fix.benchstat.txt",
