@@ -609,8 +609,8 @@ func (s *vmState) pop(release bool) error {
 	f := s.frames[len(s.frames)-1]
 	var first error
 	keep := func(err error) {
-		if err != nil && first == nil {
-			first = err
+		if err != nil {
+			first = s.chainErrors(first, err)
 		}
 	}
 	// The temporaries and the calls the frame started go first, while the

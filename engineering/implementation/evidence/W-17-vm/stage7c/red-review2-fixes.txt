@@ -312,3 +312,105 @@ Stack trace:
 ~Tb Qtb fell
 
 [exit 0]
+
+# Fifth review: output before its fixes (commit 077f7ca), probes of ~/.cache/phego-work/review7c-6.
+
+===== c1.php
+--- php
+~D3
+~D1
+F
+~D2
+ret
+done
+
+[exit 0]
+--- phego before the fix
+~D1
+~D3
+F
+~D2
+ret
+done
+
+[exit 0]
+
+===== c4.php
+--- php
+~T1
+C t1<
+F
+~T2
+G t2<
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+G t2<t1<
+done
+
+[exit 0]
+
+===== c6.php
+--- php
+~T1
+F
+~D2
+ret
+done
+
+[exit 0]
+--- phego before the fix
+~D2
+~T1
+G t1<
+done
+
+[exit 0]
+
+===== fin.php
+--- php
+~T
+F
+G t
+
+[exit 0]
+--- phego before the fix
+~T
+G t
+
+[exit 0]
+
+===== cv2.php
+--- php
+~T1
+~T2
+t2<t1
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+t1<-
+done
+
+[exit 0]
+
+===== cv3.php
+--- php
+~T1
+~T2
+t2<t1
+done
+
+[exit 0]
+--- phego before the fix
+~T1
+~T2
+t1<-
+done
+
+[exit 0]

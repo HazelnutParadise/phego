@@ -1,6 +1,8 @@
 package runtime
 
 import (
+	"errors"
+
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 )
 
@@ -126,6 +128,39 @@ func (s *vmState) chain(ex *object, err error) (*object, bool) {
 	}
 	s.setPrevious(next, ex)
 	return next, true
+}
+
+// chainErrors combines two errors raised one after the other while a
+// frame's values are released. When both are PHP exceptions, the later one
+// becomes the current exception with the earlier one as its previous, as a
+// destructor that throws while an exception is pending does
+// (zend_exception_set_previous). Otherwise the earlier error stands, as
+// before.
+func (s *vmState) chainErrors(first, next error) error {
+	if first == nil {
+		return next
+	}
+	if next == nil {
+		return first
+	}
+	// The execution chains a throw that replaces a pending one itself
+	// (replaceCompletion): then the later error already carries the
+	// earlier one as its previous.
+	var c1, c2 completion
+	if errors.As(first, &c1) && errors.As(next, &c2) && c1.serial != 0 && containsCompletion(c2.previous, c1.serial) {
+		return next
+	}
+	b, ok, _ := s.thrownObject(next)
+	if !ok {
+		return first
+	}
+	a, ok, _ := s.thrownObject(first)
+	if !ok {
+		_ = s.releaseObject(b)
+		return first
+	}
+	s.setPrevious(b, a)
+	return &vmThrown{object: b}
 }
 
 // throwObject is ZEND_HANDLE_EXCEPTION: it unwinds frames until one has a

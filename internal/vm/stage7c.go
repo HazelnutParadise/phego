@@ -12,7 +12,7 @@ import (
 // (zend_compile_try, zend_compile_throw, zend_handle_loops_and_finally).
 //
 //	start:   the try block
-//	         Leave after
+//	         Jump after                 (Leave after when there is a finally block)
 //	catch:   r = the exception          (Catch handler of [start, catch))
 //	         t = r instanceof A; Branch t, body, next
 //	body:    $e = r; the catch block; Leave after
@@ -23,8 +23,9 @@ import (
 //
 // The VM runs the finally block for every Leave, Return and throw that
 // leaves its range, and frees the temporaries that are dead where control
-// continues, so a break, continue or return needs no code of its own here
-// beyond the Leave.
+// continues. A break, continue or return that leaves foreach loops goes
+// through an exit stub after the loop, which frees their iterators first
+// (exitStub, exitLoop, returnValue).
 
 // tryScope is a try statement being compiled: loops is how many loops
 // enclosed it, finally whether it has a finally block that is still to
@@ -158,31 +159,47 @@ func (fc *fnCompiler) exitLoop(li, target int) {
 
 // returnValue is the Return of register r. Inside foreach loops the
 // iterators are freed first, innermost first, in a stub after the
-// outermost of them; the Return there runs the finally blocks around the
-// loops like any other. When a finally block lies between the return and
-// that stub, PHP runs it before it frees the loops outside it, and the
-// value would not survive the block in a register: the Return then stays in
-// place, the VM keeps the value while the finally blocks run and frees the
-// temporaries when the frame ends.
+// outermost loop it frees, and the Return there runs the finally blocks
+// that enclose the stub.
+//
+// PHP frees the loops and runs the finally blocks a return leaves in
+// nesting order (zend_handle_loops_and_finally). The stub frees the loops
+// inside the innermost try with a finally block that has foreach loops
+// inside it, or all of them when there is no such try. It lies inside that
+// try, so an exception a destructor throws while an iterator is freed
+// reaches its catch and its finally block. The loops outside it are freed
+// when the frame ends. A finally block between the return and the stub
+// keeps the Return in place (see below).
 func (fc *fnCompiler) returnValue(notice uint16, r uint32) {
-	drops := fc.iterators(-1)
+	from := -1 // the stub frees the iterators of the loops above this index
+	for _, t := range fc.tries {
+		if t.finally && len(fc.iterators(t.loops-1)) > 0 {
+			from = t.loops - 1
+		}
+	}
+	drops := fc.iterators(from)
 	if len(drops) == 0 {
 		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 		return
 	}
-	j := 0
-	for !fc.loops[j].hasIter {
-		j++
+	m := from + 1
+	for !fc.loops[m].hasIter {
+		m++
 	}
 	for _, t := range fc.tries {
-		if t.finally && t.loops > j {
+		if t.finally && t.loops > m {
+			// The way to the stub runs a finally block, whose code reuses
+			// the temporaries: the value would not survive it in r. The
+			// Return stays in place, the VM keeps the value while the
+			// finally blocks run and frees the iterators when the frame
+			// ends.
 			fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 			return
 		}
 	}
 	stub := exitStub{label: fc.label(), drops: drops, line: fc.cur, ret: true, notice: notice, reg: r}
-	fc.loops[j].stubs = append(fc.loops[j].stubs, stub)
-	fc.goTo(stub.label, fc.leaves(j, len(fc.loops)))
+	fc.loops[m].stubs = append(fc.loops[m].stubs, stub)
+	fc.goTo(stub.label, fc.leaves(m, len(fc.loops)))
 }
 
 func (fc *fnCompiler) tryStmt(n *ir.Node) {
