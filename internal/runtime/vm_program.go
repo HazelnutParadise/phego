@@ -720,7 +720,17 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	}
 	// Hand the facts to where the VM reads them without a lookup.
 	for i := range f.handlers {
-		f.handlers[i].live = f.liveAt[f.handlers[i].target]
+		h := &f.handlers[i]
+		for _, r := range f.liveAt[h.target] {
+			// The catch register is live at the target because the
+			// handler reads the exception from it. What it held before,
+			// such as the iterator of a foreach inside the try block
+			// that got the same register, is dead and is released with
+			// the other temporaries, before the handler is entered.
+			if !h.catch || r != h.reg {
+				h.live = append(h.live, r)
+			}
+		}
 	}
 	for pc := range f.code {
 		if in := &f.code[pc]; in.op == bytecode.OpLeave {

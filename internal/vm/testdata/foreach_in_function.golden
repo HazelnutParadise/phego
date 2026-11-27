@@ -44,11 +44,14 @@ func 1 "first" params=2 locals=4 registers=10 maxstack=0 flags=nothis
   12: Binary Equal 9 7 8 ; line 4
   13: Branch 0 9 14 17 ; line 4
   14: Load 0 7 4 0 ; line 5
-  15: Return 0 7 0 0 ; line 5
+  15: Jump 0 20 0 0 ; line 5
   16: Jump 0 17 0 0 ; line 5
   17: Jump 0 8 0 0 ; line 5
   18: Drop 0 6 0 0 ; line 5
-  19: Const 0 6 0 0 ; line 8 ; null
-  20: Return 0 6 0 0 ; line 8
-  21: Const 0 6 0 0 ; line 9 ; null
-  22: Return 0 6 0 0 ; line 9
+  19: Jump 0 22 0 0 ; line 5
+  20: Drop 0 6 0 0 ; line 5
+  21: Return 0 7 0 0 ; line 5
+  22: Const 0 6 0 0 ; line 8 ; null
+  23: Return 0 6 0 0 ; line 8
+  24: Const 0 6 0 0 ; line 9 ; null
+  25: Return 0 6 0 0 ; line 9

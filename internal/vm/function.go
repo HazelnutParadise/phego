@@ -64,6 +64,9 @@ type fnCompiler struct {
 	// handlers the exception table so far (stage7c.go).
 	tries    []tryScope
 	handlers []pendingHandler
+	// stubs are the exit stubs of the loop statement just compiled, until
+	// stmt emits them after it.
+	stubs []exitStub
 	// elemPCs are the instructions that name the element register, by the
 	// placeholder elemReg until finish knows where the temporaries end.
 	elemPCs []int
@@ -89,6 +92,10 @@ type loop struct {
 	cont     int
 	iter     uint32
 	hasIter  bool
+	// stubs are the exits that free this loop's iterator (and those of the
+	// loops inside it) on their way out; their code follows the loop
+	// (stage7c.go).
+	stubs []exitStub
 }
 
 // function compiles one HIR function, returning an UnsupportedError for the
@@ -671,14 +678,19 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 		fc.ifStmt(n)
 	case ir.OpWhile:
 		fc.whileStmt(n)
+		fc.flushStubs()
 	case ir.OpDo:
 		fc.doStmt(n)
+		fc.flushStubs()
 	case ir.OpFor:
 		fc.forStmt(n)
+		fc.flushStubs()
 	case ir.OpForeach:
 		fc.foreachStmt(n)
+		fc.flushStubs()
 	case ir.OpSwitch:
 		fc.switchStmt(n)
+		fc.flushStubs()
 	case ir.OpBreak, ir.OpContinue:
 		depth := 1
 		if n.Value != nil && n.Value.Kind == ir.LitInt {
@@ -726,7 +738,7 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			}
 			fc.emit(bytecode.OpVerifyReturn, uint16(bytecode.ReturnValue), r, 0, 0)
 		}
-		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
+		fc.returnValue(notice, r)
 	case ir.OpClass:
 		fc.classDecl(n)
 	case ir.OpTry:
@@ -818,7 +830,7 @@ func (fc *fnCompiler) whileStmt(n *ir.Node) {
 	fc.bind(body)
 	fc.loops = append(fc.loops, loop{brk: end, cont: cond})
 	fc.stmt(n.Kids[1])
-	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.popLoop()
 	fc.jump(cond)
 	fc.bind(end)
 }
@@ -829,7 +841,7 @@ func (fc *fnCompiler) doStmt(n *ir.Node) {
 	fc.emit(bytecode.OpCheckpoint, 0, 0, 0, 0)
 	fc.loops = append(fc.loops, loop{brk: end, cont: cont})
 	fc.stmt(n.Kids[0])
-	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.popLoop()
 	fc.bind(cont)
 	mark := fc.top
 	r := fc.value(n.Kids[1])
@@ -875,7 +887,7 @@ func (fc *fnCompiler) forStmt(n *ir.Node) {
 	fc.bind(body)
 	fc.loops = append(fc.loops, loop{brk: end, cont: step})
 	fc.stmt(n.Kids[3])
-	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.popLoop()
 	fc.bind(step)
 	for _, e := range forExprs(n.Kids[2]) {
 		fc.discard(e)
@@ -922,7 +934,7 @@ func (fc *fnCompiler) switchStmt(n *ir.Node) {
 		fc.bind(bodies[i])
 		fc.stmt(cs.Kids[1])
 	}
-	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.popLoop()
 	fc.bind(end)
 }
 
@@ -975,7 +987,7 @@ func (fc *fnCompiler) foreachStmt(n *ir.Node) {
 	}
 	fc.loops = append(fc.loops, loop{brk: brk, cont: next, iter: it, hasIter: true})
 	fc.stmt(body)
-	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.popLoop()
 	fc.jump(next)
 	fc.bind(brk)
 	fc.emit(bytecode.OpDrop, 0, it, 0, 0)

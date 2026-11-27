@@ -613,11 +613,15 @@ func (s *vmState) pop(release bool) error {
 			first = err
 		}
 	}
-	// The temporaries and the calls the frame was building go first, while
-	// the frame is still the current one (cleanup_unfinished_calls and
-	// cleanup_live_vars when an exception unwinds it; a returning frame has
-	// none left but a foreach iterator). Then PHP makes the caller the
-	// current frame and frees the variables (zend_leave_helper).
+	// The temporaries and the calls the frame started go first, while the
+	// frame is still the current one (cleanup_live_vars and
+	// cleanup_unfinished_calls when an exception unwinds it; a returning
+	// frame has none left). Then PHP makes the caller the current frame
+	// and frees the variables (zend_leave_helper). Two differences from
+	// PHP remain and are listed as known gaps: PHP frees the unfinished
+	// calls before the temporaries, and the arguments already pushed for
+	// an unfinished call stay on the argument stack until a handler is
+	// entered or the run ends.
 	for i := range f.regs {
 		v := f.regs[i]
 		f.regs[i] = value{}

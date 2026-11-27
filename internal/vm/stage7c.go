@@ -27,8 +27,9 @@ import (
 // beyond the Leave.
 
 // tryScope is a try statement being compiled: loops is how many loops
-// enclosed it, finally whether it has a finally block, and inCatch whether
-// one of its catch blocks is being compiled.
+// enclosed it, finally whether it has a finally block that is still to
+// run, and inCatch whether one of its handler bodies (a catch block, or
+// the finally block itself) is being compiled.
 type tryScope struct {
 	loops   int
 	finally bool
@@ -49,37 +50,139 @@ func (fc *fnCompiler) leaveTo(l int) {
 	fc.fixups = append(fc.fixups, fixup{pc, 0, l})
 }
 
-// exitLoop is a break or continue to label target of the loop at index li.
-// Outside any try statement it drops the iterators of the foreach loops it
-// leaves and jumps, as before. When it leaves a try statement it is a
-// Leave without the drops: a Drop inside a protected range would leave the
-// iterator undefined for the handler, and PHP frees loop variables around
-// the finally blocks in nesting order, so the VM frees what is dead where
-// the Leave arrives. Leaving only the try block of a try without finally,
-// with no iterator to free, is the plain jump PHP emits and costs what a
-// jump costs.
-func (fc *fnCompiler) exitLoop(li, target int) {
-	crossed, special := false, false
-	for _, t := range fc.tries {
-		if t.loops > li {
-			crossed = true
-			special = special || t.finally || t.inCatch
-		}
-	}
-	iterators := false
-	for _, inner := range fc.loops[li+1:] {
-		iterators = iterators || inner.hasIter
-	}
-	if special || crossed && iterators {
-		fc.leaveTo(target)
+// exitStub is the code a break, continue or return jumps to when it leaves
+// foreach loops: it frees their iterators, innermost first, and goes on to
+// the target (PHP's FE_FREE before the jump or the RETURN). It is emitted
+// right after the outermost loop it frees, which puts it outside every try
+// statement inside that loop: a Drop inside a protected range would leave
+// the iterator undefined for the handler, and PHP attributes an exception
+// raised by freeing a loop variable to the end of the loop, not to the try
+// around the break.
+type exitStub struct {
+	label, target int
+	drops         []uint32
+	line          int
+	leave, ret    bool
+	notice        uint16
+	reg           uint32
+}
+
+// popLoop ends the innermost loop and hands its stubs to stmt.
+func (fc *fnCompiler) popLoop() {
+	l := fc.loops[len(fc.loops)-1]
+	fc.loops = fc.loops[:len(fc.loops)-1]
+	fc.stubs = append(fc.stubs, l.stubs...)
+}
+
+// flushStubs emits the stubs of the loop statement just compiled; control
+// that leaves the loop normally jumps over them.
+func (fc *fnCompiler) flushStubs() {
+	if len(fc.stubs) == 0 {
 		return
 	}
-	for _, inner := range fc.loops[li+1:] {
-		if inner.hasIter {
-			fc.emit(bytecode.OpDrop, 0, inner.iter, 0, 0)
+	stubs := fc.stubs
+	fc.stubs = nil
+	skip := fc.label()
+	fc.jump(skip)
+	saved := fc.cur
+	for _, s := range stubs {
+		fc.bind(s.label)
+		fc.cur = s.line
+		for _, r := range s.drops {
+			fc.emit(bytecode.OpDrop, 0, r, 0, 0)
+		}
+		switch {
+		case s.ret:
+			fc.emit(bytecode.OpReturn, s.notice, s.reg, 0, 0)
+		case s.leave:
+			fc.leaveTo(s.target)
+		default:
+			fc.jump(s.target)
 		}
 	}
-	fc.jump(target)
+	fc.cur = saved
+	fc.bind(skip)
+}
+
+// leaves reports whether control that goes from the code compiled now to a
+// place inside the loops[:outer+1] and outside the loops above inner needs
+// a Leave: it leaves a finally range or a catch block of a try statement
+// that lies between the two.
+func (fc *fnCompiler) leaves(outer, inner int) bool {
+	for _, t := range fc.tries {
+		if t.loops > outer && t.loops <= inner && (t.finally || t.inCatch) {
+			return true
+		}
+	}
+	return false
+}
+
+// iterators are the iterator registers of the foreach loops above index li,
+// innermost first.
+func (fc *fnCompiler) iterators(li int) []uint32 {
+	var out []uint32
+	for i := len(fc.loops) - 1; i > li; i-- {
+		if fc.loops[i].hasIter {
+			out = append(out, fc.loops[i].iter)
+		}
+	}
+	return out
+}
+
+// goTo emits a jump to label l, as a Leave when leave is set.
+func (fc *fnCompiler) goTo(l int, leave bool) {
+	if leave {
+		fc.leaveTo(l)
+		return
+	}
+	fc.jump(l)
+}
+
+// exitLoop is a break or continue to label target of the loop at index li.
+// With no iterator to free it is a jump, or a Leave when it leaves a
+// finally range or a catch block (leaving the try block of a try without
+// finally is the plain jump PHP emits). Otherwise it goes to a stub after
+// the outermost loop it leaves, which frees the iterators and goes on.
+func (fc *fnCompiler) exitLoop(li, target int) {
+	top := len(fc.loops) - 1
+	drops := fc.iterators(li)
+	if len(drops) == 0 {
+		fc.goTo(target, fc.leaves(li, top+1))
+		return
+	}
+	j := li + 1
+	stub := exitStub{label: fc.label(), target: target, drops: drops, line: fc.cur, leave: fc.leaves(li, j)}
+	fc.loops[j].stubs = append(fc.loops[j].stubs, stub)
+	fc.goTo(stub.label, fc.leaves(j, top+1))
+}
+
+// returnValue is the Return of register r. Inside foreach loops the
+// iterators are freed first, innermost first, in a stub after the
+// outermost of them; the Return there runs the finally blocks around the
+// loops like any other. When a finally block lies between the return and
+// that stub, PHP runs it before it frees the loops outside it, and the
+// value would not survive the block in a register: the Return then stays in
+// place, the VM keeps the value while the finally blocks run and frees the
+// temporaries when the frame ends.
+func (fc *fnCompiler) returnValue(notice uint16, r uint32) {
+	drops := fc.iterators(-1)
+	if len(drops) == 0 {
+		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
+		return
+	}
+	j := 0
+	for !fc.loops[j].hasIter {
+		j++
+	}
+	for _, t := range fc.tries {
+		if t.finally && t.loops > j {
+			fc.emit(bytecode.OpReturn, notice, r, 0, 0)
+			return
+		}
+	}
+	stub := exitStub{label: fc.label(), drops: drops, line: fc.cur, ret: true, notice: notice, reg: r}
+	fc.loops[j].stubs = append(fc.loops[j].stubs, stub)
+	fc.goTo(stub.label, fc.leaves(j, len(fc.loops)))
 }
 
 func (fc *fnCompiler) tryStmt(n *ir.Node) {
@@ -142,8 +245,11 @@ func (fc *fnCompiler) tryStmt(n *ir.Node) {
 		fc.emit(bytecode.OpThrow, 0, r, 0, 0)
 		fc.handlers = append(fc.handlers, pendingHandler{start: start, end: end, target: target, bodyEnd: len(fc.code), register: r, kind: bytecode.Catch})
 	}
-	fc.tries = fc.tries[:len(fc.tries)-1]
 	if finally != nil {
+		// The finally block is a handler body too: an exit from it (a
+		// return to a stub that frees iterators) is a Leave, and it no
+		// longer runs this try's own finally block.
+		fc.tries[len(fc.tries)-1] = tryScope{loops: len(fc.loops), inCatch: true}
 		fc.top = mark
 		target := len(fc.code)
 		fc.at(finally.Line)
@@ -151,6 +257,7 @@ func (fc *fnCompiler) tryStmt(n *ir.Node) {
 		fc.emit(bytecode.OpEndFinally, 0, 0, 0, 0)
 		fc.handlers = append(fc.handlers, pendingHandler{start: start, end: target, target: target, bodyEnd: len(fc.code), kind: bytecode.Finally})
 	}
+	fc.tries = fc.tries[:len(fc.tries)-1]
 	fc.bind(after)
 	fc.top = mark
 }
