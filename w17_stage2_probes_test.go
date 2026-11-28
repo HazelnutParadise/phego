@@ -1173,7 +1173,7 @@ var w17Stage2Unsupported = []struct {
 	{"s2_u_coalesce_non_variable", "<?php\necho \"a\\n\";\n$GLOBALS['p'][1] ??= 2;\n", "superglobal", 3, ""},
 	{"s2_u_default_builtin_class", "<?php\necho \"a\\n\";\nfunction f($a = 1,\n  $b = new ArrayObject) {}\n", "builtin class ArrayObject", 4, ""},
 	{"s2_u_default_return_by_reference", "<?php\necho \"a\\n\";\nfunction &f($a = 1) {}\n", "return by reference", 3, ""},
-	{"s2_u_default_generator", "<?php\necho \"a\\n\";\nfunction &f($a = 1, int ...$r) { yield 1; }\n", "return by reference", 3, ""},
+	{"s2_u_default_generator", "<?php\necho \"a\\n\";\nfunction &f($a = 1, int ...$r) { return $a; }\n", "return by reference", 3, ""},
 	{"s2_u_default_class_constant", "<?php\necho \"a\\n\";\nfunction f($a = A::{'X'}) {}\n", "class constant with a computed name", 3, ""},
 	{"s2_u_default_float_concat", "<?php\necho \"a\\n\";\nfunction f($a = 1,\n  $b = 1.5 . [1][5]) {}\n", "parameter default whose string value PHP may intern", 4, ""},
 	{"s2_u_default_array_concat", "<?php\necho \"a\\n\";\nfunction f($a = [] . [1][5]) {}\n", "parameter default whose string value PHP may intern", 3, ""},

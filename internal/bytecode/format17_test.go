@@ -660,7 +660,7 @@ func TestFormat17ClassTableIsVerified(t *testing.T) {
 		"property name out of range": {func(i *Image) { c0(i).Properties[0].Name = 999 }, "invalid property"},
 		"method readonly":            {func(i *Image) { c0(i).Methods[0].Flags = MemberReadonly }, "invalid method"},
 		"method visibility 3":        {func(i *Image) { c0(i).Methods[0].Flags = 3 }, "invalid method"},
-		"method unknown flag":        {func(i *Image) { c0(i).Methods[0].Flags = MemberByRef << 1 }, "invalid method"},
+		"method unknown flag":        {func(i *Image) { c0(i).Methods[0].Flags = MemberReturnTypeWillChange << 1 }, "invalid method"},
 		"method signature not a str": {func(i *Image) { c0(i).Methods[2].Signature = k17Int + 1 }, "invalid method"},
 		"method name not a string":   {func(i *Image) { c0(i).Methods[0].Name = k17Int }, "invalid method"},
 	}

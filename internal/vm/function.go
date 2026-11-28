@@ -411,8 +411,12 @@ func (fc *fnCompiler) signature() {
 	if f.Kind == ir.FuncMain {
 		return
 	}
-	if len(f.Attributes) > 0 {
-		fc.unsupported("function attribute", positive(f.Attributes[0].Line, f.Line))
+	for _, a := range f.Attributes {
+		// #[\ReturnTypeWillChange] on a method is the one attribute the VM
+		// knows (the class table carries it).
+		if f.Kind != ir.FuncMethod || !returnTypeWillChange(a) {
+			fc.unsupported("function attribute", positive(a.Line, f.Line))
+		}
 	}
 	if f.Kind == ir.FuncNamed && isBuiltin(f.Name) {
 		// A hoisted declaration is a CompileError (compiler.compile). A
@@ -420,7 +424,9 @@ func (fc *fnCompiler) signature() {
 		// compile anyway.
 		fc.unsupported("declaration of builtin function "+f.Name+"()", f.Line)
 	}
-	if f.ByRef && f.Kind != ir.FuncArrow {
+	if f.ByRef && f.Kind != ir.FuncArrow && !f.Generator {
+		// A generator declared with & yields by reference; its return
+		// value is a plain value (zend_compile_return).
 		fc.unsupported("return by reference", f.Line)
 	}
 	for _, p := range f.Params {
@@ -740,11 +746,11 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			fc.exitLoop(li, l.brk)
 		}
 	case ir.OpReturn:
-		if n.Flags&ir.FlagRef != 0 && fc.f.Kind != ir.FuncArrow {
+		if n.Flags&ir.FlagRef != 0 && fc.f.Kind != ir.FuncArrow && !fc.f.Generator {
 			fc.unsupported("return by reference", n.Line)
 		}
 		var notice uint16
-		if fc.f.ByRef && len(n.Kids) > 0 && n.Kids[0] != nil {
+		if fc.f.ByRef && !fc.f.Generator && len(n.Kids) > 0 && n.Kids[0] != nil {
 			// fn &() => expr returns the value of a variable silently;
 			// any other expression is not a reference to return.
 			switch n.Kids[0].Op {

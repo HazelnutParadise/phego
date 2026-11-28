@@ -2,9 +2,11 @@ package vm
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
 	"github.com/HazelnutParadise/phego/internal/ir"
+	"github.com/HazelnutParadise/phego/internal/phpname"
 )
 
 // W-17 stage 8: REQ-001, REQ-016, REQ-025, REQ-026. The unwind table of
@@ -118,4 +120,11 @@ func (fc *fnCompiler) yieldFrom(n *ir.Node) operand {
 	fc.emit(bytecode.OpYieldFrom, 0, res, r, 0)
 	fc.top = res - fc.base + 1
 	return reg(res)
+}
+
+// returnTypeWillChange reports #[\ReturnTypeWillChange] without arguments,
+// the one method attribute the VM knows: it silences the deprecation of a
+// return type that does not match a tentative one of an internal method.
+func returnTypeWillChange(a ir.Attribute) bool {
+	return a.Name != nil && phpname.Lower(strings.TrimPrefix(a.Name.Resolved, "\\")) == "returntypewillchange" && len(a.Arguments) == 0
 }

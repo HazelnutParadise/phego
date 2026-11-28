@@ -357,7 +357,7 @@ var memberFlagNames = []struct {
 	name string
 }{
 	{bytecode.MemberStatic, "static"}, {bytecode.MemberFinal, "final"}, {bytecode.MemberAbstract, "abstract"},
-	{bytecode.MemberReadonly, "readonly"}, {bytecode.MemberByRef, "byref"},
+	{bytecode.MemberReadonly, "readonly"}, {bytecode.MemberByRef, "byref"}, {bytecode.MemberReturnTypeWillChange, "returntypewillchange"},
 }
 
 // memberFlagsText is the visibility, always spelled, then the other flags.

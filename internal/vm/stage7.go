@@ -104,10 +104,12 @@ func (c *compiler) classUnsupported(cl *ir.Class) *UnsupportedError {
 		}
 	}
 	for _, m := range cl.Methods {
-		if len(m.Attributes) > 0 {
-			return fail("method attribute", m.Attributes[0].Line)
+		for _, a := range m.Attributes {
+			if !returnTypeWillChange(a) {
+				return fail("method attribute", a.Line)
+			}
 		}
-		if m.ByRef {
+		if m.ByRef && !m.Generator {
 			return fail("return by reference", m.Line)
 		}
 	}
@@ -258,6 +260,11 @@ func (c *compiler) classTable(nfuncs int) (table []bytecode.Class, pending []*ir
 			}
 			if m.Static {
 				flags |= bytecode.MemberStatic
+			}
+			for _, a := range m.Attributes {
+				if returnTypeWillChange(a) {
+					flags |= bytecode.MemberReturnTypeWillChange
+				}
 			}
 			pending = append(pending, m)
 			bc.Methods = append(bc.Methods, bytecode.Method{

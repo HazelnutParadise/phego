@@ -165,6 +165,8 @@ type vmState struct {
 	// generatorClass says the run registered Generator and the iterator
 	// interfaces; suspended that the run ended at a yield (stage 8).
 	generatorClass, suspended bool
+	// atLine, when not zero, is the line warnAt reports.
+	atLine int
 	// objIters are the run's iterations of Traversable objects: an
 	// iterator register names its slot (vmObjIter).
 	objIters     []vmObjIter
@@ -227,6 +229,11 @@ func (s *vmState) where() (string, int) {
 	if len(s.frames) == 0 {
 		return s.lastFile, s.lastLine
 	}
+	if s.atLine != 0 {
+		// A diagnostic about a declaration: the line of the member.
+		f := s.frames[len(s.frames)-1]
+		return f.fn.files[f.pc], s.atLine
+	}
 	f := s.frames[len(s.frames)-1]
 	return f.fn.files[f.pc], int(f.fn.lines[f.pc])
 }
@@ -235,6 +242,13 @@ func (s *vmState) where() (string, int) {
 // diagnostic cap records the execution's stop, which the loop observes.
 func (s *vmState) warn(level int, message string) {
 	s.x.report(diagnosticLevelName(level), message, false)
+}
+
+// warnAt raises a diagnostic at line of the current file (zend_error_at).
+func (s *vmState) warnAt(level int, message string, line int) {
+	s.atLine = line
+	s.warn(level, message)
+	s.atLine = 0
 }
 
 func (s *vmState) location() (fn string, pc int, file string, line int) {
@@ -345,6 +359,9 @@ func (s *vmState) stop(err error) {
 		_, _, s.lastFile, s.lastLine = s.location()
 		if fatal.line > 0 {
 			s.lastLine = fatal.line
+		}
+		if fatal.unknown {
+			s.lastFile, s.lastLine = "", 0
 		}
 		s.x.errors.trailer = "Stack trace:\n" + s.backtrace("", nil) + "\n"
 		s.end = s.x.fail(endFatal, errors.New(fatal.message))

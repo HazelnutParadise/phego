@@ -91,7 +91,7 @@ var traversableBuiltin = &class{name: "Traversable", schema: &classSchema{classS
 // types.
 var iteratorBuiltin, iteratorAggregateBuiltin = func() (*class, *class) {
 	abstract := func(name, ret string) methodSpec {
-		return methodSpec{name: name, visibility: publicAccess, abstract: true, returnType: ret}
+		return methodSpec{name: name, visibility: publicAccess, abstract: true, returnType: ret, tentative: true}
 	}
 	it, err := buildClass(classSpec{name: "Iterator", isInterface: true, interfaces: []*class{traversableBuiltin}, methods: []methodSpec{
 		abstract("current", "mixed"), abstract("next", "void"), abstract("key", "mixed"), abstract("valid", "bool"), abstract("rewind", "void"),
@@ -139,6 +139,14 @@ var generatorBuiltin = func() *class {
 var generatorDestroy func(*vmState, *object) error
 
 func init() { generatorDestroy = (*vmState).destroyGenerator }
+
+// builtinMethodOrder is the declaration order of the methods of the
+// internal classes whose order PHP's messages show.
+var builtinMethodOrder = map[*class][]string{
+	iteratorBuiltin:          {"current", "next", "key", "valid", "rewind"},
+	iteratorAggregateBuiltin: {"getiterator"},
+	generatorBuiltin:         {"rewind", "valid", "current", "key", "next", "send", "throw", "getreturn", "__debuginfo"},
+}
 
 // iterationClass returns the built-in class of the iteration interfaces
 // and Generator by lower-case name, or nil.
@@ -212,6 +220,7 @@ func (s *vmState) createGenerator(f *vmFrame, pc int) error {
 		outer = s.frames[n-1].called
 	}
 	s.h.currentCalledScope = outer
+	v.object.refcount++
 	if boundary {
 		// The call was a nested run's (getIterator, a callback): it ends
 		// with the Generator as its result.
@@ -219,7 +228,6 @@ func (s *vmState) createGenerator(f *vmFrame, pc int) error {
 		s.end = completion{kind: endReturn, value: v, returnOwned: true}
 		return nil
 	}
-	v.object.refcount++
 	caller := s.frames[len(s.frames)-1]
 	old := caller.regs[dest]
 	caller.regs[dest] = v
@@ -369,6 +377,23 @@ func (s *vmState) runGenerator(g, orig *vmGenerator) completion {
 	gf := g.frame
 	gf.boundary = true
 	gf.via = 0
+	// A delegate runs above the frames of the generators that yield from
+	// it, suspended at their yield from, as PHP links them for the
+	// backtrace (zend_generator_check_placeholder_frame): the outermost
+	// one shows the method of Generator that resumed it.
+	base := len(s.frames)
+	for x := orig; x != g && x != nil && x.frame != nil; {
+		x.frame.via = 0
+		if x == orig {
+			x.frame.via = orig.via
+		}
+		x.frame.leaving = false
+		s.frames = append(s.frames, x.frame)
+		if x.from == nil {
+			break
+		}
+		x = x.from.gen
+	}
 	if g == orig && orig.via != 0 {
 		gf.via = orig.via
 	}
@@ -431,6 +456,11 @@ func (s *vmState) runGenerator(g, orig *vmGenerator) completion {
 			}
 		}
 		g.frame = nil
+	}
+	// The delegators' frames leave the stack as they were.
+	if len(s.frames) > base {
+		clear(s.frames[base:])
+		s.frames = s.frames[:base]
 	}
 	s.ended, s.end, s.floor = ended, end, floor
 	s.throwing = throwing

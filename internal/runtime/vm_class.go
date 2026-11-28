@@ -246,6 +246,9 @@ type vmFatal struct {
 	// line, when positive, is the line PHP reports instead of the
 	// declaring instruction's: that of the member at fault.
 	line int
+	// unknown reports the error at PHP's "Unknown" line 0, as an
+	// E_CORE_ERROR raised while a class is linked is.
+	unknown bool
 }
 
 func (e *vmFatal) Error() string { return e.message }

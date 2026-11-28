@@ -188,8 +188,10 @@ func (s *vmState) signatureCompatible(child *methodSpec, cc *class, parent *meth
 func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error {
 	vc.sigs = make(map[string]string, len(d.methods))
 	lines := make(map[string]int, len(d.methods))
+	decls := make(map[string]bytecode.MemberFlags, len(d.methods))
 	for i := range d.methods {
 		m := &d.methods[i]
+		decls[phpname.Lower(m.name)] = m.flags
 		tail := m.signature
 		if j := strings.Index(tail, "::"); j >= 0 {
 			tail = tail[j+2:]
@@ -253,6 +255,25 @@ func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error 
 		}
 		// A constructor is only bound by an abstract or interface declaration.
 		if ctor && !parent.abstract {
+			return nil
+		}
+		if parent.fn == 0 && parent.tentative && child.fn > 0 {
+			// An internal method with a tentative return type
+			// (Iterator, IteratorAggregate): it takes no parameter, and a
+			// return type that is missing or not compatible is deprecated.
+			cf := &s.prog.funcs[child.fn-1]
+			proto := parent.owner.name + "::" + parent.name + "(): " + parent.returnType
+			if cf.required > 0 {
+				return fail("Declaration of " + signature(child) + " must be compatible with " + proto)
+			}
+			if cf.returnType == "" || !s.subtype(cf.returnType, self, parent.returnType, parentClass) {
+				if decls[lower]&bytecode.MemberReturnTypeWillChange == 0 {
+					s.warnAt(levelDeprecated, "Return type of "+signature(child)+" should either be compatible with "+proto+", or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice", lines[lower])
+					if s.stopped() {
+						return nil
+					}
+				}
+			}
 			return nil
 		}
 		if !s.signatureCompatible(child, self, parent, parentClass) {
@@ -345,6 +366,17 @@ func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error 
 			}
 		}
 	}
+	if !spec.isInterface && !spec.isTrait {
+		// zend_implement_traversable, zend_implement_aggregate and
+		// zend_implement_iterator.
+		it, agg := classIs(self, iteratorBuiltin), classIs(self, iteratorAggregateBuiltin)
+		if it && agg {
+			return &vmFatal{message: "Class " + d.name + " cannot implement both Iterator and IteratorAggregate at the same time"}
+		}
+		if !spec.abstract && !it && !agg && classIs(self, traversableBuiltin) {
+			return &vmFatal{message: "Class " + d.name + " must implement interface Traversable as part of either Iterator or IteratorAggregate", unknown: true}
+		}
+	}
 	if !spec.abstract && !spec.isInterface && !spec.isTrait {
 		var left []string
 		for i := range spec.methods {
@@ -381,9 +413,13 @@ func (s *vmState) linkCheck(vc *vmClass, d *vmClassDecl, spec *classSpec) error 
 	return s.linkConstants(d, spec)
 }
 
-// methodNames lists the lower-case method names of a declared class in
-// declaration order, and of any other class in sorted order.
+// methodNames lists the lower-case method names of a declared class or of
+// an internal class whose order PHP shows in declaration order, and of any
+// other class in sorted order.
 func methodNames(c *class) []string {
+	if order, ok := builtinMethodOrder[c]; ok {
+		return append([]string(nil), order...)
+	}
 	if c.vm != nil && len(c.vm.methodOrder) > 0 {
 		names := append([]string(nil), c.vm.methodOrder...)
 		have := make(map[string]bool, len(names))

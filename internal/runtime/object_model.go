@@ -43,6 +43,10 @@ type methodSpec struct {
 	returnStrict     bool // strict_types belongs to the declaring source file
 	returnsReference bool
 	propertyGetter   bool // transient return descriptor; reuses bool padding
+	// tentative marks the return type of an internal method that a child
+	// may still leave out or contradict, with a deprecation
+	// (ZEND_ARG_TYPE_IS_TENTATIVE).
+	tentative bool
 	name             string
 	visibility       access
 	static           bool

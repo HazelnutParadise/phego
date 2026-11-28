@@ -363,6 +363,11 @@ const (
 	MemberReadonly MemberFlags = 1 << 5
 	// MemberByRef marks a method that returns by reference.
 	MemberByRef MemberFlags = 1 << 6
+	// MemberReturnTypeWillChange (format 1.10) marks a method with the
+	// #[\ReturnTypeWillChange] attribute: a return type that is not
+	// compatible with a tentative one of an internal parent raises no
+	// deprecation.
+	MemberReturnTypeWillChange MemberFlags = 1 << 7
 
 	memberFlagsKnown = memberVisMask | MemberStatic | MemberFinal | MemberAbstract | MemberReadonly | MemberByRef
 )
@@ -659,8 +664,11 @@ func verifyClasses(b *budget, image Image, minor uint16, cloneCost bool) error {
 			}
 		}
 		for _, m := range c.Methods {
-			if !name(m.Name) || !optName(m.Signature) || m.Flags&^(memberVisMask|MemberStatic|MemberFinal|MemberAbstract|MemberByRef) != 0 || m.Flags.Visibility() > MemberPrivate {
+			if !name(m.Name) || !optName(m.Signature) || m.Flags&^(memberVisMask|MemberStatic|MemberFinal|MemberAbstract|MemberByRef|MemberReturnTypeWillChange) != 0 || m.Flags.Visibility() > MemberPrivate {
 				return fail("invalid method")
+			}
+			if minor < 10 && m.Flags&MemberReturnTypeWillChange != 0 {
+				return fail(fmt.Sprintf("a method flag needs bytecode format 1.10, but the file declares format 1.%d", minor))
 			}
 			if !unique('m', lowerASCII(image.Constants[m.Name].Bytes)) {
 				return fail("duplicate method name")

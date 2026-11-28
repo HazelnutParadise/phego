@@ -536,8 +536,8 @@ func (s *vmState) sendUnpack(f *vmFrame, in *vmInstr) error {
 		slot = &f.regs[in.a]
 	}
 	t := slot.deref()
-	if t.kind == valueObject {
-		return s.unsupported("unpacking an object")
+	if t.kind == valueObject && s.isTraversable(t.object) {
+		return s.unpackTraversable(t.object)
 	}
 	if t.kind != valueArray {
 		if t.kind == valueUndefined {
@@ -618,6 +618,91 @@ func (s *vmState) sendUnpack(f *vmFrame, in *vmInstr) error {
 		}
 	}
 	return nil
+}
+
+// unpackTraversable is ZEND_SEND_UNPACK for Traversable object o: the
+// iterator is rewound and, while it is valid, its current element becomes
+// the next positional argument, or the named argument of a string key
+// that is not numeric; it moves forward after each. A by-reference
+// parameter gets a new reference to the element, with PHP's warning.
+func (s *vmState) unpackTraversable(o *object) error {
+	it, err := s.objectIterator(o, false)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = s.releaseValue(it) }()
+	iter := it.object
+	depth := len(s.calls) - 1
+	if err := s.iterRewind(iter); err != nil {
+		return err
+	}
+	named := false
+	for {
+		ok, err := s.iterValid(iter)
+		if err != nil || !ok {
+			return err
+		}
+		v, err := s.iterCurrent(iter, false)
+		if err != nil {
+			return err
+		}
+		k, err := s.iterKeyOf(iter)
+		if err != nil {
+			_ = s.releaseValue(v)
+			return err
+		}
+		// User code ran: the call's record is found again.
+		rec := &s.calls[depth]
+		fn := &s.prog.funcs[rec.fn]
+		name, isName := "", false
+		switch k.kind {
+		case valueInt:
+		case valueString:
+			if _, numeric, _ := php8512IntegerStringKey(k.text, s.prog.width); !numeric {
+				name, isName = k.text, true
+			}
+		default:
+			_ = s.releaseValue(v)
+			_ = s.releaseValue(k)
+			return &Throwable{"Error", "Keys must be of type int|string during argument unpacking"}
+		}
+		_ = s.releaseValue(k)
+		index, pos := -1, len(s.args)-rec.base
+		if isName {
+			named = true
+			if index, err = s.namedTarget(rec, name); err != nil {
+				_ = s.releaseValue(v)
+				return err
+			}
+			pos = index
+			if index < 0 {
+				pos = fn.params
+			}
+		} else if named {
+			_ = s.releaseValue(v)
+			return &Throwable{"Error", "Cannot use positional argument after named argument during unpacking"}
+		}
+		if fn.byRefAt(pos) {
+			callee := fn.name
+			if rec.scope != nil {
+				callee = rec.scope.name + "::" + callee
+			}
+			s.h.warn(levelWarning, "Cannot pass by-reference argument "+strconv.Itoa(pos+1)+" of "+callee+"() by unpacking a Traversable, passing by-value instead")
+			if s.stopped() {
+				_ = s.releaseValue(v)
+				return nil
+			}
+			v = value{kind: valueReference, ref: &reference{owner: s.h, refcount: 1, target: v}}
+		}
+		if isName {
+			s.storeNamed(rec, index, name, v)
+		} else {
+			s.args = append(s.args, v)
+		}
+		if err := s.iterForward(iter); err != nil {
+			return err
+		}
+	}
 }
 
 // paramIndex is the parameter named name, the variadic position for a name
