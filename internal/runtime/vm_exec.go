@@ -135,11 +135,17 @@ type vmState struct {
 	// at which the current loop returns to Go (1 for {main}) and nesting
 	// the number of loops running. fetchScratch holds the value a FetchProp
 	// names when the property has no location of its own.
-	declared     []*vmClass
-	classCache   []*class
-	into         vmEnter
-	floor        int
-	nesting      int
+	declared   []*vmClass
+	classCache []*class
+	into       vmEnter
+	floor      int
+	nesting    int
+	// throwing is the exception being thrown while a frame it leaves
+	// releases its values: each exception a destructor raises then becomes
+	// the current one at once, with the one before as its previous
+	// (zend_exception_set_previous), so a destructor that throws an
+	// exception already in the chain makes it current again.
+	throwing     *object
 	fetchScratch value
 	// caches are the run's inline caches (vmCache), allocated on first use.
 	caches []vmCache
@@ -608,11 +614,7 @@ func (k *vmStack[T]) shrink() {
 func (s *vmState) pop(release bool) error {
 	f := s.frames[len(s.frames)-1]
 	var first error
-	keep := func(err error) {
-		if err != nil {
-			first = s.chainErrors(first, err)
-		}
-	}
+	keep := func(err error) { first = s.keepError(first, err) }
 	// The temporaries and the calls the frame started go first, while the
 	// frame is still the current one (cleanup_live_vars and
 	// cleanup_unfinished_calls when an exception unwinds it; a returning

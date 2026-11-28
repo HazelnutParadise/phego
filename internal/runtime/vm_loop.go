@@ -718,21 +718,9 @@ func (s *vmState) loop() {
 				}
 				code = n
 			}
-			// PHP 8 unwinds the frames of this run on exit (unwind_exit)
-			// without running finally blocks. A destructor that throws
-			// while a frame's values are released replaces the exit: the
-			// exception is thrown in the caller, where a catch can take it
-			// and the script goes on (zend_throw_exception_internal over
-			// an unwind_exit).
-			for len(s.frames) > s.floor {
-				if err := s.pop(true); err != nil {
-					rerr = err
-					goto raise
-				}
-			}
-			s.ended = true
-			s.end = completion{kind: endExit, code: code}
-			return
+			// raise unwinds the frames of this run (vmState.exitFrames).
+			rerr = completion{kind: endExit, code: code}
+			goto raise
 		case bytecode.OpThrow:
 			rerr = s.throwValue(regs, in.a)
 			goto raise

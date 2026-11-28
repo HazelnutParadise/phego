@@ -962,6 +962,13 @@ func vmLiveness(f *vmFunction) {
 		}
 	}
 	def := vmDef
+	// PHP keeps a temporary until its last use in code order
+	// (zend_calc_live_ranges), whichever path control takes: exit, throw
+	// and an unmatched match leave an expression with its temporaries
+	// still alive, and the unwinding frees them, after exit has printed
+	// its message. holds are those registers at each such instruction,
+	// used there for the liveness but never killed.
+	holds := vmTerminalHolds(f, composite, uses, def)
 	succ := func(pc int, visit func(int)) {
 		in := f.code[pc]
 		switch in.op {
@@ -994,7 +1001,7 @@ func vmLiveness(f *vmFunction) {
 	if sparse {
 		// The bit sets would be too large: the same facts are computed one
 		// register at a time, in memory linear in the code.
-		vmLivenessSparse(f, composite, uses, def, succ, exc, wanted)
+		vmLivenessSparse(f, composite, uses, def, succ, exc, wanted, holds)
 		return
 	}
 	// live[pc] is the live-in set of pc; iterate to a fixed point in reverse.
@@ -1031,6 +1038,9 @@ func vmLiveness(f *vmFunction) {
 				}
 			})
 			uses(in, func(r uint32) { set(out, r) })
+			for _, r := range holds[int32(pc)] {
+				set(out, r)
+			}
 			cur := live[pc*words : (pc+1)*words]
 			for w := 0; w < words; w++ {
 				if cur[w] != out[w] {
@@ -1120,7 +1130,7 @@ var vmLivenessSparseLimit = vmLivenessSparseWork
 // copy-on-write here: it is when PHP runs the destructor of a temporary
 // object. An IterNext's element, defined on one edge only, is treated as
 // not defined there, which only keeps it longer.
-func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int)), exc func(int, func(int, int)), wanted map[int32]bool) {
+func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int)), exc func(int, func(int, int)), wanted map[int32]bool, holds map[int32][]uint32) {
 	n := len(f.code)
 	// Predecessors in compressed form. via says how each edge is taken:
 	// -2 for normal control, else an exceptional edge into a handler,
@@ -1155,16 +1165,21 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 		pc  int32
 		reg uint32
 		use bool
+		// hold marks a use that only keeps the register alive (holds).
+		hold bool
 	}
 	var touches []touch
 	for pc, in := range f.code {
 		uses(in, func(r uint32) {
 			if composite[r] {
-				touches = append(touches, touch{int32(pc), r, true})
+				touches = append(touches, touch{pc: int32(pc), reg: r, use: true})
 			}
 		})
+		for _, r := range holds[int32(pc)] {
+			touches = append(touches, touch{pc: int32(pc), reg: r, use: true, hold: true})
+		}
 		if d, ok := def(in); ok && composite[d] {
-			touches = append(touches, touch{int32(pc), d, false})
+			touches = append(touches, touch{pc: int32(pc), reg: d})
 		}
 	}
 	byReg := make([][]int32, f.nvals) // indexes into touches
@@ -1224,7 +1239,7 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 		last := int32(-1)
 		for _, ti := range list {
 			t := touches[ti]
-			if t.pc == last {
+			if t.pc == last || t.hold {
 				continue
 			}
 			last = t.pc

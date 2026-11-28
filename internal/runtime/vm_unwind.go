@@ -107,12 +107,36 @@ func (s *vmState) raise(err error) bool {
 	if s.ended {
 		return false
 	}
+	var c completion
+	if errors.As(err, &c) && c.kind == endExit {
+		// exit, here or in a nested run (a destructor, a magic method,
+		// __toString): PHP's unwind_exit goes on through the frames of
+		// this run too.
+		return s.exitFrames(c.code)
+	}
 	ex, ok, fail := s.thrownObject(err)
 	if !ok {
 		s.stop(fail)
 		return false
 	}
 	return s.throwObject(ex)
+}
+
+// exitFrames is exit with status code: PHP 8 unwinds the frames of the run
+// (unwind_exit) without running finally blocks. A destructor that throws
+// while a frame's values are released replaces the exit: the exception is
+// thrown in the caller, where a catch can take it and the script goes on
+// (zend_throw_exception_internal over an unwind_exit). It reports true
+// when a handler took that exception over.
+func (s *vmState) exitFrames(code int) bool {
+	for len(s.frames) > s.floor {
+		if err := s.pop(true); err != nil {
+			return s.raise(err)
+		}
+	}
+	s.ended = true
+	s.end = completion{kind: endExit, code: code}
+	return false
 }
 
 // chain makes the throwable of err, raised while ex was being thrown, the
@@ -181,7 +205,11 @@ func (s *vmState) throwObject(ex *object) bool {
 		if hi >= 0 {
 			h := &fn.handlers[hi]
 			s.discardPending(f, int(h.target), ex)
-			if err := s.enterHandler(f, h.live); err != nil {
+			saved := s.throwing
+			s.throwing = ex
+			err := s.enterHandler(f, h.live)
+			ex, s.throwing = s.throwing, saved
+			if err != nil {
 				var ok bool
 				if ex, ok = s.chain(ex, err); !ok {
 					return false
@@ -213,13 +241,36 @@ func (s *vmState) throwObject(ex *object) bool {
 			s.end = s.escaped(ex)
 			return false
 		}
-		if err := s.pop(true); err != nil {
+		saved := s.throwing
+		s.throwing = ex
+		err := s.pop(true)
+		ex, s.throwing = s.throwing, saved
+		if err != nil {
 			var ok bool
 			if ex, ok = s.chain(ex, err); !ok {
 				return false
 			}
 		}
 	}
+}
+
+// keepError combines err, raised while a frame's values are released, with
+// first, the error raised before it. While an exception is being thrown
+// (s.throwing), an exception err becomes the current one at once, with the
+// one thrown before as its previous; otherwise the two are chained by
+// chainErrors.
+func (s *vmState) keepError(first, err error) error {
+	if err == nil {
+		return first
+	}
+	if s.throwing != nil && first == nil {
+		if next, ok, _ := s.thrownObject(err); ok {
+			s.setPrevious(next, s.throwing)
+			s.throwing = next
+			return nil
+		}
+	}
+	return s.chainErrors(first, err)
 }
 
 // enterHandler prepares frame f for a handler a throw enters, where the
@@ -229,11 +280,7 @@ func (s *vmState) throwObject(ex *object) bool {
 // temporaries of the code it leaves (cleanup_live_vars).
 func (s *vmState) enterHandler(f *vmFrame, live []uint32) error {
 	var first error
-	keep := func(err error) {
-		if err != nil && first == nil {
-			first = err
-		}
-	}
+	keep := func(err error) { first = s.keepError(first, err) }
 	for len(s.args) > f.argBase {
 		v := s.args[len(s.args)-1]
 		s.args[len(s.args)-1] = value{}

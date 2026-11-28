@@ -47,7 +47,10 @@ func (s *vmState) invoke(fn *vmFunction, this value, scope, called *class, args 
 	// The nesting is counted until this call's frames are gone: releasing
 	// their values can run destructors, which nest in turn.
 	s.nesting++
-	defer func() { s.nesting-- }()
+	// The exception an outer frame is being left with is not this run's.
+	throwing := s.throwing
+	s.throwing = nil
+	defer func() { s.nesting--; s.throwing = throwing }()
 	for _, a := range args {
 		a = a.deref()
 		if a.kind >= valueArray {
