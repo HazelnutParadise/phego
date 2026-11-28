@@ -129,7 +129,7 @@ func TestFormat18RejectsInvalidFunctions(t *testing.T) {
 		"more captures than locals":     {func(i *Image) { i.Functions[1].Captures = append(i.Functions[1].Captures, Capture{}) }, "more captures"},
 		"unknown capture flag":          {func(i *Image) { i.Functions[1].Captures[0].Flags = CaptureImplicit << 1 }, "unknown or contradictory flags"},
 		"implicit by reference":         {func(i *Image) { i.Functions[1].Captures[0].Flags = CaptureByRef | CaptureImplicit }, "unknown or contradictory flags"},
-		"unknown function flag":         {func(i *Image) { i.Functions[1].Flags |= FuncUsesThis << 1 }, "unknown function flags"},
+		"unknown function flag":         {func(i *Image) { i.Functions[1].Flags |= FuncByRef << 1 }, "unknown function flags"},
 		"the entry is a closure":        {func(i *Image) { i.Entry = 1 }, "entry function is a closure function"},
 		"a method is a closure": {func(i *Image) {
 			i.Classes = []Class{{Name: 1, Methods: []Method{{Name: 1, Function: 1}}}}

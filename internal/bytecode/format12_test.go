@@ -346,8 +346,8 @@ func TestFormat12Safety(t *testing.T) {
 			t.Errorf("Safety(%d) = %+v, %v; want %+v", op, s, ok, want)
 		}
 	}
-	if _, ok := (OpArgByRef + 1).Safety(); ok {
-		t.Errorf("opcode %d reported known", OpArgByRef+1)
+	if _, ok := (OpYieldFrom + 1).Safety(); ok {
+		t.Errorf("opcode %d reported known", OpYieldFrom+1)
 	}
 	if OpFetchDim != 37 || OpIterInit != 38 || OpIterNext != 39 || OpIterKey != 40 || OpParamDefault != 41 {
 		t.Errorf("format 1.2 opcodes are renumbered: %d %d %d %d %d", OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpParamDefault)

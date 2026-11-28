@@ -256,6 +256,10 @@ const (
 	OpBindLexical     // A closure Value, B variable Location, C the closure's function index; Aux is the capture index
 	OpCallableConvert // A dest Value: turns the innermost started call, which has no arguments yet, into a Closure
 	OpArgByRef        // A dest Value (bool): whether the innermost started call's callee takes its next positional argument by reference
+	// Format 1.10 (W-17 stage 8). Operands are in format110.go and engineering/decisions/W-16-bytecode.md.
+	OpGeneratorCreate // no operands: the call of a FuncGenerator function returns its Generator here, which resumes at the next instruction
+	OpYield           // A dest Value (the value sent in), B value, C key; Aux is a YieldFlags
+	OpYieldFrom       // A dest Value (the delegate's return value), B the array or Traversable Value
 )
 
 // BindFlags is the Aux of OpBind.

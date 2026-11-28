@@ -464,15 +464,25 @@ func format16(in Instruction) bool {
 }
 
 // is17 reports whether op is a format 1.7 opcode.
-func is17(op Opcode) bool { return op >= OpDeclareClass && op <= OpArgByRef }
+func is17(op Opcode) bool { return op >= OpDeclareClass && op <= OpYieldFrom }
 
 // is18 reports whether op is a format 1.8 opcode. The 1.8 opcodes share
 // the operand roles (Roles17) and the data-flow rules of the 1.7 ones.
 func is18(op Opcode) bool { return op >= OpClosure && op <= OpArgByRef }
 
+// is110 reports whether op is a format 1.10 opcode. The 1.10 opcodes share
+// the operand roles (Roles17) and the data-flow rules of the 1.7 ones.
+func is110(op Opcode) bool { return op >= OpGeneratorCreate && op <= OpYieldFrom }
+
 func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) error {
 	// A format 1.7 opcode in an older file is reported as that: such a
 	// file has no class table, so its operands could never be valid.
+	if minor < 10 && is110(in.Op) {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.10, but the file declares format 1.%d", minor))
+	}
+	if is110(in.Op) && f.Flags&FuncGenerator == 0 {
+		return invalid("only a generator function may create a generator or yield")
+	}
 	if minor < 8 && is18(in.Op) {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.8, but the file declares format 1.%d", minor))
 	}

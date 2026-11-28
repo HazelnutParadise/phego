@@ -52,6 +52,12 @@ func opcodeSafety(op Opcode) (Safety, bool) {
 		// warns for an undefined one and releases the capture's old value;
 		// replacing the destination can run a destructor.
 		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
+	case OpGeneratorCreate, OpYield, OpYieldFrom:
+		// Format 1.10. Creating a generator moves the frame into an object;
+		// a yield hands its value out and resumes when the generator is
+		// resumed, with a value sent in or an exception thrown in; a
+		// delegation iterates arrays and Traversables, calling PHP code.
+		s.MayAllocate, s.MayThrow, s.MayCallUser = true, true, true
 	case Opcode(0):
 		return Safety{}, false
 	default:

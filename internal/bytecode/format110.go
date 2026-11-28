@@ -46,6 +46,26 @@ type Unwind struct {
 // Count:u32.
 const unwindWire = 17
 
+// YieldFlags is the Aux of OpYield (format 1.10).
+type YieldFlags uint16
+
+const (
+	// YieldValue: B holds the value yielded; without it the value is null.
+	YieldValue YieldFlags = 1 << iota
+	// YieldKey: C holds the key; without it the generator numbers the
+	// value with its next integer key.
+	YieldKey
+	// YieldRef: B holds a reference, which a generator declared to yield
+	// by reference hands out (MakeRef or a by-reference fetch made it).
+	YieldRef
+	// YieldNotice: a generator declared to yield by reference yields a
+	// value that is not a variable: PHP raises "Only variable references
+	// should be yielded by reference" and yields the value.
+	YieldNotice
+
+	yieldFlagsKnown = YieldValue | YieldKey | YieldRef | YieldNotice
+)
+
 // LeaveCarry (format 1.10) is the Aux of an OpLeave that carries the value
 // of register C to its target: when the Leave runs finally blocks, the
 // value waits in the completion they suspend instead of in the register,
@@ -80,7 +100,32 @@ func verifyFunction110(minor uint16, f *Function) error {
 		if len(f.Unwinds) != 0 {
 			return invalid(fmt.Sprintf("an unwind table needs bytecode format 1.10, but the file declares format 1.%d", minor))
 		}
+		if f.Flags&(FuncGenerator|FuncByRef) != 0 {
+			return invalid(fmt.Sprintf("a generator function or a function returning by reference needs bytecode format 1.10, but the file declares format 1.%d", minor))
+		}
 		return nil
+	}
+	if f.Flags&FuncGenerator != 0 {
+		// The one place the call returns the Generator, outside every
+		// protected range: PHP's GENERATOR_CREATE follows the RECVs.
+		creates := 0
+		for pc, in := range f.Code {
+			if in.Op != OpGeneratorCreate {
+				continue
+			}
+			creates++
+			for _, h := range f.Handlers {
+				if uint32(pc) >= h.Start && uint32(pc) < h.BodyEnd {
+					return invalid("a generator is created inside an exception handler's range")
+				}
+			}
+		}
+		if creates != 1 {
+			return invalid(fmt.Sprintf("a generator function creates its generator %d times, want once", creates))
+		}
+		if f.ReturnKind != Value {
+			return invalid("a generator function returns a value")
+		}
 	}
 	n, nr := uint64(len(f.Code)), uint64(len(f.Registers))
 	// open holds the ends of the call ranges that contain the current

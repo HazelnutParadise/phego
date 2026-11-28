@@ -213,8 +213,8 @@ func TestFormat17Opcodes(t *testing.T) {
 			t.Fatalf("Safety(%d) = %+v, %v", op, s, ok)
 		}
 	}
-	if _, ok := Opcode(80).Safety(); ok {
-		t.Fatal("opcode 80 is known")
+	if _, ok := Opcode(83).Safety(); ok {
+		t.Fatal("opcode 83 is known")
 	}
 	if FormatMinor != 10 {
 		t.Fatalf("FormatMinor = %d, want 10", FormatMinor)
@@ -537,7 +537,7 @@ func TestFormat17FunctionFields(t *testing.T) {
 		edit   func(*Image)
 		detail string
 	}{
-		"unknown function flag":        {func(i *Image) { i.Functions[0].Flags = FuncUsesThis << 1 }, "unknown function flags"},
+		"unknown function flag":        {func(i *Image) { i.Functions[0].Flags = FuncByRef << 1 }, "unknown function flags"},
 		"return type out of range":     {func(i *Image) { i.Functions[f17am].ReturnType = 999 }, "return type"},
 		"return type far out of range": {func(i *Image) { i.Functions[f17am].ReturnType = 0xffffffff }, "return type"},
 		"return type not a string":     {func(i *Image) { i.Functions[f17am].ReturnType = k17Int + 1 }, "return type"},

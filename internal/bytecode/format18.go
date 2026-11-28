@@ -61,7 +61,7 @@ func (f FunctionView) CaptureAt(index int) (Capture, bool) {
 // a by-reference capture is never implicit.
 func verifyFunction18(image Image, minor uint16, f *Function) error {
 	if minor < 8 {
-		if f.Flags&^functionFlagsKnown17 != 0 && f.Flags&^functionFlagsKnown == 0 || len(f.Captures) != 0 {
+		if f.Flags&^functionFlagsKnown17 != 0 && f.Flags&^functionFlagsKnown18 == 0 || len(f.Captures) != 0 {
 			return invalid(fmt.Sprintf("a closure function or a capture needs bytecode format 1.8, but the file declares format 1.%d", minor))
 		}
 		return nil

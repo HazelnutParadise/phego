@@ -28,9 +28,18 @@ const (
 	// FuncUsesThis (format 1.8) marks a closure body that uses $this
 	// (ZEND_ACC_USES_THIS): Closure::bind refuses to unbind its object.
 	FuncUsesThis
+	// FuncGenerator (format 1.10) marks a function whose body yields
+	// (ZEND_ACC_GENERATOR): a call returns a Generator at its one
+	// OpGeneratorCreate, and only such a function may yield.
+	FuncGenerator
+	// FuncByRef (format 1.10) marks a function declared to return by
+	// reference (ZEND_ACC_RETURN_REFERENCE). A generator with it yields by
+	// reference and may be iterated by reference.
+	FuncByRef
 
 	functionFlagsKnown17 = FuncStrict | FuncNoThis
-	functionFlagsKnown   = functionFlagsKnown17 | FuncClosure | FuncUsesThis
+	functionFlagsKnown18 = functionFlagsKnown17 | FuncClosure | FuncUsesThis
+	functionFlagsKnown   = functionFlagsKnown18 | FuncGenerator | FuncByRef
 )
 
 // ClassRef says how an instruction names a class. It is the low three bits
@@ -246,6 +255,21 @@ func Roles17(in Instruction) (roles [3]Role, ok bool) {
 		return [3]Role{RoleUse, RoleLocUse, RoleFunc}, true
 	case OpCallableConvert, OpArgByRef:
 		return [3]Role{RoleDef, RoleNone, RoleNone}, aux == 0
+	// Format 1.10.
+	case OpGeneratorCreate:
+		return [3]Role{}, aux == 0
+	case OpYield:
+		f := YieldFlags(aux)
+		roles = [3]Role{RoleDef, RoleNone, RoleNone}
+		if f&YieldValue != 0 {
+			roles[1] = RoleUse
+		}
+		if f&YieldKey != 0 {
+			roles[2] = RoleUse
+		}
+		return roles, f&^yieldFlagsKnown == 0 && (f&(YieldRef|YieldNotice) == 0 || f&YieldValue != 0) && f&YieldRef&(f>>1) == 0
+	case OpYieldFrom:
+		return [3]Role{RoleDef, RoleUse, RoleNone}, aux == 0
 	}
 	return roles, false
 }
