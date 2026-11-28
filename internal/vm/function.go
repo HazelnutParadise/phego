@@ -70,6 +70,14 @@ type fnCompiler struct {
 	// elemPCs are the instructions that name the element register, by the
 	// placeholder elemReg until finish knows where the temporaries end.
 	elemPCs []int
+	// unwinds is the unwind table so far (format 1.10), with positions in
+	// fc.code; callStarts are the first instructions of the calls an
+	// InitCall, InitMethod, InitStatic or New started and no CallPending
+	// has made yet; tail are the exit stubs placed after the function's
+	// last instruction (stage8.go).
+	unwinds    []bytecode.Unwind
+	callStarts []int
+	tail       []exitStub
 }
 
 // elemReg stands for the function's element Location register in emitted
@@ -153,6 +161,7 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 		}
 	}
 	fc.emit(bytecode.OpReturn, 0, r, 0, 0)
+	fc.flushTail()
 	if fc.overReg != 0 {
 		fc.unsupported("expression too large", fc.overReg)
 	}
@@ -499,7 +508,21 @@ func (fc *fnCompiler) emit(op bytecode.Opcode, aux uint16, a, b, cc uint32) int 
 	if a == elemReg || b == elemReg || cc == elemReg {
 		fc.elemPCs = append(fc.elemPCs, len(fc.code)-1)
 	}
-	return len(fc.code) - 1
+	pc := len(fc.code) - 1
+	switch op {
+	case bytecode.OpInitCall, bytecode.OpInitMethod, bytecode.OpInitStatic, bytecode.OpNew:
+		// The call is unfinished from the next instruction on: one whose
+		// start throws never began (cleanup_unfinished_calls skips the
+		// INIT it stopped at).
+		fc.callStarts = append(fc.callStarts, pc+1)
+	case bytecode.OpCallPending, bytecode.OpCallableConvert:
+		start := fc.callStarts[len(fc.callStarts)-1]
+		fc.callStarts = fc.callStarts[:len(fc.callStarts)-1]
+		if op == bytecode.OpCallPending && start < pc {
+			fc.unwinds = append(fc.unwinds, bytecode.Unwind{Kind: bytecode.UnwindPendingCall, Start: uint32(start), End: uint32(pc)})
+		}
+	}
+	return pc
 }
 
 func (fc *fnCompiler) jump(l int) {
@@ -635,6 +658,7 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 		ReturnType: returnType,
 		Captures:   captures,
 		Handlers:   fc.handlerTable(plen),
+		Unwinds:    fc.unwindTable(plen),
 	}
 }
 

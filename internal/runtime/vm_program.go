@@ -128,6 +128,14 @@ type vmFunction struct {
 	liveAt    map[int32][]uint32
 	leaveLive [][]uint32
 	liveKnown bool
+	// Format 1.10 (stage 8): the unwind table, with dense registers: the
+	// calls in order of start, each with the call it is nested in, and the
+	// returns that free loop variables (UnwindSplit). ranges are PHP's live
+	// ranges of the composite registers, worked out the first time an
+	// exception or exit unwinds the function (vmFunction.rangesFor).
+	calls  []vmUnwindCall
+	splits []bytecode.Unwind
+	ranges *vmRangeCache
 	// unsupported names a construct of the function that stage 1 cannot run;
 	// entering the function ends the run with an UnsupportedError.
 	unsupported string
@@ -242,6 +250,10 @@ func operandRoles(in bytecode.Instruction) (a, b, c int) {
 	case bytecode.OpBinary, bytecode.OpArrayGet, bytecode.OpArrayIsset:
 		return roleValue, roleValue, roleValue
 	case bytecode.OpJump, bytecode.OpLeave:
+		if in.Op == bytecode.OpLeave && in.Aux == bytecode.LeaveCarry {
+			// Format 1.10: C is the value the Leave carries.
+			return roleTarget, roleNone, roleValue
+		}
 		return roleTarget, roleNone, roleNone
 	case bytecode.OpBranch:
 		return roleValue, roleTarget, roleTarget
@@ -706,6 +718,17 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 		}
 	}
 	decodeHandlers(&f, fv)
+	f.ranges = &vmRangeCache{}
+	for i := 0; i < fv.UnwindCount(); i++ {
+		u, _ := fv.UnwindAt(i)
+		if u.Kind != bytecode.UnwindPendingCall {
+			if u.Reg >= nregs || kinds[u.Reg] != bytecode.Value {
+				return f, fail(-1, "unwind entry %d names register %d, which is not a Value", i, u.Reg)
+			}
+			u.Reg = dense[u.Reg]
+		}
+		f.addUnwind(u)
+	}
 	for i := range f.handlers {
 		h, _ := fv.Handler(uint32(i))
 		if f.handlers[i].catch {
@@ -781,21 +804,10 @@ func parameterPrologue(f vmFunction, code []bytecode.Instruction) (locals, store
 	return locals, stores
 }
 
-// vmLiveness computes, for each instruction, the Value registers that may
-// hold an array and are dead after it, so the interpreter releases them at
-// once. Holding a dead copy would make the next write to the same array copy
-// it (copy on write), turning "$x = $a[$i]; $a[$i] = ..." loops quadratic.
-// Release timing is not observable by PHP code here (no objects or
-// destructors), except through the owner count of a reference, which decides
-// whether copying an array copies its element or shares it; so no register
-// keeps a reference past its use without liveness: Push and Bind move the
-// references MakeRef and IterNext put in registers. Functions whose dataflow
-// would need more than vmLivenessWords bitset words keep registers until
-// they are overwritten or the frame ends.
-func vmLiveness(f *vmFunction) {
-	n := len(f.code)
-	// Registers that may hold a composite value: written by an instruction
-	// that can produce one (or a Move from such a register).
+// vmComposite reports the registers of f that may hold a composite value:
+// written by an instruction that can produce one (or a Move from such a
+// register).
+func vmComposite(f *vmFunction) []bool {
 	composite := make([]bool, f.nvals)
 	for _, in := range f.code {
 		switch in.op {
@@ -848,6 +860,48 @@ func vmLiveness(f *vmFunction) {
 			}
 		}
 	}
+	return composite
+}
+
+// vmUses visits the registers instruction in reads, for the liveness.
+func vmUses(in vmInstr, visit func(uint32)) {
+	ra, rb, rc := operandRoles(bytecode.Instruction{Op: in.op, Aux: in.aux})
+	if in.op == bytecode.OpExit && in.aux == 1 {
+		ra = roleValue
+	}
+	ops := [3]uint32{in.a, in.b, in.c}
+	dest := vmDefOperand(in)
+	for i, role := range [3]int{ra, rb, rc} {
+		isDest := i == dest
+		if role == roleValue && !isDest {
+			visit(ops[i])
+		}
+		if role == roleAny && i == 1 && in.op == bytecode.OpMove && in.aux == 0 {
+			visit(ops[i])
+		}
+		if role == roleAny && i == 0 && (in.op == bytecode.OpPush && (in.aux == 0 || in.aux == vmPushTemp || in.aux == vmPushResult || in.aux == vmPushElement) || (in.op == bytecode.OpDrop || in.op == bytecode.OpSendUnpack) && in.aux == 0) {
+			visit(ops[i])
+		}
+		if role == roleAny && i == 1 && in.op == bytecode.OpIterInit && in.aux&vmIterSubjectLocation == 0 {
+			visit(ops[i])
+		}
+	}
+}
+
+// vmLiveness computes, for each instruction, the Value registers that may
+// hold an array and are dead after it, so the interpreter releases them at
+// once. Holding a dead copy would make the next write to the same array copy
+// it (copy on write), turning "$x = $a[$i]; $a[$i] = ..." loops quadratic.
+// Release timing is not observable by PHP code here (no objects or
+// destructors), except through the owner count of a reference, which decides
+// whether copying an array copies its element or shares it; so no register
+// keeps a reference past its use without liveness: Push and Bind move the
+// references MakeRef and IterNext put in registers. Functions whose dataflow
+// would need more than vmLivenessWords bitset words keep registers until
+// they are overwritten or the frame ends.
+func vmLiveness(f *vmFunction) {
+	n := len(f.code)
+	composite := vmComposite(f)
 	any := false
 	for _, c := range composite {
 		any = any || c
@@ -938,29 +992,7 @@ func vmLiveness(f *vmFunction) {
 	}
 	words := (f.nvals + 63) / 64
 	sparse := words*(n+1) > vmLivenessWords
-	uses := func(in vmInstr, visit func(uint32)) {
-		ra, rb, rc := operandRoles(bytecode.Instruction{Op: in.op, Aux: in.aux})
-		if in.op == bytecode.OpExit && in.aux == 1 {
-			ra = roleValue
-		}
-		ops := [3]uint32{in.a, in.b, in.c}
-		dest := vmDefOperand(in)
-		for i, role := range [3]int{ra, rb, rc} {
-			isDest := i == dest
-			if role == roleValue && !isDest {
-				visit(ops[i])
-			}
-			if role == roleAny && i == 1 && in.op == bytecode.OpMove && in.aux == 0 {
-				visit(ops[i])
-			}
-			if role == roleAny && i == 0 && (in.op == bytecode.OpPush && (in.aux == 0 || in.aux == vmPushTemp || in.aux == vmPushResult || in.aux == vmPushElement) || (in.op == bytecode.OpDrop || in.op == bytecode.OpSendUnpack) && in.aux == 0) {
-				visit(ops[i])
-			}
-			if role == roleAny && i == 1 && in.op == bytecode.OpIterInit && in.aux&vmIterSubjectLocation == 0 {
-				visit(ops[i])
-			}
-		}
-	}
+	uses := vmUses
 	def := vmDef
 	// PHP keeps a temporary until its last use in code order
 	// (zend_calc_live_ranges), whichever path control takes: exit, throw
@@ -969,6 +1001,28 @@ func vmLiveness(f *vmFunction) {
 	// its message. holds are those registers at each such instruction,
 	// used there for the liveness but never killed.
 	holds := vmTerminalHolds(f, composite, uses, def)
+	// carryAt maps the target of a Leave that carries a value (format
+	// 1.10) to the register it carries: the edge from a finally block's
+	// EndFinally to that target writes the register, so its liveness does
+	// not reach back into the finally block, whose code reuses it.
+	var carryAt map[int]uint32
+	for _, in := range f.code {
+		if in.op == bytecode.OpLeave && in.aux == bytecode.LeaveCarry {
+			if carryAt == nil {
+				carryAt = map[int]uint32{}
+			}
+			carryAt[int(in.a)] = in.c
+		}
+	}
+	// edgeDef is the register the edge from pc to t defines, or -1.
+	edgeDef := func(pc, t int) int {
+		if carryAt != nil && f.code[pc].op == bytecode.OpEndFinally {
+			if c, ok := carryAt[t]; ok {
+				return int(c)
+			}
+		}
+		return -1
+	}
 	succ := func(pc int, visit func(int)) {
 		in := f.code[pc]
 		switch in.op {
@@ -1001,7 +1055,7 @@ func vmLiveness(f *vmFunction) {
 	if sparse {
 		// The bit sets would be too large: the same facts are computed one
 		// register at a time, in memory linear in the code.
-		vmLivenessSparse(f, composite, uses, def, succ, exc, wanted, holds)
+		vmLivenessSparse(f, composite, uses, def, succ, exc, wanted, holds, edgeDef)
 		return
 	}
 	// live[pc] is the live-in set of pc; iterate to a fixed point in reverse.
@@ -1014,8 +1068,13 @@ func vmLiveness(f *vmFunction) {
 		for pc := n - 1; pc >= 0; pc-- {
 			clear(out)
 			succ(pc, func(s int) {
+				dr := edgeDef(pc, s)
 				for w := 0; w < words; w++ {
-					out[w] |= live[s*words+w]
+					x := live[s*words+w]
+					if dr >= 0 && dr/64 == w {
+						x &^= 1 << (dr % 64)
+					}
+					out[w] |= x
 				}
 			})
 			in := f.code[pc]
@@ -1053,8 +1112,13 @@ func vmLiveness(f *vmFunction) {
 	for pc := 0; pc < n; pc++ {
 		clear(out)
 		succ(pc, func(s int) {
+			dr := edgeDef(pc, s)
 			for w := 0; w < words; w++ {
-				out[w] |= live[s*words+w]
+				x := live[s*words+w]
+				if dr >= 0 && dr/64 == w {
+					x &^= 1 << (dr % 64)
+				}
+				out[w] |= x
 			}
 		})
 		exc(pc, func(t, dr int) {
@@ -1130,7 +1194,7 @@ var vmLivenessSparseLimit = vmLivenessSparseWork
 // copy-on-write here: it is when PHP runs the destructor of a temporary
 // object. An IterNext's element, defined on one edge only, is treated as
 // not defined there, which only keeps it longer.
-func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int)), exc func(int, func(int, int)), wanted map[int32]bool, holds map[int32][]uint32) {
+func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(uint32)), def func(vmInstr) (uint32, bool), succ func(int, func(int)), exc func(int, func(int, int)), wanted map[int32]bool, holds map[int32][]uint32, edgeDef func(int, int) int) {
 	n := len(f.code)
 	// Predecessors in compressed form. via says how each edge is taken:
 	// -2 for normal control, else an exceptional edge into a handler,
@@ -1147,7 +1211,13 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 	via := make([]int32, start[n+1])
 	for pc := 0; pc < n; pc++ {
 		succ(pc, func(s int) {
-			preds[start[s+1]], via[start[s+1]] = int32(pc), -2
+			// An edge that writes a register (a carried value) is taken
+			// like a handler's entry for it.
+			v := int32(-2)
+			if dr := edgeDef(pc, s); dr >= 0 {
+				v = int32(dr)
+			}
+			preds[start[s+1]], via[start[s+1]] = int32(pc), v
 			start[s+1]++
 		})
 		exc(pc, func(s, dr int) {
@@ -1244,7 +1314,7 @@ func vmLivenessSparse(f *vmFunction, composite []bool, uses func(vmInstr, func(u
 			}
 			last = t.pc
 			liveOut := false
-			succ(int(t.pc), func(s int) { liveOut = liveOut || stamp[s] == mark })
+			succ(int(t.pc), func(s int) { liveOut = liveOut || stamp[s] == mark && edgeDef(int(t.pc), s) != r })
 			exc(int(t.pc), func(s, dr int) { liveOut = liveOut || stamp[s] == mark && dr != r })
 			if !liveOut {
 				kills = append(kills, kill{t.pc, uint32(r)})

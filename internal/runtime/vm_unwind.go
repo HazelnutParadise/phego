@@ -41,6 +41,9 @@ type vmPending struct {
 	ex     *object
 	// live are the registers live at a jump's target.
 	live []uint32
+	// carry is the register plus one a jump writes val to at its target
+	// (bytecode.LeaveCarry), or zero.
+	carry uint32
 }
 
 // decodeHandlers copies the exception table and indexes it: per pc the
@@ -274,24 +277,31 @@ func (s *vmState) keepError(first, err error) error {
 }
 
 // enterHandler prepares frame f for a handler a throw enters, where the
-// registers of live are live: the arguments and calls the frame was
-// building are dropped (Handler.StackDepth is zero) and every other
-// register is released, in register order, as PHP frees the live
-// temporaries of the code it leaves (cleanup_live_vars).
+// registers of live are live: the calls the frame was building and the
+// temporaries of the code it leaves are freed in PHP's order
+// (releaseUnwound), and so are the arguments no call took
+// (Handler.StackDepth is zero).
 func (s *vmState) enterHandler(f *vmFrame, live []uint32) error {
 	var first error
 	keep := func(err error) { first = s.keepError(first, err) }
-	for len(s.args) > f.argBase {
-		v := s.args[len(s.args)-1]
-		s.args[len(s.args)-1] = value{}
-		s.args = s.args[:len(s.args)-1]
+	s.releaseUnwound(f, live, false, keep)
+	s.releaseArgs(f, keep)
+	return first
+}
+
+// releaseArgs frees, in order, the arguments above frame f's base of the
+// argument stack that no unfinished call owns: those a call instruction
+// failed to take.
+func (s *vmState) releaseArgs(f *vmFrame, keep func(error)) {
+	if len(s.args) <= f.argBase {
+		return
+	}
+	args := append([]value(nil), s.args[f.argBase:]...)
+	clear(s.args[f.argBase:])
+	s.args = s.args[:f.argBase]
+	for _, v := range args {
 		keep(s.releaseValue(v))
 	}
-	if len(s.calls) > 0 {
-		keep(s.dropCalls(len(s.frames)))
-	}
-	keep(s.releaseDead(f, live))
-	return first
 }
 
 // releaseDead releases the registers of f that are not in live. A function
@@ -356,7 +366,10 @@ func (s *vmState) discardPending(f *vmFrame, dest int, ex *object) {
 			s.setPrevious(ex, p.ex)
 		case p.kind == pendThrow:
 			_ = s.releaseObject(p.ex)
-		case p.kind == pendReturn:
+		case p.kind == pendReturn, p.kind == pendJump:
+			// A return value, or one a jump carries (bytecode.LeaveCarry):
+			// PHP frees an incomplete return's value when the finally
+			// block ends otherwise.
 			_ = s.releaseValue(p.val)
 		}
 		*p = vmPending{}
@@ -395,21 +408,36 @@ func through(fn *vmFunction, pc, target int) int32 {
 
 // leave is OpLeave at pc: a jump to target, where the registers of live
 // are live, that first runs the finally blocks it leaves. It returns the
-// pc to continue at.
-func (s *vmState) leave(f *vmFrame, pc, target int, live []uint32) (int, error) {
+// pc to continue at. carry is the register plus one whose value the jump
+// carries (bytecode.LeaveCarry), or zero; held says the value is val,
+// taken out of the register when an earlier finally block began.
+func (s *vmState) leave(f *vmFrame, pc, target int, live []uint32, carry uint32, val value, held bool) (int, error) {
 	fn := f.fn
 	if h := through(fn, pc, target); h >= 0 {
 		t := int(fn.handlers[h].target)
 		if len(f.pend) != 0 {
 			s.discardPending(f, t, nil)
 		}
-		f.pend = append(f.pend, vmPending{h: h, kind: pendJump, target: target, live: live})
+		if carry != 0 && !held {
+			// The finally block's code may reuse the register: the value
+			// waits in the completion, as PHP keeps a return value in
+			// the temporary FAST_CALL leaves alone.
+			val = f.regs[carry-1]
+			f.regs[carry-1] = value{}
+		}
+		f.pend = append(f.pend, vmPending{h: h, kind: pendJump, target: target, live: live, val: val, carry: carry})
 		return t, s.releaseDead(f, fn.handlers[h].live)
 	}
 	if len(f.pend) != 0 {
 		s.discardPending(f, target, nil)
 	}
-	return target, s.releaseDead(f, live)
+	err := s.releaseDead(f, live)
+	if carry != 0 && held {
+		old := f.regs[carry-1]
+		f.regs[carry-1] = val
+		err = s.chainErrors(err, s.releaseValue(old))
+	}
+	return target, err
 }
 
 // returnThrough is a Return of v (owned) at pc: when a finally block has
@@ -439,7 +467,8 @@ func (s *vmState) endFinally(f *vmFrame, pc int) (kind uint8, npc int, p vmPendi
 	f.pend[len(f.pend)-1] = vmPending{}
 	f.pend = f.pend[:len(f.pend)-1]
 	if p.kind == pendJump {
-		npc, err = s.leave(f, pc, p.target, p.live)
+		npc, err = s.leave(f, pc, p.target, p.live, p.carry, p.val, true)
+		p.val = value{}
 	}
 	return p.kind, npc, p, err
 }

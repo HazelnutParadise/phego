@@ -1096,6 +1096,9 @@ func (fc *fnCompiler) call(n *ir.Node) operand {
 	target := fc.c.unit.Functions[index-1]
 	params, _ := fixedParams(target)
 	direct := uint32(len(params)) == argc
+	// PHP's INIT_FCALL comes before the arguments: from here on they are
+	// the arguments of an unfinished call.
+	start := len(fc.code)
 	res := fc.alloc()
 	var callee uint32
 	if !direct {
@@ -1136,6 +1139,7 @@ func (fc *fnCompiler) call(n *ir.Node) operand {
 		fc.emit(bytecode.OpCallValue, 0, res, callee, argc)
 	}
 	fc.cur = after
+	fc.callArgs(start, args)
 	fc.top = res - fc.base + 1
 	return reg(res)
 }

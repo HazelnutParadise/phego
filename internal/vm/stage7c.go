@@ -66,6 +66,9 @@ type exitStub struct {
 	leave, ret    bool
 	notice        uint16
 	reg           uint32
+	// carry makes the stub's Leave carry the return value in reg
+	// (bytecode.LeaveCarry) to the next stub of the same return.
+	carry bool
 }
 
 // popLoop ends the innermost loop and hands its stubs to stmt.
@@ -89,20 +92,33 @@ func (fc *fnCompiler) flushStubs() {
 	for _, s := range stubs {
 		fc.bind(s.label)
 		fc.cur = s.line
-		for _, r := range s.drops {
-			fc.emit(bytecode.OpDrop, 0, r, 0, 0)
-		}
-		switch {
-		case s.ret:
-			fc.emit(bytecode.OpReturn, s.notice, s.reg, 0, 0)
-		case s.leave:
-			fc.leaveTo(s.target)
-		default:
-			fc.jump(s.target)
-		}
+		fc.emitStub(s)
 	}
 	fc.cur = saved
 	fc.bind(skip)
+}
+
+// emitStub emits the code of stub s at the current position.
+func (fc *fnCompiler) emitStub(s exitStub) {
+	for _, r := range s.drops {
+		fc.emit(bytecode.OpDrop, 0, r, 0, 0)
+	}
+	switch {
+	case s.ret:
+		fc.emit(bytecode.OpReturn, s.notice, s.reg, 0, 0)
+	case s.carry:
+		fc.leaveCarry(s.target, s.reg)
+	case s.leave:
+		fc.leaveTo(s.target)
+	default:
+		fc.jump(s.target)
+	}
+}
+
+// leaveCarry emits a Leave to label l that carries register r.
+func (fc *fnCompiler) leaveCarry(l int, r uint32) {
+	pc := fc.emit(bytecode.OpLeave, bytecode.LeaveCarry, 0, 0, r)
+	fc.fixups = append(fc.fixups, fixup{pc, 0, l})
 }
 
 // leaves reports whether control that goes from the code compiled now to a
@@ -157,49 +173,122 @@ func (fc *fnCompiler) exitLoop(li, target int) {
 	fc.goTo(stub.label, fc.leaves(j, top+1))
 }
 
-// returnValue is the Return of register r. Inside foreach loops the
-// iterators are freed first, innermost first, in a stub after the
-// outermost loop it frees, and the Return there runs the finally blocks
-// that enclose the stub.
-//
-// PHP frees the loops and runs the finally blocks a return leaves in
-// nesting order (zend_handle_loops_and_finally). The stub frees the loops
-// inside the innermost try with a finally block that has foreach loops
-// inside it, or all of them when there is no such try. It lies inside that
-// try, so an exception a destructor throws while an iterator is freed
-// reaches its catch and its finally block. The loops outside it are freed
-// when the frame ends. A finally block between the return and the stub
-// keeps the Return in place (see below).
+// returnValue is the Return of register r. PHP frees the loop variables
+// a return leaves and runs the finally blocks around it in nesting order,
+// innermost first, with the value kept in a temporary meanwhile
+// (zend_handle_loops_and_finally). The loop variables between two finally
+// blocks are freed by a stub after the outermost of those loops, which lies
+// inside the outer try, so an exception a destructor throws there reaches
+// that try's catch and its finally block; the value goes from stub to stub
+// with Leaves that carry it across the finally blocks (LeaveCarry). The
+// last stub returns it. Without a finally block to cross, one stub frees
+// every loop variable and returns, and with no loop variable to free the
+// Return stays in place, where the VM runs the finally blocks itself.
 func (fc *fnCompiler) returnValue(notice uint16, r uint32) {
-	from := -1 // the stub frees the iterators of the loops above this index
-	for _, t := range fc.tries {
-		if t.finally && len(fc.iterators(t.loops-1)) > 0 {
-			from = t.loops - 1
-		}
-	}
-	drops := fc.iterators(from)
-	if len(drops) == 0 {
+	all := fc.iterators(-1)
+	if len(all) == 0 {
 		fc.emit(bytecode.OpReturn, notice, r, 0, 0)
 		return
 	}
-	m := from + 1
+	// The finally blocks still to run, innermost first, by how many loops
+	// enclose each try statement.
+	var finallies []int
+	for i := len(fc.tries) - 1; i >= 0; i-- {
+		if fc.tries[i].finally {
+			finallies = append(finallies, fc.tries[i].loops)
+		}
+	}
+	// groups[i] are the loops (indexes into fc.loops) freed after the
+	// i-th finally block runs and before the next one: group 0 is inside
+	// the innermost finally's try, the last group outside every one.
+	groups := make([][]int, len(finallies)+1)
+	for li := len(fc.loops) - 1; li >= 0; li-- {
+		if !fc.loops[li].hasIter {
+			continue
+		}
+		g := 0
+		for g < len(finallies) && li < finallies[g] {
+			g++
+		}
+		groups[g] = append(groups[g], li)
+	}
+	chain := false
+	for _, g := range groups[1:] {
+		chain = chain || len(g) > 0
+	}
+	if !chain {
+		// Every loop to free is inside the innermost finally's try: one
+		// stub after the outermost of them frees them all and returns,
+		// and the VM runs the finally blocks around that Return.
+		fc.returnStub(notice, r, all)
+		return
+	}
+	if r < fc.base {
+		// The value leaves its register while finally blocks run: a
+		// variable's own register must stay as it is.
+		t := fc.alloc()
+		fc.emit(bytecode.OpMove, 0, t, r, 0)
+		r = t
+	}
+	// The stubs of the chain, from the return outwards. A group without
+	// loops to free needs none: the next Leave crosses its finally block
+	// too.
+	type hop struct {
+		label int
+		loop  int // the outermost loop of the group, or -1 for the tail
+		drops []uint32
+	}
+	var hops []hop
+	for _, g := range groups {
+		if len(g) == 0 {
+			continue
+		}
+		var drops []uint32
+		for _, li := range g {
+			drops = append(drops, fc.loops[li].iter)
+		}
+		hops = append(hops, hop{label: fc.label(), loop: g[len(g)-1], drops: drops})
+	}
+	if len(groups[len(groups)-1]) == 0 {
+		// No loop outside the outermost finally's try: the Return goes
+		// after the function's code, outside every try statement.
+		hops = append(hops, hop{label: fc.label(), loop: -1})
+	}
+	first := hops[0]
+	if len(groups[0]) > 0 {
+		// The first stub is inside the innermost finally's try: a jump,
+		// or a Leave out of a catch block, where the value stays in r.
+		fc.goTo(first.label, fc.leaves(first.loop, len(fc.loops)))
+	} else {
+		fc.leaveCarry(first.label, r)
+	}
+	fc.splitAt(len(fc.code)-1, all)
+	for i, h := range hops {
+		stub := exitStub{label: h.label, drops: h.drops, line: fc.cur, notice: notice, reg: r}
+		if i == len(hops)-1 {
+			stub.ret = true
+		} else {
+			stub.target, stub.carry = hops[i+1].label, true
+		}
+		if h.loop < 0 {
+			fc.tail = append(fc.tail, stub)
+		} else {
+			fc.loops[h.loop].stubs = append(fc.loops[h.loop].stubs, stub)
+		}
+	}
+}
+
+// returnStub is a return that frees the loop variables drops (innermost
+// first) in a stub after the outermost loop with one and returns there.
+func (fc *fnCompiler) returnStub(notice uint16, r uint32, drops []uint32) {
+	m := 0
 	for !fc.loops[m].hasIter {
 		m++
-	}
-	for _, t := range fc.tries {
-		if t.finally && t.loops > m {
-			// The way to the stub runs a finally block, whose code reuses
-			// the temporaries: the value would not survive it in r. The
-			// Return stays in place, the VM keeps the value while the
-			// finally blocks run and frees the iterators when the frame
-			// ends.
-			fc.emit(bytecode.OpReturn, notice, r, 0, 0)
-			return
-		}
 	}
 	stub := exitStub{label: fc.label(), drops: drops, line: fc.cur, ret: true, notice: notice, reg: r}
 	fc.loops[m].stubs = append(fc.loops[m].stubs, stub)
 	fc.goTo(stub.label, fc.leaves(m, len(fc.loops)))
+	fc.splitAt(len(fc.code)-1, drops)
 }
 
 func (fc *fnCompiler) tryStmt(n *ir.Node) {

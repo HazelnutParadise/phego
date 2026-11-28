@@ -352,13 +352,15 @@ func (s *vmState) dropCalls(depth int) error {
 		}
 		s.calls[n-1] = vmPendingCall{}
 		s.calls = s.calls[:n-1]
-		if err := s.releaseValue(named); err != nil && first == nil {
-			first = err
-		}
+		// PHP frees a call's object before its extra named arguments
+		// (cleanup_unfinished_calls).
 		if this != nil {
 			if err := s.releaseObject(this); err != nil && first == nil {
 				first = err
 			}
+		}
+		if err := s.releaseValue(named); err != nil && first == nil {
+			first = err
 		}
 		if closure != nil {
 			if err := s.releaseObject(closure); err != nil && first == nil {

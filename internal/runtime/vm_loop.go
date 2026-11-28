@@ -729,7 +729,11 @@ func (s *vmState) loop() {
 			if in.b != 0 {
 				live = f.fn.leaveLive[in.b-1]
 			}
-			npc, err := s.leave(f, pc, int(in.a), live)
+			var carry uint32
+			if in.aux == bytecode.LeaveCarry {
+				carry = in.c + 1
+			}
+			npc, err := s.leave(f, pc, int(in.a), live, carry, value{}, false)
 			pc = npc
 			if err != nil {
 				f.pc = pc

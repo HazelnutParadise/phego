@@ -63,8 +63,8 @@ type vmFrame struct {
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
 	extra      []value // arguments beyond the declared parameters, for backtraces
-	// Stage 7C, for a function with an exception table: argBase is the
-	// depth of the argument stack when the frame was entered, and pend
+	// argBase is the depth of the argument stack when the frame was
+	// entered (stage 7C, for every frame since stage 8), and pend
 	// the completions its running finally blocks suspended, innermost
 	// last.
 	argBase int
@@ -537,9 +537,7 @@ func (s *vmState) push(fn *vmFunction, argc int, dest uint32) error {
 		}
 	}
 	s.frames = append(s.frames, fr)
-	if fn.handlers != nil {
-		fr.argBase = len(s.args)
-	}
+	fr.argBase = len(s.args)
 	fr.weak, fr.ctor = into.internal || into.via != 0, into.ctor
 	if argc < fn.required {
 		// ZEND_RECV checks each parameter in order: the type of an
@@ -615,32 +613,21 @@ func (s *vmState) pop(release bool) error {
 	f := s.frames[len(s.frames)-1]
 	var first error
 	keep := func(err error) { first = s.keepError(first, err) }
-	// The temporaries and the calls the frame started go first, while the
-	// frame is still the current one (cleanup_live_vars and
-	// cleanup_unfinished_calls when an exception unwinds it; a returning
+	// The calls the frame started and the temporaries go first, while the
+	// frame is still the current one (cleanup_unfinished_calls and
+	// cleanup_live_vars when an exception or exit unwinds it; a returning
 	// frame has none left). Then PHP makes the caller the current frame
-	// and frees the variables (zend_leave_helper). Two differences from
-	// PHP remain and are listed as known gaps: PHP frees the unfinished
-	// calls before the temporaries, and the arguments already pushed for
-	// an unfinished call stay on the argument stack until a handler is
-	// entered or the run ends.
-	for i := range f.regs {
-		v := f.regs[i]
-		f.regs[i] = value{}
-		if release {
-			keep(s.releaseValue(v))
-		}
+	// and frees the variables (zend_leave_helper).
+	if release {
+		s.releaseUnwound(f, nil, true, keep)
+		s.releaseArgs(f, keep)
+	} else if len(s.calls) > 0 {
+		_ = s.dropCalls(len(s.frames))
 	}
+	// The window is reused: scalars, which hold nothing, are cleared too.
+	clear(f.regs)
 	if len(f.pend) > 0 {
 		s.dropPending(f, release)
-	}
-	if len(s.calls) > 0 {
-		// Calls the frame started and never made: an error or exit ended
-		// it between their arguments.
-		err := s.dropCalls(len(s.frames))
-		if release {
-			keep(err)
-		}
 	}
 	f.leaving = len(s.frames) > 1
 	if release {
