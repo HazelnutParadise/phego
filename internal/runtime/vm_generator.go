@@ -865,14 +865,15 @@ func (s *vmState) closeGenerator(g *vmGenerator) error {
 		keep(s.releaseValue(v))
 	}
 	gf.extra = nil
-	// The unfinished execution goes last: its calls, then its
-	// temporaries (zend_generator_cleanup_unfinished_execution).
-	genReleaseCalls(g, func(v value) { keep(s.releaseValue(v)) })
-	for i := range gf.regs {
-		v := gf.regs[i]
-		gf.regs[i] = value{}
-		keep(s.releaseValue(v))
-	}
+	// The unfinished execution goes last, in the unwinding's order: its
+	// calls, innermost first, then its temporaries
+	// (zend_generator_cleanup_unfinished_execution).
+	s.frames = append(s.frames, gf)
+	s.genResumeCalls(g, gf)
+	s.releaseUnwound(gf, nil, true, keep)
+	s.releaseArgs(gf, keep)
+	s.frames = s.frames[:len(s.frames)-1]
+	clear(gf.regs)
 	s.dropPending(gf, true)
 	if c := gf.closure; c != nil {
 		gf.closure = nil

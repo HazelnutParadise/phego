@@ -137,6 +137,9 @@ func verifyFunction110(minor uint16, f *Function) error {
 			if (in.Op == OpYield || in.Op == OpYieldFrom) && p < c {
 				return invalid("a generator function yields before it creates its generator")
 			}
+			if (in.Op == OpReturn || in.Op == OpReturnRef) && p < c {
+				return invalid("a generator function returns before it creates its generator")
+			}
 			for k := 0; k < successorCount(in, p, n); k++ {
 				t := successor(in, p, n, k).pc
 				if p < c && t > c || p > c && t <= c {

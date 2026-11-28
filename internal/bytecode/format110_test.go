@@ -199,6 +199,9 @@ func TestFormat110GeneratorCreation(t *testing.T) {
 		"a jump back to the creation": {genImage(
 			Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpJump, A: 1}, Instruction{Op: OpReturn, A: 0}),
 			"bypasses or reenters"},
+		"a return before the creation": {genImage(
+			Instruction{Op: OpReturn, A: 0}, Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpReturn, A: 0}),
+			"returns before it creates"},
 		"two creations": {genImage(
 			Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpReturn, A: 0}),
 			"creates its generator 2 times"},
