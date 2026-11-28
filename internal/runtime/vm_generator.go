@@ -29,7 +29,9 @@ import (
 
 // vmGenerator is what a Generator object holds (zend_generator).
 type vmGenerator struct {
-	fn *vmFunction
+	// obj is the Generator object that holds this (not an owner).
+	obj *object
+	fn  *vmFunction
 	// frame is the suspended frame (its pc names the GeneratorCreate,
 	// Yield or YieldFrom it stopped at), or nil once the generator has
 	// finished or was closed.
@@ -181,6 +183,11 @@ func (s *vmState) registerIteration() error {
 	return nil
 }
 
+// vmGenSplitStorage gives a generator's frame separate blocks for its
+// registers and its locals. The layout benchmark measures it against the
+// one block a generator gets (engineering/decisions/W-17-vm.md, stage 8).
+var vmGenSplitStorage = false
+
 // createGenerator is ZEND_GENERATOR_CREATE at pc of the top frame f: the
 // frame moves into a new Generator object, which becomes the result of
 // the call that entered it.
@@ -198,14 +205,23 @@ func (s *vmState) createGenerator(f *vmFrame, pc int) error {
 	o := v.object
 	gf := new(vmFrame)
 	*gf = *f
-	gf.regs = append([]value(nil), f.regs...)
-	gf.locals = append([]value(nil), f.locals...)
+	if vmGenSplitStorage {
+		gf.regs = append([]value(nil), f.regs...)
+		gf.locals = append([]value(nil), f.locals...)
+	} else {
+		// One block for the registers and the locals, as the value
+		// stack's window had them.
+		vals := make([]value, len(f.regs)+len(f.locals))
+		copy(vals, f.regs)
+		copy(vals[len(f.regs):], f.locals)
+		gf.regs, gf.locals = vals[:len(f.regs):len(f.regs)], vals[len(f.regs):]
+	}
 	gf.locs = append([]int32(nil), f.locs...)
 	gf.elems = make([]*value, len(f.elems))
 	gf.pc, gf.dest, gf.boundary, gf.generator = pc, 0, false, o
 	gf.freshV, gf.freshL, gf.freshE = false, false, false
 	gf.argBase, gf.pend, gf.leaving = 0, nil, false
-	o.gen = &vmGenerator{fn: f.fn, frame: gf, largest: -1}
+	o.gen = &vmGenerator{obj: o, fn: f.fn, frame: gf, largest: -1}
 	// The frame's values now belong to the generator: the window is given
 	// back without releasing them.
 	clear(f.regs)
@@ -241,6 +257,13 @@ func (s *vmState) createGenerator(f *vmFrame, pc int) error {
 // when it has none, that generator gets a ClosedGeneratorException thrown
 // in.
 func (s *vmState) genCurrent(g *vmGenerator) *vmGenerator {
+	return s.genCurrentAfter(g, false)
+}
+
+// genCurrentAfter is genCurrent; with failing an exception is already on
+// its way into the generator that yielded from a delegate that died, and
+// no ClosedGeneratorException is made for it.
+func (s *vmState) genCurrentAfter(g *vmGenerator, failing bool) *vmGenerator {
 	cur := g
 	for cur.from != nil {
 		inner := cur.from.gen
@@ -262,16 +285,32 @@ func (s *vmState) genCurrent(g *vmGenerator) *vmGenerator {
 					_ = s.releaseValue(inner.retval)
 				}
 			}
-		} else if cur.frame != nil && cur.throwIn == nil {
+		} else if cur.frame != nil && cur.throwIn == nil && !failing {
 			ex, ok, _ := s.thrownObject(&Throwable{"ClosedGeneratorException", "Generator yielded from aborted, no return value available"})
 			if ok {
 				cur.throwIn = ex
 			}
 		}
 		_ = s.releaseObject(from)
+		if cur.throwIn != nil && !g.running && !cur.running {
+			// The exception is thrown in at once, and g goes on
+			// (zend_generator_update_current resumes it).
+			if err := s.genResume(g.obj); err != nil && s.genErr == nil {
+				s.genErr = err
+			}
+			return s.genCurrent(g)
+		}
 		break
 	}
 	return cur
+}
+
+// genCur is genCurrent with the error of a resume it made.
+func (s *vmState) genCur(g *vmGenerator) (*vmGenerator, error) {
+	c := s.genCurrent(g)
+	err := s.genErr
+	s.genErr = nil
+	return c, err
 }
 
 // genEnsureInit is zend_generator_ensure_initialized: a generator that
@@ -290,7 +329,10 @@ func (s *vmState) genEnsureInit(o *object) error {
 // genResume is zend_generator_resume.
 func (s *vmState) genResume(orig *object) error {
 	og := orig.gen
-	g := s.genCurrent(og)
+	g, err := s.genCur(og)
+	if err != nil {
+		return err
+	}
 	if g.frame == nil {
 		return nil
 	}
@@ -329,7 +371,7 @@ func (s *vmState) genResume(orig *object) error {
 			if !errors.As(out.err, &t) || t.object == nil {
 				return out
 			}
-			g = s.genCurrent(og)
+			g = s.genCurrentAfter(og, true)
 			if g.frame == nil {
 				return out
 			}
@@ -345,12 +387,16 @@ func (s *vmState) genResume(orig *object) error {
 		if g.frame != nil && g.frame.code[g.frame.pc].op == bytecode.OpYieldFrom {
 			// yield from was used: resume what it delegates to.
 			delegator = g
-			g = s.genCurrent(og)
+			if g, err = s.genCur(og); err != nil {
+				return err
+			}
 			continue
 		}
 		if g != og && g.hasRet {
 			delegator = og
-			g = s.genCurrent(og)
+			if g, err = s.genCur(og); err != nil {
+				return err
+			}
 			continue
 		}
 		return nil
@@ -936,13 +982,18 @@ func (s *vmState) genMethod(o *object, native uint8, args []value) (value, error
 		if err := s.genEnsureInit(o); err != nil {
 			return value{}, err
 		}
-		s.genCurrent(g)
+		if _, err := s.genCur(g); err != nil {
+			return value{}, err
+		}
 		return boolValue(g.frame != nil), nil
 	case genCurrent, genKey:
 		if err := s.genEnsureInit(o); err != nil {
 			return value{}, err
 		}
-		root := s.genCurrent(g)
+		root, err := s.genCur(g)
+		if err != nil {
+			return value{}, err
+		}
 		if g.frame == nil {
 			return nullValue(), nil
 		}
@@ -962,7 +1013,10 @@ func (s *vmState) genMethod(o *object, native uint8, args []value) (value, error
 		if g.frame == nil {
 			return nullValue(), nil
 		}
-		root := s.genCurrent(g)
+		root, err := s.genCur(g)
+		if err != nil {
+			return value{}, err
+		}
 		if root.send != 0 && !root.running && root.frame != nil {
 			v := args[0].deref()
 			retain(v)
@@ -975,7 +1029,9 @@ func (s *vmState) genMethod(o *object, native uint8, args []value) (value, error
 		if err := s.genResume(o); err != nil {
 			return value{}, err
 		}
-		root = s.genCurrent(g)
+		if root, err = s.genCur(g); err != nil {
+			return value{}, err
+		}
 		if g.frame == nil {
 			return nullValue(), nil
 		}
@@ -991,7 +1047,11 @@ func (s *vmState) genMethod(o *object, native uint8, args []value) (value, error
 			// A closed generator throws the exception in the caller.
 			return value{}, &vmThrown{object: ex}
 		}
-		root := s.genCurrent(g)
+		root, err := s.genCur(g)
+		if err != nil {
+			_ = s.releaseObject(ex)
+			return value{}, err
+		}
 		if root.running {
 			_ = s.releaseObject(ex)
 			return value{}, &Throwable{"Error", "Cannot resume an already running generator"}
@@ -1003,7 +1063,9 @@ func (s *vmState) genMethod(o *object, native uint8, args []value) (value, error
 		if err := s.genResume(o); err != nil {
 			return value{}, err
 		}
-		root = s.genCurrent(g)
+		if root, err = s.genCur(g); err != nil {
+			return value{}, err
+		}
 		if g.frame == nil {
 			return nullValue(), nil
 		}

@@ -53,6 +53,14 @@ jobs:
             after: HEAD
             bench: '^BenchmarkVMDispatch$'
             files: ''
+          # W-17 stage 8: code without generators against the loop of
+          # stage 7C (main before stage 8): the unwind table, the carrying
+          # Leave and the generator instructions must cost it nothing.
+          - name: vm-stage8
+            before: 100cfbb
+            after: HEAD
+            bench: '^Benchmark(VMDispatch|VMFrames|VMLocals|ExecutionCall)$'
+            files: ''
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -109,5 +117,38 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: benchstat-try-cost
+          path: ${{ runner.temp }}/benchstat
+          if-no-files-found: error
+
+  # W-17 stage 8: the two storage layouts of a generator's frame, on
+  # foreach over a generator and on creating many small ones, in one test
+  # binary (engineering/decisions/W-17-vm.md, stage 8).
+  generator-layout:
+    name: generator-layout
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Install benchstat
+        run: go install golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
+      - name: Measure
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/benchstat"
+          { uname -a; nproc; grep -m1 'model name' /proc/cpuinfo; } | tee "$RUNNER_TEMP/benchstat/generator-layout.system.txt"
+          CGO_ENABLED=0 go test -c -o "$RUNNER_TEMP/runtime.test" ./internal/runtime
+          (cd internal/runtime && "$RUNNER_TEMP/runtime.test" -test.run '^$' -test.bench '^BenchmarkVMGenerator$' -test.benchmem -test.count 10) | tee "$RUNNER_TEMP/benchstat/generator-layout.txt"
+          "$(go env GOPATH)/bin/benchstat" -col /layout "$RUNNER_TEMP/benchstat/generator-layout.txt" | tee "$RUNNER_TEMP/benchstat/generator-layout.benchstat.txt"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchstat-generator-layout
           path: ${{ runner.temp }}/benchstat
           if-no-files-found: error
