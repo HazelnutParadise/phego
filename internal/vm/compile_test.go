@@ -794,8 +794,8 @@ var compilerFatal = map[string]CompileError{
 
 func TestReferenceFixturesCompile(t *testing.T) {
 	files, err := filepath.Glob("../../tests/vm/w17/cases/*.php")
-	if err != nil || len(files) != 1072 {
-		t.Fatalf("want 1072 fixtures, got %d (%v)", len(files), err)
+	if err != nil || len(files) != 1178 {
+		t.Fatalf("want 1178 fixtures, got %d (%v)", len(files), err)
 	}
 	for _, width := range []int{64, 32} {
 		for _, path := range files {

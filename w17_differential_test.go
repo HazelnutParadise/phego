@@ -50,7 +50,7 @@ var w17Unsupported = map[string]UnsupportedError{}
 
 // w17Cases is the number of programs in tests/vm/w17/cases; every
 // reference file holds one entry per program.
-const w17Cases = 1072
+const w17Cases = 1178
 
 // w17Profile is one PHP build the reference was recorded on.
 type w17Profile struct {
@@ -245,7 +245,13 @@ func w17Execute(t *testing.T, e *Engine, name, src string, opts ...RunOption) w1
 func w17LogLines(ds []Diagnostic) []byte {
 	var b []byte
 	for _, d := range ds {
-		b = fmt.Appendf(b, "PHP %s:  %s in %s on line %d\n", d.Level, d.Message, d.File, d.Line)
+		// A diagnostic without a file is PHP's "Unknown", line 0 (an
+		// E_CORE_ERROR raised while a class is linked).
+		file := d.File
+		if file == "" {
+			file = "Unknown"
+		}
+		b = fmt.Appendf(b, "PHP %s:  %s in %s on line %d\n", d.Level, d.Message, file, d.Line)
 		// PHP 8.5 appends the backtrace to a fatal error that is not an
 		// exception. A Diagnostic does not carry it; the fixtures raise
 		// such errors (a class that cannot be declared) at top level only,
