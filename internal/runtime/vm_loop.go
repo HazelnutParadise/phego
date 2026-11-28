@@ -771,9 +771,10 @@ func (s *vmState) loop() {
 					goto raise
 				}
 			}
-			// The frame leaves the stack at this instruction; the resume
-			// that ran it goes on.
+			// The frame leaves the stack at this instruction, with the
+			// calls it is building; the resume that ran it goes on.
 			f.pc = pc
+			s.genSuspendCalls(f.generator.gen, f)
 			s.frames = s.frames[:len(s.frames)-1]
 			if n := len(s.frames); n > 0 {
 				s.h.currentCalledScope = s.frames[n-1].called

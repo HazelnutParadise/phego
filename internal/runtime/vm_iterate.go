@@ -151,7 +151,9 @@ func (s *vmState) iterValid(o *object) (bool, error) {
 		if err := s.genEnsureInit(o); err != nil {
 			return false, err
 		}
-		s.genCurrent(g)
+		if _, err := s.genCur(g); err != nil {
+			return false, err
+		}
 		return g.frame != nil, nil
 	}
 	v, err := s.callIterMethod(o, "valid")
@@ -169,7 +171,11 @@ func (s *vmState) iterCurrent(o *object, byRef bool) (value, error) {
 		if err := s.genEnsureInit(o); err != nil {
 			return value{}, err
 		}
-		v := s.genCurrent(g).value
+		root, err := s.genCur(g)
+		if err != nil {
+			return value{}, err
+		}
+		v := root.value
 		if !byRef {
 			v = v.deref()
 		}
@@ -191,7 +197,11 @@ func (s *vmState) iterKeyOf(o *object) (value, error) {
 		if err := s.genEnsureInit(o); err != nil {
 			return value{}, err
 		}
-		k := s.genCurrent(g).key.deref()
+		root, err := s.genCur(g)
+		if err != nil {
+			return value{}, err
+		}
+		k := root.key.deref()
 		if k.kind == valueUndefined {
 			return nullValue(), nil
 		}

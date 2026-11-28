@@ -62,6 +62,90 @@ type vmGenerator struct {
 	// viaArgs its arguments, borrowed while it runs.
 	via     uint8
 	viaArgs []value
+	// calls and args are the calls the frame had started and not made
+	// when it suspended, and the arguments it had pushed for them, owned:
+	// a yield can sit among a call's arguments, and PHP's frame keeps its
+	// call chain (zend_generator_freeze_call_stack). Each call's base is
+	// relative to args.
+	calls []vmPendingCall
+	args  []value
+}
+
+// genSuspendCalls moves the calls frame f, the top frame, started and has
+// not made, with their arguments, off the run's stacks into g.
+func (s *vmState) genSuspendCalls(g *vmGenerator, f *vmFrame) {
+	depth := len(s.frames)
+	i := len(s.calls)
+	for i > 0 && s.calls[i-1].depth >= depth {
+		i--
+	}
+	if i < len(s.calls) {
+		g.calls = append(g.calls[:0], s.calls[i:]...)
+		for k := range g.calls {
+			g.calls[k].base -= f.argBase
+		}
+		clear(s.calls[i:])
+		s.calls = s.calls[:i]
+	}
+	if len(s.args) > f.argBase {
+		g.args = append(g.args[:0], s.args[f.argBase:]...)
+		clear(s.args[f.argBase:])
+		s.args = s.args[:f.argBase]
+	}
+}
+
+// genResumeCalls puts the calls and arguments g suspended with back on the
+// run's stacks for its frame, now the top frame.
+func (s *vmState) genResumeCalls(g *vmGenerator, f *vmFrame) {
+	f.argBase = len(s.args)
+	if len(g.args) > 0 {
+		s.args = append(s.args, g.args...)
+		clear(g.args)
+		g.args = g.args[:0]
+	}
+	if len(g.calls) > 0 {
+		for _, c := range g.calls {
+			c.base += f.argBase
+			c.depth = len(s.frames)
+			s.calls = append(s.calls, c)
+		}
+		clear(g.calls)
+		g.calls = g.calls[:0]
+	}
+}
+
+// genReleaseCalls frees the calls g suspended with, innermost first, each
+// with its arguments in order, its object, its extra named arguments and
+// its Closure (cleanup_unfinished_calls), then any argument left.
+func genReleaseCalls(g *vmGenerator, rel func(value)) {
+	end := len(g.args)
+	for k := len(g.calls) - 1; k >= 0; k-- {
+		c := g.calls[k]
+		g.calls[k] = vmPendingCall{}
+		if c.base >= 0 && c.base <= end {
+			for _, v := range g.args[c.base:end] {
+				rel(v)
+			}
+			clear(g.args[c.base:end])
+			end = c.base
+		}
+		if c.this != nil {
+			if c.ctor {
+				c.this.destructorCalled = true
+			}
+			rel(value{kind: valueObject, object: c.this})
+		}
+		rel(c.named)
+		if c.closure != nil {
+			rel(value{kind: valueObject, object: c.closure})
+		}
+	}
+	g.calls = g.calls[:0]
+	for _, v := range g.args[:end] {
+		rel(v)
+	}
+	clear(g.args)
+	g.args = g.args[:0]
 }
 
 // The methods of Generator the VM implements (methodSpec.native), after
@@ -443,8 +527,8 @@ func (s *vmState) runGenerator(g, orig *vmGenerator) completion {
 	if g == orig && orig.via != 0 {
 		gf.via = orig.via
 	}
-	gf.argBase = len(s.args)
 	s.frames = append(s.frames, gf)
+	s.genResumeCalls(g, gf)
 	s.floor = len(s.frames)
 	if s.h.currentCalledScope != gf.called {
 		s.h.currentCalledScope = gf.called
@@ -736,7 +820,9 @@ func (s *vmState) runGeneratorFinally(g *vmGenerator, target int) completion {
 	}
 	var first error
 	s.frames = append(s.frames, gf)
+	s.genResumeCalls(g, gf)
 	s.releaseUnwound(gf, live, false, func(err error) { first = s.keepError(first, err) })
+	s.releaseArgs(gf, func(err error) { first = s.keepError(first, err) })
 	s.frames = s.frames[:len(s.frames)-1]
 	if first != nil {
 		return completion{kind: endThrow, err: first}
@@ -775,6 +861,9 @@ func (s *vmState) closeGenerator(g *vmGenerator) error {
 		keep(s.releaseValue(v))
 	}
 	gf.extra = nil
+	// The unfinished execution goes last: its calls, then its
+	// temporaries (zend_generator_cleanup_unfinished_execution).
+	genReleaseCalls(g, func(v value) { keep(s.releaseValue(v)) })
 	for i := range gf.regs {
 		v := gf.regs[i]
 		gf.regs[i] = value{}
@@ -822,6 +911,7 @@ func (h *heap) freeGeneratorStorage(o *object, dead map[gcNode]bool) error {
 			rel(value{kind: valueObject, object: gf.closure})
 		}
 	}
+	genReleaseCalls(g, rel)
 	if g.from != nil {
 		rel(value{kind: valueObject, object: g.from})
 	}
@@ -857,6 +947,18 @@ func generatorEdges(g *vmGenerator, cell func(value)) {
 		}
 		if gf.closure != nil {
 			cell(value{kind: valueObject, object: gf.closure})
+		}
+	}
+	for _, v := range g.args {
+		cell(v)
+	}
+	for _, c := range g.calls {
+		cell(c.named)
+		if c.this != nil {
+			cell(value{kind: valueObject, object: c.this})
+		}
+		if c.closure != nil {
+			cell(value{kind: valueObject, object: c.closure})
 		}
 	}
 	if g.from != nil {

@@ -167,6 +167,9 @@ type vmState struct {
 	generatorClass, suspended bool
 	// atLine, when not zero, is the line warnAt reports.
 	atLine int
+	// genErr is the error of a resume genCurrent made itself (a
+	// ClosedGeneratorException thrown into a delegator), for genCur.
+	genErr error
 	// objIters are the run's iterations of Traversable objects: an
 	// iterator register names its slot (vmObjIter).
 	objIters     []vmObjIter
