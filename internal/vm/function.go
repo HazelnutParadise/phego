@@ -766,8 +766,10 @@ func (fc *fnCompiler) stmt(n *ir.Node) {
 			r = fc.alloc()
 			fc.emit(bytecode.OpConst, 0, r, fc.c.literal(&ir.Literal{Kind: ir.LitNull}), 0)
 		}
-		switch fc.returnType() {
-		case "", "void", "mixed", "never":
+		switch rt := fc.returnType(); {
+		case rt == "" || rt == "void" || rt == "mixed" || rt == "never" || fc.f.Generator:
+			// A generator's declared type is that of the Generator; what
+			// it returns is not checked (zend_compile_return).
 		default:
 			if r < fc.base {
 				// The check replaces the register with the converted value.

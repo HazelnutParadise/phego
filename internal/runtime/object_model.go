@@ -46,12 +46,12 @@ type methodSpec struct {
 	// tentative marks the return type of an internal method that a child
 	// may still leave out or contradict, with a deprecation
 	// (ZEND_ARG_TYPE_IS_TENTATIVE).
-	tentative bool
-	name             string
-	visibility       access
-	static           bool
-	final            bool
-	abstract         bool
+	tentative  bool
+	name       string
+	visibility access
+	static     bool
+	final      bool
+	abstract   bool
 	// fn is, for a method a program declares, the index of its bytecode
 	// function plus one. It reuses the padding after the flags.
 	fn int32
