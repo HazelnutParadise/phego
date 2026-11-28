@@ -929,13 +929,20 @@ func (fc *fnCompiler) switchStmt(n *ir.Node) {
 	} else {
 		fc.jump(end)
 	}
-	fc.loops = append(fc.loops, loop{isSwitch: true, brk: end})
+	// A subject that is a temporary lives until the end of the switch, as
+	// PHP frees it with the FREE after the last case body (a break jumps
+	// there; a return or an outer break frees it first, like an iterator).
+	held := subject.cv < 0
+	fc.loops = append(fc.loops, loop{isSwitch: true, brk: end, iter: subject.reg, hasIter: held})
 	for i, cs := range cases {
 		fc.bind(bodies[i])
 		fc.stmt(cs.Kids[1])
 	}
 	fc.popLoop()
 	fc.bind(end)
+	if held {
+		fc.emit(bytecode.OpDrop, 0, subject.reg, 0, 0)
+	}
 }
 
 // foreachStmt compiles a by-value foreach: FE_RESET_R on the subject's line,
