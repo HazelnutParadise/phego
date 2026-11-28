@@ -704,6 +704,12 @@ var parseFatal = map[string]string{
 // Fixtures whose PHP result is a compile-time fatal error, which ir.Lower
 // reports before the compiler runs.
 var compileFatal = map[string]string{
+	// Stage 8: generator declarations PHP rejects while compiling.
+	"fatal_generator_extend":        "Class G cannot extend final class Generator",
+	"fatal_generator_extends_final": "Class G cannot extend final class Generator",
+	"fatal_generator_return_type":   "Generator return type must be a supertype of Generator, int given",
+	"fatal_yield_from_byref":        "Cannot use \"yield from\" inside a by-reference generator",
+	"fatal_yield_outside":           "The \"yield\" expression can only be used inside a function",
 	// Stage 7A: the class, method, property and type declarations PHP
 	// rejects while compiling the file.
 	"fatal_callable_new":                             "Cannot create Closure for new expression",

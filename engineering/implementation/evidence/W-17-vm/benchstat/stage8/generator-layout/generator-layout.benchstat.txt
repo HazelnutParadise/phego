@@ -1,0 +1,29 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+                      │  oneblock   │               split                │
+                      │   sec/op    │   sec/op     vs base               │
+VMGenerator/foreach-4   684.2µ ± 0%   686.1µ ± 0%  +0.27% (p=0.000 n=10)
+VMGenerator/create-4    702.8µ ± 0%   726.6µ ± 1%  +3.39% (p=0.000 n=10)
+geomean                 693.5µ        706.1µ       +1.82%
+
+                      │  oneblock   │                split                 │
+                      │  steps/op   │  steps/op    vs base                 │
+VMGenerator/foreach-4   34.03k ± 0%   34.03k ± 0%       ~ (p=1.000 n=10) ¹
+VMGenerator/create-4    16.01k ± 0%   16.01k ± 0%       ~ (p=1.000 n=10) ¹
+geomean                 23.34k        23.34k       +0.00%
+¹ all samples are equal
+
+                      │   oneblock   │                 split                 │
+                      │     B/op     │     B/op      vs base                 │
+VMGenerator/foreach-4   11.60Ki ± 0%   11.60Ki ± 0%       ~ (p=1.000 n=10) ¹
+VMGenerator/create-4    699.3Ki ± 0%   699.3Ki ± 0%       ~ (p=1.000 n=10)
+geomean                 90.07Ki        90.07Ki       +0.00%
+¹ all samples are equal
+
+                      │  oneblock   │                split                │
+                      │  allocs/op  │  allocs/op   vs base                │
+VMGenerator/foreach-4    55.00 ± 0%    56.00 ± 0%   +1.82% (p=0.000 n=10)
+VMGenerator/create-4    2.559k ± 0%   3.059k ± 0%  +19.54% (p=0.000 n=10)
+geomean                  375.2         413.9       +10.32%

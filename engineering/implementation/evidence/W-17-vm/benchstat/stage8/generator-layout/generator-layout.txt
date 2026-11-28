@@ -1,0 +1,45 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1738	    685223 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1741	    683821 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1750	    684572 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1744	    684083 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1748	    684459 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1666	    684603 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1744	    684056 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1748	    684122 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1743	    684297 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=oneblock-4         	    1743	    682918 ns/op	     34026 steps/op	   11880 B/op	      55 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1750	    684403 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1743	    686590 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1744	    688070 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1738	    684643 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1736	    684893 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1748	    686896 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1746	    687418 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1653	    685537 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1746	    686601 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/foreach/layout=split-4            	    1743	    685048 ns/op	     34026 steps/op	   11880 B/op	      56 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1753	    704858 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1705	    703514 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1755	    699380 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1760	    703008 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1747	    702870 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1729	    700700 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1746	    699538 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1748	    702794 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1747	    701808 ns/op	     16014 steps/op	  716048 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=oneblock-4          	    1724	    703735 ns/op	     16014 steps/op	  716051 B/op	    2559 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1665	    726931 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1712	    736104 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1702	    724698 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1686	    725822 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1712	    735105 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1699	    724342 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1718	    732601 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1710	    729860 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1688	    725006 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+BenchmarkVMGenerator/create/layout=split-4             	    1690	    726368 ns/op	     16014 steps/op	  716048 B/op	    3059 allocs/op
+PASS

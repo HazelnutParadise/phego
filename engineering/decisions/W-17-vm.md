@@ -38,6 +38,7 @@ W-17 的局部退出條件是「核心程式可執行，錯誤與邊界皆有測
 | 七 A | 類別、介面、trait 的宣告（含提早綁定與條件式宣告、繼承規則的 fatal）、`new`、屬性與 static 屬性的讀寫（typed、readonly、動態屬性、陣列寫入、複合指定、`++`／`--`、`??=`、`unset`、`isset`、`empty`、參照）、方法與 static 方法、`$this`、`self`／`parent`／`static`、`::class`、類別常數、參數與回傳型別、magic method、`instanceof`、`clone`、物件比較與轉型、走訪物件、nullsafe、`$callable()` | closure 與箭頭函式、first-class callable（七 B），try／catch／finally、`throw`、例外類別（七 C），enum、property hooks、非對稱可見度、屬性與類別上的 attribute、匿名類別、回傳參照、generator、stdClass 與 Stringable 以外的內建類別、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 |
 | 七 B | closure 物件（呼叫、具名與展開引數、傳參照參數、型別、`instanceof Closure`、比較、`clone`、轉型）、`use` 傳值與傳參照捕捉、closure 裡的 `static` 變數、方法裡自動綁定的 `$this` 與類別範圍、static closure、箭頭函式與自動捕捉、first-class callable（`f(...)`、`$o->m(...)`、`A::m(...)`、`static::m(...)`、`$closure(...)`、`'f'(...)`、陣列 `[$o, 'm']` 接 `(...)`）、以字串 `A::m` 與陣列呼叫方法、`Closure::bind`／`bindTo`／`call`／`fromCallable`、把元素或屬性傳給執行期才知道的被呼叫者的傳參照參數 | try／catch／finally、`throw`、例外類別（七 C），generator，回傳參照的函式與 closure（`fn &` 除外），內建函式的 `strlen(...)`、需要 callable 的內建函式、Reflection，其他七 A 右欄的項目 |
 | 七 C | `try`／`catch`／`finally`（多個 catch、`catch (A \| B $e)`、不寫變數的 catch、依繼承比對、不存在的類別、巢狀、跨函式與 closure 的傳播、`return`／`break`／`continue` 經過 finally、finally 的 `return` 取代回傳值或例外、finally 再丟出時的 previous）、`throw` 陳述式與運算式、Core 與 SPL 的 26 個例外類別與它們的屬性和方法、繼承它們的類別、所有引擎錯誤都能捕捉、未捕捉回報的 `Next` 串接 | generator，回傳參照的函式，`set_exception_handler`、`set_error_handler` 等內建函式，Reflection，其他擴充的例外類別（`JsonException` 等）與 `FiberError`，enum、匿名類別、`goto`，其他七 A 右欄的項目 |
+| 八 | 展開時照 PHP 的順序釋放（還沒完成的呼叫由內而外，再依 live range 的起點釋放暫存值）、`return` 經過迴圈與 finally 的順序、`switch` 主體的暫存值、巢狀執行裡的 `exit`；generator（函式、方法、closure、箭頭函式、傳參照的 generator）、`Generator` 的方法與錯誤、`yield` 的各種形式、`yield from` 陣列與 Traversable 與 generator、generator 的 finally 與丟棄、`Traversable`、`Iterator`、`IteratorAggregate`（含 tentative return type 與 `#[\ReturnTypeWillChange]`）、`foreach` 與 `f(...$x)` 走訪物件 | Fiber，一般函式與方法的回傳參照，`iterator_to_array` 等內建函式，`ArrayIterator` 等 SPL 類別，Reflection，方法以外的屬性（attribute），其他七 A 右欄的項目 |
 | 之後 | 依上表右欄逐批加入，每批都擴充格式、編譯器、VM 與對照測試 | |
 
 不支援的語法在編譯時回報帶位置的 `UnsupportedError`，不產生會靜默略過的指令。完整產品的範圍不變，階段只決定交付順序。
@@ -527,7 +528,68 @@ Codex 的審查用量在 PR 開出時已用完，依規則改由另一位獨立�
 
 測試程式加到 1,072 個（新增 145 個 `exception_*`、`throw_*`、`try_*`、`finally_*`、`catch_engine_*` 與對應的 `fatal_*`，以及審查的 42 個回歸 fixture），三個 profile 各 3,216 項全部和 PHP 8.5.12 逐位元組相同。
 
-## 階段一的對照結果
+## 階段八
+
+第八階段分兩部分。第一部分修掉七 C 留下的展開順序缺口，第二部分加入 generator、`yield` 與 Traversable。兩部分都需要新的 bytecode，格式升到 1.10，規則在 [W-16 文件](W-16-bytecode.md)的「格式 1.10」。1.0 到 1.9 的檔案照樣能載入，舊版檔案裡出現 1.10 的表格、旗標、指令或 Aux 時以 `ErrInvalid` 拒絕，訊息指出需要 1.10。
+
+### 展開的順序
+
+七 C 的 VM 在展開時依暫存器編號釋放值，PHP 則依編譯器算出的 live range（zend_calc_live_ranges）。暫存器是照堆疊方式配置的，大部分情況兩者剛好一致，不一致的有三種：
+
+- **還沒完成的呼叫**：PHP 先釋放還沒完成的呼叫（cleanup_unfinished_calls），由最內層開始，每個呼叫依序釋放引數、物件、多出來的具名引數與 closure；之後才釋放其他暫存值（cleanup_live_vars）。`g(new D(1), g(new D(2), t()))` 在 `t()` 丟出例外時，PHP 先解構 D(2)。
+- **`return` 釋放過的迴圈變數**：`return` 在原地依序釋放迭代器（ZEND_FREE_ON_RETURN），迴圈變數的 live range 從那裡切開，重新開始。所以 `return` 之後的程式（例如 catch 再丟出）展開時，內層迭代器排在外層前面；`return` 的運算式本身丟出例外時，則是外層在前。
+- **exit 與 throw 留下的暫存值**：VM 的活性分析會在「之後的路徑都不再使用」的地方釋放暫存器。`$x = [new D(1), exit("bye")]` 的陣列，在 exit 那條路徑上已經不會再用到，所以 exit 之前就被釋放了。PHP 是依程式碼的順序，只要後面還有用到，這個值就一直活著，exit 印出訊息後的展開才釋放它。
+
+修法是讓編譯器輸出 VM 自己推不出來的資訊，其餘由 VM 推算，不逐項補特例：
+
+- **展開表**（格式 1.10 的 Unwinds）記下每個呼叫還沒完成的範圍：引數放在暫存器的呼叫，逐一記下引數暫存器（UnwindCall）；用 InitCall、InitMethod、InitStatic、New 開始、引數放在引數堆疊的呼叫，只記範圍（UnwindPendingCall）。範圍之間只能巢狀或分開，所以「最內層還沒完成的呼叫」就是最後開始的那一個。表裡也記下每個釋放迴圈變數的 `return`（UnwindSplit）。
+- **VM 依程式碼順序算 live range**（`vmLinearRanges`，演算法和 zend_calc_live_ranges 相同），只在函式第一次被展開時計算，結果以 `sync.Once` 存在共用的函式上。exit、throw 與 match 沒有比中時，它們位置上的 live range 所持有的暫存器，在活性分析裡算成被使用，所以不會先被釋放。
+- **展開時的順序**（`releaseUnwound`）：先釋放失敗的那條指令的運算元（PHP 的 FREE_OP 在 HANDLE_EXCEPTION 之前），接著依展開表由內而外釋放還沒完成的呼叫，再依 live range 的起點釋放暫存值，最後才是其他還有值的暫存器。沒有活性資訊的函式在處理區塊入口仍然不釋放暫存器，和七 C 相同。
+- **已送出的引數跟著 frame 走**：每個 frame 都記下進入時引數堆疊的深度，frame 被展開時釋放它自己送出、還沒被呼叫取走的引數。七 C 只有帶例外表的函式會記，其他 frame 的引數要等到處理區塊進入或執行結束才釋放。
+
+`return` 經過 finally 時，PHP 依巢狀順序穿插「釋放迭代器」與「執行 finally」，回傳值放在暫存器裡等待（FAST_CALL 不會動到它）。Phego 的 finally 會重複使用暫存器，所以格式 1.10 讓 Leave 可以帶一個值（LeaveCarry）：Leave 執行 finally 時，值放在 finally 暫停的完成狀態裡，到目標時再寫回暫存器。`return` 編成一串小段落：每一段放在兩個 finally 之間最外層迴圈的後面，先釋放這一段的迭代器，再用帶值的 Leave 前往下一段，最後一段 Return。所以解構子在釋放迭代器時丟出的例外，會被包住那個迴圈的 try 接到。finally 改以其他方式結束時（自己 return、丟出例外、另一個跳躍），帶著的值當下釋放，和 PHP 釋放未完成的 RETURN 一樣。
+
+其他三項：
+
+- **`switch` 的主體**：暫存值當成 `switch` 自己的迴圈變數，留到最後一個 case 區塊之後的 Drop。`break` 經過 finally 之後才到這裡，`return` 與外層的 `break` 則和迭代器一樣先釋放它。釋放的行號是最後一個陳述式的行，和 PHP 的 FREE 相同。
+- **解構子重新丟出正在展開的例外**：例外丟出、frame 釋放值的期間，每個解構子丟出的例外會立刻成為目前的例外，前一個接在 previous（`keepError`）。七 C 是先把同一個 frame 的錯誤兩兩接好，最後才接上正在丟出的例外，所以解構子丟出 `$e` 本身時，zend_exception_set_previous 的「已經在鏈裡」判斷看不到。
+
+### Generator
+
+照 PHP 的 GENERATOR_CREATE：generator 函式的呼叫照常接收並檢查參數，接著執行 GeneratorCreate。這條指令把 frame 從共用的值、位置與元素堆疊搬進 generator 自己的儲存（暫存器與區域變數一塊，位置與元素各一塊），呼叫的結果是 `Generator` 物件。恢復執行時，這個 frame 的指標被放到 frame 堆疊上，當成一次巢狀執行的最底層；`yield` 把它再拿下來，停在那條指令上。暫停的 frame 不在共用堆疊裡，所以之後的呼叫重複使用那些位置時，它持有的值不受影響（`TestVMGeneratorFrameOutsideStacks`）。元素位置的驗證規則只允許固定的幾種指令出現在 FetchDim 之後的直線序列裡，`yield` 不在其中，所以暫停時不會有指向陣列元素的位置留在 frame 上。
+
+- **方法**照 zend_generators.c：`current`、`key`、`valid`、`next` 先跑到第一個 `yield`（ensure_initialized）；`send` 把值放進目前的 `yield` 再恢復；`throw` 把例外丟進暫停的位置，就像那個 `yield` 丟出的一樣，已經結束的 generator 則在呼叫者丟出；`rewind` 在已經前進之後丟出 Exception；`getReturn` 在還沒 return 時丟出 Exception；執行中又被恢復時丟出 `Cannot resume an already running generator`。`new Generator` 與 `clone` 照 PHP 拒絕。從方法恢復時，backtrace 在 generator 的 frame 下方顯示 `[internal function]` 與那個方法的 frame。
+- **`yield`** 先算 key 再算值（zend_compile_yield）。自動遞增的 key 從 -1 起算，取用過的最大整數 key 加一。`yield` 讀過、之後不再使用的暫存器在暫停前釋放，所以 generator 持有的是唯一的一份。傳參照的 generator 對變數、元素與屬性產生參照，其他值照 PHP 發出 notice 後傳值。
+- **`yield from`**：陣列與 Traversable 由之後的每次恢復逐一取值；另一個 generator 則成為委派的對象。PHP 用一棵樹加上 root 與 leaf 的快取表示委派，Phego 只讓每個 generator 記下它委派的對象，需要時沿著這條鏈找到最內層還沒結束的那一個。對象結束時，它的回傳值成為 `yield from` 的值；對象因例外而結束時，例外丟進委派它的 generator；同一個對象被另一個 generator 委派、而它已經中止時，丟出 ClosedGeneratorException。委派對象執行時，委派它的那些 generator 的 frame 也放在堆疊上（不執行），所以 backtrace 會列出整條鏈，和 PHP 的 placeholder frame 相同。
+- **丟棄**：`Generator` 類別的解構子照 zend_generator_dtor_storage 處理。暫停的位置在帶 finally 的 try 裡時，先釋放 finally 不再使用的暫存值，再以「關閉」這種待處理狀態（pendClose）從那個 finally 恢復執行；EndFinally 遇到它就前往外層的下一個 finally，最後結束 generator。這時的 `yield` 丟出 `Cannot yield from finally in a force-closed generator`。沒有 finally 時直接釋放區域變數、`$this`、多出來的引數，最後是暫存值，和 zend_generator_close 的順序相同。
+- **持有者與循環回收**：generator 的 frame、它 yield 的值與 key、回傳值、`yield from` 的來源與委派對象，都列在循環回收的圖上（`generatorEdges`）。generator 持有自己（`$g->send($g)`）時，要等回收才釋放。請求結束時還暫停的 generator，在一般的物件釋放順序裡執行它們的 finally。
+- **資料歸屬**：`Generator`、`Traversable`、`Iterator`、`IteratorAggregate` 的類別描述唯讀、跨請求共用。generator 物件、暫停的 frame、送入的值、委派關係與走訪 Traversable 的狀態都屬於當次執行（`TestVMGeneratorsSharedProgram`，16 個 goroutine，`-race`）。
+
+### Traversable 與迭代介面
+
+`foreach`、`yield from` 與 `f(...$x)` 遇到 Traversable 物件時，Generator 用它自己的走訪函式，其他 Iterator 呼叫它的方法；IteratorAggregate 先呼叫 `getIterator`，直到拿到 Iterator 為止，拿到的不是 Traversable 時丟出 PHP 的 Exception。呼叫順序和 PHP 相同：`foreach` 在開始時 rewind 並檢查 valid，之後每一輪先 next、valid，再 current，迴圈要 key 時呼叫 key，最後才指定變數。`yield from` 每次取值都檢查 valid；展開引數則是每輪 valid、current、key，送出之後才 next。走訪 Traversable 的迴圈暫存器持有 Iterator，並以負的整數欄位指到 `vmState.objIters` 裡的狀態，記著 PHP 的 index 與已經讀出、還沒交給 IterKey 的 key。
+
+類別連結照 zend_inheritance.c 與 zend_interfaces.c：Iterator 與 IteratorAggregate 的方法帶有 tentative return type，子類別的回傳型別沒寫或不相容時，在那個方法的行發出 Deprecated，帶 `#[\ReturnTypeWillChange]` 的方法除外。這是 VM 唯一認得的方法屬性，格式 1.10 以 MemberReturnTypeWillChange 傳給 VM，其他屬性仍在 `Compile` 拒絕。缺少的方法依介面宣告的順序列出；只實作 Traversable 的類別是 `in Unknown on line 0` 的 fatal，同時實作兩個介面也是 fatal。
+
+### 效能
+
+量測用「Runtime layout benchmarks」工作流程（run 46131128471，commit c9c0c7b），在 GitHub 的 ubuntu-24.04（amd64，Intel Xeon 6975P-C）runner 上以 benchstat 比較，每組 10 輪交替執行，原始輸出在 [benchstat/stage8](../implementation/evidence/W-17-vm/benchstat/stage8)。
+
+- **沒有用到 generator 的程式**（vm-stage8，main 的 `100cfbb` 對 c9c0c7b）：VMDispatch、VMFrames、VMLocals 與 ExecutionCall 的時間幾何平均快 4.98%，遞迴的 fib 快 16%。沒有逐項量測是哪個改動造成的，可能和 `pop` 改成只釋放有值的暫存器、再一次清空有關，這只是推測。變慢的項目：closures 那組候選分派方式慢 0.3%～0.6%，ExecutionCall（W-14 的路徑，不經過 VM 的迴圈）慢 0.75%，每次執行的配置多 1%～1.3%，原因還沒有查。
+- **generator 的 frame 布局**（generator-layout，同一個測試執行檔）：暫存器與區域變數合成一塊配置，比分開配置在建立 generator 時快 3.39%，每個 generator 少一次配置；foreach 走訪時差 0.27%。所以採用合成一塊的布局，分開配置的版本只留給量測用（`vmGenSplitStorage`）。每次恢復都是把 frame 的指標直接放回堆疊，值不在共用堆疊和 generator 之間來回複製，所以沒有拿「每次恢復都把值複製進出」的布局來比：那種布局每個元素多兩次複製，只會更慢。
+- **foreach 走訪 generator** 每個元素約 342ns（2,000 個元素 684µs），比走訪陣列慢很多，列為已知缺口。
+
+### 獨立審查
+
+一位審查者只拿到需求和程式碼，用映像跑了約 45 個 PHP 探測（Part 1 的五項、Generator 的方法與錯誤、key、`send`、`yield from` 的共用與中止、`throw()` 穿過委派、force close、傳參照的 generator、stack trace、tentative return type、展開 Traversable、`$this` 的循環、請求結束的清理順序）。找到並修掉的問題：
+
+- **P0**：`yield` 出現在方法、動態呼叫、`new`、具名或展開引數的呼叫裡時，暫停沒有把那個呼叫的紀錄和已送出的引數存起來。恢復時找不到呼叫，以不支援結束；恢復之前別的 frame 返回就釋放了那些引數；丟棄 generator 時 Go 直接 panic。現在暫停時把它們搬進 generator，恢復時放回去，關閉時在區域變數之後由內而外釋放（zend_generator_cleanup_unfinished_execution）。修正前的輸出在 [stage8/review-before-fix](../implementation/evidence/W-17-vm/stage8/review-before-fix)，回歸 fixture 是 `yield_in_*_args`、`generator_discard_in_call_args`、`generator_throw_in_call_args` 與 `generator_cycle_in_call_args`。
+- **P3**：驗證器只檢查 GeneratorCreate 恰好一條、不在 handler 裡。現在也拒絕在它之前的 yield、繞過它或跳回它的邊與 handler，以及引數還沒送完時的建立。
+- 審查回報的 P1（引數堆疊不是空的時候執行 Yield）在 P0 修好後是合法的 bytecode，VM 會保存那些呼叫。
+
+另外，三個 profile 對照時找到 32 位元的自動遞增 key 在 PHP_INT_MAX 之後沒有回繞，一起修掉。
+
+
 
 `TestW17PHP8512Programs` 把 `tests/vm/w17/cases` 的 90 個程式交給 Phego 執行，和固定映像中 PHP 8.5.12 的輸出、錯誤文字與退出碼逐位元組比對。每個程式跑三種錯誤模式（只顯示、只記錄、兩者都開），三個 profile 各 270 項。
 
@@ -586,7 +648,6 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **`[&$a] = f()`**：PHP 會發出 `Attempting to set reference to non referenceable value` 的 notice 再照值讀取；Phego 沿用第三階段「參照到函式呼叫結果」的不支援回報。執行期 FetchDim 的容器暫存器不是參照時也以 Unsupported 結束，編譯器不會產生這種 bytecode。
 - **沒有參數表的函式不受參照檢查**：格式 1.6 的驗證器只在被呼叫函式記錄了參數表時，拒絕以 Call 把參照送給傳值參數。編譯器產生的函式都有參數表，手寫的 bytecode 可以省略，舊版檔案則都沒有。被呼叫端的 Store 會解開參照，不會造成記憶體問題。
 - **`$GLOBALS` 與 `global $$name`**：`Compile` 回報不支援。全域變數目前只能以編譯時已知的名稱取得。
-- **展開物件與 Traversable**：`f(...$iterator)` 要等迭代器介面，執行期遇到物件以 Unsupported 結束。
 - **`func_get_args()`、`func_num_args()`**：內建函式，屬於模組工作包。
 - **把不是變數的值以名稱或不定參數傳給傳參照參數**：`f(r: 1 + 2)` 與 `f(r: g())` 沿用第三階段的不支援回報。PHP 對字面值是執行期的 `Error: f(): Argument #1 ($r) could not be passed by reference`，對函式回傳值是 `Only variables should be passed by reference` 的 notice。
 - **heredoc 當第一個引數時的引數列行號**：PHP 不認得被呼叫函式時，後面單純變數引數的警告報在 heredoc 內容的那一行，Phego 報在 heredoc 開頭那一行。HIR 的字面值只記開頭的行。
@@ -620,19 +681,11 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **箭頭函式結束的行**：PHP 把行號計數器停在箭頭函式運算式結束的那一行，也就是 parser 多讀的下一個 token 所在的行。Phego 取運算式裡最大的行號，下一個 token 換行時會差一行，只影響同一個陳述式裡後面才發出的警告。
 - **逐暫存器活性分析的工作量上限**：超大函式超過上限後不再分析，只被暫存器持有的 closure 要等暫存器被覆寫才釋放。審查在大小限制內做不出會碰到上限的程式（3,000 個陳述式仍準時釋放，更大的被「program too large」拒絕），所以沒有觀察到差別，也還不能排除。
 - **closure 的捕捉另外配置**：有 `use` 的 closure 建立時多一次配置放捕捉的值。把少量捕捉放進物件同一塊記憶體是審查提出、還沒做的改進。
-- **回傳參照的函式與方法**：在 `Compile` 回報不支援。`fn &() => ...` 可以宣告與呼叫，但 `$r = &$f()` 仍屬「參照到函式呼叫結果」，在 `Compile` 回報不支援，所以還拿不到它回傳的參照。它回傳的是函式呼叫的結果時，一律發出 `Only variable references should be returned by reference`，PHP 只在那個結果不是參照時才發。
+- **回傳參照的函式與方法**：generator 以外，在 `Compile` 回報不支援。`fn &() => ...` 可以宣告與呼叫，但 `$r = &$f()` 仍屬「參照到函式呼叫結果」，在 `Compile` 回報不支援，所以還拿不到它回傳的參照。它回傳的是函式呼叫的結果時，一律發出 `Only variable references should be returned by reference`，PHP 只在那個結果不是參照時才發。
 - **stdClass、Closure、Stringable 與 Core／SPL 例外類別以外的內建類別與介面**：`new ArrayObject`、`extends JsonException`、`implements Countable`、`implements ArrayAccess` 等在 `Compile` 回報不支援，不會被當成不存在的類別。名稱清單由固定映像的 `get_declared_classes()` 等產生（`internal/vm/classes_gen.go`）。
 - **其他擴充的例外類別與 `FiberError`**：`JsonException`、`DateException`、`Random\RandomException` 等在 `Compile` 回報不支援，等各自的模組。
 - **執行期才知道名稱的內建類別到執行期才拒絕**：`$c = 'ReflectionClass'; new $c` 這類寫法在執行到時以 PHP 的 `Class "ReflectionClass" not found` 結束，之前的輸出已經寫出，而且看起來像 PHP 的錯誤。名稱是執行期的值，`Compile` 看不到。
-- **`switch` 主體的暫存值太早釋放**：`switch (new D) { ... }` 的物件在比對完就釋放，PHP 留到 `switch` 結束（`break` 時在 finally 之後）。解構子和 `switch` 裡的輸出、finally 的相對順序因此不同。main 上就是如此。
-- **巢狀呼叫的引數在例外時的釋放順序**：`g(new D(1), g(new D(2), t()))` 在 `t()` 丟出例外時，PHP 先釋放最內層呼叫的引數（cleanup_unfinished_calls），Phego 依暫存器順序從外層開始。同一個呼叫裡的引數順序相同。要修得讓 VM 知道每個引數暫存器屬於哪個呼叫。
-- **還沒完成的呼叫已經送出的引數**：`(new K)->m(new D(1), t())`、`new C(new D(1), t())` 與具名引數的呼叫，引數求值後立刻送上引數堆疊。`t()` 的例外穿過這個 frame 時，frame 不釋放它們，要等接住例外的 frame 進入處理區塊，或執行結束。解構子因此比 PHP 晚，backtrace 也少了原本的 frame。PHP 另外是先釋放還沒完成的呼叫、再釋放暫存值，Phego 依暫存器順序：`try { $x = [new D(1), g(new D(2), t())]; } catch ...` PHP 先解構 D(2)，Phego 先解構 D(1)。要修得讓每個 frame 記下引數堆疊的深度，目前只有帶例外表的函式會記。
 - **`Closure::call` 與 `__invoke` 的引數存活時間**：PHP 的內部 frame 自己持有一份引數，暫時的物件引數在 closure 的變數之後才釋放。Phego 在釋放參數變數時就釋放它。
-- **`exit` 時還在暫存器裡的值**：`$x = [new D(1), exit("bye\n")]` PHP 先印 `bye` 才解構 D(1)，Phego 相反。main 上就是如此。
-- **巢狀執行裡的 `exit`**：`exit` 寫在解構子、magic method 或 `__toString` 裡時，VM 只展開那次巢狀執行的 frame，外面的 frame 在執行結束時才釋放，那時解構子丟出的例外仍會被丟掉。直接在函式裡的 `exit` 已照 PHP。
-- **解構子重新丟出正在展開的那個例外**：`throw $e` 展開時，一個解構子丟出新的例外 T1，另一個解構子又丟出 `$e` 本身。PHP 讓 `$e` 成為目前的例外、沒有 previous（zend_exception_set_previous 發現它已經在鏈裡），Phego 留下 T1 與 `$e` 兩個。
-- **`return` 的運算式丟出例外時內層迭代器的釋放順序**：`try { foreach (...) { foreach (...) { try { return "s" . $o; } catch (Exception $e) {} } } } finally {}` 的串接丟出 Error 時，PHP 先釋放內層迭代器，Phego 先釋放外層。同樣的位置換成 `echo`，或拿掉內層的 try，PHP 就是先外層，看起來是 Zend live range 的細節。
-- **`return` 經過 finally 之後才釋放的迴圈**：`foreach (...) { try { return 1; } finally { ... } }` 這類寫法（finally 的 `try` 裡沒有 `foreach`，迴圈在它外面），以及兩層帶 finally 的 `try` 之間的迴圈，PHP 先執行 finally，再由內而外釋放迭代器。Phego 在 finally 之後、frame 結束時由外而內釋放；釋放時解構子丟出的例外也因此算在函式外面，函式裡包住迴圈的 try 接不到。要修得讓回傳值能跨過 finally 存放，例如在 Return 之前先交給 VM 的待處理狀態。迴圈在 finally 的 `try` 裡面、或 finally 在所有迴圈外面時已照 PHP。
 - **迴圈後的小段落多一個跳躍**：有 `break N`、`continue N` 或 `return` 要釋放迭代器的迴圈，正常結束時多執行一個跳過小段落的 Jump。把小段落放在迴圈回邊的 Jump 後面可以省掉，跳出點和迴圈之間沒有 try 時也可以照舊把 Drop 寫在原地。
 - **方法與函式呼叫跨行時引擎錯誤的行號**：`$o\n->\nnom()` 與 `nofn\n(` 的 `Call to undefined ...`，PHP 報在名稱那一行，Phego 差一行。`new` 與 `throw` 已照 PHP。
 - **例外物件的屬性被 `unset` 之後**：子類別 `unset($this->message)` 再呼叫 `getMessage()`，PHP 發出 `Undefined property` 警告；`unset($this->file)` 之後則是 `must not be accessed before initialization` 的 Error。Phego 安靜地讀到 null。
@@ -661,3 +714,5 @@ Phego 的上限都高於 PHP 的門檻，所以 PHP 能編譯或比較的程式 
 - **走訪物件時 key 一律是字串**：PHP 對整數樣子的屬性名稱給整數 key。
 - **簽章相容的判斷是保守的近似**：參數與回傳型別以 union 的成員逐一比對，交集型別（`A&B`）與 `callable`、`iterable` 的特殊規則沒有完整實作，可能拒絕或接受少數 PHP 判斷不同的宣告。
 - **`declare(ticks=1)` 與 `declare(encoding=...)`** 編譯成沒有作用。tick 函式要靠內建函式註冊，目前觀察不到差別。
+- **恢復 generator 的成本**：foreach 走訪 generator 每個元素約 342ns（CI 的 amd64 runner），每次恢復都要建立一次巢狀執行（保存並還原執行狀態、計數巢狀深度、放回 frame）。把 frame 直接放上目前的執行、不另開巢狀執行，是還沒做的改進。
+- **其他內部介面的 tentative return type**：只有 Iterator 與 IteratorAggregate 有這個判斷。`Countable`、`ArrayAccess` 等介面在 `Compile` 仍回報不支援，等它們的工作包時一起做。

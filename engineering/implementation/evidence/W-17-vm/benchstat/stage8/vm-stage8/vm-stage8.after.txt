@@ -1,0 +1,272 @@
+# commit c9c0c7b8e69b8c05bd7f0597a472feb954843731
+# go version go1.26.11 linux/amd64
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2119188	       564.2 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4389	    274544 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3332	    356997 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4377	    276513 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2882	    412974 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2091	    571957 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2923	    408517 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3004	    473488 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2811	    500143 ns/op	      8015 steps/op	 1249310 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3045	    479604 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     645	   1724606 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     572	   2118298 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     649	   1719063 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     934	   1275304 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     831	   1427763 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     937	   1279671 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4339	    273630 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2902	    413870 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    3028	    490862 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     686	   1734507 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     922	   1283349 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1352	    954661 ns/op	 2931040 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2135559	       566.6 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4382	    274563 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3332	    356930 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4335	    274137 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2882	    413798 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2082	    573555 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2931	    408672 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3073	    471834 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2810	    493753 ns/op	      8015 steps/op	 1249310 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3034	    488229 ns/op	      8015 steps/op	 1246484 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     692	   1734138 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     566	   2114343 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     691	   1736983 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     922	   1278948 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     835	   1433106 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     936	   1276299 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4404	    274378 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2898	    413297 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2820	    481790 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     691	   1721580 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     934	   1271869 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1461	    914916 ns/op	 2931040 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2125369	       561.8 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4364	    273772 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3369	    356492 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4371	    273219 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2907	    412526 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2084	    571652 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2923	    407864 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    2926	    473547 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2823	    502618 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3022	    480441 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     692	   1724411 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     572	   2099293 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     694	   1720829 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     933	   1271903 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     840	   1424918 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     934	   1268717 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4360	    272770 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2901	    412023 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2893	    472662 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     694	   1712341 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     942	   1266718 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1466	    909014 ns/op	 2931040 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2130480	       561.9 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4376	    273518 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3338	    357248 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4360	    273707 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2893	    413578 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2077	    572819 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2924	    408398 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    2872	    471131 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2806	    505134 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    2995	    477888 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     694	   1729012 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     570	   2115388 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     698	   1720202 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     933	   1272835 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     835	   1427055 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     932	   1272608 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4386	    273928 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2884	    413320 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2959	    483522 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     694	   1724619 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     932	   1275102 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1476	    928764 ns/op	 2931041 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2118525	       563.7 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4360	    273715 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3331	    356747 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4362	    274001 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2901	    413636 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2088	    571371 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2584	    463134 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3015	    475614 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2694	    523840 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    2920	    484658 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     684	   1723658 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     566	   2107864 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     696	   1731198 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     928	   1280192 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     836	   1424873 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     936	   1275650 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4399	    274028 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2886	    413864 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2918	    483822 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     686	   1727479 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     930	   1281093 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1410	    922843 ns/op	 2931041 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2124920	       563.0 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4357	    274624 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3337	    357346 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4356	    274201 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2900	    413469 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2090	    572514 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2930	    409099 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3034	    474315 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2728	    497493 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3008	    482506 ns/op	      8015 steps/op	 1246484 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     692	   1729769 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     574	   2111820 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     698	   1721264 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     932	   1279491 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     836	   1427840 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     925	   1273277 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4388	    274317 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2888	    414029 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2781	    472377 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     693	   1723945 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     934	   1278052 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1431	    918027 ns/op	 2931042 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2118878	       562.6 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4376	    274518 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3354	    357677 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4342	    274569 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2896	    413798 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2085	    573106 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2928	    409777 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    2916	    472000 ns/op	      8015 steps/op	 1246485 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2734	    495327 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    2924	    486187 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     690	   1727553 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     572	   2098854 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     697	   1725495 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     934	   1277223 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     840	   1425932 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     932	   1275092 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4393	    274375 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2870	    413054 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2850	    482458 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     694	   1721503 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     933	   1274251 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1470	    913256 ns/op	 2931043 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2117727	       563.4 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4411	    274590 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3336	    356749 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4338	    273808 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2893	    413180 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2090	    572188 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2931	    408862 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3003	    472699 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2805	    495715 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3091	    484855 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     696	   1726695 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     572	   2099726 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     698	   1718501 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     942	   1274502 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     842	   1426102 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     937	   1274161 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4332	    273218 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2901	    413279 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2961	    479667 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     697	   1719359 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     940	   1272896 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1442	    909699 ns/op	 2931041 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2111674	       561.0 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4389	    273123 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3336	    356442 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4399	    273394 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2896	    412400 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2090	    573487 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2929	    407969 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    2894	    473218 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2758	    500837 ns/op	      8015 steps/op	 1249311 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    2986	    481836 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     663	   1726402 ns/op	    108692 steps/op	  835177 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     574	   2096343 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     706	   1721957 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     936	   1272491 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     837	   1423865 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     936	   1271903 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4348	    273615 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2884	    412842 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2934	    483974 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     684	   1718880 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     932	   1273405 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1420	    920915 ns/op	 2931041 B/op	     633 allocs/op
+PASS
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+BenchmarkExecutionCall-4   	 2138652	       563.6 ns/op	     384 B/op	       6 allocs/op
+BenchmarkVMDispatch/arith/switch-4         	    4384	    273514 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/arith/closures-4       	    3337	    357198 ns/op	     32013 steps/op	   12232 B/op	      98 allocs/op
+BenchmarkVMDispatch/arith/fused-4          	    4363	    273720 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/switch-4        	    2881	    413983 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/branch/closures-4      	    2084	    572777 ns/op	     49211 steps/op	   15392 B/op	     158 allocs/op
+BenchmarkVMDispatch/branch/fused-4         	    2918	    408925 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMDispatch/concat/switch-4        	    3073	    478693 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMDispatch/concat/closures-4      	    2716	    498987 ns/op	      8015 steps/op	 1249310 B/op	    1505 allocs/op
+BenchmarkVMDispatch/concat/fused-4         	    3072	    481974 ns/op	      8015 steps/op	 1246486 B/op	    1425 allocs/op
+BenchmarkVMDispatch/fib/switch-4           	     696	   1724607 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/fib/closures-4         	     573	   2097423 ns/op	    108692 steps/op	  837656 B/op	     160 allocs/op
+BenchmarkVMDispatch/fib/fused-4            	     697	   1719230 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMDispatch/array/switch-4         	     940	   1273610 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMDispatch/array/closures-4       	     832	   1426559 ns/op	     62023 steps/op	  259960 B/op	     272 allocs/op
+BenchmarkVMDispatch/array/fused-4          	     925	   1274736 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMFrames/arith/slab-4             	    4387	    273772 ns/op	     32013 steps/op	    9656 B/op	      24 allocs/op
+BenchmarkVMFrames/branch/slab-4            	    2880	    413340 ns/op	     49211 steps/op	   10552 B/op	      24 allocs/op
+BenchmarkVMFrames/concat/slab-4            	    2996	    487495 ns/op	      8015 steps/op	 1246487 B/op	    1425 allocs/op
+BenchmarkVMFrames/fib/slab-4               	     691	   1722567 ns/op	    108692 steps/op	  835176 B/op	      85 allocs/op
+BenchmarkVMFrames/array/slab-4             	     940	   1275087 ns/op	     62023 steps/op	  255448 B/op	     138 allocs/op
+BenchmarkVMLocals/slots-4                  	    1425	    922815 ns/op	 2931041 B/op	     633 allocs/op
+PASS

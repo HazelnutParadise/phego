@@ -1,0 +1,108 @@
+goos: linux
+goarch: amd64
+pkg: github.com/HazelnutParadise/phego/internal/runtime
+cpu: Intel(R) Xeon(R) 6975P-C
+                             │   before    │                after                │
+                             │   sec/op    │   sec/op     vs base                │
+ExecutionCall-4                559.0n ± 1%   563.2n ± 0%   +0.75% (p=0.004 n=10)
+VMDispatch/arith/switch-4      289.5µ ± 0%   274.1µ ± 0%   -5.32% (p=0.000 n=10)
+VMDispatch/arith/closures-4    355.8µ ± 0%   357.0µ ± 0%   +0.34% (p=0.000 n=10)
+VMDispatch/arith/fused-4       289.4µ ± 0%   273.9µ ± 0%   -5.36% (p=0.000 n=10)
+VMDispatch/branch/switch-4     436.1µ ± 0%   413.5µ ± 0%   -5.17% (p=0.000 n=10)
+VMDispatch/branch/closures-4   569.5µ ± 0%   572.6µ ± 0%   +0.55% (p=0.000 n=10)
+VMDispatch/branch/fused-4      429.4µ ± 0%   408.8µ ± 0%   -4.81% (p=0.002 n=10)
+VMDispatch/concat/switch-4     473.2µ ± 1%   473.4µ ± 0%        ~ (p=0.971 n=10)
+VMDispatch/concat/closures-4   496.3µ ± 1%   499.6µ ± 1%        ~ (p=0.123 n=10)
+VMDispatch/concat/fused-4      477.4µ ± 1%   482.2µ ± 1%   +1.01% (p=0.007 n=10)
+VMDispatch/fib/switch-4        2.057m ± 1%   1.727m ± 0%  -16.06% (p=0.000 n=10)
+VMDispatch/fib/closures-4      2.353m ± 0%   2.104m ± 1%  -10.58% (p=0.000 n=10)
+VMDispatch/fib/fused-4         2.051m ± 1%   1.721m ± 1%  -16.11% (p=0.000 n=10)
+VMDispatch/array/switch-4      1.358m ± 0%   1.275m ± 0%   -6.09% (p=0.000 n=10)
+VMDispatch/array/closures-4    1.418m ± 0%   1.426m ± 0%   +0.57% (p=0.000 n=10)
+VMDispatch/array/fused-4       1.357m ± 0%   1.274m ± 0%   -6.09% (p=0.000 n=10)
+VMFrames/arith/slab-4          289.1µ ± 0%   273.9µ ± 0%   -5.26% (p=0.000 n=10)
+VMFrames/branch/slab-4         435.9µ ± 0%   413.3µ ± 0%   -5.19% (p=0.000 n=10)
+VMFrames/concat/slab-4         482.8µ ± 1%   483.0µ ± 2%        ~ (p=0.796 n=10)
+VMFrames/fib/slab-4            2.054m ± 0%   1.722m ± 0%  -16.17% (p=0.000 n=10)
+VMFrames/array/slab-4          1.358m ± 0%   1.275m ± 1%   -6.14% (p=0.000 n=10)
+VMLocals/slots-4               933.7µ ± 1%   919.5µ ± 1%   -1.53% (p=0.004 n=10)
+geomean                        528.9µ        502.5µ        -4.98%
+
+                             │    before    │                 after                 │
+                             │     B/op     │     B/op      vs base                 │
+ExecutionCall-4                  384.0 ± 0%     384.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/switch-4      9.305Ki ± 0%   9.430Ki ± 0%  +1.34% (p=0.000 n=10)
+VMDispatch/arith/closures-4    11.82Ki ± 0%   11.95Ki ± 0%  +1.06% (p=0.000 n=10)
+VMDispatch/arith/fused-4       9.305Ki ± 0%   9.430Ki ± 0%  +1.34% (p=0.000 n=10)
+VMDispatch/branch/switch-4     10.18Ki ± 0%   10.30Ki ± 0%  +1.23% (p=0.000 n=10)
+VMDispatch/branch/closures-4   14.91Ki ± 0%   15.03Ki ± 0%  +0.84% (p=0.000 n=10)
+VMDispatch/branch/fused-4      10.18Ki ± 0%   10.30Ki ± 0%  +1.23% (p=0.000 n=10)
+VMDispatch/concat/switch-4     1.189Mi ± 0%   1.189Mi ± 0%  +0.01% (p=0.000 n=10)
+VMDispatch/concat/closures-4   1.191Mi ± 0%   1.191Mi ± 0%  +0.01% (p=0.000 n=10)
+VMDispatch/concat/fused-4      1.189Mi ± 0%   1.189Mi ± 0%  +0.01% (p=0.000 n=10)
+VMDispatch/fib/switch-4        815.5Ki ± 0%   815.6Ki ± 0%  +0.02% (p=0.000 n=10)
+VMDispatch/fib/closures-4      817.9Ki ± 0%   818.0Ki ± 0%  +0.02% (p=0.000 n=10)
+VMDispatch/fib/fused-4         815.5Ki ± 0%   815.6Ki ± 0%  +0.02% (p=0.000 n=10)
+VMDispatch/array/switch-4      249.3Ki ± 0%   249.5Ki ± 0%  +0.05% (p=0.000 n=10)
+VMDispatch/array/closures-4    253.7Ki ± 0%   253.9Ki ± 0%  +0.05% (p=0.000 n=10)
+VMDispatch/array/fused-4       249.3Ki ± 0%   249.5Ki ± 0%  +0.05% (p=0.000 n=10)
+VMFrames/arith/slab-4          9.305Ki ± 0%   9.430Ki ± 0%  +1.34% (p=0.000 n=10)
+VMFrames/branch/slab-4         10.18Ki ± 0%   10.30Ki ± 0%  +1.23% (p=0.000 n=10)
+VMFrames/concat/slab-4         1.189Mi ± 0%   1.189Mi ± 0%  +0.01% (p=0.000 n=10)
+VMFrames/fib/slab-4            815.5Ki ± 0%   815.6Ki ± 0%  +0.02% (p=0.000 n=10)
+VMFrames/array/slab-4          249.3Ki ± 0%   249.5Ki ± 0%  +0.05% (p=0.000 n=10)
+VMLocals/slots-4               2.795Mi ± 0%   2.795Mi ± 0%  +0.00% (p=0.000 n=10)
+geomean                        108.6Ki        109.1Ki       +0.45%
+¹ all samples are equal
+
+                             │   before    │                after                 │
+                             │  allocs/op  │  allocs/op   vs base                 │
+ExecutionCall-4                 6.000 ± 0%    6.000 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/switch-4       24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/closures-4     98.00 ± 0%    98.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/fused-4        24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/switch-4      24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/closures-4    158.0 ± 0%    158.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/fused-4       24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/switch-4     1.425k ± 0%   1.425k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/closures-4   1.505k ± 0%   1.505k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/fused-4      1.425k ± 0%   1.425k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/switch-4         85.00 ± 0%    85.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/closures-4       160.0 ± 0%    160.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/fused-4          85.00 ± 0%    85.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/switch-4       138.0 ± 0%    138.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/closures-4     272.0 ± 0%    272.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/fused-4        138.0 ± 0%    138.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/arith/slab-4           24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/branch/slab-4          24.00 ± 0%    24.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/concat/slab-4         1.425k ± 0%   1.425k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/fib/slab-4             85.00 ± 0%    85.00 ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/array/slab-4           138.0 ± 0%    138.0 ± 0%       ~ (p=1.000 n=10) ¹
+VMLocals/slots-4                633.0 ± 0%    633.0 ± 0%       ~ (p=1.000 n=10) ¹
+geomean                         117.4         117.4       +0.00%
+¹ all samples are equal
+
+                             │   before    │                after                 │
+                             │  steps/op   │  steps/op    vs base                 │
+VMDispatch/arith/switch-4      32.01k ± 0%   32.01k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/closures-4    32.01k ± 0%   32.01k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/arith/fused-4       32.01k ± 0%   32.01k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/switch-4     49.21k ± 0%   49.21k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/closures-4   49.21k ± 0%   49.21k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/branch/fused-4      49.21k ± 0%   49.21k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/switch-4     8.015k ± 0%   8.015k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/closures-4   8.015k ± 0%   8.015k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/concat/fused-4      8.015k ± 0%   8.015k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/switch-4        108.7k ± 0%   108.7k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/closures-4      108.7k ± 0%   108.7k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/fib/fused-4         108.7k ± 0%   108.7k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/switch-4      62.02k ± 0%   62.02k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/closures-4    62.02k ± 0%   62.02k ± 0%       ~ (p=1.000 n=10) ¹
+VMDispatch/array/fused-4       62.02k ± 0%   62.02k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/arith/slab-4          32.01k ± 0%   32.01k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/branch/slab-4         49.21k ± 0%   49.21k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/concat/slab-4         8.015k ± 0%   8.015k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/fib/slab-4            108.7k ± 0%   108.7k ± 0%       ~ (p=1.000 n=10) ¹
+VMFrames/array/slab-4          62.02k ± 0%   62.02k ± 0%       ~ (p=1.000 n=10) ¹
+geomean                        38.55k        38.55k       +0.00%
+¹ all samples are equal

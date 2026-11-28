@@ -324,6 +324,38 @@ Leave 明示需要展開 finally 的控制轉移。其 continuation 必須重新
 
 取消、配額耗盡、輸出錯誤及引擎內部錯誤屬於宿主停止，不得被 PHP Catch 吞掉。保留回傳值、執行 finally、釋放 locals 及解構函式的順序依 `internal/runtime` 的生命週期契約，不能由 bytecode 自行指定任意記憶體清理。
 
+### 格式 1.10：展開表、帶值的 Leave 與 generator
+
+格式 1.10 由 W-17 第八階段加入，理由與執行方式在 [W-17 文件](W-17-vm.md)的「階段八」。它在函式記錄的最後加一張展開表，並加入下列旗標、指令與 Aux。1.0 到 1.9 的檔案照樣能載入；舊版檔案出現其中任何一項時以 `ErrInvalid` 拒絕，訊息指出需要 1.10 與檔案宣告的版本。
+
+**展開表**（Function.Unwinds，每筆 17 bytes：Kind:u8、Start、End、Reg、Count 各 u32）依 Start 遞增排列。展開表只決定展開時的釋放順序，不影響一般執行：
+
+| Kind | 欄位與意義 |
+|---|---|
+| UnwindCall | 一個引數放在暫存器的呼叫的第 Count 個引數，在暫存器 Reg。呼叫在 `[Start, End)` 之間還沒完成，End 是送出它的指令。同一個呼叫的各筆共用 Start 與 End，依引數順序排列 |
+| UnwindPendingCall | InitCall、InitMethod、InitStatic 或 New 開始、引數放在引數堆疊的呼叫，在 `[Start, End)` 之間還沒完成。Reg 與 Count 為 0 |
+| UnwindSplit | 在 Start 的 `return` 釋放了暫存器 Reg 裡的迴圈變數（迭代器或 `switch` 的主體），Count 是它在這個 `return` 釋放的變數裡的位置，由內而外。End 為 0 |
+
+驗證器檢查：Start 不遞減；呼叫的範圍非空、在函式的指令之內，而且彼此只能巢狀或分開；Reg 是函式的 Value 暫存器；UnwindPendingCall 的 Reg 與 Count 為 0；UnwindSplit 的 Start 在指令之內、End 為 0、Count 不超過 65535；Kind 是已知的值。
+
+**函式旗標**：
+
+- **FuncGenerator**：函式含有 `yield`（ZEND_ACC_GENERATOR）。只有這種函式能用下面三條指令，而且它恰好有一條 GeneratorCreate，不在任何 Handler 的保護區間或處理區塊裡，回傳 Value。
+- **FuncByRef**：函式宣告為回傳參照（ZEND_ACC_RETURN_REFERENCE）。目前只有 generator 會帶它，表示它以參照 yield，可以用傳參照的 `foreach` 走訪。
+
+**方法旗標**：MemberReturnTypeWillChange 表示方法帶有 `#[\ReturnTypeWillChange]`，回傳型別和內部方法的 tentative 型別不相容時不發出 Deprecated。
+
+**指令**：
+
+| 指令 | 操作數與行為 |
+|---|---|
+| GeneratorCreate | 沒有操作數。對應 ZEND_GENERATOR_CREATE：呼叫在這裡回傳 `Generator`，frame 留在 generator 裡，第一次恢復時從下一條指令開始 |
+| Yield | A 接收送入的值，B 是值，C 是 key，Aux 是 YieldFlags：YieldValue（有 B，否則 yield null）、YieldKey（有 C，否則用自動遞增的 key）、YieldRef（B 是傳參照 generator 要交出的參照）、YieldNotice（傳參照 generator 交出的不是變數，先發出 `Only variable references should be yielded by reference`）。YieldRef 與 YieldNotice 都需要 YieldValue，兩者不能同時設定 |
+| YieldFrom | A 接收委派對象的回傳值，B 是陣列或 Traversable |
+| Leave 的 Aux 1 | LeaveCarry：C 是要帶到目標的 Value 暫存器。執行 finally 時，值放在 finally 暫停的完成狀態裡，到目標時寫回 C；不經過 finally 時等同 Jump。驗證器要求每個前往同一目標的 Leave 帶同一個暫存器，C 在 Leave 處已定義、不是參照，並視為在目標有定義 |
+
+元素位置的規則不變：FetchDim 之後的直線序列只允許固定的幾種指令，Yield 與 YieldFrom 不在其中，所以 generator 暫停時不會留下指向陣列元素的位置。
+
 ## 後端必須履行指令安全契約
 
 `Opcode.Safety()` 由程式碼決定。輸入檔案無法宣稱指令沒有副作用，或自行移除能力檢查。每個語意步驟先檢查取消、計量 Steps，再執行副作用。配置前計量實際 bytes，進入呼叫前計量 frame 與深度，長操作在內部持續檢查取消。
