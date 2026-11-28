@@ -42,7 +42,8 @@ func isBuiltinClass(name string) bool {
 
 // supportedBuiltinClasses are the builtin classes the runtime provides.
 var supportedBuiltinClasses = func() map[string]bool {
-	out := map[string]bool{"stdclass": true, "stringable": true, "closure": true, "throwable": true}
+	out := map[string]bool{"stdclass": true, "stringable": true, "closure": true, "throwable": true,
+		"traversable": true, "iterator": true, "iteratoraggregate": true, "generator": true}
 	for name := range ir.BuiltinThrowables {
 		out[name] = true
 	}

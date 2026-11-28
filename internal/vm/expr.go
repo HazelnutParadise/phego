@@ -196,6 +196,10 @@ func (fc *fnCompiler) expr(n *ir.Node) operand {
 		return fc.closure(n)
 	case ir.OpCallable:
 		return fc.callable(n)
+	case ir.OpYield:
+		return fc.yieldExpr(n)
+	case ir.OpYieldFrom:
+		return fc.yieldFrom(n)
 	}
 	fc.unsupportedNode(n)
 	return operand{}
@@ -215,7 +219,7 @@ func (fc *fnCompiler) unsupportedNode(n *ir.Node) {
 		ir.OpNullsafeMC: "nullsafe method call", ir.OpStaticCall: "static method call",
 		ir.OpCallable: "first-class callable", ir.OpClone: "clone", ir.OpClosure: "closure",
 		ir.OpArrowFn: "arrow function", ir.OpInstanceof: "instanceof",
-		ir.OpShell: "shell execution", ir.OpYield: "yield", ir.OpYieldFrom: "yield",
+		ir.OpShell:  "shell execution",
 		ir.OpSpread: "argument unpacking", ir.OpGoto: "goto", ir.OpDeclare: "declare",
 		ir.OpFuncDecl: "conditional function declaration", ir.OpHalt: "__halt_compiler",
 	}[n.Op]

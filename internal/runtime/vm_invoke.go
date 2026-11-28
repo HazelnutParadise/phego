@@ -477,6 +477,9 @@ func (s *vmState) newObject(f *vmFrame, in *vmInstr) (jump bool, err error) {
 	if c == closureBuiltin {
 		return false, &Throwable{"Error", "Instantiation of class Closure is not allowed"}
 	}
+	if c == generatorBuiltin {
+		return false, &Throwable{"Error", "The \"Generator\" class is reserved for internal use and cannot be manually instantiated"}
+	}
 	if err := s.prepareClass(c); err != nil {
 		return false, err
 	}

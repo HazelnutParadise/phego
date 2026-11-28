@@ -282,6 +282,10 @@ func (s *vmState) lookupClass(name string) *class {
 		if s.h.registerClass(stringableBuiltin) == nil {
 			return stringableBuiltin
 		}
+	case "traversable", "iterator", "iteratoraggregate", "generator":
+		if s.registerIteration() == nil {
+			return iterationClass(lower)
+		}
 	}
 	if c := throwableBuiltins[lower]; c != nil {
 		// A class is registered with its parents; the interfaces come

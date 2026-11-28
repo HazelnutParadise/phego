@@ -136,6 +136,12 @@ func (c *compiler) function(f *ir.Func) (fn bytecode.Function, err error) {
 	fc.cur = positive(f.Line, 1)
 	fc.receive()
 	fc.promote()
+	if f.Generator {
+		// ZEND_GENERATOR_CREATE follows the RECVs: the parameters are
+		// received and checked by the call, the body runs when the
+		// Generator is first resumed.
+		fc.emit(bytecode.OpGeneratorCreate, 0, 0, 0, 0)
+	}
 	for _, s := range f.Body {
 		fc.stmt(s)
 	}
@@ -426,9 +432,6 @@ func (fc *fnCompiler) signature() {
 			panic(internalError{"parameter without a variable"})
 		}
 	}
-	if f.Generator {
-		fc.unsupported("generator", f.Line)
-	}
 }
 
 func positive(line, fallback int) int {
@@ -620,6 +623,12 @@ func (fc *fnCompiler) finish(locals int) bytecode.Function {
 	closure := f.Kind == ir.FuncClosure || f.Kind == ir.FuncArrow
 	if f.Static || f.Kind != ir.FuncMethod && !closure {
 		fnFlags |= bytecode.FuncNoThis
+	}
+	if f.Generator {
+		fnFlags |= bytecode.FuncGenerator
+		if f.ByRef {
+			fnFlags |= bytecode.FuncByRef
+		}
 	}
 	var captures []bytecode.Capture
 	if closure {

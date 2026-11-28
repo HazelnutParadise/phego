@@ -114,6 +114,10 @@ type vmFunction struct {
 	noThis   bool
 	usesThis bool
 	captures []vmCapture
+	// Format 1.10: generator marks a function that yields, whose call
+	// returns a Generator at its GeneratorCreate; byRef one declared to
+	// return (a generator: to yield) by reference.
+	generator, byRef bool
 	// Format 1.9 (stage 7C). handlers is the exception table; handlerAt,
 	// finallyAt and bodyAt index it per pc (nil without handlers).
 	// liveAt holds, for each handler target and each Leave target, the
@@ -530,6 +534,8 @@ func decodeFunction(fv bytecode.FunctionView, code []bytecode.Instruction, index
 	f.closure = fv.Flags()&bytecode.FuncClosure != 0
 	f.noThis = fv.Flags()&bytecode.FuncNoThis != 0
 	f.usesThis = fv.Flags()&bytecode.FuncUsesThis != 0
+	f.generator = fv.Flags()&bytecode.FuncGenerator != 0
+	f.byRef = fv.Flags()&bytecode.FuncByRef != 0
 	for i, n := 0, fv.CaptureCount(); i < n; i++ {
 		c, _ := fv.CaptureAt(i)
 		if int(c.Local) >= f.locals {
@@ -826,7 +832,8 @@ func vmComposite(f *vmFunction) []bool {
 				composite[in.a] = true
 			}
 		case bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropSet, bytecode.OpPropRef, bytecode.OpStaticGet, bytecode.OpStaticSet,
-			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn, bytecode.OpClosure, bytecode.OpCallableConvert:
+			bytecode.OpStaticRef, bytecode.OpClassConst, bytecode.OpClone, bytecode.OpVerifyReturn, bytecode.OpClosure, bytecode.OpCallableConvert,
+			bytecode.OpYield, bytecode.OpYieldFrom:
 			// Format 1.7: every register these define or replace can hold
 			// an object, whose release runs its destructor.
 			roles, _ := bytecode.Roles17(bytecode.Instruction{Op: in.op, Aux: in.aux})
@@ -1357,7 +1364,7 @@ func definesA(op bytecode.Opcode) bool {
 		bytecode.OpFetchConst, bytecode.OpBeginSilence, bytecode.OpRecvVariadic, bytecode.OpCallPending,
 		bytecode.OpNew, bytecode.OpThis, bytecode.OpPropGet, bytecode.OpPropRef, bytecode.OpPropIsset, bytecode.OpStaticGet, bytecode.OpStaticRef,
 		bytecode.OpClassConst, bytecode.OpClassName, bytecode.OpInstanceof, bytecode.OpClone,
-		bytecode.OpClosure, bytecode.OpCallableConvert, bytecode.OpArgByRef:
+		bytecode.OpClosure, bytecode.OpCallableConvert, bytecode.OpArgByRef, bytecode.OpYield, bytecode.OpYieldFrom:
 		return true
 	}
 	return false

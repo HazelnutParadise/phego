@@ -542,6 +542,9 @@ func (s *vmState) iterInit(f *vmFrame, in *vmInstr) (iterable bool, err error) {
 	case valueArray:
 		return true, s.setReg(f.regs, in.a, value{kind: valueArray, array: v.array})
 	case valueObject:
+		if s.isTraversable(v.object) {
+			return s.iterInitTraversable(f, in, v.object, false)
+		}
 		// The iterator holds the object and a position in its property
 		// table: the loop sees properties as they are when it reaches them.
 		old := f.regs[in.a]
@@ -565,6 +568,9 @@ func (s *vmState) iterInit(f *vmFrame, in *vmInstr) (iterable bool, err error) {
 // CV. It reports false when the iteration is over or the run stopped.
 func (s *vmState) iterNext(f *vmFrame, in *vmInstr) (more bool, err error) {
 	it := &f.regs[in.a]
+	if it.kind == valueObject && it.integer < 0 {
+		return s.iterNextTraversable(f, in)
+	}
 	if it.kind == valueObject && it.object != nil && !it.object.freed {
 		return s.iterNextObject(f, in)
 	}

@@ -35,6 +35,9 @@ type object struct {
 	// closure is what a Closure object holds beyond an object (W-17 stage
 	// 7B): its function, binding, captured variables and static variables.
 	closure *closureData
+	// gen is what a Generator object holds (W-17 stage 8): its suspended
+	// frame, the values it yielded and the generator it delegates to.
+	gen *vmGenerator
 }
 
 // weakReference observes an object without owning it. PHP returns the same
@@ -543,6 +546,7 @@ func (h *heap) freeObject(o *object) error {
 	first = h.mergeObjectErrors(first, h.freeLazyStorage(o, nil))
 	first = h.mergeObjectErrors(first, h.freeProperties(o, nil))
 	first = h.mergeObjectErrors(first, h.freeClosureStorage(o, nil))
+	first = h.mergeObjectErrors(first, h.freeGeneratorStorage(o, nil))
 	if !h.noHandleReuse {
 		h.freeHandles = append(h.freeHandles, o.handle)
 	}
@@ -1252,6 +1256,9 @@ func edges(n gcNode, visit func(gcNode)) {
 				cell(v)
 			}
 		}
+		if g := x.gen; g != nil {
+			generatorEdges(g, cell)
+		}
 		// A WeakMap entry value is kept alive through its key, so a value
 		// that refers back to its key forms a collectable cycle.
 		for _, m := range x.weakMaps {
@@ -1462,6 +1469,9 @@ func (h *heap) collectCyclePass() (int, error, bool) {
 				err = e
 			}
 			if e := h.freeClosureStorage(x, dead); e != nil && err == nil {
+				err = e
+			}
+			if e := h.freeGeneratorStorage(x, dead); e != nil && err == nil {
 				err = e
 			}
 			if !h.noHandleReuse {

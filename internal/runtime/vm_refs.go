@@ -164,6 +164,9 @@ func (s *vmState) iterInitRef(f *vmFrame, in *vmInstr) (iterable bool, err error
 	}
 	// The subject is read (BP_VAR_R): an undefined variable warns and is
 	// not created, and only an array becomes a reference.
+	if t := subject.deref(); t.kind == valueObject && s.isTraversable(t.object) {
+		return s.iterInitTraversable(f, in, t.object, true)
+	}
 	if t := subject.deref(); t.kind == valueObject {
 		// The iterator holds the object and a position in its property
 		// table; boolean marks it as binding each property by reference.

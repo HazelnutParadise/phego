@@ -28,6 +28,11 @@ const (
 	pendThrow uint8 = iota + 1
 	pendReturn
 	pendJump
+	// pendClose (stage 8) is a generator that is closed while it is
+	// suspended inside a try with a finally block: the finally blocks run,
+	// with no exception pending, and the generator ends after the last one
+	// (zend_generator_dtor_storage).
+	pendClose
 )
 
 // vmPending is the completion a running finally block suspended

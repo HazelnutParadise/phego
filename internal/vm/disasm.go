@@ -38,7 +38,8 @@ var opNames = [...]string{
 	bytecode.OpClassConst: "ClassConst", bytecode.OpClassName: "ClassName", bytecode.OpInstanceof: "Instanceof",
 	bytecode.OpClone: "Clone", bytecode.OpVerifyReturn: "VerifyReturn",
 	bytecode.OpClosure: "Closure", bytecode.OpBindLexical: "BindLexical", bytecode.OpCallableConvert: "CallableConvert",
-	bytecode.OpArgByRef: "ArgByRef",
+	bytecode.OpArgByRef:        "ArgByRef",
+	bytecode.OpGeneratorCreate: "GeneratorCreate", bytecode.OpYield: "Yield", bytecode.OpYieldFrom: "YieldFrom",
 }
 
 var binaryNames = [...]string{
@@ -83,6 +84,21 @@ func auxName(in bytecode.Instruction) string {
 		return name(incDecNames[:], a)
 	case bytecode.OpFetchDim:
 		return fetchName(bytecode.FetchFlags(in.Aux))
+	case bytecode.OpYield:
+		var parts []string
+		for _, f := range [...]struct {
+			bit  bytecode.YieldFlags
+			name string
+		}{{bytecode.YieldValue, "value"}, {bytecode.YieldKey, "key"}, {bytecode.YieldRef, "ref"}, {bytecode.YieldNotice, "notice"}} {
+			if bytecode.YieldFlags(in.Aux)&f.bit != 0 {
+				parts = append(parts, f.name)
+			}
+		}
+		return joinOrZero(parts)
+	case bytecode.OpLeave:
+		if in.Aux == bytecode.LeaveCarry {
+			return "carry"
+		}
 	case bytecode.OpArrayGet:
 		if in.Aux == bytecode.ArrayGetList {
 			return "list"

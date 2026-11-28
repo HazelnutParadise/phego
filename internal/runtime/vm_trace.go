@@ -191,6 +191,15 @@ func (s *vmState) traceFrames(internal string, args []value) []vmTraceFrame {
 		case closureInvoke:
 			add(callerFile, line, class, typ, fn, s.frameArgs(f), named)
 			add(callerFile, line, "Closure", "->", "__invoke", s.frameArgs(f), named)
+		case genRewind, genValid, genCurrent, genKey, genNext, genSend, genThrow, genGetReturn:
+			// A method of Generator resumed the generator: its frame has
+			// no PHP caller, and the method's frame follows it.
+			addInternal(f, s.frameArgs(f))
+			var margs []value
+			if f.generator != nil && f.generator.gen != nil {
+				margs = f.generator.gen.viaArgs
+			}
+			add(callerFile, line, "Generator", "->", genNames[f.via-genRewind], margs, nil)
 		default:
 			add(callerFile, line, class, typ, fn, s.frameArgs(f), named)
 		}

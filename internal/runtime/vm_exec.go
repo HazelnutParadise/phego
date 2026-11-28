@@ -63,6 +63,10 @@ type vmFrame struct {
 	// names the parameter that is missing, but no prologue Store has run.
 	unreceived bool
 	extra      []value // arguments beyond the declared parameters, for backtraces
+	// generator is the Generator object whose frame this is (stage 8), or
+	// nil: such a frame has storage of its own, outside the value, location
+	// and element stacks, and is pushed and taken off by the resumes.
+	generator *object
 	// argBase is the depth of the argument stack when the frame was
 	// entered (stage 7C, for every frame since stage 8), and pend
 	// the completions its running finally blocks suspended, innermost
@@ -158,6 +162,13 @@ type vmState struct {
 	// that it registered a class that implements Throwable: until then no
 	// object can be an exception.
 	closureClass bool
+	// generatorClass says the run registered Generator and the iterator
+	// interfaces; suspended that the run ended at a yield (stage 8).
+	generatorClass, suspended bool
+	// objIters are the run's iterations of Traversable objects: an
+	// iterator register names its slot (vmObjIter).
+	objIters     []vmObjIter
+	freeObjIters []int
 	throwables   bool
 	// traceFloor is the depth of the outermost frame a backtrace shows: 0,
 	// or the depth of a call PHP makes after the frames below are gone
@@ -410,6 +421,8 @@ func (s *vmState) setReg(regs []value, r uint32, v value) error {
 func (s *vmState) releaseValue(v value) error {
 	if v.kind == valueReference && v.integer != 0 {
 		s.endRefIter(v)
+	} else if v.kind == valueObject && v.integer < 0 {
+		s.endObjIter(v)
 	}
 	if v.kind >= valueArray {
 		return s.h.release(v)
@@ -606,6 +619,26 @@ func (k *vmStack[T]) shrink() {
 	k.cur, k.top = m.cur, m.top
 }
 
+// releaseWindow gives the top frame's windows of the value, location and
+// element stacks back, cleared: its values are released or moved.
+func (s *vmState) releaseWindow(f *vmFrame) {
+	clear(f.locals)
+	clear(f.locs)
+	clear(f.elems)
+	s.vals.top -= len(f.regs) + len(f.locals)
+	s.locs.top -= len(f.locs)
+	s.elems.top -= len(f.elems)
+	if f.freshV {
+		s.vals.shrink()
+	}
+	if f.freshL {
+		s.locs.shrink()
+	}
+	if f.freshE {
+		s.elems.shrink()
+	}
+}
+
 // pop releases the top frame's values and removes it. The values are
 // released for normal ends, returns, throws and exits, as callInScope does;
 // fatal errors and host stops keep them for request teardown.
@@ -668,20 +701,12 @@ func (s *vmState) pop(release bool) error {
 	if f.via != 0 {
 		f.via = 0
 	}
-	clear(f.locals)
-	clear(f.locs)
-	clear(f.elems)
-	s.vals.top -= len(f.regs) + len(f.locals)
-	s.locs.top -= len(f.locs)
-	s.elems.top -= len(f.elems)
-	if f.freshV {
-		s.vals.shrink()
-	}
-	if f.freshL {
-		s.locs.shrink()
-	}
-	if f.freshE {
-		s.elems.shrink()
+	if f.generator == nil {
+		s.releaseWindow(f)
+	} else {
+		clear(f.locals)
+		clear(f.locs)
+		clear(f.elems)
 	}
 	// The frame object is reused. push writes every field it reads; only
 	// what could keep a value alive is cleared here, and only when set, so

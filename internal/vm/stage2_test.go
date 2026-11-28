@@ -536,7 +536,7 @@ func TestStage2Unsupported(t *testing.T) {
 		{"??= on an element of a property with computed operands", "echo 1;\n$o->p[f()] ??= 2;", 3},
 		{"variable variables", "echo 1;\n$$n[1][2] = 3;", 3},
 		// Constant expressions that PHP 8.5 allows in a default.
-		{"generator", "echo 1;\nfunction f($a = 1,\n  $b = static function () { yield 1; }) {}", 4},
+		{"builtin function iterator_to_array()", "echo 1;\nfunction f($a = 1,\n  $b = static function () { yield iterator_to_array([]); }) {}", 4},
 		{"a closure of builtin function strlen()", "echo 1;\nfunction f($a = \\strlen(...)) {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[A] int $a = 1) {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[A] int &...$a) {}", 3},

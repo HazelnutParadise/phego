@@ -16,7 +16,8 @@ func (s *vmState) loop() {
 	h := s.h
 	f := s.frames[len(s.frames)-1]
 	code, regs := f.code, f.regs
-	pc := 0
+	// A new frame starts at 0; a generator's frame where it resumes.
+	pc := f.pc
 	// rerr is the error of the instruction that jumps to raise, and rv the
 	// value of the Return that jumps to ret.
 	var rerr error
@@ -446,6 +447,13 @@ func (s *vmState) loop() {
 				goto raise
 			}
 		case bytecode.OpIterKey:
+			if st := s.objIterOf(regs[in.b]); st != nil {
+				if err := s.iterKeyTraversable(f, in, st); err != nil {
+					rerr = err
+					goto raise
+				}
+				goto advance
+			}
 			if ri := s.refIter(regs[in.b]); ri != nil {
 				if err := s.iterKeyRef(f, in, ri); err != nil {
 					rerr = err
@@ -724,6 +732,56 @@ func (s *vmState) loop() {
 		case bytecode.OpThrow:
 			rerr = s.throwValue(regs, in.a)
 			goto raise
+		case bytecode.OpGeneratorCreate:
+			// The call returns its Generator; the frame waits in it.
+			if err := s.createGenerator(f, pc); err != nil {
+				rerr = err
+				goto raise
+			}
+			if s.ended || s.poll() {
+				return
+			}
+			f = s.frames[len(s.frames)-1]
+			code, regs = f.code, f.regs
+			pc = f.pc + 1
+			continue
+		case bytecode.OpYield, bytecode.OpYieldFrom:
+			suspend := true
+			var err error
+			if in.op == bytecode.OpYield {
+				err = s.yield(f, in)
+			} else {
+				suspend, err = s.yieldFrom(f, in)
+			}
+			if err != nil {
+				rerr = err
+				goto raise
+			}
+			if s.stopped() {
+				return
+			}
+			if !suspend {
+				goto advance
+			}
+			if in.nkill != 0 {
+				// What the yield read and no later code reads is released
+				// now: the generator holds its own copy.
+				if err := s.kill(f, in); err != nil {
+					rerr = err
+					goto raise
+				}
+			}
+			// The frame leaves the stack at this instruction; the resume
+			// that ran it goes on.
+			f.pc = pc
+			s.frames = s.frames[:len(s.frames)-1]
+			if n := len(s.frames); n > 0 {
+				s.h.currentCalledScope = s.frames[n-1].called
+			} else {
+				s.h.currentCalledScope = nil
+			}
+			s.suspended, s.ended, s.end = true, true, completion{}
+			return
 		case bytecode.OpLeave:
 			var live []uint32
 			if in.b != 0 {
@@ -753,6 +811,22 @@ func (s *vmState) loop() {
 			case kind == pendReturn:
 				rv = p.val
 				goto ret
+			case kind == pendClose:
+				// A generator being closed: the next finally block around
+				// this one runs, or the generator ends.
+				if h := through(f.fn, pc, -1); h >= 0 {
+					f.pend = append(f.pend, vmPending{h: h, kind: pendClose})
+					pc = int(f.fn.handlers[h].target)
+					if err := s.releaseDead(f, f.fn.handlers[h].live); err != nil {
+						f.pc = pc
+						rerr = err
+						goto raise
+					}
+					continue
+				}
+				s.ended = true
+				s.end = completion{}
+				return
 			case kind != pendJump:
 				rerr = err
 				goto raise

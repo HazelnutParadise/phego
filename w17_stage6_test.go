@@ -123,7 +123,7 @@ func TestW17Stage6UnsupportedIsRefusedAtCompile(t *testing.T) {
 		{"dynamic global", "<?php\necho 1;\nfunction f($n) {\n  global $$n;\n}\n", "variable variables", 4},
 		{"func_get_args", "<?php\necho 1;\nfunction f(...$a) {\n  return func_get_args();\n}\n", "builtin function func_get_args()", 4},
 		{"unpacking an object", "<?php\necho 1;\nfunction f(...$a) {}\nf(...new ArrayIterator([1]));\n", "builtin class ArrayIterator", 4},
-		{"unpacking a generator", "<?php\necho 1;\nfunction f(...$a) {}\nf(...(function () { yield 1; })());\n", "generator", 4},
+		{"unpacking an SPL iterator", "<?php\necho 1;\nfunction f(...$a) {}\nf(...new ArrayIterator([1]));\n", "builtin class ArrayIterator", 4},
 		{"variadic attribute", "<?php\necho 1;\nfunction f(#[A] int ...$a) {}\n", "parameter attribute", 3},
 		{"static closure returning by reference", "<?php\necho 1;\n$f = static function &() {};\n", "return by reference", 3},
 		{"enum case", "<?php\necho 1;\nenum A { case B; }\n", "enum declaration", 3},

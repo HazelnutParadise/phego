@@ -701,6 +701,9 @@ func nativeThrow(name string, args []value, class, message string) error {
 // callPending goes on to make (Closure::call); otherwise the result is in
 // the destination register and the call is gone.
 func (s *vmState) callNative(rec *vmPendingCall, in *vmInstr) (enter bool, err error) {
+	if isGeneratorNative(rec.native) {
+		return false, s.callGenerator(rec, in)
+	}
 	if rec.native >= excConstruct {
 		return false, s.callException(rec, in)
 	}

@@ -474,7 +474,7 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"return by reference", "echo 1;\nfunction &f() { return $x; }", 3},
 		{"function attribute", "echo 1;\n#[Foo]\nfunction f() {}", 3},
 		{"parameter attribute", "echo 1;\nfunction f(#[\\SensitiveParameter] $a) {}", 3},
-		{"generator", "echo 1;\n$f = function () { yield 1; };", 3},
+		{"builtin function iterator_to_array()", "echo 1;\n$f = function () { yield iterator_to_array([]); };", 3},
 		{"closure in a property default", "echo 1;\nclass A {\n  public $p = static function () {};\n}", 4},
 		{"closure in a property default", "echo 1;\nclass A { public static $p = [1, strtoupper2(...)]; }", 3},
 		{"passing $a[] to a callee found at run time", "echo 1;\n$f = fn(&$r) => 1;\n$f($a[]);", 4},
@@ -482,7 +482,7 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"builtin function strlen() named by a callable", "echo 1;\necho 'strlen'('abc');", 3},
 		{"builtin function StrLen() named by a callable", "echo 1;\n$f = \"\\\\StrLen\"(...);", 3},
 		{"builtin function count() named by a callable", "echo 1;\n$f = Closure::fromCallable(\n'count');", 4},
-		{"generator", "echo 1;\n$f = fn() => yield 1;", 3},
+		{"builtin function iterator_to_array()", "echo 1;\n$f = fn() => yield iterator_to_array([]);", 3},
 		{"enum declaration", "echo 1;\nenum E {}", 3},
 		{"enum declaration", "echo 1;\nenum E: int { case A = 1; }", 3},
 		{"anonymous class", "echo 1;\n$o = new class {};", 3},
@@ -520,9 +520,9 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"class constant with a computed name", "echo 1;\nclass A { const C = 1; function m() { return static::{'C'}; } }", 3},
 		{"goto", "echo 1;\ngoto a;\na:\necho 2;", 3},
 		{"enum declaration", "enum E {}\necho 1;", 2},
-		{"generator", "echo 1;\nfunction g() { yield 1; }", 3},
-		{"generator", "echo 1;\nfunction g() { yield from h(); }", 3},
-		{"generator", "echo 1;\nclass A { function m() { yield 1; } }", 3},
+		{"return by reference", "echo 1;\nfunction &g() { return $x; }", 3},
+		{"builtin class ArrayIterator", "echo 1;\nfunction g() { yield from new ArrayIterator([]); }", 3},
+		{"return by reference", "echo 1;\nclass A { function &m() { return $this->x; } }", 3},
 		{"clone with arguments", "echo 1;\n$b = clone($a, ['x' => 1]);", 3},
 		{"property hook", "echo 1;\nclass A {\n  public int $p { get => 1; }\n}", 4},
 		{"shell execution", "echo 1;\n$b = `ls`;", 3},
@@ -542,8 +542,8 @@ func TestUnsupportedConstructs(t *testing.T) {
 		{"a closure of builtin function array_map()", "echo 1;\nfunction f() {}\n$g = array_map(...);", 4},
 		{"builtin class ArrayObject", "echo 1;\n$x = $a ?? throw new ArrayObject([]);", 3},
 		{"require", "echo 1;\nrequire 'x.php';", 3},
-		{"generator", "echo 1;\nclass A { function m() { return function () { yield 1; }; } }", 3},
-		{"generator", "echo 1;\nclass A { function m() { try { yield 1; } catch (Exception $e) { } finally { } } }", 3},
+		{"builtin class Fiber", "echo 1;\nclass A { function m() { return function () { yield new Fiber(fn() => 1); }; } }", 3},
+		{"builtin function iterator_to_array()", "echo 1;\nclass A { function m() { try { yield 1; } catch (Exception $e) { } finally { yield iterator_to_array([]); } } }", 3},
 		{"goto", "echo 1;\nclass A { function m() { goto a; a: } }", 3},
 		{"__halt_compiler", "echo 1;\n__halt_compiler();", 3},
 		{"array write through a non-variable", "echo 1;\nfunction f() {}\nf()[0] = 1;", 4},
@@ -667,13 +667,13 @@ func TestUnsupportedReportsTheFirstInSourceOrder(t *testing.T) {
 		line    int
 	}{
 		// A function body before the main code that has a closure.
-		{"<?php\nfunction f() { return fn() => yield 1; }\necho 1;\n$f = function &() {};\n", "generator", 2},
+		{"<?php\nfunction f() { return fn() => yield iterator_to_array([]); }\necho 1;\n$f = function &() {};\n", "builtin function iterator_to_array()", 2},
 		// The main code before a later function.
 		{"<?php\necho 1;\n$f = function &() {};\nfunction f() { return fn() => yield 1; }\n", "return by reference", 3},
 		// Within a statement, the left operand first.
 		{"<?php\necho $$a . (fn() => 1)();\n", "variable variables", 2},
 		// A class declaration and a function, in either order.
-		{"<?php\nfunction f() { return fn() => yield 1; }\nenum E {}\n", "generator", 2},
+		{"<?php\nfunction f() { return fn() => yield iterator_to_array([]); }\nenum E {}\n", "builtin function iterator_to_array()", 2},
 		{"<?php\nenum E {}\nfunction f() { return fn() => 1; }\n", "enum declaration", 2},
 		// A method body before the main code, and a class part before a
 		// later method.

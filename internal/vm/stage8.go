@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/HazelnutParadise/phego/internal/bytecode"
+	"github.com/HazelnutParadise/phego/internal/ir"
 )
 
 // W-17 stage 8: REQ-001, REQ-016, REQ-025, REQ-026. The unwind table of
@@ -76,4 +77,45 @@ func (fc *fnCompiler) flushTail() {
 		fc.emitStub(s)
 	}
 	fc.cur = saved
+}
+
+// yieldExpr is yield (zend_compile_yield): the key is evaluated before the
+// value. A generator declared to yield by reference yields a reference to
+// a variable, an element or a property; anything else is yielded by value
+// with PHP's notice, a call's result included, since a call here never
+// returns a reference.
+func (fc *fnCompiler) yieldExpr(n *ir.Node) operand {
+	key, val := n.Kids[0], n.Kids[1]
+	res := fc.alloc()
+	var flags bytecode.YieldFlags
+	var rk, rv uint32
+	if key != nil {
+		rk = fc.value(key)
+		flags |= bytecode.YieldKey
+	}
+	if val != nil {
+		flags |= bytecode.YieldValue
+		switch {
+		case !fc.f.ByRef:
+			rv = fc.value(val)
+		case val.Op == ir.OpVar || val.Op == ir.OpDim || val.Op == ir.OpProp || val.Op == ir.OpStaticProp:
+			rv = fc.refArg(val, n.Line)
+			flags |= bytecode.YieldRef
+		default:
+			rv = fc.value(val)
+			flags |= bytecode.YieldNotice
+		}
+	}
+	fc.emit(bytecode.OpYield, uint16(flags), res, rv, rk)
+	fc.top = res - fc.base + 1
+	return reg(res)
+}
+
+// yieldFrom is yield from (zend_compile_yield_from).
+func (fc *fnCompiler) yieldFrom(n *ir.Node) operand {
+	res := fc.alloc()
+	r := fc.value(n.Kids[0])
+	fc.emit(bytecode.OpYieldFrom, 0, res, r, 0)
+	fc.top = res - fc.base + 1
+	return reg(res)
 }
