@@ -662,8 +662,12 @@ func (s *vmState) yield(f *vmFrame, in *vmInstr) error {
 			g.largest = k.integer
 		}
 	} else {
+		// largest_used_integer_key++ wraps around like a zend_long.
 		g.largest++
-		k, _ = intValue(g.largest, s.prog.width)
+		if s.prog.width == 32 {
+			g.largest = int64(int32(g.largest))
+		}
+		k = s.h.number(g.largest)
 	}
 	oldV, oldK := g.value, g.key
 	g.value, g.key = v, k
