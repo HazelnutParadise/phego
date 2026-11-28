@@ -680,6 +680,9 @@ func verifyFunction17(image Image, minor uint16, f *Function) error {
 	if err := verifyFunction18(image, minor, f); err != nil {
 		return err
 	}
+	if err := verifyFunction110(minor, f); err != nil {
+		return err
+	}
 	if minor < 7 {
 		if f.Flags != 0 || f.ReturnType != 0 {
 			return invalid(fmt.Sprintf("function flags and return types need bytecode format 1.7, but the file declares format 1.%d", minor))

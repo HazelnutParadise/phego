@@ -18,11 +18,12 @@ import (
 // 1.1, the first W-17 stage), minor 2 (format 1.2, the second W-17 stage),
 // minor 3 (format 1.3, the third), minor 4 (format 1.4, the fourth), minor 5
 // (format 1.5, the fifth), minor 6 (format 1.6, the sixth), minor 7 (format
-// 1.7, stage 7A) and minor 8 (format 1.8, stage 7B); a file may not use
+// 1.7, stage 7A), minor 8 (format 1.8, stage 7B), minor 9 (format 1.9,
+// stage 7C) and minor 10 (format 1.10, stage 8); a file may not use
 // operations newer than the minor it declares.
 const (
 	FormatVersion uint16 = 1
-	FormatMinor   uint16 = 9
+	FormatMinor   uint16 = 10
 )
 
 // PushFlags is the Aux of OpPush (format 1.6).
@@ -505,6 +506,9 @@ type Function struct {
 	// Captures (format 1.8) is the use list of a closure function: capture
 	// i is copied or bound into its Local when a call enters the function.
 	Captures []Capture
+	// Unwinds (format 1.10) is the unwind table: the unfinished calls and
+	// the returns that free loop variables, sorted by Start.
+	Unwinds []Unwind
 }
 
 // Image is builder input, never executable. Callers keep all input unchanged

@@ -215,7 +215,7 @@ func TestFormat18Opcodes(t *testing.T) {
 			t.Fatalf("Safety(%d) = %+v, %v", op, s, ok)
 		}
 	}
-	if FormatMinor != 9 {
-		t.Fatalf("FormatMinor = %d, want 9", FormatMinor)
+	if FormatMinor != 10 {
+		t.Fatalf("FormatMinor = %d, want 10", FormatMinor)
 	}
 }

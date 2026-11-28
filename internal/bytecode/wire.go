@@ -395,6 +395,21 @@ func (w *writer) payload(i Image, minor uint16) error {
 				}
 			}
 		}
+		if minor >= 10 {
+			if err := w.u32(uint32(len(f.Unwinds))); err != nil {
+				return err
+			}
+			for _, u := range f.Unwinds {
+				if err := w.u8(uint8(u.Kind)); err != nil {
+					return err
+				}
+				for _, v := range [...]uint32{u.Start, u.End, u.Reg, u.Count} {
+					if err := w.u32(v); err != nil {
+						return err
+					}
+				}
+			}
+		}
 	}
 	if minor >= 7 {
 		return w.classes(i.Classes)
@@ -826,6 +841,26 @@ func decodePayload(ctx context.Context, b *budget, data []byte, minor uint16) (I
 						return Image{}, ee
 					}
 					f.Captures[j] = Capture{Local: binary.LittleEndian.Uint32(p), Flags: CaptureFlags(p[4])}
+				}
+			}
+		}
+		if minor >= 10 {
+			nu, ee := r.count(unwindWire, b.lim.MaxInstructions)
+			if ee != nil {
+				return Image{}, ee
+			}
+			if nu > 0 {
+				if ee = b.reserveMul(uint64(nu), 20); ee != nil {
+					return Image{}, ee
+				}
+				f.Unwinds = make([]Unwind, int(nu))
+				for j := range f.Unwinds {
+					p, ee := r.take(unwindWire)
+					if ee != nil {
+						return Image{}, ee
+					}
+					le := binary.LittleEndian
+					f.Unwinds[j] = Unwind{Kind: UnwindKind(p[0]), Start: le.Uint32(p[1:]), End: le.Uint32(p[5:]), Reg: le.Uint32(p[9:]), Count: le.Uint32(p[13:])}
 				}
 			}
 		}

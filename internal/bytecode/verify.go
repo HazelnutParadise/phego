@@ -485,6 +485,9 @@ func verifyInstruction(image Image, f *Function, minor uint16, in Instruction) e
 	if minor >= 8 && (in.Op == OpCall || in.Op == OpInitCall) && image.Functions[in.B].Flags&FuncClosure != 0 {
 		return invalid("a closure function is entered only through its Closure object, not by a direct call")
 	}
+	if minor < 10 && in.Op == OpLeave && in.Aux != 0 {
+		return invalid(fmt.Sprintf("instruction needs bytecode format 1.10, but the file declares format 1.%d", minor))
+	}
 	if minor < 8 && in.Op == OpReturn && in.Aux != 0 {
 		return invalid(fmt.Sprintf("instruction needs bytecode format 1.8, but the file declares format 1.%d", minor))
 	}
@@ -523,7 +526,7 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 	zero := in.B == 0 && in.C == 0
 	switch in.Op {
 	case OpBinary, OpInclude, OpLoad, OpArrayGet, OpUnary, OpCast, OpIncDec, OpExit, OpArraySet, OpArrayAppend, OpArrayUnset, OpArrayAdd,
-		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush, OpReturn:
+		OpFetchDim, OpIterInit, OpIterNext, OpIterKey, OpBind, OpArrayIsset, OpFetchConst, OpPush, OpReturn, OpLeave:
 	default:
 		if is17(in.Op) {
 			return checkOperands17(image, f, in)
@@ -561,9 +564,16 @@ func checkOperands(image Image, f *Function, in Instruction) error {
 		if in.Aux < uint16(Add) || in.Aux > uint16(BoolXor) || !reg(in.A, Value) || !reg(in.B, Value) || !reg(in.C, Value) {
 			return invalid("invalid binary operands")
 		}
-	case OpJump, OpLeave:
+	case OpJump:
 		if !zero || uint64(in.A) >= uint64(len(f.Code)) {
 			return invalid("invalid control target")
+		}
+	case OpLeave:
+		switch {
+		case uint64(in.A) >= uint64(len(f.Code)):
+			return invalid("invalid control target")
+		case in.Aux == 0 && !zero, in.Aux == LeaveCarry && (in.B != 0 || !reg(in.C, Value)), in.Aux > LeaveCarry:
+			return invalid("invalid leave operands")
 		}
 	case OpBranch:
 		if !reg(in.A, Value) || uint64(in.B) >= uint64(len(f.Code)) || uint64(in.C) >= uint64(len(f.Code)) {
@@ -1308,6 +1318,34 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 			return err
 		}
 	}
+	// carries are the targets of the Leaves that carry a value (format
+	// 1.10), with the register they write there. Every Leave to one target
+	// carries the same register or none, so the continuation of a finally
+	// block knows which register it defines.
+	var carries map[uint32]uint32
+	for pc := range f.Code {
+		if in := f.Code[pc]; in.Op == OpLeave && in.Aux == LeaveCarry {
+			if carries == nil {
+				carries = map[uint32]uint32{}
+			}
+			carries[in.A] = in.C
+		}
+	}
+	if carries != nil {
+		if err := b.chargeWork(uint64(n)); err != nil {
+			return err
+		}
+		for pc := range f.Code {
+			in := f.Code[pc]
+			if in.Op != OpLeave {
+				continue
+			}
+			if c, ok := carries[in.A]; ok && (in.Aux != LeaveCarry || in.C != c) {
+				return &Error{Kind: ErrInvalid, Offset: -1, Function: int(fi), PC: pc, Detail: "leaves to one target carry different registers"}
+			}
+		}
+	}
+	carryDefs, carryRefs := make([]uint64, words), make([]uint64, len(seedRefs))
 	for _, h := range f.Handlers {
 		if keep {
 			// The entry state comes from the instructions of the range.
@@ -1733,9 +1771,30 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 			if len(stack) != 0 {
 				return invalidPC("unwind instruction leaves pending arguments")
 			}
+			if in.Op == OpLeave && in.Aux == LeaveCarry {
+				if err := read(in.C); err != nil {
+					return flowError(err, fi, pc)
+				}
+				if isRef(in.C) {
+					return invalidPC("leave carries a reference")
+				}
+			}
 			if keep && in.Op == OpEndFinally {
 				for _, t := range conts[uint32(pc)] {
-					if _, err := merge(int(t), scratchDefs, scratchRefs, stack); err != nil {
+					defs, refs := scratchDefs, scratchRefs
+					if c, ok := carries[t]; ok {
+						// The finally block ends with the carried value,
+						// never a reference, written back to its register.
+						copy(carryDefs, scratchDefs)
+						carryDefs[c/64] |= uint64(1) << (c % 64)
+						defs = carryDefs
+						if track {
+							copy(carryRefs, scratchRefs)
+							carryRefs[c/64] &^= uint64(1) << (c % 64)
+							refs = carryRefs
+						}
+					}
+					if _, err := merge(int(t), defs, refs, stack); err != nil {
 						return flowError(err, fi, pc)
 					}
 				}

@@ -35,6 +35,9 @@ func afterNames(minor uint16) int {
 	if minor >= 8 {
 		n += 4 // the empty capture table
 	}
+	if minor >= 10 {
+		n += 4 // the empty unwind table
+	}
 	return n
 }
 

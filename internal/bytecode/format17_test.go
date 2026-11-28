@@ -216,8 +216,8 @@ func TestFormat17Opcodes(t *testing.T) {
 	if _, ok := Opcode(80).Safety(); ok {
 		t.Fatal("opcode 80 is known")
 	}
-	if FormatMinor != 9 {
-		t.Fatalf("FormatMinor = %d, want 9", FormatMinor)
+	if FormatMinor != 10 {
+		t.Fatalf("FormatMinor = %d, want 10", FormatMinor)
 	}
 	if CastObject != CastArray+1 || PushAuto != PushLoad+1 || PushTemp != PushAuto+1 || PushResult != PushTemp+1 || PushElement != PushResult+1 {
 		t.Fatalf("format 1.7 Aux values are renumbered: cast %d, push %d %d %d %d", CastObject, PushAuto, PushTemp, PushResult, PushElement)
