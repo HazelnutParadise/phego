@@ -1813,6 +1813,9 @@ func verifyFlow(b *budget, image Image, minor uint16, f *Function, fi uint32, ha
 			if !is17(in.Op) {
 				break
 			}
+			if in.Op == OpGeneratorCreate && len(stack) != 0 {
+				return invalidPC("generator created while call arguments are pending")
+			}
 			roles, _ := Roles17(in)
 			ops := [3]uint32{in.A, in.B, in.C}
 			for i, role := range roles {

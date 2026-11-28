@@ -171,3 +171,48 @@ func TestFormat110VerifierRejects(t *testing.T) {
 		})
 	}
 }
+
+// genImage is a generator function {main} with Value registers r0..r3.
+func genImage(code ...Instruction) Image {
+	image := format110Image(nil, nil, code...)
+	image.Functions[0].Flags |= FuncGenerator
+	return image
+}
+
+func TestFormat110GeneratorCreation(t *testing.T) {
+	if p, err := Build(context.Background(), genImage(
+		Instruction{Op: OpGeneratorCreate},
+		Instruction{Op: OpYield, Aux: uint16(YieldValue), A: 1, B: 0},
+		Instruction{Op: OpReturn, A: 0}), testOptions()); err != nil || p == nil {
+		t.Fatalf("Build = (%v, %v)", p, err)
+	}
+	cases := map[string]struct {
+		image  Image
+		detail string
+	}{
+		"yield before the creation": {genImage(
+			Instruction{Op: OpYield, A: 1}, Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpReturn, A: 0}),
+			"yields before it creates"},
+		"a jump over the creation": {genImage(
+			Instruction{Op: OpJump, A: 3}, Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpReturn, A: 0}),
+			"bypasses or reenters"},
+		"a jump back to the creation": {genImage(
+			Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpJump, A: 1}, Instruction{Op: OpReturn, A: 0}),
+			"bypasses or reenters"},
+		"two creations": {genImage(
+			Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpGeneratorCreate}, Instruction{Op: OpReturn, A: 0}),
+			"creates its generator 2 times"},
+		"a yield outside a generator": {format110Image(nil, nil,
+			Instruction{Op: OpYield, A: 1}, Instruction{Op: OpReturn, A: 0}),
+			"only a generator function"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			p, err := Build(context.Background(), tc.image, testOptions())
+			var e *Error
+			if p != nil || !errors.Is(err, ErrInvalid) || !errors.As(err, &e) || !strings.Contains(e.Detail, tc.detail) {
+				t.Fatalf("Build=(%v,%v), want ErrInvalid with %q", p, err, tc.detail)
+			}
+		})
+	}
+}

@@ -123,6 +123,33 @@ func verifyFunction110(minor uint16, f *Function) error {
 		if creates != 1 {
 			return invalid(fmt.Sprintf("a generator function creates its generator %d times, want once", creates))
 		}
+		// Every path reaches the creation once and only then the body: no
+		// edge, handler or yield crosses it except falling through.
+		c := uint32(0)
+		for pc, in := range f.Code {
+			if in.Op == OpGeneratorCreate {
+				c = uint32(pc)
+			}
+		}
+		n := uint32(len(f.Code))
+		for pc, in := range f.Code {
+			p := uint32(pc)
+			if (in.Op == OpYield || in.Op == OpYieldFrom) && p < c {
+				return invalid("a generator function yields before it creates its generator")
+			}
+			for k := 0; k < successorCount(in, p, n); k++ {
+				t := successor(in, p, n, k).pc
+				if p < c && t > c || p > c && t <= c {
+					return invalid("control flow bypasses or reenters the creation of the generator")
+				}
+			}
+		}
+		for _, h := range f.Handlers {
+			before := h.Start < c
+			if h.End > c && before || h.Target < c != before || h.BodyEnd > c && h.Target < c {
+				return invalid("an exception handler crosses the creation of the generator")
+			}
+		}
 		if f.ReturnKind != Value {
 			return invalid("a generator function returns a value")
 		}
